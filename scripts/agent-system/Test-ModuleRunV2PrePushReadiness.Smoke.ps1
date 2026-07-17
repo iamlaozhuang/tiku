@@ -270,4 +270,325 @@ Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT"
     & $scriptPath -TaskId $fixtureTaskId -ProjectStatePath $fixtureProjectStatePath -QueuePath $fixtureQueuePath -SkipRemoteAheadCheck
 }
 
+$f0115PrePushBaseSha = "6bde2f2aec3d71fa0ce138b26f64243861cace6f"
+$f0115PrePushParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+$f0115PrePushQueuePath = "docs/04-agent-system/state/task-queue.yaml"
+$f0115PrePushProjectStatePath = "docs/04-agent-system/state/project-state.yaml"
+$f0115PrePushMatrixPath = "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+$f0115PrePushAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md"
+$f0115PrePushEvidencePath = "docs/05-execution-logs/evidence/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+$f0115PrePushAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+$f0115PrePushFiles = @(
+    $f0115PrePushQueuePath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $f0115PrePushAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix.md",
+    $f0115PrePushEvidencePath,
+    $f0115PrePushAuditPath
+)
+$f0115PrePushSourceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$f0115PrePushFixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-module-f0115-pre-push-" + [guid]::NewGuid().ToString("N"))
+$f0115PrePushUtf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
+
+function Set-F0115PrePushFixtureFile {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content
+    )
+
+    $fullPath = Join-Path $Root ($Path -replace "/", "\")
+    $parentPath = Split-Path -Parent $fullPath
+    if (-not (Test-Path -LiteralPath $parentPath)) {
+        New-Item -ItemType Directory -Path $parentPath -Force | Out-Null
+    }
+    [System.IO.File]::WriteAllText($fullPath, ($Content -replace "`r`n?", "`n"), $f0115PrePushUtf8WithoutBom)
+}
+
+function Test-F0115PrePushReviewFailure {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$MatrixPath,
+        [Parameter(Mandatory = $true)][string]$EvidencePath,
+        [Parameter(Mandatory = $true)][string]$AuditReviewPath,
+        [Parameter(Mandatory = $true)][string]$ExpectedPattern,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$ForbiddenPatterns,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.Generic.List[string]]$RedFindings
+    )
+
+    $capturedOutput = [System.Collections.Generic.List[string]]::new()
+    $failed = $false
+    try {
+        & $scriptPath `
+            -TaskId $f0115PrePushParentTaskId `
+            -ProjectStatePath $ProjectStatePath `
+            -QueuePath $QueuePath `
+            -MatrixPath $MatrixPath `
+            -EvidencePath $EvidencePath `
+            -AuditReviewPath $AuditReviewPath `
+            -SkipRemoteAheadCheck `
+            -P1TransitionScopeMode transition_only 2>&1 | ForEach-Object {
+                $capturedOutput.Add($_.ToString())
+            }
+    } catch {
+        $failed = $true
+        $capturedOutput.Add($_.Exception.Message)
+    }
+
+    $outputText = $capturedOutput -join "`n"
+    if (-not $failed -and $LASTEXITCODE -eq 0) {
+        $RedFindings.Add("$Label unexpectedly passed; expected $ExpectedPattern")
+        return
+    }
+    if ($outputText -notmatch $ExpectedPattern) {
+        $RedFindings.Add("$Label failed without expected marker $ExpectedPattern. Output: $outputText")
+    }
+    foreach ($forbiddenPattern in $ForbiddenPatterns) {
+        if ($outputText -match $forbiddenPattern) {
+            $RedFindings.Add("$Label leaked forbidden success marker $forbiddenPattern")
+        }
+    }
+}
+
+$f0115PrePushReviewerRedFindings = [System.Collections.Generic.List[string]]::new()
+
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0115PrePushFixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0115 Module pre-push fixture." }
+    & git -C $f0115PrePushFixtureRoot config user.name "Module F-0115 Pre-Push Smoke"
+    & git -C $f0115PrePushFixtureRoot config user.email "module-f0115-pre-push-smoke@example.invalid"
+    & git -C $f0115PrePushFixtureRoot config core.autocrlf false
+    & git -C $f0115PrePushFixtureRoot config core.longpaths true
+    & git -C $f0115PrePushFixtureRoot sparse-checkout init --no-cone
+    $f0115PrePushSparseFiles = @(
+        $f0115PrePushFiles + @($f0115PrePushProjectStatePath, $f0115PrePushMatrixPath)
+    )
+    & git -C $f0115PrePushFixtureRoot sparse-checkout set --no-cone -- $f0115PrePushSparseFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to configure F-0115 Module pre-push sparse fixture." }
+    & git -C $f0115PrePushFixtureRoot switch --quiet -C master $f0115PrePushBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out the fixed F-0115 Module pre-push base." }
+    & git -C $f0115PrePushFixtureRoot update-ref refs/remotes/origin/master $f0115PrePushBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to pin F-0115 Module pre-push origin/master." }
+
+    $f0115QueueFullPath = Join-Path $f0115PrePushFixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $f0115BaseQueue = [System.IO.File]::ReadAllText($f0115QueueFullPath)
+    Set-F0115PrePushFixtureFile -Root $f0115PrePushFixtureRoot -Path $f0115PrePushQueuePath -Content "$f0115BaseQueue`n# Exact F-0115 scope-correction queue candidate is covered independently by the Module pre-commit smoke.`n"
+    Set-F0115PrePushFixtureFile -Root $f0115PrePushFixtureRoot -Path $f0115PrePushAuthorizationPath -Content @"
+# P1 F-0115 Scope-Correction Authorization
+
+Status: approved
+Task ID: p1-f0115-scope-correction-hotfix-2026-07-16
+Parent task: $f0115PrePushParentTaskId
+Base: $f0115PrePushBaseSha
+Branch: codex/p1-f0115-scope-correction-hotfix
+
+Every other in_progress SHA mismatch remains a hard-block.
+"@
+    Set-F0115PrePushFixtureFile -Root $f0115PrePushFixtureRoot -Path $f0115PrePushEvidencePath -Content "# F-0115 transition evidence`n`nstatus: complete`nResult: pass`n"
+    Set-F0115PrePushFixtureFile -Root $f0115PrePushFixtureRoot -Path $f0115PrePushAuditPath -Content "# F-0115 transition audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`nDecision: APPROVE`n"
+    foreach ($f0115Path in @($f0115PrePushFiles | Where-Object {
+        $_ -notin @($f0115PrePushQueuePath, $f0115PrePushAuthorizationPath, $f0115PrePushEvidencePath, $f0115PrePushAuditPath)
+    })) {
+        Set-F0115PrePushFixtureFile -Root $f0115PrePushFixtureRoot -Path $f0115Path -Content "# Exact F-0115 transition fixture: $f0115Path`n"
+    }
+
+    & git -C $f0115PrePushFixtureRoot add -- $f0115PrePushFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage the exact F-0115 Module pre-push file set." }
+    $f0115StagedFiles = @(& git -C $f0115PrePushFixtureRoot diff --cached --name-only --diff-filter=ACMR | Sort-Object -Unique)
+    if (($f0115StagedFiles -join "|") -cne (@($f0115PrePushFiles | Sort-Object -Unique) -join "|")) {
+        throw "F-0115 Module pre-push fixture did not stage the exact file set.`nActual: $($f0115StagedFiles -join ', ')"
+    }
+    & git -C $f0115PrePushFixtureRoot commit --quiet -m "materialize exact F-0115 scope correction"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit the exact F-0115 Module pre-push fixture." }
+    $f0115HotfixSha = ((& git -C $f0115PrePushFixtureRoot rev-parse HEAD) -join "").Trim()
+    $f0115CommitLine = ((& git -C $f0115PrePushFixtureRoot rev-list --parents -n 1 HEAD) -join "").Trim()
+    $f0115CommitParts = @($f0115CommitLine -split "\s+")
+    if ($f0115CommitParts.Count -ne 2 -or $f0115CommitParts[1] -ne $f0115PrePushBaseSha) {
+        throw "F-0115 Module pre-push fixture is not the exact one-parent base handoff: $f0115CommitLine"
+    }
+    $f0115CommittedFiles = @(& git -C $f0115PrePushFixtureRoot diff-tree --no-commit-id --name-only -r HEAD | Sort-Object -Unique)
+    if (($f0115CommittedFiles -join "|") -cne (@($f0115PrePushFiles | Sort-Object -Unique) -join "|")) {
+        throw "F-0115 Module pre-push commit does not contain the exact file set.`nActual: $($f0115CommittedFiles -join ', ')"
+    }
+
+    $f0115ProjectStateFullPath = Join-Path $f0115PrePushFixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $f0115MatrixFullPath = Join-Path $f0115PrePushFixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $f0115EvidenceFullPath = Join-Path $f0115PrePushFixtureRoot ($f0115PrePushEvidencePath -replace "/", "\")
+    $f0115AuditFullPath = Join-Path $f0115PrePushFixtureRoot ($f0115PrePushAuditPath -replace "/", "\")
+    $f0115ProjectStateText = [System.IO.File]::ReadAllText($f0115ProjectStateFullPath)
+    $f0115CheckpointMatch = [regex]::Match($f0115ProjectStateText, "(?m)^\s+lastKnownMasterSha:\s*([0-9a-f]{40})\s*$")
+    if (-not $f0115CheckpointMatch.Success) { throw "F-0115 Module pre-push state checkpoint is missing." }
+    $f0115StateCheckpointSha = $f0115CheckpointMatch.Groups[1].Value
+    & git -C $f0115PrePushFixtureRoot merge-base --is-ancestor $f0115StateCheckpointSha $f0115PrePushBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "F-0115 state checkpoint is not an ancestor of the fixed base." }
+
+    $ordinaryTaskId = "ordinary-non-f0115-in-progress-sha-drift-smoke"
+    $ordinaryStatePath = Join-Path $f0115PrePushFixtureRoot "ordinary-project-state.yaml"
+    $ordinaryQueuePath = Join-Path $f0115PrePushFixtureRoot "ordinary-task-queue.yaml"
+    [System.IO.File]::WriteAllText($ordinaryStatePath, @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $f0115StateCheckpointSha
+  lastKnownOriginMasterSha: $f0115StateCheckpointSha
+currentTask:
+  id: $ordinaryTaskId
+  status: in_progress
+"@, $f0115PrePushUtf8WithoutBom)
+    [System.IO.File]::WriteAllText($ordinaryQueuePath, @"
+schemaVersion: 1
+tasks:
+  - id: $ordinaryTaskId
+    evidencePath: $f0115EvidenceFullPath
+    auditReviewPath: $f0115AuditFullPath
+    status: in_progress
+"@, $f0115PrePushUtf8WithoutBom)
+
+    Push-Location $f0115PrePushFixtureRoot
+    try {
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master" -Command {
+            & $scriptPath -TaskId $ordinaryTaskId -ProjectStatePath $ordinaryStatePath -QueuePath $ordinaryQueuePath -MatrixPath $f0115MatrixFullPath -EvidencePath $f0115EvidenceFullPath -AuditReviewPath $f0115AuditFullPath -SkipRemoteAheadCheck
+        }
+
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115ProjectStateFullPath -QueuePath $f0115QueueFullPath -MatrixPath $f0115MatrixFullPath -EvidencePath $f0115EvidenceFullPath -AuditReviewPath $f0115AuditFullPath -SkipRemoteAheadCheck
+        }
+
+        $f0115TransitionOutput = @(
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115ProjectStateFullPath -QueuePath $f0115QueueFullPath -MatrixPath $f0115MatrixFullPath -EvidencePath $f0115EvidenceFullPath -AuditReviewPath $f0115AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        )
+        Assert-Contains -Output $f0115TransitionOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+        Assert-Contains -Output $f0115TransitionOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR origin/master"
+        Assert-Contains -Output $f0115TransitionOutput -Pattern "pre-push readiness passed"
+
+        $missingEvidencePath = Join-Path $f0115PrePushFixtureRoot "missing-f0115-transition-evidence.md"
+        Test-F0115PrePushReviewFailure `
+            -ProjectStatePath $f0115ProjectStateFullPath `
+            -QueuePath $f0115QueueFullPath `
+            -MatrixPath $f0115MatrixFullPath `
+            -EvidencePath $missingEvidencePath `
+            -AuditReviewPath $f0115AuditFullPath `
+            -ExpectedPattern "HARD_BLOCK_MISSING_EVIDENCE" `
+            -ForbiddenPatterns @(
+                "p1F0115TransitionTopology:\s*exact_one_parent",
+                "p1TransitionScopeMode:\s*transition_only"
+            ) `
+            -Label "topology-valid transition with later evidence finding" `
+            -RedFindings $f0115PrePushReviewerRedFindings
+
+        $mismatchedStatePath = Join-Path $f0115PrePushFixtureRoot "mismatched-project-state.yaml"
+        [System.IO.File]::WriteAllText($mismatchedStatePath, @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $f0115StateCheckpointSha
+  lastKnownOriginMasterSha: $f0115PrePushBaseSha
+currentTask:
+  id: $f0115PrePushParentTaskId
+  status: in_progress
+"@, $f0115PrePushUtf8WithoutBom)
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $mismatchedStatePath -QueuePath $f0115QueueFullPath -MatrixPath $f0115MatrixFullPath -EvidencePath $f0115EvidenceFullPath -AuditReviewPath $f0115AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+
+        $f0115BaseTreeSha = ((& git rev-parse "$f0115PrePushBaseSha`^{tree}") -join "").Trim()
+        $movedOriginSha = (("independent origin movement" | & git commit-tree $f0115BaseTreeSha -p $f0115PrePushBaseSha) -join "").Trim()
+        if ($LASTEXITCODE -ne 0 -or $movedOriginSha -notmatch '^[0-9a-f]{40}$') { throw "Failed to synthesize F-0115 origin movement." }
+        & git update-ref refs/remotes/origin/master $movedOriginSha $f0115PrePushBaseSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to move F-0115 fixture origin/master." }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115ProjectStateFullPath -QueuePath $f0115QueueFullPath -MatrixPath $f0115MatrixFullPath -EvidencePath $f0115EvidenceFullPath -AuditReviewPath $f0115AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+        & git update-ref refs/remotes/origin/master $f0115PrePushBaseSha $movedOriginSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to restore F-0115 fixture origin/master." }
+
+        & git reset --hard --quiet $f0115PrePushBaseSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to reset F-0115 fixture before deletion topology probe." }
+        & git --literal-pathspecs checkout $f0115HotfixSha -- $f0115PrePushFiles
+        if ($LASTEXITCODE -ne 0) { throw "Failed to restore the exact F-0115 file set for deletion topology probe." }
+        $deletedPath = "scripts/agent-system/Test-P1RemediationSerialProgram.ps1"
+        Remove-Item -LiteralPath (Join-Path $f0115PrePushFixtureRoot ($deletedPath -replace "/", "\")) -Force
+        & git --literal-pathspecs add -A -- $deletedPath
+        if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0115 deletion topology probe." }
+        & git commit --quiet -m "destroy exact F-0115 path by deletion"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to commit F-0115 deletion topology probe." }
+        $deletionStatusLines = @(& git diff-tree --no-commit-id --name-status --no-renames -r HEAD)
+        $deletionPaths = @($deletionStatusLines | ForEach-Object { ($_ -split "`t")[-1] } | Sort-Object -Unique)
+        if (($deletionPaths -join "|") -cne (@($f0115PrePushFiles | Sort-Object -Unique) -join "|")) {
+            throw "F-0115 deletion topology probe must retain the exact 12-name path set.`nActual: $($deletionPaths -join ', ')"
+        }
+        if (-not ($deletionStatusLines -contains "D`t$deletedPath")) {
+            throw "F-0115 deletion topology probe did not produce the required D status for $deletedPath."
+        }
+        Test-F0115PrePushReviewFailure `
+            -ProjectStatePath $f0115ProjectStateFullPath `
+            -QueuePath $f0115QueueFullPath `
+            -MatrixPath $f0115MatrixFullPath `
+            -EvidencePath $f0115EvidenceFullPath `
+            -AuditReviewPath $f0115AuditFullPath `
+            -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" `
+            -ForbiddenPatterns @() `
+            -Label "exact-12 path set with deleted expected file" `
+            -RedFindings $f0115PrePushReviewerRedFindings
+
+        & git reset --hard --quiet $f0115PrePushBaseSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to reset F-0115 fixture before type-change topology probe." }
+        & git --literal-pathspecs checkout $f0115HotfixSha -- $f0115PrePushFiles
+        if ($LASTEXITCODE -ne 0) { throw "Failed to restore the exact F-0115 file set for type-change topology probe." }
+        $typeChangePath = "scripts/agent-system/Test-P1RemediationSerialProgram.ps1"
+        $typeChangeBlob = (("synthetic-f0115-link-target" | & git hash-object -w --stdin) -join "").Trim()
+        if ($LASTEXITCODE -ne 0 -or $typeChangeBlob -notmatch '^[0-9a-f]{40}$') {
+            throw "Failed to create F-0115 type-change blob."
+        }
+        & git update-index --cacheinfo "120000,$typeChangeBlob,$typeChangePath"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0115 type-change topology probe." }
+        & git commit --quiet -m "destroy exact F-0115 path by type change"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to commit F-0115 type-change topology probe." }
+        $typeChangeStatusLines = @(& git diff-tree --no-commit-id --name-status --no-renames -r HEAD)
+        $typeChangePaths = @($typeChangeStatusLines | ForEach-Object { ($_ -split "`t")[-1] } | Sort-Object -Unique)
+        if (($typeChangePaths -join "|") -cne (@($f0115PrePushFiles | Sort-Object -Unique) -join "|")) {
+            throw "F-0115 type-change topology probe must retain the exact 12-name path set.`nActual: $($typeChangePaths -join ', ')"
+        }
+        if (-not ($typeChangeStatusLines -contains "T`t$typeChangePath")) {
+            throw "F-0115 type-change topology probe did not produce the required T status for $typeChangePath."
+        }
+        Test-F0115PrePushReviewFailure `
+            -ProjectStatePath $f0115ProjectStateFullPath `
+            -QueuePath $f0115QueueFullPath `
+            -MatrixPath $f0115MatrixFullPath `
+            -EvidencePath $f0115EvidenceFullPath `
+            -AuditReviewPath $f0115AuditFullPath `
+            -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" `
+            -ForbiddenPatterns @() `
+            -Label "exact-12 path set with type-changed expected file" `
+            -RedFindings $f0115PrePushReviewerRedFindings
+
+        & git reset --hard --quiet $f0115HotfixSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to restore F-0115 positive transition before replay probe." }
+
+        Add-Content -LiteralPath $f0115EvidenceFullPath -Value "Replay attempt must not reuse transition_only." -Encoding UTF8
+        & git add -- $f0115PrePushEvidencePath
+        & git commit --quiet -m "replay F-0115 transition"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to synthesize F-0115 replay commit." }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115ProjectStateFullPath -QueuePath $f0115QueueFullPath -MatrixPath $f0115MatrixFullPath -EvidencePath $f0115EvidenceFullPath -AuditReviewPath $f0115AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+        if ($f0115PrePushReviewerRedFindings.Count -gt 0) {
+            throw "F-0115 Module pre-push reviewer coverage is RED:`n- $($f0115PrePushReviewerRedFindings -join "`n- ")"
+        }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    if (Test-Path -LiteralPath $f0115PrePushFixtureRoot) {
+        Remove-Item -LiteralPath $f0115PrePushFixtureRoot -Recurse -Force
+    }
+}
+
 Write-Output "Module Run v2 pre-push readiness smoke passed"

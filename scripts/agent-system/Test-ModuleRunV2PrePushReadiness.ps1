@@ -43,6 +43,23 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+New-Variable -Name p1F0115ScopeCorrectionParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+New-Variable -Name p1F0115ScopeCorrectionBaseSha -Option Constant -Value "6bde2f2aec3d71fa0ce138b26f64243861cace6f"
+New-Variable -Name p1F0115ScopeCorrectionAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md"
+New-Variable -Name p1F0115ScopeCorrectionFiles -Option Constant -Value @(
+    "docs/04-agent-system/state/task-queue.yaml",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $p1F0115ScopeCorrectionAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-f0115-scope-correction-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+)
 
 function Write-Section {
     param(
@@ -136,6 +153,23 @@ function Get-CurrentTaskId {
         }
     }
 
+    return ""
+}
+
+function Get-CurrentTaskStatus {
+    param([Parameter(Mandatory = $true)][string[]]$Lines)
+
+    $insideCurrentTask = $false
+    foreach ($line in $Lines) {
+        if ($line -match "^currentTask:\s*$") {
+            $insideCurrentTask = $true
+            continue
+        }
+        if ($insideCurrentTask -and $line -match "^\S") { break }
+        if ($insideCurrentTask -and $line -match "^\s+status:\s*(.+)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
     return ""
 }
 
@@ -237,6 +271,78 @@ function Test-GitAncestor {
     } finally {
         $ErrorActionPreference = $previousErrorActionPreference
     }
+}
+
+function ConvertTo-NormalizedPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $candidatePath = $Path.Replace("\", "/")
+    while ($candidatePath.StartsWith("./", [System.StringComparison]::Ordinal)) {
+        $candidatePath = $candidatePath.Substring(2)
+    }
+    return $candidatePath.TrimStart("/")
+}
+
+function Test-P1F0115TransitionTopology {
+    param(
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskStatus,
+        [Parameter(Mandatory = $true)][string]$TaskStatus,
+        [Parameter(Mandatory = $true)][string]$CurrentBranch,
+        [Parameter(Mandatory = $true)][string]$HeadSha,
+        [Parameter(Mandatory = $true)][string]$MasterSha,
+        [Parameter(Mandatory = $true)][string]$OriginMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateOriginMasterSha
+    )
+
+    if ($TaskId -ne $p1F0115ScopeCorrectionParentTaskId `
+        -or $StateCurrentTaskId -ne $p1F0115ScopeCorrectionParentTaskId `
+        -or $StateCurrentTaskStatus -ne "in_progress" `
+        -or $TaskStatus -ne "in_progress" `
+        -or $CurrentBranch -ne "master" `
+        -or $HeadSha -ne $MasterSha `
+        -or $OriginMasterSha -ne $p1F0115ScopeCorrectionBaseSha `
+        -or [string]::IsNullOrWhiteSpace($StateMasterSha) `
+        -or $StateMasterSha -ne $StateOriginMasterSha `
+        -or -not (Test-GitAncestor -AncestorSha $StateMasterSha -DescendantSha $OriginMasterSha) `
+        -or $OriginMasterSha -eq $MasterSha) {
+        return $false
+    }
+
+    $headParentLine = ((& git rev-list --parents -n 1 $MasterSha) -join "").Trim()
+    $headParentInspectionExitCode = $LASTEXITCODE
+    $headParentParts = @($headParentLine -split "\s+" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($headParentInspectionExitCode -ne 0 -or $headParentParts.Count -ne 2 -or $headParentParts[0] -ne $MasterSha -or $headParentParts[1] -ne $OriginMasterSha) {
+        return $false
+    }
+
+    $committedNameStatus = @(& git diff-tree --no-commit-id --name-status --no-renames -r $MasterSha)
+    $committedFileInspectionExitCode = $LASTEXITCODE
+    $committedFiles = [System.Collections.Generic.List[string]]::new()
+    $hasInvalidCommittedStatus = $false
+    foreach ($committedEntry in $committedNameStatus) {
+        if ($committedEntry -notmatch '^([AM])\s+(.+)$') {
+            $hasInvalidCommittedStatus = $true
+            continue
+        }
+        $committedFiles.Add((ConvertTo-NormalizedPath -Path $Matches[2]))
+    }
+    $committedFiles = @($committedFiles | Sort-Object -Unique)
+    $expectedFiles = @($p1F0115ScopeCorrectionFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    if ($committedFileInspectionExitCode -ne 0 -or $hasInvalidCommittedStatus -or ($committedFiles -join "|") -cne ($expectedFiles -join "|")) {
+        return $false
+    }
+
+    $parentAuthorizationPath = ((& git ls-tree -r --name-only $OriginMasterSha -- $p1F0115ScopeCorrectionAuthorizationPath) -join "").Trim()
+    $parentAuthorizationInspectionExitCode = $LASTEXITCODE
+    $headAuthorizationPath = ((& git ls-tree -r --name-only $MasterSha -- $p1F0115ScopeCorrectionAuthorizationPath) -join "").Trim()
+    $headAuthorizationInspectionExitCode = $LASTEXITCODE
+    return $parentAuthorizationInspectionExitCode -eq 0 `
+        -and [string]::IsNullOrWhiteSpace($parentAuthorizationPath) `
+        -and $headAuthorizationInspectionExitCode -eq 0 `
+        -and $headAuthorizationPath -eq $p1F0115ScopeCorrectionAuthorizationPath
 }
 
 function Invoke-DocsOnlyBatchReadiness {
@@ -469,9 +575,12 @@ $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
 $headSha = ((& git rev-parse HEAD) -join "").Trim()
 $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
 $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
+$stateCurrentTaskId = Get-CurrentTaskId -Lines $projectStateLines
+$stateCurrentTaskStatus = Get-CurrentTaskStatus -Lines $projectStateLines
 $canUseCloseoutShaAncestry = $taskStatus -in @("done", "closed", "ready_for_closeout")
 $isP1TransitionScopeMode = $P1TransitionScopeMode -eq "transition_only"
-$canUseP1TransitionMasterAncestry = $isP1TransitionScopeMode `
+$isP1F0115TransitionContext = $TaskId -eq $p1F0115ScopeCorrectionParentTaskId -or $stateCurrentTaskId -eq $p1F0115ScopeCorrectionParentTaskId
+$canUseGenericP1TransitionMasterAncestry = $isP1TransitionScopeMode `
     -and $taskStatus -eq "in_progress" `
     -and $currentBranch -eq "master" `
     -and $headSha -eq $masterSha `
@@ -481,12 +590,30 @@ $canUseP1TransitionMasterAncestry = $isP1TransitionScopeMode `
     -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $originMasterSha) `
     -and $originMasterSha -ne $masterSha `
     -and (Test-GitAncestor -AncestorSha $originMasterSha -DescendantSha $masterSha)
+$canUseP1F0115TransitionMasterAncestry = $isP1TransitionScopeMode -and (Test-P1F0115TransitionTopology `
+    -TaskId $TaskId `
+    -StateCurrentTaskId $stateCurrentTaskId `
+    -StateCurrentTaskStatus $stateCurrentTaskStatus `
+    -TaskStatus $taskStatus `
+    -CurrentBranch $currentBranch `
+    -HeadSha $headSha `
+    -MasterSha $masterSha `
+    -OriginMasterSha $originMasterSha `
+    -StateMasterSha $stateMasterSha `
+    -StateOriginMasterSha $stateOriginMasterSha)
+$canUseP1TransitionMasterAncestry = if ($isP1F0115TransitionContext) {
+    $canUseP1F0115TransitionMasterAncestry
+} else {
+    $canUseGenericP1TransitionMasterAncestry
+}
 
 Write-Output "master: $masterSha"
 Write-Output "originMaster: $originMasterSha"
 Write-Output "stateMaster: $stateMasterSha"
 Write-Output "stateOriginMaster: $stateOriginMasterSha"
-Write-Output "p1TransitionScopeMode: $P1TransitionScopeMode"
+if (-not $isP1F0115TransitionContext) {
+    Write-Output "p1TransitionScopeMode: $P1TransitionScopeMode"
+}
 
 if ($isP1TransitionScopeMode -and -not $canUseP1TransitionMasterAncestry) {
     Add-Finding "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID"
@@ -536,4 +663,10 @@ if ($findings.Count -gt 0) {
     throw "Module Run v2 pre-push readiness failed with $($findings.Count) finding(s): $($findings -join '; ')"
 }
 
+if ($isP1F0115TransitionContext) {
+    Write-Output "p1TransitionScopeMode: $P1TransitionScopeMode"
+    if ($canUseP1F0115TransitionMasterAncestry) {
+        Write-Output "p1F0115TransitionTopology: exact_one_parent"
+    }
+}
 Write-Output "pre-push readiness passed"

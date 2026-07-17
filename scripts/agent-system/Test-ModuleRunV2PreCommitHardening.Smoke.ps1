@@ -804,4 +804,751 @@ try {
     }
 }
 
+$f0115ModuleBaseSha = "6bde2f2aec3d71fa0ce138b26f64243861cace6f"
+$f0115ModuleBranch = "codex/p1-f0115-scope-correction-hotfix"
+$f0115ModuleParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+$f0115ModuleTaskId = "p1-f0115-scope-correction-hotfix-2026-07-16"
+$f0115ModuleQueuePath = "docs/04-agent-system/state/task-queue.yaml"
+$f0115ModuleAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md"
+$f0115ModuleEvidencePath = "docs/05-execution-logs/evidence/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+$f0115ModuleAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+$f0115ModuleFiles = @(
+    $f0115ModuleQueuePath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $f0115ModuleAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix.md",
+    $f0115ModuleEvidencePath,
+    $f0115ModuleAuditPath
+)
+$f0115ModuleSourceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$f0115ModuleUtf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
+
+function Replace-F0115ModuleQueueAnchor {
+    param(
+        [Parameter(Mandatory = $true)][string]$Content,
+        [Parameter(Mandatory = $true)][string]$Anchor,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Replacement,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $anchorCount = [regex]::Matches($Content, [regex]::Escape($Anchor)).Count
+    if ($anchorCount -ne 1) {
+        throw "F-0115 Module fixture anchor '$Label' expected once, found $anchorCount."
+    }
+    return $Content.Replace($Anchor, $Replacement)
+}
+
+function ConvertTo-F0115ModuleScopeCorrectionQueue {
+    param([Parameter(Mandatory = $true)][string]$QueueText)
+
+    $normalizedQueue = $QueueText -replace "`r`n?", "`n"
+    $taskPattern = "(?ms)^  - id:\s*$([regex]::Escape($f0115ModuleParentTaskId))\s*`n.*?(?=^  - id:|^standingAuthorization:|\z)"
+    $taskMatch = [regex]::Match($normalizedQueue, $taskPattern)
+    if (-not $taskMatch.Success -or [regex]::Matches($normalizedQueue, $taskPattern).Count -ne 1) {
+        throw "F-0115 Module fixture parent task block must exist exactly once."
+    }
+    $candidateTaskBlock = $taskMatch.Value
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "fresh approval source" -Anchor @"
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+"@ -Replacement @"
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md
+    executionProfile: R3
+"@
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "rollback boundary" -Anchor @"
+    rollbackOrStopCondition: stop_if_schema_migration_persistent_batch_command_database_runtime_external_distribution_service_or_other_finding_repair_is_required
+"@ -Replacement @"
+    rollbackOrStopCondition: stop_if_generated_migration_source_would_be_executed_or_if_dependency_database_provider_runtime_p2_pr_force_push_deploy_or_other_finding_repair_is_required
+"@
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "focused gates" -Anchor @"
+    focusedGates:
+      - jit_post_p0_credential_membership_transaction_boundary
+      - auth_user_auth_account_user_employee_quota_atomicity
+      - employee_creation_failure_rolls_back_all_identity_side_effects
+      - account_phone_conflict_and_concurrent_retry_fail_closed
+      - batch_row_exception_returns_explainable_partial_result_without_losing_success_rows
+      - one_time_initial_password_only_for_committed_rows
+      - response_loss_and_retry_boundary_explicitly_classified
+      - operations_or_super_admin_write_boundary_preserved
+      - focused_service_repository_route_and_static_regression
+      - full_static_regression
+      - two_round_adversarial_review
+"@ -Replacement @"
+    focusedGates:
+      - persistent_employee_import_command_idempotency_and_request_hmac
+      - auth_user_auth_account_user_employee_current_org_auth_quota_atomicity
+      - row_savepoint_rolls_back_all_identity_side_effects_before_rejection
+      - unknown_result_remains_recoverable_and_is_never_reclassified_as_rejected
+      - generated_credential_placeholder_rotate_revision_and_confirm_distribution
+      - login_and_issue_share_advisory_lock_with_deterministic_multi_lock_order
+      - canonical_and_legacy_routes_are_no_store_and_redacted
+      - operations_or_super_admin_write_and_actor_visibility_boundaries
+      - drizzle_generated_migration_source_only_without_execution
+      - focused_service_repository_route_ui_and_static_regression
+      - full_static_regression
+      - two_round_adversarial_review
+"@
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "product allowlist" -Anchor @"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - src/server/services/employee-account-service.ts
+      - src/server/services/employee-account-service.test.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+"@ -Replacement @"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/superpowers/specs/2026-07-16-employee-import-command-recovery-design.md
+      - docs/superpowers/plans/2026-07-16-employee-import-command-recovery.md
+      - src/db/schema/employee-import.ts
+      - src/db/schema/employee-import.test.ts
+      - src/db/schema/index.ts
+      - drizzle/*_p1_rc_02_employee_import_command_recovery.sql
+      - drizzle/meta/*_snapshot.json
+      - drizzle/meta/_journal.json
+      - src/server/contracts/employee-import-command-contract.ts
+      - src/server/validators/employee-import-command.ts
+      - src/server/validators/employee-import-command.test.ts
+      - src/server/services/employee-import-command-crypto.ts
+      - src/server/services/employee-import-command-crypto.test.ts
+      - src/server/repositories/employee-import-command-repository.ts
+      - src/server/repositories/postgres-employee-import-command-repository.ts
+      - src/server/repositories/postgres-employee-import-command-repository.test.ts
+      - src/server/services/employee-import-command-service.ts
+      - src/server/services/employee-import-command-service.test.ts
+      - src/server/services/employee-import-command-route.ts
+      - src/server/services/employee-import-command-route.test.ts
+      - src/app/api/v1/employee-import-commands/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/issue-credentials/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/confirm-distribution/route.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/contracts/employee-account-contract.ts
+      - src/server/services/employee-account-service.ts
+      - src/server/services/employee-account-service.test.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/features/admin/org-auth-redeem/employee-import-command-client.ts
+      - src/features/admin/org-auth-redeem/employee-import-command-client.test.ts
+      - src/features/admin/org-auth-redeem/useEmployeeImportCommand.ts
+      - src/features/admin/org-auth-redeem/useEmployeeImportCommand.test.tsx
+      - src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.tsx
+      - src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.test.tsx
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/p1-employee-import-command-atomicity.test.ts
+      - tests/unit/p1-employee-import-command-migration-source.test.ts
+      - tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts
+      - tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
+"@
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "blocked schema and drizzle paths" -Anchor @"
+      - src/db/schema/**
+      - drizzle/**
+"@ -Replacement ""
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "schema capability" -Anchor @"
+      schemaMigration: blocked_without_fresh_approval
+"@ -Replacement @"
+      schemaMigration: approved_source_generation_only_no_execution
+"@
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "acceptance standards" -Anchor @"
+    acceptanceStandards:
+      - JIT revalidation must first distinguish post-P0 covered atomic creation from any remaining batch exception, unknown-result or one-time-secret residual; superseded evidence cannot be reopened wholesale.
+      - A committed employee account must contain auth_user, auth_account, user, employee and quota reservation in one transaction; any failure must leave no orphan credential or partial membership.
+      - Batch import must preserve explainable committed-row results and must never expose an initial password for a row whose transaction did not commit.
+      - Response-loss and retry safety must be proven within the current no-schema boundary; if durable batch idempotency or recoverable secret storage is required, stop and request separate approval rather than inventing persistence.
+      - F-0115 can close only at static level after focused and full regression; RV-0018 remains pending and no schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+"@ -Replacement @"
+    acceptanceStandards:
+      - The command idempotency key and normalized request HMAC must make same-key/same-request resume safe and same-key/different-request fail with 409 without storing raw request, phone, name, or password.
+      - Each row must atomically commit identity, credential, employee membership, current org_auth quota, outcome, and audit; deterministic rejection must roll back identity through a savepoint, and unknown outcome must remain recoverable rather than being marked rejected.
+      - Generated credentials must start with an unknowable placeholder and only explicit revision-bound issue may rotate and return plaintext once; GET never returns plaintext, active sessions block issue, and confirm closes distribution.
+      - F-0115 closes statically only after focused/full regression and two reviews; Drizzle generation may create migration source but no migration/database execution occurs, RV-0018 remains pending, and dependency/Provider/browser/P2/PR/force/deploy remain blocked.
+"@
+
+    $candidateTaskBlock = Replace-F0115ModuleQueueAnchor -Content $candidateTaskBlock -Label "focused validation command" -Anchor @"
+      - corepack pnpm@10.15.1 exec vitest run src/server/services/employee-account-service.test.ts src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts --maxWorkers=1
+"@ -Replacement @"
+      - corepack pnpm@10.15.1 exec vitest run src/db/schema/employee-import.test.ts src/server/validators/employee-import-command.test.ts src/server/services/employee-import-command-crypto.test.ts src/server/repositories/postgres-employee-import-command-repository.test.ts src/server/services/employee-import-command-service.test.ts src/server/services/employee-import-command-route.test.ts src/server/auth/local-session-runtime.test.ts src/features/admin/org-auth-redeem/employee-import-command-client.test.ts src/features/admin/org-auth-redeem/useEmployeeImportCommand.test.tsx src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.test.tsx tests/unit/p1-employee-import-command-atomicity.test.ts tests/unit/p1-employee-import-command-migration-source.test.ts tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts --maxWorkers=1
+"@
+
+    return $normalizedQueue.Substring(0, $taskMatch.Index) + $candidateTaskBlock + $normalizedQueue.Substring($taskMatch.Index + $taskMatch.Length)
+}
+
+function Set-F0115ModuleFixtureFile {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content
+    )
+
+    $fullPath = Join-Path $Root ($Path -replace "/", "\")
+    $parentPath = Split-Path -Parent $fullPath
+    if (-not (Test-Path -LiteralPath $parentPath)) {
+        New-Item -ItemType Directory -Path $parentPath -Force | Out-Null
+    }
+    [System.IO.File]::WriteAllText($fullPath, ($Content -replace "`r`n?", "`n"), $f0115ModuleUtf8WithoutBom)
+}
+
+function New-F0115ModuleFixture {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Branch = $f0115ModuleBranch,
+        [switch]$AdvanceBase
+    )
+
+    $fixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-module-f0115-" + $Name + "-" + [guid]::NewGuid().ToString("N"))
+    & git clone --quiet --shared --no-checkout $f0115ModuleSourceRoot $fixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0115 Module fixture '$Name'." }
+    & git -C $fixtureRoot config user.name "Module F-0115 Scope Smoke"
+    & git -C $fixtureRoot config user.email "module-f0115-scope-smoke@example.invalid"
+    & git -C $fixtureRoot config core.autocrlf false
+    & git -C $fixtureRoot config core.longpaths true
+    & git -C $fixtureRoot sparse-checkout init --no-cone
+    $sparseFiles = @(
+        $f0115ModuleFiles + @(
+            "docs/04-agent-system/state/project-state.yaml",
+            "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml",
+            "src/server/services/employee-account-service.ts"
+        )
+    )
+    & git -C $fixtureRoot sparse-checkout set --no-cone -- $sparseFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to configure F-0115 Module sparse fixture '$Name'." }
+    & git -C $fixtureRoot switch --quiet -C $Branch $f0115ModuleBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out F-0115 Module fixture '$Name'." }
+    & git -C $fixtureRoot update-ref refs/remotes/origin/master $f0115ModuleBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to pin F-0115 Module fixture origin/master." }
+
+    if ($AdvanceBase) {
+        $baseTreeSha = ((& git -C $fixtureRoot rev-parse "$f0115ModuleBaseSha`^{tree}") -join "").Trim()
+        $wrongBaseSha = (("advance F-0115 wrong base" | & git -C $fixtureRoot commit-tree $baseTreeSha -p $f0115ModuleBaseSha) -join "").Trim()
+        if ($LASTEXITCODE -ne 0 -or $wrongBaseSha -notmatch '^[0-9a-f]{40}$') { throw "Failed to synthesize F-0115 wrong-base fixture." }
+        & git -C $fixtureRoot update-ref "refs/heads/$Branch" $wrongBaseSha $f0115ModuleBaseSha
+        & git -C $fixtureRoot reset --hard --quiet $wrongBaseSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to advance F-0115 wrong-base fixture." }
+    }
+
+    return $fixtureRoot
+}
+
+function Set-F0115ModuleCandidate {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $queueFullPath = Join-Path $Root ($f0115ModuleQueuePath -replace "/", "\")
+    $candidateQueue = ConvertTo-F0115ModuleScopeCorrectionQueue -QueueText ([System.IO.File]::ReadAllText($queueFullPath))
+    Set-F0115ModuleFixtureFile -Root $Root -Path $f0115ModuleQueuePath -Content $candidateQueue
+
+    $authorizationFileList = @($f0115ModuleFiles | ForEach-Object { "- ``$_``" }) -join "`n"
+    Set-F0115ModuleFixtureFile -Root $Root -Path $f0115ModuleAuthorizationPath -Content @"
+# P1 F-0115 Scope-Correction Authorization
+
+Status: approved
+Human approval source: current user message
+Task ID: ``$f0115ModuleTaskId``
+Parent task: ``$f0115ModuleParentTaskId``
+Base: ``$f0115ModuleBaseSha``
+Branch: ``$f0115ModuleBranch``
+
+## Exact Files
+
+$authorizationFileList
+
+## Capability Authorization
+
+schemaMigration: approved_source_generation_only_no_execution
+dependencyIntroduction: blocked_without_fresh_approval
+databaseMutation: blocked_without_fresh_user_approval
+providerCall: blocked_without_fresh_approval
+runtimeAcceptance: blocked_out_of_program
+browserRuntimeValidation: blocked_out_of_program
+p2Implementation: blocked_out_of_program
+stagingProdDeploy: blocked_requires_fresh_user_approval
+forcePush: blocked
+pr: blocked
+costCalibrationGate: blocked
+
+Every other in_progress SHA mismatch remains a hard-block.
+Hook bypass is not approved.
+No product implementation, migration/database execution, dependency, Provider, browser/runtime, P2, PR, force push, or deployment is authorized by this governance commit.
+"@
+    Set-F0115ModuleFixtureFile -Root $Root -Path $f0115ModuleEvidencePath -Content @"
+# P1 F-0115 Scope-Correction Evidence
+
+status: complete
+conflictsFound: false
+targetSourceReviewed: true
+targetTestsReviewed: true
+analogousImplementationReviewed: true
+
+## Requirement Mapping Result
+
+Result: pass
+
+## Root-Cause Reproduction
+
+Result: pass
+
+## TDD Evidence
+
+Result: pass
+
+## Validation Results
+
+Result: pass
+
+Cost Calibration Gate remains blocked.
+"@
+    Set-F0115ModuleFixtureFile -Root $Root -Path $f0115ModuleAuditPath -Content @"
+# P1 F-0115 Scope-Correction Audit
+
+## Round 1
+
+Result: pass
+
+## Round 2
+
+Result: pass
+
+## Decision
+
+Decision: APPROVE
+"@
+
+    foreach ($fixturePath in @($f0115ModuleFiles | Where-Object {
+        $_ -notin @($f0115ModuleQueuePath, $f0115ModuleAuthorizationPath, $f0115ModuleEvidencePath, $f0115ModuleAuditPath)
+    })) {
+        Set-F0115ModuleFixtureFile -Root $Root -Path $fixturePath -Content "# Independent F-0115 Module governance fixture: $fixturePath`n"
+    }
+
+    & git -C $Root add -- $f0115ModuleFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0115 Module fixture." }
+    $stagedFiles = @(& git -C $Root diff --cached --name-only --diff-filter=ACMR | Sort-Object -Unique)
+    if (($stagedFiles -join "|") -cne (@($f0115ModuleFiles | Sort-Object -Unique) -join "|")) {
+        throw "F-0115 Module fixture did not stage the exact file set.`nActual: $($stagedFiles -join ', ')"
+    }
+    $worktreeOnlyFiles = @(& git -C $Root diff --name-only)
+    if ($worktreeOnlyFiles.Count -gt 0) {
+        throw "F-0115 Module fixture unexpectedly contains an index/worktree split: $($worktreeOnlyFiles -join ', ')"
+    }
+}
+
+function Invoke-F0115ModulePreCommit {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    Push-Location $Root
+    try {
+        return @(& $scriptPath)
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-F0115ModuleExpectFailure {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$ExpectedPattern,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $failed = $false
+    $failureOutput = @()
+    try {
+        $failureOutput = @(Invoke-F0115ModulePreCommit -Root $Root 2>&1)
+    } catch {
+        $failed = $true
+        $failureOutput += $_.Exception.Message
+    }
+    if (-not $failed) {
+        throw "F-0115 Module negative '$Label' unexpectedly passed.`n$($failureOutput -join "`n")"
+    }
+    Assert-Contains -Output $failureOutput -Pattern $ExpectedPattern
+}
+
+function Assert-F0115ModuleExactCandidateIndex {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $cachedStatusLines = @(& git -C $Root diff --cached --name-status --no-renames --diff-filter=ACMRTD)
+    $cachedStatusExitCode = $LASTEXITCODE
+    $cachedPaths = [System.Collections.Generic.List[string]]::new()
+    $hasInvalidStatus = $false
+    foreach ($cachedStatusLine in $cachedStatusLines) {
+        if ($cachedStatusLine -notmatch '^(?:A|M)\t(.+)$') {
+            $hasInvalidStatus = $true
+            continue
+        }
+        $cachedPaths.Add($Matches[1])
+    }
+    $actualCachedPaths = @($cachedPaths.ToArray() | Sort-Object -Unique)
+    $expectedCachedPaths = @($f0115ModuleFiles | Sort-Object -Unique)
+    $unstagedPaths = @(& git -C $Root diff --name-only)
+    $unstagedExitCode = $LASTEXITCODE
+    $untrackedPaths = @(& git -C $Root ls-files --others --exclude-standard)
+    $untrackedExitCode = $LASTEXITCODE
+    if (
+        $cachedStatusExitCode -ne 0 -or
+        $cachedStatusLines.Count -ne 12 -or
+        $hasInvalidStatus -or
+        ($actualCachedPaths -join "|") -cne ($expectedCachedPaths -join "|") -or
+        $unstagedExitCode -ne 0 -or
+        $unstagedPaths.Count -ne 0 -or
+        $untrackedExitCode -ne 0 -or
+        $untrackedPaths.Count -ne 0
+    ) {
+        throw "F-0115 Module contradiction fixture '$Label' must contain exact twelve staged A/M paths with zero unstaged or untracked paths."
+    }
+}
+
+function Test-F0115ModuleReviewFailure {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$ExpectedPattern,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [string[]]$ForbiddenPatterns = @(),
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.Generic.List[string]]$RedFindings
+    )
+
+    $capturedOutput = [System.Collections.Generic.List[string]]::new()
+    $failed = $false
+    Push-Location $Root
+    try {
+        try {
+            & $scriptPath 2>&1 | ForEach-Object { $capturedOutput.Add($_.ToString()) }
+        } catch {
+            $failed = $true
+            $capturedOutput.Add($_.Exception.Message)
+        }
+    } finally {
+        Pop-Location
+    }
+
+    if (-not $failed) {
+        $RedFindings.Add("$Label unexpectedly passed; expected $ExpectedPattern")
+        return
+    }
+
+    Assert-Contains -Output @($capturedOutput) -Pattern $ExpectedPattern
+    foreach ($forbiddenPattern in $ForbiddenPatterns) {
+        if ((@($capturedOutput) | Where-Object { $_ -match $forbiddenPattern }).Count -gt 0) {
+            $RedFindings.Add("$Label leaked forbidden success output '$forbiddenPattern'")
+        }
+    }
+}
+
+$f0115ModuleGuardText = Get-Content -LiteralPath $scriptPath -Raw -Encoding UTF8
+$f0115ModuleRequiredContracts = @(
+    "preCommitScopeMode: p1_f0115_scope_correction",
+    "p1F0115ScopeCorrectionAuthorization: approved_one_time",
+    "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID",
+    "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID"
+)
+$missingF0115ModuleContracts = @($f0115ModuleRequiredContracts | Where-Object {
+    $f0115ModuleGuardText -notmatch [regex]::Escape($_)
+})
+$f0115ModuleFixtureRoots = [System.Collections.Generic.List[string]]::new()
+$f0115ModuleReviewerRedFindings = [System.Collections.Generic.List[string]]::new()
+
+try {
+    $positiveRoot = New-F0115ModuleFixture -Name "exact-positive"
+    $f0115ModuleFixtureRoots.Add($positiveRoot)
+    Set-F0115ModuleCandidate -Root $positiveRoot
+
+    if ($missingF0115ModuleContracts.Count -gt 0) {
+        $redFailure = ""
+        try {
+            $unexpectedOutput = Invoke-F0115ModulePreCommit -Root $positiveRoot
+        } catch {
+            $redFailure = $_.Exception.Message
+        }
+        if ([string]::IsNullOrWhiteSpace($redFailure)) {
+            throw "Exact F-0115 Module fixture unexpectedly passed without the required marker contract.`n$($unexpectedOutput -join "`n")"
+        }
+        if ($redFailure -notmatch "HARD_BLOCK_") {
+            throw "Exact F-0115 Module fixture failed before reaching the guard contract: $redFailure"
+        }
+        throw "Existing Module pre-commit regression passed; exact F-0115 scope-correction is RED because the guard contract is missing: $($missingF0115ModuleContracts -join ', '). Guard failure: $redFailure"
+    }
+
+    $positiveOutput = Invoke-F0115ModulePreCommit -Root $positiveRoot
+    Assert-Contains -Output $positiveOutput -Pattern "preCommitScopeMode: p1_f0115_scope_correction"
+    Assert-Contains -Output $positiveOutput -Pattern "p1F0115ScopeCorrectionAuthorization: approved_one_time"
+    Assert-Contains -Output $positiveOutput -Pattern "OK_SCOPE $([regex]::Escape($f0115ModuleQueuePath))"
+
+    $wrongBaseRoot = New-F0115ModuleFixture -Name "wrong-base" -AdvanceBase
+    $f0115ModuleFixtureRoots.Add($wrongBaseRoot)
+    Set-F0115ModuleCandidate -Root $wrongBaseRoot
+    Invoke-F0115ModuleExpectFailure -Root $wrongBaseRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_CONTEXT_INVALID" -Label "wrong base"
+
+    $wrongBranchRoot = New-F0115ModuleFixture -Name "wrong-branch" -Branch "codex/p1-f0115-wrong-branch"
+    $f0115ModuleFixtureRoots.Add($wrongBranchRoot)
+    Set-F0115ModuleCandidate -Root $wrongBranchRoot
+    Invoke-F0115ModuleExpectFailure -Root $wrongBranchRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_CONTEXT_INVALID" -Label "wrong branch"
+
+    $wrongTaskRoot = New-F0115ModuleFixture -Name "wrong-task"
+    $f0115ModuleFixtureRoots.Add($wrongTaskRoot)
+    Set-F0115ModuleCandidate -Root $wrongTaskRoot
+    $wrongTaskQueuePath = Join-Path $wrongTaskRoot ($f0115ModuleQueuePath -replace "/", "\")
+    $wrongTaskQueue = [System.IO.File]::ReadAllText($wrongTaskQueuePath).Replace(
+        "  - id: $f0115ModuleParentTaskId",
+        "  - id: p1-remediation-rc-02-wrong-task-2026-07-16"
+    )
+    Set-F0115ModuleFixtureFile -Root $wrongTaskRoot -Path $f0115ModuleQueuePath -Content $wrongTaskQueue
+    & git -C $wrongTaskRoot add -- $f0115ModuleQueuePath
+    Invoke-F0115ModuleExpectFailure -Root $wrongTaskRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_(?:CONTEXT|QUEUE_DELTA)_INVALID" -Label "wrong task"
+
+    $wrongStatusRoot = New-F0115ModuleFixture -Name "wrong-status"
+    $f0115ModuleFixtureRoots.Add($wrongStatusRoot)
+    Set-F0115ModuleCandidate -Root $wrongStatusRoot
+    $wrongStatusQueuePath = Join-Path $wrongStatusRoot ($f0115ModuleQueuePath -replace "/", "\")
+    $wrongStatusQueue = [System.IO.File]::ReadAllText($wrongStatusQueuePath)
+    $wrongStatusQueue = [regex]::Replace(
+        $wrongStatusQueue,
+        "(?ms)(^  - id:\s*$([regex]::Escape($f0115ModuleParentTaskId))\s*\r?\n.*?^    status:)\s*in_progress",
+        '${1} pending',
+        1
+    )
+    Set-F0115ModuleFixtureFile -Root $wrongStatusRoot -Path $f0115ModuleQueuePath -Content $wrongStatusQueue
+    & git -C $wrongStatusRoot add -- $f0115ModuleQueuePath
+    Invoke-F0115ModuleExpectFailure -Root $wrongStatusRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_CONTEXT_INVALID" -Label "wrong status"
+
+    $invalidApprovalRoot = New-F0115ModuleFixture -Name "invalid-approval"
+    $f0115ModuleFixtureRoots.Add($invalidApprovalRoot)
+    Set-F0115ModuleCandidate -Root $invalidApprovalRoot
+    $invalidApprovalFullPath = Join-Path $invalidApprovalRoot ($f0115ModuleAuthorizationPath -replace "/", "\")
+    $invalidApproval = [System.IO.File]::ReadAllText($invalidApprovalFullPath).Replace("Status: approved", "Status: pending")
+    Set-F0115ModuleFixtureFile -Root $invalidApprovalRoot -Path $f0115ModuleAuthorizationPath -Content $invalidApproval
+    & git -C $invalidApprovalRoot add -- $f0115ModuleAuthorizationPath
+    Invoke-F0115ModuleExpectFailure -Root $invalidApprovalRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_AUTHORIZATION_INVALID" -Label "invalid approval"
+
+    $scalarDeltaRoot = New-F0115ModuleFixture -Name "scalar-delta"
+    $f0115ModuleFixtureRoots.Add($scalarDeltaRoot)
+    Set-F0115ModuleCandidate -Root $scalarDeltaRoot
+    $scalarQueuePath = Join-Path $scalarDeltaRoot ($f0115ModuleQueuePath -replace "/", "\")
+    $scalarQueue = [System.IO.File]::ReadAllText($scalarQueuePath).Replace(
+        "rollbackOrStopCondition: stop_if_generated_migration_source_would_be_executed_or_if_dependency_database_provider_runtime_p2_pr_force_push_deploy_or_other_finding_repair_is_required",
+        "rollbackOrStopCondition: stop_if_generated_migration_source_would_be_executed"
+    )
+    Set-F0115ModuleFixtureFile -Root $scalarDeltaRoot -Path $f0115ModuleQueuePath -Content $scalarQueue
+    & git -C $scalarDeltaRoot add -- $f0115ModuleQueuePath
+    Invoke-F0115ModuleExpectFailure -Root $scalarDeltaRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Label "scalar queue semantics"
+
+    $listDeltaRoot = New-F0115ModuleFixture -Name "list-delta"
+    $f0115ModuleFixtureRoots.Add($listDeltaRoot)
+    Set-F0115ModuleCandidate -Root $listDeltaRoot
+    $listQueuePath = Join-Path $listDeltaRoot ($f0115ModuleQueuePath -replace "/", "\")
+    $listQueue = [System.IO.File]::ReadAllText($listQueuePath).Replace(
+        "      - unknown_result_remains_recoverable_and_is_never_reclassified_as_rejected",
+        "      - unknown_result_is_rejected"
+    )
+    Set-F0115ModuleFixtureFile -Root $listDeltaRoot -Path $f0115ModuleQueuePath -Content $listQueue
+    & git -C $listDeltaRoot add -- $f0115ModuleQueuePath
+    Invoke-F0115ModuleExpectFailure -Root $listDeltaRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Label "list queue semantics"
+
+    $orderDeltaRoot = New-F0115ModuleFixture -Name "order-delta"
+    $f0115ModuleFixtureRoots.Add($orderDeltaRoot)
+    Set-F0115ModuleCandidate -Root $orderDeltaRoot
+    $orderQueuePath = Join-Path $orderDeltaRoot ($f0115ModuleQueuePath -replace "/", "\")
+    $orderQueue = [System.IO.File]::ReadAllText($orderQueuePath).Replace(
+        "      - persistent_employee_import_command_idempotency_and_request_hmac`n      - auth_user_auth_account_user_employee_current_org_auth_quota_atomicity",
+        "      - auth_user_auth_account_user_employee_current_org_auth_quota_atomicity`n      - persistent_employee_import_command_idempotency_and_request_hmac"
+    )
+    Set-F0115ModuleFixtureFile -Root $orderDeltaRoot -Path $f0115ModuleQueuePath -Content $orderQueue
+    & git -C $orderDeltaRoot add -- $f0115ModuleQueuePath
+    Invoke-F0115ModuleExpectFailure -Root $orderDeltaRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Label "ordered queue semantics"
+
+    $contentDeltaRoot = New-F0115ModuleFixture -Name "content-delta"
+    $f0115ModuleFixtureRoots.Add($contentDeltaRoot)
+    Set-F0115ModuleCandidate -Root $contentDeltaRoot
+    $contentQueuePath = Join-Path $contentDeltaRoot ($f0115ModuleQueuePath -replace "/", "\")
+    $contentQueue = [System.IO.File]::ReadAllText($contentQueuePath).Replace("schemaVersion: 1", "schemaVersion: 2")
+    Set-F0115ModuleFixtureFile -Root $contentDeltaRoot -Path $f0115ModuleQueuePath -Content $contentQueue
+    & git -C $contentDeltaRoot add -- $f0115ModuleQueuePath
+    Invoke-F0115ModuleExpectFailure -Root $contentDeltaRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Label "queue content outside the target block"
+
+    $missingPathRoot = New-F0115ModuleFixture -Name "missing-path"
+    $f0115ModuleFixtureRoots.Add($missingPathRoot)
+    Set-F0115ModuleCandidate -Root $missingPathRoot
+    & git -C $missingPathRoot restore --source=HEAD --staged --worktree -- "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to prepare F-0115 Module missing-path fixture." }
+    Invoke-F0115ModuleExpectFailure -Root $missingPathRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_(?:FILE_SET|CONTEXT)_INVALID|HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)" -Label "missing hotfix path"
+
+    $productPathRoot = New-F0115ModuleFixture -Name "extra-product-path"
+    $f0115ModuleFixtureRoots.Add($productPathRoot)
+    Set-F0115ModuleCandidate -Root $productPathRoot
+    $productPath = "src/server/services/employee-account-service.ts"
+    $productFullPath = Join-Path $productPathRoot ($productPath -replace "/", "\")
+    $productText = [System.IO.File]::ReadAllText($productFullPath)
+    Set-F0115ModuleFixtureFile -Root $productPathRoot -Path $productPath -Content "$productText`n// Product code must not enter the governance hotfix.`n"
+    & git -C $productPathRoot add -- $productPath
+    Invoke-F0115ModuleExpectFailure -Root $productPathRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_(?:FILE_SET|PRODUCT_PATH|CONTEXT)_INVALID|HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)" -Label "extra product path"
+
+    $partialStageRoot = New-F0115ModuleFixture -Name "index-worktree-split"
+    $f0115ModuleFixtureRoots.Add($partialStageRoot)
+    Set-F0115ModuleCandidate -Root $partialStageRoot
+    Add-Content -LiteralPath (Join-Path $partialStageRoot ($f0115ModuleAuthorizationPath -replace "/", "\")) -Value "unstaged divergence" -Encoding UTF8
+    Invoke-F0115ModuleExpectFailure -Root $partialStageRoot -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID" -Label "index/worktree split"
+
+    $missingSchemaApprovalRoot = New-F0115ModuleFixture -Name "missing-schema-capability-approval"
+    $f0115ModuleFixtureRoots.Add($missingSchemaApprovalRoot)
+    Set-F0115ModuleCandidate -Root $missingSchemaApprovalRoot
+    $missingSchemaApprovalFullPath = Join-Path $missingSchemaApprovalRoot ($f0115ModuleAuthorizationPath -replace "/", "\")
+    $missingSchemaApproval = [System.IO.File]::ReadAllText($missingSchemaApprovalFullPath).Replace(
+        "schemaMigration: approved_source_generation_only_no_execution`n",
+        ""
+    )
+    if ($missingSchemaApproval -ceq [System.IO.File]::ReadAllText($missingSchemaApprovalFullPath)) {
+        throw "F-0115 missing-schema capability fixture did not mutate the authorization."
+    }
+    Set-F0115ModuleFixtureFile -Root $missingSchemaApprovalRoot -Path $f0115ModuleAuthorizationPath -Content $missingSchemaApproval
+    & git -C $missingSchemaApprovalRoot add -- $f0115ModuleAuthorizationPath
+    Test-F0115ModuleReviewFailure `
+        -Root $missingSchemaApprovalRoot `
+        -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_AUTHORIZATION_INVALID" `
+        -Label "missing schema source-generation capability approval" `
+        -RedFindings $f0115ModuleReviewerRedFindings
+
+    $tamperedPreservedApprovalRoot = New-F0115ModuleFixture -Name "tampered-preserved-capability"
+    $f0115ModuleFixtureRoots.Add($tamperedPreservedApprovalRoot)
+    Set-F0115ModuleCandidate -Root $tamperedPreservedApprovalRoot
+    $tamperedPreservedApprovalFullPath = Join-Path $tamperedPreservedApprovalRoot ($f0115ModuleAuthorizationPath -replace "/", "\")
+    $tamperedPreservedApproval = [System.IO.File]::ReadAllText($tamperedPreservedApprovalFullPath).Replace(
+        "dependencyIntroduction: blocked_without_fresh_approval",
+        "dependencyIntroduction: approved"
+    )
+    if ($tamperedPreservedApproval -ceq [System.IO.File]::ReadAllText($tamperedPreservedApprovalFullPath)) {
+        throw "F-0115 preserved-capability fixture did not mutate the authorization."
+    }
+    Set-F0115ModuleFixtureFile -Root $tamperedPreservedApprovalRoot -Path $f0115ModuleAuthorizationPath -Content $tamperedPreservedApproval
+    & git -C $tamperedPreservedApprovalRoot add -- $f0115ModuleAuthorizationPath
+    Test-F0115ModuleReviewFailure `
+        -Root $tamperedPreservedApprovalRoot `
+        -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_AUTHORIZATION_INVALID" `
+        -Label "tampered preserved capability approval" `
+        -RedFindings $f0115ModuleReviewerRedFindings
+
+    $contradictoryAuthorizationRoot = New-F0115ModuleFixture -Name "contradictory-authorization"
+    $f0115ModuleFixtureRoots.Add($contradictoryAuthorizationRoot)
+    Set-F0115ModuleCandidate -Root $contradictoryAuthorizationRoot
+    $contradictoryAuthorizationFullPath = Join-Path $contradictoryAuthorizationRoot ($f0115ModuleAuthorizationPath -replace "/", "\")
+    $canonicalAuthorization = [System.IO.File]::ReadAllText($contradictoryAuthorizationFullPath)
+    Set-F0115ModuleFixtureFile -Root $contradictoryAuthorizationRoot -Path $f0115ModuleAuthorizationPath -Content @"
+$canonicalAuthorization
+
+## Capability Authorization
+
+schemaMigration: approved_execution
+databaseMutation: approved
+dependencyIntroduction: approved
+"@
+    & git -C $contradictoryAuthorizationRoot add -- $f0115ModuleAuthorizationPath
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0115 Module contradictory authorization fixture." }
+    Assert-F0115ModuleExactCandidateIndex -Root $contradictoryAuthorizationRoot -Label "contradictory authorization"
+    Test-F0115ModuleReviewFailure `
+        -Root $contradictoryAuthorizationRoot `
+        -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_ARTIFACT_CONTRADICTION authorization" `
+        -ForbiddenPatterns @(
+            "(?m)^preCommitScopeMode:\s*",
+            "p1F0115ScopeCorrectionAuthorization:\s*approved_one_time",
+            "(?m)^pre-commit hardening passed\s*$"
+        ) `
+        -Label "contradictory authorization artifact" `
+        -RedFindings $f0115ModuleReviewerRedFindings
+
+    $contradictoryAuditRoot = New-F0115ModuleFixture -Name "contradictory-audit"
+    $f0115ModuleFixtureRoots.Add($contradictoryAuditRoot)
+    Set-F0115ModuleCandidate -Root $contradictoryAuditRoot
+    $contradictoryAuditFullPath = Join-Path $contradictoryAuditRoot ($f0115ModuleAuditPath -replace "/", "\")
+    $canonicalAudit = [System.IO.File]::ReadAllText($contradictoryAuditFullPath)
+    Set-F0115ModuleFixtureFile -Root $contradictoryAuditRoot -Path $f0115ModuleAuditPath -Content @"
+$canonicalAudit
+
+## Round 2
+
+Result: fail
+
+## Decision
+
+Decision: REJECT
+"@
+    & git -C $contradictoryAuditRoot add -- $f0115ModuleAuditPath
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0115 Module contradictory audit fixture." }
+    Assert-F0115ModuleExactCandidateIndex -Root $contradictoryAuditRoot -Label "contradictory audit"
+    Test-F0115ModuleReviewFailure `
+        -Root $contradictoryAuditRoot `
+        -ExpectedPattern "HARD_BLOCK_P1_F0115_SCOPE_CORRECTION_ARTIFACT_CONTRADICTION audit" `
+        -ForbiddenPatterns @(
+            "(?m)^preCommitScopeMode:\s*",
+            "p1F0115ScopeCorrectionAuthorization:\s*approved_one_time",
+            "(?m)^pre-commit hardening passed\s*$"
+        ) `
+        -Label "contradictory audit artifact" `
+        -RedFindings $f0115ModuleReviewerRedFindings
+
+    $postAnchorFindingRoot = New-F0115ModuleFixture -Name "candidate-valid-post-anchor-finding"
+    $f0115ModuleFixtureRoots.Add($postAnchorFindingRoot)
+    Set-F0115ModuleCandidate -Root $postAnchorFindingRoot
+    $postAnchorPlanPath = "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix-design.md"
+    $postAnchorPlanFullPath = Join-Path $postAnchorFindingRoot ($postAnchorPlanPath -replace "/", "\")
+    $sensitiveHeaderName = "Authori" + "zation"
+    $postAnchorPlan = [System.IO.File]::ReadAllText($postAnchorPlanFullPath) + "`n$sensitiveHeaderName`: Bearer synthetic-f0115-marker-leak-probe`n"
+    Set-F0115ModuleFixtureFile -Root $postAnchorFindingRoot -Path $postAnchorPlanPath -Content $postAnchorPlan
+    & git -C $postAnchorFindingRoot add -- $postAnchorPlanPath
+    Test-F0115ModuleReviewFailure `
+        -Root $postAnchorFindingRoot `
+        -ExpectedPattern "HARD_BLOCK_SENSITIVE_EVIDENCE" `
+        -ForbiddenPatterns @(
+            "preCommitScopeMode:\s*p1_f0115_scope_correction",
+            "p1F0115ScopeCorrectionAuthorization:\s*approved_one_time"
+        ) `
+        -Label "candidate-valid post-anchor generic finding" `
+        -RedFindings $f0115ModuleReviewerRedFindings
+
+    if ($f0115ModuleReviewerRedFindings.Count -gt 0) {
+        throw "F-0115 Module reviewer coverage is RED: $($f0115ModuleReviewerRedFindings -join '; ')"
+    }
+} finally {
+    foreach ($f0115FixtureRoot in $f0115ModuleFixtureRoots) {
+        if (Test-Path -LiteralPath $f0115FixtureRoot) {
+            Remove-Item -LiteralPath $f0115FixtureRoot -Recurse -Force
+        }
+    }
+}
+
 Write-Output "Module Run v2 pre-commit hardening smoke passed"

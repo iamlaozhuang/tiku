@@ -137,6 +137,192 @@ $p1F0132ScopeCorrectionFiles = @(
     $p1F0132ScopeCorrectionEvidencePath,
     $p1F0132ScopeCorrectionAuditPath
 )
+New-Variable -Name p1F0115ScopeCorrectionTaskId -Option Constant -Value "p1-f0115-scope-correction-hotfix-2026-07-16"
+New-Variable -Name p1F0115ScopeCorrectionParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+New-Variable -Name p1F0115ScopeCorrectionBaseSha -Option Constant -Value "6bde2f2aec3d71fa0ce138b26f64243861cace6f"
+New-Variable -Name p1F0115ScopeCorrectionBranch -Option Constant -Value "codex/p1-f0115-scope-correction-hotfix"
+New-Variable -Name p1F0115ScopeCorrectionAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md"
+New-Variable -Name p1F0115ScopeCorrectionEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+New-Variable -Name p1F0115ScopeCorrectionAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-16-p1-f0115-scope-correction-hotfix.md"
+New-Variable -Name p1F0115ScopeCorrectionFiles -Option Constant -Value @(
+    "docs/04-agent-system/state/task-queue.yaml",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $p1F0115ScopeCorrectionAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0115-scope-correction-hotfix.md",
+    $p1F0115ScopeCorrectionEvidencePath,
+    $p1F0115ScopeCorrectionAuditPath
+)
+New-Variable -Name p1F0115ScopeCorrectionApprovalAnchor -Option Constant -Value @"
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+"@
+New-Variable -Name p1F0115ScopeCorrectionApprovalReplacement -Option Constant -Value @"
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md
+    executionProfile: R3
+"@
+New-Variable -Name p1F0115ScopeCorrectionRollbackAnchor -Option Constant -Value @"
+    rollbackOrStopCondition: stop_if_schema_migration_persistent_batch_command_database_runtime_external_distribution_service_or_other_finding_repair_is_required
+"@
+New-Variable -Name p1F0115ScopeCorrectionRollbackReplacement -Option Constant -Value @"
+    rollbackOrStopCondition: stop_if_generated_migration_source_would_be_executed_or_if_dependency_database_provider_runtime_p2_pr_force_push_deploy_or_other_finding_repair_is_required
+"@
+New-Variable -Name p1F0115ScopeCorrectionFocusedGatesAnchor -Option Constant -Value @"
+    focusedGates:
+      - jit_post_p0_credential_membership_transaction_boundary
+      - auth_user_auth_account_user_employee_quota_atomicity
+      - employee_creation_failure_rolls_back_all_identity_side_effects
+      - account_phone_conflict_and_concurrent_retry_fail_closed
+      - batch_row_exception_returns_explainable_partial_result_without_losing_success_rows
+      - one_time_initial_password_only_for_committed_rows
+      - response_loss_and_retry_boundary_explicitly_classified
+      - operations_or_super_admin_write_boundary_preserved
+      - focused_service_repository_route_and_static_regression
+      - full_static_regression
+      - two_round_adversarial_review
+"@
+New-Variable -Name p1F0115ScopeCorrectionFocusedGatesReplacement -Option Constant -Value @"
+    focusedGates:
+      - persistent_employee_import_command_idempotency_and_request_hmac
+      - auth_user_auth_account_user_employee_current_org_auth_quota_atomicity
+      - row_savepoint_rolls_back_all_identity_side_effects_before_rejection
+      - unknown_result_remains_recoverable_and_is_never_reclassified_as_rejected
+      - generated_credential_placeholder_rotate_revision_and_confirm_distribution
+      - login_and_issue_share_advisory_lock_with_deterministic_multi_lock_order
+      - canonical_and_legacy_routes_are_no_store_and_redacted
+      - operations_or_super_admin_write_and_actor_visibility_boundaries
+      - drizzle_generated_migration_source_only_without_execution
+      - focused_service_repository_route_ui_and_static_regression
+      - full_static_regression
+      - two_round_adversarial_review
+"@
+New-Variable -Name p1F0115ScopeCorrectionAllowedFilesAnchor -Option Constant -Value @"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - src/server/services/employee-account-service.ts
+      - src/server/services/employee-account-service.test.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+"@
+New-Variable -Name p1F0115ScopeCorrectionAllowedFilesReplacement -Option Constant -Value @"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
+      - docs/superpowers/specs/2026-07-16-employee-import-command-recovery-design.md
+      - docs/superpowers/plans/2026-07-16-employee-import-command-recovery.md
+      - src/db/schema/employee-import.ts
+      - src/db/schema/employee-import.test.ts
+      - src/db/schema/index.ts
+      - drizzle/*_p1_rc_02_employee_import_command_recovery.sql
+      - drizzle/meta/*_snapshot.json
+      - drizzle/meta/_journal.json
+      - src/server/contracts/employee-import-command-contract.ts
+      - src/server/validators/employee-import-command.ts
+      - src/server/validators/employee-import-command.test.ts
+      - src/server/services/employee-import-command-crypto.ts
+      - src/server/services/employee-import-command-crypto.test.ts
+      - src/server/repositories/employee-import-command-repository.ts
+      - src/server/repositories/postgres-employee-import-command-repository.ts
+      - src/server/repositories/postgres-employee-import-command-repository.test.ts
+      - src/server/services/employee-import-command-service.ts
+      - src/server/services/employee-import-command-service.test.ts
+      - src/server/services/employee-import-command-route.ts
+      - src/server/services/employee-import-command-route.test.ts
+      - src/app/api/v1/employee-import-commands/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/issue-credentials/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/confirm-distribution/route.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/contracts/employee-account-contract.ts
+      - src/server/services/employee-account-service.ts
+      - src/server/services/employee-account-service.test.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/features/admin/org-auth-redeem/employee-import-command-client.ts
+      - src/features/admin/org-auth-redeem/employee-import-command-client.test.ts
+      - src/features/admin/org-auth-redeem/useEmployeeImportCommand.ts
+      - src/features/admin/org-auth-redeem/useEmployeeImportCommand.test.tsx
+      - src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.tsx
+      - src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.test.tsx
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/p1-employee-import-command-atomicity.test.ts
+      - tests/unit/p1-employee-import-command-migration-source.test.ts
+      - tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts
+      - tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
+"@
+New-Variable -Name p1F0115ScopeCorrectionBlockedFilesAnchor -Option Constant -Value @"
+      - src/db/schema/**
+      - drizzle/**
+"@
+New-Variable -Name p1F0115ScopeCorrectionBlockedFilesReplacement -Option Constant -Value ""
+New-Variable -Name p1F0115ScopeCorrectionSchemaMigrationAnchor -Option Constant -Value @"
+      schemaMigration: blocked_without_fresh_approval
+"@
+New-Variable -Name p1F0115ScopeCorrectionSchemaMigrationReplacement -Option Constant -Value @"
+      schemaMigration: approved_source_generation_only_no_execution
+"@
+New-Variable -Name p1F0115ScopeCorrectionAcceptanceAnchor -Option Constant -Value @"
+    acceptanceStandards:
+      - JIT revalidation must first distinguish post-P0 covered atomic creation from any remaining batch exception, unknown-result or one-time-secret residual; superseded evidence cannot be reopened wholesale.
+      - A committed employee account must contain auth_user, auth_account, user, employee and quota reservation in one transaction; any failure must leave no orphan credential or partial membership.
+      - Batch import must preserve explainable committed-row results and must never expose an initial password for a row whose transaction did not commit.
+      - Response-loss and retry safety must be proven within the current no-schema boundary; if durable batch idempotency or recoverable secret storage is required, stop and request separate approval rather than inventing persistence.
+      - F-0115 can close only at static level after focused and full regression; RV-0018 remains pending and no schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+"@
+New-Variable -Name p1F0115ScopeCorrectionAcceptanceReplacement -Option Constant -Value @"
+    acceptanceStandards:
+      - The command idempotency key and normalized request HMAC must make same-key/same-request resume safe and same-key/different-request fail with 409 without storing raw request, phone, name, or password.
+      - Each row must atomically commit identity, credential, employee membership, current org_auth quota, outcome, and audit; deterministic rejection must roll back identity through a savepoint, and unknown outcome must remain recoverable rather than being marked rejected.
+      - Generated credentials must start with an unknowable placeholder and only explicit revision-bound issue may rotate and return plaintext once; GET never returns plaintext, active sessions block issue, and confirm closes distribution.
+      - F-0115 closes statically only after focused/full regression and two reviews; Drizzle generation may create migration source but no migration/database execution occurs, RV-0018 remains pending, and dependency/Provider/browser/P2/PR/force/deploy remain blocked.
+"@
+New-Variable -Name p1F0115ScopeCorrectionValidationAnchor -Option Constant -Value @"
+      - corepack pnpm@10.15.1 exec vitest run src/server/services/employee-account-service.test.ts src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts --maxWorkers=1
+"@
+New-Variable -Name p1F0115ScopeCorrectionValidationReplacement -Option Constant -Value @"
+      - corepack pnpm@10.15.1 exec vitest run src/db/schema/employee-import.test.ts src/server/validators/employee-import-command.test.ts src/server/services/employee-import-command-crypto.test.ts src/server/repositories/postgres-employee-import-command-repository.test.ts src/server/services/employee-import-command-service.test.ts src/server/services/employee-import-command-route.test.ts src/server/auth/local-session-runtime.test.ts src/features/admin/org-auth-redeem/employee-import-command-client.test.ts src/features/admin/org-auth-redeem/useEmployeeImportCommand.test.tsx src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.test.tsx tests/unit/p1-employee-import-command-atomicity.test.ts tests/unit/p1-employee-import-command-migration-source.test.ts tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts --maxWorkers=1
+"@
+New-Variable -Name p1F0115ScopeCorrectionCapabilityAuthorization -Option Constant -Value @"
+schemaMigration: approved_source_generation_only_no_execution
+dependencyIntroduction: blocked_without_fresh_approval
+databaseMutation: blocked_without_fresh_user_approval
+providerCall: blocked_without_fresh_approval
+runtimeAcceptance: blocked_out_of_program
+browserRuntimeValidation: blocked_out_of_program
+p2Implementation: blocked_out_of_program
+stagingProdDeploy: blocked_requires_fresh_user_approval
+forcePush: blocked
+pr: blocked
+costCalibrationGate: blocked
+"@
 $findings = [System.Collections.Generic.List[string]]::new()
 
 function Add-Finding {
@@ -652,6 +838,252 @@ function Test-P1F0132ScopeCorrectionAnchors {
     if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0132ScopeCorrectionAuthorization: approved_one_time" }
 }
 
+function Test-P1F0115ScopeCorrectionFileSet {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
+
+    $actualFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    $expectedFiles = @($p1F0115ScopeCorrectionFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    return ($actualFiles -join "|") -ceq ($expectedFiles -join "|")
+}
+
+function Test-P1F0115ScopeCorrectionReviewContract {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$EvidenceText,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$AuditText
+    )
+
+    $normalizedEvidenceText = $EvidenceText -replace "`r`n?", "`n"
+    $normalizedAuditText = $AuditText -replace "`r`n?", "`n"
+    $evidenceHasContradiction = $normalizedEvidenceText -match '(?im)^\s*(?:-\s*)?Result\s*:\s*fail\s*$' -or $normalizedEvidenceText -match '(?im)^\s*(?:-\s*)?Decision\s*:\s*REJECT\s*$'
+    foreach ($evidenceSection in @("Requirement Mapping Result", "Root-Cause Reproduction", "TDD Evidence", "Validation Results", "Scope Freeze")) {
+        $evidenceHeadingPattern = "(?im)^##\s+$([regex]::Escape($evidenceSection))\s*$"
+        $evidenceSectionText = Get-MarkdownSection -Content $normalizedEvidenceText -HeadingPattern ([regex]::Escape($evidenceSection))
+        if ([regex]::Matches($normalizedEvidenceText, $evidenceHeadingPattern).Count -ne 1 -or [regex]::Matches($evidenceSectionText, '(?im)^\s*Result\s*:\s*pass\s*$').Count -ne 1) {
+            $evidenceHasContradiction = $true
+        }
+    }
+    $readingEvidenceHeadingCount = [regex]::Matches($normalizedEvidenceText, '(?im)^##\s+Reading Evidence\s*$').Count
+    $readingEvidenceSection = Get-MarkdownSection -Content $normalizedEvidenceText -HeadingPattern "Reading Evidence"
+    if ($readingEvidenceHeadingCount -ne 1 -or [regex]::Matches($normalizedEvidenceText, '(?im)^\s*-\s*Evidence status\s*:\s*pass\s*$').Count -ne 1) {
+        $evidenceHasContradiction = $true
+    }
+    foreach ($readingEvidenceMarkerPattern in @(
+        '(?im)^\s*status\s*:\s*complete\s*$',
+        '(?im)^\s*conflictsFound\s*:\s*false\s*$',
+        '(?im)^\s*targetSourceReviewed\s*:\s*true\s*$',
+        '(?im)^\s*targetTestsReviewed\s*:\s*true\s*$',
+        '(?im)^\s*analogousImplementationReviewed\s*:\s*true\s*$',
+        '(?im)^\s*Cost Calibration Gate remains blocked\s*$'
+    )) {
+        if ([regex]::Matches($readingEvidenceSection, $readingEvidenceMarkerPattern).Count -ne 1) { $evidenceHasContradiction = $true }
+    }
+    if ($evidenceHasContradiction) { Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_ARTIFACT_CONTRADICTION evidence" }
+
+    $auditHasContradiction = $normalizedAuditText -match '(?im)^\s*(?:-\s*)?Result\s*:\s*fail\s*$' -or $normalizedAuditText -match '(?im)^\s*(?:-\s*)?Decision\s*:\s*REJECT\s*$'
+    foreach ($auditSection in @("Round 1", "Round 2")) {
+        $auditHeadingPattern = "(?im)^##\s+$([regex]::Escape($auditSection))\s*$"
+        $auditSectionText = Get-MarkdownSection -Content $normalizedAuditText -HeadingPattern ([regex]::Escape($auditSection))
+        if ([regex]::Matches($normalizedAuditText, $auditHeadingPattern).Count -ne 1 -or [regex]::Matches($auditSectionText, '(?im)^\s*Result\s*:\s*pass\s*$').Count -ne 1) {
+            $auditHasContradiction = $true
+        }
+    }
+    if ([regex]::Matches($normalizedAuditText, '(?im)^##\s+Decision\s*$').Count -ne 1 -or [regex]::Matches($normalizedAuditText, '(?im)^\s*Decision\s*:\s*APPROVE\s*$').Count -ne 1) {
+        $auditHasContradiction = $true
+    }
+    if ($auditHasContradiction) { Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_ARTIFACT_CONTRADICTION audit" }
+
+    foreach ($evidenceMarker in @(
+        "Evidence status: pass",
+        "## Reading Evidence",
+        "status: complete",
+        "conflictsFound: false",
+        "targetSourceReviewed: true",
+        "targetTestsReviewed: true",
+        "analogousImplementationReviewed: true",
+        "Cost Calibration Gate remains blocked"
+    )) {
+        if ($EvidenceText -notmatch [regex]::Escape($evidenceMarker)) { Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_EVIDENCE_INCOMPLETE $evidenceMarker" }
+    }
+    foreach ($evidenceSection in @("Requirement Mapping Result", "Root-Cause Reproduction", "TDD Evidence", "Validation Results", "Scope Freeze")) {
+        if ((Get-MarkdownSection -Content $EvidenceText -HeadingPattern ([regex]::Escape($evidenceSection))) -notmatch '(?im)^Result:\s*pass\s*$') {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_REVIEW_NOT_FINAL evidence_$($evidenceSection.Replace(' ', '_').ToLowerInvariant())"
+        }
+    }
+    foreach ($auditSection in @("Round 1", "Round 2")) {
+        if ((Get-MarkdownSection -Content $AuditText -HeadingPattern ([regex]::Escape($auditSection))) -notmatch '(?im)^Result:\s*pass\s*$') {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_REVIEW_NOT_FINAL audit_$($auditSection.Replace(' ', '_').ToLowerInvariant())"
+        }
+    }
+    if ((Get-MarkdownSection -Content $AuditText -HeadingPattern "Decision") -notmatch '(?im)^Decision:\s*APPROVE\s*$') {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_REVIEW_NOT_FINAL audit_decision"
+    }
+}
+
+function Test-P1F0115ScopeCorrectionAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$CurrentTaskId,
+        [Parameter(Mandatory = $true)][AllowNull()][AllowEmptyCollection()][AllowEmptyString()][string[]]$CurrentTaskBlock,
+        [Parameter(Mandatory = $true)][ValidateSet("pre_commit", "pre_push")][string]$CurrentPhase
+    )
+
+    $headSha = ((& git -C $Root rev-parse HEAD) -join "").Trim()
+    $branch = ((& git -C $Root branch --show-current) -join "").Trim()
+    $taskStatus = if (@($CurrentTaskBlock).Count -eq 0) { "" } else { Get-ScalarValue -Block $CurrentTaskBlock -Key "status" }
+    $parentReference = "HEAD"
+
+    if ($CurrentPhase -eq "pre_commit") {
+        if ($headSha -ne $p1F0115ScopeCorrectionBaseSha -or $branch -ne $p1F0115ScopeCorrectionBranch) {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_CONTEXT_INVALID pre_commit"
+        }
+        & git -C $Root diff --quiet
+        $unstagedTrackedExitCode = $LASTEXITCODE
+        $untrackedFiles = @(& git -C $Root ls-files --others --exclude-standard)
+        $untrackedInspectionExitCode = $LASTEXITCODE
+        if ($unstagedTrackedExitCode -ne 0 -or $untrackedInspectionExitCode -ne 0 -or $untrackedFiles.Count -gt 0) {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID"
+        }
+    } else {
+        $headParents = @(((& git -C $Root rev-list --parents -n 1 HEAD) -join "").Trim() -split '\s+')
+        $parentInspectionExitCode = $LASTEXITCODE
+        $originMasterSha = ((& git -C $Root rev-parse origin/master) -join "").Trim()
+        $originInspectionExitCode = $LASTEXITCODE
+        if ($parentInspectionExitCode -ne 0 -or $originInspectionExitCode -ne 0 -or $headParents.Count -ne 2 -or $headParents[1] -ne $p1F0115ScopeCorrectionBaseSha -or $originMasterSha -ne $p1F0115ScopeCorrectionBaseSha -or $branch -ne "master") {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_CONTEXT_INVALID pre_push"
+        } else {
+            $parentReference = $headParents[1]
+        }
+        $worktreeStatus = @(& git -C $Root status --porcelain)
+        if ($LASTEXITCODE -ne 0 -or $worktreeStatus.Count -gt 0) {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID"
+        }
+    }
+
+    if ($CurrentTaskId -ne $p1F0115ScopeCorrectionParentTaskId -or $taskStatus -ne "in_progress") {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_CONTEXT_INVALID task"
+    }
+
+    $materializedAuthorizationPath = ((& git -C $Root ls-tree -r --name-only $parentReference -- $p1F0115ScopeCorrectionAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_PARENT_INSPECTION_FAILED"
+    } elseif ($materializedAuthorizationPath -eq $p1F0115ScopeCorrectionAuthorizationPath) {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_ALREADY_MATERIALIZED"
+    }
+
+    $contentSnapshot = if ($CurrentPhase -eq "pre_commit") { "INDEX" } else { "HEAD" }
+    $authorizationText = Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $p1F0115ScopeCorrectionAuthorizationPath
+    $normalizedAuthorizationText = $authorizationText -replace "`r`n?", "`n"
+    foreach ($authorizationPattern in @(
+        '(?im)^Status:\s*approved\s*$',
+        '(?im)^Human approval source:\s*current user message',
+        "(?im)^Task ID:\s*[\x60]?$([regex]::Escape($p1F0115ScopeCorrectionTaskId))[\x60]?\s*$",
+        "(?im)^Parent task:\s*[\x60]?$([regex]::Escape($p1F0115ScopeCorrectionParentTaskId))[\x60]?\s*$",
+        "(?im)^Base:\s*[\x60]?$([regex]::Escape($p1F0115ScopeCorrectionBaseSha))[\x60]?\s*$",
+        "(?im)^Branch:\s*[\x60]?$([regex]::Escape($p1F0115ScopeCorrectionBranch))[\x60]?\s*$",
+        '(?i)every other.+in_progress.+hard-block',
+        '(?i)(?:hook bypass.+not (?:approved|authorized)|does not authorize[^\r\n]*hook bypass)',
+        '(?i)no product implementation.+migration/database execution.+dependency.+Provider.+browser/runtime.+P2.+PR.+force push.+deployment'
+    )) {
+        if ($authorizationText -notmatch $authorizationPattern) {
+            Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+    $capabilityAuthorizationSection = Get-MarkdownSection -Content $normalizedAuthorizationText -HeadingPattern "Capability Authorization"
+    $capabilityAuthorizationIsExact = [regex]::Matches($capabilityAuthorizationSection, [regex]::Escape($p1F0115ScopeCorrectionCapabilityAuthorization)).Count -eq 1
+    foreach ($capabilityAuthorizationLine in @($p1F0115ScopeCorrectionCapabilityAuthorization -split "`n")) {
+        $capabilityName = ($capabilityAuthorizationLine -split ':', 2)[0]
+        if ([regex]::Matches($capabilityAuthorizationSection, "(?m)^$([regex]::Escape($capabilityName)):\s*.*$").Count -ne 1) {
+            $capabilityAuthorizationIsExact = $false
+        }
+    }
+    if (-not $capabilityAuthorizationIsExact) {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_AUTHORIZATION_INVALID capability_authorization"
+    }
+    $authorizationHasContradiction = [regex]::Matches($normalizedAuthorizationText, '(?im)^##\s+Capability Authorization\s*$').Count -ne 1 -or
+        [regex]::Matches($normalizedAuthorizationText, '(?im)^##\s+.*Authorization.*$').Count -ne 1 -or
+        [regex]::Matches($normalizedAuthorizationText, '(?im)^\s*Status\s*:\s*approved\s*$').Count -ne 1 -or
+        [regex]::Matches($normalizedAuthorizationText, '(?im)^\s*Status\s*:\s*.*$').Count -ne 1
+    $canonicalCapabilityAuthorizationLines = @($p1F0115ScopeCorrectionCapabilityAuthorization -split "`n")
+    $actualCapabilityAuthorizationLines = @($capabilityAuthorizationSection -split "`n" | Where-Object { $_ -match '^[A-Za-z][A-Za-z0-9]*:\s*\S' })
+    if (($actualCapabilityAuthorizationLines -join "`n") -cne ($canonicalCapabilityAuthorizationLines -join "`n")) {
+        $authorizationHasContradiction = $true
+    }
+    foreach ($canonicalCapabilityAuthorizationLine in $canonicalCapabilityAuthorizationLines) {
+        $canonicalCapabilityName = ($canonicalCapabilityAuthorizationLine -split ':', 2)[0]
+        if ([regex]::Matches($normalizedAuthorizationText, "(?m)^$([regex]::Escape($canonicalCapabilityAuthorizationLine))$").Count -ne 1 -or
+            [regex]::Matches($normalizedAuthorizationText, "(?m)^\s*$([regex]::Escape($canonicalCapabilityName))\s*:\s*.*$").Count -ne 1) {
+            $authorizationHasContradiction = $true
+        }
+    }
+    if ($authorizationHasContradiction) {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_ARTIFACT_CONTRADICTION authorization"
+    }
+    $authorizationFileSection = Get-MarkdownSection -Content $authorizationText -HeadingPattern "Exact Files"
+    $authorizationFileLines = @($authorizationFileSection -split "`n" | Where-Object { $_ -match '^\s*-\s+[\x60]([^\x60]+)[\x60]\s*$' } | ForEach-Object { $Matches[1] })
+    $authorizationBulletCount = @($authorizationFileSection -split "`n" | Where-Object { $_ -match '^\s*-\s+' }).Count
+    if ($authorizationBulletCount -ne $p1F0115ScopeCorrectionFiles.Count -or ($authorizationFileLines -join "|") -cne ($p1F0115ScopeCorrectionFiles -join "|")) {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_AUTHORIZATION_INVALID exact_files"
+    }
+
+    $queueGitPath = ConvertTo-NormalizedPath -Path $QueuePath
+    $parentQueueText = (Get-GitFileText -Root $Root -Reference $parentReference -Path $queueGitPath) -replace "`r`n?", "`n"
+    $currentQueueText = (Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $QueuePath) -replace "`r`n?", "`n"
+    $taskPattern = "(?ms)^  - id:\s*$([regex]::Escape($p1F0115ScopeCorrectionParentTaskId))\s*`n.*?(?=^  - id:|^standingAuthorization:|\z)"
+    $parentTaskMatches = @([regex]::Matches($parentQueueText, $taskPattern))
+    $currentTaskMatches = @([regex]::Matches($currentQueueText, $taskPattern))
+    $queueDeltaIsValid = $parentTaskMatches.Count -eq 1 -and $currentTaskMatches.Count -eq 1
+    if ($queueDeltaIsValid) {
+        $parentTaskMatch = $parentTaskMatches[0]
+        $currentTaskMatch = $currentTaskMatches[0]
+        $expectedTaskBlock = $parentTaskMatch.Value
+        $queueReplacements = @(
+            @{ Label = "fresh_approval_source"; Anchor = $p1F0115ScopeCorrectionApprovalAnchor; Replacement = $p1F0115ScopeCorrectionApprovalReplacement },
+            @{ Label = "rollback_boundary"; Anchor = $p1F0115ScopeCorrectionRollbackAnchor; Replacement = $p1F0115ScopeCorrectionRollbackReplacement },
+            @{ Label = "focused_gates"; Anchor = $p1F0115ScopeCorrectionFocusedGatesAnchor; Replacement = $p1F0115ScopeCorrectionFocusedGatesReplacement },
+            @{ Label = "product_allowlist"; Anchor = $p1F0115ScopeCorrectionAllowedFilesAnchor; Replacement = $p1F0115ScopeCorrectionAllowedFilesReplacement },
+            @{ Label = "blocked_schema_and_drizzle_paths"; Anchor = $p1F0115ScopeCorrectionBlockedFilesAnchor; Replacement = $p1F0115ScopeCorrectionBlockedFilesReplacement },
+            @{ Label = "schema_capability"; Anchor = $p1F0115ScopeCorrectionSchemaMigrationAnchor; Replacement = $p1F0115ScopeCorrectionSchemaMigrationReplacement },
+            @{ Label = "acceptance_standards"; Anchor = $p1F0115ScopeCorrectionAcceptanceAnchor; Replacement = $p1F0115ScopeCorrectionAcceptanceReplacement },
+            @{ Label = "focused_validation_command"; Anchor = $p1F0115ScopeCorrectionValidationAnchor; Replacement = $p1F0115ScopeCorrectionValidationReplacement }
+        )
+        foreach ($queueReplacement in $queueReplacements) {
+            $anchorCount = [regex]::Matches($expectedTaskBlock, [regex]::Escape($queueReplacement.Anchor)).Count
+            if ($anchorCount -ne 1) {
+                Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID $($queueReplacement.Label)_anchor_count_$anchorCount"
+                $queueDeltaIsValid = $false
+                break
+            }
+            $expectedTaskBlock = $expectedTaskBlock.Replace($queueReplacement.Anchor, $queueReplacement.Replacement)
+        }
+        if ($queueDeltaIsValid) {
+            foreach ($queueReplacement in @($queueReplacements | Where-Object { -not [string]::IsNullOrEmpty($_.Replacement) })) {
+                $replacementCount = [regex]::Matches($currentTaskMatch.Value, [regex]::Escape($queueReplacement.Replacement)).Count
+                if ($replacementCount -ne 1) {
+                    Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID $($queueReplacement.Label)_replacement_count_$replacementCount"
+                    $queueDeltaIsValid = $false
+                }
+            }
+        }
+        $parentPrefix = $parentQueueText.Substring(0, $parentTaskMatch.Index)
+        $parentSuffix = $parentQueueText.Substring($parentTaskMatch.Index + $parentTaskMatch.Length)
+        $currentPrefix = $currentQueueText.Substring(0, $currentTaskMatch.Index)
+        $currentSuffix = $currentQueueText.Substring($currentTaskMatch.Index + $currentTaskMatch.Length)
+        $expectedQueueText = $parentPrefix + $expectedTaskBlock + $parentSuffix
+        if ($currentPrefix -cne $parentPrefix -or $currentSuffix -cne $parentSuffix -or $currentTaskMatch.Value -cne $expectedTaskBlock -or $currentQueueText -cne $expectedQueueText) {
+            $queueDeltaIsValid = $false
+        }
+    }
+    if (-not $queueDeltaIsValid) {
+        Add-Finding "P1_PROGRAM_F0115_SCOPE_CORRECTION_QUEUE_DELTA_INVALID"
+    }
+
+    $evidenceText = Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $p1F0115ScopeCorrectionEvidencePath
+    $auditText = Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $p1F0115ScopeCorrectionAuditPath
+    Test-P1F0115ScopeCorrectionReviewContract -EvidenceText $evidenceText -AuditText $auditText
+}
+
 function Get-NormalizedCloseoutProjection {
     param(
         [Parameter(Mandatory = $true)][string[]]$Lines,
@@ -1053,11 +1485,18 @@ $scopeControlChanged = @($normalizedFilesToCheck | Where-Object { $_ -in $effect
 $protectedImplementationChanged = @($normalizedFilesToCheck | Where-Object { $candidatePath = $_; @($protectedImplementationPatterns | Where-Object { Test-PathPattern -Path $candidatePath -Pattern $_ }).Count -gt 0 }).Count -gt 0
 $isP1TransitionHotfixScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1TransitionHotfixFileSet -Files $filesToCheck)
 $isP1F0132ScopeCorrectionScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0132ScopeCorrectionFileSet -Files $filesToCheck)
+$isP1F0115ScopeCorrectionScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0115ScopeCorrectionFileSet -Files $filesToCheck)
+$isP1F0115ScopeCorrectionCandidateValid = $false
 if ($isP1TransitionHotfixScope) {
     Test-P1TransitionHotfixAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
 }
 if ($isP1F0132ScopeCorrectionScope) {
     Test-P1F0132ScopeCorrectionAnchors -Root $RepositoryRoot -QueuePath $QueuePath -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
+}
+if ($isP1F0115ScopeCorrectionScope) {
+    $f0115FindingCountBefore = $findings.Count
+    Test-P1F0115ScopeCorrectionAnchors -Root $RepositoryRoot -QueuePath $QueuePath -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
+    $isP1F0115ScopeCorrectionCandidateValid = $f0115FindingCountBefore -eq 0 -and $findings.Count -eq 0
 }
 
 $parentProgram = @()
@@ -1089,7 +1528,7 @@ $isSameTaskCloseoutTransition = $isSteadyTask -and $parentStatuses.ContainsKey($
 if (-not $SkipGitChecks -and $parentProgram.Count -eq 0 -and -not $isBootstrapInitialization) {
     Add-Finding "P1_PROGRAM_TRANSITION_PARENT_MISSING"
 }
-if ($isSteadyTask -and $scopeControlChanged -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope) {
+if ($isSteadyTask -and $scopeControlChanged -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
     Add-Finding "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION"
 }
 if ($isSameTaskCloseoutTransition) {
@@ -1153,7 +1592,7 @@ if ($taskBlock.Count -gt 0) {
     }
     $currentTaskGovernancePaths = @($currentTaskGovernancePathList.ToArray())
     $protectedImplementationChanged = @($normalizedFilesToCheck | Where-Object { $_ -notin $currentTaskGovernancePaths }).Count -gt 0
-    if ($isP1F0132ScopeCorrectionScope) { $protectedImplementationChanged = $false }
+    if ($isP1F0132ScopeCorrectionScope -or $isP1F0115ScopeCorrectionCandidateValid) { $protectedImplementationChanged = $false }
     foreach ($artifact in @(
         @{ Label = "plan"; Key = "planPath" },
         @{ Label = "evidence"; Key = "evidencePath" },
@@ -1203,7 +1642,7 @@ if ($taskBlock.Count -gt 0) {
             Add-Finding "P1_PROGRAM_TASK_BRANCH_INVALID $stateCurrentTaskId $taskBranch"
         }
     }
-    if ($Phase -eq "pre_commit" -and -not $SkipGitChecks -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope) {
+    if ($Phase -eq "pre_commit" -and -not $SkipGitChecks -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
         $actualBranch = ((& git -C $RepositoryRoot branch --show-current) -join "").Trim()
         if ($actualBranch -ne $taskBranch) {
             Add-Finding "P1_PROGRAM_TASK_BRANCH_BINDING_MISMATCH $stateCurrentTaskId expected=$taskBranch actual=$actualBranch"
@@ -1244,6 +1683,7 @@ if ($taskBlock.Count -gt 0) {
         $value = Get-ScalarValue -Block $capabilities -Key $approvalCapability
         if ([string]::IsNullOrWhiteSpace($value)) { Add-Finding "P1_PROGRAM_APPROVAL_GATED_CAPABILITY_MISSING $stateCurrentTaskId $approvalCapability" }
         elseif ($value -notmatch "^blocked") {
+            if ($isP1F0115ScopeCorrectionCandidateValid -and $approvalCapability -eq "schemaMigration" -and $value -eq "approved_source_generation_only_no_execution") { continue }
             $freshApprovalSource = Get-ScalarValue -Block $taskBlock -Key "freshApprovalSource"
             $freshApprovalFullPath = if ([string]::IsNullOrWhiteSpace($freshApprovalSource)) { "" } else { Resolve-RepositoryPath -Root $RepositoryRoot -Path $freshApprovalSource }
             $freshApprovalIsCanonical = $freshApprovalSource -match '^docs/05-execution-logs/acceptance/\d{4}-\d{2}-\d{2}-[a-z0-9-]+\.md$' -and $freshApprovalSource -ne $expectedAuthorizationSource
@@ -1262,6 +1702,8 @@ if ($taskBlock.Count -gt 0) {
         @($p1TransitionHotfixFiles)
     } elseif ($isP1F0132ScopeCorrectionScope) {
         @($p1F0132ScopeCorrectionFiles)
+    } elseif ($isP1F0115ScopeCorrectionCandidateValid) {
+        @($p1F0115ScopeCorrectionFiles)
     } else {
         @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
     }
@@ -1357,7 +1799,7 @@ if ($taskBlock.Count -gt 0) {
             if ($transitionHead -ne $transitionOrigin) { Add-Finding "P1_PROGRAM_TRANSITION_REQUIRES_SYNCHRONIZED_PARENT" }
         }
     }
-    if ($scopeControlChanged -and $protectedImplementationChanged -and (-not $isBootstrapInitialization -or $SkipGitChecks) -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope) {
+    if ($scopeControlChanged -and $protectedImplementationChanged -and (-not $isBootstrapInitialization -or $SkipGitChecks) -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
         Add-Finding "P1_PROGRAM_SCOPE_SELF_MODIFICATION_WITH_IMPLEMENTATION_CHANGE"
     }
     if ($protectedImplementationChanged) {
@@ -1368,7 +1810,7 @@ if ($taskBlock.Count -gt 0) {
     }
     $taskKind = Get-ScalarValue -Block $taskBlock -Key "taskKind"
     foreach ($changedFile in $filesToCheck) {
-        $effectiveBlockedFiles = @($globalBlockedPatterns + $blockedFiles + $(if ($taskKind -eq "mechanism_hardening" -or $isP1F0132ScopeCorrectionScope) { @() } else { $programControlPatterns }) | Sort-Object -Unique)
+        $effectiveBlockedFiles = @($globalBlockedPatterns + $blockedFiles + $(if ($taskKind -eq "mechanism_hardening" -or $isP1F0132ScopeCorrectionScope -or $isP1F0115ScopeCorrectionCandidateValid) { @() } else { $programControlPatterns }) | Sort-Object -Unique)
         if (@($effectiveBlockedFiles | Where-Object { Test-PathPattern -Path $changedFile -Pattern $_ }).Count -gt 0) {
             Add-Finding "P1_PROGRAM_BLOCKED_FILES_VIOLATION $changedFile"
             continue
@@ -1573,10 +2015,12 @@ if ($stateStatus -eq "closed") {
 
 if ($findings.Count -gt 0) { throw ($findings -join [Environment]::NewLine) }
 
-$p1TransitionScopeMode = if ($Phase -eq "pre_push" -and (($isTaskTransition -and -not $protectedImplementationChanged) -or $isP1F0132ScopeCorrectionScope)) { "transition_only" } else { "standard" }
+$isP1F0115ScopeCorrectionAuthorized = $isP1F0115ScopeCorrectionCandidateValid
+$p1TransitionScopeMode = if ($Phase -eq "pre_push" -and (($isTaskTransition -and -not $protectedImplementationChanged) -or $isP1F0132ScopeCorrectionScope -or $isP1F0115ScopeCorrectionAuthorized)) { "transition_only" } else { "standard" }
 
 Write-Output "p1ProgramGuardResult: $(if ($stateStatus -eq 'closed') { 'pass_closed_program' } else { 'pass' })"
 Write-Output "p1TransitionScopeMode: $p1TransitionScopeMode"
+if ($isP1F0115ScopeCorrectionAuthorized) { Write-Output "p1F0115ScopeCorrectionAuthorization: approved_one_time" }
 Write-Output "programId: $expectedProgramId"
 Write-Output "currentTaskId: $stateCurrentTaskId"
 Write-Output "currentCandidateClusterId: $(Get-ScalarValue -Block $stateProgram -Key 'currentCandidateClusterId')"

@@ -278,6 +278,7 @@ activeTasks:
       - p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
     approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md
     executionProfile: R3
     candidateRootCauseCluster: P1-RC-02
     findingIds:
@@ -285,17 +286,18 @@ activeTasks:
     authorityPath: atomic_employee_credential_membership_quota_creation_with_recoverable_batch_results
     businessInvariant: employee_identity_credentials_membership_and_quota_must_commit_atomically_and_partial_or_unknown_batch_results_must_not_create_unrecoverable_accounts_or_lost_one_time_passwords
     adversarialFailureMode: split_credential_and_membership_transactions_or_batch_exception_and_response_loss_leave_orphan_credentials_duplicate_retries_or_undeliverable_initial_passwords
-    rollbackOrStopCondition: stop_if_schema_migration_persistent_batch_command_database_runtime_external_distribution_service_or_other_finding_repair_is_required
+    rollbackOrStopCondition: stop_if_generated_migration_source_would_be_executed_or_if_dependency_database_provider_runtime_p2_pr_force_push_deploy_or_other_finding_repair_is_required
     focusedGates:
-      - jit_post_p0_credential_membership_transaction_boundary
-      - auth_user_auth_account_user_employee_quota_atomicity
-      - employee_creation_failure_rolls_back_all_identity_side_effects
-      - account_phone_conflict_and_concurrent_retry_fail_closed
-      - batch_row_exception_returns_explainable_partial_result_without_losing_success_rows
-      - one_time_initial_password_only_for_committed_rows
-      - response_loss_and_retry_boundary_explicitly_classified
-      - operations_or_super_admin_write_boundary_preserved
-      - focused_service_repository_route_and_static_regression
+      - persistent_employee_import_command_idempotency_and_request_hmac
+      - auth_user_auth_account_user_employee_current_org_auth_quota_atomicity
+      - row_savepoint_rolls_back_all_identity_side_effects_before_rejection
+      - unknown_result_remains_recoverable_and_is_never_reclassified_as_rejected
+      - generated_credential_placeholder_rotate_revision_and_confirm_distribution
+      - login_and_issue_share_advisory_lock_with_deterministic_multi_lock_order
+      - canonical_and_legacy_routes_are_no_store_and_redacted
+      - operations_or_super_admin_write_and_actor_visibility_boundaries
+      - drizzle_generated_migration_source_only_without_execution
+      - focused_service_repository_route_ui_and_static_regression
       - full_static_regression
       - two_round_adversarial_review
     buildRequired: true
@@ -320,15 +322,55 @@ activeTasks:
       - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
       - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
       - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md
-      - src/server/services/employee-account-service.ts
-      - src/server/services/employee-account-service.test.ts
+      - docs/superpowers/specs/2026-07-16-employee-import-command-recovery-design.md
+      - docs/superpowers/plans/2026-07-16-employee-import-command-recovery.md
+      - src/db/schema/employee-import.ts
+      - src/db/schema/employee-import.test.ts
+      - src/db/schema/index.ts
+      - drizzle/*_p1_rc_02_employee_import_command_recovery.sql
+      - drizzle/meta/*_snapshot.json
+      - drizzle/meta/_journal.json
+      - src/server/contracts/employee-import-command-contract.ts
+      - src/server/validators/employee-import-command.ts
+      - src/server/validators/employee-import-command.test.ts
+      - src/server/services/employee-import-command-crypto.ts
+      - src/server/services/employee-import-command-crypto.test.ts
+      - src/server/repositories/employee-import-command-repository.ts
+      - src/server/repositories/postgres-employee-import-command-repository.ts
+      - src/server/repositories/postgres-employee-import-command-repository.test.ts
+      - src/server/services/employee-import-command-service.ts
+      - src/server/services/employee-import-command-service.test.ts
+      - src/server/services/employee-import-command-route.ts
+      - src/server/services/employee-import-command-route.test.ts
+      - src/app/api/v1/employee-import-commands/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/issue-credentials/route.ts
+      - src/app/api/v1/employee-import-commands/[publicId]/confirm-distribution/route.ts
       - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
       - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts
       - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/contracts/employee-account-contract.ts
+      - src/server/services/employee-account-service.ts
+      - src/server/services/employee-account-service.test.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/features/admin/org-auth-redeem/employee-import-command-client.ts
+      - src/features/admin/org-auth-redeem/employee-import-command-client.test.ts
+      - src/features/admin/org-auth-redeem/useEmployeeImportCommand.ts
+      - src/features/admin/org-auth-redeem/useEmployeeImportCommand.test.tsx
+      - src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.tsx
+      - src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.test.tsx
       - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/p1-employee-import-command-atomicity.test.ts
+      - tests/unit/p1-employee-import-command-migration-source.test.ts
+      - tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts
+      - tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
       - tests/unit/admin-user-org-auth-ops-baseline.test.ts
       - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
       - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
     blockedFiles:
       - AGENTS.md
       - package.json
@@ -336,8 +378,7 @@ activeTasks:
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
       - yarn.lock
-      - src/db/schema/**
-      - drizzle/**
+
       - migrations/**
       - seed/**
       - e2e/**
@@ -349,7 +390,7 @@ activeTasks:
       productRuntimeSourceChange: approved_task_allowlist
       productTestSourceChange: approved_task_allowlist
       dependencyIntroduction: blocked_without_fresh_approval
-      schemaMigration: blocked_without_fresh_approval
+      schemaMigration: approved_source_generation_only_no_execution
       databaseMutation: blocked_without_fresh_user_approval
       providerCall: blocked_without_fresh_approval
       runtimeAcceptance: blocked_out_of_program
@@ -365,13 +406,12 @@ activeTasks:
       approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
       resumeAction: deep_revalidate_atomic_employee_credential_membership_quota_creation_and_batch_recovery_for_f0115
     acceptanceStandards:
-      - JIT revalidation must first distinguish post-P0 covered atomic creation from any remaining batch exception, unknown-result or one-time-secret residual; superseded evidence cannot be reopened wholesale.
-      - A committed employee account must contain auth_user, auth_account, user, employee and quota reservation in one transaction; any failure must leave no orphan credential or partial membership.
-      - Batch import must preserve explainable committed-row results and must never expose an initial password for a row whose transaction did not commit.
-      - Response-loss and retry safety must be proven within the current no-schema boundary; if durable batch idempotency or recoverable secret storage is required, stop and request separate approval rather than inventing persistence.
-      - F-0115 can close only at static level after focused and full regression; RV-0018 remains pending and no schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+      - The command idempotency key and normalized request HMAC must make same-key/same-request resume safe and same-key/different-request fail with 409 without storing raw request, phone, name, or password.
+      - Each row must atomically commit identity, credential, employee membership, current org_auth quota, outcome, and audit; deterministic rejection must roll back identity through a savepoint, and unknown outcome must remain recoverable rather than being marked rejected.
+      - Generated credentials must start with an unknowable placeholder and only explicit revision-bound issue may rotate and return plaintext once; GET never returns plaintext, active sessions block issue, and confirm closes distribution.
+      - F-0115 closes statically only after focused/full regression and two reviews; Drizzle generation may create migration source but no migration/database execution occurs, RV-0018 remains pending, and dependency/Provider/browser/P2/PR/force/deploy remain blocked.
     validationCommands:
-      - corepack pnpm@10.15.1 exec vitest run src/server/services/employee-account-service.test.ts src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts --maxWorkers=1
+      - corepack pnpm@10.15.1 exec vitest run src/db/schema/employee-import.test.ts src/server/validators/employee-import-command.test.ts src/server/services/employee-import-command-crypto.test.ts src/server/repositories/postgres-employee-import-command-repository.test.ts src/server/services/employee-import-command-service.test.ts src/server/services/employee-import-command-route.test.ts src/server/auth/local-session-runtime.test.ts src/features/admin/org-auth-redeem/employee-import-command-client.test.ts src/features/admin/org-auth-redeem/useEmployeeImportCommand.test.tsx src/features/admin/org-auth-redeem/EmployeeImportCommandPanel/EmployeeImportCommandPanel.test.tsx tests/unit/p1-employee-import-command-atomicity.test.ts tests/unit/p1-employee-import-command-migration-source.test.ts tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts --maxWorkers=1
       - npm.cmd run test:unit -- --maxWorkers=1
       - npm.cmd run lint
       - npm.cmd run typecheck
