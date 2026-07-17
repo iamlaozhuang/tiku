@@ -332,6 +332,7 @@ activeTasks:
       - src/server/validators/redeem-code.ts
       - src/server/validators/redeem-code.test.ts
       - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
       - tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
       - tests/unit/student-profile-redeem-ui.test.ts
     blockedFiles:

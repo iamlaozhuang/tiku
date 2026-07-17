@@ -476,8 +476,9 @@ $canUseP1TransitionMasterAncestry = $isP1TransitionScopeMode `
     -and $currentBranch -eq "master" `
     -and $headSha -eq $masterSha `
     -and -not [string]::IsNullOrWhiteSpace($originMasterSha) `
-    -and $stateMasterSha -eq $originMasterSha `
-    -and $stateOriginMasterSha -eq $originMasterSha `
+    -and -not [string]::IsNullOrWhiteSpace($stateMasterSha) `
+    -and $stateMasterSha -eq $stateOriginMasterSha `
+    -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $originMasterSha) `
     -and $originMasterSha -ne $masterSha `
     -and (Test-GitAncestor -AncestorSha $originMasterSha -DescendantSha $masterSha)
 
@@ -504,6 +505,8 @@ if ($stateMasterSha -ne $masterSha) {
 if ($stateOriginMasterSha -ne $originMasterSha) {
     if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
         Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR origin/master"
+    } elseif ($canUseP1TransitionMasterAncestry) {
+        Write-Output "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR origin/master"
     } else {
         Add-Finding "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT origin/master"
     }

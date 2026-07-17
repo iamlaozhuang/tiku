@@ -157,6 +157,10 @@ New-Item -ItemType Directory -Force -Path $transitionRepositoryRoot | Out-Null
 Set-Content -LiteralPath (Join-Path $transitionRepositoryRoot "checkpoint.txt") -Value "parent checkpoint" -Encoding UTF8
 & git -C $transitionRepositoryRoot add checkpoint.txt
 & git -C $transitionRepositoryRoot commit -m "parent checkpoint" *> $null
+$transitionStateCheckpointSha = ((& git -C $transitionRepositoryRoot rev-parse HEAD) -join "").Trim()
+Set-Content -LiteralPath (Join-Path $transitionRepositoryRoot "origin.txt") -Value "origin baseline after state checkpoint" -Encoding UTF8
+& git -C $transitionRepositoryRoot add origin.txt
+& git -C $transitionRepositoryRoot commit -m "advance origin beyond state checkpoint" *> $null
 & git init --bare $transitionRemoteRoot *> $null
 & git -C $transitionRepositoryRoot remote add origin $transitionRemoteRoot
 & git -C $transitionRepositoryRoot push --quiet -u origin master 2>$null
@@ -170,8 +174,8 @@ schemaVersion: 1
 project:
   name: tiku
 repository:
-  lastKnownMasterSha: $transitionOriginSha
-  lastKnownOriginMasterSha: $transitionOriginSha
+  lastKnownMasterSha: $transitionStateCheckpointSha
+  lastKnownOriginMasterSha: $transitionStateCheckpointSha
 currentTask:
   id: $transitionTaskId
   status: in_progress
@@ -196,9 +200,10 @@ try {
         & $scriptPath -TaskId $transitionTaskId -ProjectStatePath $transitionProjectStatePath -QueuePath $transitionQueuePath -MatrixPath $matrixPath -EvidencePath $absoluteEvidencePath -AuditReviewPath $absoluteAuditPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
     )
     Assert-Contains -Output $transitionAncestorOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+    Assert-Contains -Output $transitionAncestorOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR origin/master"
     Assert-Contains -Output $transitionAncestorOutput -Pattern "pre-push readiness passed"
 
-    (Get-Content -LiteralPath $transitionProjectStatePath -Raw).Replace("lastKnownOriginMasterSha: $transitionOriginSha", "lastKnownOriginMasterSha: not-the-origin-checkpoint") | Set-Content -LiteralPath $transitionProjectStatePath -Encoding UTF8
+    (Get-Content -LiteralPath $transitionProjectStatePath -Raw).Replace("lastKnownOriginMasterSha: $transitionStateCheckpointSha", "lastKnownOriginMasterSha: not-the-origin-checkpoint") | Set-Content -LiteralPath $transitionProjectStatePath -Encoding UTF8
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
         & $scriptPath -TaskId $transitionTaskId -ProjectStatePath $transitionProjectStatePath -QueuePath $transitionQueuePath -MatrixPath $matrixPath -EvidencePath $absoluteEvidencePath -AuditReviewPath $absoluteAuditPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
     }

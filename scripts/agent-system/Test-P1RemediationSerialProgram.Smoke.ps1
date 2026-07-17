@@ -424,6 +424,22 @@ function Assert-PrePushFailsWith {
 }
 
 try {
+    $p1GuardText = Get-Content -LiteralPath $guardPath -Raw -Encoding UTF8
+    foreach ($scopeCorrectionPattern in @(
+        'Test-P1F0132ScopeCorrectionFileSet',
+        'Test-P1F0132ScopeCorrectionAnchors',
+        'p1F0132ScopeCorrectionAuthorization: approved_one_time',
+        'P1_PROGRAM_F0132_SCOPE_CORRECTION_QUEUE_DELTA_INVALID',
+        'P1_PROGRAM_F0132_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID',
+        'Get-GitSnapshotFileText',
+        'scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1',
+        'scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1'
+    )) {
+        if ($p1GuardText -notmatch [regex]::Escape($scopeCorrectionPattern)) {
+            throw "P1 guard is missing F-0132 scope-correction contract: $scopeCorrectionPattern"
+        }
+    }
+
     $prePushHookPath = Join-Path $repositoryRoot ".husky\pre-push"
     $prePushHookText = Get-Content -LiteralPath $prePushHookPath -Raw -Encoding UTF8
     $pushUpdateCaptureIndex = $prePushHookText.IndexOf('push_updates=$(cat)')
