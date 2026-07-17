@@ -1259,11 +1259,13 @@ function mapUserAccountRow(row: {
     admin_public_id: null,
     admin_roles: [],
     auth_user_id: row.auth_user_id,
-    employee_public_id: row.employee_public_id,
+    employee_public_id:
+      row.user_type === "employee" ? row.employee_public_id : null,
     id: row.id,
     locked_until_at: row.locked_until_at,
     name: row.name,
-    organization_public_id: row.organization_public_id,
+    organization_public_id:
+      row.user_type === "employee" ? row.organization_public_id : null,
     phone: row.phone,
     public_id: row.public_id,
     status: row.status,

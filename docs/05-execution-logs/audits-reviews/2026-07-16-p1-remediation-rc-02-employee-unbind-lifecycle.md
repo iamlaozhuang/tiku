@@ -32,6 +32,10 @@ transition 阶段只允许五份治理文件。产品实现开始前必须先通
 
 ## Final Disposition
 
-Decision: PENDING_IMPLEMENTATION
+Decision: APPROVE
 
-当前批准只冻结 F-0114 residual 范围，不等同实现完成、runtime 验收或生产可用。RV-0018 至 RV-0021、schema/migration、真实数据库、Provider、P2、PR、force push 与部署继续阻断。
+实现后两轮对抗审查均 PASS。当前成员投影统一使用 `user_type = employee`；训练写入以原 `employee_org_auth.id` 作为 membership generation，在共享 employee identity lock 下先重验 exact reservation，再进入 answer lock/read/write，关闭了 unbind + same-org rebind ABA。personal authorization、retained employee identity、submitted history、quota/session/read-only 和 ops/super write boundary 均保留。
+
+聚焦 6 文件 90/90、完整 unit 405 文件 2448 项、lint、typecheck、format、build、P1/P0 与 Module pre-commit 均通过。批准进入独立实现提交与 ready-for-closeout 提交；最终关闭仍以 ff-only merge、fresh-master 门禁、origin/master 同步和隔离资源清理为准。
+
+本结论只关闭 F-0114 static residual，不等同 runtime 验收或生产可用。RV-0018 至 RV-0021、schema/migration、真实数据库、Provider、P2、PR、force push 与部署继续阻断。

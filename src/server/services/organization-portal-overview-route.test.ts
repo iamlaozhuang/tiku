@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { SQL } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 
 import { createSuccessResponse } from "../contracts/api-response";
 import type { ApiResponse } from "../contracts/api-response";
@@ -340,6 +342,14 @@ describe("organization portal overview route", () => {
 
   it("passes a driver-safe timestamp string into the employee locked summary query", async () => {
     const observedLockedSqlValues: unknown[] = [];
+    const employeeSummaryQuery = createThenableQuery([
+      {
+        total: 1,
+        active: 1,
+        disabled: 0,
+        locked: 0,
+      },
+    ]);
     const fakeDatabase = {
       select: vi.fn((selection: Record<string, unknown>) => {
         if ("display_name" in selection) {
@@ -358,14 +368,7 @@ describe("organization portal overview route", () => {
             ...collectSqlChunkValues(selection.locked),
           );
 
-          return createThenableQuery([
-            {
-              total: 1,
-              active: 1,
-              disabled: 0,
-              locked: 0,
-            },
-          ]);
+          return employeeSummaryQuery;
         }
 
         if ("phone" in selection) {
@@ -411,5 +414,20 @@ describe("organization portal overview route", () => {
       false,
     );
     expect(observedLockedSqlValues).toContain("2026-07-08T10:00:00.000Z");
+    const employeeSummaryCondition = (
+      employeeSummaryQuery.where.mock.calls as unknown as Array<[SQL]>
+    )[0]?.[0];
+
+    expect(employeeSummaryCondition).toBeDefined();
+
+    if (employeeSummaryCondition === undefined) {
+      throw new Error("Expected employee summary membership condition.");
+    }
+
+    const employeeSummarySql = new PgDialect().sqlToQuery(
+      employeeSummaryCondition,
+    );
+
+    expect(employeeSummarySql.params).toContain("employee");
   });
 });

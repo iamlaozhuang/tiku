@@ -121,7 +121,12 @@ async function readEmployeeSummary(
     })
     .from(employee)
     .innerJoin(user, eq(user.id, employee.user_id))
-    .where(eq(employee.organization_id, input.organizationId));
+    .where(
+      and(
+        eq(employee.organization_id, input.organizationId),
+        eq(user.user_type, "employee"),
+      ),
+    );
 
   return {
     total: row?.total ?? 0,

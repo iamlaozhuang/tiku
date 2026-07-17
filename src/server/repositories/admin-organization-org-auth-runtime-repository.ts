@@ -1922,9 +1922,7 @@ async function bindEmployeeAccountWithDatabase(
   input: BindExistingUserToOrganizationInput,
 ) {
   await lockOrganizationScopeMutation(database);
-  await database.execute(
-    sql`select pg_advisory_xact_lock(200112, hashtext(${input.userPublicId})) as employee_identity_lock`,
-  );
+  await lockEmployeeIdentity(database, input.userPublicId);
 
   const [userRow] = await database
     .select({
@@ -1964,12 +1962,26 @@ async function bindEmployeeAccountWithDatabase(
   }
 
   const [existingEmployee] = await database
-    .select({ id: employee.id })
+    .select({ id: employee.id, public_id: employee.public_id })
     .from(employee)
     .where(eq(employee.user_id, userRow.id))
     .limit(1);
 
-  if (userRow.user_type === "employee" || userRow.status === "disabled") {
+  if (existingEmployee !== undefined) {
+    await lockEmployeeIdentity(database, existingEmployee.public_id);
+  }
+
+  const [currentUserState] = await database
+    .select({ status: user.status, user_type: user.user_type })
+    .from(user)
+    .where(eq(user.id, userRow.id))
+    .limit(1);
+
+  if (
+    currentUserState === undefined ||
+    currentUserState.user_type === "employee" ||
+    currentUserState.status === "disabled"
+  ) {
     throw new EmployeeAccountMutationError("account_conflict");
   }
 

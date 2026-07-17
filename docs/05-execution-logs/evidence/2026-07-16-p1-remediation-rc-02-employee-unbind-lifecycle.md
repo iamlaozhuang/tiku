@@ -53,31 +53,46 @@ Result: pass
 
 ## Transition Evidence
 
-Result: pending
+Result: pass
 
 - 前序 F-0108 实现提交 `2e6950a696f5233b02eee4ce2ea2b03448f805ab` 与 ready-for-closeout 提交 `6b8946b37d950e12f1df2cc7284f74fc41016282` 已完成 ff-only 合入、fresh-master build、405 文件/2439 用例完整回归、origin/master 同步与隔离资源清理。
-- local master、origin/master 与实时远端均为 `6b8946b37d950e12f1df2cc7284f74fc41016282`；F-0108 五项 closeout checkpoint 均物化为 pass。
+- transition 提交 `8ba687b0b16ccf74b0c894db90f936749d13094c` 只包含 state、queue、新 plan、新 evidence、新 audit 五份治理文件，已通过 P1 `transition_only` 和 Module ancestor checkpoint。
+- 该提交已 ff-only 合入并普通推送至 `origin/master`；产品实现开始时 local master、origin/master 与实时远端均为 `8ba687b0b16ccf74b0c894db90f936749d13094c`。
 - 本 transition 只允许 state、queue、新 plan、新 evidence、新 audit 五份治理文件；产品源码和测试保持零 diff。
 - 只有该治理提交通过 P1 `transition_only` 与 Module ancestor checkpoint 后才能开始产品修改；任何其他 `in_progress` SHA 漂移继续 hard-block。
 - P2、RV-0018 至 RV-0021、schema/migration、数据库、依赖、Provider、browser/e2e、PR、force push 与部署边界保持不变。
 
 ## Validation Results
 
-Result: pending
+Result: pass
 
-待 transition 推送后按 TDD 执行。
+- 初始 RED：3 个聚焦文件 44 项中 5 项失败，分别锁定 personal retained session 投影、门户 summary current-membership 谓词、ops 当前绑定、训练同锁重验和 retained identity 再绑定锁。
+- ABA 补充 RED：2 个文件 40 项中 3 项失败，证明仅重验 `user_type` 不能阻断旧 lineage 跨越 unbind + same-org rebind；测试要求原 `employee_org_auth.id` 贯穿至事务内重验。
+- GREEN：聚焦 6 文件 90/90 通过；训练 draft/submit 的 membership-false 动态测试验证顺序为 lineage lookup → employee identity lock → exact reservation recheck，且 answer lock/insert/update 均未发生。
+- 完整 unit：405 文件、2448 项全部通过。
+- `npm.cmd run lint`、`npm.cmd run typecheck`、`npm.cmd run format:check`、`npm.cmd run build`、`git diff --check` 全部通过。
+- P1 manual guard 为 `standard` pass；P0 global baseline pass；Module pre-commit hardening 扫描 10 个变更文件并 pass。
+- 未执行真实 PostgreSQL、browser/e2e 或 Provider；RV-0018 至 RV-0021 保持 pending，本结论仅关闭 F-0114 static residual。
+- 实现提交 SHA 由包含本证据的任务提交最终确定；ready-for-closeout 仍保持独立 state/queue 提交。
 
 ## Round 1
 
 Result: pass
 
-范围主审已从 retained employee identity 逆向核对 current membership 消费者，确认不能用物理删除行掩盖问题；最小范围必须同时覆盖门户汇总、当前身份投影和训练写入 TOCTOU。
+范围主审从 retained employee identity 逆向核对 current membership 消费者，确认不能用物理删除行掩盖问题；实现进一步发现 ABA：旧请求取得 lineage 后，unbind 删除 reservation、same-org rebind 新建 reservation，若只重验 user/employee/org，旧请求会误认新成员关系。
+
+最小修复将原 `employee_org_auth.id` 作为 membership generation 随 draft/submit input 传入；写事务在共享 employee identity lock 下先精确重验该 reservation、employee、organization、version 和 active employee 状态，再取得 answer lock。解绑/再绑定删除并重建 reservation，因此旧 lineage fail closed。
 
 ## Round 2
 
 Result: pass
 
-第二轮范围复核确认 post-P0 已实现的 quota/session/read-only/rebind 不重复修改；schema/history table、真实 DB/runtime 与其他 finding 均保持排除。
+两名独立只读审查者均给出 PASS：
+
+- membership 审查确认 login 与 existing-session hydration、ops list/detail、portal summary/preview 均使用 current employee 边界；personal auth 与 submitted history 保留，再绑定复用 retained employee row，quota 失败通过事务抛错回滚。
+- training race 审查确认 exact reservation id 已关闭 lineage → unbind → same-org rebind → stale save/submit ABA；锁序为 organization scope → employee identity → quota 与 employee identity → membership → answer，未发现锁环，membership-false 零 answer 写入。
+
+schema/history table、真实 DB/runtime 与其他 finding 均保持排除。
 
 ## Closeout Command Evidence
 

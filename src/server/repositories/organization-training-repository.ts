@@ -35,6 +35,7 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
+import { lockEmployeeIdentity } from "./employee-org-auth-quota-repository";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
@@ -245,6 +246,7 @@ export type OrganizationTrainingEmployeeAnswerLookupInput =
 export type OrganizationTrainingEmployeeAnswerPersistenceLineage = {
   organizationTrainingVersionId: number;
   employeeId: number;
+  employeeOrgAuthId: number;
   organizationId: number;
   organizationName: string;
   totalScore: number;
@@ -257,6 +259,7 @@ export type OrganizationTrainingEmployeeAnswerDraftUpsertInput = {
   trainingVersionPublicId: string;
   employeeId: number;
   employeePublicId: string;
+  employeeOrgAuthId: number;
   organizationId: number;
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingAnswerOrganizationSnapshotValue;
@@ -278,6 +281,7 @@ export type OrganizationTrainingEmployeeAnswerSubmissionUpsertInput = {
   trainingVersionPublicId: string;
   employeeId: number;
   employeePublicId: string;
+  employeeOrgAuthId: number;
   organizationId: number;
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingAnswerOrganizationSnapshotValue;
@@ -1432,9 +1436,16 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async saveEmployeeAnswerDraftTransaction(input) {
       return getDatabase().transaction(async (transaction) => {
+        await lockEmployeeIdentity(transaction, input.employeePublicId);
+
+        if (!(await hasCurrentEmployeeMembership(transaction, input))) {
+          return null;
+        }
+
         await transaction.execute(
           sql`select pg_advisory_xact_lock(hashtextextended(${`${input.organizationTrainingVersionId}:${input.employeeId}`}, 0))`,
         );
+
         const [existing] = await transaction
           .select(organizationTrainingAnswerSelection)
           .from(organizationTrainingAnswer)
@@ -1525,9 +1536,16 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async submitEmployeeAnswerTransaction(input) {
       return getDatabase().transaction(async (transaction) => {
+        await lockEmployeeIdentity(transaction, input.employeePublicId);
+
+        if (!(await hasCurrentEmployeeMembership(transaction, input))) {
+          return null;
+        }
+
         await transaction.execute(
           sql`select pg_advisory_xact_lock(hashtextextended(${`${input.organizationTrainingVersionId}:${input.employeeId}`}, 0))`,
         );
+
         const [existing] = await transaction
           .select(organizationTrainingAnswerSelection)
           .from(organizationTrainingAnswer)
@@ -2976,6 +2994,7 @@ async function createEmployeeAnswerDraftUpsertInput(
     savedAt: normalizedInput.savedAt,
     organizationTrainingVersionId: lineage.organizationTrainingVersionId,
     employeeId: lineage.employeeId,
+    employeeOrgAuthId: lineage.employeeOrgAuthId,
     organizationId: lineage.organizationId,
     totalScore: lineage.totalScore,
   };
@@ -3027,6 +3046,7 @@ async function createEmployeeAnswerSubmissionUpsertInput(
     submittedAt: normalizedInput.submittedAt,
     organizationTrainingVersionId: lineage.organizationTrainingVersionId,
     employeeId: lineage.employeeId,
+    employeeOrgAuthId: lineage.employeeOrgAuthId,
     organizationId: lineage.organizationId,
     scoringTask: normalizedInput.scoringTask,
   };
@@ -3242,6 +3262,8 @@ function normalizeEmployeeAnswerPersistenceLineage(
     lineage.organizationTrainingVersionId < 1 ||
     !Number.isInteger(lineage.employeeId) ||
     lineage.employeeId < 1 ||
+    !Number.isInteger(lineage.employeeOrgAuthId) ||
+    lineage.employeeOrgAuthId < 1 ||
     !Number.isInteger(lineage.organizationId) ||
     lineage.organizationId < 1
   ) {
@@ -3258,6 +3280,7 @@ function normalizeEmployeeAnswerPersistenceLineage(
   return {
     organizationTrainingVersionId: lineage.organizationTrainingVersionId,
     employeeId: lineage.employeeId,
+    employeeOrgAuthId: lineage.employeeOrgAuthId,
     organizationId: lineage.organizationId,
     organizationName,
     totalScore,
@@ -3693,6 +3716,7 @@ async function listPublishedVersionsForEmployeeOrganization(
     .where(
       and(
         eq(employee.public_id, input.employeePublicId),
+        eq(user.user_type, "employee"),
         eq(user.status, "active"),
         eq(organization.public_id, input.organizationPublicId),
         eq(organization.status, "active"),
@@ -3988,6 +4012,7 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
     .select({
       organization_training_version_id: organizationTrainingVersion.id,
       employee_id: employee.id,
+      employee_org_auth_id: employeeOrgAuth.id,
       organization_id: organization.id,
       organization_name: organization.name,
       total_score: organizationTrainingVersion.total_score,
@@ -4015,6 +4040,7 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
           input.trainingVersionPublicId,
         ),
         eq(organization.public_id, input.organizationPublicId),
+        eq(user.user_type, "employee"),
         eq(user.status, "active"),
         eq(organization.status, "active"),
         eq(orgAuth.status, "active"),
@@ -4039,11 +4065,56 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
   return {
     organizationTrainingVersionId: row.organization_training_version_id,
     employeeId: row.employee_id,
+    employeeOrgAuthId: row.employee_org_auth_id,
     organizationId: row.organization_id,
     organizationName: row.organization_name,
     totalScore: Number(row.total_score),
     questionSnapshot: row.question_snapshot,
   };
+}
+
+async function hasCurrentEmployeeMembership(
+  database: Parameters<typeof lockEmployeeIdentity>[0],
+  input:
+    | OrganizationTrainingEmployeeAnswerDraftUpsertInput
+    | OrganizationTrainingEmployeeAnswerSubmissionUpsertInput,
+): Promise<boolean> {
+  const [membership] = await database
+    .select({ employee_org_auth_id: employeeOrgAuth.id })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(organization, eq(organization.id, employee.organization_id))
+    .innerJoin(
+      employeeOrgAuth,
+      and(
+        eq(employeeOrgAuth.id, input.employeeOrgAuthId),
+        eq(employeeOrgAuth.employee_id, employee.id),
+      ),
+    )
+    .innerJoin(
+      organizationTrainingVersion,
+      and(
+        eq(organizationTrainingVersion.id, input.organizationTrainingVersionId),
+        eq(
+          organizationTrainingVersion.org_auth_id,
+          employeeOrgAuth.org_auth_id,
+        ),
+      ),
+    )
+    .where(
+      and(
+        eq(employee.id, input.employeeId),
+        eq(employee.public_id, input.employeePublicId),
+        eq(employee.organization_id, input.organizationId),
+        eq(organization.public_id, input.organizationPublicId),
+        eq(organization.status, "active"),
+        eq(user.user_type, "employee"),
+        eq(user.status, "active"),
+      ),
+    )
+    .limit(1);
+
+  return membership !== undefined;
 }
 
 function createDefaultVersionPublicId(): string {

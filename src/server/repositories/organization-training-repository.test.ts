@@ -19,6 +19,7 @@ import type {
 import {
   createOrganizationTrainingRepository,
   createOrganizationTrainingVisibleOrganizationPublicIdArraySql,
+  createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingEmployeeAnswerLookupInput,
   type OrganizationTrainingEmployeeVisibleVersionListInput,
   type OrganizationTrainingTrustedPersistenceLineage,
@@ -65,6 +66,7 @@ type EmployeeAnswerRepositoryContract = {
 type EmployeeAnswerPersistenceLineage = {
   organizationTrainingVersionId: number;
   employeeId: number;
+  employeeOrgAuthId: number;
   organizationId: number;
   organizationName: string;
   totalScore: number;
@@ -83,6 +85,80 @@ type PaperQuestionSnapshotRow = {
   score: number | string | null;
   sortOrder: number;
 };
+
+function createRevokedMembershipPersistenceDatabase() {
+  const events: string[] = [];
+  const mutations: string[] = [];
+  const createSelectBuilder = (rows: unknown[]) => {
+    const builder = {
+      from() {
+        return builder;
+      },
+      innerJoin() {
+        return builder;
+      },
+      limit() {
+        return builder;
+      },
+      then<TResult1 = unknown[], TResult2 = never>(
+        onFulfilled?:
+          | ((value: unknown[]) => TResult1 | PromiseLike<TResult1>)
+          | null,
+        onRejected?:
+          | ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+          | null,
+      ) {
+        return Promise.resolve(rows).then(onFulfilled, onRejected);
+      },
+      where() {
+        return builder;
+      },
+    };
+
+    return builder;
+  };
+  const transaction = {
+    async execute() {
+      events.push("employee_identity_lock");
+      return [];
+    },
+    insert() {
+      mutations.push("insert");
+      throw new Error("membership conflict must not insert");
+    },
+    select() {
+      events.push("membership_recheck");
+      return createSelectBuilder([]);
+    },
+    update() {
+      mutations.push("update");
+      throw new Error("membership conflict must not update");
+    },
+  };
+  const database = {
+    select() {
+      events.push("lineage_lookup");
+      return createSelectBuilder([
+        {
+          employee_id: 701,
+          employee_org_auth_id: 601,
+          organization_id: 501,
+          organization_name: "Test Organization",
+          organization_training_version_id: 801,
+          question_snapshot: createVersionWrite().questionSnapshot,
+          total_score: "5",
+        },
+      ]);
+    },
+    async transaction<T>(
+      callback: (transactionValue: typeof transaction) => Promise<T>,
+    ) {
+      return callback(transaction);
+    },
+  };
+
+  return { database, events, mutations };
+}
 
 type EmployeeAnswerDraftUpsertInput = {
   publicId: string;
@@ -1607,6 +1683,40 @@ describe("organization training repository", () => {
     ).rejects.toThrow("organization training version takedown failed.");
   });
 
+  it("fails a stale draft lineage before answer locking or mutation when membership was replaced", async () => {
+    const fixture = createRevokedMembershipPersistenceDatabase();
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.saveEmployeeAnswerDraft(createEmployeeAnswerDraftWrite()),
+    ).rejects.toMatchObject({ kind: "answer_draft_conflict" });
+    expect(fixture.events).toEqual([
+      "lineage_lookup",
+      "employee_identity_lock",
+      "membership_recheck",
+    ]);
+    expect(fixture.mutations).toEqual([]);
+  });
+
+  it("fails a stale submission lineage before answer locking or mutation when membership was replaced", async () => {
+    const fixture = createRevokedMembershipPersistenceDatabase();
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.submitEmployeeAnswer(createEmployeeAnswerSubmissionWrite()),
+    ).rejects.toMatchObject({ kind: "answer_submit_conflict" });
+    expect(fixture.events).toEqual([
+      "lineage_lookup",
+      "employee_identity_lock",
+      "membership_recheck",
+    ]);
+    expect(fixture.mutations).toEqual([]);
+  });
+
   it("saves employee answer draft as metadata-only repository state", async () => {
     const {
       gateway,
@@ -1617,6 +1727,7 @@ describe("organization training repository", () => {
       employeeAnswerPersistenceLineage: {
         organizationTrainingVersionId: 801,
         employeeId: 701,
+        employeeOrgAuthId: 601,
         organizationId: 501,
         organizationName: "Test Organization",
         totalScore: 5,
@@ -1646,6 +1757,7 @@ describe("organization training repository", () => {
       trainingVersionPublicId: "training_version_public_123",
       employeeId: 701,
       employeePublicId: "employee_public_123",
+      employeeOrgAuthId: 601,
       expectedRevision: 0,
       operationId: "answer_draft_operation_123",
       payloadDigest: "answer_draft_digest_123",
@@ -1716,6 +1828,7 @@ describe("organization training repository", () => {
       employeeAnswerPersistenceLineage: {
         organizationTrainingVersionId: 801,
         employeeId: 701,
+        employeeOrgAuthId: 601,
         organizationId: 501,
         organizationName: "Test Organization",
         totalScore: 5,
@@ -1745,6 +1858,7 @@ describe("organization training repository", () => {
       trainingVersionPublicId: "training_version_public_123",
       employeeId: 701,
       employeePublicId: "employee_public_123",
+      employeeOrgAuthId: 601,
       expectedRevision: 0,
       operationId: "answer_submit_operation_123",
       payloadDigest: "answer_submit_digest_123",

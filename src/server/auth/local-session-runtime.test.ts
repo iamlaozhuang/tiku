@@ -367,6 +367,80 @@ function createRegistrationRecoveryRows(input?: {
 }
 
 describe("local session runtime", () => {
+  it("does not project retained employee identity as a current personal membership", async () => {
+    const { database } = createSequentialRuntimeDatabase([
+      [
+        {
+          auth_user_id: "auth-user-unbound-personal",
+          employee_public_id: "employee-historical-public-001",
+          id: 120,
+          locked_until_at: null,
+          login_failed_count: 0,
+          name: "Unbound Personal User",
+          organization_public_id: "organization-historical-public-001",
+          phone: "13900000020",
+          public_id: "user-unbound-public-001",
+          status: "active",
+          user_type: "personal",
+        },
+      ],
+    ]);
+    const repository = createPostgresSessionUserRepository(
+      () => database as never,
+      () => new Date("2026-07-16T20:30:00.000Z"),
+    );
+
+    await expect(
+      repository.findLoginUserByPhone("13900000020"),
+    ).resolves.toMatchObject({
+      employee_public_id: null,
+      organization_public_id: null,
+      user_type: "personal",
+    });
+  });
+
+  it("does not hydrate retained employee identity into an existing personal session", async () => {
+    const { database, getSelectCallCount } = createSequentialRuntimeDatabase([
+      [
+        {
+          [TEST_TOKEN_FIELD]: "opaque-unbound-personal-token",
+          auth_user_id: "auth-user-unbound-personal",
+          expires_at: new Date("2026-07-17T20:30:00.000Z"),
+        },
+      ],
+      [
+        {
+          auth_user_id: "auth-user-unbound-personal",
+          employee_public_id: "employee-historical-public-001",
+          id: 120,
+          locked_until_at: null,
+          name: "Unbound Personal User",
+          organization_public_id: "organization-historical-public-001",
+          phone: "13900000020",
+          public_id: "user-unbound-public-001",
+          status: "active",
+          user_type: "personal",
+        },
+      ],
+    ]);
+    const runtime = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-07-16T20:30:00.000Z"),
+    });
+
+    const response = await runtime.getCurrentSession({
+      authorization: "Bearer opaque-unbound-personal-token",
+    });
+
+    expect(response.data?.user).toMatchObject({
+      employeePublicId: null,
+      organizationPublicId: null,
+      publicId: "user-unbound-public-001",
+      userType: "personal",
+    });
+    expect(getSelectCallCount()).toBe(2);
+  });
+
   it("derives the registration session identity from only the high-entropy key", () => {
     const firstKey = "123e4567-e89b-42d3-a456-426614174000";
     const secondKey = "123e4567-e89b-42d3-a456-426614174001";

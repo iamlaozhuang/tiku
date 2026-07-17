@@ -38,7 +38,7 @@ F-0114 仍为 `confirmed_residual`：
 1. 先写 RED：固定组织门户 summary 必须筛当前 employee、personal session/运营详情不得返回历史绑定、训练写事务必须先锁 employee identity 并重验当前组织成员。
 2. 统一当前成员投影：`user_type !== employee` 时 session 与运营当前绑定字段返回 `null`；组织门户 summary 与 preview 使用相同当前成员谓词。
 3. 保持 P0 既有解绑/再绑定事务语义，补自动化测试锁定 retained employee row 的受控复用、quota/session/read-only 行为。
-4. 企业训练 draft save 与 submit 在 answer lock 前取得与解绑相同的 employee identity lock，并在同一事务重验 employee id/public id、organization id、active employee user；失败返回 conflict，不写入。
+4. 企业训练 lineage 捕获原 `employee_org_auth.id` 作为 membership generation；draft save 与 submit 在 answer lock 前取得与解绑相同的 employee identity lock，并在同一事务精确重验该 reservation、employee、organization、version 与 active employee user。这样 unbind + same-org rebind 创建的新 reservation 不能让旧请求复活；失败返回 conflict，不写入。
 5. 不引入 membership schema、历史表、migration 或数据库执行；`user_type` 继续作为首版显式当前成员状态。
 
 ## TDD 与对抗式验证

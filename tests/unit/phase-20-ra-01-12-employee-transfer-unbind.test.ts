@@ -98,6 +98,12 @@ describe("phase 20 RA-01-12 employee transfer unbind", () => {
     expect(unbindSource).toContain(
       "eq(organization.public_id, organizationPublicId)",
     );
+    expect(unbindSource).toMatch(
+      /eq\(\s*organizationTrainingAnswer\.organization_training_answer_status,\s*"in_progress"/u,
+    );
+    expect(unbindSource).toContain(
+      'organization_training_answer_status: "read_only"',
+    );
   });
 
   it("transfers employees transactionally with quota refresh, session revocation, and old training blocking", () => {
@@ -141,6 +147,93 @@ describe("phase 20 RA-01-12 employee transfer unbind", () => {
     expect(employeeCountSource).toContain(".innerJoin(user");
     expect(employeeCountSource).toContain('eq(user.user_type, "employee")');
     expect(activeCountSource).toContain('eq(user.user_type, "employee")');
+  });
+
+  it("treats retained employee rows as historical in current session and operations projections", () => {
+    const sessionSource = readSource(
+      "src/server/auth/local-session-runtime.ts",
+    );
+    const sessionMapperSource = extractBetween(
+      sessionSource,
+      "function mapUserAccountRow(row:",
+      "function createAdminRolesSql",
+    );
+    const adminRepositorySource = readSource(
+      "src/server/repositories/admin-flow-runtime-repository.ts",
+    );
+    const listUsersSource = extractBetween(
+      adminRepositorySource,
+      "async listUsers(query)",
+      "async getUserDetail(publicId)",
+    );
+    const userDetailSource = extractBetween(
+      adminRepositorySource,
+      "async getUserDetail(publicId)",
+      "async getUserPhoneForDisclosure(publicId)",
+    );
+
+    expect(sessionMapperSource).toContain('row.user_type === "employee"');
+    expect(listUsersSource).toContain('row.user_type === "employee"');
+    expect(userDetailSource).toContain(
+      'userDetailRow.user_type === "employee"',
+    );
+  });
+
+  it("serializes employee training writes with unbind and rechecks current membership", () => {
+    const trainingRepositorySource = readSource(
+      "src/server/repositories/organization-training-repository.ts",
+    );
+    const saveDraftSource = extractBetween(
+      trainingRepositorySource,
+      "async saveEmployeeAnswerDraftTransaction(input)",
+      "async submitEmployeeAnswerTransaction(input)",
+    );
+    const submitSource = extractBetween(
+      trainingRepositorySource,
+      "async submitEmployeeAnswerTransaction(input)",
+      "async insertManualDraft(input)",
+    );
+
+    for (const transactionSource of [saveDraftSource, submitSource]) {
+      expect(transactionSource).toContain("lockEmployeeIdentity");
+      expect(transactionSource).toContain("hasCurrentEmployeeMembership");
+      expect(transactionSource.indexOf("lockEmployeeIdentity")).toBeLessThan(
+        transactionSource.indexOf("hasCurrentEmployeeMembership"),
+      );
+      expect(
+        transactionSource.indexOf("hasCurrentEmployeeMembership"),
+      ).toBeLessThan(transactionSource.indexOf("hashtextextended"));
+    }
+
+    expect(trainingRepositorySource).toContain(
+      "employeeOrgAuthId: lineage.employeeOrgAuthId",
+    );
+    expect(trainingRepositorySource).toContain(
+      "eq(employeeOrgAuth.id, input.employeeOrgAuthId)",
+    );
+  });
+
+  it("reuses the retained employee identity for controlled re-entry", () => {
+    const repositorySource = readSource(
+      "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
+    );
+    const bindSource = extractBetween(
+      repositorySource,
+      "async function bindEmployeeAccountWithDatabase",
+      "function createOrganizationConditions",
+    );
+
+    expect(bindSource).toContain("existingEmployee");
+    expect(bindSource).toContain(
+      "lockEmployeeIdentity(database, existingEmployee.public_id)",
+    );
+    expect(bindSource).toContain(".update(employee)");
+    expect(bindSource).toContain("releaseEmployeeOrgAuthQuota");
+    expect(bindSource).toContain("reserveEmployeeOrgAuthQuota");
+    expect(bindSource).toContain('reservationResult !== "reserved"');
+    expect(bindSource).toContain(
+      "throw new EmployeeAccountMutationError(reservationResult)",
+    );
   });
 
   it("removes org_auth visibility from unbound users while preserving historical records", () => {

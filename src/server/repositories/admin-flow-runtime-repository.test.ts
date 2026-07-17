@@ -16,6 +16,11 @@ const TEST_CREDENTIAL_FIELD_NAME = ["pass", "word"].join("") as "password";
 
 function createAwaitableSelectBuilder(rows: unknown[]) {
   const builder = {
+    auth_status: undefined,
+    user_id: undefined,
+    as() {
+      return builder;
+    },
     from(...tables: unknown[]) {
       void tables;
       return builder;
@@ -26,8 +31,20 @@ function createAwaitableSelectBuilder(rows: unknown[]) {
     innerJoin() {
       return builder;
     },
+    leftJoin() {
+      return builder;
+    },
     limit() {
-      return Promise.resolve(rows);
+      return builder;
+    },
+    groupBy() {
+      return builder;
+    },
+    offset() {
+      return builder;
+    },
+    orderBy() {
+      return builder;
     },
     then<TResult1 = unknown[], TResult2 = never>(
       onFulfilled?:
@@ -45,6 +62,26 @@ function createAwaitableSelectBuilder(rows: unknown[]) {
   };
 
   return builder;
+}
+
+function createSequentialReadDatabase(selectRows: unknown[][]) {
+  let selectIndex = 0;
+
+  return {
+    database: {
+      select() {
+        const rows = selectRows[selectIndex];
+
+        if (rows === undefined) {
+          throw new Error(`Unexpected read select ${selectIndex + 1}.`);
+        }
+
+        selectIndex += 1;
+        return createAwaitableSelectBuilder(rows);
+      },
+    },
+    getSelectCount: () => selectIndex,
+  };
 }
 
 function createAdminLifecycleDatabase(input: {
@@ -381,6 +418,106 @@ describe("admin flow runtime repository backend accounts", () => {
     expect(JSON.stringify(result)).not.toContain('"id"');
     expect(JSON.stringify(result)).not.toContain("password");
     expect(JSON.stringify(result)).not.toContain("session");
+  });
+
+  it("does not expose a retained employee row as a current organization in the user list", async () => {
+    const registeredAt = new Date("2026-07-16T20:00:00.000Z");
+    const fixture = createSequentialReadDatabase([
+      [],
+      [
+        {
+          auth_status: "active",
+          created_at: registeredAt,
+          name: "Retained Personal User",
+          organization_name: "Historical Organization",
+          organization_public_id: "organization-historical-public-001",
+          phone: "13900000008",
+          public_id: "user-retained-public-001",
+          status: "active",
+          user_type: "personal",
+        },
+      ],
+      [{ value: 1 }],
+    ]);
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    const result = await repositories.userOrgAuthRepository.listUsers({
+      page: 1,
+      pageSize: 20,
+      sortBy: "registeredAt",
+      sortOrder: "desc",
+      keyword: null,
+      status: "all",
+      userType: "all",
+    });
+
+    expect(result.users).toEqual([
+      expect.objectContaining({
+        organizationName: null,
+        organizationPublicId: null,
+        publicId: "user-retained-public-001",
+        userType: "personal",
+      }),
+    ]);
+    expect(fixture.getSelectCount()).toBe(3);
+  });
+
+  it("keeps personal authorization but omits retained enterprise binding from user detail", async () => {
+    const fixture = createSequentialReadDatabase([
+      [
+        {
+          created_at: new Date("2026-07-16T20:00:00.000Z"),
+          employee_public_id: "employee-historical-public-001",
+          internal_employee_id: 701,
+          internal_organization_id: 501,
+          internal_user_id: 101,
+          name: "Retained Personal User",
+          organization_name: "Historical Organization",
+          organization_public_id: "organization-historical-public-001",
+          organization_tier: "province",
+          phone: "13900000008",
+          public_id: "user-retained-public-001",
+          status: "active",
+          user_type: "personal",
+        },
+      ],
+      [
+        {
+          expires_at: new Date("2027-07-16T20:00:00.000Z"),
+          level: 3,
+          profession: "monopoly",
+          public_id: "personal-auth-public-001",
+          starts_at: new Date("2026-07-16T20:00:00.000Z"),
+          status: "active",
+        },
+      ],
+    ]);
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    const result = await repositories.userOrgAuthRepository.getUserDetail?.(
+      "user-retained-public-001",
+    );
+
+    expect(result).toMatchObject({
+      enterpriseBinding: null,
+      user: {
+        organizationName: null,
+        organizationPublicId: null,
+        publicId: "user-retained-public-001",
+        userType: "personal",
+      },
+      authorizations: [
+        {
+          authorizationType: "personal_auth",
+          publicId: "personal-auth-public-001",
+        },
+      ],
+    });
+    expect(fixture.getSelectCount()).toBe(2);
   });
 
   it("revokes sessions and appends the success audit inside the admin disable transaction", async () => {

@@ -606,17 +606,23 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         .where(and(...conditions));
 
       return {
-        users: mergeAdminUserListRows(rows).map((row) => ({
-          publicId: row.public_id,
-          phone: maskPhoneForDisplay(row.phone),
-          name: row.name,
-          registeredAt: row.created_at.toISOString(),
-          status: row.status,
-          userType: row.user_type,
-          organizationPublicId: row.organization_public_id,
-          organizationName: row.organization_name,
-          authStatus: row.auth_status,
-        })),
+        users: mergeAdminUserListRows(rows).map((row) => {
+          const isCurrentEmployee = row.user_type === "employee";
+
+          return {
+            publicId: row.public_id,
+            phone: maskPhoneForDisplay(row.phone),
+            name: row.name,
+            registeredAt: row.created_at.toISOString(),
+            status: row.status,
+            userType: row.user_type,
+            organizationPublicId: isCurrentEmployee
+              ? row.organization_public_id
+              : null,
+            organizationName: isCurrentEmployee ? row.organization_name : null,
+            authStatus: row.auth_status,
+          };
+        }),
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
     },
@@ -648,6 +654,8 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         return null;
       }
 
+      const isCurrentEmployee = userDetailRow.user_type === "employee";
+
       const personalAuthRows = await database
         .select({
           expires_at: personalAuth.expires_at,
@@ -661,6 +669,8 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         .where(eq(personalAuth.user_id, userDetailRow.internal_user_id))
         .orderBy(desc(personalAuth.updated_at));
       const organizationAuthRows =
+        !isCurrentEmployee ||
+        userDetailRow.internal_employee_id === null ||
         userDetailRow.internal_organization_id === null
           ? []
           : await database
@@ -802,11 +812,16 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           registeredAt: userDetailRow.created_at.toISOString(),
           status: userDetailRow.status,
           userType: userDetailRow.user_type,
-          organizationPublicId: userDetailRow.organization_public_id,
-          organizationName: userDetailRow.organization_name,
+          organizationPublicId: isCurrentEmployee
+            ? userDetailRow.organization_public_id
+            : null,
+          organizationName: isCurrentEmployee
+            ? userDetailRow.organization_name
+            : null,
           authStatus: authorizations[0]?.status ?? null,
         },
         enterpriseBinding:
+          !isCurrentEmployee ||
           userDetailRow.employee_public_id === null ||
           userDetailRow.organization_public_id === null ||
           userDetailRow.organization_name === null ||
