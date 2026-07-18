@@ -495,8 +495,12 @@ describe("phase 8 admin organization org auth runtime", () => {
     });
     await expect(createEmployeeResponse.json()).resolves.toEqual({
       code: 422601,
-      message: "Employee input is invalid.",
+      message: "Idempotency-Key must be a UUID v4.",
       data: null,
     });
+    expect(createEmployeeResponse.status).toBe(422);
+    expect(createEmployeeResponse.headers.get("cache-control")).toBe(
+      "no-store",
+    );
   });
 });

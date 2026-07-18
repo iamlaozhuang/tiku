@@ -1,44 +1,37 @@
 import { describe, expect, it } from "vitest";
 
+import type { EmployeeImportCommandService } from "@/server/services/employee-import-command-service";
 import {
   createAdminOrganizationOrgAuthRuntimeRouteHandlers,
-  type AdminOrganizationOrgAuthRuntimeOptions,
   type AdminOrganizationOrgAuthRuntimeRepositories,
 } from "@/server/services/admin-organization-org-auth-runtime";
-import type { EmployeeAccountService } from "@/server/services/employee-account-service";
 import type { SessionService } from "@/server/services/session-service";
 
-type AdminRole = "super_admin" | "ops_admin" | "content_admin";
-
-function createAdminSessionService(
-  role: AdminRole,
-): Pick<SessionService, "getCurrentSession"> {
+function createAdminSessionService(): Pick<
+  SessionService,
+  "getCurrentSession"
+> {
   return {
     async getCurrentSession(input) {
       if (input.authorization !== "Bearer admin-session-token") {
-        return {
-          code: 401001,
-          message: "Unauthorized.",
-          data: null,
-        };
+        return { code: 401001, message: "Unauthorized.", data: null };
       }
-
       return {
         code: 0,
         message: "ok",
         data: {
-          session: { expiresAt: "2026-06-01T08:00:00.000Z" },
+          session: { expiresAt: "2026-07-17T20:00:00.000Z" },
           user: {
-            publicId: "admin-user-public-001",
-            phone: "13900000001",
-            name: "Ops Admin",
-            userType: null,
-            status: "active",
-            lockedUntilAt: null,
-            employeePublicId: null,
-            organizationPublicId: null,
             adminPublicId: "admin-public-001",
-            adminRoles: [role],
+            adminRoles: ["ops_admin"],
+            employeePublicId: null,
+            lockedUntilAt: null,
+            name: "Ops Admin",
+            organizationPublicId: null,
+            phone: "13900000001",
+            publicId: "admin-user-public-001",
+            status: "active",
+            userType: null,
           },
         },
       };
@@ -46,106 +39,72 @@ function createAdminSessionService(
   };
 }
 
-function createRepositories(input: {
-  auditInputs: unknown[];
-  mutationInputs: unknown[];
-}): AdminOrganizationOrgAuthRuntimeRepositories {
+function createRepositories(
+  auditInputs: unknown[],
+): AdminOrganizationOrgAuthRuntimeRepositories {
   return {
+    async listEmployees(query) {
+      return { employees: [], pagination: { ...query, total: 0 } };
+    },
     async listOrganizations(query) {
-      return {
-        organizations: [],
-        pagination: {
-          page: query.page,
-          pageSize: query.pageSize,
-          sortBy: query.sortBy,
-          sortOrder: query.sortOrder,
-          total: 0,
-        },
-      };
+      return { organizations: [], pagination: { ...query, total: 0 } };
     },
     async listOrgAuths(query) {
-      return {
-        orgAuths: [],
-        pagination: {
-          page: query.page,
-          pageSize: query.pageSize,
-          sortBy: query.sortBy,
-          sortOrder: query.sortOrder,
-          total: 0,
-        },
-      };
-    },
-    async listEmployees(query) {
-      return {
-        employees: [],
-        pagination: {
-          page: query.page,
-          pageSize: query.pageSize,
-          sortBy: query.sortBy,
-          sortOrder: query.sortOrder,
-          total: 0,
-        },
-      };
+      return { orgAuths: [], pagination: { ...query, total: 0 } };
     },
     auditLogRepository: {
-      async appendAuditLog(auditLogInput) {
-        input.auditInputs.push(auditLogInput);
+      async appendAuditLog(input) {
+        auditInputs.push(input);
       },
     },
   };
 }
 
-function createEmployeeAccountService(input: {
-  serviceInputs: unknown[];
-}): EmployeeAccountService {
-  return {
-    async createEmployeeAccount(employeeAccountInput) {
-      input.serviceInputs.push(employeeAccountInput);
-
-      return {
-        code: 0,
-        message: "ok",
-        data: {
-          employeeAccount: {
-            employee: {
-              publicId: "employee-public-001",
-              userPublicId: "user-public-001",
+describe("phase 20 RA-01-03 employee account runtime", () => {
+  it("adapts legacy employee create to a single command without route-level secret audit", async () => {
+    const auditInputs: unknown[] = [];
+    const commandInputs: unknown[] = [];
+    const commandService = {
+      async submit(input) {
+        commandInputs.push(input);
+        return {
+          httpStatus: 200,
+          response: {
+            code: 0,
+            message: "ok",
+            data: {
+              commandKind: "single_create",
+              completedAt: "2026-07-17T12:01:00.000Z",
+              counts: { pending: 0, rejected: 0, succeeded: 1 },
+              createdAt: "2026-07-17T12:00:00.000Z",
+              credentialDistributionStatus: "not_required",
+              credentialRevision: 0,
+              currentIssuePublicId: null,
+              distributionConfirmedAt: null,
               organizationPublicId: "organization-public-001",
-              createdAt: "2026-05-31T08:00:00.000Z",
-              updatedAt: "2026-05-31T08:00:00.000Z",
-            },
-            user: {
-              publicId: "user-public-001",
-              phone: "13900000002",
-              name: "Employee One",
-              userType: "employee",
-              status: "active",
-              lockedUntilAt: null,
-              employeePublicId: "employee-public-001",
-              organizationPublicId: "organization-public-001",
-            },
-            organization: {
-              publicId: "organization-public-001",
-              name: "Hangzhou Test Tobacco",
+              publicId: "employee-import-command-public-001",
+              rowCount: 1,
+              rows: [],
+              status: "completed",
+              updatedAt: "2026-07-17T12:01:00.000Z",
             },
           },
-        },
-      };
-    },
-  };
-}
-
-describe("phase 20 RA-01-03 employee account runtime", () => {
-  it("lets ops_admin create a full employee account through the active employees route with redacted audit metadata", async () => {
-    const auditInputs: unknown[] = [];
-    const mutationInputs: unknown[] = [];
-    const serviceInputs: unknown[] = [];
+        } as const;
+      },
+      async get() {
+        throw new Error("Unexpected get.");
+      },
+      async issueCredentials() {
+        throw new Error("Unexpected issue.");
+      },
+      async confirmDistribution() {
+        throw new Error("Unexpected confirm.");
+      },
+    } satisfies EmployeeImportCommandService;
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
-      employeeAccountService: createEmployeeAccountService({ serviceInputs }),
-      repositories: createRepositories({ auditInputs, mutationInputs }),
-      sessionService: createAdminSessionService("ops_admin"),
-    } as AdminOrganizationOrgAuthRuntimeOptions & {
-      employeeAccountService: EmployeeAccountService;
+      employeeImportCommandService: commandService,
+      repositories: createRepositories(auditInputs),
+      sessionService: createAdminSessionService(),
     });
 
     const response = await handlers.employees.collection.POST(
@@ -153,71 +112,50 @@ describe("phase 20 RA-01-03 employee account runtime", () => {
         method: "POST",
         headers: {
           authorization: "Bearer admin-session-token",
+          "idempotency-key": "123e4567-e89b-42d3-a456-426614174000",
           "x-forwarded-for": "203.0.113.60, 10.0.0.1",
         },
         body: JSON.stringify({
-          phone: "13900000002",
+          initialPassword: "RequestSecret1",
           name: "Employee One",
-          initialPassword: "abc12345",
           organizationPublicId: "organization-public-001",
+          phone: "13900000002",
         }),
       }),
     );
 
-    await expect(response.json()).resolves.toEqual({
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    const responsePayload = await response.json();
+    expect(responsePayload).toMatchObject({
       code: 0,
-      message: "ok",
       data: {
-        employeeAccount: {
-          employee: {
-            publicId: "employee-public-001",
-            userPublicId: "user-public-001",
-            organizationPublicId: "organization-public-001",
-            createdAt: "2026-05-31T08:00:00.000Z",
-            updatedAt: "2026-05-31T08:00:00.000Z",
-          },
-          user: {
-            publicId: "user-public-001",
-            phone: "13900000002",
-            name: "Employee One",
-            userType: "employee",
-            status: "active",
-            lockedUntilAt: null,
-            employeePublicId: "employee-public-001",
-            organizationPublicId: "organization-public-001",
-          },
-          organization: {
-            publicId: "organization-public-001",
-            name: "Hangzhou Test Tobacco",
-          },
-        },
+        commandKind: "single_create",
+        publicId: "employee-import-command-public-001",
       },
     });
-    expect(serviceInputs).toEqual([
+    expect(commandInputs).toEqual([
       {
-        phone: "13900000002",
-        name: "Employee One",
-        initialPassword: "abc12345",
-        organizationPublicId: "organization-public-001",
+        actor: {
+          publicId: "admin-public-001",
+          requestIp: "203.0.113.60",
+          role: "ops_admin",
+        },
+        body: {
+          commandKind: "single_create",
+          organizationPublicId: "organization-public-001",
+          rows: [
+            {
+              initialPassword: "RequestSecret1",
+              name: "Employee One",
+              phone: "13900000002",
+            },
+          ],
+        },
+        idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
       },
     ]);
-    expect(mutationInputs).toEqual([]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "employee.create",
-        actorRole: "ops_admin",
-        targetResourceType: "employee",
-        targetPublicId: "employee-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted employee account create metadata",
-        requestIp: "203.0.113.60",
-      }),
-    ]);
-    expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
-      "abc12345",
-    );
-    expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
-      "admin-session-token",
-    );
+    expect(auditInputs).toEqual([]);
+    expect(JSON.stringify(responsePayload)).not.toContain("RequestSecret1");
   });
 });

@@ -15,9 +15,7 @@ import {
   type AdminAuthOperationSortField,
   type EmployeeListQuery,
   type EmployeeSummaryDto,
-  type EmployeeImportResultDto,
   type EmployeeTransferResultDto,
-  type EmployeeMutationResultDto,
   type EmployeeUnbindResultDto,
   type OrganizationTreeQuery,
   type OrgAuthListQuery,
@@ -31,20 +29,17 @@ import type {
 } from "../contracts/organization-auth-contract";
 import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
-  createPostgresEmployeeAccountRepository,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
-import type { EmployeeAccountResultDto } from "../contracts/employee-account-contract";
+import type { EmployeeImportCommandActor } from "../contracts/employee-import-command-contract";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import {
-  createEmployeeAccountService,
-  type EmployeeAccountService,
-} from "./employee-account-service";
-import {
-  normalizeCreateEmployeeAccountInput,
-  type NormalizedCreateEmployeeAccountInput,
-} from "../validators/employee-account";
+  createEmployeeImportCommandService,
+  type EmployeeImportCommandService,
+} from "./employee-import-command-service";
+import { createPostgresEmployeeImportCommandRepository } from "../repositories/postgres-employee-import-command-repository";
+import { createNoStoreJsonResponse } from "./employee-import-command-route";
 import { normalizeCreateOrgAuthPackageInput } from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
@@ -68,7 +63,7 @@ export type { AdminOrganizationOrgAuthRuntimeRepositories };
 
 export type AdminOrganizationOrgAuthRuntimeOptions =
   AdminOrganizationOrgAuthRuntimeRepositoryOptions & {
-    employeeAccountService?: EmployeeAccountService;
+    employeeImportCommandService?: EmployeeImportCommandService;
     repositories?: AdminOrganizationOrgAuthRuntimeRepositories;
     sessionService?: Pick<SessionService, "getCurrentSession">;
   };
@@ -145,6 +140,10 @@ const employeeInputInvalidResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
   "Employee input is invalid.",
 );
+const employeeImportCommandUnavailableResponse = createErrorResponse(
+  503601,
+  "Employee import command is temporarily unavailable.",
+);
 
 type RouteContext = {
   params: Promise<{
@@ -182,10 +181,11 @@ type OrganizationMutationRepositories =
   };
 
 type NormalizedEmployeeImportInput = {
-  employeeAccounts: (NormalizedCreateEmployeeAccountInput & {
-    rowNumber: number;
-  })[];
-  rejectedRows: EmployeeImportResultDto["rejectedRows"];
+  rows: {
+    initialPassword: string;
+    name: string;
+    phone: string;
+  }[];
   targetOrganizationPublicId: string;
 };
 
@@ -445,18 +445,7 @@ function parseEmployeeAccountImportContent(input: {
   const firstHeaderNames = new Set(firstRow?.cells.map(normalizeHeaderName));
 
   if (hasForbiddenEmployeeImportScopeHeader(firstHeaderNames)) {
-    return {
-      employeeAccounts: [],
-      rejectedRows: [
-        {
-          rowNumber: firstRow.rowNumber,
-          userPublicId: null,
-          organizationPublicId: null,
-          reason: "invalid_row",
-        },
-      ],
-      targetOrganizationPublicId: input.targetOrganizationPublicId,
-    };
+    return null;
   }
 
   const hasHeader =
@@ -475,8 +464,7 @@ function parseEmployeeAccountImportContent(input: {
     return null;
   }
 
-  const rawAccounts = dataRows.map((row) => ({
-    rowNumber: row.rowNumber,
+  const rows = dataRows.map((row) => ({
     phone: readEmployeeAccountCell({
       cells: row.cells,
       fallbackIndex: 0,
@@ -498,72 +486,11 @@ function parseEmployeeAccountImportContent(input: {
             headerIndexByName,
             name: "initialpassword",
           }),
-    organizationPublicId: input.targetOrganizationPublicId,
   }));
-  const phoneCounts = new Map<string, number>();
-
-  for (const account of rawAccounts) {
-    if (account.phone.length > 0) {
-      phoneCounts.set(account.phone, (phoneCounts.get(account.phone) ?? 0) + 1);
-    }
-  }
-
-  const rejectedRows: EmployeeImportResultDto["rejectedRows"] = [];
-  const employeeAccounts: (NormalizedCreateEmployeeAccountInput & {
-    rowNumber: number;
-  })[] = [];
-
-  for (const account of rawAccounts) {
-    const validation = normalizeCreateEmployeeAccountInput(account);
-    const isDuplicatePhone = (phoneCounts.get(account.phone) ?? 0) > 1;
-
-    if (isDuplicatePhone) {
-      rejectedRows.push({
-        rowNumber: account.rowNumber,
-        userPublicId: null,
-        organizationPublicId: account.organizationPublicId || null,
-        reason: "duplicate_phone",
-      });
-      continue;
-    }
-
-    if (!validation.success) {
-      rejectedRows.push({
-        rowNumber: account.rowNumber,
-        userPublicId: null,
-        organizationPublicId: account.organizationPublicId || null,
-        reason: "invalid_row",
-      });
-      continue;
-    }
-
-    employeeAccounts.push({
-      ...validation.value,
-      rowNumber: account.rowNumber,
-    });
-  }
-
-  if (employeeAccounts.length === 0 && rejectedRows.length === 0) {
-    return null;
-  }
 
   return {
-    employeeAccounts,
-    rejectedRows,
+    rows,
     targetOrganizationPublicId: input.targetOrganizationPublicId,
-  };
-}
-
-function mapEmployeeAccountResultToEmployeeSummary(
-  input: EmployeeAccountResultDto,
-): EmployeeSummaryDto {
-  return {
-    publicId: input.employeeAccount.employee.publicId,
-    userPublicId: input.employeeAccount.user.publicId,
-    phone: input.employeeAccount.user.phone,
-    name: input.employeeAccount.user.name,
-    organizationPublicId: input.employeeAccount.employee.organizationPublicId,
-    status: input.employeeAccount.user.status,
   };
 }
 
@@ -573,94 +500,6 @@ function maskEmployeeSummaryPhone(
   return {
     ...employeeSummary,
     phone: maskPhoneForDisplay(employeeSummary.phone),
-  };
-}
-
-function mapEmployeeAccountImportFailureReason(
-  result: ApiResponse<EmployeeAccountResultDto | null>,
-): EmployeeImportResultDto["rejectedRows"][number]["reason"] {
-  const normalizedMessage = result.message.toLowerCase();
-
-  if (result.code === 400006) {
-    return "invalid_row";
-  }
-
-  if (result.code === 404004) {
-    return "organization_not_found";
-  }
-
-  if (normalizedMessage.includes("quota")) {
-    return "quota_insufficient";
-  }
-
-  if (normalizedMessage.includes("disabled")) {
-    return "disabled_account";
-  }
-
-  if (normalizedMessage.includes("account domain")) {
-    return "cross_domain_conflict";
-  }
-
-  if (normalizedMessage.includes("bound to another organization")) {
-    return "cross_organization_conflict";
-  }
-
-  return "employee_create_failed";
-}
-
-async function importEmployeeAccounts(input: {
-  employeeAccountService: EmployeeAccountService;
-  normalizedInput: NormalizedEmployeeImportInput;
-}): Promise<EmployeeImportResultDto> {
-  if (input.normalizedInput.rejectedRows.length > 0) {
-    return {
-      generatedInitialPasswords: [],
-      importedEmployees: [],
-      rejectedRows: input.normalizedInput.rejectedRows,
-    };
-  }
-
-  const importedEmployees: EmployeeSummaryDto[] = [];
-  const generatedInitialPasswords: NonNullable<
-    EmployeeImportResultDto["generatedInitialPasswords"]
-  > = [];
-  const rejectedRows: EmployeeImportResultDto["rejectedRows"] = [];
-
-  for (const accountInput of input.normalizedInput.employeeAccounts) {
-    const { rowNumber, ...employeeAccountInput } = accountInput;
-    const result =
-      await input.employeeAccountService.createEmployeeAccount(
-        employeeAccountInput,
-      );
-
-    if (result.code === 0 && result.data !== null) {
-      importedEmployees.push(
-        mapEmployeeAccountResultToEmployeeSummary(result.data),
-      );
-      if (typeof result.data.generatedInitialPassword === "string") {
-        generatedInitialPasswords.push({
-          rowNumber,
-          phone: maskPhoneForDisplay(employeeAccountInput.phone),
-          name: employeeAccountInput.name,
-          organizationPublicId: employeeAccountInput.organizationPublicId,
-          initialPassword: result.data.generatedInitialPassword,
-        });
-      }
-      continue;
-    }
-
-    rejectedRows.push({
-      rowNumber,
-      userPublicId: null,
-      organizationPublicId: employeeAccountInput.organizationPublicId,
-      reason: mapEmployeeAccountImportFailureReason(result),
-    });
-  }
-
-  return {
-    generatedInitialPasswords,
-    importedEmployees,
-    rejectedRows,
   };
 }
 
@@ -828,10 +667,10 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     createPostgresAdminOrganizationOrgAuthRuntimeRepositories(options);
   const organizationMutationRepositories =
     repositories as OrganizationMutationRepositories;
-  const employeeAccountService =
-    options.employeeAccountService ??
-    createEmployeeAccountService(
-      createPostgresEmployeeAccountRepository(options),
+  const employeeImportCommandService =
+    options.employeeImportCommandService ??
+    createEmployeeImportCommandService(
+      createPostgresEmployeeImportCommandRepository(options),
     );
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
 
@@ -852,12 +691,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   async function appendEmployeeAuditLog(input: {
     request: Request;
     actor: AdminOrganizationOrgAuthActor;
-    actionType:
-      | "employee.create"
-      | "employee.disable"
-      | "employee.import"
-      | "employee.transfer"
-      | "employee.unbind";
+    actionType: "employee.disable" | "employee.transfer" | "employee.unbind";
     targetPublicId: string | null;
     resultStatus: "success" | "failed";
     metadataSummary: string;
@@ -983,12 +817,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
   async function requireEmployeeManager(
     request: Request,
-    actionType:
-      | "employee.create"
-      | "employee.disable"
-      | "employee.import"
-      | "employee.transfer"
-      | "employee.unbind",
+    actionType: "employee.disable" | "employee.transfer" | "employee.unbind",
     targetPublicId: string | null,
   ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
     const actor = await resolveAdminActor(request, sessionService);
@@ -1011,6 +840,67 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     }
 
     return actor;
+  }
+
+  async function requireEmployeeImportCommandActor(
+    request: Request,
+  ): Promise<EmployeeImportCommandActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(request, sessionService);
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    const role = actor.roles.find(
+      (actorRole): actorRole is EmployeeImportCommandActor["role"] =>
+        actorRole === "ops_admin" || actorRole === "super_admin",
+    );
+    if (role === undefined) {
+      return adminPermissionDeniedResponse;
+    }
+
+    return {
+      publicId: actor.publicId,
+      requestIp: readRequestIp(request),
+      role,
+    };
+  }
+
+  async function submitEmployeeImportCommand(
+    request: Request,
+    readBody: () => Promise<
+      { success: true; body: unknown } | { success: false }
+    >,
+  ): Promise<Response> {
+    try {
+      const actorOrError = await requireEmployeeImportCommandActor(request);
+      if ("code" in actorOrError) {
+        return createNoStoreJsonResponse({
+          httpStatus: actorOrError.code === 401001 ? 401 : 403,
+          response: actorOrError,
+        });
+      }
+
+      const bodyResult = await readBody();
+      if (!bodyResult.success) {
+        return createNoStoreJsonResponse({
+          httpStatus: 422,
+          response: employeeInputInvalidResponse,
+        });
+      }
+
+      return createNoStoreJsonResponse(
+        await employeeImportCommandService.submit({
+          actor: actorOrError,
+          body: bodyResult.body,
+          idempotencyKey: request.headers.get("idempotency-key"),
+        }),
+      );
+    } catch {
+      return createNoStoreJsonResponse({
+        httpStatus: 503,
+        response: employeeImportCommandUnavailableResponse,
+      });
+    }
   }
 
   return createRouteHandlersWithErrorEnvelope({
@@ -1625,100 +1515,50 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
         async POST(request: Request): Promise<Response> {
-          const requestBody = await readRequestJson(request);
-          const actorOrError = await requireEmployeeManager(
-            request,
-            "employee.create",
-            null,
-          );
+          return submitEmployeeImportCommand(request, async () => {
+            const requestBody = await readRequestJson(request);
+            const employeeInput =
+              typeof requestBody === "object" && requestBody !== null
+                ? (requestBody as Record<string, unknown>)
+                : {};
 
-          if ("code" in actorOrError) {
-            return createJsonResponse(actorOrError);
-          }
-
-          const employeeAccountInput =
-            normalizeCreateEmployeeAccountInput(requestBody);
-
-          if (employeeAccountInput.success) {
-            const result =
-              await employeeAccountService.createEmployeeAccount(requestBody);
-            const targetPublicId =
-              result.code === 0 && result.data !== null
-                ? result.data.employeeAccount.employee.publicId
-                : null;
-
-            await appendEmployeeAuditLog({
-              request,
-              actor: actorOrError,
-              actionType: "employee.create",
-              targetPublicId,
-              resultStatus: result.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted employee account create metadata",
-            });
-
-            return createJsonResponse<
-              EmployeeAccountResultDto | EmployeeMutationResultDto | null
-            >(result);
-          }
-
-          await appendEmployeeAuditLog({
-            request,
-            actor: actorOrError,
-            actionType: "employee.create",
-            targetPublicId: null,
-            resultStatus: "failed",
-            metadataSummary: "redacted employee invalid input metadata",
+            return {
+              success: true,
+              body: {
+                commandKind: "single_create",
+                organizationPublicId: employeeInput.organizationPublicId,
+                rows: [
+                  {
+                    initialPassword: employeeInput.initialPassword,
+                    name: employeeInput.name,
+                    phone: employeeInput.phone,
+                  },
+                ],
+              },
+            };
           });
-
-          return createJsonResponse(employeeInputInvalidResponse);
         },
       },
       importBatch: {
         async POST(request: Request): Promise<Response> {
-          const actorOrError = await requireEmployeeManager(
-            request,
-            "employee.import",
-            null,
-          );
+          return submitEmployeeImportCommand(request, async () => {
+            const normalizedInput = normalizeEmployeeImportInput(
+              await readRequestJson(request),
+            );
+            if (normalizedInput === null) {
+              return { success: false };
+            }
 
-          if ("code" in actorOrError) {
-            return createJsonResponse(actorOrError);
-          }
-
-          const normalizedInput = normalizeEmployeeImportInput(
-            await readRequestJson(request),
-          );
-
-          if (normalizedInput === null) {
-            await appendEmployeeAuditLog({
-              request,
-              actor: actorOrError,
-              actionType: "employee.import",
-              targetPublicId: null,
-              resultStatus: "failed",
-              metadataSummary: "redacted employee invalid input metadata",
-            });
-
-            return createJsonResponse(employeeInputInvalidResponse);
-          }
-
-          const result = await importEmployeeAccounts({
-            employeeAccountService,
-            normalizedInput,
+            return {
+              success: true,
+              body: {
+                commandKind: "batch_import",
+                organizationPublicId:
+                  normalizedInput.targetOrganizationPublicId,
+                rows: normalizedInput.rows,
+              },
+            };
           });
-
-          await appendEmployeeAuditLog({
-            request,
-            actor: actorOrError,
-            actionType: "employee.import",
-            targetPublicId: null,
-            resultStatus: result.rejectedRows.length > 0 ? "failed" : "success",
-            metadataSummary: `redacted employee import metadata; imported=${result.importedEmployees.length} rejected=${result.rejectedRows.length}`,
-          });
-
-          return createJsonResponse(
-            createSuccessResponse<EmployeeImportResultDto>(result),
-          );
         },
       },
       organizationUnbind: {

@@ -1,5 +1,3 @@
-import { randomInt } from "node:crypto";
-
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -22,44 +20,6 @@ export type EmployeeAccountService = {
 const INVALID_EMPLOYEE_ACCOUNT_INPUT_CODE = 400006;
 const ORGANIZATION_NOT_FOUND_CODE = 404004;
 const EMPLOYEE_ORGANIZATION_CONFLICT_CODE = 409006;
-const INITIAL_PASSWORD_LOWERCASE = "abcdefghijkmnopqrstuvwxyz";
-const INITIAL_PASSWORD_UPPERCASE = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-const INITIAL_PASSWORD_DIGITS = "23456789";
-const INITIAL_PASSWORD_CHARACTERS = `${INITIAL_PASSWORD_LOWERCASE}${INITIAL_PASSWORD_UPPERCASE}${INITIAL_PASSWORD_DIGITS}`;
-
-function pickRandomCharacter(characters: string): string {
-  return characters[randomInt(characters.length)] ?? characters[0] ?? "a";
-}
-
-function shuffleCharacters(characters: string[]): string[] {
-  return characters.reduceRight((shuffledCharacters, _, index) => {
-    const swapIndex = randomInt(index + 1);
-    const nextCharacters = [...shuffledCharacters];
-    const currentCharacter = nextCharacters[index] ?? "";
-
-    nextCharacters[index] = nextCharacters[swapIndex] ?? "";
-    nextCharacters[swapIndex] = currentCharacter;
-
-    return nextCharacters;
-  }, characters);
-}
-
-function generateEmployeeInitialPassword(): string {
-  const requiredCharacters = [
-    pickRandomCharacter(INITIAL_PASSWORD_LOWERCASE),
-    pickRandomCharacter(INITIAL_PASSWORD_UPPERCASE),
-    pickRandomCharacter(INITIAL_PASSWORD_DIGITS),
-  ];
-  const remainingCharacters = Array.from({ length: 9 }, () =>
-    pickRandomCharacter(INITIAL_PASSWORD_CHARACTERS),
-  );
-
-  return shuffleCharacters([
-    ...requiredCharacters,
-    ...remainingCharacters,
-  ]).join("");
-}
-
 export function createEmployeeAccountService(
   employeeAccountRepository: EmployeeAccountRepository,
 ): EmployeeAccountService {
@@ -71,6 +31,13 @@ export function createEmployeeAccountService(
         return createErrorResponse(
           INVALID_EMPLOYEE_ACCOUNT_INPUT_CODE,
           employeeAccountInput.message,
+        );
+      }
+
+      if (employeeAccountInput.value.initialPassword.length === 0) {
+        return createErrorResponse(
+          INVALID_EMPLOYEE_ACCOUNT_INPUT_CODE,
+          "Invalid employee account input.",
         );
       }
 
@@ -111,35 +78,22 @@ export function createEmployeeAccountService(
           return mapEmployeeAccountMutationError(error);
         }
 
-        return createSuccessResponse({
-          ...mapEmployeeAccountToApi(employeeAccount),
-          generatedInitialPassword: null,
-        });
+        return createSuccessResponse(mapEmployeeAccountToApi(employeeAccount));
       }
 
-      const generatedInitialPassword =
-        employeeAccountInput.value.initialPassword.length === 0
-          ? generateEmployeeInitialPassword()
-          : null;
-      const initialPassword =
-        generatedInitialPassword ?? employeeAccountInput.value.initialPassword;
       let employeeAccount;
 
       try {
         employeeAccount = await employeeAccountRepository.createEmployeeAccount(
           {
             ...employeeAccountInput.value,
-            initialPassword,
           },
         );
       } catch (error) {
         return mapEmployeeAccountMutationError(error);
       }
 
-      return createSuccessResponse({
-        ...mapEmployeeAccountToApi(employeeAccount),
-        generatedInitialPassword,
-      });
+      return createSuccessResponse(mapEmployeeAccountToApi(employeeAccount));
     },
   };
 }

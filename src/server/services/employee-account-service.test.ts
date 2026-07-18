@@ -122,17 +122,15 @@ describe("employee account service", () => {
       }),
     );
 
-    await expect(
-      service.createEmployeeAccount({
-        phone: "13800000000",
-        name: "李四",
-        initialPassword: "abc12345",
-        organizationPublicId: "org_public_123",
-      }),
-    ).resolves.toMatchObject({
+    const response = await service.createEmployeeAccount({
+      phone: "13800000000",
+      name: "李四",
+      initialPassword: "abc12345",
+      organizationPublicId: "org_public_123",
+    });
+    expect(response).toMatchObject({
       code: 0,
       data: {
-        generatedInitialPassword: null,
         employeeAccount: {
           employee: {
             publicId: "employee_public_123",
@@ -145,6 +143,7 @@ describe("employee account service", () => {
         },
       },
     });
+    expect(Object.keys(response.data ?? {})).toEqual(["employeeAccount"]);
     expect(createInputs).toEqual([
       {
         initialPassword: "abc12345",
@@ -155,7 +154,7 @@ describe("employee account service", () => {
     ]);
   });
 
-  it("generates a one-time initial password when a new employee input omits it", async () => {
+  it("rejects a missing initial password instead of creating an unreachable account", async () => {
     let createInputs: { initialPassword: string }[] = [];
     const service = createEmployeeAccountService(
       createRepository({
@@ -173,14 +172,12 @@ describe("employee account service", () => {
       organizationPublicId: "org_public_123",
     });
 
-    expect(response.code).toBe(0);
-    expect(response.data?.generatedInitialPassword).toMatch(
-      /^(?=.*[A-Za-z])(?=.*\d).{8,}$/u,
-    );
-    expect(createInputs).toHaveLength(1);
-    expect(createInputs[0]?.initialPassword).toBe(
-      response.data?.generatedInitialPassword,
-    );
+    expect(response).toEqual({
+      code: 400006,
+      message: "Invalid employee account input.",
+      data: null,
+    });
+    expect(createInputs).toEqual([]);
   });
 
   it("binds an existing unbound user without creating new credentials", async () => {
@@ -202,17 +199,15 @@ describe("employee account service", () => {
       }),
     );
 
-    await expect(
-      service.createEmployeeAccount({
-        phone: "13800000000",
-        name: "李四",
-        initialPassword: "abc12345",
-        organizationPublicId: "org_public_123",
-      }),
-    ).resolves.toMatchObject({
+    const response = await service.createEmployeeAccount({
+      phone: "13800000000",
+      name: "李四",
+      initialPassword: "abc12345",
+      organizationPublicId: "org_public_123",
+    });
+    expect(response).toMatchObject({
       code: 0,
       data: {
-        generatedInitialPassword: null,
         employeeAccount: {
           user: {
             publicId: "user_public_123",
@@ -221,6 +216,7 @@ describe("employee account service", () => {
         },
       },
     });
+    expect(Object.keys(response.data ?? {})).toEqual(["employeeAccount"]);
     expect(bindInputs).toEqual([
       {
         userPublicId: "user_public_123",

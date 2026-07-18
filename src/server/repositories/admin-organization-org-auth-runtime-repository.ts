@@ -71,7 +71,7 @@ import {
 import { findAccountPhoneIdentityConflictUnderLock } from "./account-phone-identity-lock";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
-type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
+export type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
 >;
 
@@ -1199,60 +1199,68 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
     },
     async cancelOrgAuth(publicId) {
       const database = getDatabase();
-      const now = new Date();
-      const [orgAuthRow] = await database
-        .update(orgAuth)
-        .set({
-          status: "cancelled",
-          cancelled_at: now,
-          updated_at: now,
-        })
-        .where(eq(orgAuth.public_id, publicId))
-        .returning({
-          id: orgAuth.id,
-          public_id: orgAuth.public_id,
-          name: orgAuth.name,
-          purchaser_organization_id: orgAuth.purchaser_organization_id,
-          auth_scope_type: orgAuth.auth_scope_type,
-          edition: orgAuth.edition,
-          profession: orgAuth.profession,
-          level: orgAuth.level,
-          account_quota: orgAuth.account_quota,
-          used_quota: orgAuth.used_quota,
-          starts_at: orgAuth.starts_at,
-          expires_at: orgAuth.expires_at,
-          status: orgAuth.status,
-          cancelled_at: orgAuth.cancelled_at,
-          created_at: orgAuth.created_at,
-          updated_at: orgAuth.updated_at,
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+        await lockOrganizationScopeMutation(transactionalDatabase);
+
+        const now = new Date();
+        const [orgAuthRow] = await transactionalDatabase
+          .update(orgAuth)
+          .set({
+            status: "cancelled",
+            cancelled_at: now,
+            updated_at: now,
+          })
+          .where(eq(orgAuth.public_id, publicId))
+          .returning({
+            id: orgAuth.id,
+            public_id: orgAuth.public_id,
+            name: orgAuth.name,
+            purchaser_organization_id: orgAuth.purchaser_organization_id,
+            auth_scope_type: orgAuth.auth_scope_type,
+            edition: orgAuth.edition,
+            profession: orgAuth.profession,
+            level: orgAuth.level,
+            account_quota: orgAuth.account_quota,
+            used_quota: orgAuth.used_quota,
+            starts_at: orgAuth.starts_at,
+            expires_at: orgAuth.expires_at,
+            status: orgAuth.status,
+            cancelled_at: orgAuth.cancelled_at,
+            created_at: orgAuth.created_at,
+            updated_at: orgAuth.updated_at,
+          });
+
+        if (orgAuthRow === undefined) {
+          return null;
+        }
+
+        const [purchaserOrganization] = await transactionalDatabase
+          .select({ public_id: organization.public_id })
+          .from(organization)
+          .where(eq(organization.id, orgAuthRow.purchaser_organization_id))
+          .limit(1);
+        const organizationPublicIdsByOrgAuthId =
+          await listOrgAuthOrganizationPublicIds(transactionalDatabase, [
+            orgAuthRow.id,
+          ]);
+        const editionEvaluationsByOrgAuthId =
+          await listOrgAuthEditionEvaluations(transactionalDatabase, [
+            { id: orgAuthRow.id, edition: orgAuthRow.edition },
+          ]);
+
+        return mapOrgAuthMutationRowToDto({
+          ...orgAuthRow,
+          ...getOrgAuthEditionEvaluation(
+            orgAuthRow,
+            editionEvaluationsByOrgAuthId,
+          ),
+          purchaser_organization_public_id:
+            purchaserOrganization?.public_id ?? "",
+          organization_public_ids:
+            organizationPublicIdsByOrgAuthId.get(orgAuthRow.id) ?? [],
         });
-
-      if (orgAuthRow === undefined) {
-        return null;
-      }
-
-      const [purchaserOrganization] = await database
-        .select({ public_id: organization.public_id })
-        .from(organization)
-        .where(eq(organization.id, orgAuthRow.purchaser_organization_id))
-        .limit(1);
-      const organizationPublicIdsByOrgAuthId =
-        await listOrgAuthOrganizationPublicIds(database, [orgAuthRow.id]);
-      const editionEvaluationsByOrgAuthId = await listOrgAuthEditionEvaluations(
-        database,
-        [{ id: orgAuthRow.id, edition: orgAuthRow.edition }],
-      );
-
-      return mapOrgAuthMutationRowToDto({
-        ...orgAuthRow,
-        ...getOrgAuthEditionEvaluation(
-          orgAuthRow,
-          editionEvaluationsByOrgAuthId,
-        ),
-        purchaser_organization_public_id:
-          purchaserOrganization?.public_id ?? "",
-        organization_public_ids:
-          organizationPublicIdsByOrgAuthId.get(orgAuthRow.id) ?? [],
       });
     },
     async terminateOrgAuthActiveFlows(publicId) {
@@ -1769,9 +1777,11 @@ export function createPostgresEmployeeAccountRepository(
   };
 }
 
-async function createEmployeeAccountWithDatabase(
+export async function createEmployeeAccountWithDatabase(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
-  input: CreateEmployeeAccountInput & { passwordHash: string },
+  input: Omit<CreateEmployeeAccountInput, "initialPassword"> & {
+    passwordHash: string;
+  },
 ) {
   await lockOrganizationScopeMutation(database);
   const accountPhoneConflict = await findAccountPhoneIdentityConflictUnderLock(
@@ -1883,6 +1893,7 @@ async function createEmployeeAccountWithDatabase(
   const reservationResult = await reserveEmployeeOrgAuthQuota(database, {
     employeeId: employeeRow.id,
     organizationId: organizationRow.id,
+    requireCurrentAuthorization: true,
   });
 
   if (reservationResult !== "reserved") {
@@ -1917,7 +1928,7 @@ async function createEmployeeAccountWithDatabase(
   };
 }
 
-async function bindEmployeeAccountWithDatabase(
+export async function bindEmployeeAccountWithDatabase(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   input: BindExistingUserToOrganizationInput,
 ) {
@@ -2038,6 +2049,7 @@ async function bindEmployeeAccountWithDatabase(
   const reservationResult = await reserveEmployeeOrgAuthQuota(database, {
     employeeId: employeeRow.id,
     organizationId: organizationRow.id,
+    requireCurrentAuthorization: true,
   });
 
   if (reservationResult !== "reserved") {

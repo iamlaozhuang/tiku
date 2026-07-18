@@ -606,36 +606,68 @@ function mockSystemOpsFetchWithOrganizationTree(
         });
       }
 
-      if (path === "/api/v1/employees/import") {
+      if (path === "/api/v1/employee-import-commands") {
         return createJsonResponse({
           code: 0,
           message: "ok",
           data: {
-            generatedInitialPasswords: [
+            commandKind: "batch_import",
+            completedAt: "2026-07-17T12:01:00.000Z",
+            counts: { pending: 0, rejected: 1, succeeded: 1 },
+            createdAt: "2026-07-17T12:00:00.000Z",
+            credentialDistributionStatus: "open",
+            credentialRevision: 0,
+            currentIssuePublicId: null,
+            distributionConfirmedAt: null,
+            organizationPublicId: "org-district-001",
+            publicId: "employee-import-command-public-001",
+            rowCount: 2,
+            rows: [
               {
+                credentialMode: "generated",
+                employeePublicId: "employee-imported-public-001",
+                outcomeKind: "created",
+                publicId: "employee-import-row-public-001",
+                rejectionReason: null,
                 rowNumber: 2,
-                phone: "13900001111",
-                name: "Import One",
-                organizationPublicId: "org-district-001",
-                initialPassword: "Generated123",
+                status: "succeeded",
+                warningReason: null,
               },
-            ],
-            importedEmployees: [
               {
-                publicId: "employee-imported-public-001",
-                userPublicId: "user-imported-public-001",
-                phone: "13900001111",
-                name: "Import One",
-                organizationPublicId: "org-district-001",
-                status: "active",
-              },
-            ],
-            rejectedRows: [
-              {
+                credentialMode: null,
+                employeePublicId: null,
+                outcomeKind: null,
+                publicId: "employee-import-row-public-002",
+                rejectionReason: "duplicate_phone",
                 rowNumber: 3,
-                userPublicId: "user-rejected-public-001",
-                organizationPublicId: "org-missing-public-001",
-                reason: "duplicate_phone",
+                status: "rejected",
+                warningReason: null,
+              },
+            ],
+            status: "completed",
+            updatedAt: "2026-07-17T12:01:00.000Z",
+          },
+        });
+      }
+
+      if (
+        path ===
+        "/api/v1/employee-import-commands/employee-import-command-public-001/issue-credentials"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            credentialRevision: 1,
+            issuePublicId: "employee-credential-issue-public-001",
+            rows: [
+              {
+                employeePublicId: "employee-imported-public-001",
+                initialPassword: "Generated123",
+                name: "Import One",
+                phone: "139****1111",
+                rowNumber: 2,
+                rowPublicId: "employee-import-row-public-001",
               },
             ],
           },
@@ -1731,9 +1763,9 @@ describe("admin user organization authorization ops baseline", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
     const employeeImportContent = [
-      "phone,name",
-      "13900001111,Import One",
-      "13900002222,Import Two",
+      "\uFEFFphone,name,initialPassword",
+      '13900001111,"Import, One","Provided,123"',
+      "13900002222,Import Two,",
     ].join("\n");
 
     render(createElement(AdminOrgAuthPage));
@@ -1759,7 +1791,7 @@ describe("admin user organization authorization ops baseline", () => {
     const importPreview = screen.getByTestId("employee-import-preview");
     expect(importPreview).toHaveTextContent("员工账号 CSV");
     expect(importPreview).toHaveTextContent("2 行");
-    expect(importPreview).toHaveTextContent("2 行未填写初始密码");
+    expect(importPreview).toHaveTextContent("1 行未填写初始密码");
     expect(
       screen.getByTestId("employee-import-inherited-auth-category"),
     ).toHaveTextContent("已发现目标组织有效企业授权");
@@ -1775,19 +1807,101 @@ describe("admin user organization authorization ops baseline", () => {
     expect(importResult).toHaveTextContent("成功 1");
     expect(importResult).toHaveTextContent("拒绝 1");
     expect(importResult).toHaveTextContent("第 3 行：手机号重复");
-    expect(importResult).toHaveTextContent("初始密码一次性分发窗口");
-    expect(importResult).toHaveTextContent("Generated123");
+    expect(importResult).not.toHaveTextContent("Generated123");
     expect(importResult).not.toHaveTextContent("user-rejected-public-001");
     expect(importResult).not.toHaveTextContent("org-missing-public-001");
     expect(importResult).not.toHaveTextContent("13900002222");
 
+    fireEvent.click(screen.getByTestId("employee-import-issue-credentials"));
+    const distribution = await screen.findByTestId(
+      "employee-generated-password-distribution",
+    );
+    expect(distribution).toHaveTextContent("Generated123");
+
     const importCall = fetchMock.mock.calls.find(
-      ([url]) => String(url) === "/api/v1/employees/import",
+      ([url]) => String(url) === "/api/v1/employee-import-commands",
     );
     expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
-      content: employeeImportContent,
-      sourceFormat: "csv",
-      targetOrganizationPublicId: "org-district-001",
+      commandKind: "batch_import",
+      organizationPublicId: "org-district-001",
+      rows: [
+        {
+          initialPassword: "Provided,123",
+          name: "Import, One",
+          phone: "13900001111",
+        },
+        { initialPassword: "", name: "Import Two", phone: "13900002222" },
+      ],
+    });
+    expect(
+      new Headers(importCall?.[1]?.headers).get("idempotency-key"),
+    ).toMatch(/^[0-9a-f-]{36}$/u);
+    expect(window.location.href).not.toContain("Provided,123");
+    expect(JSON.stringify(window.history.state)).not.toContain("Provided,123");
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭批量导入员工" }));
+    fireEvent.click(screen.getByRole("button", { name: "批量导入员工" }));
+    expect(screen.getByTestId("employee-import-textarea")).toHaveValue("");
+    expect(screen.getByTestId("employee-import-result")).not.toHaveTextContent(
+      "Generated123",
+    );
+  });
+
+  it("rejects unmatched quotes and maps quoted TSV cells without shifting credentials", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+    render(createElement(AdminOrgAuthPage));
+    await openEmployeeImportDrawer();
+
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: { value: 'phone,name\n13900001111,"Unclosed' },
+    });
+    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
+      "未闭合的引号",
+    );
+    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: {
+        value: 'phone,name,initialPassword\n13900001111,Import One,Sec"ret"123',
+      },
+    });
+    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
+      "无效或未闭合的引号",
+    );
+    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+
+    const tsvContent = [
+      "\uFEFFphone\tname\tinitialPassword",
+      '13900001111\t"Import\tOne"\t"Provided\t123"',
+    ].join("\n");
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: { value: tsvContent },
+    });
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      { target: { value: "org-district-001" } },
+    );
+    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
+      "员工账号 TSV",
+    );
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
+    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+    await screen.findByTestId("employee-import-result");
+
+    const importCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/employee-import-commands",
+    );
+    expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
+      commandKind: "batch_import",
+      organizationPublicId: "org-district-001",
+      rows: [
+        {
+          initialPassword: "Provided\t123",
+          name: "Import\tOne",
+          phone: "13900001111",
+        },
+      ],
     });
   });
 

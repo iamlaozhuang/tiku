@@ -19,48 +19,81 @@ analogousImplementationReviewed: true
 - `auth_user`、`auth_account`、`user`、`employee` 与 quota reservation 必须共同提交或共同回滚。
 - 单建与批量导入均以明确目标 `organization` 为边界；缺省密码由服务端生成，只能在对应提交成功后进入一次性分发结果。
 - 批量结果必须逐行可解释并脱敏；部分失败、异常、响应丢失与重放不得产生不可辨识的部分成功。
-- 当前需求无冲突；若未知结果恢复必须新增持久 batch command、secret recovery 或 schema/migration，本任务按冻结 stop condition 停止，不以客户端缓存或派生密码伪造恢复。
+- 初始 no-schema 边界下，未知结果恢复必须停止；该停点随后由用户批准的持久 command、placeholder + versioned rotate 规格及 F-0115 精确 scope-correction 取代。客户端缓存或派生密码仍不得冒充恢复事实。
 
 ## Transition Evidence
 
-Result: pending
+Result: pass
 
 - 前序 F-0114 实现提交 `70bf9f8ab` 与 ready-for-closeout 提交 `8ee336aa4` 已 ff-only 合入 master。
 - fresh-master 聚焦 6 文件 90/90、完整 unit 405 文件 2448/2448、lint、typecheck、format、build、P1/P0/Module 与真实 pre-push 均通过。
 - local master、origin/master 与实时远端均为 `8ee336aa4f9a073b9456fc86bde641fc989f1123`；前序 worktree 与短分支已清理，既有 recovery stash 未触碰。
 - 本 transition 只允许 state、queue、新 plan、新 evidence、新 audit 五份治理文件；产品源码与测试必须零 diff。
 - 只有该治理提交通过 P1 `transition_only` 和 Module ancestor checkpoint 后才能开始 F-0115 产品复检；其他 `in_progress` SHA 漂移继续 hard-block。
+- transition 提交 `6bde2f2aec3d71fa0ce138b26f64243861cace6f` 已 ff-only 合入并普通推送至 `origin/master`；真实 pre-push 输出 `p1TransitionScopeMode: transition_only`，Module 输出 `OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master`。
+- 推送后 local master、origin/master 与实时远端均精确为 `6bde2f2aec3d71fa0ce138b26f64243861cace6f`；既有 recovery stash 未触碰。
 
 ## JIT Revalidation Result
 
 Result: pass
 
-F-0115 Verdict: `post_p0_core_covered_with_bounded_residual_and_stop_condition`
+F-0115 Verdict: `approved_persistent_command_static_implementation_ready_for_final_review`
 
-- P0 已移除原 credential adapter → employee repository 双事务：当前 repository 在一个 `database.transaction` 内依次写 `auth_user`、`auth_account`、`user`、`employee` 并预留 quota，任一步抛错均由同一事务回滚；旧事务拆分证据已 superseded。
-- 当前批量 loop 只处理返回式 `ApiResponse`。第 N 行若抛异常，前 N-1 行已提交，但聚合结果和随机初始密码不会返回，形成可复现的静态 residual。
-- HTTP 响应提交后断链仍无 request/batch key、持久结果或 secret recovery 事实；随机密码只在同步内存响应中存在。registration 相似实现之所以能恢复，依赖持久 session 行、幂等锁和凭据复核，证明不能靠 catch、客户端缓存或普通查询安全恢复本场景的一次性随机密码。
-- transition 后只允许先用 RED 证明事务共同回滚和 batch throw 行为；若完整关闭仍要求持久 batch command/secret recovery，则触发 stop condition，不扩展 schema。
+- 初始 no-schema 复检结论已被用户的 fresh scope-correction 批准取代：允许新增 `employee_import_command` / `employee_import_row` schema 与 Drizzle 迁移源，但仍禁止迁移执行和真实数据库操作。
+- command 以 UUID v4 幂等键的域分离 HMAC 标识 actor/request/row；持久层不保存原始幂等键、请求体、手机号、姓名或明文密码。同键同请求恢复，同键异请求返回冲突。
+- `claimCommand`、逐行 savepoint、identity/credential/membership/current `org_auth` quota、row outcome 与 audit 均归 command repository 事务所有；确定性行拒绝回滚 savepoint，未知异常不被伪装为 rejected。
+- create/bind primitive 强制当前有效授权；集合更新均校验精确返回 ID 集合，缺失、额外或重复更新抛错并回滚。
+- 初始凭据先写不可知 placeholder；显式 issue 在 session/advisory lock 下按 revision 原子换新，响应只返回本次明文；GET 不返回明文，confirm 关闭分发。
+- legacy single create 与 batch import 均适配为可查询 command；client/hook 只持久化 command public id 和幂等键，late response、revision/issue mismatch、session actor 切换均 fail-closed。
 
 ## Scope Freeze
 
 Result: pass
 
-冻结范围为当前 repository 单事务证明、批量第 N 行异常的逐行可解释结果、仅已提交行的一次性密码结果及对应 smoke tests。未知响应的持久恢复不在本任务授权内；不得以降低随机性、重复显示旧 secret、客户端缓存或把 auth/session 表挪作 batch 存储规避门禁。
+当前产品候选精确为 50 个 task-allowlisted 文件：5 份规格/计划/evidence/audit，3 份 Drizzle 迁移源/元数据，4 个 command API route，3 个 schema/index 文件，7 个前端 client/hook/panel/page 文件，19 个 contract/validator/crypto/repository/service/auth 文件，以及 9 个 `tests/unit` 聚焦文件。新增 phase-11 fake 适配通过独立治理热修加入 allowlist。
+
+- 未修改 `project-state.yaml`、`task-queue.yaml`、依赖清单、lockfile、环境文件或 hook。
+- 迁移源仅生成并静态验证：`drizzle/20260717141801_p1_rc_02_employee_import_command_recovery.sql`、`drizzle/meta/20260717141801_snapshot.json`、`drizzle/meta/_journal.json`；未执行 migration 或 database command。
+- 未执行真实 DB、Provider、browser/e2e、P2、PR、force-push 或 deployment。
 
 ## Validation Results
 
-Result: pending
+Result: pass
 
-待 transition 推送后按 TDD 执行。
+- Task 5 repository 聚焦：3 文件、103/103 通过。
+- phase-11 适配 RED：1/4 失败，route 返回 `422601`；最小 fake/type/idempotency 适配后 GREEN：4/4 通过。
+- 最终对抗 RED：history state 覆盖、session/401/403/404 stale command anchor 与 `org_auth` cancel/quota 锁序共 3 文件出现 7 个预期失败；最小修复后 GREEN 为 3 文件、41/41 通过。
+- Task 8 最终聚焦矩阵：21 文件、278/278 通过；其中原计划 20 文件全部通过，并增加已授权 phase-11 测试。
+- 最终完整 unit 首轮：416 文件中 415 通过，2617/2618；唯一失败是任务外 mock-exam UI 异步恢复提示在全量负载下超过等待窗口。该文件隔离复跑 42/42 通过；标准 `npm.cmd run test:unit -- --maxWorkers=1` 完整复跑最终 416/416、2618/2618 通过，耗时 `980.22s`。
+- 最终 `lint`、`typecheck`、`format:check`、`git diff --check` 通过。
+- 初始 build 因 worktree `node_modules` Junction 指向 filesystem root 外而 panic；使用同一锁文件和本地 pnpm store 建立 worktree-local 依赖树后，Turbopack 编译、TypeScript、95 个静态页面生成和最终优化全部通过。
+- 治理热修 `66a9f526d68c2647a5843da1a9d9c2fe0933cc93` 已以 `transition_only`、`exact_one_parent` 通过真实 pre-push 并推送；产品 worktree fast-forward 后 exact 50-file staged patch hash 保持不变。P1 manual/P0 global baseline pass，最终 Module pre-commit 对 50/50 scope、sensitive 与 terminology scan 全部通过；产品 commit hook/closeout/pre-push 仍待后续步骤。
+- RV-0018 保持 pending；真实 PostgreSQL 锁竞争、commit acknowledgment 丢失、断连和迁移执行未验证，不据静态结果声称 runtime closure。
 
 ## Round 1
 
-Result: pending
+Result: pass
+
+独立 repository/transaction/security 审查先发现 1 个 Important：`cancelOrgAuth` 未加入员工 current authorization/quota 的共同锁协议，存在取消与员工提交 TOCTOU。RED 后将 cancel 整体纳入 transaction，并在任何 `org_auth` update 前取得 `lockOrganizationScopeMutation`；create/bind/import 同样先取该 transaction advisory lock。复核为 APPROVE，0 Critical / 0 Important / 0 Minor。真实 PostgreSQL 双连接竞争仍属于 RV-0018，未冒充关闭。
 
 ## Round 2
 
-Result: pending
+Result: pass
+
+独立 route/client/hook/UI 审查先发现 2 个 Important：history writer 覆盖 Next Router/恢复状态，以及 session/auth/visibility 变化后旧 command query 被新 actor 自动恢复。RED 后所有 writer 合并现有 state、只删除本功能 key；session change 与 401/403/404/明确关闭清除恢复位置并阻止新 token GET 旧 command。复核为 APPROVE，0 Critical / 0 Important / 0 Minor。
+
+## 品味合规自检 Checklist
+
+- [x] 1. 无默认字体、纯黑或紫蓝渐变；新增 UI 继续使用既有 design tokens。
+- [x] 2. command UI 保留 loading/empty/error/conflict 状态。
+- [x] 3. 新增/修改按钮保留 `active:scale-[0.98]` 反馈。
+- [x] 4. `format:check` 通过，Tailwind 类名顺序合规。
+- [x] 5. command 结果读取使用集合查询；无循环内 `select` N+1。
+- [x] 6. schema 由 Drizzle schema 与 generate 产出迁移源；无业务层拼接 SQL、未 push/migrate。
+- [x] 7. 四组 API route 始终返回标准 `{ code, message, data }` envelope 与 no-store。
+- [x] 8. 未新增解释代码表面行为的垃圾注释。
+- [x] 9. 命名遵循 glossary 与动词-名词规则，无新增无意义缩写。
+- [x] 10. React/history state 通过复制与纯函数更新，未直接变更对象或数组内部属性。
 
 ## Closeout Command Evidence
 

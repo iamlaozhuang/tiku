@@ -597,6 +597,14 @@ describe("AdminOrgAuthPage", () => {
     render(createElement(AdminOrgAuthPage));
 
     await screen.findByRole("heading", { name: "企业管理" });
+    window.history.replaceState(
+      {
+        __NA: true,
+        routerSentinel: "preserved",
+      },
+      "",
+      window.location.href,
+    );
 
     const viewTabs = screen.getByTestId(
       "ops-organization-management-view-tabs",
@@ -628,6 +636,10 @@ describe("AdminOrgAuthPage", () => {
       screen.getByTestId("organization-tree-management-form"),
     ).not.toBeVisible();
     expect(window.location.search).toContain("view=org-auth");
+    expect(window.history.state).toEqual({
+      __NA: true,
+      routerSentinel: "preserved",
+    });
 
     fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
     expect(
@@ -639,6 +651,10 @@ describe("AdminOrgAuthPage", () => {
       screen.queryByTestId("org-auth-create-form"),
     ).not.toBeInTheDocument();
     expect(window.location.search).toContain("view=employees");
+    expect(window.history.state).toEqual({
+      __NA: true,
+      routerSentinel: "preserved",
+    });
   });
 
   it("shows organization node detail from the branch-loaded tree", async () => {

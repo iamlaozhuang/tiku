@@ -21,5 +21,4 @@ export type EmployeeAccountDto = {
 
 export type EmployeeAccountResultDto = {
   employeeAccount: EmployeeAccountDto;
-  generatedInitialPassword?: string | null;
 };

@@ -40,7 +40,6 @@ import type {
   AdminEmployeeListDto,
   AdminOrgAuthListDto,
   EmployeeListDto,
-  EmployeeImportResultDto,
   EmployeeTransferResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
@@ -88,6 +87,9 @@ import type {
   RedeemCodeType,
   UserStatus,
 } from "@/server/models/auth";
+import { EmployeeImportCommandPanel } from "./EmployeeImportCommandPanel/EmployeeImportCommandPanel";
+import type { EmployeeImportCommandSubmitInput } from "./employee-import-command-client";
+import { useEmployeeImportCommand } from "./useEmployeeImportCommand";
 
 type LoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
 
@@ -228,11 +230,7 @@ type OrganizationConfirmationState =
     }
   | null;
 
-type EmployeeImportInput = {
-  content: string;
-  sourceFormat: "csv" | "tsv";
-  targetOrganizationPublicId: string;
-};
+type EmployeeImportInput = EmployeeImportCommandSubmitInput;
 
 type EmployeeImportPreview = {
   activeOrgAuthCount: number;
@@ -386,22 +384,6 @@ const userStatusLabels = {
   active: "正常",
   disabled: "已禁用",
 } satisfies Record<UserStatus, string>;
-
-const employeeImportRejectedReasonLabels = {
-  cross_domain_conflict: "账号域冲突",
-  cross_organization_conflict: "已绑定其他组织",
-  disabled_account: "账号已禁用",
-  duplicate_phone: "手机号重复",
-  duplicate_user: "用户重复",
-  employee_create_failed: "员工创建失败",
-  invalid_row: "行格式无效",
-  organization_not_found: "企业组织不存在",
-  quota_insufficient: "授权额度不足",
-  user_not_found: "用户不存在",
-} satisfies Record<
-  EmployeeImportResultDto["rejectedRows"][number]["reason"],
-  string
->;
 
 const employeeImportInheritedAuthorizationLabels = {
   active_org_auth_available: "已发现目标组织有效企业授权",
@@ -1034,9 +1016,80 @@ function normalizeOptionalOrganizationText(value: string): string | null {
 
 function normalizeEmployeeImportHeaderCell(value: string): string {
   return value
+    .replace(/^\uFEFF/u, "")
     .trim()
     .toLowerCase()
     .replace(/[\s_-]+/gu, "");
+}
+
+function parseEmployeeImportDelimitedRows(
+  value: string,
+  delimiter: "," | "\t",
+): string[][] | null {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let isQuoted = false;
+  let didCloseQuote = false;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index];
+    const nextCharacter = value[index + 1];
+
+    if (character === '"') {
+      if (isQuoted) {
+        if (nextCharacter === '"') {
+          cell += '"';
+          index += 1;
+        } else {
+          isQuoted = false;
+          didCloseQuote = true;
+        }
+      } else if (cell.length === 0 && !didCloseQuote) {
+        isQuoted = true;
+      } else {
+        return null;
+      }
+      continue;
+    }
+    if (character === delimiter && !isQuoted) {
+      row.push(cell.trim());
+      cell = "";
+      didCloseQuote = false;
+      continue;
+    }
+    if ((character === "\n" || character === "\r") && !isQuoted) {
+      row.push(cell.trim());
+      if (row.some((rowCell) => rowCell.length > 0)) {
+        rows.push(row);
+      }
+      row = [];
+      cell = "";
+      didCloseQuote = false;
+      if (character === "\r" && nextCharacter === "\n") {
+        index += 1;
+      }
+      continue;
+    }
+    if (didCloseQuote) {
+      if (/\s/u.test(character)) {
+        continue;
+      }
+      return null;
+    }
+    cell += character;
+  }
+
+  if (isQuoted) {
+    return null;
+  }
+
+  row.push(cell.trim());
+  if (row.some((rowCell) => rowCell.length > 0)) {
+    rows.push(row);
+  }
+
+  return rows;
 }
 
 function findForbiddenEmployeeImportScopeHeaders(lines: string[]): string[] {
@@ -1063,30 +1116,6 @@ function buildForbiddenEmployeeImportScopeHeaderMessage(
   forbiddenLabels: string[],
 ): string {
   return `员工导入模板不得包含 ${forbiddenLabels.join(", ")}；专业、等级、版本与授权范围必须从组织授权继承。`;
-}
-
-function countRowsMissingEmployeeInitialPassword(lines: string[]): number {
-  const firstLine = lines[0] ?? "";
-  const delimiter = firstLine.includes("\t") ? "\t" : ",";
-  const headerCells = firstLine.split(delimiter);
-  const headerIndexByName = new Map(
-    headerCells.map((cell, index) => [
-      normalizeEmployeeImportHeaderCell(cell),
-      index,
-    ]),
-  );
-  const initialPasswordIndex = headerIndexByName.get("initialpassword");
-
-  if (initialPasswordIndex === undefined) {
-    return Math.max(lines.length - 1, 0);
-  }
-
-  return lines
-    .slice(1)
-    .filter(
-      (line) =>
-        (line.split(delimiter)[initialPasswordIndex] ?? "").trim().length === 0,
-    ).length;
 }
 
 function summarizeEmployeeImportTargetAuth(input: {
@@ -1237,11 +1266,19 @@ function buildEmployeeImportInput(
     return { input: null, message: "请填写员工导入内容。" };
   }
 
-  const lines = trimmedValue
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders(lines);
+  const delimiter = trimmedValue.split(/\r?\n/u, 1)[0]?.includes("\t")
+    ? "\t"
+    : ",";
+  const parsedRows = parseEmployeeImportDelimitedRows(trimmedValue, delimiter);
+
+  if (parsedRows === null) {
+    return { input: null, message: "员工导入内容包含无效或未闭合的引号。" };
+  }
+
+  const headerCells = parsedRows[0] ?? [];
+  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders([
+    headerCells.join(delimiter),
+  ]);
 
   if (forbiddenScopeHeaders.length > 0) {
     return {
@@ -1256,9 +1293,9 @@ function buildEmployeeImportInput(
     return { input: null, message: "请选择员工导入目标组织。" };
   }
 
-  const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
+  const headerNames = headerCells.map(normalizeEmployeeImportHeaderCell);
   const hasEmployeeAccountHeader =
-    firstLine.includes("phone") && firstLine.includes("name");
+    headerNames.includes("phone") && headerNames.includes("name");
   if (!hasEmployeeAccountHeader) {
     return {
       input: null,
@@ -1267,11 +1304,24 @@ function buildEmployeeImportInput(
     };
   }
 
+  const headerIndexByName = new Map(
+    headerNames.map((headerName, index) => [headerName, index]),
+  );
+
   return {
     input: {
-      content: lines.join("\n"),
-      sourceFormat: lines.some((line) => line.includes("\t")) ? "tsv" : "csv",
-      targetOrganizationPublicId: targetOrganizationPublicId.trim(),
+      commandKind: "batch_import",
+      organizationPublicId: targetOrganizationPublicId.trim(),
+      rows: parsedRows.slice(1).map((cells) => {
+        const valueFor = (name: string) =>
+          cells[headerIndexByName.get(name) ?? -1]?.trim() ?? "";
+
+        return {
+          initialPassword: valueFor("initialpassword"),
+          name: valueFor("name"),
+          phone: valueFor("phone"),
+        };
+      }),
     },
     message: null,
   };
@@ -1300,11 +1350,26 @@ function buildEmployeeImportPreview(
     };
   }
 
-  const lines = trimmedValue
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders(lines);
+  const delimiter = trimmedValue.split(/\r?\n/u, 1)[0]?.includes("\t")
+    ? "\t"
+    : ",";
+  const parsedRows = parseEmployeeImportDelimitedRows(trimmedValue, delimiter);
+
+  if (parsedRows === null) {
+    return {
+      ...emptyTargetAuthSummary,
+      formatLabel: "员工导入格式无效",
+      generatedPasswordRowCount: 0,
+      isReady: false,
+      message: "员工导入内容包含无效或未闭合的引号。",
+      rowCount: 0,
+    };
+  }
+
+  const headerCells = parsedRows[0] ?? [];
+  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders([
+    headerCells.join(delimiter),
+  ]);
 
   if (forbiddenScopeHeaders.length > 0) {
     return {
@@ -1319,15 +1384,19 @@ function buildEmployeeImportPreview(
     };
   }
 
-  const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
+  const headerNames = headerCells.map(normalizeEmployeeImportHeaderCell);
   const hasEmployeeAccountHeader =
-    firstLine.includes("phone") && firstLine.includes("name");
-  const sourceFormat = lines.some((line) => line.includes("\t"))
-    ? "TSV"
-    : "CSV";
-  const rowCount = hasEmployeeAccountHeader ? Math.max(lines.length - 1, 0) : 0;
+    headerNames.includes("phone") && headerNames.includes("name");
+  const sourceFormat = delimiter === "\t" ? "TSV" : "CSV";
+  const dataRows = hasEmployeeAccountHeader ? parsedRows.slice(1) : [];
+  const rowCount = dataRows.length;
+  const initialPasswordIndex = headerNames.indexOf("initialpassword");
   const generatedPasswordRowCount = hasEmployeeAccountHeader
-    ? countRowsMissingEmployeeInitialPassword(lines)
+    ? dataRows.filter(
+        (row) =>
+          initialPasswordIndex < 0 ||
+          (row[initialPasswordIndex]?.trim() ?? "").length === 0,
+      ).length
     : 0;
 
   const hasTargetOrganization = targetOrganizationPublicId.trim().length > 0;
@@ -1721,7 +1790,7 @@ function writeOpsOrganizationManagementViewToLocation(
 
   const nextSearch = searchParams.toString();
   window.history.replaceState(
-    null,
+    window.history.state,
     "",
     `${window.location.pathname}${nextSearch.length === 0 ? "" : `?${nextSearch}`}${window.location.hash}`,
   );
@@ -3291,110 +3360,6 @@ function EmployeeImportActionPanel({
           <Upload className="size-4" aria-hidden="true" />
           导入员工
         </button>
-      </div>
-    </section>
-  );
-}
-
-function EmployeeImportResultPanel({
-  result,
-}: {
-  result: EmployeeImportResultDto;
-}) {
-  const generatedInitialPasswords = result.generatedInitialPasswords ?? [];
-
-  return (
-    <section
-      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
-      data-testid="employee-import-result"
-    >
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">导入结果</p>
-          <h2 className="text-text-primary text-base font-semibold">
-            员工导入反馈
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            仅展示聚合数量、行号和拒绝原因；系统生成的初始密码只在本次窗口展示，普通员工列表和详情页不显示密码明文。
-          </p>
-        </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="bg-background rounded-md p-3">
-            <p className="text-text-muted text-xs">成功</p>
-            <p className="text-text-primary mt-1 text-sm font-medium">
-              成功 {result.importedEmployees.length}
-            </p>
-          </div>
-          <div className="bg-background rounded-md p-3">
-            <p className="text-text-muted text-xs">拒绝</p>
-            <p className="text-text-primary mt-1 text-sm font-medium">
-              拒绝 {result.rejectedRows.length}
-            </p>
-          </div>
-        </div>
-        {result.rejectedRows.length === 0 ? (
-          <p className="text-text-muted text-sm">所有行均已通过导入。</p>
-        ) : (
-          <ul className="text-text-secondary space-y-1 text-sm">
-            {result.rejectedRows.map((rejectedRow) => (
-              <li key={`${rejectedRow.rowNumber}-${rejectedRow.reason}`}>
-                第 {rejectedRow.rowNumber} 行：
-                {employeeImportRejectedReasonLabels[rejectedRow.reason]}
-              </li>
-            ))}
-          </ul>
-        )}
-        {generatedInitialPasswords.length === 0 ? null : (
-          <div
-            className="border-warning bg-warning/10 rounded-md border p-3"
-            data-testid="employee-generated-password-distribution"
-          >
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-1">
-                <p className="text-warning text-xs font-medium">一次性分发</p>
-                <h3 className="text-text-primary text-sm font-semibold">
-                  初始密码一次性分发窗口
-                </h3>
-                <p className="text-text-secondary text-xs leading-5">
-                  请在离开本结果前复制并线下交付；导入记录、普通列表和详情页不会保留密码明文。
-                </p>
-              </div>
-              <span className="bg-warning/10 text-warning w-fit rounded-lg px-2 py-1 text-xs font-medium">
-                {generatedInitialPasswords.length} 条
-              </span>
-            </div>
-            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {generatedInitialPasswords.map((distributionRow) => (
-                <div
-                  key={`${distributionRow.rowNumber}-${distributionRow.phone}`}
-                  className="border-border bg-surface rounded-md border p-3"
-                >
-                  <p className="text-text-primary text-sm font-medium">
-                    第 {distributionRow.rowNumber} 行 / {distributionRow.name}
-                  </p>
-                  <p className="text-text-secondary mt-1 text-xs">
-                    {distributionRow.phone} /{" "}
-                    {distributionRow.organizationPublicId}
-                  </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <code className="bg-background text-text-primary rounded px-2 py-1 text-xs">
-                      {distributionRow.initialPassword}
-                    </code>
-                    <button
-                      type="button"
-                      className="border-border bg-background hover:bg-muted inline-flex h-7 items-center justify-center rounded-lg border px-2 text-xs font-medium transition-transform active:scale-[0.98]"
-                      onClick={() =>
-                        copyTextToClipboard(distributionRow.initialPassword)
-                      }
-                    >
-                      复制
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
@@ -5383,6 +5348,12 @@ function useAdminRedeemCodeData(listQuery: string) {
 export function AdminOrgAuthPage() {
   const { canMoveOrganization, data, loadState, setData, setLoadState } =
     useAdminOrgAuthData();
+  const [employeeImportSessionToken, setEmployeeImportSessionToken] = useState<
+    string | null
+  >(() => (typeof window === "undefined" ? null : getStoredSessionToken()));
+  const employeeImportCommand = useEmployeeImportCommand({
+    sessionToken: employeeImportSessionToken,
+  });
   const [orgAuthKeyword, setOrgAuthKeyword] = useState("");
   const [orgAuthStatus, setOrgAuthStatus] = useState<AuthStatus | "all">("all");
   const [orgAuthEdition, setOrgAuthEdition] = useState<
@@ -5451,8 +5422,11 @@ export function AdminOrgAuthPage() {
   );
   const [employeeListRefreshVersion, setEmployeeListRefreshVersion] =
     useState(0);
-  const [isEmployeeImportDrawerOpen, setIsEmployeeImportDrawerOpen] =
-    useState(false);
+  const [isEmployeeImportDrawerOpen, setIsEmployeeImportDrawerOpen] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has("employeeImportCommand"),
+  );
   const [selectedTransferEmployee, setSelectedTransferEmployee] = useState<
     AdminEmployeeListDto["employees"][number] | null
   >(null);
@@ -5531,8 +5505,6 @@ export function AdminOrgAuthPage() {
     employeeImportOrganizationPublicId,
     setEmployeeImportOrganizationPublicId,
   ] = useState("");
-  const [lastEmployeeImportResult, setLastEmployeeImportResult] =
-    useState<EmployeeImportResultDto | null>(null);
   const [lastEmployeeTransferResult, setLastEmployeeTransferResult] =
     useState<EmployeeTransferResultDto | null>(null);
   const [lastEmployeeUnbindResult, setLastEmployeeUnbindResult] =
@@ -5581,6 +5553,20 @@ export function AdminOrgAuthPage() {
           ?.publicIds[0] ?? null);
 
   useEffect(() => {
+    function handleSessionStorageChange(event: StorageEvent) {
+      if (event.key === SESSION_TOKEN_STORAGE_KEY) {
+        setEmployeeImportSessionToken(getStoredSessionToken());
+      }
+    }
+
+    window.addEventListener("storage", handleSessionStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleSessionStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
     function handlePopState() {
       setActiveView(readOpsOrganizationManagementViewFromLocation());
     }
@@ -5600,6 +5586,8 @@ export function AdminOrgAuthPage() {
       setIsOrgAuthCreateDrawerOpen(false);
     }
     if (nextView !== "employees") {
+      employeeImportCommand.clearPlaintext();
+      setEmployeeImportText("");
       setIsEmployeeImportDrawerOpen(false);
       setSelectedTransferEmployee(null);
     }
@@ -6004,7 +5992,6 @@ export function AdminOrgAuthPage() {
 
   function handleSubmitEmployeeImport() {
     if (!employeeImportPreview.isReady) {
-      setLastEmployeeImportResult(null);
       setToastMessage({
         message: employeeImportPreview.message,
         tone: "error",
@@ -6018,7 +6005,6 @@ export function AdminOrgAuthPage() {
     );
 
     if (importDraft.input === null) {
-      setLastEmployeeImportResult(null);
       setToastMessage({
         message: importDraft.message ?? "员工导入输入无效。",
         tone: "error",
@@ -6042,51 +6028,33 @@ export function AdminOrgAuthPage() {
     }
 
     if (employeeConfirmationState.kind === "importEmployees") {
-      const importResponse = await postAdminApi<EmployeeImportResultDto>(
-        "/api/v1/employees/import",
-        sessionToken,
+      const submittedCommand = await employeeImportCommand.submit(
         employeeConfirmationState.input,
       );
-
       setEmployeeConfirmationState(null);
 
-      if (importResponse.code !== 0 || importResponse.data === null) {
-        setLastEmployeeImportResult(null);
-        setToastMessage({ message: importResponse.message, tone: "error" });
+      if (submittedCommand === null) {
+        setToastMessage({
+          message: "员工导入命令提交失败，请按当前状态恢复。",
+          tone: "error",
+        });
         return;
       }
-
-      const { importedEmployees, rejectedRows } = importResponse.data;
-
-      setData((currentData) => ({
-        ...currentData,
-        employees: [
-          ...importedEmployees,
-          ...currentData.employees.filter(
-            (employee) =>
-              !importedEmployees.some(
-                (importedEmployee) =>
-                  importedEmployee.publicId === employee.publicId,
-              ),
-          ),
-        ],
-        organizations: currentData.organizations.map((organization) => ({
-          ...organization,
-          employeeCount:
-            organization.employeeCount +
-            importedEmployees.filter(
-              (employee) =>
-                employee.organizationPublicId === organization.publicId,
-            ).length,
-        })),
-      }));
-      setLastEmployeeImportResult(importResponse.data);
       setLastEmployeeTransferResult(null);
-      setEmployeeImportText("");
+      if (submittedCommand.status === "completed") {
+        setEmployeeImportText("");
+      }
       setEmployeeListRefreshVersion((version) => version + 1);
       setToastMessage({
-        message: `员工导入完成：成功 ${importedEmployees.length}，拒绝 ${rejectedRows.length}。`,
-        tone: rejectedRows.length === 0 ? "success" : "error",
+        message:
+          submittedCommand.status === "completed"
+            ? `员工导入完成：成功 ${submittedCommand.counts.succeeded}，拒绝 ${submittedCommand.counts.rejected}。`
+            : "员工导入命令处理中，可使用相同文件恢复。",
+        tone:
+          submittedCommand.status === "completed" &&
+          submittedCommand.counts.rejected === 0
+            ? "success"
+            : "error",
       });
       return;
     }
@@ -6166,7 +6134,6 @@ export function AdminOrgAuthPage() {
           return organization;
         }),
       }));
-      setLastEmployeeImportResult(null);
       setLastEmployeeTransferResult(transferredEmployee);
       setLastEmployeeUnbindResult(null);
       setSelectedTransferEmployee(null);
@@ -6219,7 +6186,6 @@ export function AdminOrgAuthPage() {
       const fileContent = await file.text();
 
       setEmployeeImportText(fileContent);
-      setLastEmployeeImportResult(null);
       setLastEmployeeTransferResult(null);
       setToastMessage({ message: "员工名录文件已读取。", tone: "success" });
     } catch {
@@ -6682,7 +6648,11 @@ export function AdminOrgAuthPage() {
             ariaLabel="批量导入员工"
             eyebrow="员工运营"
             title="批量导入员工"
-            onClose={() => setIsEmployeeImportDrawerOpen(false)}
+            onClose={() => {
+              employeeImportCommand.clearPlaintext();
+              setEmployeeImportText("");
+              setIsEmployeeImportDrawerOpen(false);
+            }}
           >
             <EmployeeImportActionPanel
               importText={employeeImportText}
@@ -6696,20 +6666,32 @@ export function AdminOrgAuthPage() {
               }}
               onImportTextChange={(nextImportText) => {
                 setEmployeeImportText(nextImportText);
-                setLastEmployeeImportResult(null);
                 setLastEmployeeTransferResult(null);
               }}
               onSubmit={handleSubmitEmployeeImport}
               onTemplateDownload={downloadEmployeeImportTemplate}
               onTargetOrganizationChange={(nextOrganizationPublicId) => {
                 setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
-                setLastEmployeeImportResult(null);
                 setLastEmployeeTransferResult(null);
               }}
             />
-            {lastEmployeeImportResult === null ? null : (
+            {employeeImportCommand.state.status === "idle" ? null : (
               <div className="mt-4">
-                <EmployeeImportResultPanel result={lastEmployeeImportResult} />
+                <EmployeeImportCommandPanel
+                  canConfirm={employeeImportCommand.canConfirm}
+                  canIssue={employeeImportCommand.canIssue}
+                  state={employeeImportCommand.state}
+                  onClearPlaintext={() => {
+                    employeeImportCommand.clearPlaintext();
+                    setEmployeeImportText("");
+                  }}
+                  onConfirmDistribution={() => {
+                    void employeeImportCommand.confirmDistribution();
+                  }}
+                  onIssueCredentials={() => {
+                    void employeeImportCommand.issueCredentials();
+                  }}
+                />
               </div>
             )}
           </AdminTaskDrawer>

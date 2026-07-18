@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import {
   createLocalSessionRuntime,
   createLocalUserRegistrationRuntime,
@@ -849,6 +852,44 @@ describe("local session runtime", () => {
     });
     expect(getSelectCallCount()).toBe(3);
     expect(getTransactionInsertCount()).toBe(0);
+  });
+
+  it("shares the advisory-before-identity lock contract with credential issue", () => {
+    const loginSource = readFileSync(
+      join(process.cwd(), "src/server/auth/local-session-runtime.ts"),
+      "utf8",
+    );
+    const issueSource = readFileSync(
+      join(
+        process.cwd(),
+        "src/server/repositories/postgres-employee-import-command-repository.ts",
+      ),
+      "utf8",
+    );
+    const sharedLockSql = "pg_advisory_xact_lock(hashtext(";
+    const loginLockIndex = loginSource.indexOf(sharedLockSql);
+    const loginIdentityIndex = loginSource.indexOf(
+      "const [adminAccount]",
+      loginLockIndex,
+    );
+    const issueSortIndex = issueSource.indexOf("const sortedTargets");
+    const issueLockIndex = issueSource.indexOf(sharedLockSql);
+    const issueIdentityIndex = issueSource.indexOf(
+      "const verifiedTargets",
+      issueLockIndex,
+    );
+
+    expect(loginLockIndex).toBeGreaterThan(-1);
+    expect(loginSource.slice(loginLockIndex, loginIdentityIndex)).toContain(
+      "authUserId",
+    );
+    expect(loginIdentityIndex).toBeGreaterThan(loginLockIndex);
+    expect(issueSortIndex).toBeGreaterThan(-1);
+    expect(issueLockIndex).toBeGreaterThan(issueSortIndex);
+    expect(issueSource.slice(issueLockIndex, issueIdentityIndex)).toContain(
+      "target.authUserId",
+    );
+    expect(issueIdentityIndex).toBeGreaterThan(issueLockIndex);
   });
 
   it("creates an opaque single active session for a seeded student credential login", async () => {

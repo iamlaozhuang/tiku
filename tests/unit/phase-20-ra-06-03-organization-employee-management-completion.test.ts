@@ -27,7 +27,7 @@ import type {
   OrganizationDto,
 } from "@/server/contracts/organization-auth-contract";
 import type { SessionService } from "@/server/services/session-service";
-import type { EmployeeAccountService } from "@/server/services/employee-account-service";
+import type { EmployeeImportCommandService } from "@/server/services/employee-import-command-service";
 
 type AdminRole = "super_admin" | "ops_admin" | "content_admin";
 
@@ -417,50 +417,44 @@ function createEnterpriseRepositories(input: {
   };
 }
 
-function createImportEmployeeAccountService(
-  mutationInputs: unknown[],
-): EmployeeAccountService {
+function createImportCommandService(
+  commandInputs: unknown[],
+): EmployeeImportCommandService {
   return {
-    async createEmployeeAccount(input) {
-      const employeeInput = input as {
-        initialPassword?: string;
-        name: string;
-        organizationPublicId: string;
-        phone: string;
-      };
-
-      mutationInputs.push({ action: "createEmployeeAccount", employeeInput });
-
+    async submit(input) {
+      commandInputs.push(input);
       return {
-        code: 0,
-        message: "ok",
-        data: {
-          employeeAccount: {
-            employee: {
-              publicId: "employee-imported-1",
-              userPublicId: "user-public-002",
-              organizationPublicId: employeeInput.organizationPublicId,
-              createdAt: "2026-05-31T00:00:00.000Z",
-              updatedAt: "2026-05-31T00:00:00.000Z",
-            },
-            user: {
-              publicId: "user-public-002",
-              phone: employeeInput.phone,
-              name: employeeInput.name,
-              userType: "employee",
-              status: "active",
-              lockedUntilAt: null,
-              employeePublicId: "employee-imported-1",
-              organizationPublicId: employeeInput.organizationPublicId,
-            },
-            organization: {
-              publicId: employeeInput.organizationPublicId,
-              name: "Hangzhou Test Tobacco",
-            },
+        httpStatus: 200,
+        response: {
+          code: 0,
+          message: "ok",
+          data: {
+            commandKind: "batch_import",
+            completedAt: "2026-07-17T12:01:00.000Z",
+            counts: { pending: 0, rejected: 0, succeeded: 1 },
+            createdAt: "2026-07-17T12:00:00.000Z",
+            credentialDistributionStatus: "not_required",
+            credentialRevision: 0,
+            currentIssuePublicId: null,
+            distributionConfirmedAt: null,
+            organizationPublicId: "org-city-001",
+            publicId: "employee-import-command-public-001",
+            rowCount: 1,
+            rows: [],
+            status: "completed",
+            updatedAt: "2026-07-17T12:01:00.000Z",
           },
-          generatedInitialPassword: null,
         },
       };
+    },
+    async get() {
+      throw new Error("Unexpected get.");
+    },
+    async issueCredentials() {
+      throw new Error("Unexpected issue.");
+    },
+    async confirmDistribution() {
+      throw new Error("Unexpected confirm.");
     },
   };
 }
@@ -594,24 +588,38 @@ function mockOrganizationPageFetch() {
         });
       }
 
-      if (path === "/api/v1/employees/import") {
+      if (path === "/api/v1/employee-import-commands") {
         const body = JSON.parse(String(init?.body));
 
         return createJsonResponse({
           code: 0,
           message: "ok",
           data: {
-            importedEmployees: [
+            commandKind: "batch_import",
+            completedAt: "2026-07-17T12:01:00.000Z",
+            counts: { pending: 0, rejected: 0, succeeded: 1 },
+            createdAt: "2026-07-17T12:00:00.000Z",
+            credentialDistributionStatus: "not_required",
+            credentialRevision: 0,
+            currentIssuePublicId: null,
+            distributionConfirmedAt: null,
+            organizationPublicId: body.organizationPublicId,
+            publicId: "employee-import-command-public-001",
+            rowCount: 1,
+            rows: [
               {
-                publicId: "employee-imported-1",
-                userPublicId: "user-public-002",
-                phone: "13900000002",
-                name: "Imported Employee",
-                organizationPublicId: body.targetOrganizationPublicId,
-                status: "active",
+                credentialMode: "provided",
+                employeePublicId: "employee-imported-1",
+                outcomeKind: "created",
+                publicId: "employee-import-row-public-001",
+                rejectionReason: null,
+                rowNumber: 2,
+                status: "succeeded",
+                warningReason: null,
               },
             ],
-            rejectedRows: [],
+            status: "completed",
+            updatedAt: "2026-07-17T12:01:00.000Z",
           },
         });
       }
@@ -753,10 +761,10 @@ function mockEmptyOrganizationPageFetch() {
 describe("phase 20 RA-06-03 organization employee management completion", () => {
   it("adds organization enable, employee batch import, employee transfer, and employee unbind runtime routes with redacted audits", async () => {
     const auditInputs: unknown[] = [];
+    const commandInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
-      employeeAccountService:
-        createImportEmployeeAccountService(mutationInputs),
+      employeeImportCommandService: createImportCommandService(commandInputs),
       repositories: createEnterpriseRepositories({
         auditInputs,
         mutationInputs,
@@ -765,6 +773,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     }) as ExtendedEnterpriseHandlers;
     const headers = {
       authorization: `Bearer ${sessionToken}`,
+      "idempotency-key": "123e4567-e89b-42d3-a456-426614174000",
       "x-forwarded-for": "203.0.113.50, 10.0.0.1",
     };
 
@@ -824,14 +833,8 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     await expect(importResponse.json()).resolves.toMatchObject({
       code: 0,
       data: {
-        importedEmployees: [
-          {
-            publicId: "employee-imported-1",
-            userPublicId: "user-public-002",
-            organizationPublicId: "org-city-001",
-          },
-        ],
-        rejectedRows: [],
+        commandKind: "batch_import",
+        publicId: "employee-import-command-public-001",
       },
     });
     await expect(unbindResponse.json()).resolves.toEqual({
@@ -864,15 +867,6 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         action: "enableOrganization",
         publicId: "org-city-001",
       },
-      {
-        action: "createEmployeeAccount",
-        employeeInput: {
-          initialPassword: "abc12345",
-          name: "Imported Employee",
-          organizationPublicId: "org-city-001",
-          phone: "13900000002",
-        },
-      },
       { action: "unbindEmployee", publicId: "employee-public-001" },
       {
         action: "transferEmployee",
@@ -881,6 +875,21 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
           targetOrganizationPublicId: "org-target-001",
         },
       },
+    ]);
+    expect(commandInputs).toEqual([
+      expect.objectContaining({
+        body: {
+          commandKind: "batch_import",
+          organizationPublicId: "org-city-001",
+          rows: [
+            {
+              initialPassword: "abc12345",
+              name: "Imported Employee",
+              phone: "13900000002",
+            },
+          ],
+        },
+      }),
     ]);
     expect(auditInputs).toEqual([
       expect.objectContaining({
@@ -891,15 +900,6 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         resultStatus: "success",
         metadataSummary: "redacted organization enable metadata",
         requestIp: "203.0.113.50",
-      }),
-      expect.objectContaining({
-        actionType: "employee.import",
-        actorRole: "ops_admin",
-        targetResourceType: "employee",
-        targetPublicId: null,
-        resultStatus: "success",
-        metadataSummary:
-          "redacted employee import metadata; imported=1 rejected=0",
       }),
       expect.objectContaining({
         actionType: "employee.unbind",
@@ -994,11 +994,6 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     expect(mutationInputs).toEqual([]);
     expect(auditInputs).toEqual([
       expect.objectContaining({
-        actionType: "employee.import",
-        resultStatus: "failed",
-        metadataSummary: "redacted employee permission denial metadata",
-      }),
-      expect.objectContaining({
         actionType: "employee.unbind",
         resultStatus: "failed",
         metadataSummary: "redacted employee permission denial metadata",
@@ -1067,13 +1062,18 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
-        "/api/v1/employees/import",
+        "/api/v1/employee-import-commands",
         expect.objectContaining({
           body: JSON.stringify({
-            content:
-              "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
-            sourceFormat: "csv",
-            targetOrganizationPublicId: "org-city-001",
+            commandKind: "batch_import",
+            organizationPublicId: "org-city-001",
+            rows: [
+              {
+                initialPassword: "abc12345",
+                name: "Imported Employee",
+                phone: "13900000002",
+              },
+            ],
           }),
           method: "POST",
         }),
