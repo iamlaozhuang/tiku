@@ -367,6 +367,7 @@ activeTasks:
       - tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts
       - tests/unit/phase-20-ra-01-04-employee-import.test.ts
       - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-11-system-ops-user-management-loop.test.ts
       - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
       - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
       - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts

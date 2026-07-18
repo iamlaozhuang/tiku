@@ -43,6 +43,23 @@ function Invoke-ExpectFailure {
 }
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PreCommitHardening.ps1"
+$phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $scriptPath -Raw -Encoding UTF8
+$phase11ScopeCorrectionPatterns = @(
+    "p1F0115Phase11ScopeCorrectionTaskId",
+    "Test-P1F0115Phase11ScopeCorrectionFileSet",
+    "Test-P1F0115Phase11ScopeCorrectionAnchors",
+    "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time",
+    "HARD_BLOCK_P1_F0115_PHASE11_SCOPE_CORRECTION_QUEUE_DELTA_INVALID",
+    "HARD_BLOCK_P1_F0115_PHASE11_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID",
+    "582c156afb0cdde8a3daa99785fda8540b56fe27",
+    "tests/unit/phase-11-system-ops-user-management-loop.test.ts"
+)
+$missingPhase11ScopeCorrectionPatterns = @($phase11ScopeCorrectionPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingPhase11ScopeCorrectionPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0115 phase-11 scope-correction contract: $($missingPhase11ScopeCorrectionPatterns -join ', ')"
+}
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 
@@ -267,6 +284,7 @@ try {
             "docs/04-agent-system/state/task-queue.yaml",
             "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml",
             "docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md",
+            "docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md",
             "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md",
             "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-program-bootstrap.md",
             "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml",
@@ -368,31 +386,81 @@ Approved scope: pre-push orchestration, P1 guard, Module Run guards, and corresp
     }
 }
 
-$scopeCorrectionBaseSha = "5a5d9ac9c66f00991c17c3af7410958199d02a79"
-$scopeCorrectionBranch = "codex/p1-f0132-scope-correction-hotfix"
-$scopeCorrectionParentTaskId = "p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16"
-$scopeCorrectionTaskId = "p1-f0132-scope-correction-hotfix-2026-07-16"
-$scopeCorrectionAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-16-p1-f0132-scope-correction-hotfix-authorization.md"
-$scopeCorrectionEvidencePath = "docs/05-execution-logs/evidence/2026-07-16-p1-f0132-scope-correction-hotfix.md"
-$scopeCorrectionAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-16-p1-f0132-scope-correction-hotfix.md"
 $scopeCorrectionQueuePath = "docs/04-agent-system/state/task-queue.yaml"
-$scopeCorrectionAllowedFile = "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts"
-$scopeCorrectionFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-p1-f0132-scope-correction-" + [guid]::NewGuid().ToString("N"))
-$scopeCorrectionRemoteUrl = "file:///nonexistent/tiku-p1-f0132-scope-correction-origin.git"
-$scopeCorrectionFiles = @(
-    $scopeCorrectionQueuePath,
-    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
-    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
-    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
-    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
-    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
-    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
-    $scopeCorrectionAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix-design.md",
-    "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix.md",
-    $scopeCorrectionEvidencePath,
-    $scopeCorrectionAuditPath
+$scopeCorrectionConfigurations = @(
+    [pscustomobject]@{
+        Label = "F-0132"
+        BaseSha = "5a5d9ac9c66f00991c17c3af7410958199d02a79"
+        Branch = "codex/p1-f0132-scope-correction-hotfix"
+        ParentTaskId = "p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16"
+        TaskId = "p1-f0132-scope-correction-hotfix-2026-07-16"
+        AuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-16-p1-f0132-scope-correction-hotfix-authorization.md"
+        EvidencePath = "docs/05-execution-logs/evidence/2026-07-16-p1-f0132-scope-correction-hotfix.md"
+        AuditPath = "docs/05-execution-logs/audits-reviews/2026-07-16-p1-f0132-scope-correction-hotfix.md"
+        DesignPath = "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix-design.md"
+        PlanPath = "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix.md"
+        ParentPlanPath = "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md"
+        ParentEvidencePath = "docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md"
+        ParentAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md"
+        AllowedFile = "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts"
+        QueueAnchor = "      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts"
+        P1Marker = "p1F0132ScopeCorrectionAuthorization: approved_one_time"
+        ModuleMode = "preCommitScopeMode: p1_f0132_scope_correction"
+        P1ErrorPrefix = "P1_PROGRAM_F0132_SCOPE_CORRECTION"
+        ModuleErrorPrefix = "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION"
+        FreshApprovalDependency = $null
+    },
+    [pscustomobject]@{
+        Label = "F-0115 phase-11"
+        BaseSha = "582c156afb0cdde8a3daa99785fda8540b56fe27"
+        Branch = "codex/p1-f0115-phase11-scope-correction-hotfix"
+        ParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+        TaskId = "p1-f0115-phase11-scope-correction-hotfix-2026-07-17"
+        AuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-phase11-scope-correction-hotfix-authorization.md"
+        EvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+        AuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+        DesignPath = "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-phase11-scope-correction-hotfix-design.md"
+        PlanPath = "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+        ParentPlanPath = "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md"
+        ParentEvidencePath = "docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md"
+        ParentAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-creation-atomicity.md"
+        AllowedFile = "tests/unit/phase-11-system-ops-user-management-loop.test.ts"
+        QueueAnchor = "      - tests/unit/admin-user-org-auth-ops-baseline.test.ts"
+        P1Marker = "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time"
+        ModuleMode = "preCommitScopeMode: p1_f0115_phase11_scope_correction"
+        P1ErrorPrefix = "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION"
+        ModuleErrorPrefix = "HARD_BLOCK_P1_F0115_PHASE11_SCOPE_CORRECTION"
+        FreshApprovalDependency = "docs/05-execution-logs/acceptance/2026-07-16-p1-f0115-scope-correction-hotfix-authorization.md"
+    }
 )
+
+foreach ($scopeCorrectionConfiguration in $scopeCorrectionConfigurations) {
+    $scopeCorrectionBaseSha = $scopeCorrectionConfiguration.BaseSha
+    $scopeCorrectionBranch = $scopeCorrectionConfiguration.Branch
+    $scopeCorrectionParentTaskId = $scopeCorrectionConfiguration.ParentTaskId
+    $scopeCorrectionTaskId = $scopeCorrectionConfiguration.TaskId
+    $scopeCorrectionAuthorizationPath = $scopeCorrectionConfiguration.AuthorizationPath
+    $scopeCorrectionEvidencePath = $scopeCorrectionConfiguration.EvidencePath
+    $scopeCorrectionAuditPath = $scopeCorrectionConfiguration.AuditPath
+    $scopeCorrectionDesignPath = $scopeCorrectionConfiguration.DesignPath
+    $scopeCorrectionPlanPath = $scopeCorrectionConfiguration.PlanPath
+    $scopeCorrectionAllowedFile = $scopeCorrectionConfiguration.AllowedFile
+    $scopeCorrectionFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-p1-scope-correction-" + [guid]::NewGuid().ToString("N"))
+    $scopeCorrectionRemoteUrl = "file:///nonexistent/tiku-p1-scope-correction-origin.git"
+    $scopeCorrectionFiles = @(
+        $scopeCorrectionQueuePath,
+        "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+        $scopeCorrectionAuthorizationPath,
+        $scopeCorrectionDesignPath,
+        $scopeCorrectionPlanPath,
+        $scopeCorrectionEvidencePath,
+        $scopeCorrectionAuditPath
+    )
 
 try {
     & git clone --quiet --shared --no-checkout $sourceRepositoryRoot $scopeCorrectionFixtureRoot
@@ -406,9 +474,9 @@ try {
             "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml",
             "docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md",
             "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md",
-            "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md",
-            "docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md",
-            "docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md",
+            $scopeCorrectionConfiguration.ParentPlanPath,
+            $scopeCorrectionConfiguration.ParentEvidencePath,
+            $scopeCorrectionConfiguration.ParentAuditPath,
             "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml",
             "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml",
             "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml"
@@ -435,7 +503,7 @@ try {
     $scopeCorrectionQueueFullPath = Join-Path $scopeCorrectionFixtureRoot $scopeCorrectionQueuePath
     $scopeCorrectionQueueLines = [System.Collections.Generic.List[string]]::new()
     foreach ($scopeCorrectionQueueLine in @(Get-Content -LiteralPath $scopeCorrectionQueueFullPath)) { $scopeCorrectionQueueLines.Add($scopeCorrectionQueueLine) }
-    $scopeCorrectionQueueAnchor = "      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts"
+    $scopeCorrectionQueueAnchor = $scopeCorrectionConfiguration.QueueAnchor
     $scopeCorrectionQueueAnchorIndex = $scopeCorrectionQueueLines.IndexOf($scopeCorrectionQueueAnchor)
     if ($scopeCorrectionQueueAnchorIndex -lt 0 -or $scopeCorrectionQueueLines.Contains("      - $scopeCorrectionAllowedFile")) {
         throw "F-0132 scope-correction queue fixture anchor is missing or already materialized."
@@ -508,8 +576,8 @@ Decision: APPROVE
 "@, $utf8NoBom)
 
     foreach ($scopeCorrectionDocPath in @(
-        "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix-design.md",
-        "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix.md"
+        $scopeCorrectionDesignPath,
+        $scopeCorrectionPlanPath
     )) {
         [System.IO.File]::WriteAllText((Join-Path $scopeCorrectionFixtureRoot $scopeCorrectionDocPath), "# F-0132 scope-correction smoke artifact`n", $utf8NoBom)
     }
@@ -520,9 +588,11 @@ Decision: APPROVE
         throw "F-0132 scope-correction fixture did not stage the exact file set.`nActual: $($stagedScopeCorrectionFiles -join ', ')"
     }
 
-    $scopeCorrectionP1Output = @(& $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks)
-    Assert-Contains -Output $scopeCorrectionP1Output -Pattern "p1F0132ScopeCorrectionAuthorization: approved_one_time"
-    Assert-Contains -Output $scopeCorrectionP1Output -Pattern "p1ProgramGuardResult: pass"
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        $scopeCorrectionP1Output = @(& $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+        Assert-Contains -Output $scopeCorrectionP1Output -Pattern $scopeCorrectionConfiguration.P1Marker
+        Assert-Contains -Output $scopeCorrectionP1Output -Pattern "p1ProgramGuardResult: pass"
+    }
 
     Push-Location $scopeCorrectionFixtureRoot
     try {
@@ -530,12 +600,12 @@ Decision: APPROVE
     } finally {
         Pop-Location
     }
-    Assert-Contains -Output $scopeCorrectionOutput -Pattern "preCommitScopeMode: p1_f0132_scope_correction"
-    Assert-Contains -Output $scopeCorrectionOutput -Pattern "p1F0132ScopeCorrectionAuthorization: approved_one_time"
+    Assert-Contains -Output $scopeCorrectionOutput -Pattern $scopeCorrectionConfiguration.ModuleMode
+    Assert-Contains -Output $scopeCorrectionOutput -Pattern $scopeCorrectionConfiguration.P1Marker
     Assert-Contains -Output $scopeCorrectionOutput -Pattern "OK_SCOPE $([regex]::Escape($scopeCorrectionQueuePath))"
 
-    & git -C $scopeCorrectionFixtureRoot branch -m codex/wrong-f0132-scope-correction
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION_CONTEXT_INVALID" -Command {
+    & git -C $scopeCorrectionFixtureRoot branch -m codex/wrong-scope-correction
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_CONTEXT_INVALID" -Command {
         Push-Location $scopeCorrectionFixtureRoot
         try { & $scriptPath } finally { Pop-Location }
     }
@@ -546,10 +616,12 @@ Decision: APPROVE
     if ($scopeCorrectionWrongStatusText -ceq $scopeCorrectionExactQueueText) { throw "F-0132 scope-correction queue status negative fixture did not mutate." }
     [System.IO.File]::WriteAllText($scopeCorrectionQueueFullPath, $scopeCorrectionWrongStatusText, $utf8NoBom)
     & git -C $scopeCorrectionFixtureRoot add -- $scopeCorrectionQueuePath
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0132_SCOPE_CORRECTION_CONTEXT_INVALID" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.P1ErrorPrefix)_CONTEXT_INVALID" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION_CONTEXT_INVALID" -Command {
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_CONTEXT_INVALID" -Command {
         Push-Location $scopeCorrectionFixtureRoot
         try { & $scriptPath } finally { Pop-Location }
     }
@@ -558,10 +630,12 @@ Decision: APPROVE
 
     [System.IO.File]::WriteAllText($scopeCorrectionAuthorizationFullPath, "Status: pending`n", $utf8NoBom)
     & git -C $scopeCorrectionFixtureRoot add -- $scopeCorrectionAuthorizationPath
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0132_SCOPE_CORRECTION_AUTHORIZATION_INVALID" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.P1ErrorPrefix)_AUTHORIZATION_INVALID" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION_AUTHORIZATION_INVALID" -Command {
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_AUTHORIZATION_INVALID" -Command {
         Push-Location $scopeCorrectionFixtureRoot
         try { & $scriptPath } finally { Pop-Location }
     }
@@ -569,10 +643,12 @@ Decision: APPROVE
     & git -C $scopeCorrectionFixtureRoot add -- $scopeCorrectionAuthorizationPath
 
     [System.IO.File]::WriteAllText($scopeCorrectionAuthorizationFullPath, "Status: pending in working tree only`n", $utf8NoBom)
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0132_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.P1ErrorPrefix)_PARTIAL_STAGE_INVALID" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID" -Command {
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_PARTIAL_STAGE_INVALID" -Command {
         Push-Location $scopeCorrectionFixtureRoot
         try { & $scriptPath } finally { Pop-Location }
     }
@@ -581,10 +657,12 @@ Decision: APPROVE
     $scopeCorrectionBaseTreeSha = ((& git -C $scopeCorrectionFixtureRoot rev-parse "$scopeCorrectionBaseSha`^{tree}") -join "").Trim()
     $scopeCorrectionWrongBaseSha = (("wrong base" | & git -C $scopeCorrectionFixtureRoot commit-tree $scopeCorrectionBaseTreeSha -p $scopeCorrectionBaseSha) -join "").Trim()
     & git -C $scopeCorrectionFixtureRoot update-ref "refs/heads/$scopeCorrectionBranch" $scopeCorrectionWrongBaseSha $scopeCorrectionBaseSha
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0132_SCOPE_CORRECTION_CONTEXT_INVALID" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.P1ErrorPrefix)_CONTEXT_INVALID" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION_CONTEXT_INVALID" -Command {
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_CONTEXT_INVALID" -Command {
         Push-Location $scopeCorrectionFixtureRoot
         try { & $scriptPath } finally { Pop-Location }
     }
@@ -592,20 +670,24 @@ Decision: APPROVE
 
     [System.IO.File]::WriteAllText($scopeCorrectionQueueFullPath, ($scopeCorrectionExactQueueText + "      - tests/unit/unapproved-scope-expansion.test.ts`n"), $utf8NoBom)
     & git -C $scopeCorrectionFixtureRoot add -- $scopeCorrectionQueuePath
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0132_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.P1ErrorPrefix)_QUEUE_DELTA_INVALID" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0132_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Command {
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_QUEUE_DELTA_INVALID" -Command {
         Push-Location $scopeCorrectionFixtureRoot
         try { & $scriptPath } finally { Pop-Location }
     }
     [System.IO.File]::WriteAllText($scopeCorrectionQueueFullPath, $scopeCorrectionExactQueueText, $utf8NoBom)
     & git -C $scopeCorrectionFixtureRoot add -- $scopeCorrectionQueuePath
 
-    $scopeCorrectionMissingPath = "docs/05-execution-logs/task-plans/2026-07-16-p1-f0132-scope-correction-hotfix-design.md"
+    $scopeCorrectionMissingPath = $scopeCorrectionDesignPath
     & git -C $scopeCorrectionFixtureRoot reset --quiet HEAD -- $scopeCorrectionMissingPath
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION|P1_PROGRAM_SCOPE_SELF_MODIFICATION_WITH_IMPLEMENTATION_CHANGE" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION|P1_PROGRAM_SCOPE_SELF_MODIFICATION_WITH_IMPLEMENTATION_CHANGE" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_OUT_OF_SCOPE|HARD_BLOCK_BLOCKED_FILE" -Command {
         Push-Location $scopeCorrectionFixtureRoot
@@ -617,8 +699,10 @@ Decision: APPROVE
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $scopeCorrectionEscapePath) | Out-Null
     [System.IO.File]::WriteAllText($scopeCorrectionEscapePath, "export const outOfScope = true;`n", $utf8NoBom)
     & git -C $scopeCorrectionFixtureRoot add --sparse -- "src/out-of-scope.ts"
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_BLOCKED_FILES_VIOLATION src/out-of-scope.ts|P1_PROGRAM_ALLOWED_FILES_VIOLATION src/out-of-scope.ts" -Command {
-        & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_BLOCKED_FILES_VIOLATION src/out-of-scope.ts|P1_PROGRAM_ALLOWED_FILES_VIOLATION src/out-of-scope.ts" -Command {
+            & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        }
     }
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BLOCKED_FILE src/out-of-scope.ts|HARD_BLOCK_OUT_OF_SCOPE src/out-of-scope.ts" -Command {
         Push-Location $scopeCorrectionFixtureRoot
@@ -627,6 +711,20 @@ Decision: APPROVE
     & git -C $scopeCorrectionFixtureRoot reset --quiet HEAD -- "src/out-of-scope.ts"
     Remove-Item -LiteralPath $scopeCorrectionEscapePath -Force
 
+    if ($scopeCorrectionConfiguration.Label -eq "F-0115 phase-11") {
+        & git -C $scopeCorrectionFixtureRoot commit --quiet -m "materialize F-0115 phase-11 approval once"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to materialize the F-0115 phase-11 replay parent." }
+        foreach ($scopeCorrectionReplayFile in $scopeCorrectionFiles) {
+            Add-Content -LiteralPath (Join-Path $scopeCorrectionFixtureRoot $scopeCorrectionReplayFile) -Value "F-0115 phase-11 Module pre-commit replay must remain blocked." -Encoding UTF8
+        }
+        & git -C $scopeCorrectionFixtureRoot add -- $scopeCorrectionFiles
+        Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.ModuleErrorPrefix)_ALREADY_MATERIALIZED" -Command {
+            Push-Location $scopeCorrectionFixtureRoot
+            try { & $scriptPath } finally { Pop-Location }
+        }
+    }
+
+    if ($scopeCorrectionConfiguration.Label -eq "F-0132") {
     $scopeCorrectionTreeSha = ((& git -C $scopeCorrectionFixtureRoot write-tree) -join "").Trim()
     $scopeCorrectionHeadSha = (("F-0132 scope-correction fixture" | & git -C $scopeCorrectionFixtureRoot commit-tree $scopeCorrectionTreeSha -p $scopeCorrectionBaseSha) -join "").Trim()
     if ($LASTEXITCODE -ne 0 -or $scopeCorrectionHeadSha -notmatch '^[0-9a-f]{40}$') { throw "Failed to synthesize F-0132 scope-correction fixture commit." }
@@ -636,7 +734,7 @@ Decision: APPROVE
     $scopeCorrectionOriginUrl = ((& git -C $scopeCorrectionFixtureRoot remote get-url origin) -join "").Trim()
     $scopeCorrectionUpdateLine = "refs/heads/master $scopeCorrectionHeadSha refs/heads/master $scopeCorrectionBaseSha"
     $scopeCorrectionPrePushOutput = @(& $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $scopeCorrectionOriginUrl -PushUpdateLines $scopeCorrectionUpdateLine -SkipExternalIntegrityChecks)
-    Assert-Contains -Output $scopeCorrectionPrePushOutput -Pattern "p1F0132ScopeCorrectionAuthorization: approved_one_time"
+    Assert-Contains -Output $scopeCorrectionPrePushOutput -Pattern $scopeCorrectionConfiguration.P1Marker
     Assert-Contains -Output $scopeCorrectionPrePushOutput -Pattern "p1TransitionScopeMode: transition_only"
 
     Push-Location $scopeCorrectionFixtureRoot
@@ -668,11 +766,13 @@ Decision: APPROVE
     $scopeCorrectionReplaySha = (("F-0132 scope-correction replay" | & git -C $scopeCorrectionFixtureRoot commit-tree $scopeCorrectionReplayTreeSha -p $scopeCorrectionHeadSha) -join "").Trim()
     & git -C $scopeCorrectionFixtureRoot update-ref refs/heads/master $scopeCorrectionReplaySha $scopeCorrectionHeadSha
     $scopeCorrectionReplayUpdateLine = "refs/heads/master $scopeCorrectionReplaySha refs/heads/master $scopeCorrectionHeadSha"
-    Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0132_SCOPE_CORRECTION_ALREADY_MATERIALIZED" -Command {
+    Invoke-ExpectFailure -ExpectedPattern "$($scopeCorrectionConfiguration.P1ErrorPrefix)_ALREADY_MATERIALIZED" -Command {
         & $p1GuardPath -RepositoryRoot $scopeCorrectionFixtureRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $scopeCorrectionOriginUrl -PushUpdateLines $scopeCorrectionReplayUpdateLine -SkipExternalIntegrityChecks
+    }
     }
 } finally {
     if (Test-Path -LiteralPath $scopeCorrectionFixtureRoot) { Remove-Item -LiteralPath $scopeCorrectionFixtureRoot -Recurse -Force }
+}
 }
 
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-hardening-" + [guid]::NewGuid().ToString("N"))

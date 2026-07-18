@@ -4,6 +4,23 @@ $ErrorActionPreference = "Stop"
 
 $guardPath = Join-Path $PSScriptRoot "Test-P1RemediationSerialProgram.ps1"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $guardPath -Raw -Encoding UTF8
+$phase11ScopeCorrectionPatterns = @(
+    "p1F0115Phase11ScopeCorrectionTaskId",
+    "Test-P1F0115Phase11ScopeCorrectionFileSet",
+    "Test-P1F0115Phase11ScopeCorrectionAnchors",
+    "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time",
+    "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_QUEUE_DELTA_INVALID",
+    "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID",
+    "582c156afb0cdde8a3daa99785fda8540b56fe27",
+    "tests/unit/phase-11-system-ops-user-management-loop.test.ts"
+)
+$missingPhase11ScopeCorrectionPatterns = @($phase11ScopeCorrectionPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingPhase11ScopeCorrectionPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0115 phase-11 scope-correction contract: $($missingPhase11ScopeCorrectionPatterns -join ', ')"
+}
 $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-p1-remediation-program-" + [guid]::NewGuid().ToString("N"))
 $bootstrapTask = "p1-remediation-program-bootstrap-2026-07-16"
 $authorizationPath = "authorization.md"
@@ -29,6 +46,29 @@ $p1F0115ScopeCorrectionFiles = @(
     $p1F0115ScopeCorrectionAuditPath
 )
 $p1F0115FixtureRemote = Join-Path $smokeRoot "f0115-origin.git"
+$p1F0115Phase11ScopeCorrectionTaskId = "p1-f0115-phase11-scope-correction-hotfix-2026-07-17"
+$p1F0115Phase11ScopeCorrectionParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+$p1F0115Phase11ScopeCorrectionBaseSha = "582c156afb0cdde8a3daa99785fda8540b56fe27"
+$p1F0115Phase11ScopeCorrectionBranch = "codex/p1-f0115-phase11-scope-correction-hotfix"
+$p1F0115Phase11ScopeCorrectionAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-phase11-scope-correction-hotfix-authorization.md"
+$p1F0115Phase11ScopeCorrectionEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+$p1F0115Phase11ScopeCorrectionAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+$p1F0115Phase11ScopeCorrectionAllowedFile = "tests/unit/phase-11-system-ops-user-management-loop.test.ts"
+$p1F0115Phase11ScopeCorrectionFiles = @(
+    "docs/04-agent-system/state/task-queue.yaml",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $p1F0115Phase11ScopeCorrectionAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-phase11-scope-correction-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md",
+    $p1F0115Phase11ScopeCorrectionEvidencePath,
+    $p1F0115Phase11ScopeCorrectionAuditPath
+)
+$p1F0115Phase11FixtureRemote = Join-Path $smokeRoot "f0115-phase11-origin.git"
 $candidateOrder = @(
     "P1-RC-01",
     "P1-RC-02",
@@ -913,6 +953,196 @@ function Assert-F0115FailsWith {
     if (-not $failed) { throw "F-0115 negative '$Label' unexpectedly passed.`n$($output -join "`n")" }
 }
 
+function Initialize-F0115Phase11FixtureRemote {
+    if (Test-Path -LiteralPath $p1F0115Phase11FixtureRemote) { return }
+
+    & git -c core.longpaths=true clone --quiet --bare $repositoryRoot $p1F0115Phase11FixtureRemote
+    if ($LASTEXITCODE -ne 0) { throw "Unable to create F-0115 phase-11 fixture remote." }
+    & git --git-dir=$p1F0115Phase11FixtureRemote update-ref refs/heads/master $p1F0115Phase11ScopeCorrectionBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Unable to pin F-0115 phase-11 fixture base." }
+    & git --git-dir=$p1F0115Phase11FixtureRemote symbolic-ref HEAD refs/heads/master
+    if ($LASTEXITCODE -ne 0) { throw "Unable to set F-0115 phase-11 fixture remote HEAD." }
+}
+
+function New-F0115Phase11Fixture {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Branch = $p1F0115Phase11ScopeCorrectionBranch,
+        [switch]$AdvanceBase
+    )
+
+    Initialize-F0115Phase11FixtureRemote
+    $root = Join-Path $smokeRoot $Name
+    & git -c core.longpaths=true clone --quiet --no-checkout --branch master $p1F0115Phase11FixtureRemote $root
+    if ($LASTEXITCODE -ne 0) { throw "Unable to clone F-0115 phase-11 fixture '$Name'." }
+    & git -C $root config user.name "P1 F-0115 Phase-11 Scope Smoke"
+    & git -C $root config user.email "p1-f0115-phase11-scope-smoke@example.invalid"
+    & git -C $root config core.autocrlf false
+    & git -C $root config core.longpaths true
+    & git -C $root config core.safecrlf false
+    & git -C $root sparse-checkout init --no-cone
+    if ($LASTEXITCODE -ne 0) { throw "Unable to initialize F-0115 phase-11 sparse fixture '$Name'." }
+    $sparsePatterns = @(
+        "/.gitattributes",
+        "/docs/04-agent-system/",
+        "/docs/05-execution-logs/acceptance/2026-07-16-p1-*",
+        "/docs/05-execution-logs/acceptance/2026-07-17-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-16-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-17-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-16-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-17-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-15-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-16-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-17-p1-*",
+        "/scripts/agent-system/",
+        "/src/server/services/employee-account-service.ts"
+    )
+    & git -C $root sparse-checkout set --no-cone $sparsePatterns
+    if ($LASTEXITCODE -ne 0) { throw "Unable to configure F-0115 phase-11 sparse fixture '$Name'." }
+    & git -C $root switch --quiet master
+    if ($LASTEXITCODE -ne 0) { throw "Unable to materialize F-0115 phase-11 fixture '$Name'." }
+    & git -C $root switch --quiet -c $Branch
+    if ($LASTEXITCODE -ne 0) { throw "Unable to create F-0115 phase-11 fixture branch '$Branch'." }
+    if ($AdvanceBase) {
+        $wrongBasePath = "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md"
+        $wrongBaseText = Get-Content -LiteralPath (Join-Path $root ($wrongBasePath -replace "/", "\")) -Raw -Encoding UTF8
+        Set-F0115FixtureFile -Root $root -Path $wrongBasePath -Content "$wrongBaseText`n<!-- F-0115 phase-11 wrong-base marker -->"
+        & git -C $root add -- $wrongBasePath
+        & git -C $root commit --quiet -m "advance wrong F-0115 phase-11 base"
+        if ($LASTEXITCODE -ne 0) { throw "Unable to advance F-0115 phase-11 wrong-base fixture." }
+    }
+    return $root
+}
+
+function Set-F0115Phase11Candidate {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $parentQueue = @(& git -C $Root show "${p1F0115Phase11ScopeCorrectionBaseSha}:docs/04-agent-system/state/task-queue.yaml") -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to read F-0115 phase-11 parent queue." }
+    $parentQueue = $parentQueue -replace "`r`n?", "`n"
+    $queueAnchor = "      - tests/unit/admin-user-org-auth-ops-baseline.test.ts`n      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts"
+    $queueReplacement = "      - tests/unit/admin-user-org-auth-ops-baseline.test.ts`n      - $p1F0115Phase11ScopeCorrectionAllowedFile`n      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts"
+    if ([regex]::Matches($parentQueue, [regex]::Escape($queueAnchor)).Count -ne 1 -or $parentQueue -match [regex]::Escape($p1F0115Phase11ScopeCorrectionAllowedFile)) {
+        throw "F-0115 phase-11 queue fixture anchor is not exact."
+    }
+    Set-F0115FixtureFile -Root $Root -Path "docs/04-agent-system/state/task-queue.yaml" -Content $parentQueue.Replace($queueAnchor, $queueReplacement)
+
+    $authorizationFileList = @($p1F0115Phase11ScopeCorrectionFiles | ForEach-Object { "- ``$_``" }) -join "`n"
+    Set-F0115FixtureFile -Root $Root -Path $p1F0115Phase11ScopeCorrectionAuthorizationPath -Content @"
+# P1 F-0115 Phase-11 Scope-Correction Authorization
+
+Status: approved
+Human approval source: current user message
+Task ID: ``$p1F0115Phase11ScopeCorrectionTaskId``
+Parent task: ``$p1F0115Phase11ScopeCorrectionParentTaskId``
+Base: ``$p1F0115Phase11ScopeCorrectionBaseSha``
+Branch: ``$p1F0115Phase11ScopeCorrectionBranch``
+
+Approved allowlist correction: ``$p1F0115Phase11ScopeCorrectionAllowedFile``
+
+## Exact Files
+
+$authorizationFileList
+
+Every other in_progress SHA mismatch remains a hard-block.
+Hook bypass is not approved.
+"@
+    Set-F0115FixtureFile -Root $Root -Path $p1F0115Phase11ScopeCorrectionEvidencePath -Content @"
+# P1 F-0115 Phase-11 Scope-Correction Evidence
+
+## Reading Evidence
+
+status: complete
+conflictsFound: false
+targetSourceReviewed: true
+targetTestsReviewed: true
+analogousImplementationReviewed: true
+Cost Calibration Gate remains blocked
+
+## Requirement Mapping Result
+
+Result: pass
+
+## Root-Cause Reproduction
+
+Result: pass
+
+## TDD Evidence
+
+Result: pass
+
+## Validation Results
+
+Result: pass
+"@
+    Set-F0115FixtureFile -Root $Root -Path $p1F0115Phase11ScopeCorrectionAuditPath -Content @"
+# P1 F-0115 Phase-11 Scope-Correction Audit
+
+## Round 1
+
+Result: pass
+
+## Round 2
+
+Result: pass
+
+## Decision
+
+Decision: APPROVE
+"@
+    foreach ($fixturePath in @($p1F0115Phase11ScopeCorrectionFiles | Where-Object {
+        $_ -notin @(
+            "docs/04-agent-system/state/task-queue.yaml",
+            $p1F0115Phase11ScopeCorrectionAuthorizationPath,
+            $p1F0115Phase11ScopeCorrectionEvidencePath,
+            $p1F0115Phase11ScopeCorrectionAuditPath
+        )
+    })) {
+        Set-F0115FixtureFile -Root $Root -Path $fixturePath -Content "# F-0115 phase-11 governance fixture: $fixturePath"
+    }
+    & git -C $Root add -- $p1F0115Phase11ScopeCorrectionFiles
+    if ($LASTEXITCODE -ne 0) { throw "Unable to stage F-0115 phase-11 scope-correction fixture." }
+}
+
+function Invoke-F0115Phase11Guard {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][ValidateSet("pre_commit", "pre_push")][string]$Phase
+    )
+
+    if ($Phase -eq "pre_commit") {
+        return @(& $guardPath -RepositoryRoot $Root -Phase pre_commit -SkipExternalIntegrityChecks)
+    }
+    $headSha = ((& git -C $Root rev-parse HEAD) -join "").Trim()
+    $originSha = ((& git -C $Root rev-parse origin/master) -join "").Trim()
+    $originUrl = ((& git -C $Root remote get-url origin) -join "").Trim()
+    $updateLine = "refs/heads/master $headSha refs/heads/master $originSha"
+    return @(& $guardPath -RepositoryRoot $Root -Phase pre_push -PushRemoteName origin -PushRemoteUrl $originUrl -PushUpdateLines $updateLine -SkipExternalIntegrityChecks)
+}
+
+function Assert-F0115Phase11FailsWith {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][ValidateSet("pre_commit", "pre_push")][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$Pattern,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $failed = $false
+    try {
+        $output = Invoke-F0115Phase11Guard -Root $Root -Phase $Phase
+    } catch {
+        $failed = $true
+        if ($_.Exception.Message -notmatch $Pattern) {
+            throw "F-0115 phase-11 negative '$Label' expected '$Pattern', got:`n$($_.Exception.Message)"
+        }
+        if ($_.Exception.Message -match '(?m)^p1ProgramGuardResult:\s*pass|p1F0115Phase11ScopeCorrectionAuthorization:\s*approved_one_time|p1TransitionScopeMode:\s*transition_only') {
+            throw "F-0115 phase-11 negative '$Label' leaked a success marker.`n$($_.Exception.Message)"
+        }
+    }
+    if (-not $failed) { throw "F-0115 phase-11 negative '$Label' unexpectedly passed.`n$($output -join "`n")" }
+}
+
 try {
     $p1GuardText = Get-Content -LiteralPath $guardPath -Raw -Encoding UTF8
     foreach ($scopeCorrectionPattern in @(
@@ -1397,6 +1627,105 @@ Decision: REJECT
     Assert-F0115FailsWith -Root $f0115SteadyDriftRoot -Phase pre_commit -Pattern "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION" -Label "ordinary steady-task scope drift"
     }
 
+    $f0115Phase11PositiveRoot = New-F0115Phase11Fixture -Name "f0115-phase11-positive"
+    Set-F0115Phase11Candidate -Root $f0115Phase11PositiveRoot
+    $f0115Phase11PreCommitOutput = Invoke-F0115Phase11Guard -Root $f0115Phase11PositiveRoot -Phase pre_commit
+    if (($f0115Phase11PreCommitOutput -join "`n") -notmatch "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time") {
+        throw "F-0115 phase-11 pre-commit positive fixture did not authorize the exact candidate."
+    }
+    & git -C $f0115Phase11PositiveRoot commit --quiet -m "test F-0115 phase-11 exact transition"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to commit F-0115 phase-11 positive fixture." }
+    & git -C $f0115Phase11PositiveRoot branch -M master
+    if ($LASTEXITCODE -ne 0) { throw "Unable to move F-0115 phase-11 positive fixture to master." }
+    $f0115Phase11PrePushOutput = Invoke-F0115Phase11Guard -Root $f0115Phase11PositiveRoot -Phase pre_push
+    if (($f0115Phase11PrePushOutput -join "`n") -notmatch "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time") {
+        throw "F-0115 phase-11 pre-push positive fixture did not authorize the exact candidate."
+    }
+    if (($f0115Phase11PrePushOutput -join "`n") -notmatch "p1TransitionScopeMode: transition_only") {
+        throw "F-0115 phase-11 pre-push positive fixture did not emit transition_only."
+    }
+
+    $f0115Phase11WrongBranchRoot = New-F0115Phase11Fixture -Name "f0115-phase11-wrong-branch" -Branch "codex/p1-f0115-phase11-wrong-branch"
+    Set-F0115Phase11Candidate -Root $f0115Phase11WrongBranchRoot
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11WrongBranchRoot -Phase pre_commit -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_CONTEXT_INVALID pre_commit" -Label "wrong branch"
+
+    $f0115Phase11WrongStatusRoot = New-F0115Phase11Fixture -Name "f0115-phase11-wrong-status"
+    Set-F0115Phase11Candidate -Root $f0115Phase11WrongStatusRoot
+    $f0115Phase11WrongStatusQueuePath = "docs/04-agent-system/state/task-queue.yaml"
+    $f0115Phase11WrongStatusQueue = Get-Content -LiteralPath (Join-Path $f0115Phase11WrongStatusRoot ($f0115Phase11WrongStatusQueuePath -replace "/", "\")) -Raw -Encoding UTF8
+    $f0115Phase11WrongStatusPattern = "(?ms)(^  - id:\s*$([regex]::Escape($p1F0115Phase11ScopeCorrectionParentTaskId))\s*\r?\n.*?^    status:)\s*in_progress"
+    $f0115Phase11WrongStatusCandidate = [regex]::Replace($f0115Phase11WrongStatusQueue, $f0115Phase11WrongStatusPattern, '${1} ready_for_closeout', 1)
+    if ($f0115Phase11WrongStatusCandidate -ceq $f0115Phase11WrongStatusQueue) { throw "Unable to build F-0115 phase-11 wrong-status fixture." }
+    Set-F0115FixtureFile -Root $f0115Phase11WrongStatusRoot -Path $f0115Phase11WrongStatusQueuePath -Content $f0115Phase11WrongStatusCandidate
+    & git -C $f0115Phase11WrongStatusRoot add -- $f0115Phase11WrongStatusQueuePath
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11WrongStatusRoot -Phase pre_commit -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_CONTEXT_INVALID task" -Label "wrong status"
+
+    $f0115Phase11WrongBaseRoot = New-F0115Phase11Fixture -Name "f0115-phase11-wrong-base" -AdvanceBase
+    Set-F0115Phase11Candidate -Root $f0115Phase11WrongBaseRoot
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11WrongBaseRoot -Phase pre_commit -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_CONTEXT_INVALID pre_commit" -Label "wrong base"
+
+    $f0115Phase11ElevenFileRoot = New-F0115Phase11Fixture -Name "f0115-phase11-eleven-files"
+    Set-F0115Phase11Candidate -Root $f0115Phase11ElevenFileRoot
+    $f0115Phase11OmittedPath = "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+    & git -C $f0115Phase11ElevenFileRoot reset --quiet HEAD -- $f0115Phase11OmittedPath
+    & git -C $f0115Phase11ElevenFileRoot restore --worktree -- $f0115Phase11OmittedPath
+    if (@(& git -C $f0115Phase11ElevenFileRoot diff --cached --name-only).Count -ne 11) { throw "F-0115 phase-11 eleven-file fixture is not exact." }
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11ElevenFileRoot -Phase pre_commit -Pattern "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION" -Label "eleven files"
+
+    $f0115Phase11ThirteenFileRoot = New-F0115Phase11Fixture -Name "f0115-phase11-thirteen-files"
+    Set-F0115Phase11Candidate -Root $f0115Phase11ThirteenFileRoot
+    $f0115Phase11ExtraGovernancePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-phase11-extra-governance.md"
+    Set-F0115FixtureFile -Root $f0115Phase11ThirteenFileRoot -Path $f0115Phase11ExtraGovernancePath -Content "# extra governance file"
+    & git -C $f0115Phase11ThirteenFileRoot add -- $f0115Phase11ExtraGovernancePath
+    if (@(& git -C $f0115Phase11ThirteenFileRoot diff --cached --name-only).Count -ne 13) { throw "F-0115 phase-11 thirteen-file fixture is not exact." }
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11ThirteenFileRoot -Phase pre_commit -Pattern "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION" -Label "thirteen files"
+
+    $f0115Phase11ProductRoot = New-F0115Phase11Fixture -Name "f0115-phase11-extra-product"
+    Set-F0115Phase11Candidate -Root $f0115Phase11ProductRoot
+    $f0115Phase11ProductPath = "src/server/services/employee-account-service.ts"
+    $f0115Phase11ProductText = Get-Content -LiteralPath (Join-Path $f0115Phase11ProductRoot ($f0115Phase11ProductPath -replace "/", "\")) -Raw -Encoding UTF8
+    Set-F0115FixtureFile -Root $f0115Phase11ProductRoot -Path $f0115Phase11ProductPath -Content "$f0115Phase11ProductText`n// product path must not enter phase-11 governance"
+    & git -C $f0115Phase11ProductRoot add -- $f0115Phase11ProductPath
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11ProductRoot -Phase pre_commit -Pattern "P1_PROGRAM_SCOPE_SELF_MODIFICATION_WITH_IMPLEMENTATION_CHANGE" -Label "extra product path"
+
+    $f0115Phase11QueueBytesRoot = New-F0115Phase11Fixture -Name "f0115-phase11-queue-extra-bytes"
+    Set-F0115Phase11Candidate -Root $f0115Phase11QueueBytesRoot
+    $f0115Phase11QueuePath = "docs/04-agent-system/state/task-queue.yaml"
+    $f0115Phase11QueueBytes = Get-Content -LiteralPath (Join-Path $f0115Phase11QueueBytesRoot ($f0115Phase11QueuePath -replace "/", "\")) -Raw -Encoding UTF8
+    Set-F0115FixtureFile -Root $f0115Phase11QueueBytesRoot -Path $f0115Phase11QueuePath -Content "$f0115Phase11QueueBytes`n# forbidden extra queue byte"
+    & git -C $f0115Phase11QueueBytesRoot add -- $f0115Phase11QueuePath
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11QueueBytesRoot -Phase pre_commit -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Label "queue extra bytes"
+
+    $f0115Phase11PartialStageRoot = New-F0115Phase11Fixture -Name "f0115-phase11-partial-stage"
+    Set-F0115Phase11Candidate -Root $f0115Phase11PartialStageRoot
+    $f0115Phase11PartialAudit = Get-Content -LiteralPath (Join-Path $f0115Phase11PartialStageRoot ($p1F0115Phase11ScopeCorrectionAuditPath -replace "/", "\")) -Raw -Encoding UTF8
+    Set-F0115FixtureFile -Root $f0115Phase11PartialStageRoot -Path $p1F0115Phase11ScopeCorrectionAuditPath -Content "$f0115Phase11PartialAudit`nUnstaged divergence"
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11PartialStageRoot -Phase pre_commit -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_PARTIAL_STAGE_INVALID" -Label "partial staging"
+
+    $f0115Phase11ReplayRoot = New-F0115Phase11Fixture -Name "f0115-phase11-approval-replay"
+    Set-F0115Phase11Candidate -Root $f0115Phase11ReplayRoot
+    & git -C $f0115Phase11ReplayRoot commit --quiet -m "materialize F-0115 phase-11 approval once"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to commit F-0115 phase-11 replay parent." }
+    foreach ($replayPath in $p1F0115Phase11ScopeCorrectionFiles) {
+        $replayText = Get-Content -LiteralPath (Join-Path $f0115Phase11ReplayRoot ($replayPath -replace "/", "\")) -Raw -Encoding UTF8
+        Set-F0115FixtureFile -Root $f0115Phase11ReplayRoot -Path $replayPath -Content "$replayText`n# approval replay attempt"
+    }
+    & git -C $f0115Phase11ReplayRoot add -- $p1F0115Phase11ScopeCorrectionFiles
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11ReplayRoot -Phase pre_commit -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_ALREADY_MATERIALIZED" -Label "approval replay"
+
+    $f0115Phase11MultiCommitRoot = New-F0115Phase11Fixture -Name "f0115-phase11-multi-commit"
+    Set-F0115Phase11Candidate -Root $f0115Phase11MultiCommitRoot
+    & git -C $f0115Phase11MultiCommitRoot reset --quiet HEAD
+    & git -C $f0115Phase11MultiCommitRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+    & git -C $f0115Phase11MultiCommitRoot commit --quiet -m "split F-0115 phase-11 queue delta"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to create first F-0115 phase-11 split commit." }
+    $f0115Phase11RemainingFiles = @($p1F0115Phase11ScopeCorrectionFiles | Where-Object { $_ -ne "docs/04-agent-system/state/task-queue.yaml" })
+    & git -C $f0115Phase11MultiCommitRoot add -- $f0115Phase11RemainingFiles
+    & git -C $f0115Phase11MultiCommitRoot commit --quiet -m "split F-0115 phase-11 governance artifacts"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to create second F-0115 phase-11 split commit." }
+    & git -C $f0115Phase11MultiCommitRoot branch -M master
+    Assert-F0115Phase11FailsWith -Root $f0115Phase11MultiCommitRoot -Phase pre_push -Pattern "P1_PROGRAM_F0115_PHASE11_SCOPE_CORRECTION_CONTEXT_INVALID pre_push" -Label "multi-commit transition"
+
     $transitionRoot = Write-CaseFiles -Name "task-transition" -StateText $baseState -QueueText $baseQueue
     $transitionRemote = Join-Path $smokeRoot "transition-remote.git"
     & git -C $transitionRoot init -b master *> $null
@@ -1841,7 +2170,7 @@ Decision: APPROVE_SCOPE
         Write-Output "Existing P1 remediation smoke regression passed: 8 positive, 48 negative"
         throw "P1 guard is missing F-0115 scope-correction marker/mode contract: $($missingF0115ScopeCorrectionPatterns -join ', ')"
     }
-    Write-Output "P1 remediation serial program guard smoke passed: 10 positive, 67 negative"
+    Write-Output "P1 remediation serial program guard smoke passed: 12 positive, 77 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

@@ -43,6 +43,21 @@ function Invoke-ExpectFailure {
 }
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
+$phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $scriptPath -Raw -Encoding UTF8
+$phase11ScopeCorrectionPatterns = @(
+    "p1F0115Phase11ScopeCorrectionBaseSha",
+    "p1F0115Phase11ScopeCorrectionAuthorizationPath",
+    "p1F0115Phase11ScopeCorrectionFiles",
+    "Test-P1F0115Phase11TransitionTopology",
+    "p1F0115Phase11TransitionTopology: exact_one_parent",
+    "582c156afb0cdde8a3daa99785fda8540b56fe27"
+)
+$missingPhase11ScopeCorrectionPatterns = @($phase11ScopeCorrectionPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingPhase11ScopeCorrectionPatterns.Count -gt 0) {
+    throw "Module pre-push is RED for the F-0115 phase-11 transition contract: $($missingPhase11ScopeCorrectionPatterns -join ', ')"
+}
 
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-push readiness script: $scriptPath"
@@ -588,6 +603,168 @@ currentTask:
 } finally {
     if (Test-Path -LiteralPath $f0115PrePushFixtureRoot) {
         Remove-Item -LiteralPath $f0115PrePushFixtureRoot -Recurse -Force
+    }
+}
+
+$f0115Phase11BaseSha = "582c156afb0cdde8a3daa99785fda8540b56fe27"
+$f0115Phase11AuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-phase11-scope-correction-hotfix-authorization.md"
+$f0115Phase11EvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+$f0115Phase11AuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
+$f0115Phase11Files = @(
+    $f0115PrePushQueuePath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $f0115Phase11AuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-phase11-scope-correction-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md",
+    $f0115Phase11EvidencePath,
+    $f0115Phase11AuditPath
+)
+$f0115Phase11FixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-module-f0115-phase11-pre-push-" + [guid]::NewGuid().ToString("N"))
+
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0115Phase11FixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0115 phase-11 Module pre-push fixture." }
+    & git -C $f0115Phase11FixtureRoot config user.name "Module F-0115 Phase-11 Pre-Push Smoke"
+    & git -C $f0115Phase11FixtureRoot config user.email "module-f0115-phase11-pre-push-smoke@example.invalid"
+    & git -C $f0115Phase11FixtureRoot config core.autocrlf false
+    & git -C $f0115Phase11FixtureRoot config core.longpaths true
+    & git -C $f0115Phase11FixtureRoot sparse-checkout init --no-cone
+    & git -C $f0115Phase11FixtureRoot sparse-checkout set --no-cone -- @(
+        $f0115Phase11Files + @($f0115PrePushProjectStatePath, $f0115PrePushMatrixPath)
+    )
+    if ($LASTEXITCODE -ne 0) { throw "Failed to configure F-0115 phase-11 sparse fixture." }
+    & git -C $f0115Phase11FixtureRoot switch --quiet -C master $f0115Phase11BaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out the fixed F-0115 phase-11 base." }
+    & git -C $f0115Phase11FixtureRoot update-ref refs/remotes/origin/master $f0115Phase11BaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to pin F-0115 phase-11 origin/master." }
+
+    $f0115Phase11QueueFullPath = Join-Path $f0115Phase11FixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $f0115Phase11BaseQueue = [System.IO.File]::ReadAllText($f0115Phase11QueueFullPath)
+    Set-F0115PrePushFixtureFile -Root $f0115Phase11FixtureRoot -Path $f0115PrePushQueuePath -Content "$f0115Phase11BaseQueue`n# Exact F-0115 phase-11 queue correction fixture.`n"
+    Set-F0115PrePushFixtureFile -Root $f0115Phase11FixtureRoot -Path $f0115Phase11AuthorizationPath -Content @"
+# P1 F-0115 Phase-11 Scope Correction Hotfix Authorization
+
+Date: 2026-07-17
+Status: approved
+Human approval source: current user message in the Codex conversation on 2026-07-17.
+Task ID: p1-f0115-phase11-scope-correction-hotfix-2026-07-17
+Parent task: $f0115PrePushParentTaskId
+Base: $f0115Phase11BaseSha
+Branch: codex/p1-f0115-phase11-scope-correction-hotfix
+
+Every other in_progress SHA mismatch remains a hard-block.
+"@
+    Set-F0115PrePushFixtureFile -Root $f0115Phase11FixtureRoot -Path $f0115Phase11EvidencePath -Content "# F-0115 phase-11 transition evidence`n`nstatus: complete`nResult: pass`n"
+    Set-F0115PrePushFixtureFile -Root $f0115Phase11FixtureRoot -Path $f0115Phase11AuditPath -Content "# F-0115 phase-11 transition audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`nDecision: APPROVE`n"
+    foreach ($f0115Phase11Path in @($f0115Phase11Files | Where-Object {
+        $_ -notin @($f0115PrePushQueuePath, $f0115Phase11AuthorizationPath, $f0115Phase11EvidencePath, $f0115Phase11AuditPath)
+    })) {
+        Set-F0115PrePushFixtureFile -Root $f0115Phase11FixtureRoot -Path $f0115Phase11Path -Content "# Exact F-0115 phase-11 transition fixture: $f0115Phase11Path`n"
+    }
+
+    & git -C $f0115Phase11FixtureRoot add -- $f0115Phase11Files
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage the exact F-0115 phase-11 file set." }
+    $f0115Phase11StagedFiles = @(& git -C $f0115Phase11FixtureRoot diff --cached --name-only --diff-filter=ACMR | Sort-Object -Unique)
+    if ($f0115Phase11StagedFiles.Count -ne 12 -or ($f0115Phase11StagedFiles -join "|") -cne (@($f0115Phase11Files | Sort-Object -Unique) -join "|")) {
+        throw "F-0115 phase-11 fixture did not stage the exact 12-file set.`nActual: $($f0115Phase11StagedFiles -join ', ')"
+    }
+    & git -C $f0115Phase11FixtureRoot commit --quiet -m "materialize exact F-0115 phase-11 scope correction"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit the exact F-0115 phase-11 fixture." }
+    $f0115Phase11HotfixSha = ((& git -C $f0115Phase11FixtureRoot rev-parse HEAD) -join "").Trim()
+    $f0115Phase11CommitLine = ((& git -C $f0115Phase11FixtureRoot rev-list --parents -n 1 HEAD) -join "").Trim()
+    if ($f0115Phase11CommitLine -notmatch "^[0-9a-f]{40} $f0115Phase11BaseSha$") {
+        throw "F-0115 phase-11 fixture is not the exact one-parent base handoff: $f0115Phase11CommitLine"
+    }
+    $f0115Phase11CommittedFiles = @(& git -C $f0115Phase11FixtureRoot diff-tree --no-commit-id --name-only -r HEAD | Sort-Object -Unique)
+    if (($f0115Phase11CommittedFiles -join "|") -cne (@($f0115Phase11Files | Sort-Object -Unique) -join "|")) {
+        throw "F-0115 phase-11 commit does not contain the exact 12-file set.`nActual: $($f0115Phase11CommittedFiles -join ', ')"
+    }
+    $f0115Phase11ParentAuthorizationPath = ((& git -C $f0115Phase11FixtureRoot ls-tree -r --name-only $f0115Phase11BaseSha -- $f0115Phase11AuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or -not [string]::IsNullOrWhiteSpace($f0115Phase11ParentAuthorizationPath)) {
+        throw "F-0115 phase-11 authorization is not fresh relative to the fixed base."
+    }
+    $f0115Phase11AuthorizationText = ((& git -C $f0115Phase11FixtureRoot show "$f0115Phase11HotfixSha`:$f0115Phase11AuthorizationPath") -join "`n")
+    if ($LASTEXITCODE -ne 0 -or $f0115Phase11AuthorizationText -notmatch "Human approval source: current user message") {
+        throw "F-0115 phase-11 fixture is missing fresh current-user approval evidence."
+    }
+
+    $f0115Phase11ProjectStateFullPath = Join-Path $f0115Phase11FixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $f0115Phase11MatrixFullPath = Join-Path $f0115Phase11FixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $f0115Phase11EvidenceFullPath = Join-Path $f0115Phase11FixtureRoot ($f0115Phase11EvidencePath -replace "/", "\")
+    $f0115Phase11AuditFullPath = Join-Path $f0115Phase11FixtureRoot ($f0115Phase11AuditPath -replace "/", "\")
+    $f0115Phase11StateText = [System.IO.File]::ReadAllText($f0115Phase11ProjectStateFullPath)
+    $f0115Phase11CheckpointMatch = [regex]::Match($f0115Phase11StateText, "(?m)^\s+lastKnownMasterSha:\s*([0-9a-f]{40})\s*$")
+    if (-not $f0115Phase11CheckpointMatch.Success) { throw "F-0115 phase-11 state checkpoint is missing." }
+    $f0115Phase11CheckpointSha = $f0115Phase11CheckpointMatch.Groups[1].Value
+
+    Push-Location $f0115Phase11FixtureRoot
+    try {
+        $f0115Phase11PositiveOutput = @(
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115Phase11ProjectStateFullPath -QueuePath $f0115Phase11QueueFullPath -MatrixPath $f0115Phase11MatrixFullPath -EvidencePath $f0115Phase11EvidenceFullPath -AuditReviewPath $f0115Phase11AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        )
+        Assert-Contains -Output $f0115Phase11PositiveOutput -Pattern "p1F0115Phase11TransitionTopology: exact_one_parent"
+        Assert-Contains -Output $f0115Phase11PositiveOutput -Pattern "p1TransitionScopeMode: transition_only"
+        Assert-Contains -Output $f0115Phase11PositiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+        Assert-Contains -Output $f0115Phase11PositiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR origin/master"
+        Assert-Contains -Output $f0115Phase11PositiveOutput -Pattern "pre-push readiness passed"
+
+        $f0115Phase11BaseTreeSha = ((& git rev-parse "$f0115Phase11BaseSha`^{tree}") -join "").Trim()
+        $f0115Phase11MovedOriginSha = (("move phase-11 origin" | & git commit-tree $f0115Phase11BaseTreeSha -p $f0115Phase11BaseSha) -join "").Trim()
+        & git update-ref refs/remotes/origin/master $f0115Phase11MovedOriginSha $f0115Phase11BaseSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to move F-0115 phase-11 origin/master." }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115Phase11ProjectStateFullPath -QueuePath $f0115Phase11QueueFullPath -MatrixPath $f0115Phase11MatrixFullPath -EvidencePath $f0115Phase11EvidenceFullPath -AuditReviewPath $f0115Phase11AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+        & git update-ref refs/remotes/origin/master $f0115Phase11BaseSha $f0115Phase11MovedOriginSha
+        if ($LASTEXITCODE -ne 0) { throw "Failed to restore F-0115 phase-11 origin/master." }
+
+        $f0115Phase11NonAncestorSha = (("non-ancestor phase-11 checkpoint" | & git commit-tree $f0115Phase11BaseTreeSha) -join "").Trim()
+        $f0115Phase11NonAncestorStatePath = Join-Path $f0115Phase11FixtureRoot "non-ancestor-project-state.yaml"
+        [System.IO.File]::WriteAllText($f0115Phase11NonAncestorStatePath, @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $f0115Phase11NonAncestorSha
+  lastKnownOriginMasterSha: $f0115Phase11NonAncestorSha
+currentTask:
+  id: $f0115PrePushParentTaskId
+  status: in_progress
+"@, $f0115PrePushUtf8WithoutBom)
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115Phase11NonAncestorStatePath -QueuePath $f0115Phase11QueueFullPath -MatrixPath $f0115Phase11MatrixFullPath -EvidencePath $f0115Phase11EvidenceFullPath -AuditReviewPath $f0115Phase11AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+
+        $f0115Phase11HotfixTreeSha = ((& git rev-parse "$f0115Phase11HotfixSha`^{tree}") -join "").Trim()
+        $f0115Phase11MergeSha = (("merge-shaped phase-11 replay" | & git commit-tree $f0115Phase11HotfixTreeSha -p $f0115Phase11BaseSha -p $f0115Phase11NonAncestorSha) -join "").Trim()
+        & git reset --hard --quiet $f0115Phase11MergeSha
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115Phase11ProjectStateFullPath -QueuePath $f0115Phase11QueueFullPath -MatrixPath $f0115Phase11MatrixFullPath -EvidencePath $f0115Phase11EvidenceFullPath -AuditReviewPath $f0115Phase11AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+
+        $f0115Phase11ReplaySha = (("extra phase-11 replay commit" | & git commit-tree $f0115Phase11HotfixTreeSha -p $f0115Phase11HotfixSha) -join "").Trim()
+        & git reset --hard --quiet $f0115Phase11ReplaySha
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115Phase11ProjectStateFullPath -QueuePath $f0115Phase11QueueFullPath -MatrixPath $f0115Phase11MatrixFullPath -EvidencePath $f0115Phase11EvidenceFullPath -AuditReviewPath $f0115Phase11AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+
+        & git reset --hard --quiet $f0115Phase11BaseSha
+        Set-F0115PrePushFixtureFile -Root $f0115Phase11FixtureRoot -Path "ordinary-drift.txt" -Content "ordinary drift must remain blocked`n"
+        & git add --sparse -- ordinary-drift.txt
+        & git commit --quiet -m "ordinary in-progress drift"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to synthesize ordinary F-0115 phase-11 drift." }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0115Phase11ProjectStateFullPath -QueuePath $f0115Phase11QueueFullPath -MatrixPath $f0115Phase11MatrixFullPath -EvidencePath $f0115Phase11EvidenceFullPath -AuditReviewPath $f0115Phase11AuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    if (Test-Path -LiteralPath $f0115Phase11FixtureRoot) {
+        Remove-Item -LiteralPath $f0115Phase11FixtureRoot -Recurse -Force
     }
 }
 
