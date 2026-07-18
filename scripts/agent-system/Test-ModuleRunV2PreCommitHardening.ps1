@@ -121,16 +121,17 @@ New-Variable -Name p1F0115Phase11ScopeCorrectionFiles -Option Constant -Value @(
     $p1F0115Phase11ScopeCorrectionEvidencePath,
     $p1F0115Phase11ScopeCorrectionAuditPath
 )
-New-Variable -Name p1F0115ModulePrecommitHotfixTaskId -Option Constant -Value "p1-f0115-closeout-guard-hotfix-2026-07-17"
+New-Variable -Name p1F0115ModulePrecommitHotfixTaskId -Option Constant -Value "p1-remediation-efficiency-mechanism-tuning-2026-07-17"
 New-Variable -Name p1F0115ModulePrecommitHotfixParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
-New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
-New-Variable -Name p1F0115ModulePrecommitHotfixBranch -Option Constant -Value "codex/p1-f0115-closeout-guard-hotfix"
-New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
-New-Variable -Name p1F0115ModulePrecommitHotfixEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
-New-Variable -Name p1F0115ModulePrecommitHotfixAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
+New-Variable -Name p1F0115ModulePrecommitHotfixBranch -Option Constant -Value "codex/p1-remediation-efficiency-mechanism-tuning"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-remediation-efficiency-mechanism-tuning-authorization.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
 New-Variable -Name p1F0115ModulePrecommitHotfixFiles -Option Constant -Value @(
+    "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
     $p1F0115ModulePrecommitHotfixAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
     $p1F0115ModulePrecommitHotfixEvidencePath,
     $p1F0115ModulePrecommitHotfixAuditPath,
     "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
@@ -1281,7 +1282,7 @@ function Test-P1F0115ModulePrecommitHotfixAnchors {
     $parentTaskBlock = @(Get-TaskBlock -Lines $QueueLines -Id $p1F0115ModulePrecommitHotfixParentTaskId)
     $parentQueueStatus = if ($parentTaskBlock.Count -gt 0) { Get-ScalarValue -Block $parentTaskBlock -Key "status" } else { "" }
 
-    if ($headSha -ne $p1F0115ModulePrecommitHotfixBaseSha -or $branch -ne $p1F0115ModulePrecommitHotfixBranch -or $currentTaskId -ne $p1F0115ModulePrecommitHotfixParentTaskId -or $currentTaskStatus -ne "in_progress" -or $parentQueueStatus -ne "in_progress") {
+    if ($headSha -ne $p1F0115ModulePrecommitHotfixBaseSha -or $branch -ne $p1F0115ModulePrecommitHotfixBranch -or $currentTaskId -ne $p1F0115ModulePrecommitHotfixParentTaskId -or $currentTaskStatus -ne "ready_for_closeout" -or $parentQueueStatus -ne "ready_for_closeout") {
         Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_CONTEXT_INVALID"
     }
 

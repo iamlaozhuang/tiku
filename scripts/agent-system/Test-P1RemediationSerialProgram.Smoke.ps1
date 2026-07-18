@@ -27,7 +27,7 @@ $modulePrecommitHotfixPatterns = @(
     "Test-P1F0115ModulePrecommitHotfixFileSet",
     "Test-P1F0115ModulePrecommitHotfixAnchors",
     "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time",
-    "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
+    "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
 )
 $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where-Object {
     $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
@@ -2143,14 +2143,15 @@ Decision: APPROVE_SCOPE
     if (-not $intermediateLaunderingFailed) { throw "Intermediate same-task closeout scope laundering fixture unexpectedly passed." }
 
     $moduleHotfixRoot = Join-Path $smokeRoot "f0115-module-precommit-hotfix"
-    $moduleHotfixBaseSha = "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
-    $moduleHotfixBranch = "codex/p1-f0115-closeout-guard-hotfix"
-    $moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
-    $moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
-    $moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+    $moduleHotfixBaseSha = "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
+    $moduleHotfixBranch = "codex/p1-remediation-efficiency-mechanism-tuning"
+    $moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-remediation-efficiency-mechanism-tuning-authorization.md"
+    $moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
+    $moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
     $moduleHotfixFiles = @(
+        "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
         $moduleHotfixAuthorizationPath,
-        "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
+        "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
         $moduleHotfixEvidencePath,
         $moduleHotfixAuditPath,
         "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
@@ -2197,7 +2198,7 @@ Decision: APPROVE_SCOPE
         "",
         "Status: approved",
         "Human approval source: current user message",
-        "Task ID: p1-f0115-closeout-guard-hotfix-2026-07-17",
+        "Task ID: p1-remediation-efficiency-mechanism-tuning-2026-07-17",
         "Parent task: p1-remediation-rc-02-employee-creation-atomicity-2026-07-16",
         "Base: $moduleHotfixBaseSha",
         "Branch: $moduleHotfixBranch",
@@ -2210,8 +2211,9 @@ Decision: APPROVE_SCOPE
         "",
         $authorizationFileList
     ) -join "`n"
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md" -Content "# P1 Efficiency SOP`n"
     Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixAuthorizationPath -Content $moduleHotfixAuthorization
-    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md" -Content "# Plan`n`nCost Calibration Gate remains blocked."
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md" -Content "# Plan`n`nCost Calibration Gate remains blocked."
     $moduleHotfixEvidence = @(
         "# Evidence", "", "## Reading Evidence", "status: complete", "conflictsFound: false",
         "targetSourceReviewed: true", "targetTestsReviewed: true", "analogousImplementationReviewed: true",

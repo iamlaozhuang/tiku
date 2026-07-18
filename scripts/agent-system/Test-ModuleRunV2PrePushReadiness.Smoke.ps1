@@ -64,7 +64,7 @@ $modulePrecommitHotfixPatterns = @(
     "p1F0115ModulePrecommitHotfixFiles",
     "Test-P1F0115ModulePrecommitHotfixTransitionTopology",
     "p1F0115ModulePrecommitHotfixTransitionTopology: exact_one_parent",
-    "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
+    "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
 )
 $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where-Object {
     $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
@@ -782,13 +782,14 @@ currentTask:
     }
 }
 
-$moduleHotfixBaseSha = "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
-$moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
-$moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
-$moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+$moduleHotfixBaseSha = "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
+$moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-remediation-efficiency-mechanism-tuning-authorization.md"
+$moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
+$moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
 $moduleHotfixFiles = @(
+    "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
     $moduleHotfixAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
     $moduleHotfixEvidencePath,
     $moduleHotfixAuditPath,
     "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
@@ -819,8 +820,9 @@ try {
     foreach ($scriptFile in @($moduleHotfixFiles | Where-Object { $_ -like "scripts/*" })) {
         Add-Content -LiteralPath (Join-Path $moduleHotfixFixtureRoot ($scriptFile -replace "/", "\")) -Value "# F-0115 Module hotfix pre-push marker" -Encoding UTF8
     }
+    Set-F0115PrePushFixtureFile -Root $moduleHotfixFixtureRoot -Path "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md" -Content "# P1 Efficiency SOP`n"
     Set-F0115PrePushFixtureFile -Root $moduleHotfixFixtureRoot -Path $moduleHotfixAuthorizationPath -Content "# Authorization`n`nStatus: approved`nHuman approval source: current user message`n"
-    Set-F0115PrePushFixtureFile -Root $moduleHotfixFixtureRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md" -Content "# Plan`n"
+    Set-F0115PrePushFixtureFile -Root $moduleHotfixFixtureRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md" -Content "# Plan`n"
     Set-F0115PrePushFixtureFile -Root $moduleHotfixFixtureRoot -Path $moduleHotfixEvidencePath -Content "# Evidence`n`nResult: pass`n"
     Set-F0115PrePushFixtureFile -Root $moduleHotfixFixtureRoot -Path $moduleHotfixAuditPath -Content "# Audit`n`nDecision: APPROVE`n"
     & git -C $moduleHotfixFixtureRoot add -- $moduleHotfixFiles

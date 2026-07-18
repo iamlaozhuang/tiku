@@ -76,13 +76,14 @@ New-Variable -Name p1F0115Phase11ScopeCorrectionFiles -Option Constant -Value @(
     "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md",
     "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-phase11-scope-correction-hotfix.md"
 )
-New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
-New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-remediation-efficiency-mechanism-tuning-authorization.md"
 New-Variable -Name p1F0115ModulePrecommitHotfixFiles -Option Constant -Value @(
+    "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
     $p1F0115ModulePrecommitHotfixAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
-    "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
-    "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
+    "docs/05-execution-logs/evidence/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
     "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
     "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
     "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
@@ -453,8 +454,8 @@ function Test-P1F0115ModulePrecommitHotfixTransitionTopology {
 
     if ($TaskId -ne $p1F0115ScopeCorrectionParentTaskId `
         -or $StateCurrentTaskId -ne $p1F0115ScopeCorrectionParentTaskId `
-        -or $StateCurrentTaskStatus -ne "in_progress" `
-        -or $TaskStatus -ne "in_progress" `
+        -or $StateCurrentTaskStatus -ne "ready_for_closeout" `
+        -or $TaskStatus -ne "ready_for_closeout" `
         -or $CurrentBranch -ne "master" `
         -or $HeadSha -ne $MasterSha `
         -or $OriginMasterSha -ne $p1F0115ModulePrecommitHotfixBaseSha `
@@ -784,20 +785,20 @@ if ($isP1TransitionScopeMode -and -not $canUseP1TransitionMasterAncestry) {
 }
 
 if ($stateMasterSha -ne $masterSha) {
-    if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
-        Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR master"
-    } elseif ($canUseP1TransitionMasterAncestry) {
+    if ($canUseP1TransitionMasterAncestry) {
         Write-Output "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+    } elseif ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
+        Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR master"
     } else {
         Add-Finding "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master"
     }
 }
 
 if ($stateOriginMasterSha -ne $originMasterSha) {
-    if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
-        Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR origin/master"
-    } elseif ($canUseP1TransitionMasterAncestry) {
+    if ($canUseP1TransitionMasterAncestry) {
         Write-Output "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR origin/master"
+    } elseif ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
+        Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR origin/master"
     } else {
         Add-Finding "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT origin/master"
     }

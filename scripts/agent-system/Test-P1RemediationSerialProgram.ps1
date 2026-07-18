@@ -168,16 +168,17 @@ $p1F0115Phase11ScopeCorrectionFiles = @(
     $p1F0115Phase11ScopeCorrectionEvidencePath,
     $p1F0115Phase11ScopeCorrectionAuditPath
 )
-$p1F0115ModulePrecommitHotfixTaskId = "p1-f0115-closeout-guard-hotfix-2026-07-17"
+$p1F0115ModulePrecommitHotfixTaskId = "p1-remediation-efficiency-mechanism-tuning-2026-07-17"
 $p1F0115ModulePrecommitHotfixParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
-$p1F0115ModulePrecommitHotfixBaseSha = "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
-$p1F0115ModulePrecommitHotfixBranch = "codex/p1-f0115-closeout-guard-hotfix"
-$p1F0115ModulePrecommitHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
-$p1F0115ModulePrecommitHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
-$p1F0115ModulePrecommitHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+$p1F0115ModulePrecommitHotfixBaseSha = "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
+$p1F0115ModulePrecommitHotfixBranch = "codex/p1-remediation-efficiency-mechanism-tuning"
+$p1F0115ModulePrecommitHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-remediation-efficiency-mechanism-tuning-authorization.md"
+$p1F0115ModulePrecommitHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
+$p1F0115ModulePrecommitHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md"
 $p1F0115ModulePrecommitHotfixFiles = @(
+    "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
     $p1F0115ModulePrecommitHotfixAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-remediation-efficiency-mechanism-tuning.md",
     $p1F0115ModulePrecommitHotfixEvidencePath,
     $p1F0115ModulePrecommitHotfixAuditPath,
     "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
@@ -1098,7 +1099,7 @@ function Test-P1F0115ModulePrecommitHotfixAnchors {
         }
     }
 
-    if ($CurrentTaskId -ne $p1F0115ModulePrecommitHotfixParentTaskId -or $taskStatus -ne "in_progress") {
+    if ($CurrentTaskId -ne $p1F0115ModulePrecommitHotfixParentTaskId -or $taskStatus -ne "ready_for_closeout") {
         Add-Finding "P1_PROGRAM_F0115_MODULE_PRECOMMIT_HOTFIX_CONTEXT_INVALID task"
     }
 

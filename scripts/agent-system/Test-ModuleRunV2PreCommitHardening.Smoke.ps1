@@ -66,7 +66,7 @@ $modulePrecommitHotfixPatterns = @(
     "Test-P1F0115ModulePrecommitHotfixAnchors",
     "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time",
     "Test-IsExplicitNonSecretFixture",
-    "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
+    "529ecf24c52eb25d2097cbfdbc595b05f377e6b4"
 )
 $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where-Object {
     $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
