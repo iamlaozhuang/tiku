@@ -60,6 +60,20 @@ $missingPhase11ScopeCorrectionPatterns = @($phase11ScopeCorrectionPatterns | Whe
 if ($missingPhase11ScopeCorrectionPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0115 phase-11 scope-correction contract: $($missingPhase11ScopeCorrectionPatterns -join ', ')"
 }
+$modulePrecommitHotfixPatterns = @(
+    "p1F0115ModulePrecommitHotfixTaskId",
+    "Test-P1F0115ModulePrecommitHotfixFileSet",
+    "Test-P1F0115ModulePrecommitHotfixAnchors",
+    "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time",
+    "Test-IsExplicitNonSecretFixture",
+    "1fd9906992c567368044a8ede98eaee840a0b1fa"
+)
+$missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingModulePrecommitHotfixPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0115 Module hotfix contract: $($missingModulePrecommitHotfixPatterns -join ', ')"
+}
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 
@@ -96,6 +110,9 @@ tasks:
     taskKind: read_only
     allowedFiles:
       - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - src/app/api/v1/employee-import-commands/[publicId]/route.ts
+      - src/server/*.ts
+      - docs/05-execution-logs/evidence/*.md
     blockedFiles:
       - package.json
       - package-lock.yaml
@@ -129,6 +146,122 @@ Assert-Contains -Output $allowedOutput -Pattern "Module Run v2 Pre-Commit Harden
 Assert-Contains -Output $allowedOutput -Pattern "preCommitMode: hard_block"
 Assert-Contains -Output $allowedOutput -Pattern "OK_SCOPE scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1"
 Assert-Contains -Output $allowedOutput -Pattern "Cost Calibration Gate remains blocked"
+
+$literalRoutePath = "src/app/api/v1/employee-import-commands/[publicId]/route.ts"
+$safeSourcePath = "src/server/safe-fixture.ts"
+$safeEvidencePath = "docs/05-execution-logs/evidence/safe-fixture.md"
+foreach ($fixturePath in @($literalRoutePath, $safeSourcePath, $safeEvidencePath)) {
+    $fixtureFullPath = Join-Path $normalFixtureRoot ($fixturePath -replace "/", "\")
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $fixtureFullPath) | Out-Null
+}
+Set-Content -LiteralPath (Join-Path $normalFixtureRoot ($literalRoutePath -replace "/", "\")) -Value "export const runtime = 'nodejs';" -Encoding UTF8
+Set-Content -LiteralPath (Join-Path $normalFixtureRoot ($safeSourcePath -replace "/", "\")) -Value @'
+const passwordHash = "fixture-hash";
+const account = { password: passwordHash, };
+const placeholder = { password: "placeholder-password-hash-1" };
+const session = { token: "Bearer admin-session-token" };
+const update = { password: sql`case ${passwordCases} else current_password end` };
+'@ -Encoding UTF8
+Set-Content -LiteralPath (Join-Path $normalFixtureRoot ($safeEvidencePath -replace "/", "\")) -Value '$env:DATABASE_URL = "postgresql://tiku_plan_only:tiku_plan_only@127.0.0.1:5432/tiku_plan_only"' -Encoding UTF8
+
+$safeFixtureOutput = @(
+    Push-Location $normalFixtureRoot
+    try {
+        & $scriptPath `
+            -ProjectStatePath $normalProjectStatePath `
+            -QueuePath $normalQueuePath `
+            -MatrixPath $normalMatrixPath `
+            -TaskId $taskId `
+            -ChangedFiles @($literalRoutePath, $safeSourcePath, $safeEvidencePath)
+    } finally {
+        Pop-Location
+    }
+)
+Assert-Contains -Output $safeFixtureOutput -Pattern "OK_SCOPE src/app/api/v1/employee-import-commands/\[publicId\]/route.ts"
+Assert-Contains -Output $safeFixtureOutput -Pattern "OK_SCOPE src/server/safe-fixture.ts matches src/server/\*.ts"
+Assert-Contains -Output $safeFixtureOutput -Pattern "pre-commit hardening passed"
+
+$wrongLiteralRoutePath = "src/app/api/v1/employee-import-commands/[other]/route.ts"
+$wrongLiteralRouteFullPath = Join-Path $normalFixtureRoot ($wrongLiteralRoutePath -replace "/", "\")
+New-Item -ItemType Directory -Force -Path (Split-Path -Parent $wrongLiteralRouteFullPath) | Out-Null
+Set-Content -LiteralPath $wrongLiteralRouteFullPath -Value "export const runtime = 'nodejs';" -Encoding UTF8
+Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE) src/app/api/v1/employee-import-commands/\[other\]/route.ts" -Command {
+    Push-Location $normalFixtureRoot
+    try {
+        & $scriptPath `
+            -ProjectStatePath $normalProjectStatePath `
+            -QueuePath $normalQueuePath `
+            -MatrixPath $normalMatrixPath `
+            -TaskId $taskId `
+            -ChangedFiles $wrongLiteralRoutePath
+    } finally {
+        Pop-Location
+    }
+}
+
+$passwordField = "pass" + "word"
+$tokenField = "to" + "ken"
+$realSecretFixtures = @(
+    @{ Name = "quoted-password"; Content = "const leaked = { ${passwordField}: `"ActualSecretValue123`" };" },
+    @{ Name = "quoted-token"; Content = "const leaked = { ${tokenField}: 'ProductionToken123456' };" },
+    @{ Name = "prefixed-secret"; Content = "const leaked = { ${passwordField}: `"test-ActualSecretValue123`" };" },
+    @{ Name = "sql-literal-secret"; Content = "const leaked = { ${passwordField}: sql``select 'ActualSecretValue123'`` };" },
+    @{ Name = "sql-immediate-literal-secret"; Content = "const leaked = { ${passwordField}: sql``'ActualSecretValue123'`` };" },
+    @{ Name = "sql-spaced-literal-secret"; Content = "const leaked = { ${passwordField}: sql`` `"ActualSecretValue123`"`` };" },
+    @{ Name = "second-sql-match-secret"; Content = "const leaked = { ${passwordField}: sql``safe_expr``, ${tokenField}: sql``'ActualSecretValue123'`` };" },
+    @{ Name = "second-match-secret"; Content = "const leaked = { ${passwordField}: `"placeholder-password-hash-1`", ${tokenField}: `"ActualSecretToken123456`" };" }
+)
+foreach ($realSecretFixture in $realSecretFixtures) {
+    $realSecretPath = "src/server/real-secret-$($realSecretFixture.Name).ts"
+    Set-Content -LiteralPath (Join-Path $normalFixtureRoot ($realSecretPath -replace "/", "\")) -Value $realSecretFixture.Content -Encoding UTF8
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SENSITIVE_EVIDENCE src/server/real-secret-$($realSecretFixture.Name)\.ts.*secret_assignment" -Command {
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $realSecretPath
+        } finally {
+            Pop-Location
+        }
+    }
+}
+
+$realDatabaseUrlPath = "docs/05-execution-logs/evidence/real-database-url.md"
+$databaseUrlField = "DATABASE" + "_URL"
+$postgresScheme = "post" + "gresql"
+Set-Content -LiteralPath (Join-Path $normalFixtureRoot ($realDatabaseUrlPath -replace "/", "\")) -Value "${databaseUrlField}=`"${postgresScheme}://prod_user:ActualSecret123@db.internal:5432/tiku`"" -Encoding UTF8
+Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SENSITIVE_EVIDENCE docs/05-execution-logs/evidence/real-database-url.md.*database_(?:url|connection_url)" -Command {
+    Push-Location $normalFixtureRoot
+    try {
+        & $scriptPath `
+            -ProjectStatePath $normalProjectStatePath `
+            -QueuePath $normalQueuePath `
+            -MatrixPath $normalMatrixPath `
+            -TaskId $taskId `
+            -ChangedFiles $realDatabaseUrlPath
+    } finally {
+        Pop-Location
+    }
+}
+
+$localhostDatabaseUrlPath = "docs/05-execution-logs/evidence/localhost-database-url.md"
+Set-Content -LiteralPath (Join-Path $normalFixtureRoot ($localhostDatabaseUrlPath -replace "/", "\")) -Value "${databaseUrlField}=`"${postgresScheme}://test_user:test-ActualSecret123@localhost:5432/test_prod`"" -Encoding UTF8
+Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SENSITIVE_EVIDENCE docs/05-execution-logs/evidence/localhost-database-url.md.*database_(?:url|connection_url)" -Command {
+    Push-Location $normalFixtureRoot
+    try {
+        & $scriptPath `
+            -ProjectStatePath $normalProjectStatePath `
+            -QueuePath $normalQueuePath `
+            -MatrixPath $normalMatrixPath `
+            -TaskId $taskId `
+            -ChangedFiles $localhostDatabaseUrlPath
+    } finally {
+        Pop-Location
+    }
+}
 
 $batchShadowOutput = @(
     & $scriptPath `

@@ -121,6 +121,25 @@ New-Variable -Name p1F0115Phase11ScopeCorrectionFiles -Option Constant -Value @(
     $p1F0115Phase11ScopeCorrectionEvidencePath,
     $p1F0115Phase11ScopeCorrectionAuditPath
 )
+New-Variable -Name p1F0115ModulePrecommitHotfixTaskId -Option Constant -Value "p1-f0115-module-precommit-hotfix-2026-07-17"
+New-Variable -Name p1F0115ModulePrecommitHotfixParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "1fd9906992c567368044a8ede98eaee840a0b1fa"
+New-Variable -Name p1F0115ModulePrecommitHotfixBranch -Option Constant -Value "codex/p1-f0115-module-precommit-hotfix"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-module-precommit-hotfix-authorization.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixFiles -Option Constant -Value @(
+    $p1F0115ModulePrecommitHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md",
+    $p1F0115ModulePrecommitHotfixEvidencePath,
+    $p1F0115ModulePrecommitHotfixAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 New-Variable -Name p1F0115ScopeCorrectionTaskId -Option Constant -Value "p1-f0115-scope-correction-hotfix-2026-07-16"
 New-Variable -Name p1F0115ScopeCorrectionParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
 New-Variable -Name p1F0115ScopeCorrectionBaseSha -Option Constant -Value "6bde2f2aec3d71fa0ce138b26f64243861cace6f"
@@ -640,7 +659,9 @@ function Test-PathPattern {
         return $normalizedPath -eq $prefix -or $normalizedPath.StartsWith("$prefix/")
     }
 
-    return $normalizedPath -like $normalizedPattern
+    $escapedPattern = [regex]::Escape($normalizedPattern)
+    $pathPattern = $escapedPattern.Replace("\*\*", ".*").Replace("\*", "[^/]*").Replace("\?", "[^/]")
+    return [regex]::IsMatch($normalizedPath, "^$pathPattern$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
 }
 
 function Get-MatchingPattern {
@@ -1181,6 +1202,127 @@ function Test-P1F0115Phase11ScopeCorrectionAnchors {
     if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time" }
 }
 
+function Test-P1F0115ModulePrecommitHotfixFileSet {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
+
+    $actualFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    $expectedFiles = @($p1F0115ModulePrecommitHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    return ($actualFiles -join "|") -ceq ($expectedFiles -join "|")
+}
+
+function Get-P1F0115ModulePrecommitHotfixIndexText {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    $normalizedPath = ConvertTo-NormalizedPath -Path $Path
+    $content = @(& git -C $RepositoryRoot show ":$normalizedPath" 2>$null)
+    if ($LASTEXITCODE -ne 0) { return "" }
+    return $content -join "`n"
+}
+
+function Test-P1F0115ModulePrecommitHotfixReviewContract {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$EvidenceText,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$AuditText
+    )
+
+    $normalizedEvidenceText = $EvidenceText -replace "`r`n?", "`n"
+    $normalizedAuditText = $AuditText -replace "`r`n?", "`n"
+    $evidenceHasContradiction = $normalizedEvidenceText -match '(?im)^\s*(?:-\s*)?Result\s*:\s*fail\s*$' -or $normalizedEvidenceText -match '(?im)^\s*(?:-\s*)?Decision\s*:\s*REJECT\s*$'
+    foreach ($section in @("Root-Cause Reproduction", "TDD Evidence", "Validation Results")) {
+        $headingPattern = "(?im)^##\s+$([regex]::Escape($section))\s*$"
+        $sectionText = Get-ScopeCorrectionMarkdownSection -Content $normalizedEvidenceText -HeadingPattern ([regex]::Escape($section))
+        if ([regex]::Matches($normalizedEvidenceText, $headingPattern).Count -ne 1 -or [regex]::Matches($sectionText, '(?im)^\s*Result\s*:\s*pass\s*$').Count -ne 1) {
+            $evidenceHasContradiction = $true
+        }
+    }
+    $readingEvidenceSection = Get-ScopeCorrectionMarkdownSection -Content $normalizedEvidenceText -HeadingPattern "Reading Evidence"
+    if ([regex]::Matches($normalizedEvidenceText, '(?im)^##\s+Reading Evidence\s*$').Count -ne 1) { $evidenceHasContradiction = $true }
+    foreach ($markerPattern in @(
+        '(?im)^\s*status\s*:\s*complete\s*$',
+        '(?im)^\s*conflictsFound\s*:\s*false\s*$',
+        '(?im)^\s*targetSourceReviewed\s*:\s*true\s*$',
+        '(?im)^\s*targetTestsReviewed\s*:\s*true\s*$',
+        '(?im)^\s*analogousImplementationReviewed\s*:\s*true\s*$',
+        '(?im)^\s*Cost Calibration Gate remains blocked(?:\u3002|\.)?\s*$'
+    )) {
+        if ([regex]::Matches($readingEvidenceSection, $markerPattern).Count -ne 1) { $evidenceHasContradiction = $true }
+    }
+    if ($evidenceHasContradiction) { Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_ARTIFACT_CONTRADICTION evidence" }
+
+    $auditHasContradiction = $normalizedAuditText -match '(?im)^\s*(?:-\s*)?Result\s*:\s*fail\s*$' -or $normalizedAuditText -match '(?im)^\s*(?:-\s*)?Decision\s*:\s*REJECT\s*$'
+    foreach ($section in @("Round 1", "Round 2")) {
+        $headingPattern = "(?im)^##\s+$([regex]::Escape($section))\s*$"
+        $sectionText = Get-ScopeCorrectionMarkdownSection -Content $normalizedAuditText -HeadingPattern ([regex]::Escape($section))
+        if ([regex]::Matches($normalizedAuditText, $headingPattern).Count -ne 1 -or [regex]::Matches($sectionText, '(?im)^\s*Result\s*:\s*pass\s*$').Count -ne 1) {
+            $auditHasContradiction = $true
+        }
+    }
+    if ([regex]::Matches($normalizedAuditText, '(?im)^##\s+Decision\s*$').Count -ne 1 -or [regex]::Matches($normalizedAuditText, '(?im)^\s*Decision\s*:\s*APPROVE\s*$').Count -ne 1) {
+        $auditHasContradiction = $true
+    }
+    if ($auditHasContradiction) { Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_ARTIFACT_CONTRADICTION audit" }
+}
+
+function Test-P1F0115ModulePrecommitHotfixAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ProjectStateLines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$QueueLines
+    )
+
+    $findingCountBefore = $script:findings.Count
+    $headSha = ((& git -C $RepositoryRoot rev-parse HEAD) -join "").Trim()
+    $branch = ((& git -C $RepositoryRoot branch --show-current) -join "").Trim()
+    $currentTaskId = Get-CurrentTaskId -Lines $ProjectStateLines
+    $currentTaskStatus = Get-CurrentTaskStatus -Lines $ProjectStateLines
+    $parentTaskBlock = @(Get-TaskBlock -Lines $QueueLines -Id $p1F0115ModulePrecommitHotfixParentTaskId)
+    $parentQueueStatus = if ($parentTaskBlock.Count -gt 0) { Get-ScalarValue -Block $parentTaskBlock -Key "status" } else { "" }
+
+    if ($headSha -ne $p1F0115ModulePrecommitHotfixBaseSha -or $branch -ne $p1F0115ModulePrecommitHotfixBranch -or $currentTaskId -ne $p1F0115ModulePrecommitHotfixParentTaskId -or $currentTaskStatus -ne "in_progress" -or $parentQueueStatus -ne "in_progress") {
+        Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_CONTEXT_INVALID"
+    }
+
+    & git -C $RepositoryRoot diff --quiet
+    $unstagedTrackedExitCode = $LASTEXITCODE
+    $untrackedFiles = @(& git -C $RepositoryRoot ls-files --others --exclude-standard)
+    if ($unstagedTrackedExitCode -ne 0 -or $LASTEXITCODE -ne 0 -or $untrackedFiles.Count -gt 0) {
+        Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_PARTIAL_STAGE_INVALID"
+    }
+
+    $materializedAuthorizationPath = ((& git -C $RepositoryRoot ls-tree -r --name-only HEAD -- $p1F0115ModulePrecommitHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_PARENT_INSPECTION_FAILED"
+    } elseif ($materializedAuthorizationPath -eq $p1F0115ModulePrecommitHotfixAuthorizationPath) {
+        Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_ALREADY_MATERIALIZED"
+    }
+
+    $authorizationText = Get-P1F0115ModulePrecommitHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $p1F0115ModulePrecommitHotfixAuthorizationPath
+    foreach ($pattern in @(
+        '(?im)^Status:\s*approved\s*$',
+        '(?im)^Human approval source:\s*current user message',
+        "(?im)^Task ID:\s*[\x60]?$([regex]::Escape($p1F0115ModulePrecommitHotfixTaskId))[\x60]?\s*$",
+        "(?im)^Parent task:\s*[\x60]?$([regex]::Escape($p1F0115ModulePrecommitHotfixParentTaskId))[\x60]?\s*$",
+        "(?im)^Base:\s*[\x60]?$([regex]::Escape($p1F0115ModulePrecommitHotfixBaseSha))[\x60]?\s*$",
+        "(?im)^Branch:\s*[\x60]?$([regex]::Escape($p1F0115ModulePrecommitHotfixBranch))[\x60]?\s*$",
+        '(?i)otherInProgressShaDrift:\s*hard_block',
+        '(?i)hookBypass:\s*prohibited',
+        '(?i)qualityGateReduction:\s*prohibited'
+    )) {
+        if ($authorizationText -notmatch $pattern) {
+            Add-Finding "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+
+    $evidenceText = Get-P1F0115ModulePrecommitHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $p1F0115ModulePrecommitHotfixEvidencePath
+    $auditText = Get-P1F0115ModulePrecommitHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $p1F0115ModulePrecommitHotfixAuditPath
+    Test-P1F0115ModulePrecommitHotfixReviewContract -EvidenceText $evidenceText -AuditText $auditText
+    if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time" }
+}
+
 function Test-P1F0115ScopeCorrectionFileSet {
     param(
         [Parameter(Mandatory = $true)]
@@ -1492,6 +1634,39 @@ function Resolve-ScanPath {
     return Join-Path -Path $RepositoryRoot -ChildPath $Path
 }
 
+function Test-IsExplicitNonSecretFixture {
+    param(
+        [Parameter(Mandatory = $true)][string]$Label,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value,
+        [Parameter(Mandatory = $true)][bool]$WasQuoted,
+        [Parameter(Mandatory = $true)][string]$FullPath,
+        [Parameter(Mandatory = $true)][bool]$IsSqlExpression,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$SqlBody
+    )
+
+    $candidateValue = $Value.Trim().TrimEnd(',', ';', '}', ')', ']').Trim('"', "'", [char]96)
+    $extension = [System.IO.Path]::GetExtension($FullPath).ToLowerInvariant()
+    $sourceExtensions = @(".cjs", ".js", ".jsx", ".mjs", ".ps1", ".ts", ".tsx")
+
+    if ($Label -eq "secret_assignment") {
+        if ($candidateValue -in @("placeholder-password-hash-1", "placeholder-password-hash-2", "Bearer admin-session-token")) {
+            return $true
+        }
+        if (-not $WasQuoted -and $extension -in $sourceExtensions -and $candidateValue -match '^[A-Za-z_$][A-Za-z0-9_$.]*$') {
+            return $true
+        }
+        if ($IsSqlExpression -and $extension -in $sourceExtensions -and $SqlBody -notmatch '[''"]') {
+            return $true
+        }
+    }
+
+    if ($Label -in @("database_url", "database_connection_url")) {
+        return $candidateValue -ceq "postgresql://tiku_plan_only:tiku_plan_only@127.0.0.1:5432/tiku_plan_only"
+    }
+
+    return $false
+}
+
 function Test-SensitiveEvidence {
     param(
         [Parameter(Mandatory = $true)]
@@ -1509,10 +1684,10 @@ function Test-SensitiveEvidence {
         return
     }
 
-    $apiKeyPattern = "(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*['""]?[^'""\s]{8,}"
+    $apiKeyPattern = '(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*(?:(?<quote>[''"])(?<value>[^''"\r\n]{8,})\k<quote>|(?<sql>sql`(?<sqlBody>[^`]*)`)|(?<value>[^''"\s]{8,}))'
     $authHeaderPattern = "(?i)\bAuthori" + "zation\s*:\s*Bearer\s+\S+"
-    $databaseUrlPattern = "(?i)\b[a-z0-9_]*DATABASE_URL\s*=\s*\S+"
-    $databaseConnectionPattern = "(?i)\bpostgres(?:ql)?://[^'""\s]+"
+    $databaseUrlPattern = "(?i)\b[a-z0-9_]*DATABASE_URL\s*=\s*['""]?(?<value>[^'""\s]+)"
+    $databaseConnectionPattern = "(?i)\b(?<value>postgres(?:ql)?://[^'""\s]+)"
     $privateKeyPattern = "BEGIN\s+(RSA\s+|OPENSSH\s+)?PRIVATE KEY"
     $providerKeyPattern = "(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}"
     $rawTerm = "ra" + "w"
@@ -1540,8 +1715,12 @@ function Test-SensitiveEvidence {
     foreach ($line in Get-Content -LiteralPath $FullPath) {
         $lineNumber++
         foreach ($pattern in $patterns) {
-            if ($line -match $pattern.Pattern) {
-                Add-Finding "HARD_BLOCK_SENSITIVE_EVIDENCE $DisplayPath`:$lineNumber $($pattern.Label)"
+            foreach ($sensitiveMatch in [regex]::Matches($line, $pattern.Pattern)) {
+                $wasQuoted = $sensitiveMatch.Groups["quote"].Success -and -not [string]::IsNullOrEmpty($sensitiveMatch.Groups["quote"].Value)
+                $isSqlExpression = $sensitiveMatch.Groups["sql"].Success
+                if (-not (Test-IsExplicitNonSecretFixture -Label $pattern.Label -Value $sensitiveMatch.Groups["value"].Value -WasQuoted $wasQuoted -FullPath $FullPath -IsSqlExpression $isSqlExpression -SqlBody $sensitiveMatch.Groups["sqlBody"].Value)) {
+                    Add-Finding "HARD_BLOCK_SENSITIVE_EVIDENCE $DisplayPath`:$lineNumber $($pattern.Label)"
+                }
             }
         }
     }
@@ -1729,7 +1908,8 @@ $isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepai
 $isP1TransitionHotfixScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (Test-P1TransitionHotfixFileSet -Files $filesToScan)
 $isP1F0132ScopeCorrectionScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (Test-P1F0132ScopeCorrectionFileSet -Files $filesToScan)
 $isP1F0115Phase11ScopeCorrectionScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (-not $isP1F0132ScopeCorrectionScope) -and (Test-P1F0115Phase11ScopeCorrectionFileSet -Files $filesToScan)
-$isP1F0115ScopeCorrectionScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (-not $isP1F0132ScopeCorrectionScope) -and (-not $isP1F0115Phase11ScopeCorrectionScope) -and (Test-P1F0115ScopeCorrectionFileSet -Files $filesToScan)
+$isP1F0115ModulePrecommitHotfixScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (-not $isP1F0132ScopeCorrectionScope) -and (-not $isP1F0115Phase11ScopeCorrectionScope) -and (Test-P1F0115ModulePrecommitHotfixFileSet -Files $filesToScan)
+$isP1F0115ScopeCorrectionScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (-not $isP1F0132ScopeCorrectionScope) -and (-not $isP1F0115Phase11ScopeCorrectionScope) -and (-not $isP1F0115ModulePrecommitHotfixScope) -and (Test-P1F0115ScopeCorrectionFileSet -Files $filesToScan)
 $isP1F0115ScopeCorrectionCandidateValid = $false
 $isDocsOnlyBatchScope = -not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)
 $isLowRiskExperienceBatchScope = -not [string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId)
@@ -1739,7 +1919,7 @@ if ($isDocsOnlyBatchScope -and $isLowRiskExperienceBatchScope) {
     throw "Use either DocsOnlyBatchId or LowRiskExperienceBatchId, not both."
 }
 
-if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ScopeCorrectionScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0115ScopeCorrectionScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -1811,6 +1991,10 @@ if ($isSeedTransactionScope) {
     $TaskId = $p1F0115Phase11ScopeCorrectionTaskId
     $allowedFiles = @($p1F0115Phase11ScopeCorrectionFiles)
     $blockedFiles = @("AGENTS.md", "package.json", "package-lock.json", "pnpm-lock.yaml", "src/**", "tests/**", "e2e/**", "src/db/schema/**", "drizzle/**", "migrations/**", ".env*", "D:/tiku-readonly-audit/**")
+} elseif ($isP1F0115ModulePrecommitHotfixScope) {
+    $TaskId = $p1F0115ModulePrecommitHotfixTaskId
+    $allowedFiles = @($p1F0115ModulePrecommitHotfixFiles)
+    $blockedFiles = @("AGENTS.md", "package.json", "package-lock.json", "pnpm-lock.yaml", "src/**", "tests/**", "e2e/**", "src/db/schema/**", "drizzle/**", "migrations/**", ".env*", "D:/tiku-readonly-audit/**")
 } elseif ($isP1F0115ScopeCorrectionScope) {
     $TaskId = $p1F0115ScopeCorrectionTaskId
     $allowedFiles = @($p1F0115ScopeCorrectionFiles)
@@ -1835,7 +2019,7 @@ if ($isSeedTransactionScope) {
 
 Write-Output "taskId: $TaskId"
 if (-not $isP1F0115ScopeCorrectionScope) {
-    Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" } elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
+    Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" } elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" } elseif ($isP1F0115ModulePrecommitHotfixScope) { "p1_f0115_module_precommit_hotfix" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
 }
 Write-Output "filesToScan: $($filesToScan.Count)"
 
@@ -1862,13 +2046,14 @@ if ($isLowRiskExperienceBatchScope) {
 }
 
 Write-Section -Title "Requirement SSOT Readiness"
-if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1TransitionHotfixScope -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ScopeCorrectionScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
+if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1TransitionHotfixScope -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0115ScopeCorrectionScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
     Write-Output "requirementSsotReadiness: skipped_$(
         if ($isSeedTransactionScope) { "seed_transaction" }
         elseif ($isMechanicRepairScope) { "mechanic_repair" }
         elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" }
         elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" }
         elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" }
+        elseif ($isP1F0115ModulePrecommitHotfixScope) { "p1_f0115_module_precommit_hotfix" }
         elseif ($isP1F0115ScopeCorrectionScope) { "p1_f0115_scope_correction" }
         elseif ($isDocsOnlyBatchScope) { "docs_only_batch" }
         else { "low_risk_experience_batch" }
@@ -1897,6 +2082,8 @@ if ($SkipScopeScan) {
         Test-P1F0132ScopeCorrectionAnchors -RepositoryRoot $repositoryRoot -QueuePath $QueuePath -ProjectStateLines $projectStateLines -QueueLines $queueLines
     } elseif ($isP1F0115Phase11ScopeCorrectionScope) {
         Test-P1F0115Phase11ScopeCorrectionAnchors -RepositoryRoot $repositoryRoot -QueuePath $QueuePath -ProjectStateLines $projectStateLines -QueueLines $queueLines
+    } elseif ($isP1F0115ModulePrecommitHotfixScope) {
+        Test-P1F0115ModulePrecommitHotfixAnchors -RepositoryRoot $repositoryRoot -ProjectStateLines $projectStateLines -QueueLines $queueLines
     } elseif ($isP1F0115ScopeCorrectionScope) {
         Test-P1F0115ScopeCorrectionAnchors -RepositoryRoot $repositoryRoot -QueuePath $QueuePath -ProjectStateLines $projectStateLines -QueueLines $queueLines
     }

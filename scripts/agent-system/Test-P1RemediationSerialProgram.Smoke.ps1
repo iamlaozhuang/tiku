@@ -3,6 +3,7 @@ param()
 $ErrorActionPreference = "Stop"
 
 $guardPath = Join-Path $PSScriptRoot "Test-P1RemediationSerialProgram.ps1"
+$modulePreCommitGuardPath = Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.ps1"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $guardPath -Raw -Encoding UTF8
 $phase11ScopeCorrectionPatterns = @(
@@ -20,6 +21,19 @@ $missingPhase11ScopeCorrectionPatterns = @($phase11ScopeCorrectionPatterns | Whe
 })
 if ($missingPhase11ScopeCorrectionPatterns.Count -gt 0) {
     throw "P1 guard is RED for the F-0115 phase-11 scope-correction contract: $($missingPhase11ScopeCorrectionPatterns -join ', ')"
+}
+$modulePrecommitHotfixPatterns = @(
+    "p1F0115ModulePrecommitHotfixTaskId",
+    "Test-P1F0115ModulePrecommitHotfixFileSet",
+    "Test-P1F0115ModulePrecommitHotfixAnchors",
+    "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time",
+    "1fd9906992c567368044a8ede98eaee840a0b1fa"
+)
+$missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingModulePrecommitHotfixPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0115 Module pre-commit hotfix contract: $($missingModulePrecommitHotfixPatterns -join ', ')"
 }
 $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-p1-remediation-program-" + [guid]::NewGuid().ToString("N"))
 $bootstrapTask = "p1-remediation-program-bootstrap-2026-07-16"
@@ -2127,6 +2141,145 @@ Decision: APPROVE_SCOPE
         if ($_.Exception.Message -notmatch "P1_PROGRAM_CLOSEOUT_RANGE_PROJECTION_CHANGED") { throw }
     }
     if (-not $intermediateLaunderingFailed) { throw "Intermediate same-task closeout scope laundering fixture unexpectedly passed." }
+
+    $moduleHotfixRoot = Join-Path $smokeRoot "f0115-module-precommit-hotfix"
+    $moduleHotfixBaseSha = "1fd9906992c567368044a8ede98eaee840a0b1fa"
+    $moduleHotfixBranch = "codex/p1-f0115-module-precommit-hotfix"
+    $moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-module-precommit-hotfix-authorization.md"
+    $moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+    $moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+    $moduleHotfixFiles = @(
+        $moduleHotfixAuthorizationPath,
+        "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md",
+        $moduleHotfixEvidencePath,
+        $moduleHotfixAuditPath,
+        "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+    )
+    & git -c core.longpaths=true clone --quiet --shared --no-checkout $repositoryRoot $moduleHotfixRoot
+    if ($LASTEXITCODE -ne 0) { throw "Unable to clone F-0115 Module hotfix fixture." }
+    & git -C $moduleHotfixRoot config user.name "P1 F-0115 Module Hotfix Smoke"
+    & git -C $moduleHotfixRoot config user.email "p1-f0115-module-hotfix-smoke@example.invalid"
+    & git -C $moduleHotfixRoot config core.autocrlf false
+    & git -C $moduleHotfixRoot config core.longpaths true
+    & git -C $moduleHotfixRoot config core.safecrlf false
+    & git -C $moduleHotfixRoot sparse-checkout init --no-cone
+    if ($LASTEXITCODE -ne 0) { throw "Unable to initialize F-0115 Module hotfix sparse fixture." }
+    $moduleHotfixSparsePatterns = @(
+        "/.gitattributes",
+        "/docs/04-agent-system/",
+        "/docs/05-execution-logs/acceptance/2026-07-16-p1-*",
+        "/docs/05-execution-logs/acceptance/2026-07-17-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-16-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-17-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-16-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-17-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-15-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-16-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-17-p1-*",
+        "/scripts/agent-system/"
+    )
+    & git -C $moduleHotfixRoot sparse-checkout set --no-cone $moduleHotfixSparsePatterns
+    if ($LASTEXITCODE -ne 0) { throw "Unable to configure F-0115 Module hotfix sparse fixture." }
+    & git -C $moduleHotfixRoot switch --quiet -C $moduleHotfixBranch $moduleHotfixBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Unable to materialize F-0115 Module hotfix sparse fixture." }
+    & git -C $moduleHotfixRoot update-ref refs/remotes/origin/master $moduleHotfixBaseSha
+    foreach ($scriptFile in @($moduleHotfixFiles | Where-Object { $_ -like "scripts/*" })) {
+        Add-Content -LiteralPath (Join-Path $moduleHotfixRoot ($scriptFile -replace "/", "\")) -Value "# F-0115 Module hotfix smoke marker" -Encoding UTF8
+    }
+    $authorizationFileList = @($moduleHotfixFiles | ForEach-Object { "- ``$_``" }) -join "`n"
+    $moduleHotfixAuthorization = @(
+        "# F-0115 Module Hotfix Authorization",
+        "",
+        "Status: approved",
+        "Human approval source: current user message",
+        "Task ID: p1-f0115-module-precommit-hotfix-2026-07-17",
+        "Parent task: p1-remediation-rc-02-employee-creation-atomicity-2026-07-16",
+        "Base: $moduleHotfixBaseSha",
+        "Branch: $moduleHotfixBranch",
+        "",
+        "otherInProgressShaDrift: hard_block",
+        "hookBypass: prohibited",
+        "qualityGateReduction: prohibited",
+        "",
+        "## Exact Files",
+        "",
+        $authorizationFileList
+    ) -join "`n"
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixAuthorizationPath -Content $moduleHotfixAuthorization
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md" -Content "# Plan`n`nCost Calibration Gate remains blocked."
+    $moduleHotfixEvidence = @(
+        "# Evidence", "", "## Reading Evidence", "status: complete", "conflictsFound: false",
+        "targetSourceReviewed: true", "targetTestsReviewed: true", "analogousImplementationReviewed: true",
+        "Cost Calibration Gate remains blocked.", "",
+        "## Root-Cause Reproduction", "Result: pass", "", "## TDD Evidence", "Result: pass", "",
+        "## Validation Results", "Result: pass"
+    ) -join "`n"
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixEvidencePath -Content $moduleHotfixEvidence
+    $moduleHotfixAudit = @(
+        "# Audit", "", "## Round 1", "Result: pass", "", "## Round 2", "Result: pass", "",
+        "## Decision", "Decision: APPROVE"
+    ) -join "`n"
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixAuditPath -Content $moduleHotfixAudit
+    & git -C $moduleHotfixRoot add -- $moduleHotfixFiles
+
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixAuditPath -Content "$moduleHotfixAudit`n## Round 2`nResult: pass`nResult: fail`n## Decision`nDecision: REJECT"
+    & git -C $moduleHotfixRoot add -- $moduleHotfixAuditPath
+    $p1ContradictionFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $moduleHotfixRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $p1ContradictionFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_F0115_MODULE_PRECOMMIT_HOTFIX_ARTIFACT_CONTRADICTION audit") { throw }
+    }
+    if (-not $p1ContradictionFailed) { throw "P1 guard accepted a contradictory F-0115 Module hotfix audit." }
+    $moduleContradictionFailed = $false
+    Push-Location $moduleHotfixRoot
+    try {
+        try {
+            & $modulePreCommitGuardPath
+        } catch {
+            $moduleContradictionFailed = $true
+            if ($_.Exception.Message -notmatch "HARD_BLOCK_P1_F0115_MODULE_PRECOMMIT_HOTFIX_ARTIFACT_CONTRADICTION audit") { throw }
+        }
+    } finally {
+        Pop-Location
+    }
+    if (-not $moduleContradictionFailed) { throw "Module pre-commit guard accepted a contradictory F-0115 Module hotfix audit." }
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixAuditPath -Content $moduleHotfixAudit
+    & git -C $moduleHotfixRoot add -- $moduleHotfixAuditPath
+
+    $moduleHotfixPreCommitOutput = @(& $guardPath -RepositoryRoot $moduleHotfixRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    if (($moduleHotfixPreCommitOutput -join "`n") -notmatch "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time") {
+        throw "F-0115 Module hotfix exact pre-commit candidate was not authorized."
+    }
+    & git -C $moduleHotfixRoot commit --quiet -m "test exact F-0115 Module hotfix"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to commit F-0115 Module hotfix fixture." }
+    & git -C $moduleHotfixRoot branch -M master
+    $moduleHotfixHeadSha = ((& git -C $moduleHotfixRoot rev-parse HEAD) -join "").Trim()
+    $moduleHotfixOriginUrl = ((& git -C $moduleHotfixRoot remote get-url origin) -join "").Trim()
+    $moduleHotfixUpdateLine = "refs/heads/master $moduleHotfixHeadSha refs/heads/master $moduleHotfixBaseSha"
+    $moduleHotfixPrePushOutput = @(& $guardPath -RepositoryRoot $moduleHotfixRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $moduleHotfixOriginUrl -PushUpdateLines $moduleHotfixUpdateLine -SkipExternalIntegrityChecks)
+    if (($moduleHotfixPrePushOutput -join "`n") -notmatch "p1TransitionScopeMode: transition_only") {
+        throw "F-0115 Module hotfix exact pre-push candidate was not transition-only."
+    }
+    Add-Content -LiteralPath (Join-Path $moduleHotfixRoot ($moduleHotfixEvidencePath -replace "/", "\")) -Value "replay" -Encoding UTF8
+    & git -C $moduleHotfixRoot add -- $moduleHotfixEvidencePath
+    & git -C $moduleHotfixRoot commit --quiet -m "attempt F-0115 Module hotfix replay"
+    $moduleHotfixReplaySha = ((& git -C $moduleHotfixRoot rev-parse HEAD) -join "").Trim()
+    $moduleHotfixReplayUpdate = "refs/heads/master $moduleHotfixReplaySha refs/heads/master $moduleHotfixBaseSha"
+    $moduleHotfixReplayFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $moduleHotfixRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $moduleHotfixOriginUrl -PushUpdateLines $moduleHotfixReplayUpdate -SkipExternalIntegrityChecks
+    } catch {
+        $moduleHotfixReplayFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_F0115_MODULE_PRECOMMIT_HOTFIX_(?:CONTEXT_INVALID|ALREADY_MATERIALIZED)|P1_PROGRAM_ALLOWED_FILES_VIOLATION") { throw }
+    }
+    if (-not $moduleHotfixReplayFailed) { throw "F-0115 Module hotfix replay unexpectedly passed." }
 
     $originalGitIndexFile = [Environment]::GetEnvironmentVariable("GIT_INDEX_FILE", [EnvironmentVariableTarget]::Process)
     $activeIndexPath = $originalGitIndexFile
