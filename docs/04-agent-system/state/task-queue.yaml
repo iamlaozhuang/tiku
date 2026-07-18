@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-02-employee-import-preflight-2026-07-17
+  currentTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -224,6 +224,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
+    - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -234,6 +235,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
     - p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
+    - p1-remediation-rc-02-employee-import-preflight-2026-07-17
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -264,12 +266,167 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-user-password-reset-distribution-2026-07-16: closed
     p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16: closed
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
-    p1-remediation-rc-02-employee-import-preflight-2026-07-17: ready_for_closeout
+    p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
+    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: in_progress
 activeTasks:
+  - id: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    title: P1 RC-02 redeem_code nullable deadline
+    phase: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    status: in_progress
+    priority: p1
+    sequenceOrder: 10
+    taskKind: product_remediation
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-rc02-redeem-code-nullable-deadline
+    worktreePath: D:/tiku/.worktrees/p1-rc02-redeem-code-nullable-deadline
+    dependsOn:
+      - p1-remediation-rc-02-employee-import-preflight-2026-07-17
+    approvalSource: current-user-approved-f0117-design-option-a-2026-07-18
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-redeem-code-nullable-deadline-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-02
+    findingIds:
+      - F-0117
+    authorityPath: redeem_code_nullable_deadline_schema_contract_repository_preview_confirmation_and_ui
+    businessInvariant: unused_redeem_code_with_null_redeem_deadline_remains_redeemable_indefinitely_while_duration_day_still_controls_authorization_expiry_after_redemption
+    adversarialFailureMode: partial_nullable_support_can_crash_on_null_misclassify_long_term_codes_as_expired_omit_contract_keys_or_allow_preview_and_confirmation_deadline_facts_to_diverge
+    rollbackOrStopCondition: stop_if_database_execution_backfill_seed_dependency_provider_browser_runtime_p2_pr_force_push_deploy_other_schema_drift_or_other_finding_repair_is_required
+    focusedGates:
+      - redeem_code_schema_deadline_nullable_and_exact_migration_source
+      - omitted_or_null_input_means_long_term_and_empty_or_invalid_date_fails_closed
+      - list_detail_generation_and_preview_contracts_preserve_explicit_null
+      - expired_filter_excludes_null_and_unused_filter_includes_null
+      - ascending_and_descending_deadline_sort_place_null_last
+      - preview_version_canonical_facts_distinguish_null_and_finite_deadline
+      - confirmation_jit_expiry_check_skips_null_but_preserves_explicit_expired_state
+      - admin_long_term_control_and_all_surfaces_display_long_term_semantics
+      - student_preview_displays_long_term_without_formatter_failure
+      - focused_nullable_deadline_regression
+      - full_static_regression
+      - two_round_adversarial_review
+    buildRequired: true
+    fullRegressionPolicy: focused_redeem_code_nullable_schema_migration_contract_repository_preview_confirmation_and_ui_tests_then_unit_lint_typecheck_format_build_and_program_guards
+    protectedDomains:
+      - redeem_code_plaintext_distribution_and_redaction
+      - edition_aware_authorization_and_duration_day
+      - concurrent_redemption_preview_version_and_jit_confirmation
+      - database_execution_boundary
+      - p0_authorization_and_identity_invariants
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    designPath: docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline-design.md
+    implementationPlanPath: docs/superpowers/plans/2026-07-18-redeem-code-nullable-deadline.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-redeem-code-nullable-deadline-authorization.md
+      - docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline-design.md
+      - docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
+      - docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
+      - docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md
+      - docs/superpowers/plans/2026-07-18-redeem-code-nullable-deadline.md
+      - src/db/schema/auth.ts
+      - src/db/schema/auth.test.ts
+      - drizzle/*_p1_rc_02_redeem_code_nullable_deadline.sql
+      - drizzle/meta/*_snapshot.json
+      - drizzle/meta/_journal.json
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/contracts/authorization-contract.ts
+      - src/server/services/admin-redeem-code-runtime.ts
+      - src/server/repositories/admin-redeem-code-runtime-repository.ts
+      - src/server/repositories/redeem-code-authorization-repository.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/server/models/redeem-code-preview.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
+      - tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
+      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - src/server/services/redeem-code-authorization-service.test.ts
+      - src/server/services/redeem-code-route.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/student-profile-redeem-ui.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - migrations/**
+      - seed/**
+      - src/db/dev-seed.ts
+      - e2e/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: blocked
+      productRuntimeSourceChange: approved_after_spec_review_within_task_allowlist
+      productTestSourceChange: approved_after_spec_review_within_task_allowlist
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: approved_source_generation_only_no_execution
+      databaseMutation: blocked_without_fresh_user_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: waiting_for_spec_review
+      reason: current_user_approved_f0117_option_a_and_schema_migration_source_only_but_written_spec_review_is_required
+      approvalRequestPath: docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md
+      resumeAction: review_written_f0117_nullable_deadline_spec_then_write_implementation_plan
+    acceptanceStandards:
+      - Omitted or explicit null redeemDeadlineAt means long-term redeemability; empty or malformed date fails closed, and every output keeps the redeemDeadlineAt key as string or null.
+      - Null deadline unused codes never expire by time; expired and unused filters, both sort directions, preview version and confirmation JIT checks must handle null deliberately.
+      - durationDay, edition-aware authorization, concurrent redemption, idempotency, plaintext distribution and redaction boundaries remain unchanged.
+      - Drizzle schema and generated migration source may drop only redeem_code.redeem_deadline_at NOT NULL; no database connection, migrate, push, SQL execution, backfill or seed is allowed.
+      - F-0117 closes only at static level after focused/full regression and two reviews; no dependency, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+    validationCommands:
+      - corepack pnpm@11.9.0 exec vitest run src/db/schema/auth.test.ts tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts tests/unit/phase-21-admin-redeem-code-concurrency.test.ts tests/unit/phase-8-student-authorization-redeem-runtime.test.ts src/server/services/redeem-code-authorization-service.test.ts src/server/services/redeem-code-route.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/student-profile-redeem-ui.test.ts --maxWorkers=1
+      - npm.cmd run test:unit -- --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-rc-02-employee-import-preflight-2026-07-17
     title: P1 RC-02 employee import server preflight
     phase: p1-remediation-rc-02-employee-import-preflight-2026-07-17
-    status: ready_for_closeout
+    status: closed
     priority: p1
     sequenceOrder: 9
     taskKind: product_remediation
