@@ -48,6 +48,19 @@ $missingF0116DesignPathHotfixPatterns = @($f0116DesignPathHotfixPatterns | Where
 if ($missingF0116DesignPathHotfixPatterns.Count -gt 0) {
     throw "P1 guard is RED for the F-0116 designPath hotfix contract: $($missingF0116DesignPathHotfixPatterns -join ', ')"
 }
+$f0116ScopeCorrectionHotfixPatterns = @(
+    "p1F0116ScopeCorrectionGuardHotfixTaskId",
+    "Test-P1F0116ScopeCorrectionGuardHotfixFileSet",
+    "Test-P1F0116ScopeCorrectionGuardHotfixAnchors",
+    "p1F0116ScopeCorrectionGuardHotfixAuthorization: approved_one_time",
+    "f6b14825f41a83b3f9dd3994ec9c1936876b12ff"
+)
+$missingF0116ScopeCorrectionHotfixPatterns = @($f0116ScopeCorrectionHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0116ScopeCorrectionHotfixPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0116 scope-correction hotfix contract: $($missingF0116ScopeCorrectionHotfixPatterns -join ', ')"
+}
 $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-p1-remediation-program-" + [guid]::NewGuid().ToString("N"))
 $bootstrapTask = "p1-remediation-program-bootstrap-2026-07-16"
 $authorizationPath = "authorization.md"
@@ -974,7 +987,7 @@ function Assert-F0115FailsWith {
     } catch {
         $failed = $true
         if ($_.Exception.Message -notmatch $Pattern) {
-            throw "F-0115 negative '$Label' expected '$Pattern', got:`n$($_.Exception.Message)"
+            throw "F-0115 negative '$Label' expected '$Pattern', got:`n$($_.Exception.Message)`n$($_.ScriptStackTrace)"
         }
     }
     if (-not $failed) { throw "F-0115 negative '$Label' unexpectedly passed.`n$($output -join "`n")" }
@@ -2497,6 +2510,143 @@ Decision: APPROVE_SCOPE
     }
     if (-not $f0116ReplayFailed) { throw "F-0116 designPath hotfix replay unexpectedly passed." }
 
+    $f0116ScopeRoot = Join-Path $smokeRoot "f0116-scope-correction-guard-hotfix"
+    $f0116ScopeBaseSha = "f6b14825f41a83b3f9dd3994ec9c1936876b12ff"
+    $f0116ScopeBranch = "codex/p1-f0116-scope-correction-hotfix"
+    $f0116ScopeAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0116-scope-correction-guard-hotfix-authorization.md"
+    $f0116ScopeEvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md"
+    $f0116ScopeAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md"
+    $f0116ScopeFiles = @(
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/task-queue.yaml",
+        $f0116ScopeAuthorizationPath,
+        "docs/05-execution-logs/task-plans/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md",
+        $f0116ScopeEvidencePath,
+        $f0116ScopeAuditPath,
+        "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+    )
+    & git -c core.longpaths=true clone --quiet --shared --no-checkout $repositoryRoot $f0116ScopeRoot
+    if ($LASTEXITCODE -ne 0) { throw "Unable to clone F-0116 scope-correction hotfix fixture." }
+    & git -C $f0116ScopeRoot config user.name "P1 F-0116 Scope Correction Smoke"
+    & git -C $f0116ScopeRoot config user.email "p1-f0116-scope-correction@example.invalid"
+    & git -C $f0116ScopeRoot config core.autocrlf false
+    & git -C $f0116ScopeRoot config core.longpaths true
+    & git -C $f0116ScopeRoot sparse-checkout init --no-cone
+    & git -C $f0116ScopeRoot sparse-checkout set --no-cone -- @($moduleHotfixSparsePatterns + $f0116ScopeFiles)
+    & git -C $f0116ScopeRoot switch --quiet -C $f0116ScopeBranch $f0116ScopeBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Unable to materialize F-0116 scope-correction hotfix fixture." }
+    & git -C $f0116ScopeRoot update-ref refs/remotes/origin/master $f0116ScopeBaseSha
+    foreach ($candidatePath in $f0116ScopeFiles) {
+        $sourcePath = Join-Path $repositoryRoot ($candidatePath -replace "/", "\")
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0116 scope candidate file: $candidatePath" }
+        Set-F0115FixtureFile -Root $f0116ScopeRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+    Set-F0115FixtureFile -Root $f0116ScopeRoot -Path $f0116ScopeEvidencePath -Content @"
+# F-0116 scope-correction guard hotfix evidence
+
+## Reading Evidence
+status: complete
+conflictsFound: false
+targetSourceReviewed: true
+targetTestsReviewed: true
+analogousImplementationReviewed: true
+Cost Calibration Gate remains blocked.
+Result: pass
+
+## Root-Cause Reproduction
+Result: pass
+
+## TDD Evidence
+Result: pass
+
+## Validation Results
+Result: pass
+"@
+    Set-F0115FixtureFile -Root $f0116ScopeRoot -Path $f0116ScopeAuditPath -Content @"
+# F-0116 scope-correction guard hotfix audit
+
+## Round 1
+Result: pass
+
+## Round 2
+Result: pass
+
+## Decision
+Decision: APPROVE
+"@
+    & git -C $f0116ScopeRoot add -- $f0116ScopeFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage exact F-0116 scope-correction candidate." }
+
+    & git -C $f0116ScopeRoot branch -m codex/wrong-f0116-scope-correction
+    $f0116ScopeWrongBranchFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $f0116ScopeWrongBranchFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_F0116_SCOPE_CORRECTION_GUARD_HOTFIX_CONTEXT_INVALID pre_commit") { throw }
+    }
+    if (-not $f0116ScopeWrongBranchFailed) { throw "F-0116 scope-correction wrong branch unexpectedly passed." }
+    & git -C $f0116ScopeRoot branch -m $f0116ScopeBranch
+
+    & git -C $f0116ScopeRoot reset -- $f0116ScopeAuditPath *> $null
+    $f0116ScopePartialFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $f0116ScopePartialFailed = $true
+    }
+    if (-not $f0116ScopePartialFailed) { throw "F-0116 scope-correction partial stage unexpectedly passed." }
+    & git -C $f0116ScopeRoot add -- $f0116ScopeAuditPath
+
+    $f0116ScopeQueuePath = Join-Path $f0116ScopeRoot "docs\04-agent-system\state\task-queue.yaml"
+    Add-Content -LiteralPath $f0116ScopeQueuePath -Value "# unauthorized F-0116 scope delta" -Encoding UTF8
+    & git -C $f0116ScopeRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+    $f0116ScopeDeltaFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $f0116ScopeDeltaFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_F0116_SCOPE_CORRECTION_GUARD_HOTFIX_QUEUE_DELTA_INVALID") { throw }
+    }
+    if (-not $f0116ScopeDeltaFailed) { throw "F-0116 scope-correction extra queue delta unexpectedly passed." }
+    Set-F0115FixtureFile -Root $f0116ScopeRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content ([System.IO.File]::ReadAllText((Join-Path $repositoryRoot "docs\04-agent-system\state\task-queue.yaml")))
+    & git -C $f0116ScopeRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+
+    $f0116ScopePreCommitOutput = @(& $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    if (($f0116ScopePreCommitOutput -join "`n") -notmatch "p1F0116ScopeCorrectionGuardHotfixAuthorization: approved_one_time") { throw "P1 did not authorize exact F-0116 scope-correction hotfix." }
+    Push-Location $f0116ScopeRoot
+    try {
+        $f0116ScopeModuleOutput = @(& $modulePreCommitGuardPath)
+    } finally {
+        Pop-Location
+    }
+    if (($f0116ScopeModuleOutput -join "`n") -notmatch "p1F0116ScopeCorrectionGuardHotfixAuthorization: approved_one_time") { throw "Module pre-commit did not authorize exact F-0116 scope-correction hotfix." }
+
+    & git -C $f0116ScopeRoot commit --quiet -m "test exact F-0116 scope-correction hotfix"
+    & git -C $f0116ScopeRoot branch -M master
+    $f0116ScopeHeadSha = ((& git -C $f0116ScopeRoot rev-parse HEAD) -join "").Trim()
+    $f0116ScopeOriginUrl = ((& git -C $f0116ScopeRoot remote get-url origin) -join "").Trim()
+    $f0116ScopeUpdateLine = "refs/heads/master $f0116ScopeHeadSha refs/heads/master $f0116ScopeBaseSha"
+    $f0116ScopePrePushOutput = @(& $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $f0116ScopeOriginUrl -PushUpdateLines $f0116ScopeUpdateLine -SkipExternalIntegrityChecks)
+    if (($f0116ScopePrePushOutput -join "`n") -notmatch "p1TransitionScopeMode: transition_only") { throw "Exact F-0116 scope-correction hotfix was not transition-only." }
+    Add-Content -LiteralPath (Join-Path $f0116ScopeRoot ($f0116ScopeEvidencePath -replace "/", "\")) -Value "replay" -Encoding UTF8
+    & git -C $f0116ScopeRoot add -- $f0116ScopeEvidencePath
+    & git -C $f0116ScopeRoot commit --quiet -m "attempt F-0116 scope-correction replay"
+    $f0116ScopeReplaySha = ((& git -C $f0116ScopeRoot rev-parse HEAD) -join "").Trim()
+    $f0116ScopeReplayUpdate = "refs/heads/master $f0116ScopeReplaySha refs/heads/master $f0116ScopeBaseSha"
+    $f0116ScopeReplayFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $f0116ScopeOriginUrl -PushUpdateLines $f0116ScopeReplayUpdate -SkipExternalIntegrityChecks
+    } catch {
+        $f0116ScopeReplayFailed = $true
+    }
+    if (-not $f0116ScopeReplayFailed) { throw "F-0116 scope-correction replay unexpectedly passed." }
+
     $readOnlyProbeRoot = Join-Path $smokeRoot "read-only-audit-probe"
     New-Item -ItemType Directory -Path $readOnlyProbeRoot | Out-Null
     Set-Content -LiteralPath (Join-Path $readOnlyProbeRoot "tracked.txt") -Value "probe" -Encoding UTF8
@@ -2520,7 +2670,7 @@ Decision: APPROVE_SCOPE
         Write-Output "Existing P1 remediation smoke regression passed: 8 positive, 48 negative"
         throw "P1 guard is missing F-0115 scope-correction marker/mode contract: $($missingF0115ScopeCorrectionPatterns -join ', ')"
     }
-    Write-Output "P1 remediation serial program guard smoke passed: 12 positive, 77 negative"
+    Write-Output "P1 remediation serial program guard smoke passed: 15 positive, 81 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

@@ -671,9 +671,9 @@ currentTask:
   nextRequiredTaskId: p1-remediation-next-jit-revalidation
   currentExecutionGate:
     status: satisfied
-    reason: current_user_approved_p1_remediation_goal_2026_07_16
+    reason: current_user_approved_written_f0116_spec_2026_07_18
     approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
-    resumeAction: review_approved_server_owned_employee_create_import_preflight_design_for_f0116
+    resumeAction: execute_f0116_employee_import_server_preflight_plan_red_to_green
 standingAuthorization:
   id: current-user-approved-p1-remediation-goal-2026-07-16
   source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
@@ -683,9 +683,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: f466caa81260686d5a2fbcbf62ba08717bf56a82
-  lastKnownOriginMasterSha: f466caa81260686d5a2fbcbf62ba08717bf56a82
-  lastKnownRemoteMasterSha: f466caa81260686d5a2fbcbf62ba08717bf56a82
+  lastKnownMasterSha: f6b14825f41a83b3f9dd3994ec9c1936876b12ff
+  lastKnownOriginMasterSha: f6b14825f41a83b3f9dd3994ec9c1936876b12ff
+  lastKnownRemoteMasterSha: f6b14825f41a83b3f9dd3994ec9c1936876b12ff
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

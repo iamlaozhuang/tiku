@@ -343,6 +343,7 @@ activeTasks:
       - src/app/api/v1/employee-import-commands/preview/route.ts
       - src/app/api/v1/employee-import-commands/route.ts
       - src/server/services/admin-organization-org-auth-runtime.ts
+      - tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts
       - tests/unit/phase-20-ra-01-04-employee-import.test.ts
       - src/features/admin/org-auth-redeem/employee-import-command-client.ts
       - src/features/admin/org-auth-redeem/employee-import-command-client.test.ts
@@ -356,6 +357,7 @@ activeTasks:
       - tests/unit/admin-user-org-auth-ops-baseline.test.ts
       - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
       - tests/unit/phase-11-system-ops-user-management-loop.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
       - tests/unit/p1-employee-import-command-atomicity.test.ts
     blockedFiles:
       - AGENTS.md
@@ -388,10 +390,10 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     currentExecutionGate:
-      status: waiting_for_spec_review
-      reason: current_user_approved_design_option_a_but_written_spec_review_is_required
+      status: satisfied
+      reason: current_user_approved_written_f0116_spec_2026_07_18
       approvalRequestPath: docs/superpowers/specs/2026-07-17-employee-import-server-preflight-design.md
-      resumeAction: review_written_f0116_server_preflight_spec_then_write_implementation_plan
+      resumeAction: execute_f0116_employee_import_server_preflight_plan_red_to_green
     acceptanceStandards:
       - Single create and batch import must share one server-owned preflight model; browser code must not parse or rewrite business CSV or TSV semantics before submit.
       - Preview must return masked row-level new, bind, skip or block outcomes with redacted reasons, inherited authorization and quota impact; full phone, password, raw source and internal ids must not be returned.

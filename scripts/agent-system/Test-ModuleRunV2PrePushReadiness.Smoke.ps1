@@ -86,6 +86,20 @@ $missingF0116DesignPathHotfixPatterns = @($f0116DesignPathHotfixPatterns | Where
 if ($missingF0116DesignPathHotfixPatterns.Count -gt 0) {
     throw "Module pre-push is RED for the F-0116 designPath hotfix transition contract: $($missingF0116DesignPathHotfixPatterns -join ', ')"
 }
+$f0116ScopeCorrectionHotfixPatterns = @(
+    "p1F0116ScopeCorrectionGuardHotfixBaseSha",
+    "p1F0116ScopeCorrectionGuardHotfixAuthorizationPath",
+    "p1F0116ScopeCorrectionGuardHotfixFiles",
+    "Test-P1F0116ScopeCorrectionGuardHotfixTransitionTopology",
+    "p1F0116ScopeCorrectionGuardHotfixTransitionTopology: exact_one_parent",
+    "f6b14825f41a83b3f9dd3994ec9c1936876b12ff"
+)
+$missingF0116ScopeCorrectionHotfixPatterns = @($f0116ScopeCorrectionHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0116ScopeCorrectionHotfixPatterns.Count -gt 0) {
+    throw "Module pre-push is RED for the F-0116 scope-correction hotfix transition contract: $($missingF0116ScopeCorrectionHotfixPatterns -join ', ')"
+}
 
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-push readiness script: $scriptPath"
@@ -944,6 +958,90 @@ try {
     }
 } finally {
     if (Test-Path -LiteralPath $f0116DesignPathHotfixFixtureRoot) { Remove-Item -LiteralPath $f0116DesignPathHotfixFixtureRoot -Recurse -Force }
+}
+
+$f0116ScopeCorrectionBaseSha = "f6b14825f41a83b3f9dd3994ec9c1936876b12ff"
+$f0116ScopeCorrectionParentTaskId = "p1-remediation-rc-02-employee-import-preflight-2026-07-17"
+$f0116ScopeCorrectionAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0116-scope-correction-guard-hotfix-authorization.md"
+$f0116ScopeCorrectionEvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md"
+$f0116ScopeCorrectionAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md"
+$f0116ScopeCorrectionFiles = @(
+    $f0115PrePushProjectStatePath,
+    $f0115PrePushQueuePath,
+    $f0116ScopeCorrectionAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md",
+    $f0116ScopeCorrectionEvidencePath,
+    $f0116ScopeCorrectionAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0116ScopeCorrectionFixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-module-f0116-scope-correction-pre-push-" + [guid]::NewGuid().ToString("N"))
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0116ScopeCorrectionFixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0116 scope-correction pre-push fixture." }
+    & git -C $f0116ScopeCorrectionFixtureRoot config user.name "Module F-0116 Scope Correction Smoke"
+    & git -C $f0116ScopeCorrectionFixtureRoot config user.email "module-f0116-scope-correction@example.invalid"
+    & git -C $f0116ScopeCorrectionFixtureRoot config core.autocrlf false
+    & git -C $f0116ScopeCorrectionFixtureRoot config core.longpaths true
+    & git -C $f0116ScopeCorrectionFixtureRoot config core.safecrlf false
+    & git -C $f0116ScopeCorrectionFixtureRoot sparse-checkout init --no-cone
+    if ($LASTEXITCODE -ne 0) { throw "Failed to initialize F-0116 scope-correction sparse fixture." }
+    & git -C $f0116ScopeCorrectionFixtureRoot sparse-checkout set --no-cone -- @($f0116ScopeCorrectionFiles + @($f0115PrePushMatrixPath))
+    if ($LASTEXITCODE -ne 0) { throw "Failed to configure F-0116 scope-correction sparse fixture." }
+    & git -C $f0116ScopeCorrectionFixtureRoot switch --quiet -C master $f0116ScopeCorrectionBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out the fixed F-0116 scope-correction base." }
+    & git -C $f0116ScopeCorrectionFixtureRoot update-ref refs/remotes/origin/master $f0116ScopeCorrectionBaseSha
+
+    foreach ($candidatePath in $f0116ScopeCorrectionFiles) {
+        $sourcePath = Join-Path $f0115PrePushSourceRoot ($candidatePath -replace "/", "\")
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0116 scope-correction source file: $candidatePath" }
+        Set-F0115PrePushFixtureFile -Root $f0116ScopeCorrectionFixtureRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+    Set-F0115PrePushFixtureFile -Root $f0116ScopeCorrectionFixtureRoot -Path $f0116ScopeCorrectionEvidencePath -Content "# Evidence`n`n## Reading Evidence`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`nResult: pass`n`n## Root-Cause Reproduction`nResult: pass`n`n## TDD Evidence`nResult: pass`n`n## Validation Results`nResult: pass`n"
+    Set-F0115PrePushFixtureFile -Root $f0116ScopeCorrectionFixtureRoot -Path $f0116ScopeCorrectionAuditPath -Content "# Audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`n## Decision`nDecision: APPROVE`n"
+    & git -C $f0116ScopeCorrectionFixtureRoot add -- $f0116ScopeCorrectionFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage the exact F-0116 scope-correction file set." }
+    $f0116ScopeCorrectionStagedFiles = @(& git -C $f0116ScopeCorrectionFixtureRoot diff --cached --name-only --diff-filter=ACMR | Sort-Object -Unique)
+    if ($f0116ScopeCorrectionStagedFiles.Count -ne 12 -or ($f0116ScopeCorrectionStagedFiles -join "|") -cne (@($f0116ScopeCorrectionFiles | Sort-Object -Unique) -join "|")) {
+        throw "F-0116 scope-correction fixture did not stage the exact 12-file set.`nActual: $($f0116ScopeCorrectionStagedFiles -join ', ')"
+    }
+    & git -C $f0116ScopeCorrectionFixtureRoot commit --quiet -m "materialize exact F-0116 scope-correction guard hotfix"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit the exact F-0116 scope-correction fixture." }
+    $f0116ScopeCorrectionHeadSha = ((& git -C $f0116ScopeCorrectionFixtureRoot rev-parse HEAD) -join "").Trim()
+    $f0116ScopeCorrectionCommitLine = ((& git -C $f0116ScopeCorrectionFixtureRoot rev-list --parents -n 1 HEAD) -join "").Trim()
+    if ($f0116ScopeCorrectionCommitLine -notmatch "^[0-9a-f]{40} $f0116ScopeCorrectionBaseSha$") { throw "F-0116 scope-correction fixture is not exact one-parent topology." }
+    $f0116ScopeCorrectionCommittedFiles = @(& git -C $f0116ScopeCorrectionFixtureRoot diff-tree --no-commit-id --name-only -r HEAD | Sort-Object -Unique)
+    if (($f0116ScopeCorrectionCommittedFiles -join "|") -cne (@($f0116ScopeCorrectionFiles | Sort-Object -Unique) -join "|")) { throw "F-0116 scope-correction fixture file set is not exact." }
+
+    $f0116ScopeCorrectionProjectStateFullPath = Join-Path $f0116ScopeCorrectionFixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $f0116ScopeCorrectionQueueFullPath = Join-Path $f0116ScopeCorrectionFixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $f0116ScopeCorrectionMatrixFullPath = Join-Path $f0116ScopeCorrectionFixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $f0116ScopeCorrectionEvidenceFullPath = Join-Path $f0116ScopeCorrectionFixtureRoot ($f0116ScopeCorrectionEvidencePath -replace "/", "\")
+    $f0116ScopeCorrectionAuditFullPath = Join-Path $f0116ScopeCorrectionFixtureRoot ($f0116ScopeCorrectionAuditPath -replace "/", "\")
+    Push-Location $f0116ScopeCorrectionFixtureRoot
+    try {
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0116_SCOPE_CORRECTION_HOTFIX_REQUIRES_TRANSITION_ONLY" -Command {
+            & $scriptPath -TaskId $f0116ScopeCorrectionParentTaskId -ProjectStatePath $f0116ScopeCorrectionProjectStateFullPath -QueuePath $f0116ScopeCorrectionQueueFullPath -MatrixPath $f0116ScopeCorrectionMatrixFullPath -EvidencePath $f0116ScopeCorrectionEvidenceFullPath -AuditReviewPath $f0116ScopeCorrectionAuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode standard
+        }
+        $f0116ScopeCorrectionPositiveOutput = @(& $scriptPath -TaskId $f0116ScopeCorrectionParentTaskId -ProjectStatePath $f0116ScopeCorrectionProjectStateFullPath -QueuePath $f0116ScopeCorrectionQueueFullPath -MatrixPath $f0116ScopeCorrectionMatrixFullPath -EvidencePath $f0116ScopeCorrectionEvidenceFullPath -AuditReviewPath $f0116ScopeCorrectionAuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only)
+        Assert-Contains -Output $f0116ScopeCorrectionPositiveOutput -Pattern "p1F0116ScopeCorrectionGuardHotfixTransitionTopology: exact_one_parent"
+        Assert-Contains -Output $f0116ScopeCorrectionPositiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+        Add-Content -LiteralPath $f0116ScopeCorrectionEvidenceFullPath -Value "replay" -Encoding UTF8
+        & git add -- $f0116ScopeCorrectionEvidencePath
+        & git commit --quiet -m "attempt F-0116 scope-correction replay"
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0116ScopeCorrectionParentTaskId -ProjectStatePath $f0116ScopeCorrectionProjectStateFullPath -QueuePath $f0116ScopeCorrectionQueueFullPath -MatrixPath $f0116ScopeCorrectionMatrixFullPath -EvidencePath $f0116ScopeCorrectionEvidenceFullPath -AuditReviewPath $f0116ScopeCorrectionAuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    if (Test-Path -LiteralPath $f0116ScopeCorrectionFixtureRoot) { Remove-Item -LiteralPath $f0116ScopeCorrectionFixtureRoot -Recurse -Force }
 }
 
 Write-Output "Module Run v2 pre-push readiness smoke passed"
