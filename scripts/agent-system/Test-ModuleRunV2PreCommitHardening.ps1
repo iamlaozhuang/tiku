@@ -121,16 +121,16 @@ New-Variable -Name p1F0115Phase11ScopeCorrectionFiles -Option Constant -Value @(
     $p1F0115Phase11ScopeCorrectionEvidencePath,
     $p1F0115Phase11ScopeCorrectionAuditPath
 )
-New-Variable -Name p1F0115ModulePrecommitHotfixTaskId -Option Constant -Value "p1-f0115-module-precommit-hotfix-2026-07-17"
+New-Variable -Name p1F0115ModulePrecommitHotfixTaskId -Option Constant -Value "p1-f0115-closeout-guard-hotfix-2026-07-17"
 New-Variable -Name p1F0115ModulePrecommitHotfixParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
-New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "1fd9906992c567368044a8ede98eaee840a0b1fa"
-New-Variable -Name p1F0115ModulePrecommitHotfixBranch -Option Constant -Value "codex/p1-f0115-module-precommit-hotfix"
-New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-module-precommit-hotfix-authorization.md"
-New-Variable -Name p1F0115ModulePrecommitHotfixEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-module-precommit-hotfix.md"
-New-Variable -Name p1F0115ModulePrecommitHotfixAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixBaseSha -Option Constant -Value "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
+New-Variable -Name p1F0115ModulePrecommitHotfixBranch -Option Constant -Value "codex/p1-f0115-closeout-guard-hotfix"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+New-Variable -Name p1F0115ModulePrecommitHotfixAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
 New-Variable -Name p1F0115ModulePrecommitHotfixFiles -Option Constant -Value @(
     $p1F0115ModulePrecommitHotfixAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
     $p1F0115ModulePrecommitHotfixEvidencePath,
     $p1F0115ModulePrecommitHotfixAuditPath,
     "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",

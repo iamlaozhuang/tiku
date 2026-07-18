@@ -168,16 +168,16 @@ $p1F0115Phase11ScopeCorrectionFiles = @(
     $p1F0115Phase11ScopeCorrectionEvidencePath,
     $p1F0115Phase11ScopeCorrectionAuditPath
 )
-$p1F0115ModulePrecommitHotfixTaskId = "p1-f0115-module-precommit-hotfix-2026-07-17"
+$p1F0115ModulePrecommitHotfixTaskId = "p1-f0115-closeout-guard-hotfix-2026-07-17"
 $p1F0115ModulePrecommitHotfixParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
-$p1F0115ModulePrecommitHotfixBaseSha = "1fd9906992c567368044a8ede98eaee840a0b1fa"
-$p1F0115ModulePrecommitHotfixBranch = "codex/p1-f0115-module-precommit-hotfix"
-$p1F0115ModulePrecommitHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-module-precommit-hotfix-authorization.md"
-$p1F0115ModulePrecommitHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-module-precommit-hotfix.md"
-$p1F0115ModulePrecommitHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+$p1F0115ModulePrecommitHotfixBaseSha = "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
+$p1F0115ModulePrecommitHotfixBranch = "codex/p1-f0115-closeout-guard-hotfix"
+$p1F0115ModulePrecommitHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
+$p1F0115ModulePrecommitHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+$p1F0115ModulePrecommitHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
 $p1F0115ModulePrecommitHotfixFiles = @(
     $p1F0115ModulePrecommitHotfixAuthorizationPath,
-    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md",
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
     $p1F0115ModulePrecommitHotfixEvidencePath,
     $p1F0115ModulePrecommitHotfixAuditPath,
     "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
@@ -1382,7 +1382,7 @@ function Test-P1F0115ScopeCorrectionAnchors {
 
 function Get-NormalizedCloseoutProjection {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Lines,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string[]]$Lines,
         [Parameter(Mandatory = $true)][string]$TaskId,
         [Parameter(Mandatory = $true)][ValidateSet("state", "queue")][string]$Kind
     )

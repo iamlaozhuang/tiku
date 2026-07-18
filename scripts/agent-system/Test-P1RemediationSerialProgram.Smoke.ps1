@@ -27,7 +27,7 @@ $modulePrecommitHotfixPatterns = @(
     "Test-P1F0115ModulePrecommitHotfixFileSet",
     "Test-P1F0115ModulePrecommitHotfixAnchors",
     "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time",
-    "1fd9906992c567368044a8ede98eaee840a0b1fa"
+    "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
 )
 $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where-Object {
     $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
@@ -2022,7 +2022,7 @@ Decision: APPROVE_SCOPE
     if (-not $pendingParentFailed) { throw "Pending parent commit laundering fixture unexpectedly passed." }
 
     $closeoutRoot = Write-CaseFiles -Name "same-task-closeout" -StateText $baseState -QueueText $baseQueue
-    $closeoutParentQueue = $baseQueue.Replace("worktreePath: bootstrap-worktree-fixture", "worktreePath: $closeoutRoot")
+    $closeoutParentQueue = $baseQueue.Replace("worktreePath: bootstrap-worktree-fixture", "worktreePath: $closeoutRoot").Replace("      - audit.md`n    blockedFiles:", "      - audit.md`n`n    blockedFiles:")
     Set-Content -LiteralPath (Join-Path $closeoutRoot "queue.yaml") -Value $closeoutParentQueue -Encoding UTF8
     & git -C $closeoutRoot init -b master *> $null
     & git -C $closeoutRoot config user.name "P1 Closeout Smoke"
@@ -2055,7 +2055,7 @@ Decision: APPROVE_SCOPE
 
     $closeoutPushRoot = Write-CaseFiles -Name "same-task-closeout-pre-push" -StateText $baseState -QueueText $baseQueue
     $closeoutPushRemote = Join-Path $smokeRoot "same-task-closeout-pre-push-origin.git"
-    $closeoutPushParentQueue = $baseQueue.Replace("worktreePath: bootstrap-worktree-fixture", "worktreePath: $closeoutPushRoot").Replace("      - audit.md", "      - audit.md`n      - src/allowed.ts")
+    $closeoutPushParentQueue = $baseQueue.Replace("worktreePath: bootstrap-worktree-fixture", "worktreePath: $closeoutPushRoot").Replace("      - audit.md", "      - audit.md`n      - src/allowed.ts`n")
     $closeoutPushParentQueue = [regex]::Replace($closeoutPushParentQueue, '(?m)^      - src/\*\*\r?\n', '')
     Set-Content -LiteralPath (Join-Path $closeoutPushRoot "queue.yaml") -Value $closeoutPushParentQueue -Encoding UTF8
     & git -C $closeoutPushRoot init -b master *> $null
@@ -2143,14 +2143,14 @@ Decision: APPROVE_SCOPE
     if (-not $intermediateLaunderingFailed) { throw "Intermediate same-task closeout scope laundering fixture unexpectedly passed." }
 
     $moduleHotfixRoot = Join-Path $smokeRoot "f0115-module-precommit-hotfix"
-    $moduleHotfixBaseSha = "1fd9906992c567368044a8ede98eaee840a0b1fa"
-    $moduleHotfixBranch = "codex/p1-f0115-module-precommit-hotfix"
-    $moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-module-precommit-hotfix-authorization.md"
-    $moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-module-precommit-hotfix.md"
-    $moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-module-precommit-hotfix.md"
+    $moduleHotfixBaseSha = "66a9f526d68c2647a5843da1a9d9c2fe0933cc93"
+    $moduleHotfixBranch = "codex/p1-f0115-closeout-guard-hotfix"
+    $moduleHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0115-closeout-guard-hotfix-authorization.md"
+    $moduleHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
+    $moduleHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0115-closeout-guard-hotfix.md"
     $moduleHotfixFiles = @(
         $moduleHotfixAuthorizationPath,
-        "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md",
+        "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md",
         $moduleHotfixEvidencePath,
         $moduleHotfixAuditPath,
         "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
@@ -2197,7 +2197,7 @@ Decision: APPROVE_SCOPE
         "",
         "Status: approved",
         "Human approval source: current user message",
-        "Task ID: p1-f0115-module-precommit-hotfix-2026-07-17",
+        "Task ID: p1-f0115-closeout-guard-hotfix-2026-07-17",
         "Parent task: p1-remediation-rc-02-employee-creation-atomicity-2026-07-16",
         "Base: $moduleHotfixBaseSha",
         "Branch: $moduleHotfixBranch",
@@ -2211,7 +2211,7 @@ Decision: APPROVE_SCOPE
         $authorizationFileList
     ) -join "`n"
     Set-F0115FixtureFile -Root $moduleHotfixRoot -Path $moduleHotfixAuthorizationPath -Content $moduleHotfixAuthorization
-    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-module-precommit-hotfix.md" -Content "# Plan`n`nCost Calibration Gate remains blocked."
+    Set-F0115FixtureFile -Root $moduleHotfixRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0115-closeout-guard-hotfix.md" -Content "# Plan`n`nCost Calibration Gate remains blocked."
     $moduleHotfixEvidence = @(
         "# Evidence", "", "## Reading Evidence", "status: complete", "conflictsFound: false",
         "targetSourceReviewed: true", "targetTestsReviewed: true", "analogousImplementationReviewed: true",
