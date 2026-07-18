@@ -534,7 +534,7 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-user-password-reset-distribution-2026-07-16: closed
     p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16: closed
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
-    p1-remediation-rc-02-employee-import-preflight-2026-07-17: in_progress
+    p1-remediation-rc-02-employee-import-preflight-2026-07-17: ready_for_closeout
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -660,7 +660,7 @@ currentTask:
   id: p1-remediation-rc-02-employee-import-preflight-2026-07-17
   title: P1 RC-02 employee import server preflight
   phase: p1-remediation-rc-02-employee-import-preflight-2026-07-17
-  status: in_progress
+  status: ready_for_closeout
   priority: p1
   taskKind: product_remediation
   branch: codex/p1-rc02-employee-import-preflight
