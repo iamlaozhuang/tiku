@@ -91,6 +91,20 @@ New-Variable -Name p1F0115ModulePrecommitHotfixFiles -Option Constant -Value @(
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
+New-Variable -Name p1F0116DesignPathGuardHotfixBaseSha -Option Constant -Value "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+New-Variable -Name p1F0116DesignPathGuardHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-17-p1-f0116-designpath-guard-hotfix-authorization.md"
+New-Variable -Name p1F0116DesignPathGuardHotfixFiles -Option Constant -Value @(
+    $p1F0116DesignPathGuardHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-designpath-guard-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-17-p1-f0116-designpath-guard-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0116-designpath-guard-hotfix.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 
 function Write-Section {
     param(
@@ -488,6 +502,56 @@ function Test-P1F0115ModulePrecommitHotfixTransitionTopology {
     return $LASTEXITCODE -eq 0 -and $headAuthorizationPath -eq $p1F0115ModulePrecommitHotfixAuthorizationPath
 }
 
+function Test-P1F0116DesignPathGuardHotfixTransitionTopology {
+    param(
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskStatus,
+        [Parameter(Mandatory = $true)][string]$TaskStatus,
+        [Parameter(Mandatory = $true)][string]$CurrentBranch,
+        [Parameter(Mandatory = $true)][string]$HeadSha,
+        [Parameter(Mandatory = $true)][string]$MasterSha,
+        [Parameter(Mandatory = $true)][string]$OriginMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateOriginMasterSha
+    )
+
+    if ($TaskId -ne $p1F0115ScopeCorrectionParentTaskId `
+        -or $StateCurrentTaskId -ne $p1F0115ScopeCorrectionParentTaskId `
+        -or $StateCurrentTaskStatus -ne "ready_for_closeout" `
+        -or $TaskStatus -ne "ready_for_closeout" `
+        -or $CurrentBranch -ne "master" `
+        -or $HeadSha -ne $MasterSha `
+        -or $OriginMasterSha -ne $p1F0116DesignPathGuardHotfixBaseSha `
+        -or [string]::IsNullOrWhiteSpace($StateMasterSha) `
+        -or $StateMasterSha -ne $StateOriginMasterSha `
+        -or -not (Test-GitAncestor -AncestorSha $StateMasterSha -DescendantSha $OriginMasterSha) `
+        -or $OriginMasterSha -eq $MasterSha) {
+        return $false
+    }
+
+    $headParentLine = ((& git rev-list --parents -n 1 $MasterSha) -join "").Trim()
+    $headParentParts = @($headParentLine -split "\s+" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($LASTEXITCODE -ne 0 -or $headParentParts.Count -ne 2 -or $headParentParts[0] -ne $MasterSha -or $headParentParts[1] -ne $OriginMasterSha) {
+        return $false
+    }
+
+    $committedNameStatus = @(& git diff-tree --no-commit-id --name-status --no-renames -r $MasterSha)
+    $committedFiles = [System.Collections.Generic.List[string]]::new()
+    foreach ($entry in $committedNameStatus) {
+        if ($entry -notmatch '^([AM])\s+(.+)$') { return $false }
+        $committedFiles.Add((ConvertTo-NormalizedPath -Path $Matches[2]))
+    }
+    $actualFiles = @($committedFiles | Sort-Object -Unique)
+    $expectedFiles = @($p1F0116DesignPathGuardHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    if ($LASTEXITCODE -ne 0 -or ($actualFiles -join "|") -cne ($expectedFiles -join "|")) { return $false }
+
+    $parentAuthorizationPath = ((& git ls-tree -r --name-only $OriginMasterSha -- $p1F0116DesignPathGuardHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or -not [string]::IsNullOrWhiteSpace($parentAuthorizationPath)) { return $false }
+    $headAuthorizationPath = ((& git ls-tree -r --name-only $MasterSha -- $p1F0116DesignPathGuardHotfixAuthorizationPath) -join "").Trim()
+    return $LASTEXITCODE -eq 0 -and $headAuthorizationPath -eq $p1F0116DesignPathGuardHotfixAuthorizationPath
+}
+
 function Invoke-DocsOnlyBatchReadiness {
     param(
         [Parameter(Mandatory = $true)]
@@ -766,8 +830,20 @@ $canUseP1F0115ModulePrecommitHotfixTransitionMasterAncestry = $isP1TransitionSco
     -OriginMasterSha $originMasterSha `
     -StateMasterSha $stateMasterSha `
     -StateOriginMasterSha $stateOriginMasterSha)
+$isP1F0116DesignPathGuardHotfixTransitionTopology = Test-P1F0116DesignPathGuardHotfixTransitionTopology `
+    -TaskId $TaskId `
+    -StateCurrentTaskId $stateCurrentTaskId `
+    -StateCurrentTaskStatus $stateCurrentTaskStatus `
+    -TaskStatus $taskStatus `
+    -CurrentBranch $currentBranch `
+    -HeadSha $headSha `
+    -MasterSha $masterSha `
+    -OriginMasterSha $originMasterSha `
+    -StateMasterSha $stateMasterSha `
+    -StateOriginMasterSha $stateOriginMasterSha
+$canUseP1F0116DesignPathGuardHotfixTransitionMasterAncestry = $isP1TransitionScopeMode -and $isP1F0116DesignPathGuardHotfixTransitionTopology
 $canUseP1TransitionMasterAncestry = if ($isP1F0115TransitionContext) {
-    $canUseP1F0115TransitionMasterAncestry -or $canUseP1F0115Phase11TransitionMasterAncestry -or $canUseP1F0115ModulePrecommitHotfixTransitionMasterAncestry
+    $canUseP1F0115TransitionMasterAncestry -or $canUseP1F0115Phase11TransitionMasterAncestry -or $canUseP1F0115ModulePrecommitHotfixTransitionMasterAncestry -or $canUseP1F0116DesignPathGuardHotfixTransitionMasterAncestry
 } else {
     $canUseGenericP1TransitionMasterAncestry
 }
@@ -782,6 +858,9 @@ if (-not $isP1F0115TransitionContext) {
 
 if ($isP1TransitionScopeMode -and -not $canUseP1TransitionMasterAncestry) {
     Add-Finding "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID"
+}
+if ($isP1F0116DesignPathGuardHotfixTransitionTopology -and -not $isP1TransitionScopeMode) {
+    Add-Finding "HARD_BLOCK_P1_F0116_DESIGNPATH_HOTFIX_REQUIRES_TRANSITION_ONLY"
 }
 
 if ($stateMasterSha -ne $masterSha) {
@@ -838,6 +917,9 @@ if ($isP1F0115TransitionContext) {
     }
     if ($canUseP1F0115ModulePrecommitHotfixTransitionMasterAncestry) {
         Write-Output "p1F0115ModulePrecommitHotfixTransitionTopology: exact_one_parent"
+    }
+    if ($canUseP1F0116DesignPathGuardHotfixTransitionMasterAncestry) {
+        Write-Output "p1F0116DesignPathGuardHotfixTransitionTopology: exact_one_parent"
     }
 }
 Write-Output "pre-push readiness passed"

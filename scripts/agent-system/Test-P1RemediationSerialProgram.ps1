@@ -188,6 +188,25 @@ $p1F0115ModulePrecommitHotfixFiles = @(
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
+$p1F0116DesignPathGuardHotfixTaskId = "p1-f0116-designpath-guard-hotfix-2026-07-17"
+$p1F0116DesignPathGuardHotfixParentTaskId = "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
+$p1F0116DesignPathGuardHotfixBaseSha = "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+$p1F0116DesignPathGuardHotfixBranch = "codex/p1-f0116-designpath-guard-hotfix"
+$p1F0116DesignPathGuardHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0116-designpath-guard-hotfix-authorization.md"
+$p1F0116DesignPathGuardHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0116-designpath-guard-hotfix.md"
+$p1F0116DesignPathGuardHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0116-designpath-guard-hotfix.md"
+$p1F0116DesignPathGuardHotfixFiles = @(
+    $p1F0116DesignPathGuardHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-designpath-guard-hotfix.md",
+    $p1F0116DesignPathGuardHotfixEvidencePath,
+    $p1F0116DesignPathGuardHotfixAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 New-Variable -Name p1F0115ScopeCorrectionTaskId -Option Constant -Value "p1-f0115-scope-correction-hotfix-2026-07-16"
 New-Variable -Name p1F0115ScopeCorrectionParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-creation-atomicity-2026-07-16"
 New-Variable -Name p1F0115ScopeCorrectionBaseSha -Option Constant -Value "6bde2f2aec3d71fa0ce138b26f64243861cace6f"
@@ -1135,6 +1154,85 @@ function Test-P1F0115ModulePrecommitHotfixAnchors {
     if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time" }
 }
 
+function Test-P1F0116DesignPathGuardHotfixFileSet {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
+
+    $actualFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    $expectedFiles = @($p1F0116DesignPathGuardHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    return ($actualFiles -join "|") -ceq ($expectedFiles -join "|")
+}
+
+function Test-P1F0116DesignPathGuardHotfixAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$CurrentTaskId,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$CurrentTaskBlock,
+        [Parameter(Mandatory = $true)][ValidateSet("pre_commit", "pre_push")][string]$CurrentPhase
+    )
+
+    $findingCountBefore = $script:findings.Count
+    $headSha = ((& git -C $Root rev-parse HEAD) -join "").Trim()
+    $branch = ((& git -C $Root branch --show-current) -join "").Trim()
+    $taskStatus = Get-ScalarValue -Block $CurrentTaskBlock -Key "status"
+    $parentReference = "HEAD"
+
+    if ($CurrentPhase -eq "pre_commit") {
+        if ($headSha -ne $p1F0116DesignPathGuardHotfixBaseSha -or $branch -ne $p1F0116DesignPathGuardHotfixBranch) {
+            Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_CONTEXT_INVALID pre_commit"
+        }
+        & git -C $Root diff --quiet
+        $unstagedTrackedExitCode = $LASTEXITCODE
+        $untrackedFiles = @(& git -C $Root ls-files --others --exclude-standard)
+        if ($unstagedTrackedExitCode -ne 0 -or $LASTEXITCODE -ne 0 -or $untrackedFiles.Count -gt 0) {
+            Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_PARTIAL_STAGE_INVALID"
+        }
+    } else {
+        $headParents = @(((& git -C $Root rev-list --parents -n 1 HEAD) -join "").Trim() -split '\s+')
+        $originMasterSha = ((& git -C $Root rev-parse origin/master) -join "").Trim()
+        if ($headParents.Count -ne 2 -or $headParents[1] -ne $p1F0116DesignPathGuardHotfixBaseSha -or $originMasterSha -ne $p1F0116DesignPathGuardHotfixBaseSha -or $branch -ne "master") {
+            Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_CONTEXT_INVALID pre_push"
+        } else {
+            $parentReference = $headParents[1]
+        }
+    }
+
+    if ($CurrentTaskId -ne $p1F0116DesignPathGuardHotfixParentTaskId -or $taskStatus -ne "ready_for_closeout") {
+        Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_CONTEXT_INVALID task"
+    }
+
+    $materializedAuthorizationPath = ((& git -C $Root ls-tree -r --name-only $parentReference -- $p1F0116DesignPathGuardHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_PARENT_INSPECTION_FAILED"
+    } elseif ($materializedAuthorizationPath -eq $p1F0116DesignPathGuardHotfixAuthorizationPath) {
+        Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_ALREADY_MATERIALIZED"
+    }
+
+    $contentSnapshot = if ($CurrentPhase -eq "pre_commit") { "INDEX" } else { "HEAD" }
+    $authorizationText = Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $p1F0116DesignPathGuardHotfixAuthorizationPath
+    foreach ($pattern in @(
+        '(?im)^Status:\s*approved\s*$',
+        '(?im)^Human approval source:\s*current user message',
+        "(?im)^Task ID:\s*[\x60]?$([regex]::Escape($p1F0116DesignPathGuardHotfixTaskId))[\x60]?\s*$",
+        "(?im)^Parent task:\s*[\x60]?$([regex]::Escape($p1F0116DesignPathGuardHotfixParentTaskId))[\x60]?\s*$",
+        "(?im)^Base:\s*[\x60]?$([regex]::Escape($p1F0116DesignPathGuardHotfixBaseSha))[\x60]?\s*$",
+        "(?im)^Branch:\s*[\x60]?$([regex]::Escape($p1F0116DesignPathGuardHotfixBranch))[\x60]?\s*$",
+        '(?i)ancestorCheckpoint:\s*only_after_transition_only_guard_pass',
+        '(?i)otherInProgressShaDrift:\s*hard_block',
+        '(?i)hookBypass:\s*prohibited',
+        '(?i)qualityGateReduction:\s*prohibited'
+    )) {
+        if ($authorizationText -notmatch $pattern) {
+            Add-Finding "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+
+    $evidenceText = Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $p1F0116DesignPathGuardHotfixEvidencePath
+    $auditText = Get-GitSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path $p1F0116DesignPathGuardHotfixAuditPath
+    Test-P1F0115ModulePrecommitHotfixReviewContract -EvidenceText $evidenceText -AuditText $auditText
+    if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0116DesignPathGuardHotfixAuthorization: approved_one_time" }
+}
+
 function Test-P1F0115ScopeCorrectionFileSet {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
 
@@ -1784,6 +1882,7 @@ $isP1TransitionHotfixScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P
 $isP1F0132ScopeCorrectionScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0132ScopeCorrectionFileSet -Files $filesToCheck)
 $isP1F0115Phase11ScopeCorrectionScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0115Phase11ScopeCorrectionFileSet -Files $filesToCheck)
 $isP1F0115ModulePrecommitHotfixScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0115ModulePrecommitHotfixFileSet -Files $filesToCheck)
+$isP1F0116DesignPathGuardHotfixScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0116DesignPathGuardHotfixFileSet -Files $filesToCheck)
 $isP1F0115ScopeCorrectionScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1F0115ScopeCorrectionFileSet -Files $filesToCheck)
 $isP1F0115ScopeCorrectionCandidateValid = $false
 if ($isP1TransitionHotfixScope) {
@@ -1797,6 +1896,9 @@ if ($isP1F0115Phase11ScopeCorrectionScope) {
 }
 if ($isP1F0115ModulePrecommitHotfixScope) {
     Test-P1F0115ModulePrecommitHotfixAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
+}
+if ($isP1F0116DesignPathGuardHotfixScope) {
+    Test-P1F0116DesignPathGuardHotfixAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
 }
 if ($isP1F0115ScopeCorrectionScope) {
     $f0115FindingCountBefore = $findings.Count
@@ -1833,7 +1935,7 @@ $isSameTaskCloseoutTransition = $isSteadyTask -and $parentStatuses.ContainsKey($
 if (-not $SkipGitChecks -and $parentProgram.Count -eq 0 -and -not $isBootstrapInitialization) {
     Add-Finding "P1_PROGRAM_TRANSITION_PARENT_MISSING"
 }
-if ($isSteadyTask -and $scopeControlChanged -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
+if ($isSteadyTask -and $scopeControlChanged -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
     Add-Finding "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION"
 }
 if ($isSameTaskCloseoutTransition) {
@@ -1888,16 +1990,30 @@ if ($Phase -eq "pre_commit" -and -not $SkipGitChecks) {
         Add-Finding "P1_PROGRAM_STAGED_WORKTREE_DIVERGENCE $divergentPath"
     }
 }
+$validatedDesignPath = ""
 if ($taskBlock.Count -gt 0) {
+    $declaredDesignPath = Get-ScalarValue -Block $taskBlock -Key "designPath"
+    if (-not [string]::IsNullOrWhiteSpace($declaredDesignPath)) {
+        $normalizedDesignPath = ConvertTo-NormalizedPath -Path $declaredDesignPath
+        $canonicalDesignPath = Get-CanonicalRepositoryPath -Root $RepositoryRoot -Path $declaredDesignPath
+        if ([string]::IsNullOrWhiteSpace($canonicalDesignPath) `
+            -or $normalizedDesignPath -notmatch '^docs/superpowers/specs/[a-z0-9][a-z0-9.-]*\.md$' `
+            -or $normalizedDesignPath -match '(^|/)\.\.(/|$)') {
+            Add-Finding "P1_PROGRAM_DESIGN_PATH_INVALID $declaredDesignPath"
+        } else {
+            $validatedDesignPath = $normalizedDesignPath
+        }
+    }
     $currentTaskGovernancePathList = [System.Collections.Generic.List[string]]::new()
     foreach ($scopeControlPath in $effectiveScopeControlPaths) { $currentTaskGovernancePathList.Add($scopeControlPath) }
     foreach ($governancePathKey in @("planPath", "evidencePath", "auditReviewPath", "freshApprovalSource")) {
         $governancePath = Get-ScalarValue -Block $taskBlock -Key $governancePathKey
         if (-not [string]::IsNullOrWhiteSpace($governancePath)) { $currentTaskGovernancePathList.Add((ConvertTo-NormalizedPath -Path $governancePath)) }
     }
+    if (-not [string]::IsNullOrWhiteSpace($validatedDesignPath)) { $currentTaskGovernancePathList.Add($validatedDesignPath) }
     $currentTaskGovernancePaths = @($currentTaskGovernancePathList.ToArray())
     $protectedImplementationChanged = @($normalizedFilesToCheck | Where-Object { $_ -notin $currentTaskGovernancePaths }).Count -gt 0
-    if ($isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0115ScopeCorrectionCandidateValid) { $protectedImplementationChanged = $false }
+    if ($isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0115ScopeCorrectionCandidateValid) { $protectedImplementationChanged = $false }
     foreach ($artifact in @(
         @{ Label = "plan"; Key = "planPath" },
         @{ Label = "evidence"; Key = "evidencePath" },
@@ -1947,7 +2063,7 @@ if ($taskBlock.Count -gt 0) {
             Add-Finding "P1_PROGRAM_TASK_BRANCH_INVALID $stateCurrentTaskId $taskBranch"
         }
     }
-    if ($Phase -eq "pre_commit" -and -not $SkipGitChecks -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
+    if ($Phase -eq "pre_commit" -and -not $SkipGitChecks -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
         $actualBranch = ((& git -C $RepositoryRoot branch --show-current) -join "").Trim()
         if ($actualBranch -ne $taskBranch) {
             Add-Finding "P1_PROGRAM_TASK_BRANCH_BINDING_MISMATCH $stateCurrentTaskId expected=$taskBranch actual=$actualBranch"
@@ -2011,6 +2127,8 @@ if ($taskBlock.Count -gt 0) {
         @($p1F0115Phase11ScopeCorrectionFiles)
     } elseif ($isP1F0115ModulePrecommitHotfixScope) {
         @($p1F0115ModulePrecommitHotfixFiles)
+    } elseif ($isP1F0116DesignPathGuardHotfixScope) {
+        @($p1F0116DesignPathGuardHotfixFiles)
     } elseif ($isP1F0115ScopeCorrectionCandidateValid) {
         @($p1F0115ScopeCorrectionFiles)
     } else {
@@ -2028,6 +2146,7 @@ if ($taskBlock.Count -gt 0) {
                 (Get-ScalarValue -Block $taskBlock -Key "planPath"),
                 (Get-ScalarValue -Block $taskBlock -Key "evidencePath"),
                 (Get-ScalarValue -Block $taskBlock -Key "auditReviewPath"),
+                $validatedDesignPath,
                 (Get-ScalarValue -Block $taskBlock -Key "freshApprovalSource")
             )
         )) {
@@ -2108,7 +2227,7 @@ if ($taskBlock.Count -gt 0) {
             if ($transitionHead -ne $transitionOrigin) { Add-Finding "P1_PROGRAM_TRANSITION_REQUIRES_SYNCHRONIZED_PARENT" }
         }
     }
-    if ($scopeControlChanged -and $protectedImplementationChanged -and (-not $isBootstrapInitialization -or $SkipGitChecks) -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
+    if ($scopeControlChanged -and $protectedImplementationChanged -and (-not $isBootstrapInitialization -or $SkipGitChecks) -and -not $isSameTaskCloseoutTransition -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0115ScopeCorrectionCandidateValid) {
         Add-Finding "P1_PROGRAM_SCOPE_SELF_MODIFICATION_WITH_IMPLEMENTATION_CHANGE"
     }
     if ($protectedImplementationChanged) {
@@ -2119,7 +2238,7 @@ if ($taskBlock.Count -gt 0) {
     }
     $taskKind = Get-ScalarValue -Block $taskBlock -Key "taskKind"
     foreach ($changedFile in $filesToCheck) {
-        $effectiveBlockedFiles = @($globalBlockedPatterns + $blockedFiles + $(if ($taskKind -eq "mechanism_hardening" -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0115ScopeCorrectionCandidateValid) { @() } else { $programControlPatterns }) | Sort-Object -Unique)
+        $effectiveBlockedFiles = @($globalBlockedPatterns + $blockedFiles + $(if ($taskKind -eq "mechanism_hardening" -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0115ScopeCorrectionCandidateValid) { @() } else { $programControlPatterns }) | Sort-Object -Unique)
         if (@($effectiveBlockedFiles | Where-Object { Test-PathPattern -Path $changedFile -Pattern $_ }).Count -gt 0) {
             Add-Finding "P1_PROGRAM_BLOCKED_FILES_VIOLATION $changedFile"
             continue
@@ -2325,13 +2444,14 @@ if ($stateStatus -eq "closed") {
 if ($findings.Count -gt 0) { throw ($findings -join [Environment]::NewLine) }
 
 $isP1F0115ScopeCorrectionAuthorized = $isP1F0115ScopeCorrectionCandidateValid
-$p1TransitionScopeMode = if ($Phase -eq "pre_push" -and (($isTaskTransition -and -not $protectedImplementationChanged) -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0115ScopeCorrectionAuthorized)) { "transition_only" } else { "standard" }
+$p1TransitionScopeMode = if ($Phase -eq "pre_push" -and (($isTaskTransition -and -not $protectedImplementationChanged) -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0115ScopeCorrectionAuthorized)) { "transition_only" } else { "standard" }
 
 Write-Output "p1ProgramGuardResult: $(if ($stateStatus -eq 'closed') { 'pass_closed_program' } else { 'pass' })"
 Write-Output "p1TransitionScopeMode: $p1TransitionScopeMode"
 if ($isP1F0115ScopeCorrectionAuthorized) { Write-Output "p1F0115ScopeCorrectionAuthorization: approved_one_time" }
 if ($isP1F0115Phase11ScopeCorrectionScope) { Write-Output "p1F0115Phase11ScopeCorrectionAuthorization: approved_one_time" }
 if ($isP1F0115ModulePrecommitHotfixScope) { Write-Output "p1F0115ModulePrecommitHotfixAuthorization: approved_one_time" }
+if ($isP1F0116DesignPathGuardHotfixScope) { Write-Output "p1F0116DesignPathGuardHotfixAuthorization: approved_one_time" }
 Write-Output "programId: $expectedProgramId"
 Write-Output "currentTaskId: $stateCurrentTaskId"
 Write-Output "currentCandidateClusterId: $(Get-ScalarValue -Block $stateProgram -Key 'currentCandidateClusterId')"

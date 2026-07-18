@@ -74,6 +74,19 @@ $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where
 if ($missingModulePrecommitHotfixPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0115 Module hotfix contract: $($missingModulePrecommitHotfixPatterns -join ', ')"
 }
+$f0116DesignPathHotfixPatterns = @(
+    "p1F0116DesignPathGuardHotfixTaskId",
+    "Test-P1F0116DesignPathGuardHotfixFileSet",
+    "Test-P1F0116DesignPathGuardHotfixAnchors",
+    "p1F0116DesignPathGuardHotfixAuthorization: approved_one_time",
+    "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+)
+$missingF0116DesignPathHotfixPatterns = @($f0116DesignPathHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0116DesignPathHotfixPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0116 designPath hotfix contract: $($missingF0116DesignPathHotfixPatterns -join ', ')"
+}
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 

@@ -35,6 +35,19 @@ $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where
 if ($missingModulePrecommitHotfixPatterns.Count -gt 0) {
     throw "P1 guard is RED for the F-0115 Module pre-commit hotfix contract: $($missingModulePrecommitHotfixPatterns -join ', ')"
 }
+$f0116DesignPathHotfixPatterns = @(
+    "p1F0116DesignPathGuardHotfixTaskId",
+    "Test-P1F0116DesignPathGuardHotfixFileSet",
+    "Test-P1F0116DesignPathGuardHotfixAnchors",
+    "p1F0116DesignPathGuardHotfixAuthorization: approved_one_time",
+    "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+)
+$missingF0116DesignPathHotfixPatterns = @($f0116DesignPathHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0116DesignPathHotfixPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0116 designPath hotfix contract: $($missingF0116DesignPathHotfixPatterns -join ', ')"
+}
 $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-p1-remediation-program-" + [guid]::NewGuid().ToString("N"))
 $bootstrapTask = "p1-remediation-program-bootstrap-2026-07-16"
 $authorizationPath = "authorization.md"
@@ -1803,6 +1816,7 @@ currentTask:
     adversarialFailureMode: duplicate identity
     rollbackOrStopCondition: stop on requirement conflict
     reviewMode: evidence_two_rounds
+    designPath: docs/superpowers/specs/next-design.md
     planPath: next-plan.md
     evidencePath: next-evidence.md
     auditReviewPath: next-audit.md
@@ -1812,6 +1826,7 @@ currentTask:
       - next-plan.md
       - next-evidence.md
       - next-audit.md
+      - docs/superpowers/specs/next-design.md
       - src/**
       - tests/**
     blockedFiles:
@@ -1888,9 +1903,11 @@ Decision: APPROVE_SCOPE
     Set-Content -LiteralPath (Join-Path $transitionRoot "state.yaml") -Value $transitionState -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $transitionQueue -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $transitionRoot "next-plan.md") -Value "# Next plan`n" -Encoding UTF8
+    New-Item -ItemType Directory -Path (Join-Path $transitionRoot "docs/superpowers/specs") -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $transitionRoot "docs/superpowers/specs/next-design.md") -Value "# Approved design`n" -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $transitionRoot "next-evidence.md") -Value $scopeEvidence -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $transitionRoot "next-audit.md") -Value $scopeAudit -Encoding UTF8
-    & git -C $transitionRoot add state.yaml queue.yaml next-plan.md next-evidence.md next-audit.md
+    & git -C $transitionRoot add state.yaml queue.yaml next-plan.md next-evidence.md next-audit.md docs/superpowers/specs/next-design.md
 
     $aliasTransitionQueue = $transitionQueue.Replace("evidencePath: next-evidence.md", "evidencePath: subdir/../evidence.md")
     Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $aliasTransitionQueue -Encoding UTF8
@@ -1968,6 +1985,72 @@ Decision: APPROVE_SCOPE
     }
     if (-not $worktreeCleanupFailed) { throw "Residual predecessor worktree fixture unexpectedly passed." }
     Remove-Item -LiteralPath $residualWorktreePath -Recurse -Force
+
+    Set-Content -LiteralPath (Join-Path $transitionRoot "undeclared-design.md") -Value "# Undeclared design`n" -Encoding UTF8
+    & git -C $transitionRoot add undeclared-design.md
+    $undeclaredDesignFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $undeclaredDesignFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_TRANSITION_FILE_SCOPE_INVALID undeclared-design.md") { throw }
+    }
+    if (-not $undeclaredDesignFailed) { throw "Undeclared design artifact fixture unexpectedly passed." }
+    & git -C $transitionRoot reset -- undeclared-design.md *> $null
+    Remove-Item -LiteralPath (Join-Path $transitionRoot "undeclared-design.md") -Force
+
+    $productDesignQueue = $transitionQueue.Replace("designPath: docs/superpowers/specs/next-design.md", "designPath: src/hidden-transition.ts")
+    New-Item -ItemType Directory -Path (Join-Path $transitionRoot "src") -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $transitionRoot "src/hidden-transition.ts") -Value "export {};`n" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $productDesignQueue -Encoding UTF8
+    & git -C $transitionRoot add queue.yaml src/hidden-transition.ts
+    $productDesignFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $productDesignFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_DESIGN_PATH_INVALID src/hidden-transition.ts") { throw }
+    }
+    if (-not $productDesignFailed) { throw "Product path declared as designPath unexpectedly passed." }
+    Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $transitionQueue -Encoding UTF8
+    & git -C $transitionRoot add queue.yaml
+    & git -C $transitionRoot reset -- src/hidden-transition.ts *> $null
+    Remove-Item -LiteralPath (Join-Path $transitionRoot "src") -Recurse -Force
+
+    $nestedDesignPath = "docs/superpowers/specs/nested/hidden-design.md"
+    $nestedDesignQueue = $transitionQueue.Replace("designPath: docs/superpowers/specs/next-design.md", "designPath: $nestedDesignPath")
+    New-Item -ItemType Directory -Path (Join-Path $transitionRoot "docs/superpowers/specs/nested") -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $transitionRoot $nestedDesignPath) -Value "# Nested design`n" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $nestedDesignQueue -Encoding UTF8
+    & git -C $transitionRoot add queue.yaml $nestedDesignPath
+    $nestedDesignFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $nestedDesignFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_DESIGN_PATH_INVALID $([regex]::Escape($nestedDesignPath))") { throw }
+    }
+    if (-not $nestedDesignFailed) { throw "Nested designPath unexpectedly passed." }
+    Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $transitionQueue -Encoding UTF8
+    & git -C $transitionRoot add queue.yaml
+    & git -C $transitionRoot reset -- $nestedDesignPath *> $null
+    Remove-Item -LiteralPath (Join-Path $transitionRoot "docs/superpowers/specs/nested") -Recurse -Force
+
+    foreach ($invalidDesignPath in @("docs/superpowers/specs/../../src/hidden.ts", "D:/outside/spec.md")) {
+        $invalidDesignQueue = $transitionQueue.Replace("designPath: docs/superpowers/specs/next-design.md", "designPath: $invalidDesignPath")
+        Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $invalidDesignQueue -Encoding UTF8
+        & git -C $transitionRoot add queue.yaml
+        $invalidDesignFailed = $false
+        try {
+            & $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_commit -SkipExternalIntegrityChecks
+        } catch {
+            $invalidDesignFailed = $true
+            if ($_.Exception.Message -notmatch "P1_PROGRAM_DESIGN_PATH_INVALID") { throw }
+        }
+        if (-not $invalidDesignFailed) { throw "Invalid designPath unexpectedly passed: $invalidDesignPath" }
+    }
+    Set-Content -LiteralPath (Join-Path $transitionRoot "queue.yaml") -Value $transitionQueue -Encoding UTF8
+    & git -C $transitionRoot add queue.yaml
 
     $transitionOutput = @(& $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_commit -SkipExternalIntegrityChecks)
     if (($transitionOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Positive task-transition fixture failed." }
@@ -2301,6 +2384,118 @@ Decision: APPROVE_SCOPE
             Remove-Item -LiteralPath "Env:GIT_INDEX_FILE" -ErrorAction SilentlyContinue
         }
     }
+
+    $f0116HotfixRoot = Join-Path $smokeRoot "f0116-designpath-guard-hotfix"
+    $f0116HotfixBaseSha = "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+    $f0116HotfixBranch = "codex/p1-f0116-designpath-guard-hotfix"
+    $f0116HotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0116-designpath-guard-hotfix-authorization.md"
+    $f0116HotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0116-designpath-guard-hotfix.md"
+    $f0116HotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0116-designpath-guard-hotfix.md"
+    $f0116HotfixFiles = @(
+        $f0116HotfixAuthorizationPath,
+        "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-designpath-guard-hotfix.md",
+        $f0116HotfixEvidencePath,
+        $f0116HotfixAuditPath,
+        "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+    )
+    & git -c core.longpaths=true clone --quiet --shared --no-checkout $repositoryRoot $f0116HotfixRoot
+    if ($LASTEXITCODE -ne 0) { throw "Unable to clone F-0116 designPath hotfix fixture." }
+    & git -C $f0116HotfixRoot config user.name "P1 F-0116 DesignPath Hotfix Smoke"
+    & git -C $f0116HotfixRoot config user.email "p1-f0116-designpath-hotfix@example.invalid"
+    & git -C $f0116HotfixRoot config core.autocrlf false
+    & git -C $f0116HotfixRoot config core.longpaths true
+    & git -C $f0116HotfixRoot sparse-checkout init --no-cone
+    & git -C $f0116HotfixRoot sparse-checkout set --no-cone $moduleHotfixSparsePatterns
+    & git -C $f0116HotfixRoot switch --quiet -C $f0116HotfixBranch $f0116HotfixBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Unable to materialize F-0116 designPath hotfix fixture." }
+    & git -C $f0116HotfixRoot update-ref refs/remotes/origin/master $f0116HotfixBaseSha
+    foreach ($scriptFile in @($f0116HotfixFiles | Where-Object { $_ -like "scripts/*" })) {
+        Add-Content -LiteralPath (Join-Path $f0116HotfixRoot ($scriptFile -replace "/", "\")) -Value "# F-0116 designPath hotfix smoke marker" -Encoding UTF8
+    }
+    $f0116AuthorizationFileList = @($f0116HotfixFiles | ForEach-Object { "- ``$_``" }) -join "`n"
+    $f0116HotfixAuthorization = @(
+        "# Authorization", "", "Status: approved", "Human approval source: current user message",
+        "Task ID: p1-f0116-designpath-guard-hotfix-2026-07-17",
+        "Parent task: p1-remediation-rc-02-employee-creation-atomicity-2026-07-16",
+        "Base: $f0116HotfixBaseSha", "Branch: $f0116HotfixBranch", "",
+        "ancestorCheckpoint: only_after_transition_only_guard_pass",
+        "otherInProgressShaDrift: hard_block", "hookBypass: prohibited", "qualityGateReduction: prohibited", "",
+        "## Exact Files", "", $f0116AuthorizationFileList
+    ) -join "`n"
+    $f0116HotfixEvidence = @(
+        "# Evidence", "", "## Reading Evidence", "status: complete", "conflictsFound: false",
+        "targetSourceReviewed: true", "targetTestsReviewed: true", "analogousImplementationReviewed: true",
+        "Cost Calibration Gate remains blocked.", "", "## Root-Cause Reproduction", "Result: pass", "",
+        "## TDD Evidence", "Result: pass", "", "## Validation Results", "Result: pass"
+    ) -join "`n"
+    $f0116HotfixAudit = @(
+        "# Audit", "", "## Round 1", "Result: pass", "", "## Round 2", "Result: pass", "",
+        "## Decision", "Decision: APPROVE"
+    ) -join "`n"
+    Set-F0115FixtureFile -Root $f0116HotfixRoot -Path $f0116HotfixAuthorizationPath -Content $f0116HotfixAuthorization
+    Set-F0115FixtureFile -Root $f0116HotfixRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-designpath-guard-hotfix.md" -Content "# Plan`n"
+    Set-F0115FixtureFile -Root $f0116HotfixRoot -Path $f0116HotfixEvidencePath -Content $f0116HotfixEvidence
+    Set-F0115FixtureFile -Root $f0116HotfixRoot -Path $f0116HotfixAuditPath -Content $f0116HotfixAudit
+    & git -C $f0116HotfixRoot add -- $f0116HotfixFiles
+
+    & git -C $f0116HotfixRoot branch -m codex/wrong-f0116-designpath-hotfix
+    $f0116WrongBranchFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116HotfixRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $f0116WrongBranchFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_F0116_DESIGNPATH_GUARD_HOTFIX_CONTEXT_INVALID pre_commit") { throw }
+    }
+    if (-not $f0116WrongBranchFailed) { throw "F-0116 designPath hotfix wrong branch unexpectedly passed." }
+    & git -C $f0116HotfixRoot branch -m $f0116HotfixBranch
+
+    $f0116ExtraFilePath = "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-extra.md"
+    Set-F0115FixtureFile -Root $f0116HotfixRoot -Path $f0116ExtraFilePath -Content "extra"
+    & git -C $f0116HotfixRoot add -- $f0116ExtraFilePath
+    $f0116ExtraFileFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116HotfixRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $f0116ExtraFileFailed = $true
+    }
+    if (-not $f0116ExtraFileFailed) { throw "F-0116 designPath hotfix extra file unexpectedly passed." }
+    & git -C $f0116HotfixRoot reset -- $f0116ExtraFilePath *> $null
+    Remove-Item -LiteralPath (Join-Path $f0116HotfixRoot ($f0116ExtraFilePath -replace "/", "\")) -Force
+
+    $f0116PreCommitOutput = @(& $guardPath -RepositoryRoot $f0116HotfixRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    if (($f0116PreCommitOutput -join "`n") -notmatch "p1F0116DesignPathGuardHotfixAuthorization: approved_one_time") { throw "P1 did not authorize exact F-0116 designPath hotfix." }
+    Push-Location $f0116HotfixRoot
+    try {
+        $f0116ModulePreCommitOutput = @(& $modulePreCommitGuardPath)
+    } finally {
+        Pop-Location
+    }
+    if (($f0116ModulePreCommitOutput -join "`n") -notmatch "p1F0116DesignPathGuardHotfixAuthorization: approved_one_time") { throw "Module pre-commit did not authorize exact F-0116 designPath hotfix." }
+
+    & git -C $f0116HotfixRoot commit --quiet -m "test exact F-0116 designPath hotfix"
+    & git -C $f0116HotfixRoot branch -M master
+    $f0116HotfixHeadSha = ((& git -C $f0116HotfixRoot rev-parse HEAD) -join "").Trim()
+    $f0116HotfixOriginUrl = ((& git -C $f0116HotfixRoot remote get-url origin) -join "").Trim()
+    $f0116HotfixUpdateLine = "refs/heads/master $f0116HotfixHeadSha refs/heads/master $f0116HotfixBaseSha"
+    $f0116PrePushOutput = @(& $guardPath -RepositoryRoot $f0116HotfixRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $f0116HotfixOriginUrl -PushUpdateLines $f0116HotfixUpdateLine -SkipExternalIntegrityChecks)
+    if (($f0116PrePushOutput -join "`n") -notmatch "p1TransitionScopeMode: transition_only") { throw "Exact F-0116 designPath hotfix was not transition-only." }
+    Add-Content -LiteralPath (Join-Path $f0116HotfixRoot ($f0116HotfixEvidencePath -replace "/", "\")) -Value "replay" -Encoding UTF8
+    & git -C $f0116HotfixRoot add -- $f0116HotfixEvidencePath
+    & git -C $f0116HotfixRoot commit --quiet -m "attempt F-0116 designPath hotfix replay"
+    $f0116ReplaySha = ((& git -C $f0116HotfixRoot rev-parse HEAD) -join "").Trim()
+    $f0116ReplayUpdate = "refs/heads/master $f0116ReplaySha refs/heads/master $f0116HotfixBaseSha"
+    $f0116ReplayFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $f0116HotfixRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $f0116HotfixOriginUrl -PushUpdateLines $f0116ReplayUpdate -SkipExternalIntegrityChecks
+    } catch {
+        $f0116ReplayFailed = $true
+    }
+    if (-not $f0116ReplayFailed) { throw "F-0116 designPath hotfix replay unexpectedly passed." }
 
     $readOnlyProbeRoot = Join-Path $smokeRoot "read-only-audit-probe"
     New-Item -ItemType Directory -Path $readOnlyProbeRoot | Out-Null

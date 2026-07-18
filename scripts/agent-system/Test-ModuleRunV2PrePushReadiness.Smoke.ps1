@@ -72,6 +72,20 @@ $missingModulePrecommitHotfixPatterns = @($modulePrecommitHotfixPatterns | Where
 if ($missingModulePrecommitHotfixPatterns.Count -gt 0) {
     throw "Module pre-push is RED for the F-0115 Module hotfix transition contract: $($missingModulePrecommitHotfixPatterns -join ', ')"
 }
+$f0116DesignPathHotfixPatterns = @(
+    "p1F0116DesignPathGuardHotfixBaseSha",
+    "p1F0116DesignPathGuardHotfixAuthorizationPath",
+    "p1F0116DesignPathGuardHotfixFiles",
+    "Test-P1F0116DesignPathGuardHotfixTransitionTopology",
+    "p1F0116DesignPathGuardHotfixTransitionTopology: exact_one_parent",
+    "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+)
+$missingF0116DesignPathHotfixPatterns = @($f0116DesignPathHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0116DesignPathHotfixPatterns.Count -gt 0) {
+    throw "Module pre-push is RED for the F-0116 designPath hotfix transition contract: $($missingF0116DesignPathHotfixPatterns -join ', ')"
+}
 
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-push readiness script: $scriptPath"
@@ -856,6 +870,80 @@ try {
     }
 } finally {
     if (Test-Path -LiteralPath $moduleHotfixFixtureRoot) { Remove-Item -LiteralPath $moduleHotfixFixtureRoot -Recurse -Force }
+}
+
+$f0116DesignPathHotfixBaseSha = "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
+$f0116DesignPathHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-17-p1-f0116-designpath-guard-hotfix-authorization.md"
+$f0116DesignPathHotfixEvidencePath = "docs/05-execution-logs/evidence/2026-07-17-p1-f0116-designpath-guard-hotfix.md"
+$f0116DesignPathHotfixAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-17-p1-f0116-designpath-guard-hotfix.md"
+$f0116DesignPathHotfixFiles = @(
+    $f0116DesignPathHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-designpath-guard-hotfix.md",
+    $f0116DesignPathHotfixEvidencePath,
+    $f0116DesignPathHotfixAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0116DesignPathHotfixFixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-module-f0116-designpath-hotfix-pre-push-" + [guid]::NewGuid().ToString("N"))
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0116DesignPathHotfixFixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0116 designPath hotfix pre-push fixture." }
+    & git -C $f0116DesignPathHotfixFixtureRoot config user.name "Module F-0116 DesignPath Hotfix Smoke"
+    & git -C $f0116DesignPathHotfixFixtureRoot config user.email "module-f0116-designpath-hotfix@example.invalid"
+    & git -C $f0116DesignPathHotfixFixtureRoot config core.autocrlf false
+    & git -C $f0116DesignPathHotfixFixtureRoot config core.longpaths true
+    & git -C $f0116DesignPathHotfixFixtureRoot sparse-checkout init --no-cone
+    & git -C $f0116DesignPathHotfixFixtureRoot sparse-checkout set --no-cone -- @(
+        $f0116DesignPathHotfixFiles + @($f0115PrePushProjectStatePath, $f0115PrePushQueuePath, $f0115PrePushMatrixPath)
+    )
+    & git -C $f0116DesignPathHotfixFixtureRoot switch --quiet -C master $f0116DesignPathHotfixBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out F-0116 designPath hotfix base." }
+    & git -C $f0116DesignPathHotfixFixtureRoot update-ref refs/remotes/origin/master $f0116DesignPathHotfixBaseSha
+    foreach ($scriptFile in @($f0116DesignPathHotfixFiles | Where-Object { $_ -like "scripts/*" })) {
+        Add-Content -LiteralPath (Join-Path $f0116DesignPathHotfixFixtureRoot ($scriptFile -replace "/", "\")) -Value "# F-0116 designPath hotfix marker" -Encoding UTF8
+    }
+    Set-F0115PrePushFixtureFile -Root $f0116DesignPathHotfixFixtureRoot -Path $f0116DesignPathHotfixAuthorizationPath -Content "# Authorization`n`nStatus: approved`nHuman approval source: current user message`n"
+    Set-F0115PrePushFixtureFile -Root $f0116DesignPathHotfixFixtureRoot -Path "docs/05-execution-logs/task-plans/2026-07-17-p1-f0116-designpath-guard-hotfix.md" -Content "# Plan`n"
+    Set-F0115PrePushFixtureFile -Root $f0116DesignPathHotfixFixtureRoot -Path $f0116DesignPathHotfixEvidencePath -Content "# Evidence`n`nResult: pass`n"
+    Set-F0115PrePushFixtureFile -Root $f0116DesignPathHotfixFixtureRoot -Path $f0116DesignPathHotfixAuditPath -Content "# Audit`n`nDecision: APPROVE`n"
+    & git -C $f0116DesignPathHotfixFixtureRoot add -- $f0116DesignPathHotfixFiles
+    & git -C $f0116DesignPathHotfixFixtureRoot commit --quiet -m "materialize exact F-0116 designPath guard hotfix"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit F-0116 designPath hotfix fixture." }
+    $f0116DesignPathHotfixHeadSha = ((& git -C $f0116DesignPathHotfixFixtureRoot rev-parse HEAD) -join "").Trim()
+    $f0116DesignPathHotfixCommitLine = ((& git -C $f0116DesignPathHotfixFixtureRoot rev-list --parents -n 1 HEAD) -join "").Trim()
+    if ($f0116DesignPathHotfixCommitLine -notmatch "^[0-9a-f]{40} $f0116DesignPathHotfixBaseSha$") { throw "F-0116 designPath hotfix fixture is not exact one-parent topology." }
+    $f0116DesignPathHotfixCommittedFiles = @(& git -C $f0116DesignPathHotfixFixtureRoot diff-tree --no-commit-id --name-only -r HEAD | Sort-Object -Unique)
+    if (($f0116DesignPathHotfixCommittedFiles -join "|") -cne (@($f0116DesignPathHotfixFiles | Sort-Object -Unique) -join "|")) { throw "F-0116 designPath hotfix fixture file set is not exact." }
+
+    $f0116DesignPathHotfixProjectStateFullPath = Join-Path $f0116DesignPathHotfixFixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $f0116DesignPathHotfixQueueFullPath = Join-Path $f0116DesignPathHotfixFixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $f0116DesignPathHotfixMatrixFullPath = Join-Path $f0116DesignPathHotfixFixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $f0116DesignPathHotfixEvidenceFullPath = Join-Path $f0116DesignPathHotfixFixtureRoot ($f0116DesignPathHotfixEvidencePath -replace "/", "\")
+    $f0116DesignPathHotfixAuditFullPath = Join-Path $f0116DesignPathHotfixFixtureRoot ($f0116DesignPathHotfixAuditPath -replace "/", "\")
+    Push-Location $f0116DesignPathHotfixFixtureRoot
+    try {
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0116_DESIGNPATH_HOTFIX_REQUIRES_TRANSITION_ONLY" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0116DesignPathHotfixProjectStateFullPath -QueuePath $f0116DesignPathHotfixQueueFullPath -MatrixPath $f0116DesignPathHotfixMatrixFullPath -EvidencePath $f0116DesignPathHotfixEvidenceFullPath -AuditReviewPath $f0116DesignPathHotfixAuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode standard
+        }
+        $f0116DesignPathHotfixPositiveOutput = @(& $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0116DesignPathHotfixProjectStateFullPath -QueuePath $f0116DesignPathHotfixQueueFullPath -MatrixPath $f0116DesignPathHotfixMatrixFullPath -EvidencePath $f0116DesignPathHotfixEvidenceFullPath -AuditReviewPath $f0116DesignPathHotfixAuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only)
+        Assert-Contains -Output $f0116DesignPathHotfixPositiveOutput -Pattern "p1F0116DesignPathGuardHotfixTransitionTopology: exact_one_parent"
+        Assert-Contains -Output $f0116DesignPathHotfixPositiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+        Add-Content -LiteralPath $f0116DesignPathHotfixEvidenceFullPath -Value "replay" -Encoding UTF8
+        & git add -- $f0116DesignPathHotfixEvidencePath
+        & git commit --quiet -m "attempt F-0116 designPath hotfix replay"
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+            & $scriptPath -TaskId $f0115PrePushParentTaskId -ProjectStatePath $f0116DesignPathHotfixProjectStateFullPath -QueuePath $f0116DesignPathHotfixQueueFullPath -MatrixPath $f0116DesignPathHotfixMatrixFullPath -EvidencePath $f0116DesignPathHotfixEvidenceFullPath -AuditReviewPath $f0116DesignPathHotfixAuditFullPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+        }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    if (Test-Path -LiteralPath $f0116DesignPathHotfixFixtureRoot) { Remove-Item -LiteralPath $f0116DesignPathHotfixFixtureRoot -Recurse -Force }
 }
 
 Write-Output "Module Run v2 pre-push readiness smoke passed"
