@@ -384,10 +384,10 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     currentExecutionGate:
-      status: waiting_for_spec_review
-      reason: current_user_approved_f0117_option_a_and_schema_migration_source_only_but_written_spec_review_is_required
+      status: satisfied
+      reason: current_user_approved_written_f0117_spec_2026_07_18
       approvalRequestPath: docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md
-      resumeAction: review_written_f0117_nullable_deadline_spec_then_write_implementation_plan
+      resumeAction: execute_f0117_redeem_code_nullable_deadline_plan_red_to_green
     acceptanceStandards:
       - Omitted or explicit null redeemDeadlineAt means long-term redeemability; empty or malformed date fails closed, and every output keeps the redeemDeadlineAt key as string or null.
       - Null deadline unused codes never expire by time; expired and unused filters, both sort directions, preview version and confirmation JIT checks must handle null deliberately.

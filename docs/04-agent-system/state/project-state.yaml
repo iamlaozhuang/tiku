@@ -679,10 +679,10 @@ currentTask:
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
   nextRequiredTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-implementation-plan
   currentExecutionGate:
-    status: waiting_for_spec_review
-    reason: current_user_approved_f0117_option_a_and_schema_migration_source_only_but_written_spec_review_is_required
+    status: satisfied
+    reason: current_user_approved_written_f0117_spec_2026_07_18
     approvalRequestPath: docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md
-    resumeAction: review_written_f0117_nullable_deadline_spec_then_write_implementation_plan
+    resumeAction: execute_f0117_redeem_code_nullable_deadline_plan_red_to_green
 standingAuthorization:
   id: current-user-approved-p1-remediation-goal-2026-07-16
   source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
@@ -692,9 +692,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: f6b14825f41a83b3f9dd3994ec9c1936876b12ff
-  lastKnownOriginMasterSha: f6b14825f41a83b3f9dd3994ec9c1936876b12ff
-  lastKnownRemoteMasterSha: f6b14825f41a83b3f9dd3994ec9c1936876b12ff
+  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7
+  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7
+  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

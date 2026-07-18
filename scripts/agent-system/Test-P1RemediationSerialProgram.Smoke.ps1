@@ -61,6 +61,20 @@ $missingF0116ScopeCorrectionHotfixPatterns = @($f0116ScopeCorrectionHotfixPatter
 if ($missingF0116ScopeCorrectionHotfixPatterns.Count -gt 0) {
     throw "P1 guard is RED for the F-0116 scope-correction hotfix contract: $($missingF0116ScopeCorrectionHotfixPatterns -join ', ')"
 }
+$f0117SpecApprovalHotfixPatterns = @(
+    "p1F0117SpecApprovalTransitionHotfixTaskId",
+    "Test-P1F0117SpecApprovalTransitionHotfixFileSet",
+    "Test-P1F0117SpecApprovalTransitionHotfixAnchors",
+    "p1F0117SpecApprovalTransitionHotfixAuthorization: approved_one_time",
+    "366f17446e9fc75a777ebfe5977ad72db1062eb7",
+    "P1_PROGRAM_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_GATE_PROJECTION_INVALID"
+)
+$missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
+}
 $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-p1-remediation-program-" + [guid]::NewGuid().ToString("N"))
 $bootstrapTask = "p1-remediation-program-bootstrap-2026-07-16"
 $authorizationPath = "authorization.md"
@@ -2512,6 +2526,7 @@ Decision: APPROVE_SCOPE
 
     $f0116ScopeRoot = Join-Path $smokeRoot "f0116-scope-correction-guard-hotfix"
     $f0116ScopeBaseSha = "f6b14825f41a83b3f9dd3994ec9c1936876b12ff"
+    $f0116ScopeTransitionSnapshotSha = "992fc119a"
     $f0116ScopeBranch = "codex/p1-f0116-scope-correction-hotfix"
     $f0116ScopeAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0116-scope-correction-guard-hotfix-authorization.md"
     $f0116ScopeEvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0116-scope-correction-guard-hotfix.md"
@@ -2542,9 +2557,15 @@ Decision: APPROVE_SCOPE
     if ($LASTEXITCODE -ne 0) { throw "Unable to materialize F-0116 scope-correction hotfix fixture." }
     & git -C $f0116ScopeRoot update-ref refs/remotes/origin/master $f0116ScopeBaseSha
     foreach ($candidatePath in $f0116ScopeFiles) {
-        $sourcePath = Join-Path $repositoryRoot ($candidatePath -replace "/", "\")
-        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0116 scope candidate file: $candidatePath" }
-        Set-F0115FixtureFile -Root $f0116ScopeRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+        if ($candidatePath -in @("docs/04-agent-system/state/project-state.yaml", "docs/04-agent-system/state/task-queue.yaml")) {
+            $candidateContent = ((& git -C $repositoryRoot show "${f0116ScopeTransitionSnapshotSha}:$candidatePath") -join "`n")
+            if ($LASTEXITCODE -ne 0) { throw "Missing historical F-0116 transition snapshot file: $candidatePath" }
+        } else {
+            $sourcePath = Join-Path $repositoryRoot ($candidatePath -replace "/", "\")
+            if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0116 scope candidate file: $candidatePath" }
+            $candidateContent = [System.IO.File]::ReadAllText($sourcePath)
+        }
+        Set-F0115FixtureFile -Root $f0116ScopeRoot -Path $candidatePath -Content $candidateContent
     }
     Set-F0115FixtureFile -Root $f0116ScopeRoot -Path $f0116ScopeEvidencePath -Content @"
 # F-0116 scope-correction guard hotfix evidence
@@ -2614,7 +2635,9 @@ Decision: APPROVE
         if ($_.Exception.Message -notmatch "P1_PROGRAM_F0116_SCOPE_CORRECTION_GUARD_HOTFIX_QUEUE_DELTA_INVALID") { throw }
     }
     if (-not $f0116ScopeDeltaFailed) { throw "F-0116 scope-correction extra queue delta unexpectedly passed." }
-    Set-F0115FixtureFile -Root $f0116ScopeRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content ([System.IO.File]::ReadAllText((Join-Path $repositoryRoot "docs\04-agent-system\state\task-queue.yaml")))
+    $f0116ScopeTransitionQueue = ((& git -C $repositoryRoot show "${f0116ScopeTransitionSnapshotSha}:docs/04-agent-system/state/task-queue.yaml") -join "`n")
+    if ($LASTEXITCODE -ne 0) { throw "Unable to restore historical F-0116 transition queue snapshot." }
+    Set-F0115FixtureFile -Root $f0116ScopeRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content $f0116ScopeTransitionQueue
     & git -C $f0116ScopeRoot add -- "docs/04-agent-system/state/task-queue.yaml"
 
     $f0116ScopePreCommitOutput = @(& $guardPath -RepositoryRoot $f0116ScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks)
@@ -2669,6 +2692,10 @@ Decision: APPROVE
     if ($missingF0115ScopeCorrectionPatterns.Count -gt 0) {
         Write-Output "Existing P1 remediation smoke regression passed: 8 positive, 48 negative"
         throw "P1 guard is missing F-0115 scope-correction marker/mode contract: $($missingF0115ScopeCorrectionPatterns -join ', ')"
+    }
+    $f0117PreCommitBehaviorOutput = @(& (Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.Smoke.ps1"))
+    if (($f0117PreCommitBehaviorOutput -join "`n") -notmatch "F-0117 P1 and Module pre-commit behavior smoke passed") {
+        throw "P1 smoke did not execute the shared F-0117 pre-commit behavior fixture."
     }
     Write-Output "P1 remediation serial program guard smoke passed: 15 positive, 81 negative"
 } finally {

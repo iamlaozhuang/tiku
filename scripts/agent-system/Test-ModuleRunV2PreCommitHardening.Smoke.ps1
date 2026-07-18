@@ -100,6 +100,20 @@ $missingF0116ScopeCorrectionHotfixPatterns = @($f0116ScopeCorrectionHotfixPatter
 if ($missingF0116ScopeCorrectionHotfixPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0116 scope-correction hotfix contract: $($missingF0116ScopeCorrectionHotfixPatterns -join ', ')"
 }
+$f0117SpecApprovalHotfixPatterns = @(
+    "p1F0117SpecApprovalTransitionHotfixTaskId",
+    "Test-P1F0117SpecApprovalTransitionHotfixFileSet",
+    "Test-P1F0117SpecApprovalTransitionHotfixAnchors",
+    "p1F0117SpecApprovalTransitionHotfixAuthorization: approved_one_time",
+    "366f17446e9fc75a777ebfe5977ad72db1062eb7",
+    "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_GATE_PROJECTION_INVALID"
+)
+$missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
+}
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 
@@ -1810,4 +1824,180 @@ Decision: REJECT
     }
 }
 
+function Set-F0117PreCommitFixtureFile {
+    param([string]$Root, [string]$Path, [string]$Content)
+    $fullPath = Join-Path $Root ($Path -replace "/", "\")
+    $parent = Split-Path -Parent $fullPath
+    if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
+    [System.IO.File]::WriteAllText($fullPath, (($Content -replace "`r`n?", "`n").TrimEnd("`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
+}
+
+$f0117BehaviorRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-f0117-precommit-behavior-" + [guid]::NewGuid().ToString("N"))
+$f0117BehaviorBaseSha = "366f17446e9fc75a777ebfe5977ad72db1062eb7"
+$f0117BehaviorBranch = "codex/p1-f0117-spec-approval-transition-hotfix"
+$f0117BehaviorAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-spec-approval-transition-hotfix-authorization.md"
+$f0117BehaviorFiles = @(
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    $f0117BehaviorAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-spec-approval-transition-hotfix.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0117BehaviorSourceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+
+function Reset-F0117PreCommitBehaviorFixture {
+    & git -C $f0117BehaviorRoot rm --quiet -f --cached --ignore-unmatch --sparse -- f0117-extra.md src/f0117-product.ts *> $null
+    foreach ($probePath in @("f0117-extra.md", "src/f0117-product.ts")) {
+        Remove-Item -LiteralPath (Join-Path $f0117BehaviorRoot ($probePath -replace "/", "\")) -Force -ErrorAction SilentlyContinue
+    }
+    & git -C $f0117BehaviorRoot reset --hard --quiet $f0117BehaviorBaseSha
+    & git -C $f0117BehaviorRoot clean -fdx --quiet
+    & git -C $f0117BehaviorRoot branch -M $f0117BehaviorBranch
+    foreach ($candidatePath in $f0117BehaviorFiles) {
+        $sourcePath = Join-Path $f0117BehaviorSourceRoot ($candidatePath -replace "/", "\")
+        Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+    & git -C $f0117BehaviorRoot add -- $f0117BehaviorFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0117 behavior fixture." }
+}
+
+function Assert-F0117PreCommitBehaviorFailure {
+    param(
+        [string]$Label,
+        [string]$P1Pattern = "P1_PROGRAM_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_",
+        [string]$ModulePattern = "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_"
+    )
+    $p1Failed = $false
+    $p1FailureOutput = @()
+    try { $p1FailureOutput = @(& $p1GuardPath -RepositoryRoot $f0117BehaviorRoot -Phase pre_commit -SkipExternalIntegrityChecks 2>&1) } catch { $p1Failed = $true; $p1FailureOutput += $_.Exception.Message }
+    $moduleFailed = $false
+    $moduleFailureOutput = @()
+    Push-Location $f0117BehaviorRoot
+    try { try { $moduleFailureOutput = @(& $scriptPath 2>&1) } catch { $moduleFailed = $true; $moduleFailureOutput += $_.Exception.Message } } finally { Pop-Location }
+    if (-not $p1Failed -or -not $moduleFailed) { throw "F-0117 $Label did not fail both P1 and Module pre-commit guards." }
+    if (($p1FailureOutput -join "`n") -notmatch $P1Pattern) { throw "F-0117 $Label P1 failure did not contain '$P1Pattern': $($p1FailureOutput -join '; ')" }
+    if (($moduleFailureOutput -join "`n") -notmatch $ModulePattern) { throw "F-0117 $Label Module failure did not contain '$ModulePattern': $($moduleFailureOutput -join '; ')" }
+}
+
+try {
+    & git clone --quiet --shared --no-checkout $f0117BehaviorSourceRoot $f0117BehaviorRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0117 pre-commit behavior fixture." }
+    & git -C $f0117BehaviorRoot config user.name "F0117 PreCommit Behavior Smoke"
+    & git -C $f0117BehaviorRoot config user.email "f0117-precommit@example.invalid"
+    & git -C $f0117BehaviorRoot config core.autocrlf false
+    & git -C $f0117BehaviorRoot config core.longpaths true
+    & git -C $f0117BehaviorRoot sparse-checkout init --no-cone
+    & git -C $f0117BehaviorRoot sparse-checkout set --no-cone -- @(
+        "/.gitattributes",
+        "/docs/04-agent-system/",
+        "/docs/05-execution-logs/acceptance/2026-07-16-p1-*",
+        "/docs/05-execution-logs/acceptance/2026-07-17-p1-*",
+        "/docs/05-execution-logs/acceptance/2026-07-18-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-16-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-17-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-18-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-16-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-17-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-18-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-16-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-15-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-17-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-18-p1-*",
+        "/scripts/agent-system/"
+    )
+    & git -C $f0117BehaviorRoot switch --quiet -C $f0117BehaviorBranch $f0117BehaviorBaseSha
+    & git -C $f0117BehaviorRoot update-ref refs/remotes/origin/master $f0117BehaviorBaseSha
+    Reset-F0117PreCommitBehaviorFixture
+
+    $p1Positive = @(& $p1GuardPath -RepositoryRoot $f0117BehaviorRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    Assert-Contains -Output $p1Positive -Pattern "p1F0117SpecApprovalTransitionHotfixAuthorization: approved_one_time"
+    Push-Location $f0117BehaviorRoot
+    try { $modulePositive = @(& $scriptPath) } finally { Pop-Location }
+    Assert-Contains -Output $modulePositive -Pattern "preCommitScopeMode: p1_f0117_spec_approval_transition_hotfix"
+
+    & git -C $f0117BehaviorRoot branch -M codex/wrong-f0117-branch
+    Assert-F0117PreCommitBehaviorFailure -Label "wrong branch"
+    Reset-F0117PreCommitBehaviorFixture
+
+    & git -C $f0117BehaviorRoot reset --soft "${f0117BehaviorBaseSha}^"
+    Assert-F0117PreCommitBehaviorFailure -Label "wrong base"
+    Reset-F0117PreCommitBehaviorFixture
+
+    $statePath = Join-Path $f0117BehaviorRoot "docs\04-agent-system\state\project-state.yaml"
+    $stateText = [System.IO.File]::ReadAllText($statePath)
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content $stateText.Replace("currentTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18", "currentTaskId: p1-remediation-rc-02-employee-import-preflight-2026-07-17")
+    & git -C $f0117BehaviorRoot add -- "docs/04-agent-system/state/project-state.yaml"
+    Assert-F0117PreCommitBehaviorFailure -Label "wrong task"
+    Reset-F0117PreCommitBehaviorFixture
+
+    $queuePath = Join-Path $f0117BehaviorRoot "docs\04-agent-system\state\task-queue.yaml"
+    $queueText = [System.IO.File]::ReadAllText($queuePath)
+    $f0117GateAnchor = "    currentExecutionGate:`n      status: satisfied`n      reason: current_user_approved_written_f0117_spec_2026_07_18`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md`n      resumeAction: execute_f0117_redeem_code_nullable_deadline_plan_red_to_green"
+    if ([regex]::Matches(($queueText -replace "`r`n?", "`n"), [regex]::Escape($f0117GateAnchor)).Count -ne 1) { throw "F-0117 wrong-gate fixture anchor must occur exactly once." }
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content (($queueText -replace "`r`n?", "`n").Replace($f0117GateAnchor, $f0117GateAnchor.Replace("status: satisfied", "status: waiting_for_spec_review")))
+    & git -C $f0117BehaviorRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+    Assert-F0117PreCommitBehaviorFailure -Label "wrong gate"
+    Reset-F0117PreCommitBehaviorFixture
+
+    $authorizationFullPath = Join-Path $f0117BehaviorRoot ($f0117BehaviorAuthorizationPath -replace "/", "\")
+    $authorizationText = [System.IO.File]::ReadAllText($authorizationFullPath)
+    foreach ($mutation in @(
+        @{ Label = "human approval suffix"; From = 'execution on 2026-07-18'; To = 'execution on 2026-07-18 rejected' },
+        @{ Label = "authorization branch"; From = 'Branch: `codex/p1-f0117-spec-approval-transition-hotfix`'; To = 'Branch: `codex/wrong-f0117`' },
+        @{ Label = "standing source"; From = '2026-07-16-p1-remediation-program-authorization.md'; To = '2026-07-16-wrong-authorization.md' },
+        @{ Label = "exact files"; From = '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`'; To = '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1`' }
+    )) {
+        Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $f0117BehaviorAuthorizationPath -Content $authorizationText.Replace($mutation.From, $mutation.To)
+        & git -C $f0117BehaviorRoot add -- $f0117BehaviorAuthorizationPath
+        Assert-F0117PreCommitBehaviorFailure -Label $mutation.Label
+        Reset-F0117PreCommitBehaviorFixture
+    }
+
+    foreach ($appendMutation in @(
+        @{ Label = "conflicting authorization field"; Content = "`nstandardMode: allow`n"; P1Pattern = "P1_PROGRAM_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID"; ModulePattern = "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID" },
+        @{ Label = "duplicate authorization field"; Content = "`nstandardMode: hard_block`n"; P1Pattern = "P1_PROGRAM_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID"; ModulePattern = "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID" },
+        @{ Label = "duplicate exact file"; Content = ("`n" + '13. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`' + "`n"); P1Pattern = "P1_PROGRAM_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID"; ModulePattern = "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID" }
+    )) {
+        Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $f0117BehaviorAuthorizationPath -Content ($authorizationText.TrimEnd() + $appendMutation.Content)
+        & git -C $f0117BehaviorRoot add -- $f0117BehaviorAuthorizationPath
+        Assert-F0117PreCommitBehaviorFailure -Label $appendMutation.Label -P1Pattern $appendMutation.P1Pattern -ModulePattern $appendMutation.ModulePattern
+        Reset-F0117PreCommitBehaviorFixture
+    }
+
+    & git -C $f0117BehaviorRoot rm --quiet -f -- $f0117BehaviorAuthorizationPath
+    Assert-F0117PreCommitBehaviorFailure -Label "missing authorization"
+    Reset-F0117PreCommitBehaviorFixture
+
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "f0117-extra.md" -Content "extra"
+    & git -C $f0117BehaviorRoot add --sparse -- f0117-extra.md
+    Assert-F0117PreCommitBehaviorFailure -Label "extra file" -P1Pattern "P1_PROGRAM_ALLOWED_FILES_VIOLATION" -ModulePattern "HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)"
+    Reset-F0117PreCommitBehaviorFixture
+
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "src/f0117-product.ts" -Content "export const forbidden = true;"
+    & git -C $f0117BehaviorRoot add --sparse -- src/f0117-product.ts
+    Assert-F0117PreCommitBehaviorFailure -Label "product file" -P1Pattern "P1_PROGRAM_(?:ALLOWED_FILES|BLOCKED_FILES)_VIOLATION" -ModulePattern "HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)"
+    Reset-F0117PreCommitBehaviorFixture
+
+    Add-Content -LiteralPath $authorizationFullPath -Value "unstaged divergence" -Encoding UTF8
+    Assert-F0117PreCommitBehaviorFailure -Label "partial stage"
+    Reset-F0117PreCommitBehaviorFixture
+
+    & git -C $f0117BehaviorRoot commit --quiet -m "materialize F-0117 candidate"
+    foreach ($candidatePath in $f0117BehaviorFiles) {
+        Add-Content -LiteralPath (Join-Path $f0117BehaviorRoot ($candidatePath -replace "/", "\")) -Value "# replay probe" -Encoding UTF8
+    }
+    & git -C $f0117BehaviorRoot add -- $f0117BehaviorFiles
+    Assert-F0117PreCommitBehaviorFailure -Label "replay"
+} finally {
+    if (Test-Path -LiteralPath $f0117BehaviorRoot) { Remove-Item -LiteralPath $f0117BehaviorRoot -Recurse -Force }
+}
+
+Write-Output "F-0117 P1 and Module pre-commit behavior smoke passed"
 Write-Output "Module Run v2 pre-commit hardening smoke passed"
