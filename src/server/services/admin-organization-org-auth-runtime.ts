@@ -78,8 +78,6 @@ type AdminOrganizationOrgAuthActor = {
   roles: [AdminOrganizationOrgAuthRole, ...AdminOrganizationOrgAuthRole[]];
 };
 
-const EMPLOYEE_IMPORT_ROW_LIMIT = 500;
-
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
@@ -179,15 +177,6 @@ type OrganizationMutationRepositories =
       input: NormalizedDisableOrganizationInput & { publicId: string },
     ): Promise<OrganizationDto | null>;
   };
-
-type NormalizedEmployeeImportInput = {
-  rows: {
-    initialPassword: string;
-    name: string;
-    phone: string;
-  }[];
-  targetOrganizationPublicId: string;
-};
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -310,188 +299,6 @@ function normalizeEmployeeTransferInput(
         targetOrganizationPublicId: value.targetOrganizationPublicId.trim(),
       }
     : null;
-}
-
-function normalizeEmployeeImportInput(
-  input: unknown,
-): NormalizedEmployeeImportInput | null {
-  if (typeof input !== "object" || input === null) {
-    return null;
-  }
-
-  const value = input as {
-    content?: unknown;
-    sourceFormat?: unknown;
-    targetOrganizationPublicId?: unknown;
-  };
-
-  if (
-    typeof value.content === "string" &&
-    (value.sourceFormat === "csv" || value.sourceFormat === "tsv") &&
-    typeof value.targetOrganizationPublicId === "string" &&
-    value.targetOrganizationPublicId.trim().length > 0
-  ) {
-    return parseEmployeeAccountImportContent({
-      content: value.content,
-      sourceFormat: value.sourceFormat,
-      targetOrganizationPublicId: value.targetOrganizationPublicId.trim(),
-    });
-  }
-
-  return null;
-}
-
-function parseDelimitedLine(line: string, delimiter: "," | "\t"): string[] {
-  const cells: string[] = [];
-  let cell = "";
-  let isQuoted = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const character = line[index];
-    const nextCharacter = line[index + 1];
-
-    if (character === '"' && isQuoted && nextCharacter === '"') {
-      cell += '"';
-      index += 1;
-      continue;
-    }
-
-    if (character === '"') {
-      isQuoted = !isQuoted;
-      continue;
-    }
-
-    if (character === delimiter && !isQuoted) {
-      cells.push(cell.trim());
-      cell = "";
-      continue;
-    }
-
-    cell += character;
-  }
-
-  cells.push(cell.trim());
-
-  return cells;
-}
-
-function normalizeHeaderName(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/gu, "");
-}
-
-const employeeAccountImportHeaderNames = new Set([
-  "phone",
-  "name",
-  "initialpassword",
-]);
-
-const forbiddenEmployeeImportScopeHeaderNames = new Set([
-  "profession",
-  "level",
-  "edition",
-  "orgauthscopepublicid",
-  "organizationpublicid",
-  "userpublicid",
-]);
-
-function hasForbiddenEmployeeImportScopeHeader(
-  firstHeaderNames: Set<string>,
-): boolean {
-  const forbiddenHeaderCount = Array.from(
-    forbiddenEmployeeImportScopeHeaderNames,
-  ).filter((name) => firstHeaderNames.has(name)).length;
-  const looksLikeHeader =
-    Array.from(firstHeaderNames).some((name) =>
-      employeeAccountImportHeaderNames.has(name),
-    ) || forbiddenHeaderCount > 1;
-
-  return looksLikeHeader && forbiddenHeaderCount > 0;
-}
-
-function readEmployeeAccountCell(input: {
-  cells: string[];
-  fallbackIndex: number;
-  headerIndexByName: Map<string, number>;
-  name: string;
-}): string {
-  const headerIndex = input.headerIndexByName.get(input.name);
-  const index = headerIndex ?? input.fallbackIndex;
-
-  return input.cells[index]?.trim() ?? "";
-}
-
-function parseEmployeeAccountImportContent(input: {
-  content: string;
-  sourceFormat: "csv" | "tsv";
-  targetOrganizationPublicId: string;
-}): NormalizedEmployeeImportInput | null {
-  const delimiter = input.sourceFormat === "tsv" ? "\t" : ",";
-  const parsedRows = input.content
-    .split(/\r?\n/u)
-    .map((line, index) => ({
-      cells: parseDelimitedLine(line, delimiter),
-      rowNumber: index + 1,
-    }))
-    .filter((row) => row.cells.some((cell) => cell.length > 0));
-
-  if (parsedRows.length === 0) {
-    return null;
-  }
-
-  const firstRow = parsedRows[0];
-  const firstHeaderNames = new Set(firstRow?.cells.map(normalizeHeaderName));
-
-  if (hasForbiddenEmployeeImportScopeHeader(firstHeaderNames)) {
-    return null;
-  }
-
-  const hasHeader =
-    firstHeaderNames.has("phone") && firstHeaderNames.has("name");
-  const headerIndexByName = new Map<string, number>(
-    hasHeader
-      ? (firstRow?.cells.map((cell, index) => [
-          normalizeHeaderName(cell),
-          index,
-        ]) ?? [])
-      : [],
-  );
-  const dataRows = hasHeader ? parsedRows.slice(1) : parsedRows;
-
-  if (dataRows.length === 0 || dataRows.length > EMPLOYEE_IMPORT_ROW_LIMIT) {
-    return null;
-  }
-
-  const rows = dataRows.map((row) => ({
-    phone: readEmployeeAccountCell({
-      cells: row.cells,
-      fallbackIndex: 0,
-      headerIndexByName,
-      name: "phone",
-    }),
-    name: readEmployeeAccountCell({
-      cells: row.cells,
-      fallbackIndex: 1,
-      headerIndexByName,
-      name: "name",
-    }),
-    initialPassword:
-      hasHeader && !headerIndexByName.has("initialpassword")
-        ? ""
-        : readEmployeeAccountCell({
-            cells: row.cells,
-            fallbackIndex: 2,
-            headerIndexByName,
-            name: "initialpassword",
-          }),
-  }));
-
-  return {
-    rows,
-    targetOrganizationPublicId: input.targetOrganizationPublicId,
-  };
 }
 
 function maskEmployeeSummaryPhone(
@@ -1526,14 +1333,11 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
               success: true,
               body: {
                 commandKind: "single_create",
+                expectedPreviewRevision: employeeInput.expectedPreviewRevision,
+                initialPassword: employeeInput.initialPassword,
+                name: employeeInput.name,
                 organizationPublicId: employeeInput.organizationPublicId,
-                rows: [
-                  {
-                    initialPassword: employeeInput.initialPassword,
-                    name: employeeInput.name,
-                    phone: employeeInput.phone,
-                  },
-                ],
+                phone: employeeInput.phone,
               },
             };
           });
@@ -1542,20 +1346,22 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
       importBatch: {
         async POST(request: Request): Promise<Response> {
           return submitEmployeeImportCommand(request, async () => {
-            const normalizedInput = normalizeEmployeeImportInput(
-              await readRequestJson(request),
-            );
-            if (normalizedInput === null) {
-              return { success: false };
-            }
+            const requestBody = await readRequestJson(request);
+            const employeeImportInput =
+              typeof requestBody === "object" && requestBody !== null
+                ? (requestBody as Record<string, unknown>)
+                : {};
 
             return {
               success: true,
               body: {
                 commandKind: "batch_import",
+                content: employeeImportInput.content,
+                expectedPreviewRevision:
+                  employeeImportInput.expectedPreviewRevision,
                 organizationPublicId:
-                  normalizedInput.targetOrganizationPublicId,
-                rows: normalizedInput.rows,
+                  employeeImportInput.targetOrganizationPublicId,
+                sourceFormat: employeeImportInput.sourceFormat,
               },
             };
           });

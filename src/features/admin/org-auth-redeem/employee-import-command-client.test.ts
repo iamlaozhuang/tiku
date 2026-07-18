@@ -2,16 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createEmployeeImportCommandClient } from "./employee-import-command-client";
 
-const input = {
+const preflightInput = {
   commandKind: "batch_import" as const,
+  content:
+    'phone,name,initialPassword\n13900000001,"Employee\nOne",RequestSecret1',
   organizationPublicId: "organization-public-1",
-  rows: [
-    {
-      initialPassword: "RequestSecret1",
-      name: "Employee One",
-      phone: "13900000001",
-    },
-  ],
+  sourceFormat: "csv" as const,
+};
+const input = {
+  ...preflightInput,
+  expectedPreviewRevision: "a".repeat(64),
 };
 
 function response(
@@ -22,6 +22,26 @@ function response(
 }
 
 describe("employee import command client", () => {
+  it("previews raw source unchanged without an idempotency key or retry", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(response(503, null));
+    const client = createEmployeeImportCommandClient(fetchMock);
+
+    await client.preview("session-token", preflightInput);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [path, init] = fetchMock.mock.calls[0] ?? [];
+    expect(path).toBe("/api/v1/employee-import-commands/preview");
+    expect(init).toMatchObject({
+      body: JSON.stringify(preflightInput),
+      cache: "no-store",
+      credentials: "same-origin",
+      method: "POST",
+    });
+    expect(new Headers(init?.headers).has("idempotency-key")).toBe(false);
+  });
+
   it("submits with no-store, same-origin and an idempotency key", async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(response());
     const client = createEmployeeImportCommandClient(fetchMock);

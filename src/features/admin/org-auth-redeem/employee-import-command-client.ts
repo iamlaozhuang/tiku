@@ -4,17 +4,15 @@ import type {
   EmployeeDistributionConfirmationInput,
   EmployeeCredentialIssueInput,
   EmployeeImportCommandDto,
+  EmployeeImportCommandConfirmationInput,
+  EmployeeImportCommandConfirmationResult,
+  EmployeeImportPreflightDto,
+  EmployeeImportPreflightInput,
 } from "@/server/contracts/employee-import-command-contract";
 
-export type EmployeeImportCommandSubmitInput = {
-  commandKind: "batch_import" | "single_create";
-  organizationPublicId: string;
-  rows: {
-    initialPassword: string;
-    name: string;
-    phone: string;
-  }[];
-};
+export type EmployeeImportCommandPreviewInput = EmployeeImportPreflightInput;
+export type EmployeeImportCommandSubmitInput =
+  EmployeeImportCommandConfirmationInput;
 
 export type EmployeeImportCommandClientResult<TData> = {
   httpStatus: number;
@@ -38,11 +36,17 @@ export type EmployeeImportCommandClient = {
   ) => Promise<
     EmployeeImportCommandClientResult<EmployeeCredentialManifestDto>
   >;
+  preview: (
+    sessionToken: string,
+    input: EmployeeImportCommandPreviewInput,
+  ) => Promise<EmployeeImportCommandClientResult<EmployeeImportPreflightDto>>;
   submit: (
     sessionToken: string,
     idempotencyKey: string,
     input: EmployeeImportCommandSubmitInput,
-  ) => Promise<EmployeeImportCommandClientResult<EmployeeImportCommandDto>>;
+  ) => Promise<
+    EmployeeImportCommandClientResult<EmployeeImportCommandConfirmationResult>
+  >;
 };
 
 type FetchImplementation = typeof fetch;
@@ -91,6 +95,15 @@ export function createEmployeeImportCommandClient(
   fetchImplementation: FetchImplementation = fetch,
 ): EmployeeImportCommandClient {
   return {
+    preview(sessionToken, input) {
+      return post<EmployeeImportPreflightDto>({
+        body: JSON.stringify(input),
+        fetchImplementation,
+        path: "/api/v1/employee-import-commands/preview",
+        sessionToken,
+      });
+    },
+
     async submit(sessionToken, idempotencyKey, input) {
       const request = {
         body: JSON.stringify(input),
@@ -101,13 +114,14 @@ export function createEmployeeImportCommandClient(
       };
 
       try {
-        const result = await post<EmployeeImportCommandDto>(request);
+        const result =
+          await post<EmployeeImportCommandConfirmationResult>(request);
 
         return result.httpStatus === 503
-          ? await post<EmployeeImportCommandDto>(request)
+          ? await post<EmployeeImportCommandConfirmationResult>(request)
           : result;
       } catch {
-        return post<EmployeeImportCommandDto>(request);
+        return post<EmployeeImportCommandConfirmationResult>(request);
       }
     },
 

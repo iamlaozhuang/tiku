@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -603,6 +604,76 @@ function mockSystemOpsFetchWithOrganizationTree(
           code: 0,
           message: "ok",
           data: { employees: [] },
+        });
+      }
+
+      if (path === "/api/v1/employee-import-commands/preview") {
+        const body = JSON.parse(String(init?.body)) as {
+          content: string;
+          organizationPublicId: string;
+          sourceFormat: "csv" | "tsv";
+        };
+        if (
+          body.content.includes('"Unclosed') ||
+          body.content.includes('Sec"ret"123')
+        ) {
+          return Response.json(
+            {
+              code: 422601,
+              message: "员工导入内容包含无效或未闭合的引号。",
+              data: null,
+            },
+            { status: 422 },
+          );
+        }
+        if (body.content.includes("organizationPublicId")) {
+          return Response.json(
+            {
+              code: 422601,
+              message: "员工导入源包含未知授权范围表头。",
+              data: null,
+            },
+            { status: 422 },
+          );
+        }
+        const quotaBlocked =
+          options.includeFullQuotaSibling === true ||
+          body.content.includes("Import Eight");
+        const isTsv = body.sourceFormat === "tsv";
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            previewRevision: "a".repeat(64),
+            commandKind: "batch_import",
+            organizationPublicId: body.organizationPublicId,
+            rowCount: quotaBlocked ? 8 : isTsv ? 1 : 2,
+            counts: quotaBlocked
+              ? { new: 0, bind: 0, skip: 0, block: 1 }
+              : { new: isTsv ? 1 : 2, bind: 0, skip: 0, block: 0 },
+            canConfirm: !quotaBlocked,
+            confirmDisabledReason: quotaBlocked ? "blocked_rows" : null,
+            rows: [
+              {
+                rowNumber: 1,
+                maskedPhone: "139****1111",
+                name: isTsv ? "Import\tOne" : "Import, One",
+                outcome: quotaBlocked ? "block" : "new",
+                redactedReason: quotaBlocked ? "quota_insufficient" : null,
+                credentialMode: quotaBlocked ? null : "provided",
+                inheritedAuthorizationSummary: {
+                  status: "available",
+                  activeScopeCount: 1,
+                  effectiveEdition: "advanced",
+                },
+                quotaImpact: {
+                  status: quotaBlocked ? "insufficient" : "available",
+                  requiredSeatCount: 1,
+                  availableSeatCount: quotaBlocked ? 0 : 7,
+                },
+              },
+            ],
+          },
         });
       }
 
@@ -1776,9 +1847,6 @@ describe("admin user organization authorization ops baseline", () => {
       target: { value: employeeImportContent },
     });
 
-    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
-      "请选择员工导入目标组织。",
-    );
     expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
 
     fireEvent.change(
@@ -1788,20 +1856,12 @@ describe("admin user organization authorization ops baseline", () => {
       },
     );
 
-    const importPreview = screen.getByTestId("employee-import-preview");
-    expect(importPreview).toHaveTextContent("员工账号 CSV");
-    expect(importPreview).toHaveTextContent("2 行");
-    expect(importPreview).toHaveTextContent("1 行未填写初始密码");
-    expect(
-      screen.getByTestId("employee-import-inherited-auth-category"),
-    ).toHaveTextContent("已发现目标组织有效企业授权");
-    expect(
-      screen.getByTestId("employee-import-quota-impact-category"),
-    ).toHaveTextContent("授权额度足够");
-
     fireEvent.click(screen.getByTestId("employee-import-submit"));
-    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认导入员工？");
-    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+    const importPreview = await screen.findByTestId("employee-import-preview");
+    expect(importPreview).toHaveTextContent("新建 2");
+    expect(importPreview).toHaveTextContent("139****1111");
+    expect(importPreview).not.toHaveTextContent("13900001111");
+    fireEvent.click(screen.getByTestId("employee-import-confirm"));
 
     const importResult = await screen.findByTestId("employee-import-result");
     expect(importResult).toHaveTextContent("成功 1");
@@ -1823,15 +1883,10 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
       commandKind: "batch_import",
+      content: employeeImportContent,
+      expectedPreviewRevision: "a".repeat(64),
       organizationPublicId: "org-district-001",
-      rows: [
-        {
-          initialPassword: "Provided,123",
-          name: "Import, One",
-          phone: "13900001111",
-        },
-        { initialPassword: "", name: "Import Two", phone: "13900002222" },
-      ],
+      sourceFormat: "csv",
     });
     expect(
       new Headers(importCall?.[1]?.headers).get("idempotency-key"),
@@ -1852,24 +1907,24 @@ describe("admin user organization authorization ops baseline", () => {
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
     render(createElement(AdminOrgAuthPage));
     await openEmployeeImportDrawer();
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      { target: { value: "org-district-001" } },
+    );
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: 'phone,name\n13900001111,"Unclosed' },
     });
-    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
-      "未闭合的引号",
-    );
-    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
+    await screen.findByText("员工导入内容包含无效或未闭合的引号。");
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: {
         value: 'phone,name,initialPassword\n13900001111,Import One,Sec"ret"123',
       },
     });
-    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
-      "无效或未闭合的引号",
-    );
-    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
+    await screen.findByText("员工导入内容包含无效或未闭合的引号。");
 
     const tsvContent = [
       "\uFEFFphone\tname\tinitialPassword",
@@ -1878,15 +1933,12 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: tsvContent },
     });
-    fireEvent.change(
-      screen.getByTestId("employee-import-organization-select"),
-      { target: { value: "org-district-001" } },
-    );
-    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
-      "员工账号 TSV",
-    );
+    fireEvent.change(screen.getByLabelText("员工导入源格式"), {
+      target: { value: "tsv" },
+    });
     fireEvent.click(screen.getByTestId("employee-import-submit"));
-    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+    await screen.findByTestId("employee-import-preview");
+    fireEvent.click(screen.getByTestId("employee-import-confirm"));
     await screen.findByTestId("employee-import-result");
 
     const importCall = fetchMock.mock.calls.find(
@@ -1894,14 +1946,10 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
       commandKind: "batch_import",
+      content: tsvContent,
+      expectedPreviewRevision: "a".repeat(64),
       organizationPublicId: "org-district-001",
-      rows: [
-        {
-          initialPassword: "Provided\t123",
-          name: "Import\tOne",
-          phone: "13900001111",
-        },
-      ],
+      sourceFormat: "tsv",
     });
   });
 
@@ -1950,6 +1998,137 @@ describe("admin user organization authorization ops baseline", () => {
     });
   });
 
+  it("discards a late roster file read after the import drawer closes", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+    render(createElement(AdminOrgAuthPage));
+    await openEmployeeImportDrawer();
+
+    let resolveContent!: (value: string) => void;
+    const readPromise = new Promise<string>((resolve) => {
+      resolveContent = resolve;
+    });
+    const file = new File([], "employee-import.csv", { type: "text/csv" });
+    Object.defineProperty(file, "text", {
+      value: vi.fn(() => readPromise),
+    });
+    fireEvent.change(screen.getByTestId("employee-import-file-input"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "关闭批量导入员工" }));
+
+    await act(async () => {
+      resolveContent("phone,name\n13900003333,Late File");
+      await readPromise;
+    });
+    await openEmployeeImportDrawer();
+    expect(screen.getByTestId("employee-import-textarea")).toHaveValue("");
+  });
+
+  it("discards a pending roster read when leaving the employee view", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+    render(createElement(AdminOrgAuthPage));
+    await openEmployeeImportDrawer();
+
+    let resolveContent!: (value: string) => void;
+    const readPromise = new Promise<string>((resolve) => {
+      resolveContent = resolve;
+    });
+    const file = new File([], "employee-import.csv", { type: "text/csv" });
+    Object.defineProperty(file, "text", {
+      value: vi.fn(() => readPromise),
+    });
+    fireEvent.change(screen.getByTestId("employee-import-file-input"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(
+      screen.getByTestId("ops-organization-view-organization-tree"),
+    );
+
+    await act(async () => {
+      resolveContent("phone,name\n13900006666,Late View File");
+      await readPromise;
+    });
+    await openEmployeeImportDrawer();
+    expect(screen.getByTestId("employee-import-textarea")).toHaveValue("");
+  });
+
+  it("clears single-create identity and password fields when the session changes", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+    render(createElement(AdminOrgAuthPage));
+    await openOpsOrganizationManagementView("ops-organization-view-employees");
+    fireEvent.click(screen.getByRole("button", { name: "单个创建员工" }));
+    fireEvent.change(screen.getByLabelText("员工手机号"), {
+      target: { value: "13900007777" },
+    });
+    fireEvent.change(screen.getByLabelText("员工姓名"), {
+      target: { value: "Previous Admin Employee" },
+    });
+    fireEvent.change(screen.getByLabelText("员工初始密码"), {
+      target: { value: "PreviousSecret1" },
+    });
+
+    localStorage.setItem("tiku.localSessionToken", "next-admin-token");
+    act(() =>
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "tiku.localSessionToken",
+          newValue: "next-admin-token",
+        }),
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.queryByLabelText("员工初始密码")).not.toBeInTheDocument(),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "单个创建员工" }));
+    expect(screen.getByLabelText("员工手机号")).toHaveValue("");
+    expect(screen.getByLabelText("员工姓名")).toHaveValue("");
+    expect(screen.getByLabelText("员工初始密码")).toHaveValue("");
+  });
+
+  it("keeps the newest roster file when older reads resolve last", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+    render(createElement(AdminOrgAuthPage));
+    await openEmployeeImportDrawer();
+
+    let resolveFirst!: (value: string) => void;
+    const firstRead = new Promise<string>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const firstFile = new File([], "first.csv", { type: "text/csv" });
+    Object.defineProperty(firstFile, "text", {
+      value: vi.fn(() => firstRead),
+    });
+    const secondContent = "phone,name\n13900004444,Second File";
+    const secondFile = new File([], "second.csv", { type: "text/csv" });
+    Object.defineProperty(secondFile, "text", {
+      value: vi.fn(() => Promise.resolve(secondContent)),
+    });
+
+    fireEvent.change(screen.getByTestId("employee-import-file-input"), {
+      target: { files: [firstFile] },
+    });
+    fireEvent.change(screen.getByTestId("employee-import-file-input"), {
+      target: { files: [secondFile] },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("employee-import-textarea")).toHaveValue(
+        secondContent,
+      ),
+    );
+    await act(async () => {
+      resolveFirst("phone,name\n13900005555,First File");
+      await firstRead;
+    });
+    expect(screen.getByTestId("employee-import-textarea")).toHaveValue(
+      secondContent,
+    );
+  });
+
   it("blocks employee import preview when selected organization quota is insufficient", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockSystemOpsFetchWithOrganizationTree();
@@ -1979,10 +2158,11 @@ describe("admin user organization authorization ops baseline", () => {
       },
     );
 
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
     expect(
-      screen.getByTestId("employee-import-quota-impact-category"),
-    ).toHaveTextContent("授权额度不足");
-    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+      await screen.findByTestId("employee-import-preview"),
+    ).toHaveTextContent("额度不足");
+    expect(screen.getByTestId("employee-import-confirm")).toBeDisabled();
   });
 
   it("blocks import when any inherited authorization is full even if another has quota", async () => {
@@ -2000,10 +2180,11 @@ describe("admin user organization authorization ops baseline", () => {
       { target: { value: "org-district-001" } },
     );
 
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
     expect(
-      screen.getByTestId("employee-import-quota-impact-category"),
-    ).toHaveTextContent("授权额度不足");
-    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+      await screen.findByTestId("employee-import-preview"),
+    ).toHaveTextContent("额度不足");
+    expect(screen.getByTestId("employee-import-confirm")).toBeDisabled();
   });
 
   it("blocks employee import templates that contain authorization scope fields", async () => {
@@ -2021,19 +2202,14 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: employeeImportContent },
     });
-
-    const importPreview = screen.getByTestId("employee-import-preview");
-    expect(importPreview).toHaveTextContent("profession");
-    expect(importPreview).toHaveTextContent("organizationPublicId");
-    expect(importPreview).toHaveTextContent("userPublicId");
-    expect(importPreview).toHaveTextContent("level");
-    expect(importPreview).toHaveTextContent("edition");
-    expect(importPreview).toHaveTextContent("orgAuthScopePublicId");
-    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      { target: { value: "org-district-001" } },
+    );
 
     fireEvent.click(screen.getByTestId("employee-import-submit"));
-
-    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await screen.findByText("员工导入源包含未知授权范围表头。");
+    expect(screen.getByTestId("employee-import-confirm")).toBeDisabled();
     expect(
       fetchMock.mock.calls.some(
         ([url]) => String(url) === "/api/v1/employees/import",

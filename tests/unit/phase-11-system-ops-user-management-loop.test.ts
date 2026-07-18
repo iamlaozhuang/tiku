@@ -309,6 +309,9 @@ describe("phase 11 system ops user management loop", () => {
     const serviceInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
       employeeImportCommandService: {
+        async preview() {
+          throw new Error("preview is not used by this test");
+        },
         async submit(commandInput) {
           serviceInputs.push(commandInput);
 
@@ -363,6 +366,7 @@ describe("phase 11 system ops user management loop", () => {
         method: "POST",
         headers,
         body: JSON.stringify({
+          expectedPreviewRevision: "a".repeat(64),
           initialPassword: "abc12345",
           name: "Employee User",
           organizationPublicId: "organization-public-001",
@@ -405,14 +409,11 @@ describe("phase 11 system ops user management loop", () => {
         },
         body: {
           commandKind: "single_create",
+          expectedPreviewRevision: "a".repeat(64),
+          initialPassword: "abc12345",
+          name: "Employee User",
           organizationPublicId: "organization-public-001",
-          rows: [
-            {
-              initialPassword: "abc12345",
-              name: "Employee User",
-              phone: "13900000002",
-            },
-          ],
+          phone: "13900000002",
         },
         idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
       },

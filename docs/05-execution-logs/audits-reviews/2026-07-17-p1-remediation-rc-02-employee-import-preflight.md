@@ -28,6 +28,37 @@ Result: pass
 
 ## Final Disposition
 
-Decision: PENDING_SPEC_REVIEW
+Decision: APPROVE
 
-当前只完成设计物化，不等同 F-0116 实现、static closure、runtime 验收或生产可用。RV-0018 继续 pending。
+用户已于 2026-07-18 书面批准规格；实现、静态验证和两轮对抗审查现已完成，批准进入 F-0116 static closeout。该结论不等同 runtime/database 验收或生产可用；RV-0018 继续 pending。
+
+## 2026-07-18 Full-Regression Scope Audit
+
+Result: closed_by_approved_exact_scope_correction
+
+对抗式复核确认聚焦矩阵与 typecheck 已通过；full unit 的 3 个失败只来自两个未在当前 allowedFiles 内的旧 smoke tests。它们要求已被 F-0116 设计明确淘汰的浏览器/legacy rows 组装路径，不能通过恢复旧行为来绿化。
+
+允许的最小修正只能是：把 `tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts` 与 `tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts` 精确加入 F-0116 allowedFiles，并将其更新为 raw source、服务端 preview 与 `expectedPreviewRevision` 合同。不得扩大产品能力、依赖、schema、database、provider、runtime、P2 或远端动作边界；未经批准保持 hard-block。
+
+用户已书面批准该精确修正。最终两个 smoke 2 files / 5 tests、聚焦矩阵 16 files / 240 tests、full unit 419 files / 2667 tests 全部通过；未恢复旧 rows transport 或浏览器 parser。
+
+## 2026-07-18 Implementation Round 1
+
+Result: pass
+
+对抗式复核覆盖 parser 边界、集合查询、身份与 quota、revision、零写入失败路径、响应丢失恢复、事务/JIT 竞争、角色边界和脱敏。发现完成态仍持有 preview/raw source/password 引用；先以回归测试复现，再清除 hook/page 敏感状态。复核后无未关闭 blocker。
+
+## 2026-07-18 Independent Round 2
+
+Result: pass
+
+独立只读审查发现并关闭 late preview、future auth quota reservation、stale confirmation、file read ordering/close、preflight explanation、501 early-stop 六项问题；follow-up 又关闭 session token/view change 下的敏感字段与 pending read 清理问题。最终复核结论：全部 CLOSED，无新 blocker，`Ready to merge: Yes (static review scope)`。
+
+## Final Static Disposition
+
+Decision: APPROVED_FOR_STATIC_CLOSEOUT_GATES
+
+- 最终聚焦、full unit、lint、typecheck、format、diff check、browser-parser negative scan 和原始 Turbopack production build 均有新鲜通过证据。
+- preview revision 仍非授权凭证；确认重新认证/解析/读取事实，最终安全边界仍是 F-0115 transaction/JIT guard。
+- 无 schema、migration、dependency、database、provider、runtime、P2、PR、force-push 或 deploy 扩权；RV-0018 继续 pending，不声称 runtime/database closure。
+- 当前无未解决 blocker；允许进入既有 P1/Module governance gates，不允许绕过普通 `in_progress` SHA drift hard-block。

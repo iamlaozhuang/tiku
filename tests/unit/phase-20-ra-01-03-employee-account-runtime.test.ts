@@ -116,6 +116,7 @@ describe("phase 20 RA-01-03 employee account runtime", () => {
           "x-forwarded-for": "203.0.113.60, 10.0.0.1",
         },
         body: JSON.stringify({
+          expectedPreviewRevision: "a".repeat(64),
           initialPassword: "RequestSecret1",
           name: "Employee One",
           organizationPublicId: "organization-public-001",
@@ -143,14 +144,11 @@ describe("phase 20 RA-01-03 employee account runtime", () => {
         },
         body: {
           commandKind: "single_create",
+          expectedPreviewRevision: "a".repeat(64),
+          initialPassword: "RequestSecret1",
+          name: "Employee One",
           organizationPublicId: "organization-public-001",
-          rows: [
-            {
-              initialPassword: "RequestSecret1",
-              name: "Employee One",
-              phone: "13900000002",
-            },
-          ],
+          phone: "13900000002",
         },
         idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
       },

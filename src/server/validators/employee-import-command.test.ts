@@ -1,11 +1,179 @@
 import { describe, expect, it } from "vitest";
 
+import * as employeeImportValidators from "./employee-import-command";
 import {
   normalizeCredentialIssueInput,
   normalizeDistributionConfirmationInput,
+  normalizeEmployeeImportCommandConfirmationInput,
   normalizeEmployeeImportCommandInput,
+  normalizeEmployeeImportPreflightInput,
   normalizeIdempotencyKey,
 } from "./employee-import-command";
+
+describe("employee import preflight transport exports", () => {
+  it("exposes separate preview and revision-bound confirmation normalizers", () => {
+    expect(employeeImportValidators).toMatchObject({
+      normalizeEmployeeImportCommandConfirmationInput: expect.any(Function),
+      normalizeEmployeeImportPreflightInput: expect.any(Function),
+    });
+  });
+
+  it("normalizes exact single and raw batch preview inputs", () => {
+    expect(
+      normalizeEmployeeImportPreflightInput({
+        commandKind: "single_create",
+        organizationPublicId: " organization-public-001 ",
+        phone: " 13900000001 ",
+        name: " Employee One ",
+        initialPassword: null,
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        commandKind: "single_create",
+        organizationPublicId: "organization-public-001",
+        phone: "13900000001",
+        name: "Employee One",
+        initialPassword: null,
+      },
+    });
+
+    const content = 'phone,name\r\n13900000001,"Employee\r\nOne"';
+    expect(
+      normalizeEmployeeImportPreflightInput({
+        commandKind: "batch_import",
+        organizationPublicId: " organization-public-001 ",
+        sourceFormat: "csv",
+        content,
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-001",
+        sourceFormat: "csv",
+        content,
+      },
+    });
+  });
+
+  it("normalizes revision-bound confirmation without rewriting raw source", () => {
+    const content = "phone\tname\n13900000001\tEmployee One\n";
+    expect(
+      normalizeEmployeeImportCommandConfirmationInput({
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-001",
+        sourceFormat: "tsv",
+        content,
+        expectedPreviewRevision: "a".repeat(64),
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-001",
+        sourceFormat: "tsv",
+        content,
+        expectedPreviewRevision: "a".repeat(64),
+      },
+    });
+  });
+
+  it("accepts null-prototype transport objects and ignores no inherited fields", () => {
+    const preview = Object.assign(Object.create(null), {
+      commandKind: "single_create",
+      organizationPublicId: "organization-public-001",
+      phone: "13900000001",
+      name: "Employee One",
+    });
+
+    expect(normalizeEmployeeImportPreflightInput(preview)).toEqual({
+      success: true,
+      value: {
+        commandKind: "single_create",
+        organizationPublicId: "organization-public-001",
+        phone: "13900000001",
+        name: "Employee One",
+        initialPassword: null,
+      },
+    });
+    expect(
+      normalizeEmployeeImportPreflightInput(
+        Object.assign(Object.create({ edition: "advanced" }), preview),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid employee import preflight input.",
+    });
+  });
+
+  it.each([
+    [
+      "rows on batch preview",
+      {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-001",
+        sourceFormat: "csv",
+        content: "phone,name",
+        rows: [],
+      },
+    ],
+    [
+      "source on single preview",
+      {
+        commandKind: "single_create",
+        organizationPublicId: "organization-public-001",
+        phone: "13900000001",
+        name: "Employee",
+        content: "phone,name",
+      },
+    ],
+    [
+      "invalid source format",
+      {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-001",
+        sourceFormat: "xlsx",
+        content: "phone,name",
+      },
+    ],
+    [
+      "symbol field",
+      {
+        commandKind: "single_create",
+        organizationPublicId: "organization-public-001",
+        phone: "13900000001",
+        name: "Employee",
+        [Symbol("hidden")]: "hidden",
+      },
+    ],
+  ])("rejects %s", (_label, input) => {
+    expect(normalizeEmployeeImportPreflightInput(input)).toEqual({
+      success: false,
+      message: "Invalid employee import preflight input.",
+    });
+  });
+
+  it.each([
+    ["missing revision", {}],
+    ["short revision", { expectedPreviewRevision: "a".repeat(63) }],
+    ["uppercase revision", { expectedPreviewRevision: "A".repeat(64) }],
+    ["extra revision field", { extra: true }],
+  ])("rejects confirmation with %s", (_label, confirmationDelta) => {
+    expect(
+      normalizeEmployeeImportCommandConfirmationInput({
+        commandKind: "single_create",
+        organizationPublicId: "organization-public-001",
+        phone: "13900000001",
+        name: "Employee",
+        ...confirmationDelta,
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid employee import confirmation input.",
+    });
+  });
+});
 
 const validBatchInput = {
   commandKind: "batch_import",

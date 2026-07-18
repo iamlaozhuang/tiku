@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type {
   EmployeeImportCommandActor,
+  EmployeeImportCommandConfirmationResult,
+  EmployeeImportCommandDto,
+  EmployeeImportCommandServiceResult,
   IssuedEmployeeCredential,
   PreparedEmployeeCredential,
 } from "../contracts/employee-import-command-contract";
@@ -11,10 +14,15 @@ import {
   type ConfirmEmployeeCredentialDistributionInput,
   type EmployeeImportCommandRecord,
   type EmployeeImportCommandRepository,
+  type EmployeeImportPreflightFacts,
   type IssueEmployeeCredentialsInput,
+  type PreflightEmployeeImportRowsInput,
   type ProcessEmployeeImportRowInput,
 } from "../repositories/employee-import-command-repository";
-import { createEmployeeImportCommandService } from "./employee-import-command-service";
+import {
+  createEmployeeImportCommandService,
+  type EmployeeImportCommandServiceWithPreview,
+} from "./employee-import-command-service";
 
 const ACTOR: EmployeeImportCommandActor = {
   publicId: "admin-public-1",
@@ -34,6 +42,9 @@ type SubmitBody = {
 type RepositoryHarnessOptions = {
   claimedStatuses?: Record<number, "pending" | "succeeded" | "rejected">;
   onFindCommand?: () => Promise<EmployeeImportCommandRecord | null>;
+  onPreflightRows?: (
+    input: PreflightEmployeeImportRowsInput,
+  ) => Promise<EmployeeImportPreflightFacts> | EmployeeImportPreflightFacts;
   onProcessRow?: (input: {
     commit: (outcome?: {
       rejectionReason?:
@@ -56,6 +67,79 @@ function createSubmitBody(rows: SubmitBody["rows"]): SubmitBody {
     organizationPublicId: "organization-public-1",
     rows,
   };
+}
+
+function quoteCsvCell(value: string): string {
+  return `"${value.replaceAll('"', '""')}"`;
+}
+
+function createPreflightBody(body: SubmitBody) {
+  if (body.commandKind === "single_create") {
+    const row = body.rows[0];
+    if (row === undefined) {
+      throw new Error("Single create test input requires one row.");
+    }
+    return {
+      commandKind: body.commandKind,
+      initialPassword: row.initialPassword ?? null,
+      name: row.name,
+      organizationPublicId: body.organizationPublicId,
+      phone: row.phone,
+    };
+  }
+
+  return {
+    commandKind: body.commandKind,
+    content: [
+      "phone,name,initialPassword",
+      ...body.rows.map((row) =>
+        [row.phone, row.name, row.initialPassword ?? ""]
+          .map(quoteCsvCell)
+          .join(","),
+      ),
+    ].join("\n"),
+    organizationPublicId: body.organizationPublicId,
+    sourceFormat: "csv" as const,
+  };
+}
+
+async function previewAndSubmitRows(
+  service: EmployeeImportCommandServiceWithPreview,
+  input: {
+    actor: EmployeeImportCommandActor;
+    body: SubmitBody;
+    idempotencyKey: string;
+  },
+): Promise<
+  EmployeeImportCommandServiceResult<EmployeeImportCommandConfirmationResult>
+> {
+  const preflightBody = createPreflightBody(input.body);
+  const preview = await service.preview({
+    actor: input.actor,
+    body: preflightBody,
+  });
+  if (preview.response.data === null) {
+    return preview;
+  }
+
+  return service.submit({
+    actor: input.actor,
+    body: {
+      ...preflightBody,
+      expectedPreviewRevision: preview.response.data.previewRevision,
+    },
+    idempotencyKey: input.idempotencyKey,
+  });
+}
+
+function requireCommandData(
+  result: EmployeeImportCommandServiceResult<EmployeeImportCommandConfirmationResult>,
+): EmployeeImportCommandDto {
+  const data = result.response.data;
+  if (data === null || !("publicId" in data)) {
+    throw new Error("Expected an employee import command result.");
+  }
+  return data;
 }
 
 function createRow(index: number): SubmitBody["rows"][number] {
@@ -97,6 +181,8 @@ function countRows(record: EmployeeImportCommandRecord) {
 function createRepositoryHarness(options: RepositoryHarnessOptions = {}): {
   repository: EmployeeImportCommandRepository;
   getClaimInputs: () => ClaimEmployeeImportCommandInput[];
+  getFindClaimedCallCount: () => number;
+  getPreflightInputs: () => PreflightEmployeeImportRowsInput[];
   getProcessInputs: () => ProcessEmployeeImportRowInput[];
   getCredentialActionCallCount: () => number;
   getRecord: () => EmployeeImportCommandRecord | null;
@@ -108,6 +194,8 @@ function createRepositoryHarness(options: RepositoryHarnessOptions = {}): {
 
   let commandStates = new Map<string, CommandState>();
   let claimInputs: ClaimEmployeeImportCommandInput[] = [];
+  let findClaimedCallCount = 0;
+  let preflightInputs: PreflightEmployeeImportRowsInput[] = [];
   let processInputs: ProcessEmployeeImportRowInput[] = [];
   let credentialActionCallCount = 0;
 
@@ -209,6 +297,38 @@ function createRepositoryHarness(options: RepositoryHarnessOptions = {}): {
   }
 
   const repository: EmployeeImportCommandRepository = {
+    async preflightRows(input) {
+      preflightInputs = [...preflightInputs, input];
+      if (options.onPreflightRows !== undefined) {
+        return options.onPreflightRows(input);
+      }
+
+      return {
+        authorization: {
+          activeScopeCount: 1,
+          availableSeatCount: 500,
+          effectiveEdition: "advanced",
+          status: "available",
+        },
+        organizationStatus: "active",
+        rows: input.rows.map((row) => ({
+          identityState: "absent",
+          rowNumber: row.rowNumber,
+        })),
+      };
+    },
+
+    async findClaimedCommand(input) {
+      findClaimedCallCount += 1;
+      const commandState = commandStates.get(input.idempotencyScopeHash);
+      return commandState === undefined
+        ? null
+        : {
+            command: cloneRecord(commandState.record),
+            requestHash: commandState.requestHash,
+          };
+    },
+
     async claimCommand(input) {
       claimInputs = [...claimInputs, input];
       const existingCommandState = commandStates.get(
@@ -308,6 +428,8 @@ function createRepositoryHarness(options: RepositoryHarnessOptions = {}): {
   return {
     getClaimInputs: () => claimInputs,
     getCredentialActionCallCount: () => credentialActionCallCount,
+    getFindClaimedCallCount: () => findClaimedCallCount,
+    getPreflightInputs: () => preflightInputs,
     getProcessInputs: () => processInputs,
     getRecord: () => {
       const firstCommandState = [...commandStates.values()][0];
@@ -368,6 +490,12 @@ function createCredentialServiceHarness(input?: {
     updatedAt: UPDATED_AT,
   };
   const repository: EmployeeImportCommandRepository = {
+    async preflightRows() {
+      throw new Error("preview is not expected");
+    },
+    async findClaimedCommand() {
+      return null;
+    },
     async claimCommand() {
       throw new Error("submit is not expected");
     },
@@ -425,6 +553,309 @@ function createCredentialServiceHarness(input?: {
 }
 
 describe("employee import command service", () => {
+  it("exposes a server-owned preview operation", () => {
+    const harness = createRepositoryHarness();
+    const service = createEmployeeImportCommandService(harness.repository, {
+      prepareCredential: createFastCredentialPreparer(),
+    });
+
+    expect(service).toMatchObject({ preview: expect.any(Function) });
+  });
+
+  it("returns a stable masked single-create preview without credential material", async () => {
+    const harness = createRepositoryHarness();
+    const service = createEmployeeImportCommandService(harness.repository, {
+      prepareCredential: createFastCredentialPreparer(),
+    });
+    const body = {
+      commandKind: "single_create" as const,
+      organizationPublicId: "organization-public-1",
+      phone: "13900000001",
+      name: "Employee One",
+      initialPassword: "Secret123",
+    };
+
+    const first = await service.preview({ actor: ACTOR, body });
+    const second = await service.preview({ actor: ACTOR, body });
+
+    expect(first.httpStatus).toBe(200);
+    expect(first.response.data).toMatchObject({
+      commandKind: "single_create",
+      organizationPublicId: "organization-public-1",
+      rowCount: 1,
+      counts: { new: 1, bind: 0, skip: 0, block: 0 },
+      canConfirm: true,
+      confirmDisabledReason: null,
+      rows: [
+        {
+          rowNumber: 1,
+          maskedPhone: "139****0001",
+          name: "Employee One",
+          outcome: "new",
+          redactedReason: null,
+          credentialMode: "provided",
+          inheritedAuthorizationSummary: {
+            status: "available",
+            activeScopeCount: 1,
+            effectiveEdition: "advanced",
+          },
+          quotaImpact: {
+            status: "available",
+            requiredSeatCount: 1,
+            availableSeatCount: 500,
+          },
+        },
+      ],
+    });
+    expect(first.response.data?.previewRevision).toMatch(/^[a-f0-9]{64}$/u);
+    expect(second.response.data?.previewRevision).toBe(
+      first.response.data?.previewRevision,
+    );
+    expect(JSON.stringify(first)).not.toContain("13900000001");
+    expect(JSON.stringify(first)).not.toContain("Secret123");
+  });
+
+  it("maps set facts to new, bind, skip and block with deterministic quota impact", async () => {
+    const harness = createRepositoryHarness({
+      onPreflightRows: (input) => ({
+        authorization: {
+          activeScopeCount: 2,
+          availableSeatCount: 2,
+          effectiveEdition: "standard",
+          status: "available",
+        },
+        organizationStatus: "active",
+        rows: input.rows.map((row, index) => ({
+          rowNumber: row.rowNumber,
+          identityState: [
+            "absent",
+            "personal_active",
+            "employee_same_organization",
+            "employee_other_organization",
+          ][
+            index
+          ] as EmployeeImportPreflightFacts["rows"][number]["identityState"],
+        })),
+      }),
+    });
+    const service = createEmployeeImportCommandService(harness.repository);
+
+    const result = await service.preview({
+      actor: ACTOR,
+      body: {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-1",
+        sourceFormat: "csv",
+        content:
+          "phone,name\n13900000001,New\n13900000002,Bind\n13900000003,Skip\n13900000004,Block",
+      },
+    });
+
+    expect(result.response.data?.counts).toEqual({
+      new: 1,
+      bind: 1,
+      skip: 1,
+      block: 1,
+    });
+    expect(
+      result.response.data?.rows.map((row) => ({
+        outcome: row.outcome,
+        reason: row.redactedReason,
+        quota: row.quotaImpact,
+      })),
+    ).toEqual([
+      {
+        outcome: "new",
+        reason: null,
+        quota: {
+          status: "available",
+          requiredSeatCount: 1,
+          availableSeatCount: 2,
+        },
+      },
+      {
+        outcome: "bind",
+        reason: null,
+        quota: {
+          status: "available",
+          requiredSeatCount: 1,
+          availableSeatCount: 1,
+        },
+      },
+      {
+        outcome: "skip",
+        reason: null,
+        quota: {
+          status: "not_required",
+          requiredSeatCount: 0,
+          availableSeatCount: 0,
+        },
+      },
+      {
+        outcome: "block",
+        reason: "cross_organization_conflict",
+        quota: {
+          status: "not_required",
+          requiredSeatCount: 0,
+          availableSeatCount: 0,
+        },
+      },
+    ]);
+    expect(result.response.data).toMatchObject({
+      canConfirm: false,
+      confirmDisabledReason: "blocked_rows",
+    });
+  });
+
+  it("blocks rows deterministically after current quota is exhausted", async () => {
+    const harness = createRepositoryHarness({
+      onPreflightRows: (input) => ({
+        authorization: {
+          activeScopeCount: 1,
+          availableSeatCount: 2,
+          effectiveEdition: "standard",
+          status: "available",
+        },
+        organizationStatus: "active",
+        rows: input.rows.map((row) => ({
+          rowNumber: row.rowNumber,
+          identityState: "absent",
+        })),
+      }),
+    });
+    const service = createEmployeeImportCommandService(harness.repository);
+    const result = await service.preview({
+      actor: ACTOR,
+      body: {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-1",
+        sourceFormat: "csv",
+        content:
+          "phone,name\n13900000001,One\n13900000002,Two\n13900000003,Three",
+      },
+    });
+
+    expect(
+      result.response.data?.rows.map((row) => [
+        row.outcome,
+        row.redactedReason,
+      ]),
+    ).toEqual([
+      ["new", null],
+      ["new", null],
+      ["block", "quota_insufficient"],
+    ]);
+  });
+
+  it("returns latest safe preview and performs zero writes when revision is stale", async () => {
+    let identityState: EmployeeImportPreflightFacts["rows"][number]["identityState"] =
+      "absent";
+    const harness = createRepositoryHarness({
+      onPreflightRows: (input) => ({
+        authorization: {
+          activeScopeCount: 1,
+          availableSeatCount: 1,
+          effectiveEdition: "standard",
+          status: "available",
+        },
+        organizationStatus: "active",
+        rows: input.rows.map((row) => ({
+          rowNumber: row.rowNumber,
+          identityState,
+        })),
+      }),
+    });
+    const service = createEmployeeImportCommandService(harness.repository);
+    const source = {
+      commandKind: "single_create" as const,
+      organizationPublicId: "organization-public-1",
+      phone: "13900000001",
+      name: "Employee One",
+    };
+    const preview = await service.preview({ actor: ACTOR, body: source });
+    identityState = "employee_same_organization";
+
+    const result = await service.submit({
+      actor: ACTOR,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      body: {
+        ...source,
+        expectedPreviewRevision: preview.response.data?.previewRevision,
+      },
+    });
+
+    expect(result).toMatchObject({
+      httpStatus: 409,
+      response: {
+        code: 409608,
+        data: { counts: { skip: 1 }, canConfirm: false },
+      },
+    });
+    expect(harness.getClaimInputs()).toHaveLength(0);
+    expect(harness.getProcessInputs()).toHaveLength(0);
+  });
+
+  it("confirms a matching preview and recovers the same command before re-preflight", async () => {
+    const harness = createRepositoryHarness();
+    const service = createEmployeeImportCommandService(harness.repository, {
+      prepareCredential: createFastCredentialPreparer(),
+    });
+    const source = {
+      commandKind: "single_create" as const,
+      organizationPublicId: "organization-public-1",
+      phone: "13900000001",
+      name: "Employee One",
+    };
+    const preview = await service.preview({ actor: ACTOR, body: source });
+    const confirmation = {
+      ...source,
+      expectedPreviewRevision: preview.response.data?.previewRevision,
+    };
+
+    const first = await service.submit({
+      actor: ACTOR,
+      body: confirmation,
+      idempotencyKey: IDEMPOTENCY_KEY,
+    });
+    const replay = await service.submit({
+      actor: ACTOR,
+      body: confirmation,
+      idempotencyKey: IDEMPOTENCY_KEY,
+    });
+
+    expect(first.httpStatus).toBe(200);
+    expect(replay).toEqual(first);
+    expect(harness.getClaimInputs()).toHaveLength(1);
+    expect(harness.getProcessInputs()).toHaveLength(1);
+    expect(harness.getPreflightInputs()).toHaveLength(2);
+    expect(harness.getFindClaimedCallCount()).toBe(2);
+  });
+
+  it("rejects malformed batch source before repository access", async () => {
+    const harness = createRepositoryHarness();
+    const service = createEmployeeImportCommandService(harness.repository);
+
+    const result = await service.preview({
+      actor: ACTOR,
+      body: {
+        commandKind: "batch_import",
+        organizationPublicId: "organization-public-1",
+        sourceFormat: "csv",
+        content: 'phone,name\n13900000001,"Unclosed',
+      },
+    });
+
+    expect(result).toEqual({
+      httpStatus: 422,
+      response: {
+        code: 422601,
+        data: null,
+        message: "Employee import source contains malformed quotes.",
+      },
+    });
+    expect(harness.getPreflightInputs()).toHaveLength(0);
+  });
+
   it("resumes the same command and hashes or processes only claimed pending rows", async () => {
     const harness = createRepositoryHarness({
       claimedStatuses: { 1: "succeeded", 2: "pending" },
@@ -439,12 +870,12 @@ describe("employee import command service", () => {
     });
     const body = createSubmitBody([createRow(1), createRow(2)]);
 
-    const firstResult = await service.submit({
+    const firstResult = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body,
       idempotencyKey: IDEMPOTENCY_KEY,
     });
-    const replayResult = await service.submit({
+    const replayResult = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body,
       idempotencyKey: IDEMPOTENCY_KEY,
@@ -452,7 +883,7 @@ describe("employee import command service", () => {
 
     expect(firstResult.httpStatus).toBe(200);
     expect(replayResult).toEqual(firstResult);
-    expect(harness.getClaimInputs()).toHaveLength(2);
+    expect(harness.getClaimInputs()).toHaveLength(1);
     expect(harness.getProcessInputs().map((row) => row.rowNumber)).toEqual([2]);
     expect(prepareCount).toBe(1);
   });
@@ -505,14 +936,18 @@ describe("employee import command service", () => {
       });
       const body = createSubmitBody([createRow(1), createRow(2)]);
 
-      await service.submit({
+      await previewAndSubmitRows(service, {
         actor: ACTOR,
         body,
         idempotencyKey: IDEMPOTENCY_KEY,
       });
-      const result = await service.submit({
+      const changedBody: SubmitBody =
+        "body" in change
+          ? { ...change.body, rows: [...change.body.rows] }
+          : body;
+      const result = await previewAndSubmitRows(service, {
         actor: ACTOR,
-        body: "body" in change ? change.body : body,
+        body: changedBody,
         idempotencyKey: IDEMPOTENCY_KEY,
       });
 
@@ -558,13 +993,13 @@ describe("employee import command service", () => {
         idempotencyKey: IDEMPOTENCY_KEY,
       };
 
-      const originalResult = await service.submit(originalInput);
-      const changedResult = await service.submit({
+      const originalResult = await previewAndSubmitRows(service, originalInput);
+      const changedResult = await previewAndSubmitRows(service, {
         ...changedInput,
         idempotencyKey: IDEMPOTENCY_KEY,
       });
-      const originalReplay = await service.submit(originalInput);
-      const changedReplay = await service.submit({
+      const originalReplay = await previewAndSubmitRows(service, originalInput);
+      const changedReplay = await previewAndSubmitRows(service, {
         ...changedInput,
         idempotencyKey: IDEMPOTENCY_KEY,
       });
@@ -574,18 +1009,16 @@ describe("employee import command service", () => {
 
       expect(originalResult.httpStatus).toBe(200);
       expect(changedResult.httpStatus).toBe(200);
-      expect(originalResult.response.data?.publicId).not.toBe(
-        changedResult.response.data?.publicId,
+      expect(requireCommandData(originalResult).publicId).not.toBe(
+        requireCommandData(changedResult).publicId,
       );
-      expect(originalReplay.response.data?.publicId).toBe(
-        originalResult.response.data?.publicId,
+      expect(requireCommandData(originalReplay).publicId).toBe(
+        requireCommandData(originalResult).publicId,
       );
-      expect(changedReplay.response.data?.publicId).toBe(
-        changedResult.response.data?.publicId,
+      expect(requireCommandData(changedReplay).publicId).toBe(
+        requireCommandData(changedResult).publicId,
       );
       expect(claimScopeHashes).toEqual([
-        claimScopeHashes[0],
-        claimScopeHashes[1],
         claimScopeHashes[0],
         claimScopeHashes[1],
       ]);
@@ -594,14 +1027,14 @@ describe("employee import command service", () => {
     },
   );
 
-  it("persists every occurrence of a duplicate phone as duplicate_phone", async () => {
+  it("blocks every duplicate phone occurrence before command writes", async () => {
     const harness = createRepositoryHarness();
     const service = createEmployeeImportCommandService(harness.repository, {
       prepareCredential: createFastCredentialPreparer(),
     });
     const duplicateRow = createRow(1);
 
-    const result = await service.submit({
+    const result = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody([
         duplicateRow,
@@ -610,24 +1043,24 @@ describe("employee import command service", () => {
       idempotencyKey: IDEMPOTENCY_KEY,
     });
 
-    expect(harness.getProcessInputs()).toHaveLength(2);
-    expect(
-      harness
-        .getProcessInputs()
-        .map((row) => [
-          row.prevalidatedRejectionReason,
-          row.preparedCredential,
-        ]),
-    ).toEqual([
-      ["duplicate_phone", null],
-      ["duplicate_phone", null],
-    ]);
-    expect(
-      result.response.data?.rows.map((row) => row.rejectionReason),
-    ).toEqual(["duplicate_phone", "duplicate_phone"]);
+    expect(result).toMatchObject({
+      httpStatus: 422,
+      response: {
+        code: 422602,
+        data: {
+          counts: { block: 2 },
+          rows: [
+            { outcome: "block", redactedReason: "duplicate_phone" },
+            { outcome: "block", redactedReason: "duplicate_phone" },
+          ],
+        },
+      },
+    });
+    expect(harness.getClaimInputs()).toHaveLength(0);
+    expect(harness.getProcessInputs()).toHaveLength(0);
   });
 
-  it("uses the employee-account validator for invalid rows without hashing them", async () => {
+  it("uses the employee-account validator to block the whole confirmation before hashing", async () => {
     const harness = createRepositoryHarness();
     let prepareCount = 0;
     const service = createEmployeeImportCommandService(harness.repository, {
@@ -638,7 +1071,7 @@ describe("employee import command service", () => {
       }),
     });
 
-    const result = await service.submit({
+    const result = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody([
         { ...createRow(1), phone: "invalid-phone" },
@@ -647,17 +1080,22 @@ describe("employee import command service", () => {
       idempotencyKey: IDEMPOTENCY_KEY,
     });
 
-    expect(harness.getProcessInputs()).toHaveLength(2);
-    expect(harness.getProcessInputs()[0]).toMatchObject({
-      preparedCredential: null,
-      prevalidatedRejectionReason: "invalid_row",
-      rowNumber: 1,
+    expect(result).toMatchObject({
+      httpStatus: 422,
+      response: {
+        code: 422602,
+        data: {
+          counts: { block: 1 },
+          rows: [
+            { outcome: "block", redactedReason: "invalid_row", rowNumber: 1 },
+            { outcome: "new", redactedReason: null, rowNumber: 2 },
+          ],
+        },
+      },
     });
-    expect(result.response.data?.rows[0]).toMatchObject({
-      rejectionReason: "invalid_row",
-      status: "rejected",
-    });
-    expect(prepareCount).toBe(1);
+    expect(harness.getClaimInputs()).toHaveLength(0);
+    expect(harness.getProcessInputs()).toHaveLength(0);
+    expect(prepareCount).toBe(0);
   });
 
   it("continues after the Nth deterministic repository rejection", async () => {
@@ -674,7 +1112,7 @@ describe("employee import command service", () => {
       prepareCredential: createFastCredentialPreparer(),
     });
 
-    const result = await service.submit({
+    const result = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody([createRow(1), createRow(2), createRow(3)]),
       idempotencyKey: IDEMPOTENCY_KEY,
@@ -689,7 +1127,7 @@ describe("employee import command service", () => {
       rejected: 1,
       succeeded: 2,
     });
-    expect(result.response.data?.rows[1]?.rejectionReason).toBe(
+    expect(requireCommandData(result).rows[1]?.rejectionReason).toBe(
       "quota_insufficient",
     );
   });
@@ -707,7 +1145,7 @@ describe("employee import command service", () => {
       prepareCredential: createFastCredentialPreparer(),
     });
 
-    const result = await service.submit({
+    const result = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody([createRow(1), createRow(2), createRow(3)]),
       idempotencyKey: IDEMPOTENCY_KEY,
@@ -753,12 +1191,12 @@ describe("employee import command service", () => {
       idempotencyKey: IDEMPOTENCY_KEY,
     };
 
-    const unknownResult = await service.submit(input);
-    const replayResult = await service.submit(input);
+    const unknownResult = await previewAndSubmitRows(service, input);
+    const replayResult = await previewAndSubmitRows(service, input);
 
     expect(unknownResult.httpStatus).toBe(503);
     expect(replayResult.httpStatus).toBe(200);
-    expect(replayResult.response.data?.rows[0]?.status).toBe("succeeded");
+    expect(requireCommandData(replayResult).rows[0]?.status).toBe("succeeded");
     expect(harness.getProcessInputs()).toHaveLength(1);
   });
 
@@ -769,7 +1207,7 @@ describe("employee import command service", () => {
       { prepareCredential: createFastCredentialPreparer() },
     );
 
-    const acceptedResult = await acceptedService.submit({
+    const acceptedResult = await previewAndSubmitRows(acceptedService, {
       actor: ACTOR,
       body: createSubmitBody(
         Array.from({ length: 500 }, (_, index) => createRow(index)),
@@ -792,12 +1230,13 @@ describe("employee import command service", () => {
         }),
       },
     );
-    const rejectedResult = await rejectedService.submit({
+    const rejectedResult = await rejectedService.preview({
       actor: ACTOR,
-      body: createSubmitBody(
-        Array.from({ length: 501 }, (_, index) => createRow(index)),
+      body: createPreflightBody(
+        createSubmitBody(
+          Array.from({ length: 501 }, (_, index) => createRow(index)),
+        ),
       ),
-      idempotencyKey: IDEMPOTENCY_KEY,
     });
 
     expect(rejectedResult).toEqual({
@@ -805,10 +1244,11 @@ describe("employee import command service", () => {
       response: {
         code: 422601,
         data: null,
-        message: "Invalid employee import command input.",
+        message: "Employee import source exceeds 500 data rows.",
       },
     });
     expect(rejectedHarness.getClaimInputs()).toHaveLength(0);
+    expect(rejectedHarness.getPreflightInputs()).toHaveLength(0);
     expect(prepareCount).toBe(0);
   });
 
@@ -819,7 +1259,7 @@ describe("employee import command service", () => {
     const service = createEmployeeImportCommandService(harness.repository, {
       prepareCredential: createFastCredentialPreparer(),
     });
-    await service.submit({
+    await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody([createRow(1)]),
       idempotencyKey: IDEMPOTENCY_KEY,
@@ -982,7 +1422,7 @@ describe("employee import command service", () => {
       }),
     });
 
-    const result = await service.submit({
+    const result = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody(
         Array.from({ length: 12 }, (_, index) => createRow(index)),
@@ -1005,7 +1445,7 @@ describe("employee import command service", () => {
       },
     });
 
-    const result = await service.submit({
+    const result = await previewAndSubmitRows(service, {
       actor: ACTOR,
       body: createSubmitBody([
         createRow(1),
@@ -1028,8 +1468,10 @@ describe("employee import command service", () => {
       prepareCredential: createFastCredentialPreparer(),
     });
     const hostileBody = {
+      expectedPreviewRevision: "a".repeat(64),
+      name: "Employee",
       organizationPublicId: "organization-public-1",
-      rows: [createRow(1)],
+      phone: "13900000001",
     } as Record<string, unknown>;
     Object.defineProperty(hostileBody, "commandKind", {
       enumerable: true,
@@ -1256,7 +1698,7 @@ describe("employee import command service", () => {
       response: {
         code: 422601,
         data: null,
-        message: "Invalid employee import command input.",
+        message: "Invalid employee import confirmation input.",
       },
     });
     expect(harness.getClaimInputs()).toHaveLength(0);

@@ -1,6 +1,8 @@
 import type {
+  EmployeeImportCommandConfirmationInput,
   EmployeeCredentialIssueInput,
   EmployeeDistributionConfirmationInput,
+  EmployeeImportPreflightInput,
   NormalizedEmployeeImportCommandInput,
 } from "../contracts/employee-import-command-contract";
 
@@ -17,8 +19,30 @@ type EmployeeImportRowInput = {
 const UUID_V4_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const PUBLIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u;
+const PREVIEW_REVISION_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMAND_KEYS = ["commandKind", "organizationPublicId", "rows"];
 const ROW_KEYS = ["phone", "name", "initialPassword"];
+const SINGLE_PREFLIGHT_KEYS = [
+  "commandKind",
+  "organizationPublicId",
+  "phone",
+  "name",
+  "initialPassword",
+];
+const BATCH_PREFLIGHT_KEYS = [
+  "commandKind",
+  "organizationPublicId",
+  "sourceFormat",
+  "content",
+];
+const SINGLE_CONFIRMATION_KEYS = [
+  ...SINGLE_PREFLIGHT_KEYS,
+  "expectedPreviewRevision",
+];
+const BATCH_CONFIRMATION_KEYS = [
+  ...BATCH_PREFLIGHT_KEYS,
+  "expectedPreviewRevision",
+];
 const CREDENTIAL_ISSUE_KEYS = ["expectedCredentialRevision"];
 const DISTRIBUTION_CONFIRMATION_KEYS = [
   "issuePublicId",
@@ -27,6 +51,10 @@ const DISTRIBUTION_CONFIRMATION_KEYS = [
 const INVALID_IDEMPOTENCY_KEY_MESSAGE = "Idempotency-Key must be a UUID v4.";
 const INVALID_EMPLOYEE_IMPORT_COMMAND_INPUT_MESSAGE =
   "Invalid employee import command input.";
+const INVALID_EMPLOYEE_IMPORT_PREFLIGHT_INPUT_MESSAGE =
+  "Invalid employee import preflight input.";
+const INVALID_EMPLOYEE_IMPORT_CONFIRMATION_INPUT_MESSAGE =
+  "Invalid employee import confirmation input.";
 const INVALID_CREDENTIAL_ISSUE_INPUT_MESSAGE =
   "Invalid credential issue input.";
 const INVALID_DISTRIBUTION_CONFIRMATION_INPUT_MESSAGE =
@@ -102,6 +130,108 @@ function hasDenseEmployeeImportRows(
   return true;
 }
 
+function normalizeEmployeeImportTransport(
+  input: unknown,
+  requiresPreviewRevision: boolean,
+): {
+  preflightInput: EmployeeImportPreflightInput;
+  expectedPreviewRevision: string | null;
+} | null {
+  if (!isRecord(input)) {
+    return null;
+  }
+
+  const requiredKeys = ["commandKind", "organizationPublicId"];
+  const expectedPreviewRevision = requiresPreviewRevision
+    ? input.expectedPreviewRevision
+    : null;
+  if (
+    !hasRequiredOwnKeys(input, requiredKeys) ||
+    (requiresPreviewRevision &&
+      (!Object.hasOwn(input, "expectedPreviewRevision") ||
+        typeof expectedPreviewRevision !== "string" ||
+        !PREVIEW_REVISION_PATTERN.test(expectedPreviewRevision)))
+  ) {
+    return null;
+  }
+
+  const organizationPublicId =
+    typeof input.organizationPublicId === "string"
+      ? input.organizationPublicId.trim()
+      : "";
+  if (!PUBLIC_ID_PATTERN.test(organizationPublicId)) {
+    return null;
+  }
+
+  if (input.commandKind === "single_create") {
+    const allowedKeys = requiresPreviewRevision
+      ? SINGLE_CONFIRMATION_KEYS
+      : SINGLE_PREFLIGHT_KEYS;
+    const hasInitialPassword = Object.hasOwn(input, "initialPassword");
+    if (
+      !hasOnlyOwnKeys(input, allowedKeys) ||
+      !hasRequiredOwnKeys(input, [...requiredKeys, "phone", "name"]) ||
+      typeof input.phone !== "string" ||
+      typeof input.name !== "string" ||
+      (hasInitialPassword &&
+        input.initialPassword !== null &&
+        typeof input.initialPassword !== "string")
+    ) {
+      return null;
+    }
+
+    return {
+      expectedPreviewRevision:
+        typeof expectedPreviewRevision === "string"
+          ? expectedPreviewRevision
+          : null,
+      preflightInput: {
+        commandKind: "single_create",
+        initialPassword:
+          hasInitialPassword && typeof input.initialPassword === "string"
+            ? input.initialPassword.trim()
+            : null,
+        name: input.name.trim(),
+        organizationPublicId,
+        phone: input.phone.trim(),
+      },
+    };
+  }
+
+  if (input.commandKind === "batch_import") {
+    const allowedKeys = requiresPreviewRevision
+      ? BATCH_CONFIRMATION_KEYS
+      : BATCH_PREFLIGHT_KEYS;
+    if (
+      !hasOnlyOwnKeys(input, allowedKeys) ||
+      !hasRequiredOwnKeys(input, [
+        ...requiredKeys,
+        "sourceFormat",
+        "content",
+      ]) ||
+      (input.sourceFormat !== "csv" && input.sourceFormat !== "tsv") ||
+      typeof input.content !== "string"
+    ) {
+      return null;
+    }
+
+    return {
+      expectedPreviewRevision:
+        typeof expectedPreviewRevision === "string"
+          ? expectedPreviewRevision
+          : null,
+      preflightInput: {
+        commandKind: "batch_import",
+        content: input.content,
+        organizationPublicId,
+        sourceFormat: input.sourceFormat,
+      },
+    };
+  }
+
+  return null;
+}
+
 export function normalizeIdempotencyKey(
   input: unknown,
 ): EmployeeImportCommandValidationResult<string> {
@@ -172,6 +302,40 @@ export function normalizeEmployeeImportCommandInput(
       organizationPublicId,
       rows: normalizedRows,
     },
+  };
+}
+
+export function normalizeEmployeeImportPreflightInput(
+  input: unknown,
+): EmployeeImportCommandValidationResult<EmployeeImportPreflightInput> {
+  const normalized = normalizeEmployeeImportTransport(input, false);
+  if (normalized !== null) {
+    return { success: true, value: normalized.preflightInput };
+  }
+
+  return {
+    success: false,
+    message: INVALID_EMPLOYEE_IMPORT_PREFLIGHT_INPUT_MESSAGE,
+  };
+}
+
+export function normalizeEmployeeImportCommandConfirmationInput(
+  input: unknown,
+): EmployeeImportCommandValidationResult<EmployeeImportCommandConfirmationInput> {
+  const normalized = normalizeEmployeeImportTransport(input, true);
+  if (normalized !== null && normalized.expectedPreviewRevision !== null) {
+    return {
+      success: true,
+      value: {
+        ...normalized.preflightInput,
+        expectedPreviewRevision: normalized.expectedPreviewRevision,
+      },
+    };
+  }
+
+  return {
+    success: false,
+    message: INVALID_EMPLOYEE_IMPORT_CONFIRMATION_INPUT_MESSAGE,
   };
 }
 

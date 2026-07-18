@@ -10,6 +10,7 @@ import {
   auditLog,
   authAccount,
   authSession,
+  authUpgrade,
   authUser,
   employee,
   employeeImportCommand,
@@ -228,6 +229,166 @@ describe("postgres employee import command repository", () => {
     ).rejects.toEqual(new EmployeeImportCommandError("actor_forbidden"));
   });
 
+  it("reads organization, authorization and all phone identities with fixed set queries", async () => {
+    const database = createPreflightDatabase();
+    const repository = createPostgresEmployeeImportCommandRepository({
+      createDatabase: () => database,
+    });
+
+    const facts = await repository.preflightRows({
+      actor,
+      organizationPublicId: "organization-public-001",
+      rows: [
+        { rowNumber: 1, phone: "13900000001" },
+        { rowNumber: 2, phone: "13900000002" },
+        { rowNumber: 3, phone: "13900000003" },
+        { rowNumber: 4, phone: "13900000004" },
+        { rowNumber: 5, phone: "13900000005" },
+        { rowNumber: 6, phone: "13900000006" },
+      ],
+    });
+
+    expect(facts).toEqual({
+      organizationStatus: "active",
+      authorization: {
+        status: "available",
+        activeScopeCount: 2,
+        effectiveEdition: "advanced",
+        availableSeatCount: 4,
+      },
+      rows: [
+        { rowNumber: 1, identityState: "absent" },
+        { rowNumber: 2, identityState: "personal_active" },
+        { rowNumber: 3, identityState: "employee_same_organization" },
+        { rowNumber: 4, identityState: "employee_other_organization" },
+        { rowNumber: 5, identityState: "disabled_user" },
+        { rowNumber: 6, identityState: "admin_phone_conflict" },
+      ],
+    });
+    expect(database.selectCounts).toEqual({
+      actor: 1,
+      adminPhones: 1,
+      authUpgrades: 1,
+      organization: 1,
+      orgAuths: 1,
+      users: 1,
+    });
+    expect(database.writeCount).toBe(0);
+  });
+
+  it("includes a future covering authorization in the JIT quota reservation set", async () => {
+    const database = createPreflightDatabase({
+      orgAuthRows: [
+        {
+          account_quota: 10,
+          edition: "standard",
+          id: 51,
+          starts_at: new Date("2026-01-01T00:00:00.000Z"),
+          used_quota: 2,
+        },
+        {
+          account_quota: 5,
+          edition: "advanced",
+          id: 52,
+          starts_at: new Date("2099-01-01T00:00:00.000Z"),
+          used_quota: 5,
+        },
+      ],
+    });
+    const repository = createPostgresEmployeeImportCommandRepository({
+      createDatabase: () => database,
+    });
+
+    const facts = await repository.preflightRows({
+      actor,
+      organizationPublicId: "organization-public-001",
+      rows: [{ rowNumber: 1, phone: "13900000001" }],
+    });
+
+    expect(facts.authorization).toEqual({
+      status: "available",
+      activeScopeCount: 1,
+      effectiveEdition: "advanced",
+      availableSeatCount: 0,
+    });
+  });
+
+  it("does not read identity or authorization facts when the target organization is unavailable", async () => {
+    const database = createPreflightDatabase({ organizationExists: false });
+    const repository = createPostgresEmployeeImportCommandRepository({
+      createDatabase: () => database,
+    });
+
+    await expect(
+      repository.preflightRows({
+        actor,
+        organizationPublicId: "organization-public-missing",
+        rows: [{ rowNumber: 1, phone: "13900000001" }],
+      }),
+    ).resolves.toEqual({
+      organizationStatus: "not_found",
+      authorization: {
+        status: "unavailable",
+        activeScopeCount: 0,
+        effectiveEdition: null,
+        availableSeatCount: null,
+      },
+      rows: [{ rowNumber: 1, identityState: "absent" }],
+    });
+    expect(database.selectCounts).toEqual({
+      actor: 1,
+      adminPhones: 0,
+      authUpgrades: 0,
+      organization: 1,
+      orgAuths: 0,
+      users: 0,
+    });
+  });
+
+  it("keeps preflight query count constant for 500 rows", async () => {
+    const database = createPreflightDatabase();
+    const repository = createPostgresEmployeeImportCommandRepository({
+      createDatabase: () => database,
+    });
+
+    await repository.preflightRows({
+      actor,
+      organizationPublicId: "organization-public-001",
+      rows: Array.from({ length: 500 }, (_, index) => ({
+        rowNumber: index + 1,
+        phone: `138${String(index).padStart(8, "0")}`,
+      })),
+    });
+
+    expect(
+      Object.values(database.selectCounts).reduce(
+        (sum, count) => sum + count,
+        0,
+      ),
+    ).toBe(6);
+    expect(database.writeCount).toBe(0);
+  });
+
+  it("recovers a claimed command by idempotency scope without mutation", async () => {
+    const database = createCommandBehaviorDatabase({ seedCommand: true });
+    const repository = createPostgresEmployeeImportCommandRepository({
+      createDatabase: () => database,
+    });
+
+    await expect(
+      repository.findClaimedCommand({
+        actor,
+        idempotencyScopeHash: "v1:idempotency-scope-hash",
+      }),
+    ).resolves.toMatchObject({
+      requestHash: "v1:request-hash",
+      command: { publicId: "employee-import-command-public-001" },
+    });
+    expect(database.commandInsertCount).toBe(0);
+    expect(database.rowInsertCount).toBe(0);
+    expect(database.startedAuditCount).toBe(0);
+  });
+
   it("implements the complete Task 3 repository port", () => {
     const repository: EmployeeImportCommandRepository =
       createPostgresEmployeeImportCommandRepository({
@@ -238,9 +399,11 @@ describe("postgres employee import command repository", () => {
       [
         "claimCommand",
         "confirmDistribution",
+        "findClaimedCommand",
         "findCommand",
         "issueCredentials",
         "listIssueTargets",
+        "preflightRows",
         "processRow",
       ].sort(),
     );
@@ -1237,6 +1400,177 @@ function createCommandBehaviorDatabase(
     },
   };
   const database = databaseShape as unknown as CommandBehaviorDatabase;
+
+  return database;
+}
+
+type PreflightDatabase = EmployeeImportCommandDatabase & {
+  selectCounts: {
+    actor: number;
+    adminPhones: number;
+    authUpgrades: number;
+    organization: number;
+    orgAuths: number;
+    users: number;
+  };
+  writeCount: number;
+};
+
+function createPreflightDatabase(
+  options: {
+    actorIsValid?: boolean;
+    organizationExists?: boolean;
+    orgAuthRows?: {
+      account_quota: number;
+      edition: "standard" | "advanced";
+      id: number;
+      starts_at: Date;
+      used_quota: number;
+    }[];
+  } = {},
+): PreflightDatabase {
+  const selectCounts = {
+    actor: 0,
+    adminPhones: 0,
+    authUpgrades: 0,
+    organization: 0,
+    orgAuths: 0,
+    users: 0,
+  };
+  let writeCount = 0;
+
+  const createSelectBuilder = (
+    fields: Record<string, unknown>,
+  ): Record<string, unknown> => {
+    let selectedTable: unknown;
+    const resolveRows = (): unknown[] => {
+      if (selectedTable === admin && "admin_role" in fields) {
+        selectCounts.actor += 1;
+        return options.actorIsValid === false
+          ? []
+          : [
+              {
+                admin_role: actor.role,
+                id: 11,
+                public_id: actor.publicId,
+              },
+            ];
+      }
+      if (selectedTable === admin) {
+        selectCounts.adminPhones += 1;
+        return [{ phone: "13900000006" }];
+      }
+      if (selectedTable === organization) {
+        selectCounts.organization += 1;
+        return options.organizationExists === false
+          ? []
+          : [{ id: 31, public_id: "organization-public-001" }];
+      }
+      if (selectedTable === orgAuth) {
+        selectCounts.orgAuths += 1;
+        return (
+          options.orgAuthRows ?? [
+            {
+              account_quota: 10,
+              edition: "standard",
+              id: 51,
+              starts_at: new Date("2026-01-01T00:00:00.000Z"),
+              used_quota: 2,
+            },
+            {
+              account_quota: 5,
+              edition: "standard",
+              id: 52,
+              starts_at: new Date("2026-01-01T00:00:00.000Z"),
+              used_quota: 1,
+            },
+          ]
+        );
+      }
+      if (selectedTable === authUpgrade) {
+        selectCounts.authUpgrades += 1;
+        return [
+          {
+            expires_at: new Date("2099-01-01T00:00:00.000Z"),
+            org_auth_id: 51,
+            revoked_at: null,
+            starts_at: new Date("2026-01-01T00:00:00.000Z"),
+            status: "active",
+            target_edition: "advanced",
+          },
+        ];
+      }
+      if (selectedTable === user) {
+        selectCounts.users += 1;
+        return [
+          {
+            employee_organization_id: null,
+            phone: "13900000002",
+            status: "active",
+            user_type: "personal",
+          },
+          {
+            employee_organization_id: 31,
+            phone: "13900000003",
+            status: "active",
+            user_type: "employee",
+          },
+          {
+            employee_organization_id: 32,
+            phone: "13900000004",
+            status: "active",
+            user_type: "employee",
+          },
+          {
+            employee_organization_id: null,
+            phone: "13900000005",
+            status: "disabled",
+            user_type: "personal",
+          },
+        ];
+      }
+      return [];
+    };
+    const builder: Record<string, unknown> = {
+      from: (table: unknown) => {
+        selectedTable = table;
+        return builder;
+      },
+      innerJoin: () => builder,
+      leftJoin: () => builder,
+      limit: () => builder,
+      orderBy: () => builder,
+      then: (
+        resolve: (rows: unknown[]) => unknown,
+        reject: (error: unknown) => unknown,
+      ) => Promise.resolve(resolveRows()).then(resolve, reject),
+      where: () => builder,
+    };
+    return builder;
+  };
+
+  const rejectWrite = () => {
+    writeCount += 1;
+    throw new Error("Preflight attempted a write.");
+  };
+  const databaseShape = {
+    delete: rejectWrite,
+    insert: rejectWrite,
+    select: (fields: Record<string, unknown>) => createSelectBuilder(fields),
+    transaction: <TResult>(
+      callback: (
+        transaction: EmployeeImportCommandDatabase,
+      ) => Promise<TResult>,
+    ) => callback(database),
+    update: rejectWrite,
+    get selectCounts() {
+      return { ...selectCounts };
+    },
+    get writeCount() {
+      return writeCount;
+    },
+  };
+  const database = databaseShape as unknown as PreflightDatabase;
 
   return database;
 }

@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
-  Download,
   Eye,
   LoaderCircle,
   MoveRight,
@@ -88,8 +87,10 @@ import type {
   UserStatus,
 } from "@/server/models/auth";
 import { EmployeeImportCommandPanel } from "./EmployeeImportCommandPanel/EmployeeImportCommandPanel";
-import type { EmployeeImportCommandSubmitInput } from "./employee-import-command-client";
+import { EmployeeCreateActionPanel } from "./EmployeeCreateActionPanel/EmployeeCreateActionPanel";
+import { EmployeeImportPreflightPanel } from "./EmployeeImportPreflightPanel/EmployeeImportPreflightPanel";
 import { useEmployeeImportCommand } from "./useEmployeeImportCommand";
+import type { EmployeeImportSourceFormat } from "@/server/contracts/employee-import-command-contract";
 
 type LoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
 
@@ -230,27 +231,6 @@ type OrganizationConfirmationState =
     }
   | null;
 
-type EmployeeImportInput = EmployeeImportCommandSubmitInput;
-
-type EmployeeImportPreview = {
-  activeOrgAuthCount: number;
-  availableQuota: number | null;
-  formatLabel: string;
-  generatedPasswordRowCount: number;
-  inheritedAuthorizationCategory:
-    | "active_org_auth_available"
-    | "no_active_org_auth"
-    | "target_not_selected";
-  isReady: boolean;
-  message: string;
-  quotaImpactCategory:
-    | "quota_available"
-    | "quota_insufficient"
-    | "quota_unknown"
-    | "target_not_selected";
-  rowCount: number;
-};
-
 type EmployeeTransferReviewRow = {
   activeScopeCount: number;
   availableQuota: number;
@@ -263,10 +243,6 @@ type EmployeeTransferReviewRow = {
 };
 
 type EmployeeConfirmationState =
-  | {
-      kind: "importEmployees";
-      input: EmployeeImportInput;
-    }
   | {
       kind: "unbindEmployee";
       publicId: string;
@@ -385,47 +361,8 @@ const userStatusLabels = {
   disabled: "已禁用",
 } satisfies Record<UserStatus, string>;
 
-const employeeImportInheritedAuthorizationLabels = {
-  active_org_auth_available: "已发现目标组织有效企业授权",
-  no_active_org_auth: "目标组织暂无有效企业授权",
-  target_not_selected: "请先选择目标组织",
-} satisfies Record<
-  EmployeeImportPreview["inheritedAuthorizationCategory"],
-  string
->;
-
-const employeeImportQuotaImpactLabels = {
-  quota_available: "授权额度足够",
-  quota_insufficient: "授权额度不足，导入已阻断",
-  quota_unknown: "暂无有效授权，无法计算额度影响",
-  target_not_selected: "请先选择目标组织",
-} satisfies Record<EmployeeImportPreview["quotaImpactCategory"], string>;
-
 const employeeImportTemplateFileName = "employee-import-template.csv";
 const employeeImportTemplateContent = "phone,name,initialPassword\n";
-
-const employeeImportKnownHeaderNames = new Set([
-  "phone",
-  "name",
-  "initialpassword",
-]);
-
-const forbiddenEmployeeImportScopeHeaderLabels = [
-  { label: "profession", normalizedName: "profession" },
-  { label: "level", normalizedName: "level" },
-  { label: "subject", normalizedName: "subject" },
-  { label: "edition", normalizedName: "edition" },
-  {
-    label: "orgAuthScopePublicId",
-    normalizedName: "orgauthscopepublicid",
-  },
-  {
-    label: "employeeAuthScopePublicId",
-    normalizedName: "employeeauthscopepublicid",
-  },
-  { label: "organizationPublicId", normalizedName: "organizationpublicid" },
-  { label: "userPublicId", normalizedName: "userpublicid" },
-] as const;
 
 const defaultOrgAuthFormState: OrgAuthFormState = {
   accountQuota: "100",
@@ -1014,164 +951,6 @@ function normalizeOptionalOrganizationText(value: string): string | null {
   return text.length === 0 ? null : text;
 }
 
-function normalizeEmployeeImportHeaderCell(value: string): string {
-  return value
-    .replace(/^\uFEFF/u, "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/gu, "");
-}
-
-function parseEmployeeImportDelimitedRows(
-  value: string,
-  delimiter: "," | "\t",
-): string[][] | null {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let cell = "";
-  let isQuoted = false;
-  let didCloseQuote = false;
-
-  for (let index = 0; index < value.length; index += 1) {
-    const character = value[index];
-    const nextCharacter = value[index + 1];
-
-    if (character === '"') {
-      if (isQuoted) {
-        if (nextCharacter === '"') {
-          cell += '"';
-          index += 1;
-        } else {
-          isQuoted = false;
-          didCloseQuote = true;
-        }
-      } else if (cell.length === 0 && !didCloseQuote) {
-        isQuoted = true;
-      } else {
-        return null;
-      }
-      continue;
-    }
-    if (character === delimiter && !isQuoted) {
-      row.push(cell.trim());
-      cell = "";
-      didCloseQuote = false;
-      continue;
-    }
-    if ((character === "\n" || character === "\r") && !isQuoted) {
-      row.push(cell.trim());
-      if (row.some((rowCell) => rowCell.length > 0)) {
-        rows.push(row);
-      }
-      row = [];
-      cell = "";
-      didCloseQuote = false;
-      if (character === "\r" && nextCharacter === "\n") {
-        index += 1;
-      }
-      continue;
-    }
-    if (didCloseQuote) {
-      if (/\s/u.test(character)) {
-        continue;
-      }
-      return null;
-    }
-    cell += character;
-  }
-
-  if (isQuoted) {
-    return null;
-  }
-
-  row.push(cell.trim());
-  if (row.some((rowCell) => rowCell.length > 0)) {
-    rows.push(row);
-  }
-
-  return rows;
-}
-
-function findForbiddenEmployeeImportScopeHeaders(lines: string[]): string[] {
-  const firstLine = lines[0] ?? "";
-  const delimiter = firstLine.includes("\t") ? "\t" : ",";
-  const firstHeaderNames = new Set(
-    firstLine
-      .split(delimiter)
-      .map(normalizeEmployeeImportHeaderCell)
-      .filter((name) => name.length > 0),
-  );
-  const forbiddenLabels = forbiddenEmployeeImportScopeHeaderLabels
-    .filter(({ normalizedName }) => firstHeaderNames.has(normalizedName))
-    .map(({ label }) => label);
-  const looksLikeHeader =
-    Array.from(firstHeaderNames).some((name) =>
-      employeeImportKnownHeaderNames.has(name),
-    ) || forbiddenLabels.length > 1;
-
-  return looksLikeHeader ? forbiddenLabels : [];
-}
-
-function buildForbiddenEmployeeImportScopeHeaderMessage(
-  forbiddenLabels: string[],
-): string {
-  return `员工导入模板不得包含 ${forbiddenLabels.join(", ")}；专业、等级、版本与授权范围必须从组织授权继承。`;
-}
-
-function summarizeEmployeeImportTargetAuth(input: {
-  orgAuths: AdminOrgAuthData["orgAuths"];
-  rowCount: number;
-  targetOrganizationPublicId: string;
-}): Pick<
-  EmployeeImportPreview,
-  | "activeOrgAuthCount"
-  | "availableQuota"
-  | "inheritedAuthorizationCategory"
-  | "quotaImpactCategory"
-> {
-  const targetOrganizationPublicId = input.targetOrganizationPublicId.trim();
-
-  if (targetOrganizationPublicId.length === 0) {
-    return {
-      activeOrgAuthCount: 0,
-      availableQuota: null,
-      inheritedAuthorizationCategory: "target_not_selected",
-      quotaImpactCategory: "target_not_selected",
-    };
-  }
-
-  const activeTargetOrgAuths = input.orgAuths.filter(
-    (orgAuth) =>
-      orgAuth.status === "active" &&
-      orgAuth.organizationPublicIds.includes(targetOrganizationPublicId),
-  );
-
-  if (activeTargetOrgAuths.length === 0) {
-    return {
-      activeOrgAuthCount: 0,
-      availableQuota: null,
-      inheritedAuthorizationCategory: "no_active_org_auth",
-      quotaImpactCategory: "quota_unknown",
-    };
-  }
-
-  const availableQuota = Math.min(
-    ...activeTargetOrgAuths.map((orgAuth) =>
-      Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0),
-    ),
-  );
-
-  return {
-    activeOrgAuthCount: activeTargetOrgAuths.length,
-    availableQuota,
-    inheritedAuthorizationCategory: "active_org_auth_available",
-    quotaImpactCategory:
-      input.rowCount > availableQuota
-        ? "quota_insufficient"
-        : "quota_available",
-  };
-}
-
 function buildOrganizationInput(
   formState: OrganizationFormState,
   organizations: AdminOrgAuthData["organizations"],
@@ -1250,187 +1029,6 @@ function buildOrganizationInput(
       parentOrganizationPublicId,
     },
     message: null,
-  };
-}
-
-function buildEmployeeImportInput(
-  value: string,
-  targetOrganizationPublicId: string,
-): {
-  input: EmployeeImportInput | null;
-  message: string | null;
-} {
-  const trimmedValue = value.trim();
-
-  if (trimmedValue.length === 0) {
-    return { input: null, message: "请填写员工导入内容。" };
-  }
-
-  const delimiter = trimmedValue.split(/\r?\n/u, 1)[0]?.includes("\t")
-    ? "\t"
-    : ",";
-  const parsedRows = parseEmployeeImportDelimitedRows(trimmedValue, delimiter);
-
-  if (parsedRows === null) {
-    return { input: null, message: "员工导入内容包含无效或未闭合的引号。" };
-  }
-
-  const headerCells = parsedRows[0] ?? [];
-  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders([
-    headerCells.join(delimiter),
-  ]);
-
-  if (forbiddenScopeHeaders.length > 0) {
-    return {
-      input: null,
-      message: buildForbiddenEmployeeImportScopeHeaderMessage(
-        forbiddenScopeHeaders,
-      ),
-    };
-  }
-
-  if (targetOrganizationPublicId.trim().length === 0) {
-    return { input: null, message: "请选择员工导入目标组织。" };
-  }
-
-  const headerNames = headerCells.map(normalizeEmployeeImportHeaderCell);
-  const hasEmployeeAccountHeader =
-    headerNames.includes("phone") && headerNames.includes("name");
-  if (!hasEmployeeAccountHeader) {
-    return {
-      input: null,
-      message:
-        "员工账号导入必须包含 phone,name 表头；initialPassword 可选，并先选择目标组织。",
-    };
-  }
-
-  const headerIndexByName = new Map(
-    headerNames.map((headerName, index) => [headerName, index]),
-  );
-
-  return {
-    input: {
-      commandKind: "batch_import",
-      organizationPublicId: targetOrganizationPublicId.trim(),
-      rows: parsedRows.slice(1).map((cells) => {
-        const valueFor = (name: string) =>
-          cells[headerIndexByName.get(name) ?? -1]?.trim() ?? "";
-
-        return {
-          initialPassword: valueFor("initialpassword"),
-          name: valueFor("name"),
-          phone: valueFor("phone"),
-        };
-      }),
-    },
-    message: null,
-  };
-}
-
-function buildEmployeeImportPreview(
-  value: string,
-  targetOrganizationPublicId: string,
-  orgAuths: AdminOrgAuthData["orgAuths"],
-): EmployeeImportPreview {
-  const trimmedValue = value.trim();
-  const emptyTargetAuthSummary = summarizeEmployeeImportTargetAuth({
-    orgAuths,
-    rowCount: 0,
-    targetOrganizationPublicId,
-  });
-
-  if (trimmedValue.length === 0) {
-    return {
-      ...emptyTargetAuthSummary,
-      formatLabel: "待输入",
-      generatedPasswordRowCount: 0,
-      isReady: false,
-      message: "请粘贴员工导入内容。",
-      rowCount: 0,
-    };
-  }
-
-  const delimiter = trimmedValue.split(/\r?\n/u, 1)[0]?.includes("\t")
-    ? "\t"
-    : ",";
-  const parsedRows = parseEmployeeImportDelimitedRows(trimmedValue, delimiter);
-
-  if (parsedRows === null) {
-    return {
-      ...emptyTargetAuthSummary,
-      formatLabel: "员工导入格式无效",
-      generatedPasswordRowCount: 0,
-      isReady: false,
-      message: "员工导入内容包含无效或未闭合的引号。",
-      rowCount: 0,
-    };
-  }
-
-  const headerCells = parsedRows[0] ?? [];
-  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders([
-    headerCells.join(delimiter),
-  ]);
-
-  if (forbiddenScopeHeaders.length > 0) {
-    return {
-      ...emptyTargetAuthSummary,
-      formatLabel: "员工导入范围字段被阻断",
-      generatedPasswordRowCount: 0,
-      isReady: false,
-      message: buildForbiddenEmployeeImportScopeHeaderMessage(
-        forbiddenScopeHeaders,
-      ),
-      rowCount: 0,
-    };
-  }
-
-  const headerNames = headerCells.map(normalizeEmployeeImportHeaderCell);
-  const hasEmployeeAccountHeader =
-    headerNames.includes("phone") && headerNames.includes("name");
-  const sourceFormat = delimiter === "\t" ? "TSV" : "CSV";
-  const dataRows = hasEmployeeAccountHeader ? parsedRows.slice(1) : [];
-  const rowCount = dataRows.length;
-  const initialPasswordIndex = headerNames.indexOf("initialpassword");
-  const generatedPasswordRowCount = hasEmployeeAccountHeader
-    ? dataRows.filter(
-        (row) =>
-          initialPasswordIndex < 0 ||
-          (row[initialPasswordIndex]?.trim() ?? "").length === 0,
-      ).length
-    : 0;
-
-  const hasTargetOrganization = targetOrganizationPublicId.trim().length > 0;
-  const targetAuthSummary = summarizeEmployeeImportTargetAuth({
-    orgAuths,
-    rowCount,
-    targetOrganizationPublicId,
-  });
-  const message =
-    rowCount <= 0
-      ? hasEmployeeAccountHeader
-        ? "请至少提供一行员工数据。"
-        : "员工账号导入必须包含 phone,name 表头；initialPassword 可选。"
-      : !hasTargetOrganization
-        ? "请选择员工导入目标组织。"
-        : targetAuthSummary.inheritedAuthorizationCategory !==
-            "active_org_auth_available"
-          ? "目标组织暂无有效企业授权，员工能力无法继承，导入已阻断。"
-          : targetAuthSummary.quotaImpactCategory === "quota_insufficient"
-            ? "目标组织可用授权额度不足，导入已阻断。"
-            : `将按员工账号 ${sourceFormat} 解析 ${rowCount} 行员工，并导入到已选择的目标组织。`;
-
-  return {
-    ...targetAuthSummary,
-    formatLabel: `员工账号 ${sourceFormat}`,
-    generatedPasswordRowCount,
-    isReady:
-      rowCount > 0 &&
-      hasTargetOrganization &&
-      targetAuthSummary.inheritedAuthorizationCategory ===
-        "active_org_auth_available" &&
-      targetAuthSummary.quotaImpactCategory === "quota_available",
-    message,
-    rowCount,
   };
 }
 
@@ -3212,159 +2810,6 @@ function EmployeeTransferResultPanel({
   );
 }
 
-function EmployeeImportActionPanel({
-  importText,
-  importPreview,
-  organizations,
-  onImportFileChange,
-  onImportTextChange,
-  onSubmit,
-  onTargetOrganizationChange,
-  onTemplateDownload,
-  targetOrganizationPublicId,
-}: {
-  importText: string;
-  importPreview: EmployeeImportPreview;
-  onImportFileChange: (file: File | null) => void;
-  onImportTextChange: (value: string) => void;
-  onSubmit: () => void;
-  onTargetOrganizationChange: (value: string) => void;
-  onTemplateDownload: () => void;
-  organizations: AdminOrgAuthData["organizations"];
-  targetOrganizationPublicId: string;
-}) {
-  return (
-    <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">员工导入</p>
-          <h2 className="text-text-primary text-base font-semibold">
-            员工批量导入
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            先选择员工所属企业，再上传或粘贴员工名录。初始密码可不填写，系统生成后仅在本次导入结果中展示。
-          </p>
-        </div>
-        <ol
-          className="border-border grid gap-2 border-y py-3 text-xs sm:grid-cols-2"
-          aria-label="员工导入步骤"
-        >
-          {[
-            "1. 选择企业",
-            "2. 上传或粘贴名录",
-            "3. 核对解析预览",
-            "4. 确认导入",
-          ].map((step) => (
-            <li key={step} className="text-text-secondary">
-              {step}
-            </li>
-          ))}
-        </ol>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="border-border bg-background text-text-primary inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-            data-testid="employee-import-template-download"
-            onClick={onTemplateDownload}
-          >
-            <Download className="size-4" aria-hidden="true" />
-            下载模板
-          </button>
-          <label className="border-border bg-background text-text-secondary inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-transform active:scale-[0.98]">
-            <Upload className="size-4" aria-hidden="true" />
-            上传名录
-            <input
-              className="sr-only"
-              data-testid="employee-import-file-input"
-              type="file"
-              accept=".csv,.tsv,text/csv,text/tab-separated-values"
-              onChange={(event) => {
-                onImportFileChange(event.target.files?.[0] ?? null);
-                event.currentTarget.value = "";
-              }}
-            />
-          </label>
-        </div>
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">目标企业</span>
-          <select
-            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-            data-testid="employee-import-organization-select"
-            value={targetOrganizationPublicId}
-            onChange={(event) => onTargetOrganizationChange(event.target.value)}
-          >
-            <option value="">请选择目标企业</option>
-            {organizations.map((organization) => (
-              <option key={organization.publicId} value={organization.publicId}>
-                {organization.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <textarea
-          aria-label="员工名录"
-          className="border-border bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm"
-          data-testid="employee-import-textarea"
-          value={importText}
-          onChange={(event) => onImportTextChange(event.target.value)}
-        />
-        <div
-          className="bg-background border-border rounded-md border p-3"
-          data-testid="employee-import-preview"
-        >
-          <p className="text-text-primary text-sm font-medium">导入预览</p>
-          <p className="text-text-secondary mt-1 text-sm">
-            {importPreview.message}
-          </p>
-          <p className="text-text-muted mt-1 text-xs">
-            格式 {importPreview.formatLabel} / 数据行 {importPreview.rowCount}
-          </p>
-          <p
-            className="text-text-muted mt-1 text-xs"
-            data-testid="employee-import-inherited-auth-category"
-          >
-            继承授权：
-            {
-              employeeImportInheritedAuthorizationLabels[
-                importPreview.inheritedAuthorizationCategory
-              ]
-            }
-            {importPreview.activeOrgAuthCount > 0
-              ? ` / 有效授权 ${importPreview.activeOrgAuthCount}`
-              : ""}
-          </p>
-          <p
-            className="text-text-muted mt-1 text-xs"
-            data-testid="employee-import-quota-impact-category"
-          >
-            额度影响：
-            {employeeImportQuotaImpactLabels[importPreview.quotaImpactCategory]}
-            {importPreview.availableQuota === null
-              ? ""
-              : ` / 可用 ${importPreview.availableQuota}`}
-          </p>
-          {importPreview.generatedPasswordRowCount > 0 ? (
-            <p className="text-warning mt-2 text-xs leading-5">
-              {importPreview.generatedPasswordRowCount}{" "}
-              行未填写初始密码；成功新建账号时将在一次性分发窗口展示系统生成密码。
-            </p>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-          data-testid="employee-import-submit"
-          disabled={!importPreview.isReady}
-          onClick={onSubmit}
-        >
-          <Upload className="size-4" aria-hidden="true" />
-          导入员工
-        </button>
-      </div>
-    </section>
-  );
-}
-
 function EmployeeConfirmationDialog({
   confirmationState,
   onCancel,
@@ -3374,7 +2819,6 @@ function EmployeeConfirmationDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
-  const isImport = confirmationState.kind === "importEmployees";
   const isTransfer = confirmationState.kind === "transferEmployee";
 
   return (
@@ -3390,11 +2834,7 @@ function EmployeeConfirmationDialog({
             aria-hidden="true"
           />
           <h2 className="text-text-primary text-base font-semibold">
-            {isImport
-              ? "确认导入员工？"
-              : isTransfer
-                ? "确认转移员工？"
-                : "确认解绑员工？"}
+            {isTransfer ? "确认转移员工？" : "确认解绑员工？"}
           </h2>
         </div>
         <p className="text-text-muted text-sm leading-6">
@@ -3404,7 +2844,7 @@ function EmployeeConfirmationDialog({
           <button
             type="button"
             className={
-              isImport || isTransfer
+              isTransfer
                 ? "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
                 : "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
             }
@@ -5354,6 +4794,7 @@ export function AdminOrgAuthPage() {
   const employeeImportCommand = useEmployeeImportCommand({
     sessionToken: employeeImportSessionToken,
   });
+  const clearEmployeeImportPlaintext = employeeImportCommand.clearPlaintext;
   const [orgAuthKeyword, setOrgAuthKeyword] = useState("");
   const [orgAuthStatus, setOrgAuthStatus] = useState<AuthStatus | "all">("all");
   const [orgAuthEdition, setOrgAuthEdition] = useState<
@@ -5422,11 +4863,15 @@ export function AdminOrgAuthPage() {
   );
   const [employeeListRefreshVersion, setEmployeeListRefreshVersion] =
     useState(0);
-  const [isEmployeeImportDrawerOpen, setIsEmployeeImportDrawerOpen] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).has("employeeImportCommand"),
+  const [employeeActionDrawer, setEmployeeActionDrawer] = useState<
+    "batch" | "single" | null
+  >(() =>
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("employeeImportCommand")
+      ? "batch"
+      : null,
   );
+  const employeeImportFileGenerationRef = useRef(0);
   const [selectedTransferEmployee, setSelectedTransferEmployee] = useState<
     AdminEmployeeListDto["employees"][number] | null
   >(null);
@@ -5501,10 +4946,29 @@ export function AdminOrgAuthPage() {
   const [organizationFormState, setOrganizationFormState] =
     useState<OrganizationFormState>(defaultOrganizationFormState);
   const [employeeImportText, setEmployeeImportText] = useState("");
+  const [employeeImportSourceFormat, setEmployeeImportSourceFormat] =
+    useState<EmployeeImportSourceFormat>("csv");
   const [
     employeeImportOrganizationPublicId,
     setEmployeeImportOrganizationPublicId,
   ] = useState("");
+  const [
+    employeeCreateOrganizationPublicId,
+    setEmployeeCreateOrganizationPublicId,
+  ] = useState("");
+  const [employeeCreatePhone, setEmployeeCreatePhone] = useState("");
+  const [employeeCreateName, setEmployeeCreateName] = useState("");
+  const [employeeCreateInitialPassword, setEmployeeCreateInitialPassword] =
+    useState("");
+  const clearEmployeeImportSensitiveState = useCallback(() => {
+    employeeImportFileGenerationRef.current += 1;
+    clearEmployeeImportPlaintext();
+    setEmployeeImportText("");
+    setEmployeeCreatePhone("");
+    setEmployeeCreateName("");
+    setEmployeeCreateInitialPassword("");
+    setEmployeeActionDrawer(null);
+  }, [clearEmployeeImportPlaintext]);
   const [lastEmployeeTransferResult, setLastEmployeeTransferResult] =
     useState<EmployeeTransferResultDto | null>(null);
   const [lastEmployeeUnbindResult, setLastEmployeeUnbindResult] =
@@ -5517,17 +4981,6 @@ export function AdminOrgAuthPage() {
   const [selectedOrgAuthDetail, setSelectedOrgAuthDetail] =
     useState<OrgAuthDetailDto | null>(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
-  const employeeImportPreview = useMemo(
-    () =>
-      buildEmployeeImportPreview(
-        employeeImportText,
-        employeeImportOrganizationPublicId,
-        data.orgAuths,
-      ),
-    [data.orgAuths, employeeImportOrganizationPublicId, employeeImportText],
-  );
-  const selectedEmployeeImportOrganizationPublicId =
-    employeeImportOrganizationPublicId;
   const organizationFormOptions = useMemo(() => {
     const organizationsByPublicId = new Map(
       data.organizations.map((organization) => [
@@ -5555,6 +5008,7 @@ export function AdminOrgAuthPage() {
   useEffect(() => {
     function handleSessionStorageChange(event: StorageEvent) {
       if (event.key === SESSION_TOKEN_STORAGE_KEY) {
+        clearEmployeeImportSensitiveState();
         setEmployeeImportSessionToken(getStoredSessionToken());
       }
     }
@@ -5564,7 +5018,7 @@ export function AdminOrgAuthPage() {
     return () => {
       window.removeEventListener("storage", handleSessionStorageChange);
     };
-  }, []);
+  }, [clearEmployeeImportSensitiveState]);
 
   useEffect(() => {
     function handlePopState() {
@@ -5586,9 +5040,7 @@ export function AdminOrgAuthPage() {
       setIsOrgAuthCreateDrawerOpen(false);
     }
     if (nextView !== "employees") {
-      employeeImportCommand.clearPlaintext();
-      setEmployeeImportText("");
-      setIsEmployeeImportDrawerOpen(false);
+      clearEmployeeImportSensitiveState();
       setSelectedTransferEmployee(null);
     }
     writeOpsOrganizationManagementViewToLocation(nextView);
@@ -5990,31 +5442,50 @@ export function AdminOrgAuthPage() {
     });
   }
 
-  function handleSubmitEmployeeImport() {
-    if (!employeeImportPreview.isReady) {
-      setToastMessage({
-        message: employeeImportPreview.message,
-        tone: "error",
+  async function handlePreviewEmployeeAction() {
+    if (employeeActionDrawer === "single") {
+      await employeeImportCommand.preview({
+        commandKind: "single_create",
+        initialPassword: employeeCreateInitialPassword || null,
+        name: employeeCreateName,
+        organizationPublicId: employeeCreateOrganizationPublicId,
+        phone: employeeCreatePhone,
       });
       return;
     }
-
-    const importDraft = buildEmployeeImportInput(
-      employeeImportText,
-      selectedEmployeeImportOrganizationPublicId,
-    );
-
-    if (importDraft.input === null) {
-      setToastMessage({
-        message: importDraft.message ?? "员工导入输入无效。",
-        tone: "error",
+    if (employeeActionDrawer === "batch") {
+      await employeeImportCommand.preview({
+        commandKind: "batch_import",
+        content: employeeImportText,
+        organizationPublicId: employeeImportOrganizationPublicId,
+        sourceFormat: employeeImportSourceFormat,
       });
+    }
+  }
+
+  async function handleConfirmEmployeePreview() {
+    const submittedCommand = await employeeImportCommand.confirmPreview();
+    if (submittedCommand === null) {
       return;
     }
-
-    setEmployeeConfirmationState({
-      kind: "importEmployees",
-      input: importDraft.input,
+    setEmployeeListRefreshVersion((version) => version + 1);
+    if (submittedCommand.status === "completed") {
+      employeeImportFileGenerationRef.current += 1;
+      setEmployeeImportText("");
+      setEmployeeCreatePhone("");
+      setEmployeeCreateName("");
+      setEmployeeCreateInitialPassword("");
+    }
+    setToastMessage({
+      message:
+        submittedCommand.status === "completed"
+          ? `员工操作完成：成功 ${submittedCommand.counts.succeeded}，拒绝 ${submittedCommand.counts.rejected}。`
+          : "员工导入命令处理中，可使用相同输入恢复。",
+      tone:
+        submittedCommand.status === "completed" &&
+        submittedCommand.counts.rejected === 0
+          ? "success"
+          : "error",
     });
   }
 
@@ -6024,38 +5495,6 @@ export function AdminOrgAuthPage() {
     if (sessionToken === null || employeeConfirmationState === null) {
       setEmployeeConfirmationState(null);
       setLoadState("unauthorized");
-      return;
-    }
-
-    if (employeeConfirmationState.kind === "importEmployees") {
-      const submittedCommand = await employeeImportCommand.submit(
-        employeeConfirmationState.input,
-      );
-      setEmployeeConfirmationState(null);
-
-      if (submittedCommand === null) {
-        setToastMessage({
-          message: "员工导入命令提交失败，请按当前状态恢复。",
-          tone: "error",
-        });
-        return;
-      }
-      setLastEmployeeTransferResult(null);
-      if (submittedCommand.status === "completed") {
-        setEmployeeImportText("");
-      }
-      setEmployeeListRefreshVersion((version) => version + 1);
-      setToastMessage({
-        message:
-          submittedCommand.status === "completed"
-            ? `员工导入完成：成功 ${submittedCommand.counts.succeeded}，拒绝 ${submittedCommand.counts.rejected}。`
-            : "员工导入命令处理中，可使用相同文件恢复。",
-        tone:
-          submittedCommand.status === "completed" &&
-          submittedCommand.counts.rejected === 0
-            ? "success"
-            : "error",
-      });
       return;
     }
 
@@ -6178,17 +5617,28 @@ export function AdminOrgAuthPage() {
   }
 
   async function handleEmployeeImportFileChange(file: File | null) {
+    const fileGeneration = ++employeeImportFileGenerationRef.current;
     if (file === null) {
       return;
     }
 
     try {
       const fileContent = await file.text();
+      if (fileGeneration !== employeeImportFileGenerationRef.current) {
+        return;
+      }
 
+      employeeImportCommand.invalidatePreview();
       setEmployeeImportText(fileContent);
+      setEmployeeImportSourceFormat(
+        file.name.toLowerCase().endsWith(".tsv") ? "tsv" : "csv",
+      );
       setLastEmployeeTransferResult(null);
       setToastMessage({ message: "员工名录文件已读取。", tone: "success" });
     } catch {
+      if (fileGeneration !== employeeImportFileGenerationRef.current) {
+        return;
+      }
       setToastMessage({
         message: "员工名录文件读取失败，请重新选择 CSV/TSV 文件。",
         tone: "error",
@@ -6535,14 +5985,24 @@ export function AdminOrgAuthPage() {
         <AdminListToolbar
           description="按员工姓名、手机号、所属企业和账号状态缩小结果；筛选变化自动回到第一页。"
           primaryAction={
-            <button
-              className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium"
-              type="button"
-              onClick={() => setIsEmployeeImportDrawerOpen(true)}
-            >
-              <Upload className="size-4" aria-hidden="true" />
-              批量导入员工
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="border-border bg-background inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium"
+                type="button"
+                onClick={() => setEmployeeActionDrawer("single")}
+              >
+                <PlusCircle className="size-4" aria-hidden="true" />
+                单个创建员工
+              </button>
+              <button
+                className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium"
+                type="button"
+                onClick={() => setEmployeeActionDrawer("batch")}
+              >
+                <Upload className="size-4" aria-hidden="true" />
+                批量导入员工
+              </button>
+            </div>
           }
           resultLabel={`共 ${employeeListPagination.total} 名员工`}
           title="员工筛选"
@@ -6643,59 +6103,94 @@ export function AdminOrgAuthPage() {
           onPageChange={handleEmployeePageChange}
         />
 
-        {isEmployeeImportDrawerOpen ? (
+        {employeeActionDrawer === null ? null : (
           <AdminTaskDrawer
-            ariaLabel="批量导入员工"
+            ariaLabel={
+              employeeActionDrawer === "single"
+                ? "单个创建员工"
+                : "批量导入员工"
+            }
             eyebrow="员工运营"
-            title="批量导入员工"
+            title={
+              employeeActionDrawer === "single"
+                ? "单个创建员工"
+                : "批量导入员工"
+            }
             onClose={() => {
-              employeeImportCommand.clearPlaintext();
-              setEmployeeImportText("");
-              setIsEmployeeImportDrawerOpen(false);
+              clearEmployeeImportSensitiveState();
             }}
           >
-            <EmployeeImportActionPanel
-              importText={employeeImportText}
-              importPreview={employeeImportPreview}
-              organizations={data.organizations}
-              targetOrganizationPublicId={
-                selectedEmployeeImportOrganizationPublicId
-              }
-              onImportFileChange={(file) => {
-                void handleEmployeeImportFileChange(file);
-              }}
-              onImportTextChange={(nextImportText) => {
-                setEmployeeImportText(nextImportText);
-                setLastEmployeeTransferResult(null);
-              }}
-              onSubmit={handleSubmitEmployeeImport}
-              onTemplateDownload={downloadEmployeeImportTemplate}
-              onTargetOrganizationChange={(nextOrganizationPublicId) => {
-                setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
-                setLastEmployeeTransferResult(null);
-              }}
-            />
-            {employeeImportCommand.state.status === "idle" ? null : (
+            {employeeActionDrawer === "single" ? (
+              <EmployeeCreateActionPanel
+                initialPassword={employeeCreateInitialPassword}
+                isBusy={
+                  employeeImportCommand.state.status === "previewing" ||
+                  employeeImportCommand.state.status === "submitting"
+                }
+                message={employeeImportCommand.state.message}
+                name={employeeCreateName}
+                organizationPublicId={employeeCreateOrganizationPublicId}
+                organizations={data.organizations}
+                phone={employeeCreatePhone}
+                preview={employeeImportCommand.state.preview}
+                canConfirm={employeeImportCommand.canConfirmPreview}
+                onConfirm={() => void handleConfirmEmployeePreview()}
+                onInitialPasswordChange={setEmployeeCreateInitialPassword}
+                onInvalidatePreview={employeeImportCommand.invalidatePreview}
+                onNameChange={setEmployeeCreateName}
+                onOrganizationChange={setEmployeeCreateOrganizationPublicId}
+                onPhoneChange={setEmployeeCreatePhone}
+                onPreview={() => void handlePreviewEmployeeAction()}
+              />
+            ) : (
+              <EmployeeImportPreflightPanel
+                content={employeeImportText}
+                isBusy={
+                  employeeImportCommand.state.status === "previewing" ||
+                  employeeImportCommand.state.status === "submitting"
+                }
+                message={employeeImportCommand.state.message}
+                organizationPublicId={employeeImportOrganizationPublicId}
+                organizations={data.organizations}
+                preview={employeeImportCommand.state.preview}
+                canConfirm={employeeImportCommand.canConfirmPreview}
+                sourceFormat={employeeImportSourceFormat}
+                onConfirm={() => void handleConfirmEmployeePreview()}
+                onContentChange={(value) => {
+                  employeeImportFileGenerationRef.current += 1;
+                  setEmployeeImportText(value);
+                }}
+                onFileChange={(file) =>
+                  void handleEmployeeImportFileChange(file)
+                }
+                onInvalidatePreview={employeeImportCommand.invalidatePreview}
+                onOrganizationChange={setEmployeeImportOrganizationPublicId}
+                onPreview={() => void handlePreviewEmployeeAction()}
+                onSourceFormatChange={(value) => {
+                  employeeImportFileGenerationRef.current += 1;
+                  setEmployeeImportSourceFormat(value);
+                }}
+                onTemplateDownload={downloadEmployeeImportTemplate}
+              />
+            )}
+            {employeeImportCommand.state.command === null ? null : (
               <div className="mt-4">
                 <EmployeeImportCommandPanel
                   canConfirm={employeeImportCommand.canConfirm}
                   canIssue={employeeImportCommand.canIssue}
                   state={employeeImportCommand.state}
-                  onClearPlaintext={() => {
-                    employeeImportCommand.clearPlaintext();
-                    setEmployeeImportText("");
-                  }}
-                  onConfirmDistribution={() => {
-                    void employeeImportCommand.confirmDistribution();
-                  }}
-                  onIssueCredentials={() => {
-                    void employeeImportCommand.issueCredentials();
-                  }}
+                  onClearPlaintext={employeeImportCommand.clearPlaintext}
+                  onConfirmDistribution={() =>
+                    void employeeImportCommand.confirmDistribution()
+                  }
+                  onIssueCredentials={() =>
+                    void employeeImportCommand.issueCredentials()
+                  }
                 />
               </div>
             )}
           </AdminTaskDrawer>
-        ) : null}
+        )}
 
         {selectedTransferEmployee === null ? null : (
           <AdminTaskDrawer

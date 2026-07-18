@@ -14,13 +14,13 @@ import {
 } from "../repositories/postgres-employee-import-command-repository";
 import {
   createEmployeeImportCommandService,
-  type EmployeeImportCommandService,
+  type EmployeeImportCommandServiceWithPreview,
 } from "./employee-import-command-service";
 import type { SessionService } from "./session-service";
 
 export type EmployeeImportCommandRouteOptions =
   PostgresEmployeeImportCommandRepositoryOptions & {
-    commandService?: EmployeeImportCommandService;
+    commandService?: EmployeeImportCommandServiceWithPreview;
     sessionService?: Pick<SessionService, "getCurrentSession">;
   };
 
@@ -90,6 +90,16 @@ export function createEmployeeImportCommandRouteHandlers(
   }
 
   return {
+    preview: {
+      async POST(request: Request): Promise<Response> {
+        return execute(request, async (actor) =>
+          commandService.preview({
+            actor,
+            body: await readRequestJson(request),
+          }),
+        );
+      },
+    },
     collection: {
       async POST(request: Request): Promise<Response> {
         return execute(request, async (actor) =>

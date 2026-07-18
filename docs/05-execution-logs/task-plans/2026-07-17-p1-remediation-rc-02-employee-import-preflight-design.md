@@ -52,3 +52,10 @@
 - 规格复核未获用户批准；
 - 设计需要持久 preview 表、migration、外部 cache 或真实 DB；
 - allowlist 无法覆盖最小实现且需要独立 scope-correction。
+
+## 规格复核与实现交接
+
+- 2026-07-18，用户书面回复“批准规格”。
+- implementation plan：`docs/superpowers/plans/2026-07-17-employee-import-server-preflight.md`。
+- 执行方式：当前线程内联执行；未经新的明确批准不创建 Subagent。
+- 产品阶段继续使用既有 allowlist、blockedFiles、WIP=1 与 stop conditions，不因规格批准扩大权限。

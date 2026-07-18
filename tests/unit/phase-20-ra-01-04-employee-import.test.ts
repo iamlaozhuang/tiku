@@ -64,6 +64,9 @@ function createCommandService(
   commandInputs: unknown[],
 ): EmployeeImportCommandService {
   return {
+    async preview() {
+      throw new Error("Unexpected preview.");
+    },
     async submit(input) {
       commandInputs.push(input);
       return {
@@ -114,7 +117,7 @@ function createHandlers(input: {
 }
 
 describe("phase 20 RA-01-04 employee import", () => {
-  it("maps ordered CSV rows to one batch command and leaves command audit ownership to the repository", async () => {
+  it("forwards raw CSV and the reviewed revision without browser-compatible parsing", async () => {
     const auditInputs: unknown[] = [];
     const commandInputs: unknown[] = [];
     const handlers = createHandlers({ auditInputs, commandInputs });
@@ -131,6 +134,7 @@ describe("phase 20 RA-01-04 employee import", () => {
             "13900001001,Employee One,abc12345",
             "13900001002,Employee Two,def67890",
           ].join("\n"),
+          expectedPreviewRevision: "a".repeat(64),
           sourceFormat: "csv",
           targetOrganizationPublicId: "organization-public-001",
         }),
@@ -150,19 +154,14 @@ describe("phase 20 RA-01-04 employee import", () => {
       expect.objectContaining({
         body: {
           commandKind: "batch_import",
+          content: [
+            "phone,name,initialPassword",
+            "13900001001,Employee One,abc12345",
+            "13900001002,Employee Two,def67890",
+          ].join("\n"),
+          expectedPreviewRevision: "a".repeat(64),
           organizationPublicId: "organization-public-001",
-          rows: [
-            {
-              initialPassword: "abc12345",
-              name: "Employee One",
-              phone: "13900001001",
-            },
-            {
-              initialPassword: "def67890",
-              name: "Employee Two",
-              phone: "13900001002",
-            },
-          ],
+          sourceFormat: "csv",
         },
         idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
       }),
@@ -170,10 +169,16 @@ describe("phase 20 RA-01-04 employee import", () => {
     expect(auditInputs).toEqual([]);
   });
 
-  it("preserves duplicate and invalid raw rows for command-level classification", async () => {
+  it("preserves quoted newlines, duplicates, and invalid rows byte-for-byte for server classification", async () => {
     const auditInputs: unknown[] = [];
     const commandInputs: unknown[] = [];
     const handlers = createHandlers({ auditInputs, commandInputs });
+    const content = [
+      "phone,name,initialPassword",
+      '13900001001,"Employee\nOne",abc12345',
+      "13900001001,Employee Duplicate,abc12345",
+      "not-phone,Employee Invalid,abc12345",
+    ].join("\n");
     await handlers.employees.importBatch.POST(
       new Request("http://localhost/api/v1/employees/import", {
         method: "POST",
@@ -182,12 +187,8 @@ describe("phase 20 RA-01-04 employee import", () => {
           "idempotency-key": "123e4567-e89b-42d3-a456-426614174000",
         },
         body: JSON.stringify({
-          content: [
-            "phone,name,initialPassword",
-            "13900001001,Employee One,abc12345",
-            "13900001001,Employee Duplicate,abc12345",
-            "not-phone,Employee Invalid,abc12345",
-          ].join("\n"),
+          content,
+          expectedPreviewRevision: "b".repeat(64),
           sourceFormat: "csv",
           targetOrganizationPublicId: "organization-public-001",
         }),
@@ -197,11 +198,9 @@ describe("phase 20 RA-01-04 employee import", () => {
     expect(commandInputs).toEqual([
       expect.objectContaining({
         body: expect.objectContaining({
-          rows: [
-            expect.objectContaining({ phone: "13900001001" }),
-            expect.objectContaining({ phone: "13900001001" }),
-            expect.objectContaining({ phone: "not-phone" }),
-          ],
+          content,
+          expectedPreviewRevision: "b".repeat(64),
+          sourceFormat: "csv",
         }),
       }),
     ]);
@@ -227,7 +226,7 @@ describe("phase 20 RA-01-04 employee import", () => {
       ].join("\n"),
       label: "more than 500 rows",
     },
-  ])("rejects $label before command submission", async ({ content }) => {
+  ])("delegates $label to the canonical server parser", async ({ content }) => {
     const auditInputs: unknown[] = [];
     const commandInputs: unknown[] = [];
     const handlers = createHandlers({ auditInputs, commandInputs });
@@ -240,15 +239,26 @@ describe("phase 20 RA-01-04 employee import", () => {
         },
         body: JSON.stringify({
           content,
+          expectedPreviewRevision: "c".repeat(64),
           sourceFormat: "csv",
           targetOrganizationPublicId: "organization-public-001",
         }),
       }),
     );
 
-    expect(response.status).toBe(422);
+    expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(commandInputs).toEqual([]);
+    expect(commandInputs).toEqual([
+      expect.objectContaining({
+        body: {
+          commandKind: "batch_import",
+          content,
+          expectedPreviewRevision: "c".repeat(64),
+          organizationPublicId: "organization-public-001",
+          sourceFormat: "csv",
+        },
+      }),
+    ]);
     expect(auditInputs).toEqual([]);
   });
 });

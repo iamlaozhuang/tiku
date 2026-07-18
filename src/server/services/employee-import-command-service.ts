@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -5,9 +7,16 @@ import {
 import type {
   EmployeeCredentialManifestDto,
   EmployeeImportCommandActor,
+  EmployeeImportCommandConfirmationInput,
+  EmployeeImportCommandConfirmationResult,
   EmployeeImportCommandDto,
+  EmployeeImportPreflightDto,
+  EmployeeImportPreflightInput,
+  EmployeeImportPreflightReason,
+  EmployeeImportPreflightRowDto,
   EmployeeImportCommandServiceResult,
   IssuedEmployeeCredential,
+  NormalizedEmployeeImportCommandInput,
   PreparedEmployeeCredential,
 } from "../contracts/employee-import-command-contract";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
@@ -20,7 +29,9 @@ import {
 import {
   normalizeCredentialIssueInput,
   normalizeDistributionConfirmationInput,
+  normalizeEmployeeImportCommandConfirmationInput,
   normalizeEmployeeImportCommandInput,
+  normalizeEmployeeImportPreflightInput,
   normalizeIdempotencyKey,
 } from "../validators/employee-import-command";
 import { normalizeCreateEmployeeAccountInput } from "../validators/employee-account";
@@ -29,13 +40,22 @@ import {
   prepareEmployeeCreationCredential,
   prepareIssuedEmployeeCredential,
 } from "./employee-import-command-crypto";
+import { parseEmployeeImportSource } from "./employee-import-source-parser";
+
+type EmployeeImportCommandPreviewOperation = (input: {
+  actor: EmployeeImportCommandActor;
+  body: unknown;
+}) => Promise<EmployeeImportCommandServiceResult<EmployeeImportPreflightDto>>;
 
 export type EmployeeImportCommandService = {
+  preview?: EmployeeImportCommandPreviewOperation;
   submit(input: {
     actor: EmployeeImportCommandActor;
     idempotencyKey: unknown;
     body: unknown;
-  }): Promise<EmployeeImportCommandServiceResult<EmployeeImportCommandDto>>;
+  }): Promise<
+    EmployeeImportCommandServiceResult<EmployeeImportCommandConfirmationResult>
+  >;
   get(input: {
     actor: EmployeeImportCommandActor;
     commandPublicId: string;
@@ -53,6 +73,11 @@ export type EmployeeImportCommandService = {
     body: unknown;
   }): Promise<EmployeeImportCommandServiceResult<EmployeeImportCommandDto>>;
 };
+
+export type EmployeeImportCommandServiceWithPreview =
+  EmployeeImportCommandService & {
+    preview: EmployeeImportCommandPreviewOperation;
+  };
 
 export type EmployeeImportCommandServiceDependencies = {
   prepareCredential?: (
@@ -95,13 +120,42 @@ const errorMap = {
 export function createEmployeeImportCommandService(
   repository: EmployeeImportCommandRepository,
   dependencies: EmployeeImportCommandServiceDependencies = {},
-): EmployeeImportCommandService {
+): EmployeeImportCommandServiceWithPreview {
   const prepareCredential =
     dependencies.prepareCredential ?? prepareEmployeeCreationCredential;
   const prepareIssuedCredential =
     dependencies.prepareIssuedCredential ?? prepareIssuedEmployeeCredential;
 
   return {
+    async preview(input) {
+      try {
+        const normalizedInput = normalizeEmployeeImportPreflightInput(
+          input.body,
+        );
+        if (!normalizedInput.success) {
+          return createValidationError(normalizedInput.message);
+        }
+        const normalizedCommand = normalizePreflightSource(
+          normalizedInput.value,
+        );
+        if (!normalizedCommand.success) {
+          return createValidationError(normalizedCommand.message);
+        }
+
+        return {
+          httpStatus: 200,
+          response: createSuccessResponse(
+            await createEmployeeImportPreview(repository, {
+              actor: input.actor,
+              command: normalizedCommand.command,
+            }),
+          ),
+        };
+      } catch (error) {
+        return mapServiceError(error);
+      }
+    },
+
     async submit(input) {
       try {
         const normalizedIdempotencyKey = normalizeIdempotencyKey(
@@ -111,82 +165,112 @@ export function createEmployeeImportCommandService(
           return createValidationError(normalizedIdempotencyKey.message);
         }
 
-        const normalizedCommand = normalizeEmployeeImportCommandInput(
-          input.body,
+        const normalizedConfirmation =
+          normalizeEmployeeImportCommandConfirmationInput(input.body);
+        if (!normalizedConfirmation.success) {
+          return createValidationError(normalizedConfirmation.message);
+        }
+        const normalizedCommand = normalizePreflightSource(
+          toEmployeeImportPreflightInput(normalizedConfirmation.value),
         );
         if (!normalizedCommand.success) {
           return createValidationError(normalizedCommand.message);
         }
 
-        const commandHashes = createEmployeeImportCommandHashes({
+        const fullCommandHashes = createEmployeeImportCommandHashes({
           actorPublicId: input.actor.publicId,
-          command: normalizedCommand.value,
+          command: normalizedCommand.command,
           idempotencyKey: normalizedIdempotencyKey.value,
         });
-        const claimedCommand = await repository.claimCommand({
+        const claimedCommand = await repository.findClaimedCommand({
           actor: input.actor,
-          commandKind: normalizedCommand.value.commandKind,
-          idempotencyScopeHash: commandHashes.idempotencyScopeHash,
-          organizationPublicId: normalizedCommand.value.organizationPublicId,
-          requestHash: commandHashes.requestHash,
-          rows: normalizedCommand.value.rows.map((row) => ({
-            rowNumber: row.rowNumber,
-            rowRequestHash: resolveRowRequestHash(
-              commandHashes.rowHashes,
-              row.rowNumber,
-            ),
-          })),
+          idempotencyScopeHash: fullCommandHashes.idempotencyScopeHash,
         });
-        const duplicatePhones = findDuplicatePhones(
-          normalizedCommand.value.rows.map((row) => row.phone),
-        );
-        const pendingRowNumbers = new Set(
-          claimedCommand.rows
-            .filter((row) => row.status === "pending")
-            .map((row) => row.rowNumber),
-        );
-        const pendingRows = normalizedCommand.value.rows
-          .filter((row) => pendingRowNumbers.has(row.rowNumber))
-          .sort((leftRow, rightRow) => leftRow.rowNumber - rightRow.rowNumber)
-          .map((row) => ({
-            initialPassword: row.initialPassword,
-            name: row.name,
-            phone: row.phone,
-            prevalidatedRejectionReason: resolvePrevalidatedRejectionReason({
-              duplicatePhones,
-              initialPassword: row.initialPassword,
-              name: row.name,
-              organizationPublicId:
-                normalizedCommand.value.organizationPublicId,
-              phone: row.phone,
-            }),
-            rowNumber: row.rowNumber,
-            rowRequestHash: resolveRowRequestHash(
-              commandHashes.rowHashes,
-              row.rowNumber,
-            ),
-          }));
-        const preparedRows = await preparePendingRows(
-          pendingRows,
-          prepareCredential,
-        );
+        if (claimedCommand !== null) {
+          if (claimedCommand.requestHash !== fullCommandHashes.requestHash) {
+            throw new EmployeeImportCommandError(
+              "idempotency_request_mismatch",
+            );
+          }
+          if (claimedCommand.command.status === "completed") {
+            return {
+              httpStatus: 200,
+              response: createSuccessResponse(
+                mapCommandRecordToDto(claimedCommand.command),
+              ),
+            };
+          }
 
-        for (const row of preparedRows) {
-          await repository.processRow({
+          const claimedRowNumbers = new Set(
+            claimedCommand.command.rows.map((row) => row.rowNumber),
+          );
+          const resumedRows = normalizedCommand.command.rows.filter((row) =>
+            claimedRowNumbers.has(row.rowNumber),
+          );
+          if (resumedRows.length !== claimedRowNumbers.size) {
+            throw new Error("Claimed employee import row set changed.");
+          }
+
+          return await executeNormalizedEmployeeImportCommand(repository, {
             actor: input.actor,
-            commandPublicId: claimedCommand.publicId,
-            name: row.name,
-            phone: row.phone,
-            preparedCredential: row.preparedCredential,
-            prevalidatedRejectionReason: row.prevalidatedRejectionReason,
-            rowNumber: row.rowNumber,
-            rowRequestHash: row.rowRequestHash,
+            command: {
+              ...normalizedCommand.command,
+              rows: resumedRows,
+            },
+            fullCommandHashes,
+            prepareCredential,
           });
         }
 
-        return await readCommand(repository, {
+        const currentPreview = await createEmployeeImportPreview(repository, {
           actor: input.actor,
-          commandPublicId: claimedCommand.publicId,
+          command: normalizedCommand.command,
+        });
+        if (
+          currentPreview.previewRevision !==
+          normalizedConfirmation.value.expectedPreviewRevision
+        ) {
+          return createPreviewBoundError(
+            409,
+            409608,
+            "Employee import preview is stale.",
+            currentPreview,
+          );
+        }
+        if (currentPreview.counts.block > 0) {
+          return createPreviewBoundError(
+            422,
+            422602,
+            "Employee import preview contains blocked rows.",
+            currentPreview,
+          );
+        }
+        const actionableRowNumbers = new Set(
+          currentPreview.rows.flatMap((row) =>
+            row.outcome === "new" || row.outcome === "bind"
+              ? [row.rowNumber]
+              : [],
+          ),
+        );
+        if (actionableRowNumbers.size === 0) {
+          return createPreviewBoundError(
+            422,
+            422603,
+            "Employee import preview requires no write.",
+            currentPreview,
+          );
+        }
+
+        return await executeNormalizedEmployeeImportCommand(repository, {
+          actor: input.actor,
+          command: {
+            ...normalizedCommand.command,
+            rows: normalizedCommand.command.rows.filter((row) =>
+              actionableRowNumbers.has(row.rowNumber),
+            ),
+          },
+          fullCommandHashes,
+          prepareCredential,
         });
       } catch (error) {
         return mapServiceError(error);
@@ -302,6 +386,346 @@ export function createEmployeeImportCommandService(
   };
 }
 
+type NormalizedPreflightSourceResult =
+  | { success: true; command: NormalizedEmployeeImportCommandInput }
+  | { success: false; message: string };
+
+function toEmployeeImportPreflightInput(
+  input: EmployeeImportCommandConfirmationInput,
+): EmployeeImportPreflightInput {
+  if (input.commandKind === "batch_import") {
+    return {
+      commandKind: input.commandKind,
+      content: input.content,
+      organizationPublicId: input.organizationPublicId,
+      sourceFormat: input.sourceFormat,
+    };
+  }
+
+  return {
+    commandKind: input.commandKind,
+    initialPassword: input.initialPassword ?? null,
+    name: input.name,
+    organizationPublicId: input.organizationPublicId,
+    phone: input.phone,
+  };
+}
+
+function normalizePreflightSource(
+  input: EmployeeImportPreflightInput,
+): NormalizedPreflightSourceResult {
+  const commandInput =
+    input.commandKind === "batch_import"
+      ? parseEmployeeImportSource({
+          content: input.content,
+          sourceFormat: input.sourceFormat,
+        })
+      : {
+          success: true as const,
+          rows: [
+            {
+              initialPassword: input.initialPassword ?? "",
+              name: input.name,
+              phone: input.phone,
+              rowNumber: 1,
+            },
+          ],
+        };
+  if (!commandInput.success) {
+    return { success: false, message: commandInput.message };
+  }
+
+  const normalized = normalizeEmployeeImportCommandInput({
+    commandKind: input.commandKind,
+    organizationPublicId: input.organizationPublicId,
+    rows: commandInput.rows.map((row) => ({
+      initialPassword: row.initialPassword,
+      name: row.name,
+      phone: row.phone,
+    })),
+  });
+  if (!normalized.success) {
+    return normalized;
+  }
+
+  return {
+    success: true,
+    command: {
+      ...normalized.value,
+      rows: normalized.value.rows.map((row, index) => ({
+        ...row,
+        rowNumber: commandInput.rows[index]?.rowNumber ?? row.rowNumber,
+      })),
+    },
+  };
+}
+
+async function createEmployeeImportPreview(
+  repository: EmployeeImportCommandRepository,
+  input: {
+    actor: EmployeeImportCommandActor;
+    command: NormalizedEmployeeImportCommandInput;
+  },
+): Promise<EmployeeImportPreflightDto> {
+  const facts = await repository.preflightRows({
+    actor: input.actor,
+    organizationPublicId: input.command.organizationPublicId,
+    rows: input.command.rows.map((row) => ({
+      phone: row.phone,
+      rowNumber: row.rowNumber,
+    })),
+  });
+  const factByRowNumber = new Map(
+    facts.rows.map((row) => [row.rowNumber, row]),
+  );
+  if (
+    factByRowNumber.size !== input.command.rows.length ||
+    input.command.rows.some((row) => !factByRowNumber.has(row.rowNumber))
+  ) {
+    throw new Error("Employee import preflight fact set changed.");
+  }
+
+  const duplicatePhones = findDuplicatePhones(
+    input.command.rows.map((row) => row.phone),
+  );
+  let remainingSeatCount = facts.authorization.availableSeatCount;
+  const rows = input.command.rows.map((row): EmployeeImportPreflightRowDto => {
+    const fact = factByRowNumber.get(row.rowNumber);
+    if (fact === undefined) {
+      throw new Error("Employee import preflight row fact is unavailable.");
+    }
+    const inheritedAuthorizationSummary = {
+      activeScopeCount: facts.authorization.activeScopeCount,
+      effectiveEdition: facts.authorization.effectiveEdition,
+      status: facts.authorization.status,
+    };
+    const availableSeatCount = remainingSeatCount;
+    const prevalidatedReason = resolvePrevalidatedRejectionReason({
+      duplicatePhones,
+      initialPassword: row.initialPassword,
+      name: row.name,
+      organizationPublicId: input.command.organizationPublicId,
+      phone: row.phone,
+    });
+    const blockedRow = (
+      reason: EmployeeImportPreflightReason,
+      quotaStatus:
+        | "insufficient"
+        | "not_required"
+        | "unavailable" = "not_required",
+      requiredSeatCount: 0 | 1 = 0,
+    ): EmployeeImportPreflightRowDto => ({
+      credentialMode: null,
+      inheritedAuthorizationSummary,
+      maskedPhone: maskPhoneForDisplay(row.phone),
+      name: row.name,
+      outcome: "block",
+      quotaImpact: {
+        availableSeatCount:
+          quotaStatus === "unavailable" ? null : availableSeatCount,
+        requiredSeatCount,
+        status: quotaStatus,
+      },
+      redactedReason: reason,
+      rowNumber: row.rowNumber,
+    });
+
+    if (prevalidatedReason !== null) {
+      return blockedRow(prevalidatedReason);
+    }
+    if (facts.organizationStatus === "not_found") {
+      return blockedRow("organization_not_found", "unavailable");
+    }
+    if (facts.authorization.status === "unavailable") {
+      return blockedRow("current_authorization_insufficient", "unavailable");
+    }
+    if (fact.identityState === "admin_phone_conflict") {
+      return blockedRow("cross_domain_conflict");
+    }
+    if (fact.identityState === "disabled_user") {
+      return blockedRow("disabled_account");
+    }
+    if (fact.identityState === "employee_other_organization") {
+      return blockedRow("cross_organization_conflict");
+    }
+    if (fact.identityState === "employee_same_organization") {
+      return {
+        credentialMode: "existing_account",
+        inheritedAuthorizationSummary,
+        maskedPhone: maskPhoneForDisplay(row.phone),
+        name: row.name,
+        outcome: "skip",
+        quotaImpact: {
+          availableSeatCount,
+          requiredSeatCount: 0,
+          status: "not_required",
+        },
+        redactedReason: null,
+        rowNumber: row.rowNumber,
+      };
+    }
+    if (remainingSeatCount === null) {
+      throw new Error("Employee import available quota is unavailable.");
+    }
+    if (remainingSeatCount < 1) {
+      return blockedRow("quota_insufficient", "insufficient", 1);
+    }
+
+    const outcome = fact.identityState === "personal_active" ? "bind" : "new";
+    const credentialMode =
+      outcome === "bind"
+        ? "existing_account"
+        : row.initialPassword.length === 0
+          ? "generated"
+          : "provided";
+    remainingSeatCount -= 1;
+    return {
+      credentialMode,
+      inheritedAuthorizationSummary,
+      maskedPhone: maskPhoneForDisplay(row.phone),
+      name: row.name,
+      outcome,
+      quotaImpact: {
+        availableSeatCount,
+        requiredSeatCount: 1,
+        status: "available",
+      },
+      redactedReason: null,
+      rowNumber: row.rowNumber,
+    };
+  });
+  const counts = rows.reduce(
+    (current, row) => ({
+      ...current,
+      [row.outcome]: current[row.outcome] + 1,
+    }),
+    { new: 0, bind: 0, skip: 0, block: 0 },
+  );
+  const canConfirm = counts.block === 0 && counts.new + counts.bind > 0;
+  const semanticPreview = {
+    canConfirm,
+    commandKind: input.command.commandKind,
+    confirmDisabledReason: canConfirm
+      ? null
+      : counts.block > 0
+        ? ("blocked_rows" as const)
+        : ("no_action_required" as const),
+    counts,
+    organizationPublicId: input.command.organizationPublicId,
+    rowCount: input.command.rows.length,
+    rows,
+  };
+  const previewRevision = createHash("sha256")
+    .update(
+      JSON.stringify({
+        actorPublicId: input.actor.publicId,
+        command: input.command,
+        preview: semanticPreview,
+        version: 1,
+      }),
+    )
+    .digest("hex");
+
+  return { previewRevision, ...semanticPreview };
+}
+
+async function executeNormalizedEmployeeImportCommand(
+  repository: EmployeeImportCommandRepository,
+  input: {
+    actor: EmployeeImportCommandActor;
+    command: NormalizedEmployeeImportCommandInput;
+    fullCommandHashes: ReturnType<typeof createEmployeeImportCommandHashes>;
+    prepareCredential: (
+      initialPassword: string,
+    ) => Promise<PreparedEmployeeCredential>;
+  },
+): Promise<
+  EmployeeImportCommandServiceResult<EmployeeImportCommandConfirmationResult>
+> {
+  const rowRequestHashByNumber = new Map(
+    input.command.rows.map((row) => [
+      row.rowNumber,
+      input.fullCommandHashes.rowHashes[row.rowNumber - 1],
+    ]),
+  );
+  const claimedCommand = await repository.claimCommand({
+    actor: input.actor,
+    commandKind: input.command.commandKind,
+    idempotencyScopeHash: input.fullCommandHashes.idempotencyScopeHash,
+    organizationPublicId: input.command.organizationPublicId,
+    requestHash: input.fullCommandHashes.requestHash,
+    rows: input.command.rows.map((row) => ({
+      rowNumber: row.rowNumber,
+      rowRequestHash: resolveRowRequestHash(
+        rowRequestHashByNumber,
+        row.rowNumber,
+      ),
+    })),
+  });
+  const duplicatePhones = findDuplicatePhones(
+    input.command.rows.map((row) => row.phone),
+  );
+  const pendingRowNumbers = new Set(
+    claimedCommand.rows
+      .filter((row) => row.status === "pending")
+      .map((row) => row.rowNumber),
+  );
+  const pendingRows = input.command.rows
+    .filter((row) => pendingRowNumbers.has(row.rowNumber))
+    .sort((leftRow, rightRow) => leftRow.rowNumber - rightRow.rowNumber)
+    .map((row) => ({
+      initialPassword: row.initialPassword,
+      name: row.name,
+      phone: row.phone,
+      prevalidatedRejectionReason: resolvePrevalidatedRejectionReason({
+        duplicatePhones,
+        initialPassword: row.initialPassword,
+        name: row.name,
+        organizationPublicId: input.command.organizationPublicId,
+        phone: row.phone,
+      }),
+      rowNumber: row.rowNumber,
+      rowRequestHash: resolveRowRequestHash(
+        rowRequestHashByNumber,
+        row.rowNumber,
+      ),
+    }));
+  const preparedRows = await preparePendingRows(
+    pendingRows,
+    input.prepareCredential,
+  );
+
+  for (const row of preparedRows) {
+    await repository.processRow({
+      actor: input.actor,
+      commandPublicId: claimedCommand.publicId,
+      name: row.name,
+      phone: row.phone,
+      preparedCredential: row.preparedCredential,
+      prevalidatedRejectionReason: row.prevalidatedRejectionReason,
+      rowNumber: row.rowNumber,
+      rowRequestHash: row.rowRequestHash,
+    });
+  }
+
+  return readCommand(repository, {
+    actor: input.actor,
+    commandPublicId: claimedCommand.publicId,
+  });
+}
+
+function createPreviewBoundError(
+  httpStatus: 409 | 422,
+  code: 409608 | 422602 | 422603,
+  message: string,
+  preview: EmployeeImportPreflightDto,
+): EmployeeImportCommandServiceResult<EmployeeImportCommandConfirmationResult> {
+  return {
+    httpStatus,
+    response: { code, data: preview, message },
+  };
+}
+
 async function prepareCredentialIssueTargets(
   targets: {
     employeePublicId: string;
@@ -351,8 +775,11 @@ async function prepareCredentialIssueTargets(
   return preparedTargets;
 }
 
-function resolveRowRequestHash(rowHashes: string[], rowNumber: number): string {
-  const rowRequestHash = rowHashes[rowNumber - 1];
+function resolveRowRequestHash(
+  rowHashes: Map<number, string | undefined>,
+  rowNumber: number,
+): string {
+  const rowRequestHash = rowHashes.get(rowNumber);
   if (rowRequestHash === undefined) {
     throw new Error("Employee import row hash is unavailable.");
   }

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   EmployeeCredentialManifestDto,
   EmployeeImportCommandDto,
+  EmployeeImportPreflightDto,
 } from "@/server/contracts/employee-import-command-contract";
 
 import type { EmployeeImportCommandClient } from "./employee-import-command-client";
@@ -11,15 +12,53 @@ import { useEmployeeImportCommand } from "./useEmployeeImportCommand";
 
 const submitInput = {
   commandKind: "batch_import" as const,
+  content:
+    "phone,name,initialPassword\n13900000001,Employee One,RequestSecret1",
+  expectedPreviewRevision: "a".repeat(64),
   organizationPublicId: "organization-public-1",
-  rows: [
-    {
-      initialPassword: "RequestSecret1",
-      name: "Employee One",
-      phone: "13900000001",
-    },
-  ],
+  sourceFormat: "csv" as const,
 };
+const preflightInput = {
+  commandKind: submitInput.commandKind,
+  content: submitInput.content,
+  organizationPublicId: submitInput.organizationPublicId,
+  sourceFormat: submitInput.sourceFormat,
+};
+
+function preview(
+  overrides: Partial<EmployeeImportPreflightDto> = {},
+): EmployeeImportPreflightDto {
+  return {
+    previewRevision: "a".repeat(64),
+    commandKind: "batch_import",
+    organizationPublicId: "organization-public-1",
+    rowCount: 1,
+    counts: { new: 1, bind: 0, skip: 0, block: 0 },
+    canConfirm: true,
+    confirmDisabledReason: null,
+    rows: [
+      {
+        rowNumber: 1,
+        maskedPhone: "139****0001",
+        name: "Employee One",
+        outcome: "new",
+        redactedReason: null,
+        credentialMode: "provided",
+        inheritedAuthorizationSummary: {
+          status: "available",
+          activeScopeCount: 1,
+          effectiveEdition: "advanced",
+        },
+        quotaImpact: {
+          status: "available",
+          requiredSeatCount: 1,
+          availableSeatCount: 1,
+        },
+      },
+    ],
+    ...overrides,
+  };
+}
 
 function command(
   overrides: Partial<EmployeeImportCommandDto> = {},
@@ -98,6 +137,7 @@ function createClient(
     ),
     get: vi.fn(() => ok(command())),
     issueCredentials: vi.fn(() => ok(manifest(1))),
+    preview: vi.fn(() => ok(preview())),
     submit: vi.fn(() => ok(command())),
     ...overrides,
   };
@@ -113,6 +153,89 @@ describe("useEmployeeImportCommand", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("requires a server preview, confirms the exact reviewed input, and invalidates on edit", async () => {
+    const client = createClient();
+    const { result } = renderHook(() =>
+      useEmployeeImportCommand({ client, sessionToken: "session-token" }),
+    );
+
+    await act(() => result.current.preview(preflightInput));
+
+    expect(result.current.state.status).toBe("preview_ready");
+    expect(result.current.canConfirmPreview).toBe(true);
+    await act(() => result.current.confirmPreview());
+    expect(client.submit).toHaveBeenCalledWith(
+      "session-token",
+      "123e4567-e89b-42d3-a456-426614174000",
+      submitInput,
+    );
+    expect(result.current.state.preview).toBeNull();
+    expect(result.current.state.previewInput).toBeNull();
+
+    await act(() => result.current.preview(preflightInput));
+    act(() => result.current.invalidatePreview());
+    expect(result.current.state.preview).toBeNull();
+    expect(result.current.canConfirmPreview).toBe(false);
+  });
+
+  it("discards a late preview after the reviewed input is invalidated", async () => {
+    const previewRequest =
+      deferred<Awaited<ReturnType<EmployeeImportCommandClient["preview"]>>>();
+    const client = createClient({
+      preview: vi.fn(() => previewRequest.promise),
+    });
+    const { result } = renderHook(() =>
+      useEmployeeImportCommand({ client, sessionToken: "session-token" }),
+    );
+
+    let request: Promise<EmployeeImportPreflightDto | null> | undefined;
+    act(() => {
+      request = result.current.preview(preflightInput);
+    });
+    act(() => result.current.invalidatePreview());
+    await act(async () => previewRequest.resolve(await ok(preview())));
+    await act(() => request);
+
+    expect(result.current.state.preview).toBeNull();
+    expect(result.current.state.previewInput).toBeNull();
+    expect(result.current.canConfirmPreview).toBe(false);
+  });
+
+  it("adopts a stale safe preview without auto-confirming", async () => {
+    const stalePreview = preview({
+      previewRevision: "b".repeat(64),
+      canConfirm: true,
+      confirmDisabledReason: null,
+      counts: { new: 1, bind: 0, skip: 0, block: 0 },
+    });
+    const client = createClient({
+      submit: vi.fn(() =>
+        Promise.resolve({
+          httpStatus: 409,
+          response: {
+            code: 409608,
+            message: "Employee import preview is stale.",
+            data: stalePreview,
+          },
+        }),
+      ),
+    });
+    const { result } = renderHook(() =>
+      useEmployeeImportCommand({ client, sessionToken: "session-token" }),
+    );
+
+    await act(() => result.current.preview(preflightInput));
+    await act(() => result.current.confirmPreview());
+
+    expect(result.current.state.status).toBe("preview_stale");
+    expect(result.current.state.preview).toEqual(stalePreview);
+    expect(result.current.state.command).toBeNull();
+    expect(client.submit).toHaveBeenCalledTimes(1);
+    expect(result.current.canConfirmPreview).toBe(false);
+    await act(() => result.current.confirmPreview());
+    expect(client.submit).toHaveBeenCalledTimes(1);
   });
 
   it("generates a UUID, stores only recovery identifiers, and clears input when complete", async () => {
@@ -379,7 +502,7 @@ describe("useEmployeeImportCommand", () => {
     await waitFor(() => expect(result.current.state.command).not.toBeNull());
     const changedInput = {
       ...submitInput,
-      rows: [{ ...submitInput.rows[0]!, name: "Changed Employee" }],
+      content: submitInput.content.replace("Employee One", "Changed Employee"),
     };
 
     await act(() => result.current.submit(changedInput));

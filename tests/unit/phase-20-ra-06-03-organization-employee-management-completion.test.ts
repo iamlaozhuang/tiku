@@ -588,6 +588,44 @@ function mockOrganizationPageFetch() {
         });
       }
 
+      if (path === "/api/v1/employee-import-commands/preview") {
+        const body = JSON.parse(String(init?.body));
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            previewRevision: "a".repeat(64),
+            commandKind: "batch_import",
+            organizationPublicId: body.organizationPublicId,
+            rowCount: 1,
+            counts: { new: 1, bind: 0, skip: 0, block: 0 },
+            canConfirm: true,
+            confirmDisabledReason: null,
+            rows: [
+              {
+                rowNumber: 1,
+                maskedPhone: "139****0002",
+                name: "Imported Employee",
+                outcome: "new",
+                redactedReason: null,
+                credentialMode: "provided",
+                inheritedAuthorizationSummary: {
+                  status: "available",
+                  activeScopeCount: 1,
+                  effectiveEdition: "advanced",
+                },
+                quotaImpact: {
+                  status: "available",
+                  requiredSeatCount: 1,
+                  availableSeatCount: 7,
+                },
+              },
+            ],
+          },
+        });
+      }
+
       if (path === "/api/v1/employee-import-commands") {
         const body = JSON.parse(String(init?.body));
 
@@ -792,6 +830,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         body: JSON.stringify({
           content:
             "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
+          expectedPreviewRevision: "a".repeat(64),
           sourceFormat: "csv",
           targetOrganizationPublicId: "org-city-001",
         }),
@@ -880,14 +919,11 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       expect.objectContaining({
         body: {
           commandKind: "batch_import",
+          content:
+            "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
+          expectedPreviewRevision: "a".repeat(64),
           organizationPublicId: "org-city-001",
-          rows: [
-            {
-              initialPassword: "abc12345",
-              name: "Imported Employee",
-              phone: "13900000002",
-            },
-          ],
+          sourceFormat: "csv",
         },
       }),
     ]);
@@ -1058,27 +1094,28 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       },
     );
     fireEvent.click(screen.getByTestId("employee-import-submit"));
-    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+    await screen.findByTestId("employee-import-preview");
+    fireEvent.click(screen.getByTestId("employee-import-confirm"));
 
     await waitFor(() =>
-      expect(fetchMock).toHaveBeenCalledWith(
-        "/api/v1/employee-import-commands",
-        expect.objectContaining({
-          body: JSON.stringify({
-            commandKind: "batch_import",
-            organizationPublicId: "org-city-001",
-            rows: [
-              {
-                initialPassword: "abc12345",
-                name: "Imported Employee",
-                phone: "13900000002",
-              },
-            ],
-          }),
-          method: "POST",
-        }),
-      ),
+      expect(
+        fetchMock.mock.calls.some(
+          ([path]) => String(path) === "/api/v1/employee-import-commands",
+        ),
+      ).toBe(true),
     );
+    const importCall = fetchMock.mock.calls.find(
+      ([path]) => String(path) === "/api/v1/employee-import-commands",
+    );
+    expect(importCall?.[1]?.method).toBe("POST");
+    expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
+      commandKind: "batch_import",
+      content:
+        "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
+      expectedPreviewRevision: "a".repeat(64),
+      organizationPublicId: "org-city-001",
+      sourceFormat: "csv",
+    });
 
     fireEvent.keyDown(document, { key: "Escape" });
     const employeeRow = await screen.findByTestId(

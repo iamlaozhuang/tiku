@@ -3,9 +3,10 @@ import { describe, expect, it } from "vitest";
 import type {
   EmployeeCredentialManifestDto,
   EmployeeImportCommandDto,
+  EmployeeImportPreflightDto,
   EmployeeImportCommandServiceResult,
 } from "../contracts/employee-import-command-contract";
-import type { EmployeeImportCommandService } from "./employee-import-command-service";
+import type { EmployeeImportCommandServiceWithPreview } from "./employee-import-command-service";
 import type { SessionService } from "./session-service";
 import { createEmployeeImportCommandRouteHandlers } from "./employee-import-command-route";
 
@@ -37,6 +38,35 @@ const COMMAND_DTO: EmployeeImportCommandDto = {
   ],
   status: "completed",
   updatedAt: "2026-07-17T12:01:00.000Z",
+};
+const PREVIEW_DTO: EmployeeImportPreflightDto = {
+  previewRevision: "a".repeat(64),
+  commandKind: "batch_import",
+  organizationPublicId: "organization-public-1",
+  rowCount: 1,
+  counts: { new: 1, bind: 0, skip: 0, block: 0 },
+  canConfirm: true,
+  confirmDisabledReason: null,
+  rows: [
+    {
+      rowNumber: 1,
+      maskedPhone: "139****0002",
+      name: "Employee One",
+      outcome: "new",
+      redactedReason: null,
+      credentialMode: "provided",
+      inheritedAuthorizationSummary: {
+        status: "available",
+        activeScopeCount: 1,
+        effectiveEdition: "advanced",
+      },
+      quotaImpact: {
+        status: "available",
+        requiredSeatCount: 1,
+        availableSeatCount: 2,
+      },
+    },
+  ],
 };
 
 type AdminRole = "content_admin" | "ops_admin" | "super_admin";
@@ -88,9 +118,10 @@ function createService(
     confirmResult?: EmployeeImportCommandServiceResult<EmployeeImportCommandDto>;
     getResult?: EmployeeImportCommandServiceResult<EmployeeImportCommandDto>;
     issueResult?: EmployeeImportCommandServiceResult<EmployeeCredentialManifestDto>;
+    previewResult?: EmployeeImportCommandServiceResult<EmployeeImportPreflightDto>;
     submitResult?: EmployeeImportCommandServiceResult<EmployeeImportCommandDto>;
   } = {},
-): EmployeeImportCommandService {
+): EmployeeImportCommandServiceWithPreview {
   const successResult: EmployeeImportCommandServiceResult<EmployeeImportCommandDto> =
     {
       httpStatus: 200,
@@ -98,6 +129,15 @@ function createService(
     };
 
   return {
+    async preview(serviceInput) {
+      input.calls?.push({ action: "preview", serviceInput });
+      return (
+        input.previewResult ?? {
+          httpStatus: 200,
+          response: { code: 0, message: "ok", data: PREVIEW_DTO },
+        }
+      );
+    },
     async submit(serviceInput) {
       input.calls?.push({ action: "submit", serviceInput });
       return input.submitResult ?? successResult;
@@ -165,6 +205,58 @@ function createRequest(
 }
 
 describe("employee import command route", () => {
+  it.each(["ops_admin", "super_admin"] as const)(
+    "previews raw source for %s with one actor resolution and a secret-free no-store response",
+    async (role) => {
+      const calls: unknown[] = [];
+      const resolutionCount = { value: 0 };
+      const handlers = createEmployeeImportCommandRouteHandlers({
+        commandService: createService({ calls }),
+        sessionService: createSessionService({ role, resolutionCount }),
+      });
+      const source =
+        "phone,name,initialPassword\n13900000002,Employee One,RequestSecret1";
+
+      const response = await handlers.preview.POST(
+        createRequest({
+          body: {
+            commandKind: "batch_import",
+            organizationPublicId: "organization-public-1",
+            sourceFormat: "csv",
+            content: source,
+          },
+          token: "Bearer admin-session-token",
+        }),
+      );
+      const serializedResponse = JSON.stringify(await response.json());
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(resolutionCount.value).toBe(1);
+      expect(calls).toEqual([
+        {
+          action: "preview",
+          serviceInput: {
+            actor: {
+              publicId: "admin-public-1",
+              requestIp: null,
+              role,
+            },
+            body: {
+              commandKind: "batch_import",
+              organizationPublicId: "organization-public-1",
+              sourceFormat: "csv",
+              content: source,
+            },
+          },
+        },
+      ]);
+      expect(serializedResponse).not.toContain("13900000002");
+      expect(serializedResponse).not.toContain("RequestSecret1");
+      expect(serializedResponse).not.toContain(source);
+    },
+  );
+
   it.each([undefined, "Bearer invalid-session"])(
     "returns 401 with no-store for missing or invalid session",
     async (token) => {

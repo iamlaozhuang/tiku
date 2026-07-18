@@ -1,6 +1,16 @@
 import { randomUUID } from "node:crypto";
 
-import { and, asc, count, eq, gt, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 
 import {
   admin,
@@ -8,10 +18,12 @@ import {
   auditLog,
   authAccount,
   authSession,
+  authUpgrade,
   authUser,
   employee,
   employeeImportCommand,
   employeeImportRow,
+  orgAuth,
   organization,
   user,
 } from "@/db/schema";
@@ -30,12 +42,16 @@ import {
   EmployeeImportCommandError,
   type EmployeeImportCommandRecord,
   type EmployeeImportCommandRepository,
+  type EmployeeImportPreflightIdentityState,
   type EmployeeImportRejectionReason,
   type ProcessEmployeeImportRowInput,
 } from "./employee-import-command-repository";
 import type { EmployeeImportCommandActor } from "../contracts/employee-import-command-contract";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
-import { lockOrganizationScopeMutation } from "./organization-scope-query";
+import {
+  createOrgAuthCoversOrganizationCondition,
+  lockOrganizationScopeMutation,
+} from "./organization-scope-query";
 import * as databaseSchema from "@/db/schema";
 
 export type EmployeeImportCommandDatabase =
@@ -123,6 +139,190 @@ export function createPostgresEmployeeImportCommandRepository(
   );
 
   return {
+    async preflightRows(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const preflightDatabase = transaction as EmployeeImportCommandDatabase;
+        await resolveActiveActor(preflightDatabase, input.actor);
+        const [organizationRow] = await preflightDatabase
+          .select({
+            id: organization.id,
+            public_id: organization.public_id,
+          })
+          .from(organization)
+          .where(
+            and(
+              eq(organization.public_id, input.organizationPublicId),
+              eq(organization.status, "active"),
+            ),
+          )
+          .limit(1);
+
+        if (organizationRow === undefined) {
+          return createUnavailablePreflightFacts(input.rows);
+        }
+
+        const now = new Date();
+        const orgAuthRows = await preflightDatabase
+          .select({
+            account_quota: orgAuth.account_quota,
+            edition: orgAuth.edition,
+            id: orgAuth.id,
+            starts_at: orgAuth.starts_at,
+            used_quota: orgAuth.used_quota,
+          })
+          .from(orgAuth)
+          .where(
+            and(
+              eq(orgAuth.status, "active"),
+              gt(orgAuth.expires_at, now),
+              createOrgAuthCoversOrganizationCondition({
+                authScopeType: orgAuth.auth_scope_type,
+                orgAuthId: orgAuth.id,
+                organizationId: organizationRow.id,
+                purchaserOrganizationId: orgAuth.purchaser_organization_id,
+              }),
+            ),
+          )
+          .orderBy(asc(orgAuth.id));
+        const currentOrgAuthRows = orgAuthRows.filter(
+          (row) => row.starts_at <= now,
+        );
+        const activeUpgradeRows =
+          currentOrgAuthRows.length === 0
+            ? []
+            : await preflightDatabase
+                .select({
+                  expires_at: authUpgrade.expires_at,
+                  org_auth_id: authUpgrade.org_auth_id,
+                  revoked_at: authUpgrade.revoked_at,
+                  starts_at: authUpgrade.starts_at,
+                  status: authUpgrade.status,
+                  target_edition: authUpgrade.target_edition,
+                })
+                .from(authUpgrade)
+                .where(
+                  and(
+                    inArray(
+                      authUpgrade.org_auth_id,
+                      currentOrgAuthRows.map((row) => row.id),
+                    ),
+                    eq(authUpgrade.status, "active"),
+                    isNull(authUpgrade.revoked_at),
+                    lte(authUpgrade.starts_at, now),
+                    gt(authUpgrade.expires_at, now),
+                  ),
+                );
+        const uniquePhones = [...new Set(input.rows.map((row) => row.phone))];
+        const adminPhoneRows =
+          uniquePhones.length === 0
+            ? []
+            : await preflightDatabase
+                .select({ phone: admin.phone })
+                .from(admin)
+                .where(inArray(admin.phone, uniquePhones));
+        const userRows =
+          uniquePhones.length === 0
+            ? []
+            : await preflightDatabase
+                .select({
+                  employee_organization_id: employee.organization_id,
+                  phone: user.phone,
+                  status: user.status,
+                  user_type: user.user_type,
+                })
+                .from(user)
+                .leftJoin(employee, eq(employee.user_id, user.id))
+                .where(inArray(user.phone, uniquePhones));
+        const adminPhones = new Set(adminPhoneRows.map((row) => row.phone));
+        const userByPhone = new Map(userRows.map((row) => [row.phone, row]));
+        const hasAdvancedEdition =
+          currentOrgAuthRows.some((row) => row.edition === "advanced") ||
+          activeUpgradeRows.some(
+            (row) =>
+              row.status === "active" &&
+              row.revoked_at === null &&
+              row.starts_at <= now &&
+              row.expires_at > now &&
+              row.target_edition === "advanced",
+          );
+
+        return {
+          authorization:
+            currentOrgAuthRows.length === 0
+              ? {
+                  activeScopeCount: 0,
+                  availableSeatCount: null,
+                  effectiveEdition: null,
+                  status: "unavailable" as const,
+                }
+              : {
+                  activeScopeCount: currentOrgAuthRows.length,
+                  availableSeatCount: Math.min(
+                    ...orgAuthRows.map((row) =>
+                      Math.max(row.account_quota - row.used_quota, 0),
+                    ),
+                  ),
+                  effectiveEdition: hasAdvancedEdition
+                    ? ("advanced" as const)
+                    : ("standard" as const),
+                  status: "available" as const,
+                },
+          organizationStatus: "active" as const,
+          rows: input.rows.map((row) => ({
+            identityState: resolvePreflightIdentityState({
+              adminPhones,
+              organizationId: organizationRow.id,
+              phone: row.phone,
+              userByPhone,
+            }),
+            rowNumber: row.rowNumber,
+          })),
+        };
+      });
+    },
+
+    async findClaimedCommand(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const commandDatabase = transaction as EmployeeImportCommandDatabase;
+        const actorRow = await resolveActiveActor(commandDatabase, input.actor);
+        const [claimedCommand] = await commandDatabase
+          .select({
+            actor_admin_id: employeeImportCommand.actor_admin_id,
+            id: employeeImportCommand.id,
+            request_hash: employeeImportCommand.request_hash,
+          })
+          .from(employeeImportCommand)
+          .where(
+            eq(
+              employeeImportCommand.idempotency_scope_hash,
+              input.idempotencyScopeHash,
+            ),
+          )
+          .limit(1)
+          .for("share", { of: employeeImportCommand });
+
+        if (
+          claimedCommand === undefined ||
+          !canActorAccessCommand(actorRow, claimedCommand)
+        ) {
+          return null;
+        }
+        const command = await readEmployeeImportCommandRecord(
+          commandDatabase,
+          claimedCommand.id,
+        );
+        if (command === null) {
+          throw new Error("Claimed employee import command could not be read.");
+        }
+
+        return { command, requestHash: claimedCommand.request_hash };
+      });
+    },
+
     async claimCommand(input) {
       const database = getDatabase();
 
@@ -598,6 +798,58 @@ export function createPostgresEmployeeImportCommandRepository(
       });
     },
   };
+}
+
+function createUnavailablePreflightFacts(rows: { rowNumber: number }[]) {
+  return {
+    authorization: {
+      activeScopeCount: 0,
+      availableSeatCount: null,
+      effectiveEdition: null,
+      status: "unavailable" as const,
+    },
+    organizationStatus: "not_found" as const,
+    rows: rows.map((row) => ({
+      identityState: "absent" as const,
+      rowNumber: row.rowNumber,
+    })),
+  };
+}
+
+function resolvePreflightIdentityState(input: {
+  adminPhones: Set<string>;
+  organizationId: number;
+  phone: string;
+  userByPhone: Map<
+    string,
+    {
+      employee_organization_id: number | null;
+      phone: string;
+      status: "active" | "disabled";
+      user_type: "personal" | "employee";
+    }
+  >;
+}): EmployeeImportPreflightIdentityState {
+  if (input.adminPhones.has(input.phone)) {
+    return "admin_phone_conflict";
+  }
+  const userRow = input.userByPhone.get(input.phone);
+  if (userRow === undefined) {
+    return "absent";
+  }
+  if (userRow.status === "disabled") {
+    return "disabled_user";
+  }
+  if (
+    userRow.user_type === "employee" ||
+    userRow.employee_organization_id !== null
+  ) {
+    return userRow.employee_organization_id === input.organizationId
+      ? "employee_same_organization"
+      : "employee_other_organization";
+  }
+
+  return "personal_active";
 }
 
 function createLazyDatabaseGetter(

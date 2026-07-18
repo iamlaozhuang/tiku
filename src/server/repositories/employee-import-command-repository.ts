@@ -43,6 +43,44 @@ export type ClaimEmployeeImportCommandInput = {
   rows: { rowNumber: number; rowRequestHash: string }[];
 };
 
+export type EmployeeImportPreflightIdentityState =
+  | "absent"
+  | "personal_active"
+  | "employee_same_organization"
+  | "employee_other_organization"
+  | "disabled_user"
+  | "admin_phone_conflict";
+
+export type PreflightEmployeeImportRowsInput = {
+  actor: EmployeeImportCommandActor;
+  organizationPublicId: string;
+  rows: { rowNumber: number; phone: string }[];
+};
+
+export type EmployeeImportPreflightFacts = {
+  organizationStatus: "active" | "not_found";
+  authorization: {
+    status: "available" | "unavailable";
+    activeScopeCount: number;
+    effectiveEdition: "standard" | "advanced" | null;
+    availableSeatCount: number | null;
+  };
+  rows: {
+    rowNumber: number;
+    identityState: EmployeeImportPreflightIdentityState;
+  }[];
+};
+
+export type FindClaimedEmployeeImportCommandInput = {
+  actor: EmployeeImportCommandActor;
+  idempotencyScopeHash: string;
+};
+
+export type ClaimedEmployeeImportCommand = {
+  command: EmployeeImportCommandRecord;
+  requestHash: string;
+};
+
 export type ProcessEmployeeImportRowInput = {
   actor: EmployeeImportCommandActor;
   commandPublicId: string;
@@ -100,6 +138,12 @@ export type ConfirmEmployeeCredentialDistributionInput = {
 };
 
 export type EmployeeImportCommandRepository = {
+  preflightRows(
+    input: PreflightEmployeeImportRowsInput,
+  ): Promise<EmployeeImportPreflightFacts>;
+  findClaimedCommand(
+    input: FindClaimedEmployeeImportCommandInput,
+  ): Promise<ClaimedEmployeeImportCommand | null>;
   claimCommand(
     input: ClaimEmployeeImportCommandInput,
   ): Promise<EmployeeImportCommandRecord>;

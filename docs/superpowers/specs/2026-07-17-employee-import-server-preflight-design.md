@@ -2,7 +2,7 @@
 
 日期：2026-07-17
 
-状态：方案 A 已获用户批准，等待书面规格复核
+状态：方案 A 已获用户批准，书面规格已于 2026-07-18 复核通过
 
 任务：`p1-remediation-rc-02-employee-import-preflight-2026-07-17`
 
@@ -95,4 +95,4 @@ RED 必须证明：
 
 ## 规格复核门禁
 
-本文件提交后必须由用户书面复核。复核通过后才允许调用 `superpowers:writing-plans` 编制实现计划并开始产品 RED；未经复核不得写产品代码。
+本文件已于 2026-07-18 获用户书面回复“批准规格”。实施计划固定为 `docs/superpowers/plans/2026-07-17-employee-import-server-preflight.md`；产品实现必须按该计划和 RED→GREEN 门禁推进。

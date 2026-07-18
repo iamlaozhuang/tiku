@@ -5,11 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   EmployeeCredentialManifestDto,
   EmployeeImportCommandDto,
+  EmployeeImportPreflightDto,
 } from "@/server/contracts/employee-import-command-contract";
 
 import {
   createEmployeeImportCommandClient,
   type EmployeeImportCommandClient,
+  type EmployeeImportCommandPreviewInput,
   type EmployeeImportCommandSubmitInput,
 } from "./employee-import-command-client";
 
@@ -18,6 +20,9 @@ const IDEMPOTENCY_HISTORY_KEY = "employeeImportCommandIdempotencyKey";
 
 export type EmployeeImportCommandUiStatus =
   | "idle"
+  | "previewing"
+  | "preview_ready"
+  | "preview_stale"
   | "submitting"
   | "processing"
   | "open"
@@ -31,8 +36,18 @@ export type EmployeeImportCommandUiState = {
   idempotencyKey: string | null;
   manifest: EmployeeCredentialManifestDto | null;
   message: string | null;
+  preview?: EmployeeImportPreflightDto | null;
+  previewInput?: EmployeeImportCommandPreviewInput | null;
   status: EmployeeImportCommandUiStatus;
   submittedInput: EmployeeImportCommandSubmitInput | null;
+};
+
+type EmployeeImportCommandInternalState = Omit<
+  EmployeeImportCommandUiState,
+  "preview" | "previewInput"
+> & {
+  preview: EmployeeImportPreflightDto | null;
+  previewInput: EmployeeImportCommandPreviewInput | null;
 };
 
 type UseEmployeeImportCommandOptions = {
@@ -42,8 +57,14 @@ type UseEmployeeImportCommandOptions = {
 
 type EmployeeImportMutation = {
   epoch: number;
-  kind: "confirm" | "issue" | "submit";
+  kind: "confirm" | "issue" | "preview" | "submit";
 };
+
+function isEmployeeImportCommandDto(
+  value: EmployeeImportCommandDto | EmployeeImportPreflightDto,
+): value is EmployeeImportCommandDto {
+  return "publicId" in value;
+}
 
 function readHistoryIdempotencyKey(): string | null {
   if (typeof window === "undefined") {
@@ -137,7 +158,7 @@ function statusFromCommand(
   return "open";
 }
 
-function initialState(): EmployeeImportCommandUiState {
+function initialState(): EmployeeImportCommandInternalState {
   const hasCommandToRecover = readCommandPublicId() !== null;
 
   return {
@@ -146,6 +167,8 @@ function initialState(): EmployeeImportCommandUiState {
     idempotencyKey: readHistoryIdempotencyKey(),
     manifest: null,
     message: hasCommandToRecover ? "正在查询员工导入命令。" : null,
+    preview: null,
+    previewInput: null,
     status: hasCommandToRecover ? "submitting" : "idle",
     submittedInput: null,
   };
@@ -160,7 +183,7 @@ export function useEmployeeImportCommand({
     [suppliedClient],
   );
   const [state, setState] =
-    useState<EmployeeImportCommandUiState>(initialState);
+    useState<EmployeeImportCommandInternalState>(initialState);
   const stateRef = useRef(state);
   const mountedRef = useRef(true);
   const operationEpochRef = useRef(0);
@@ -169,18 +192,20 @@ export function useEmployeeImportCommand({
   const sensitiveRef = useRef<{
     idempotencyKey: string | null;
     manifest: EmployeeCredentialManifestDto | null;
+    previewInput: EmployeeImportCommandPreviewInput | null;
     submittedInput: EmployeeImportCommandSubmitInput | null;
   }>({
     idempotencyKey: state.idempotencyKey,
     manifest: null,
+    previewInput: null,
     submittedInput: null,
   });
 
   const updateState = useCallback(
     (
       updater: (
-        current: EmployeeImportCommandUiState,
-      ) => EmployeeImportCommandUiState,
+        current: EmployeeImportCommandInternalState,
+      ) => EmployeeImportCommandInternalState,
     ) => {
       if (!mountedRef.current) {
         return;
@@ -189,6 +214,7 @@ export function useEmployeeImportCommand({
       sensitiveRef.current = {
         idempotencyKey: next.idempotencyKey,
         manifest: next.manifest,
+        previewInput: next.previewInput,
         submittedInput: next.submittedInput,
       };
       stateRef.current = next;
@@ -271,6 +297,8 @@ export function useEmployeeImportCommand({
             ? current.manifest
             : null,
         message: null,
+        preview: isCompleted ? null : current.preview,
+        previewInput: isCompleted ? null : current.previewInput,
         status: statusFromCommand(command),
         submittedInput: isCompleted ? null : current.submittedInput,
       }));
@@ -352,6 +380,8 @@ export function useEmployeeImportCommand({
           commandPublicId !== null && sessionToken === null
             ? "管理员会话已失效。"
             : null,
+        preview: null,
+        previewInput: null,
         status:
           commandPublicId !== null && sessionToken === null ? "error" : "idle",
         submittedInput: null,
@@ -377,16 +407,181 @@ export function useEmployeeImportCommand({
       sensitiveRef.current = {
         idempotencyKey: null,
         manifest: null,
+        previewInput: null,
         submittedInput: null,
       };
       stateRef.current = {
         ...stateRef.current,
         idempotencyKey: null,
         manifest: null,
+        preview: null,
+        previewInput: null,
         submittedInput: null,
       };
     };
   }, []);
+
+  const preview = useCallback(
+    async (input: EmployeeImportCommandPreviewInput) => {
+      if (sessionToken === null || mutationRef.current !== null) {
+        return null;
+      }
+      const operationEpoch = ++operationEpochRef.current;
+      mutationRef.current = { epoch: operationEpoch, kind: "preview" };
+      updateState((current) => ({
+        ...current,
+        message: null,
+        preview: null,
+        previewInput: input,
+        status: "previewing",
+      }));
+
+      try {
+        const result = await client.preview(sessionToken, input);
+        if (!isOperationCurrent(operationEpoch)) {
+          return null;
+        }
+        const nextPreview = result.response.data;
+        if (result.response.code !== 0 || nextPreview === null) {
+          applyFailure(result, operationEpoch);
+          return null;
+        }
+        updateState((current) => ({
+          ...current,
+          message: null,
+          preview: nextPreview,
+          previewInput: input,
+          status: "preview_ready",
+        }));
+        return nextPreview;
+      } catch {
+        if (isOperationCurrent(operationEpoch)) {
+          updateState((current) => ({
+            ...current,
+            message: "员工导入预检暂时不可用。",
+            preview: null,
+            status: "error",
+          }));
+        }
+        return null;
+      } finally {
+        if (mutationRef.current?.epoch === operationEpoch) {
+          mutationRef.current = null;
+        }
+      }
+    },
+    [applyFailure, client, isOperationCurrent, sessionToken, updateState],
+  );
+
+  const invalidatePreview = useCallback(() => {
+    if (mutationRef.current?.kind === "preview") {
+      operationEpochRef.current += 1;
+      mutationRef.current = null;
+    }
+    updateState((current) => ({
+      ...current,
+      preview: null,
+      previewInput: null,
+      status:
+        current.status === "previewing" ||
+        current.status === "preview_ready" ||
+        current.status === "preview_stale"
+          ? "idle"
+          : current.status,
+    }));
+  }, [updateState]);
+
+  const confirmPreview = useCallback(async () => {
+    const reviewedPreview = stateRef.current.preview;
+    const reviewedInput = stateRef.current.previewInput;
+    if (
+      sessionToken === null ||
+      reviewedPreview === null ||
+      reviewedInput === null ||
+      !reviewedPreview.canConfirm ||
+      stateRef.current.status !== "preview_ready" ||
+      mutationRef.current !== null
+    ) {
+      return null;
+    }
+
+    const operationEpoch = ++operationEpochRef.current;
+    mutationRef.current = { epoch: operationEpoch, kind: "submit" };
+    const existingIdempotencyKey = stateRef.current.idempotencyKey;
+    const idempotencyKey = existingIdempotencyKey ?? crypto.randomUUID();
+    const confirmationInput: EmployeeImportCommandSubmitInput = {
+      ...reviewedInput,
+      expectedPreviewRevision: reviewedPreview.previewRevision,
+    };
+    replaceIdempotencyHistoryKey(
+      idempotencyKey,
+      existingIdempotencyKey === null,
+    );
+    updateState((current) => ({
+      ...current,
+      idempotencyKey,
+      manifest: null,
+      message: null,
+      status: "submitting",
+      submittedInput: confirmationInput,
+    }));
+
+    try {
+      const result = await client.submit(
+        sessionToken,
+        idempotencyKey,
+        confirmationInput,
+      );
+      if (!isOperationCurrent(operationEpoch)) {
+        return null;
+      }
+      const data = result.response.data;
+      if (
+        result.response.code === 0 &&
+        data !== null &&
+        isEmployeeImportCommandDto(data)
+      ) {
+        applyCommand(data, idempotencyKey, operationEpoch);
+        return data;
+      }
+      if (data !== null && !isEmployeeImportCommandDto(data)) {
+        replaceIdempotencyHistoryKey(null, true);
+        updateState((current) => ({
+          ...current,
+          idempotencyKey: null,
+          message: result.response.message,
+          preview: data,
+          previewInput: reviewedInput,
+          status:
+            result.response.code === 409608 ? "preview_stale" : "preview_ready",
+          submittedInput: null,
+        }));
+        return null;
+      }
+      applyFailure(result, operationEpoch);
+      return null;
+    } catch {
+      if (isOperationCurrent(operationEpoch)) {
+        updateState((current) => ({
+          ...current,
+          message: "提交结果未知，可使用相同输入安全恢复。",
+          status: "error",
+        }));
+      }
+      return null;
+    } finally {
+      if (mutationRef.current?.epoch === operationEpoch) {
+        mutationRef.current = null;
+      }
+    }
+  }, [
+    applyCommand,
+    applyFailure,
+    client,
+    isOperationCurrent,
+    sessionToken,
+    updateState,
+  ]);
 
   const submit = useCallback(
     async (input: EmployeeImportCommandSubmitInput) => {
@@ -432,7 +627,11 @@ export function useEmployeeImportCommand({
           return null;
         }
         const command = result.response.data;
-        if (result.response.code !== 0 || command === null) {
+        if (
+          result.response.code !== 0 ||
+          command === null ||
+          !isEmployeeImportCommandDto(command)
+        ) {
           applyFailure(result, operationEpoch);
           return null;
         }
@@ -640,11 +839,17 @@ export function useEmployeeImportCommand({
           ? "操作结果未知，敏感内容已清除；请刷新页面重新查询。"
           : current.message,
       status: didCancelMutation ? "conflict" : current.status,
+      preview: null,
+      previewInput: null,
       submittedInput: null,
     }));
   }, [updateState]);
 
   return {
+    canConfirmPreview:
+      state.preview !== null &&
+      state.preview.canConfirm &&
+      state.status === "preview_ready",
     canConfirm: state.manifest !== null && state.status === "open",
     canIssue:
       state.command?.status === "completed" &&
@@ -652,8 +857,11 @@ export function useEmployeeImportCommand({
       state.status !== "conflict" &&
       state.status !== "submitting",
     clearPlaintext,
+    confirmPreview,
     confirmDistribution,
+    invalidatePreview,
     issueCredentials,
+    preview,
     refresh,
     state,
     submit,
