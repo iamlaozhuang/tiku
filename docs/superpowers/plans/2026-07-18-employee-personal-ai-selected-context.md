@@ -11,9 +11,9 @@
 ## Execution Status
 
 - Tasks 0–6: complete；各 Task 均由独立 Subagent 实施，主线程逐项复核。
-- Task 7 Steps 1–7: complete；focused `9/9` files、`226/226` tests，full unit `421/421` files、`2773/2773` tests，lint/typecheck/format/build 通过，两轮审查最终 `Critical 0 / Important 0 / Minor 0`；Step 7 由包含本计划的单一产品 commit 完成。
+- Task 7 Steps 1–9: complete；focused `9/9` files、`226/226` tests，full unit `421/421` files、`2773/2773` tests，lint/typecheck/提交范围 format/build 通过，两轮审查最终 `Critical 0 / Important 0 / Minor 0`；产品与 ready commits 已 ff-only 合入并推送，产品 worktree/短分支已清理。
 - Round 2 修复：关闭 numeric-string scope/idempotency Critical、history pagination sequence Important、exact-selected detail port Minor；未扩大产品或审批边界。
-- Remaining: `ready_for_closeout` transition 与 pre-push、ff-only/push/product worktree cleanup、最终 closed projection 与 deferred checkpoint；产品提交由包含本计划的单一 commit 完成。
+- Remaining: Step 10 final closed projection 与 deferred checkpoint。现行 P1 状态机要求 `in_progress` Program 恰有一个 active current task，并只允许在同时 materialize successor 的 transition 中关闭前任务；因此“不 materialize 下一任务且保持 Program in_progress”的 closed 投影被 hard-block。
 
 ## Global Constraints
 
@@ -467,7 +467,7 @@ git commit -m "fix(ai-generation): honor selected employee authorization"
 
 Status: finalized by the single product commit containing this plan；不得在该 commit 中包含 state/queue ready transition。
 
-- [ ] **Step 8: Create the ready governance commit**
+- [x] **Step 8: Create the ready governance commit**
 
 仅把 state/queue/evidence/audit 更新为 `ready_for_closeout`，记录 product SHA、验证与 reviews。通过 exact transition 后：
 
@@ -477,7 +477,7 @@ git commit -m "chore(p1): ready employee personal ai context"
 
 Then run `Test-ModuleRunV2PrePushReadiness.ps1 ... -SkipRemoteAheadCheck`; it must pass only for the exact approved transition/ancestor-checkpoint topology。
 
-- [ ] **Step 9: ff-only merge, push and cleanup**
+- [x] **Step 9: ff-only merge, push and cleanup**
 
 ```powershell
 git merge --ff-only codex/p1-rc02-employee-personal-ai-context
@@ -492,6 +492,8 @@ git push origin master
 
 最终只读确认 `master == origin/master == live remote`、master clean、F-0143 closed、所有 F-0143 worktree/短分支已清理、无运行命令/Subagent、下一 RED 未开始；然后回复精确标记 `READY_FOR_MECHANISM_CHARTER` 并等待完整“P1 机制执行层兼容式收敛实施章程 v2.1”，不得自行从摘要启动机制改良。
 
+Status: hard-blocked before state/queue edit. `Test-P1RemediationSerialProgram.ps1` requires an `in_progress` Program to retain exactly one active current task and its completed-task partition excludes that current task；the serial plan permits closing it only in a transition that also materializes a successor. Closing the whole Program would violate Program completion criteria，while materializing a successor would violate the deferred checkpoint. Do not patch or bypass the guard without the user's revised instruction or the full v2.1 charter.
+
 ---
 
 ## Plan Self-Review Checklist
@@ -503,6 +505,6 @@ git push origin master
 - [x] Client owner/source/org/quota metadata 始终由服务端覆盖。
 - [x] repository 复用现有 task join，不新增 schema/migration/dependency 或数据库执行。
 - [x] 每个执行 Task 使用独立 Subagent，主线程串行复核；最终第二轮 reviewer 与 implementer 独立。
-- [x] 单一产品提交、ready transition、ff-only merge、push 与 cleanup 遵守现有 closeout discipline。
+- [x] 单一产品提交、ready transition、ff-only merge、push 与产品 worktree cleanup 遵守现有 closeout discipline；最终 closed 投影未绕过现行状态机。
 - [x] 普通 `in_progress` SHA drift 继续 hard-block；只允许 P1 transition-only ancestor checkpoint。
 - [x] 本计划无未决 placeholder、未列文件或未决接口。

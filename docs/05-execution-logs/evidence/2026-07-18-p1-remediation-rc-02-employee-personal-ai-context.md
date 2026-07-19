@@ -170,12 +170,26 @@ Result: pre_product_closeout_readiness_pass_prepush_deferred_to_ready_transition
 
 ## Git closeout checkpoint
 
-- productCommit: `finalized_by_commit_containing_this_record` with message `fix(ai-generation): honor selected employee authorization`.
-- readyGovernanceCommit: pending exact state/queue transition after the product commit.
-- masterMerge: pending.
-- originMasterSync: pending.
-- productWorktreeCleanup: pending.
-- finalClosedProjection: pending after product merge/push/cleanup; it must not materialize the next product task.
+- productCommit: `e46e4340c` with message `fix(ai-generation): honor selected employee authorization`.
+- readyGovernanceCommit: `12c348de2` with message `chore(p1): ready employee personal ai context`; exact two-file `in_progress -> ready_for_closeout` transition.
+- masterMerge: pass, ff-only to `12c348de2793675a4d69f99d0966e874bac81ab9`.
+- originMasterSync: pass at `12c348de2793675a4d69f99d0966e874bac81ab9`; local, tracking, and live remote matched after the normal push.
+- productWorktreeCleanup: pass; `D:/tiku/.worktrees/p1-rc02-employee-personal-ai-context` and `codex/p1-rc02-employee-personal-ai-context` were removed after remote synchronization.
+- closeoutEvidenceCommit: `finalized_by_commit_containing_this_record`.
+- finalClosedProjection: hard-blocked before edit; no next task was materialized and no guard was changed or bypassed.
+
+## Post-merge closeout evidence
+
+Result: blocked_on_closed_without_successor_state_contract
+
+- Fresh master focused regression passed `9/9` files and `226/226` tests; lint and typecheck passed.
+- Full-repository `format:check` found seven task-external, locally ignored `.superpowers/sdd` files. The exact `23fda0d64..12c348de2` committed-file set passed Prettier; no ignored file was changed.
+- Standard master `npm.cmd run build` passed compilation, TypeScript, and `96/96` static pages.
+- Fresh master P1 manual, P0 global baseline, Module pre-commit, Module closeout, Module pre-push, and `git diff --check` passed. Normal push hooks also passed before `origin/master` advanced to `12c348de2`.
+- The product implementation, validation, two reviews, product commit, ready transition, ff-only merge, normal push, and product isolation cleanup are complete. The next product RED has not started.
+- The remaining projection is structurally incompatible with the current authorized contract: the serial plan says closeout facts are recorded by the next governance transition that also materializes exactly one successor; the P1 guard requires an `in_progress` Program to have exactly one active current task and excludes that current task from `completedTaskIds`.
+- Setting F-0143 to `closed` without a successor fails the active-task pointer and completed partition invariants. Setting the whole P1 Program to `closed` would falsely claim all 125 P1 findings complete. Materializing a successor or changing the guard would violate the deferred checkpoint instruction.
+- Therefore F-0143 remains truthfully `ready_for_closeout` in state/queue. `READY_FOR_MECHANISM_CHARTER` is not emitted because its explicit `F-0143 closed` prerequisite is unsatisfied.
 
 ## 品味合规自检 Checklist
 

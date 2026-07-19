@@ -110,3 +110,12 @@ Decision: READY_FOR_GOVERNANCE_CLOSEOUT
 Result: pass
 
 The complete product diff passed two-round adversarial review and fresh static validation. Product commit and later Git/state transitions remain governed separately and are not pre-claimed by this review disposition.
+
+## Post-merge closeout review
+
+Decision: BLOCKED_GOVERNANCE_CONTRACT_MISMATCH
+
+- Product implementation, validation, two reviews, product/ready commits, ff-only merge, normal push, and product worktree/branch cleanup are complete.
+- The existing Program contract closes a task only while materializing its successor. The P1 guard likewise requires one active current task while the Program is `in_progress`.
+- A no-successor `closed` projection would require either falsely closing the entire P1 Program or changing/bypassing the guard. Both violate the approved boundary and the deferred checkpoint instruction.
+- No state/queue edit, next-task materialization, guard change, or next product RED was performed. The only valid disposition is to keep F-0143 `ready_for_closeout` and request revised direction or the complete v2.1 charter before any mechanism change.
