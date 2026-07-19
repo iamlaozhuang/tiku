@@ -12,12 +12,40 @@ import type {
   PersonalAuthAccessRow,
   RedeemCodeAuthorizationRow,
 } from "@/server/repositories/redeem-code-authorization-repository";
+import { createPostgresStudentAuthorizationRedeemRuntimeRepositories } from "@/server/repositories/student-authorization-redeem-runtime-repository";
 
 const now = new Date("2026-05-22T04:00:00.000Z");
 const startsAt = new Date("2026-05-01T04:00:00.000Z");
 const expiresAt = new Date("2027-05-01T04:00:00.000Z");
 const bearerScheme = "Bearer";
 const sessionCredential = "student-session-token";
+
+class StubRowQuery<Row> implements PromiseLike<Row[]> {
+  constructor(private readonly rows: Row[]) {}
+
+  from(): this {
+    return this;
+  }
+
+  where(): this {
+    return this;
+  }
+
+  for(): this {
+    return this;
+  }
+
+  limit(): this {
+    return this;
+  }
+
+  then<TResult1 = Row[], TResult2 = never>(
+    onfulfilled?: ((value: Row[]) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
+  ): PromiseLike<TResult1 | TResult2> {
+    return Promise.resolve(this.rows).then(onfulfilled, onrejected);
+  }
+}
 
 function createStudentSession(
   userPublicId = "user_public_student_123",
@@ -177,6 +205,10 @@ function createHandlers(
         });
         options.onConfirmRedeemCode?.(input);
 
+        if (options.redeemCode?.status === "expired") {
+          return { status: "expired" as const };
+        }
+
         return {
           status: "redeemed" as const,
           personalAuth: options.personalAuth ?? createPersonalAuth(),
@@ -189,6 +221,32 @@ function createHandlers(
       },
     },
   });
+}
+
+function createJitConfirmationRepository(
+  redeemCodeRow: RedeemCodeAuthorizationRow,
+) {
+  let selectCount = 0;
+  const transaction = {
+    select() {
+      selectCount += 1;
+
+      return new StubRowQuery<unknown>(
+        selectCount === 1 ? [{ id: 101 }] : [redeemCodeRow],
+      );
+    },
+  };
+  const database = {
+    async transaction<Result>(
+      callback: (transactionValue: typeof transaction) => Promise<Result>,
+    ) {
+      return callback(transaction);
+    },
+  };
+
+  return createPostgresStudentAuthorizationRedeemRuntimeRepositories({
+    createDatabase: () => database as never,
+  }).redeemCodeAuthorizationRepository;
 }
 
 function createRequestAuthHeaders() {
@@ -511,6 +569,102 @@ describe("phase 8 student authorization redeem runtime", () => {
     });
     expect(JSON.stringify(previewPayload)).not.toContain("ABCDEFG2");
   });
+
+  it("previews and confirms a long-term code with an explicit null deadline", async () => {
+    const handlers = createHandlers(createStudentSession(), {
+      redeemCode: createRedeemCode({ redeem_deadline_at: null }),
+    });
+    const previewResponse = await handlers.redeemCodes.preview.POST(
+      new Request("http://localhost/api/v1/redeem-codes/preview", {
+        method: "POST",
+        headers: createRequestAuthHeaders(),
+        body: JSON.stringify({ code: "abcdefg2" }),
+      }),
+    );
+    const previewPayload = (await readJson(previewResponse)) as {
+      code: number;
+      data: { previewVersion: string; redeemDeadlineAt: string | null };
+    };
+
+    expect(previewPayload).toMatchObject({
+      code: 0,
+      data: {
+        redeemDeadlineAt: null,
+      },
+    });
+
+    const confirmResponse = await handlers.redeemCodes.redeem.POST(
+      new Request("http://localhost/api/v1/redeem-codes/redeem", {
+        method: "POST",
+        headers: createRequestAuthHeaders(),
+        body: JSON.stringify({
+          code: "abcdefg2",
+          previewVersion: previewPayload.data.previewVersion,
+          targetPersonalAuthPublicId: null,
+        }),
+      }),
+    );
+
+    await expect(readJson(confirmResponse)).resolves.toMatchObject({
+      code: 0,
+    });
+  });
+
+  it("rejects an explicitly expired code even when its deadline is null", async () => {
+    const handlers = createHandlers(createStudentSession(), {
+      redeemCode: createRedeemCode({
+        status: "expired",
+        redeem_deadline_at: null,
+      }),
+    });
+    const response = await handlers.redeemCodes.redeem.POST(
+      new Request("http://localhost/api/v1/redeem-codes/redeem", {
+        method: "POST",
+        headers: createRequestAuthHeaders(),
+        body: JSON.stringify({
+          code: "abcdefg2",
+          previewVersion: `sha256:${"1".repeat(64)}`,
+          targetPersonalAuthPublicId: null,
+        }),
+      }),
+    );
+
+    await expect(readJson(response)).resolves.toMatchObject({
+      code: 410001,
+      data: null,
+    });
+  });
+
+  it.each([
+    ["null unused", null, "unused", "stale"],
+    [
+      "finite past unused",
+      new Date("2026-05-22T03:59:59.000Z"),
+      "unused",
+      "expired",
+    ],
+    ["null explicit expired", null, "expired", "expired"],
+  ] as const)(
+    "keeps confirm JIT deadline semantics for %s rows",
+    async (_label, redeemDeadlineAt, status, expectedStatus) => {
+      const repository = createJitConfirmationRepository(
+        createRedeemCode({
+          redeem_deadline_at: redeemDeadlineAt,
+          status,
+        }),
+      );
+
+      await expect(
+        repository.confirmRedeemCodeForUser({
+          code: "ABCDEFG2",
+          userPublicId: "user_public_student_123",
+          confirmedAt: now,
+          previewVersion: `sha256:${"1".repeat(64)}`,
+          targetPersonalAuthPublicId: null,
+        }),
+      ).resolves.toEqual({ status: expectedStatus });
+    },
+  );
 
   it("derives advanced activation facts on the server preview", async () => {
     const handlers = createHandlers(createStudentSession(), {

@@ -186,7 +186,7 @@ type CreateRedeemCodeInput = {
   level: number;
   profession: Profession;
   redeemCodeType: RedeemCodeType;
-  redeemDeadlineDate: string;
+  redeemDeadlineDate: string | null;
 };
 
 type RedeemCodeGenerationMode = "batch" | "single";
@@ -195,6 +195,7 @@ type RedeemCodeGenerationFormState = {
   count: string;
   durationDay: string;
   generationMode: RedeemCodeGenerationMode;
+  isLongTermRedeemable: boolean;
   level: string;
   profession: Profession | "";
   redeemCodeType: RedeemCodeType | "";
@@ -383,6 +384,7 @@ const defaultRedeemCodeGenerationFormState: RedeemCodeGenerationFormState = {
   count: "1",
   durationDay: "365",
   generationMode: "single",
+  isLongTermRedeemable: false,
   level: "",
   profession: "",
   redeemCodeType: "",
@@ -490,6 +492,10 @@ function isAdminContext(payload: AuthContextDto): boolean {
 
 function formatDate(value: string | null): string {
   return value === null ? "未设置" : value.slice(0, 10);
+}
+
+function formatRedeemDeadline(value: string | null): string {
+  return value === null ? "长期可兑换" : formatDate(value);
 }
 
 function formatProfessionLevel(input: {
@@ -888,7 +894,7 @@ function buildRedeemCodeGenerationInput(
     return { input: null, message: "授权天数必须为 1 到 1095。" };
   }
 
-  if (redeemDeadlineDate.length === 0) {
+  if (!formState.isLongTermRedeemable && redeemDeadlineDate.length === 0) {
     return { input: null, message: "请选择卡密兑换截止日期。" };
   }
 
@@ -899,7 +905,9 @@ function buildRedeemCodeGenerationInput(
       level,
       profession,
       redeemCodeType,
-      redeemDeadlineDate,
+      redeemDeadlineDate: formState.isLongTermRedeemable
+        ? null
+        : redeemDeadlineDate,
     },
     message: null,
   };
@@ -2954,7 +2962,8 @@ function RedeemCodeList({
                         : "已兑换"}
                     </p>
                     <p className="text-text-muted mt-1 text-xs">
-                      兑换截止 {formatDate(redeemCode.redeemDeadlineAt)}
+                      兑换截止{" "}
+                      {formatRedeemDeadline(redeemCode.redeemDeadlineAt)}
                     </p>
                     <p className="text-text-muted mt-1 text-xs">
                       {visiblePlainText === null ? "明文不可用" : "明文可复制"}
@@ -3070,7 +3079,7 @@ function RedeemCodeDetailPanel({
           <div className="bg-background rounded-md p-3">
             <dt className="text-text-muted text-xs">兑换截止</dt>
             <dd className="text-text-primary mt-1 text-sm font-medium">
-              {formatDate(redeemCode.redeemDeadlineAt)}
+              {formatRedeemDeadline(redeemCode.redeemDeadlineAt)}
             </dd>
           </div>
           <div className="bg-background rounded-md p-3">
@@ -3177,7 +3186,7 @@ function RedeemCodeDistributionWindow({
             共 {generation.count} 个 /{" "}
             {redeemCodeTypeLabels[generation.redeemCodeType]} /{" "}
             {professionLabels[generation.profession]} {generation.level}级 /
-            兑换截止 {formatDate(generation.redeemDeadlineAt)}
+            兑换截止 {formatRedeemDeadline(generation.redeemDeadlineAt)}
           </p>
         </div>
 
@@ -3602,7 +3611,7 @@ function RedeemCodeConfirmationDialog({
           将生成 {input.count} 个{redeemCodeTypeLabels[input.redeemCodeType]}
           ，授权范围为 {professionLabels[input.profession]} {input.level}{" "}
           级，有效期 {input.durationDay} 天，兑换截止日期{" "}
-          {input.redeemDeadlineDate}
+          {formatRedeemDeadline(input.redeemDeadlineDate)}
           。审计日志只记录操作摘要，不记录卡密明文。
         </p>
         <div className="flex gap-2">
@@ -4235,12 +4244,24 @@ function RedeemCodeGenerationPanel({
           <input
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
             data-testid="redeem-code-generation-deadline-input"
+            disabled={formState.isLongTermRedeemable}
             type="date"
             value={formState.redeemDeadlineDate}
             onChange={(event) =>
               updateFormState({ redeemDeadlineDate: event.target.value })
             }
           />
+        </label>
+
+        <label className="border-border bg-background flex h-9 items-center gap-2 rounded-md border px-3 text-sm transition-transform active:scale-[0.98]">
+          <input
+            checked={formState.isLongTermRedeemable}
+            type="checkbox"
+            onChange={(event) =>
+              updateFormState({ isLongTermRedeemable: event.target.checked })
+            }
+          />
+          <span>长期可兑换（不设截止）</span>
         </label>
       </div>
 

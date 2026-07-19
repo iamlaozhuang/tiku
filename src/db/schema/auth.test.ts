@@ -31,6 +31,18 @@ function getColumnNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   return getTableConfig(table).columns.map((column) => column.name);
 }
 
+function getColumn(
+  table: Parameters<typeof getTableConfig>[0],
+  columnName: string,
+) {
+  const column = getTableConfig(table).columns.find(
+    (candidate) => candidate.name === columnName,
+  );
+
+  expect(column).toBeDefined();
+  return column!;
+}
+
 function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   return getTableConfig(table).indexes.flatMap((schemaIndex) =>
     schemaIndex.config.name ? [schemaIndex.config.name] : [],
@@ -152,6 +164,11 @@ describe("auth schema baseline", () => {
     expect(getColumnNames(redeemCode)).toContain("redeem_code_type");
     expect(getColumnNames(personalAuth)).toContain("edition");
     expect(getColumnNames(orgAuth)).toContain("edition");
+  });
+
+  it("keeps redeem_code deadline nullable for long-term redemption", () => {
+    expect(getColumn(redeemCode, "redeem_deadline_at").notNull).toBe(false);
+    expect(getColumn(redeemCode, "duration_day").notNull).toBe(true);
   });
 
   it("defines auth_upgrade as the source table for standard to advanced upgrades", () => {

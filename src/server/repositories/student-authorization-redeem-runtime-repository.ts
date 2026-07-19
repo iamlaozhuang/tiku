@@ -305,7 +305,8 @@ async function confirmRedeemCodeForUser(
 
     if (
       redeemCodeRow.status === "expired" ||
-      redeemCodeRow.redeem_deadline_at < input.confirmedAt
+      (redeemCodeRow.redeem_deadline_at !== null &&
+        redeemCodeRow.redeem_deadline_at < input.confirmedAt)
     ) {
       return { status: "expired" };
     }

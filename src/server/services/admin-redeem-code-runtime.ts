@@ -51,7 +51,7 @@ type RedeemCodeBatchRequest = {
   profession: Profession;
   level: number;
   durationDay: number;
-  redeemDeadlineAt: Date;
+  redeemDeadlineAt: Date | null;
 };
 
 type RedeemCodeBatchRequestResult =
@@ -81,7 +81,6 @@ const systemClock: AdminRedeemCodeClock = {
     return new Date();
   },
 };
-const DEFAULT_REDEEM_CODE_DURATION_DAY = 365;
 const PUBLIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u;
 const NO_STORE_HEADERS = {
   "cache-control": "no-store",
@@ -215,10 +214,7 @@ function normalizeRedeemCodeBatchRequest(
 ): RedeemCodeBatchRequestResult {
   const source = isRecord(input) ? input : {};
   const count = readInteger(source.count, 1);
-  const durationDay = readInteger(
-    source.durationDay,
-    DEFAULT_REDEEM_CODE_DURATION_DAY,
-  );
+  const durationDay = readOptionalInteger(source.durationDay);
   const redeemCodeType = readRedeemCodeType(source.redeemCodeType);
   const profession = readProfession(source.profession);
   const level = readOptionalInteger(source.level);
@@ -243,7 +239,7 @@ function normalizeRedeemCodeBatchRequest(
     };
   }
 
-  if (durationDay < 1 || durationDay > 1095) {
+  if (durationDay === null || durationDay < 1 || durationDay > 1095) {
     return {
       success: false,
       response: createErrorResponse(
@@ -263,17 +259,25 @@ function normalizeRedeemCodeBatchRequest(
     };
   }
 
+  const hasRedeemDeadline =
+    source.redeemDeadlineDate !== undefined &&
+    source.redeemDeadlineDate !== null;
   const redeemDeadlineAt =
     typeof source.redeemDeadlineDate === "string"
       ? createUtcPlus8EndOfDay(source.redeemDeadlineDate)
-      : createDefaultRedeemDeadlineAt(now, durationDay);
+      : null;
 
-  if (redeemDeadlineAt === null || redeemDeadlineAt <= now) {
+  if (
+    hasRedeemDeadline &&
+    (typeof source.redeemDeadlineDate !== "string" ||
+      redeemDeadlineAt === null ||
+      redeemDeadlineAt <= now)
+  ) {
     return {
       success: false,
       response: createErrorResponse(
         ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
-        "Redeem code redeemDeadlineDate must be a future UTC+8 date.",
+        "Redeem code redeemDeadlineDate must be null or a future UTC+8 date.",
       ),
     };
   }
@@ -331,15 +335,6 @@ function readRedeemCodeType(value: unknown): RedeemCodeType | null {
     value === "edition_upgrade"
     ? value
     : null;
-}
-
-function createDefaultRedeemDeadlineAt(now: Date, durationDay: number): Date {
-  const target = new Date(now.getTime() + durationDay * 24 * 60 * 60 * 1000);
-  const utcPlus8Date = new Date(target.getTime() + UTC_PLUS_8_OFFSET_MS)
-    .toISOString()
-    .slice(0, 10);
-
-  return createUtcPlus8EndOfDay(utcPlus8Date)!;
 }
 
 function createUtcPlus8EndOfDay(dateValue: string): Date | null {
@@ -449,6 +444,9 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
           throw error;
         }
 
+        const deadlineSummary =
+          createdRedeemCodeBatch.generation.redeemDeadlineAt ?? "long_term";
+
         await repositories.auditLogRepository?.appendAuditLog({
           actorPublicId: actor.publicId,
           actorRole: actor.roles[0],
@@ -456,7 +454,7 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
           targetResourceType: "redeem_code",
           targetPublicId: createdRedeemCodeBatch.generation.generationGroupId,
           resultStatus: "success",
-          metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodeBatch.generation.count} type=${createdRedeemCodeBatch.generation.redeemCodeType} profession=${createdRedeemCodeBatch.generation.profession} level=${createdRedeemCodeBatch.generation.level} deadline=${createdRedeemCodeBatch.generation.redeemDeadlineAt}`,
+          metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodeBatch.generation.count} type=${createdRedeemCodeBatch.generation.redeemCodeType} profession=${createdRedeemCodeBatch.generation.profession} level=${createdRedeemCodeBatch.generation.level} deadline=${deadlineSummary}`,
           requestIp: null,
         });
 

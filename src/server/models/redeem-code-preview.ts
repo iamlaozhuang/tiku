@@ -53,10 +53,13 @@ export function evaluateRedeemCodePreview(
 
   if (
     redeemCode.status === "expired" ||
-    redeemCode.redeem_deadline_at < input.checkedAt
+    (redeemCode.redeem_deadline_at !== null &&
+      redeemCode.redeem_deadline_at < input.checkedAt)
   ) {
     return { status: "unavailable", reason: "expired" };
   }
+
+  const redeemDeadlineAt = redeemCode.redeem_deadline_at?.toISOString() ?? null;
 
   const resultEdition =
     redeemCode.redeem_code_type === "personal_standard_activation"
@@ -85,7 +88,7 @@ export function evaluateRedeemCodePreview(
       profession: redeemCode.profession,
       level: redeemCode.level,
       durationDay: redeemCode.duration_day,
-      redeemDeadlineAt: redeemCode.redeem_deadline_at.toISOString(),
+      redeemDeadlineAt,
       updatedAt: redeemCode.updated_at.toISOString(),
     },
     resultEdition,
@@ -106,7 +109,7 @@ export function evaluateRedeemCodePreview(
       level: redeemCode.level,
       resultEdition,
       durationDay: redeemCode.duration_day,
-      redeemDeadlineAt: redeemCode.redeem_deadline_at.toISOString(),
+      redeemDeadlineAt,
       previewVersion: `sha256:${createHash("sha256")
         .update(JSON.stringify(versionFacts))
         .digest("hex")}`,

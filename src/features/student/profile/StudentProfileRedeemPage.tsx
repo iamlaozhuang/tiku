@@ -167,6 +167,10 @@ function formatChineseDate(value: string): string {
   return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`;
 }
 
+function formatRedeemDeadline(value: string | null): string {
+  return value === null ? "长期可兑换" : formatChineseDate(value);
+}
+
 function formatQuotaOwnerLabel(
   quotaOwnerType: EditionAwareAuthorizationContextDto["quotaOwnerType"],
 ): string {
@@ -1342,7 +1346,7 @@ export function StudentRedeemCodePage() {
                 </p>
                 <p className="text-text-secondary leading-6">
                   兑换截止：
-                  {formatChineseDate(readyPreview.data.redeemDeadlineAt)}
+                  {formatRedeemDeadline(readyPreview.data.redeemDeadlineAt)}
                 </p>
               </div>
 

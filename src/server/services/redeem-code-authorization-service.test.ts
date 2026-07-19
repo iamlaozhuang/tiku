@@ -134,6 +134,62 @@ describe("redeem code authorization service", () => {
     expect(JSON.stringify(response)).not.toContain("code_hash");
   });
 
+  it("previews a long-term redeem code with an explicit null deadline", async () => {
+    const authorizationService = createRedeemCodeAuthorizationService(
+      createRepository({
+        async previewRedeemCodeForUser() {
+          return createPreviewFacts({
+            redeemCode: createRedeemCode({ redeem_deadline_at: null }),
+          });
+        },
+      }),
+      clock,
+      { consume: () => ({ allowed: true }) },
+    );
+
+    await expect(
+      authorizationService.previewRedeemCode(
+        { code: "ABCD2345" },
+        { userPublicId: "user_public_123" },
+      ),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        redeemDeadlineAt: null,
+        previewVersion: expect.stringMatching(/^sha256:[a-f0-9]{64}$/u),
+      },
+    });
+  });
+
+  it("binds preview version to null versus finite deadline", async () => {
+    let redeemDeadlineAt: Date | null = null;
+    const authorizationService = createRedeemCodeAuthorizationService(
+      createRepository({
+        async previewRedeemCodeForUser() {
+          return createPreviewFacts({
+            redeemCode: createRedeemCode({
+              redeem_deadline_at: redeemDeadlineAt,
+            }),
+          });
+        },
+      }),
+      clock,
+      { consume: () => ({ allowed: true }) },
+    );
+    const readVersion = async () =>
+      (
+        await authorizationService.previewRedeemCode(
+          { code: "ABCD2345" },
+          { userPublicId: "user_public_123" },
+        )
+      ).data?.previewVersion;
+
+    const longTermVersion = await readVersion();
+    redeemDeadlineAt = activeDeadline;
+
+    expect(await readVersion()).not.toBe(longTermVersion);
+  });
+
   it("returns every eligible standard target in stable order", async () => {
     const authorizationService = createRedeemCodeAuthorizationService(
       createRepository({

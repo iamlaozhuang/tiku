@@ -32,7 +32,7 @@ export type RedeemCodePreviewDto = {
   level: number;
   resultEdition: AuthorizationEdition;
   durationDay: number;
-  redeemDeadlineAt: string;
+  redeemDeadlineAt: string | null;
   previewVersion: string;
   upgradeTargets: RedeemCodeUpgradeTargetDto[];
 };

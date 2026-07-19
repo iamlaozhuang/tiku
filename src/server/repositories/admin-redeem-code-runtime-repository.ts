@@ -9,6 +9,8 @@ import {
   gte,
   ilike,
   inArray,
+  isNotNull,
+  isNull,
   lt,
   or,
   type SQL,
@@ -66,7 +68,7 @@ export type CreateRedeemCodeBatchInput = {
   profession: Profession;
   level: number;
   durationDay: number;
-  redeemDeadlineAt: Date;
+  redeemDeadlineAt: Date | null;
   actorPublicId: string;
 };
 
@@ -123,6 +125,10 @@ function createPagination(
   };
 }
 
+function serializeRedeemDeadlineAt(value: Date | null): string | null {
+  return value?.toISOString() ?? null;
+}
+
 export function createPostgresAdminRedeemCodeRuntimeRepositories(
   options: AdminRedeemCodeRuntimeRepositoryOptions = {},
 ): AdminRedeemCodeRuntimeRepositories {
@@ -170,7 +176,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
             profession: input.profession,
             level: input.level,
             durationDay: input.durationDay,
-            redeemDeadlineAt: input.redeemDeadlineAt.toISOString(),
+            redeemDeadlineAt: serializeRedeemDeadlineAt(input.redeemDeadlineAt),
           },
           redeemCodes,
         };
@@ -196,7 +202,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
         })
         .from(redeemCode)
         .where(and(...conditions))
-        .orderBy(createRedeemCodeOrderBy(query))
+        .orderBy(...createRedeemCodeOrderBy(query))
         .limit(query.pageSize)
         .offset((query.page - 1) * query.pageSize);
       const [totalRow] = await database
@@ -224,7 +230,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
             row.used_by_user_id === null
               ? null
               : (redeemedUserPublicIds.get(row.used_by_user_id) ?? null),
-          redeemDeadlineAt: row.redeem_deadline_at.toISOString(),
+          redeemDeadlineAt: serializeRedeemDeadlineAt(row.redeem_deadline_at),
           createdAt: row.created_at.toISOString(),
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
@@ -277,7 +283,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
             : (redeemedUserPublicIds.get(row.used_by_user_id) ?? null),
         redeemedAt: row.used_at?.toISOString() ?? null,
         durationDay: row.duration_day,
-        redeemDeadlineAt: row.redeem_deadline_at.toISOString(),
+        redeemDeadlineAt: serializeRedeemDeadlineAt(row.redeem_deadline_at),
         generationGroupId: row.generation_group_id,
         createdAt: row.created_at.toISOString(),
         updatedAt: row.updated_at.toISOString(),
@@ -358,7 +364,9 @@ async function createRedeemCodeWithRetry(
         profession: createdRedeemCode.profession,
         level: createdRedeemCode.level,
         status: createdRedeemCode.status,
-        redeemDeadlineAt: createdRedeemCode.redeem_deadline_at.toISOString(),
+        redeemDeadlineAt: serializeRedeemDeadlineAt(
+          createdRedeemCode.redeem_deadline_at,
+        ),
         createdAt: createdRedeemCode.created_at.toISOString(),
       };
     } catch (error) {
@@ -412,6 +420,7 @@ function createRedeemCodeConditions(
         eq(redeemCode.status, "expired"),
         and(
           eq(redeemCode.status, "unused"),
+          isNotNull(redeemCode.redeem_deadline_at),
           lt(redeemCode.redeem_deadline_at, now),
         ),
       )!,
@@ -420,7 +429,10 @@ function createRedeemCodeConditions(
     conditions.push(
       and(
         eq(redeemCode.status, "unused"),
-        gte(redeemCode.redeem_deadline_at, now),
+        or(
+          isNull(redeemCode.redeem_deadline_at),
+          gte(redeemCode.redeem_deadline_at, now),
+        ),
       )!,
     );
   } else if (query.status === "used") {
@@ -430,22 +442,22 @@ function createRedeemCodeConditions(
   return conditions;
 }
 
-function createRedeemCodeOrderBy(query: AdminAuthOperationListQuery): SQL {
-  if (query.sortBy === "createdAt") {
-    return query.sortOrder === "asc"
-      ? asc(redeemCode.created_at)
-      : desc(redeemCode.created_at);
-  }
-
+function createRedeemCodeOrderBy(query: AdminAuthOperationListQuery): SQL[] {
   if (query.sortBy === "expiresAt") {
-    return query.sortOrder === "asc"
-      ? asc(redeemCode.redeem_deadline_at)
-      : desc(redeemCode.redeem_deadline_at);
+    return [
+      asc(isNull(redeemCode.redeem_deadline_at)),
+      query.sortOrder === "asc"
+        ? asc(redeemCode.redeem_deadline_at)
+        : desc(redeemCode.redeem_deadline_at),
+    ];
   }
 
-  return query.sortOrder === "asc"
-    ? asc(redeemCode.updated_at)
-    : desc(redeemCode.updated_at);
+  const column =
+    query.sortBy === "createdAt"
+      ? redeemCode.created_at
+      : redeemCode.updated_at;
+
+  return [query.sortOrder === "asc" ? asc(column) : desc(column)];
 }
 
 async function listRedeemedUserPublicIds(
@@ -468,10 +480,12 @@ async function listRedeemedUserPublicIds(
 }
 
 function getEffectiveRedeemCodeStatus(
-  row: { status: RedeemCodeStatus; redeem_deadline_at: Date },
+  row: { status: RedeemCodeStatus; redeem_deadline_at: Date | null },
   now: Date,
 ): RedeemCodeStatus {
-  return row.status === "unused" && row.redeem_deadline_at < now
+  return row.status === "unused" &&
+    row.redeem_deadline_at !== null &&
+    row.redeem_deadline_at < now
     ? "expired"
     : row.status;
 }

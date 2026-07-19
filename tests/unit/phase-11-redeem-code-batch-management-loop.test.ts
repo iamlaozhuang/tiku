@@ -19,6 +19,10 @@ import { createStudentAuthorizationRedeemRuntimeRouteHandlers } from "@/server/s
 const now = new Date("2026-05-24T07:00:00.000Z");
 const generatedCodePlaceholder = "ABCDEFG2";
 
+function serializeDeadline(value: Date | null): string | null {
+  return value?.toISOString() ?? null;
+}
+
 function createAdminSession(): ApiResponse<AuthContextDto> {
   return {
     code: 0,
@@ -83,7 +87,7 @@ function createAdminRepositories(auditInputs: unknown[] = []) {
           profession: input.profession,
           level: input.level,
           durationDay: input.durationDay,
-          redeemDeadlineAt: input.redeemDeadlineAt.toISOString(),
+          redeemDeadlineAt: serializeDeadline(input.redeemDeadlineAt),
         },
         redeemCodes: Array.from({ length: input.count }, (_, index) => ({
           publicId: `redeem-code-public-${index + 1}`,
@@ -93,7 +97,7 @@ function createAdminRepositories(auditInputs: unknown[] = []) {
           profession: input.profession,
           level: input.level,
           status: "unused" as const,
-          redeemDeadlineAt: input.redeemDeadlineAt.toISOString(),
+          redeemDeadlineAt: serializeDeadline(input.redeemDeadlineAt),
           createdAt: now.toISOString(),
         })),
       };
@@ -252,6 +256,111 @@ async function readJson(response: Response): Promise<unknown> {
 }
 
 describe("phase 11 redeem_code batch management loop", () => {
+  it.each([
+    ["omitted", {}],
+    ["explicit null", { redeemDeadlineDate: null }],
+  ])(
+    "creates a long-term batch for %s deadline",
+    async (_label, deadlineInput) => {
+      const auditInputs: unknown[] = [];
+      const { createInputs, repositories } =
+        createAdminRepositories(auditInputs);
+      const handlers = createAdminHandlers(repositories);
+      const response = await handlers.redeemCodes.POST(
+        new Request("http://localhost/api/v1/redeem-codes", {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+          body: JSON.stringify({
+            count: 1,
+            redeemCodeType: "personal_standard_activation",
+            profession: "monopoly",
+            level: 3,
+            durationDay: 365,
+            ...deadlineInput,
+          }),
+        }),
+      );
+      const payload = await readJson(response);
+
+      expect(createInputs).toEqual([
+        expect.objectContaining({ redeemDeadlineAt: null }),
+      ]);
+      expect(payload).toMatchObject({
+        code: 0,
+        data: {
+          generation: { redeemDeadlineAt: null },
+          redeemCodes: [{ redeemDeadlineAt: null }],
+        },
+      });
+      expect(auditInputs).toEqual([
+        expect.objectContaining({
+          metadataSummary: expect.stringContaining("deadline=long_term"),
+        }),
+      ]);
+    },
+  );
+
+  it.each([
+    ["empty", ""],
+    ["invalid", "2026-02-30"],
+    ["non-future", "2026-05-23"],
+  ])(
+    "rejects a %s deadline instead of treating it as long-term",
+    async (_label, redeemDeadlineDate) => {
+      const { createInputs, repositories } = createAdminRepositories();
+      const handlers = createAdminHandlers(repositories);
+      const response = await handlers.redeemCodes.POST(
+        new Request("http://localhost/api/v1/redeem-codes", {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+          body: JSON.stringify({
+            count: 1,
+            redeemCodeType: "personal_standard_activation",
+            profession: "monopoly",
+            level: 3,
+            durationDay: 365,
+            redeemDeadlineDate,
+          }),
+        }),
+      );
+
+      await expect(readJson(response)).resolves.toMatchObject({
+        code: 422601,
+        data: null,
+      });
+      expect(createInputs).toEqual([]);
+    },
+  );
+
+  it.each([
+    ["omitted", {}],
+    ["invalid", { durationDay: "invalid" }],
+    ["below range", { durationDay: 0 }],
+    ["above range", { durationDay: 1096 }],
+  ])("rejects durationDay when it is %s", async (_label, durationInput) => {
+    const { createInputs, repositories } = createAdminRepositories();
+    const handlers = createAdminHandlers(repositories);
+    const response = await handlers.redeemCodes.POST(
+      new Request("http://localhost/api/v1/redeem-codes", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          count: 1,
+          redeemCodeType: "personal_standard_activation",
+          profession: "monopoly",
+          level: 3,
+          ...durationInput,
+        }),
+      }),
+    );
+
+    await expect(readJson(response)).resolves.toMatchObject({
+      code: 422601,
+      data: null,
+    });
+    expect(createInputs).toEqual([]);
+  });
+
   it("creates a bounded batch, normalizes UTC+8 deadline, and writes redacted audit metadata", async () => {
     const auditInputs: unknown[] = [];
     const { createInputs, repositories } = createAdminRepositories(auditInputs);

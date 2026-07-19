@@ -13,7 +13,7 @@ export type RedeemCodeAuthorizationRow = {
   level: number;
   redeem_code_type: RedeemCodeType;
   duration_day: number;
-  redeem_deadline_at: Date;
+  redeem_deadline_at: Date | null;
   status: RedeemCodeStatus;
   used_by_user_id: number | null;
   used_at: Date | null;

@@ -145,7 +145,7 @@ const redeemCodePayload = {
         level: 3,
         status: "unused",
         redeemedUserPublicId: null,
-        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+        redeemDeadlineAt: null,
         createdAt: "2026-05-22T00:00:00.000Z",
         id: 401,
         code_hash: "do-not-render",
@@ -170,164 +170,225 @@ function createJsonResponse(payload: unknown, status = 200) {
 }
 
 function mockAdminFetch() {
-  const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-    const path = String(url);
+  const fetchMock = vi.fn(
+    async (url: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(url);
 
-    if (path === "/api/v1/sessions") {
-      return createJsonResponse(adminSessionPayload);
-    }
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
 
-    if (path.startsWith("/api/v1/organization-tree-nodes?")) {
-      const requestUrl = new URL(path, "http://localhost");
-      const parentOrganizationPublicId = requestUrl.searchParams.get(
-        "parentOrganizationPublicId",
-      );
-      const keyword = requestUrl.searchParams.get("keyword");
-      const treeNodes = [
-        {
-          publicId: "organization-public-province",
-          name: "测试省",
-          orgTier: "province",
-          parentOrganizationPublicId: null,
-          status: "active",
-          employeeCount: 8,
-          childCount: 1,
-          authSummary: null,
-          ancestorPath: [],
-        },
-        {
-          publicId: "organization-public-city",
-          name: "测试地市",
-          orgTier: "city",
-          parentOrganizationPublicId: "organization-public-province",
-          status: "active",
-          employeeCount: 6,
-          childCount: 1,
-          authSummary: null,
-          ancestorPath: [
-            {
-              publicId: "organization-public-province",
-              name: "测试省",
-              orgTier: "province",
+      if (path.startsWith("/api/v1/organization-tree-nodes?")) {
+        const requestUrl = new URL(path, "http://localhost");
+        const parentOrganizationPublicId = requestUrl.searchParams.get(
+          "parentOrganizationPublicId",
+        );
+        const keyword = requestUrl.searchParams.get("keyword");
+        const treeNodes = [
+          {
+            publicId: "organization-public-province",
+            name: "测试省",
+            orgTier: "province",
+            parentOrganizationPublicId: null,
+            status: "active",
+            employeeCount: 8,
+            childCount: 1,
+            authSummary: null,
+            ancestorPath: [],
+          },
+          {
+            publicId: "organization-public-city",
+            name: "测试地市",
+            orgTier: "city",
+            parentOrganizationPublicId: "organization-public-province",
+            status: "active",
+            employeeCount: 6,
+            childCount: 1,
+            authSummary: null,
+            ancestorPath: [
+              {
+                publicId: "organization-public-province",
+                name: "测试省",
+                orgTier: "province",
+              },
+            ],
+          },
+          {
+            publicId: "organization-public-district",
+            name: "测试县区",
+            orgTier: "district",
+            parentOrganizationPublicId: "organization-public-city",
+            status: "active",
+            employeeCount: 4,
+            childCount: 1,
+            authSummary: "专卖 3级",
+            ancestorPath: [
+              {
+                publicId: "organization-public-province",
+                name: "测试省",
+                orgTier: "province",
+              },
+              {
+                publicId: "organization-public-city",
+                name: "测试地市",
+                orgTier: "city",
+              },
+            ],
+          },
+          {
+            publicId: "organization-public-station",
+            name: "测试站点",
+            orgTier: "station",
+            parentOrganizationPublicId: "organization-public-district",
+            status: "active",
+            employeeCount: 2,
+            childCount: 0,
+            authSummary: "专卖 3级",
+            ancestorPath: [
+              {
+                publicId: "organization-public-province",
+                name: "测试省",
+                orgTier: "province",
+              },
+              {
+                publicId: "organization-public-city",
+                name: "测试地市",
+                orgTier: "city",
+              },
+              {
+                publicId: "organization-public-district",
+                name: "测试县区",
+                orgTier: "district",
+              },
+            ],
+          },
+        ];
+        const nodes =
+          keyword === "测试站点"
+            ? [treeNodes[3]]
+            : treeNodes.filter(
+                (node) =>
+                  node.parentOrganizationPublicId ===
+                  parentOrganizationPublicId,
+              );
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: { nodes },
+          pagination: {
+            page: 1,
+            pageSize: 50,
+            total: nodes.length,
+            sortBy: "name",
+            sortOrder: "asc",
+          },
+        });
+      }
+
+      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+        return createJsonResponse(organizationPayload);
+      }
+
+      if (path.startsWith("/api/v1/org-auths?")) {
+        const requestUrl = new URL(path, "http://localhost");
+        const page = Number(requestUrl.searchParams.get("page") ?? "1");
+        const pageSize = Number(
+          requestUrl.searchParams.get("pageSize") ?? "20",
+        );
+
+        return createJsonResponse({
+          ...orgAuthPayload,
+          pagination: {
+            page,
+            pageSize,
+            total: 75,
+            sortBy: requestUrl.searchParams.get("sortBy") ?? "updatedAt",
+            sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
+          },
+        });
+      }
+
+      if (path.startsWith("/api/v1/employees?")) {
+        const requestUrl = new URL(path, "http://localhost");
+        const page = Number(requestUrl.searchParams.get("page") ?? "1");
+        const pageSize = Number(
+          requestUrl.searchParams.get("pageSize") ?? "20",
+        );
+
+        return createJsonResponse({
+          ...employeePayload,
+          pagination: {
+            page,
+            pageSize,
+            total: 65,
+            sortBy: requestUrl.searchParams.get("sortBy") ?? "registeredAt",
+            sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
+          },
+        });
+      }
+
+      if (path.startsWith("/api/v1/redeem-codes?")) {
+        return createJsonResponse(redeemCodePayload);
+      }
+
+      if (path === "/api/v1/redeem-codes/redeem-code-public-001") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            redeemCode: {
+              ...redeemCodePayload.data.redeemCodes[0],
+              redeemedAt: null,
+              durationDay: 365,
+              generationGroupId: "generation-group-public-001",
+              updatedAt: "2026-05-22T00:00:00.000Z",
+              redactionStatus: "redacted",
+              redactionReason: "plaintext_redeem_code_and_hash_hidden",
             },
-          ],
-        },
-        {
-          publicId: "organization-public-district",
-          name: "测试县区",
-          orgTier: "district",
-          parentOrganizationPublicId: "organization-public-city",
-          status: "active",
-          employeeCount: 4,
-          childCount: 1,
-          authSummary: "专卖 3级",
-          ancestorPath: [
-            {
-              publicId: "organization-public-province",
-              name: "测试省",
-              orgTier: "province",
+          },
+        });
+      }
+
+      if (path === "/api/v1/redeem-codes" && init?.method === "POST") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            generation: {
+              generationGroupId: "generation-group-public-002",
+              count: 1,
+              redeemCodeType: "personal_standard_activation",
+              profession: "monopoly",
+              level: 3,
+              durationDay: 365,
+              redeemDeadlineAt: null,
             },
-            {
-              publicId: "organization-public-city",
-              name: "测试地市",
-              orgTier: "city",
-            },
-          ],
-        },
-        {
-          publicId: "organization-public-station",
-          name: "测试站点",
-          orgTier: "station",
-          parentOrganizationPublicId: "organization-public-district",
-          status: "active",
-          employeeCount: 2,
-          childCount: 0,
-          authSummary: "专卖 3级",
-          ancestorPath: [
-            {
-              publicId: "organization-public-province",
-              name: "测试省",
-              orgTier: "province",
-            },
-            {
-              publicId: "organization-public-city",
-              name: "测试地市",
-              orgTier: "city",
-            },
-            {
-              publicId: "organization-public-district",
-              name: "测试县区",
-              orgTier: "district",
-            },
-          ],
-        },
-      ];
-      const nodes =
-        keyword === "测试站点"
-          ? [treeNodes[3]]
-          : treeNodes.filter(
-              (node) =>
-                node.parentOrganizationPublicId === parentOrganizationPublicId,
-            );
+            redeemCodes: [
+              {
+                publicId: "redeem-code-public-002",
+                codeDisplay: "RC-2026-****",
+                codePlainText:
+                  redeemCodePayload.data.redeemCodes[0].codePlainText,
+                redeemCodeType: "personal_standard_activation",
+                profession: "monopoly",
+                level: 3,
+                status: "unused",
+                redeemDeadlineAt: null,
+                createdAt: "2026-05-22T00:00:00.000Z",
+              },
+            ],
+          },
+        });
+      }
 
       return createJsonResponse({
-        code: 0,
-        message: "ok",
-        data: { nodes },
-        pagination: {
-          page: 1,
-          pageSize: 50,
-          total: nodes.length,
-          sortBy: "name",
-          sortOrder: "asc",
-        },
+        code: 404001,
+        message: "missing",
+        data: null,
       });
-    }
-
-    if (path === "/api/v1/organizations?page=1&pageSize=20") {
-      return createJsonResponse(organizationPayload);
-    }
-
-    if (path.startsWith("/api/v1/org-auths?")) {
-      const requestUrl = new URL(path, "http://localhost");
-      const page = Number(requestUrl.searchParams.get("page") ?? "1");
-      const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "20");
-
-      return createJsonResponse({
-        ...orgAuthPayload,
-        pagination: {
-          page,
-          pageSize,
-          total: 75,
-          sortBy: requestUrl.searchParams.get("sortBy") ?? "updatedAt",
-          sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
-        },
-      });
-    }
-
-    if (path.startsWith("/api/v1/employees?")) {
-      const requestUrl = new URL(path, "http://localhost");
-      const page = Number(requestUrl.searchParams.get("page") ?? "1");
-      const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "20");
-
-      return createJsonResponse({
-        ...employeePayload,
-        pagination: {
-          page,
-          pageSize,
-          total: 65,
-          sortBy: requestUrl.searchParams.get("sortBy") ?? "registeredAt",
-          sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
-        },
-      });
-    }
-
-    if (path.startsWith("/api/v1/redeem-codes?")) {
-      return createJsonResponse(redeemCodePayload);
-    }
-
-    return createJsonResponse({ code: 404001, message: "missing", data: null });
-  });
+    },
+  );
 
   vi.stubGlobal("fetch", fetchMock);
 
@@ -876,6 +937,7 @@ describe("AdminRedeemCodePage", () => {
     );
     expect(redeemCode).not.toHaveAttribute("data-id");
     expect(within(redeemCode).getByText("明文不可用")).toBeInTheDocument();
+    expect(redeemCode).toHaveTextContent("兑换截止 长期可兑换");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("do-not-render");
     expect(document.body.textContent).not.toContain("RC-2026-0001-PLAIN");
@@ -885,6 +947,126 @@ describe("AdminRedeemCodePage", () => {
         headers: { authorization: "Bearer unit-test-admin-token" },
       }),
     );
+  });
+
+  it("submits null for long-term redemption and uses the same label across admin surfaces", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    const redeemCode = await screen.findByTestId(
+      "admin-redeem-code-redeem-code-public-001",
+    );
+    expect(redeemCode).toHaveTextContent("兑换截止 长期可兑换");
+
+    fireEvent.click(
+      within(redeemCode).getByRole("button", {
+        name: "查看卡密 RC-2026-**** 详情",
+      }),
+    );
+    const detail = await screen.findByTestId(
+      "admin-redeem-code-detail-redeem-code-public-001",
+    );
+    expect(detail).toHaveTextContent("兑换截止");
+    expect(detail).toHaveTextContent("长期可兑换");
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭卡密详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成卡密" }));
+    const drawer = screen.getByRole("dialog", { name: "生成卡密" });
+
+    fireEvent.change(
+      within(drawer).getByTestId("redeem-code-generation-type-select"),
+      { target: { value: "personal_standard_activation" } },
+    );
+    fireEvent.change(
+      within(drawer).getByTestId("redeem-code-generation-profession-select"),
+      { target: { value: "monopoly" } },
+    );
+    fireEvent.change(
+      within(drawer).getByTestId("redeem-code-generation-level-input"),
+      { target: { value: "3" } },
+    );
+    const longTermControl =
+      within(drawer).getByLabelText("长期可兑换（不设截止）");
+    const deadlineInput = within(drawer).getByTestId(
+      "redeem-code-generation-deadline-input",
+    );
+    fireEvent.click(longTermControl);
+    expect(deadlineInput).toBeDisabled();
+    expect(deadlineInput).toHaveValue("2026-06-24");
+    fireEvent.click(longTermControl);
+    expect(deadlineInput).toBeEnabled();
+    expect(deadlineInput).toHaveValue("2026-06-24");
+    fireEvent.click(longTermControl);
+
+    fireEvent.click(within(drawer).getByTestId("redeem-code-generate-button"));
+    const confirmationDialog = screen.getByRole("alertdialog");
+    expect(confirmationDialog).toHaveTextContent("长期可兑换");
+    fireEvent.click(
+      within(confirmationDialog).getByTestId(
+        "redeem-code-generation-confirm-action",
+      ),
+    );
+
+    await waitFor(() => {
+      const postCall = fetchMock.mock.calls.find(
+        ([url, init]) =>
+          String(url) === "/api/v1/redeem-codes" && init?.method === "POST",
+      );
+      expect(postCall).toBeDefined();
+      expect(JSON.parse(String(postCall?.[1]?.body))).toMatchObject({
+        redeemDeadlineDate: null,
+      });
+    });
+    expect(
+      await within(drawer).findByTestId(
+        "redeem-code-generation-redacted-summary",
+      ),
+    ).toHaveTextContent("兑换截止 长期可兑换");
+    expect(
+      screen.getByTestId("admin-redeem-code-redeem-code-public-002"),
+    ).toHaveTextContent("兑换截止 长期可兑换");
+  });
+
+  it("keeps finite redeem deadline formatting unchanged", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: RequestInfo | URL) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (path.startsWith("/api/v1/redeem-codes?")) {
+          return createJsonResponse({
+            ...redeemCodePayload,
+            data: {
+              redeemCodes: [
+                {
+                  ...redeemCodePayload.data.redeemCodes[0],
+                  redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+                },
+              ],
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      }),
+    );
+
+    render(createElement(AdminRedeemCodePage));
+
+    expect(
+      await screen.findByTestId("admin-redeem-code-redeem-code-public-001"),
+    ).toHaveTextContent("兑换截止 2026-06-24");
   });
 
   it("renders empty and error states for redeem_code list responses", async () => {

@@ -7,7 +7,9 @@ import {
 } from "./redeem-code-route";
 import type { RedeemCodeAuthorizationService } from "./redeem-code-authorization-service";
 
-function createService(): RedeemCodeAuthorizationService {
+function createService(
+  redeemDeadlineAt: string | null = "2026-06-18T04:00:00.000Z",
+): RedeemCodeAuthorizationService {
   return {
     async previewRedeemCode(input) {
       const redeemCodeInput = input as { code: string };
@@ -21,7 +23,7 @@ function createService(): RedeemCodeAuthorizationService {
           level: 3,
           resultEdition: "advanced" as const,
           durationDay: 365,
-          redeemDeadlineAt: "2026-06-18T04:00:00.000Z",
+          redeemDeadlineAt,
           previewVersion: `sha256:${redeemCodeInput.code.length.toString().padStart(64, "0")}`,
           upgradeTargets: [],
         },
@@ -126,6 +128,27 @@ describe("redeem code route handlers", () => {
       },
     });
     expect(JSON.stringify(payload)).not.toContain("abcd2345");
+  });
+
+  it("keeps an explicit null deadline in the preview DTO", async () => {
+    const { POST } = createRedeemCodePreviewRouteHandlers(
+      createService(null),
+      async () => ({ userPublicId: "user_public_123" }),
+    );
+
+    const response = await POST(
+      new Request("http://localhost/api/v1/redeem-codes/preview", {
+        method: "POST",
+        body: JSON.stringify({ code: "abcd2345" }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        redeemDeadlineAt: null,
+      },
+    });
   });
 
   it("returns standard unauthorized response when user context is missing", async () => {

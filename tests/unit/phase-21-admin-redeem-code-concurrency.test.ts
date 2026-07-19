@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
+import type { SQL } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -23,7 +25,69 @@ function hashRedeemCode(codePlainText: string): string {
   return createHash("sha256").update(codePlainText).digest("hex");
 }
 
+function compilePostgresExpression(expression: SQL) {
+  const query = new PgDialect().sqlToQuery(expression);
+
+  return {
+    sql: query.sql.replace(/\s+/gu, " ").trim(),
+    params: query.params,
+  };
+}
+
+function createCapturingRedeemCodeListDatabase(rows: unknown[]) {
+  const whereConditions: Array<SQL | undefined> = [];
+  const orderByExpressionGroups: SQL[][] = [];
+  const database = {
+    select(selection: Record<string, unknown>) {
+      const isCountSelection = "value" in selection;
+
+      return {
+        from() {
+          return {
+            where(condition: SQL | undefined) {
+              whereConditions.push(condition);
+
+              if (isCountSelection) {
+                return Promise.resolve([{ value: rows.length }]);
+              }
+
+              return {
+                orderBy(...expressions: SQL[]) {
+                  orderByExpressionGroups.push(expressions);
+
+                  return {
+                    limit() {
+                      return {
+                        async offset() {
+                          return rows;
+                        },
+                      };
+                    },
+                  };
+                },
+              };
+            },
+          };
+        },
+      };
+    },
+  };
+
+  return { database, orderByExpressionGroups, whereConditions };
+}
+
 describe("phase 21 admin redeem_code generation concurrency proof", () => {
+  it("keeps the nullable deadline formatter and status guard explicit", () => {
+    const source = readFileSync(
+      "src/server/repositories/admin-redeem-code-runtime-repository.ts",
+      "utf8",
+    );
+
+    expect(source).toContain("row.redeem_deadline_at !== null &&");
+    expect(source).toContain("value?.toISOString() ?? null");
+    expect(source).not.toContain("row.redeem_deadline_at.toISOString()");
+  });
+
   it("retries unique redeem_code collisions inside one transaction", async () => {
     const insertedRows: Array<{
       public_id: string;
@@ -31,6 +95,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       code_display: string;
       redeem_code_type: string;
       generation_group_id: string;
+      redeem_deadline_at: Date | null;
     }> = [];
     let transactionCount = 0;
 
@@ -54,7 +119,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
                     profession: "monopoly" as const,
                     level: 3,
                     status: "unused" as const,
-                    redeem_deadline_at: new Date("2026-06-24T15:59:59.999Z"),
+                    redeem_deadline_at: null,
                     created_at: new Date("2026-05-31T17:00:00.000Z"),
                   },
                 ];
@@ -89,7 +154,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       profession: "monopoly",
       level: 3,
       durationDay: 365,
-      redeemDeadlineAt: new Date("2026-06-24T15:59:59.999Z"),
+      redeemDeadlineAt: null,
       actorPublicId: "admin-public-001",
     });
 
@@ -101,6 +166,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         code_display: "AAAAAAA2",
         redeem_code_type: "personal_standard_activation",
         generation_group_id: "redeem-code-batch-fixed",
+        redeem_deadline_at: null,
       },
       {
         public_id: "redeem-code-public-unique",
@@ -108,6 +174,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         code_display: "BBBBBBB2",
         redeem_code_type: "personal_standard_activation",
         generation_group_id: "redeem-code-batch-fixed",
+        redeem_deadline_at: null,
       },
     ]);
     expect(result).toEqual({
@@ -118,7 +185,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         profession: "monopoly",
         level: 3,
         durationDay: 365,
-        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+        redeemDeadlineAt: null,
       },
       redeemCodes: [
         {
@@ -129,7 +196,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
           profession: "monopoly",
           level: 3,
           status: "unused",
-          redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+          redeemDeadlineAt: null,
           createdAt: "2026-05-31T17:00:00.000Z",
         },
       ],
@@ -191,6 +258,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
           redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
+          durationDay: 365,
           redeemDeadlineDate: "2026-06-24",
         }),
       }),
@@ -203,6 +271,222 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       data: null,
     });
     expect(auditInputs).toEqual([]);
+  });
+
+  it.each([
+    {
+      status: "expired" as const,
+      expectedSql:
+        '("redeem_code"."status" = $1 or ("redeem_code"."status" = $2 and "redeem_code"."redeem_deadline_at" is not null and "redeem_code"."redeem_deadline_at" < $3))',
+      expectedParams: ["expired", "unused", "2026-06-01T00:00:00.000Z"],
+      wrongGroupedSql:
+        '(("redeem_code"."status" = $1 or "redeem_code"."status" = $2) and "redeem_code"."redeem_deadline_at" is not null and "redeem_code"."redeem_deadline_at" < $3)',
+    },
+    {
+      status: "unused" as const,
+      expectedSql:
+        '("redeem_code"."status" = $1 and ("redeem_code"."redeem_deadline_at" is null or "redeem_code"."redeem_deadline_at" >= $2))',
+      expectedParams: ["unused", "2026-06-01T00:00:00.000Z"],
+      wrongGroupedSql:
+        '(("redeem_code"."status" = $1 and "redeem_code"."redeem_deadline_at" is null) or "redeem_code"."redeem_deadline_at" >= $2)',
+    },
+  ])(
+    "compiles the complete $status deadline filter grouping and boundary parameters",
+    async ({ expectedParams, expectedSql, status, wrongGroupedSql }) => {
+      const { database, whereConditions } =
+        createCapturingRedeemCodeListDatabase([]);
+      const repositories = createPostgresAdminRedeemCodeRuntimeRepositories({
+        createDatabase: () => database as never,
+        now: () => new Date("2026-06-01T00:00:00.000Z"),
+      });
+
+      await repositories.listRedeemCodes({
+        page: 1,
+        pageSize: 20,
+        keyword: null,
+        status,
+        sortBy: "updatedAt",
+        sortOrder: "desc",
+        userType: "all",
+        userCategory: "all",
+        authFilter: "all",
+      });
+
+      expect(whereConditions).toHaveLength(2);
+      expect(whereConditions[0]).toBeDefined();
+      expect(whereConditions[1]).toBeDefined();
+      const listCondition = compilePostgresExpression(whereConditions[0]!);
+      const countCondition = compilePostgresExpression(whereConditions[1]!);
+
+      expect(listCondition).toEqual({
+        sql: expectedSql,
+        params: expectedParams,
+      });
+      expect(countCondition).toEqual({
+        sql: expectedSql,
+        params: expectedParams,
+      });
+      expect(listCondition).not.toEqual({
+        sql: wrongGroupedSql,
+        params: expectedParams,
+      });
+    },
+  );
+
+  it.each(["asc", "desc"] as const)(
+    "uses nulls-last expressions for %s deadline sorting and preserves nullable row status",
+    async (sortOrder) => {
+      const rows = [
+        {
+          id: 1,
+          public_id: "redeem-code-public-long-term-unused",
+          code_display: "ABCDEFG2",
+          redeem_code_type: "personal_standard_activation" as const,
+          profession: "monopoly" as const,
+          level: 3,
+          status: "unused" as const,
+          used_by_user_id: null,
+          redeem_deadline_at: null,
+          created_at: new Date("2026-05-31T17:00:00.000Z"),
+          updated_at: new Date("2026-05-31T17:00:00.000Z"),
+        },
+        {
+          id: 2,
+          public_id: "redeem-code-public-explicit-expired",
+          code_display: "BCDEFGH2",
+          redeem_code_type: "personal_standard_activation" as const,
+          profession: "monopoly" as const,
+          level: 3,
+          status: "expired" as const,
+          used_by_user_id: null,
+          redeem_deadline_at: null,
+          created_at: new Date("2026-05-30T17:00:00.000Z"),
+          updated_at: new Date("2026-05-30T17:00:00.000Z"),
+        },
+        {
+          id: 3,
+          public_id: "redeem-code-public-time-expired",
+          code_display: "CDEFGHJ2",
+          redeem_code_type: "personal_standard_activation" as const,
+          profession: "monopoly" as const,
+          level: 3,
+          status: "unused" as const,
+          used_by_user_id: null,
+          redeem_deadline_at: new Date("2026-05-31T00:00:00.000Z"),
+          created_at: new Date("2026-05-29T17:00:00.000Z"),
+          updated_at: new Date("2026-05-29T17:00:00.000Z"),
+        },
+      ];
+      const { database, orderByExpressionGroups } =
+        createCapturingRedeemCodeListDatabase(rows);
+      const repositories = createPostgresAdminRedeemCodeRuntimeRepositories({
+        createDatabase: () => database as never,
+        now: () => new Date("2026-06-01T00:00:00.000Z"),
+      });
+
+      const result = await repositories.listRedeemCodes({
+        page: 1,
+        pageSize: 20,
+        keyword: null,
+        status: "all",
+        sortBy: "expiresAt",
+        sortOrder,
+        userType: "all",
+        userCategory: "all",
+        authFilter: "all",
+      });
+
+      expect(orderByExpressionGroups).toHaveLength(1);
+      expect(orderByExpressionGroups[0]).toHaveLength(2);
+      expect(
+        orderByExpressionGroups[0]!.map(compilePostgresExpression),
+      ).toEqual([
+        {
+          sql: '"redeem_code"."redeem_deadline_at" is null asc',
+          params: [],
+        },
+        {
+          sql: `"redeem_code"."redeem_deadline_at" ${
+            sortOrder === "asc" ? "asc" : "desc"
+          }`,
+          params: [],
+        },
+      ]);
+      expect(
+        compilePostgresExpression(orderByExpressionGroups[0]![1]!),
+      ).not.toEqual({
+        sql: `"redeem_code"."redeem_deadline_at" ${
+          sortOrder === "asc" ? "desc" : "asc"
+        }`,
+        params: [],
+      });
+      expect(result.redeemCodes).toMatchObject([
+        {
+          publicId: "redeem-code-public-long-term-unused",
+          status: "unused",
+          redeemDeadlineAt: null,
+        },
+        {
+          publicId: "redeem-code-public-explicit-expired",
+          status: "expired",
+          redeemDeadlineAt: null,
+        },
+        {
+          publicId: "redeem-code-public-time-expired",
+          status: "expired",
+          redeemDeadlineAt: "2026-05-31T00:00:00.000Z",
+        },
+      ]);
+    },
+  );
+
+  it("serializes a null deadline in redeem_code detail", async () => {
+    const row = {
+      public_id: "redeem-code-public-long-term",
+      code_display: "ABCDEFG2",
+      redeem_code_type: "personal_standard_activation" as const,
+      profession: "monopoly" as const,
+      level: 3,
+      status: "unused" as const,
+      used_by_user_id: null,
+      used_at: null,
+      duration_day: 365,
+      redeem_deadline_at: null,
+      generation_group_id: "redeem-code-batch-fixed",
+      created_at: new Date("2026-05-31T17:00:00.000Z"),
+      updated_at: new Date("2026-05-31T17:00:00.000Z"),
+    };
+    const database = {
+      select() {
+        return {
+          from() {
+            return {
+              where() {
+                return {
+                  async limit() {
+                    return [row];
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
+    };
+    const repositories = createPostgresAdminRedeemCodeRuntimeRepositories({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-06-01T00:00:00.000Z"),
+    });
+
+    await expect(
+      repositories.findRedeemCodeDetailByPublicId?.(
+        "redeem-code-public-long-term",
+      ),
+    ).resolves.toMatchObject({
+      publicId: "redeem-code-public-long-term",
+      status: "unused",
+      redeemDeadlineAt: null,
+    });
   });
 });
 

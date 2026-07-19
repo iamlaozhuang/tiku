@@ -366,7 +366,7 @@ export type RedeemCodeSummaryDto = {
   level: number;
   status: RedeemCodeStatus;
   redeemedUserPublicId: string | null;
-  redeemDeadlineAt: string;
+  redeemDeadlineAt: string | null;
   createdAt: string;
 };
 
@@ -397,7 +397,7 @@ export type RedeemCodeGenerationItemDto = {
   profession: Profession;
   level: number;
   status: RedeemCodeStatus;
-  redeemDeadlineAt: string;
+  redeemDeadlineAt: string | null;
   createdAt: string;
 };
 
@@ -409,7 +409,7 @@ export type RedeemCodeGenerationDto = {
     profession: Profession;
     level: number;
     durationDay: number;
-    redeemDeadlineAt: string;
+    redeemDeadlineAt: string | null;
   };
   redeemCodes: RedeemCodeGenerationItemDto[];
 };

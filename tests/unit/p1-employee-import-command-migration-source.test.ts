@@ -297,7 +297,6 @@ function readGeneratedSnapshotChain(): {
   );
 
   expect(matchingEntries).toHaveLength(1);
-  expect(journal.entries.at(-1)?.tag).toBe(migrationTag);
   expect(migrationTag).toMatch(timestampedMigrationTagPattern);
 
   const currentEntryIndex = journal.entries.findIndex(
@@ -442,7 +441,7 @@ describe("P1 employee import command generated migration source", () => {
     ).toEqual([]);
   });
 
-  it("keeps one terminal journal tag and a linear timestamped snapshot", () => {
+  it("keeps one journal entry and a linear timestamped snapshot", () => {
     const { current, previous, migrationTag } = readGeneratedSnapshotChain();
 
     expect(migrationTag.endsWith(migrationTagSuffix)).toBe(true);

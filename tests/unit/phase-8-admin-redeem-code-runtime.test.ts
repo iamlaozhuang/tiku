@@ -60,7 +60,9 @@ function createSessionService(role: "super_admin" | "content_admin") {
 
 function createRepositories(): AdminRedeemCodeRuntimeRepositories {
   return {
-    async createRedeemCodeBatch() {
+    async createRedeemCodeBatch(input) {
+      const redeemDeadlineAt = input.redeemDeadlineAt?.toISOString() ?? null;
+
       return {
         generation: {
           generationGroupId: "redeem-code-batch-public-001",
@@ -69,7 +71,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
           profession: "monopoly",
           level: 3,
           durationDay: 365,
-          redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+          redeemDeadlineAt,
         },
         redeemCodes: [
           {
@@ -80,7 +82,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
             profession: "monopoly",
             level: 3,
             status: "unused",
-            redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+            redeemDeadlineAt,
             createdAt: now.toISOString(),
           },
         ],
@@ -399,10 +401,78 @@ describe("phase 8 admin redeem code runtime", () => {
     });
   });
 
-  it("generates one local redeem_code with plaintext only in the creation response", async () => {
+  it.each([
+    ["omitted", {}],
+    ["explicit null", { redeemDeadlineDate: null }],
+  ])(
+    "generates a long-term redeem_code when the deadline is %s",
+    async (_label, deadlineInput) => {
+      const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+        repositories: createRepositories(),
+        sessionService: createSessionService("super_admin"),
+        now: () => now,
+      });
+
+      const response = await handlers.redeemCodes.POST(
+        new Request("http://localhost/api/v1/redeem-codes", {
+          body: JSON.stringify({
+            redeemCodeType: "personal_standard_activation",
+            profession: "monopoly",
+            level: 3,
+            durationDay: 365,
+            ...deadlineInput,
+          }),
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+        }),
+      );
+
+      await expect(response.json()).resolves.toMatchObject({
+        code: 0,
+        data: {
+          generation: { redeemDeadlineAt: null },
+          redeemCodes: [{ redeemDeadlineAt: null }],
+        },
+      });
+    },
+  );
+
+  it.each([
+    ["empty", ""],
+    ["invalid", "2026-02-30"],
+    ["non-future", "2026-05-21"],
+  ])("rejects a %s finite deadline", async (_label, redeemDeadlineDate) => {
     const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
       repositories: createRepositories(),
       sessionService: createSessionService("super_admin"),
+      now: () => now,
+    });
+
+    const response = await handlers.redeemCodes.POST(
+      new Request("http://localhost/api/v1/redeem-codes", {
+        body: JSON.stringify({
+          redeemCodeType: "personal_standard_activation",
+          profession: "monopoly",
+          level: 3,
+          durationDay: 365,
+          redeemDeadlineDate,
+        }),
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 422601,
+      data: null,
+    });
+  });
+
+  it("keeps a future finite deadline at the UTC+8 end of day", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+      now: () => now,
     });
 
     const response = await (
@@ -415,6 +485,8 @@ describe("phase 8 admin redeem code runtime", () => {
           redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
+          durationDay: 365,
+          redeemDeadlineDate: "2026-05-23",
         }),
         method: "POST",
         headers: { authorization: "Bearer admin-session-token" },
@@ -434,7 +506,7 @@ describe("phase 8 admin redeem code runtime", () => {
           profession: "monopoly",
           level: 3,
           durationDay: 365,
-          redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+          redeemDeadlineAt: "2026-05-23T15:59:59.999Z",
         },
         redeemCodes: [
           {
@@ -445,7 +517,7 @@ describe("phase 8 admin redeem code runtime", () => {
             profession: "monopoly",
             level: 3,
             status: "unused",
-            redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+            redeemDeadlineAt: "2026-05-23T15:59:59.999Z",
             createdAt: now.toISOString(),
           },
         ],

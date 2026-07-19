@@ -352,7 +352,7 @@ export const redeemCode = pgTable(
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
     duration_day: integer("duration_day").notNull(),
-    redeem_deadline_at: timestampColumn("redeem_deadline_at"),
+    redeem_deadline_at: timestamp("redeem_deadline_at", { withTimezone: true }),
     status: redeemCodeStatusEnum("status").default("unused").notNull(),
     used_by_user_id: bigint("used_by_user_id", { mode: "number" }).references(
       () => user.id,

@@ -116,6 +116,14 @@ const redeemCodePreviewPayload = {
   },
 };
 
+const longTermPreviewPayload = {
+  ...redeemCodePreviewPayload,
+  data: {
+    ...redeemCodePreviewPayload.data,
+    redeemDeadlineAt: null,
+  },
+};
+
 type TestSessionUser = {
   adminPublicId: string | null;
   adminRoles: string[];
@@ -737,6 +745,9 @@ describe("StudentRedeemCodePage", () => {
     expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
       "365 天",
     );
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "兑换截止：2026年8月22日",
+    );
     expect(
       screen.getByTestId("redeem-code-confirmation"),
     ).not.toHaveTextContent("ABCD2345");
@@ -747,6 +758,49 @@ describe("StudentRedeemCodePage", () => {
       "/api/v1/redeem-codes/redeem",
       expect.anything(),
     );
+  });
+
+  it("shows a long-term redeem deadline in the server entitlement preview", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: RequestInfo | URL) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(sessionPayload);
+        }
+
+        if (path === "/api/v1/personal-auths") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { personalAuths: [] },
+          });
+        }
+
+        if (path === "/api/v1/redeem-codes/preview") {
+          return createJsonResponse(longTermPreviewPayload);
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      }),
+    );
+
+    render(createElement(StudentRedeemCodePage));
+    await screen.findByRole("heading", { name: "个人授权" });
+
+    fireEvent.change(screen.getByLabelText("兑换码"), {
+      target: { value: "ABCD2345" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+
+    expect(
+      await screen.findByTestId("redeem-code-confirmation"),
+    ).toHaveTextContent("兑换截止：长期可兑换");
   });
 
   it("ignores a late preview after the input has changed", async () => {
