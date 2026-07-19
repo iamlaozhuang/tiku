@@ -2,7 +2,7 @@
 
 日期：2026-07-18
 
-状态：方案 A 已获用户批准；等待书面规格复核
+状态：F-0117 产品实现已完成；closeout migration smoke appendability 设计 A 已获用户批准，等待书面规格复核
 
 任务：`p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18`
 
@@ -85,3 +85,50 @@
 ## 规格复核门禁
 
 本文件提交并 ff-only 合入 `master` 后，必须由用户书面复核。复核前不得调用 writing-plans，不得修改产品、测试、schema 或 migration 源码。用户批准后才编制 implementation plan 并从 RED 开始。
+
+## Closeout Addendum：Migration Smoke 可追加链语义
+
+### 问题与目标
+
+F-0117 产品实现、静态验证、两轮复核、治理 closeout 修正、合入与推送已经完成，任务当前为 `ready_for_closeout`。剩余机制摩擦位于 `tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`：测试使用 `journal.entries.at(-1)`，把 F-0117 迁移错误绑定为 journal 永久末项。任何合法后续迁移都会使该历史测试失败，即使 F-0117 自身的 journal 邻接关系、snapshot `prevId` 和 schema diff 完全正确。
+
+本 addendum 只让 F-0117 migration smoke 验证自身在可追加线性迁移链中的不变量，不降低全局迁移完整性，不修改产品、schema、migration、journal、snapshot 或任何守卫语义。
+
+### 任务形态与隔离
+
+- 作为 F-0117 closeout 前的独立、可审查小提交执行，保持当前 F-0117 为唯一 WIP，不物化第二个产品任务。
+- 规格、实现均使用独立短分支和 worktree；实现由独立 Subagent 执行，主线程逐项复核，再由独立 reviewer 完成第二轮对抗复核。
+- 实现提交只允许修改以下既有 F-0117 allowlist 文件：
+  - `docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md`
+  - `docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline-design.md`
+  - `docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md`
+  - `docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md`
+  - `tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`
+- authoritative task worktree 中的 `project-state.yaml`、`task-queue.yaml`、P1/P0/Module guards、guard smoke、产品源码、schema、migration、snapshot、journal、package/lockfile、env、Provider、runtime/browser、P2、PR、deploy 全部禁止修改。唯一例外是 RED/GREEN 使用的 disposable worktree 可临时追加 synthetic journal fixture；该临时改动不得进入任务 diff 或任何提交。
+
+### 可追加链校验
+
+测试继续通过 migration suffix 找到恰好一个 F-0117 SQL 文件，并保留“SQL 仅包含目标列 `DROP NOT NULL`”的精确断言。snapshot 测试改为：
+
+1. 在 journal 中按完整 migration tag 精确匹配，要求匹配项恰好一项。
+2. 取得该匹配项的实际索引，要求其前一项存在。
+3. 要求当前 journal entry 的 `idx` 等于直接前项 `idx + 1`。
+4. 从直接前项 tag 的 14 位时间戳动态定位 previous snapshot；不再硬编码前一 snapshot 文件名。
+5. 要求当前 snapshot 存在、其 `prevId` 等于 previous snapshot 的 `id`，且当前 `id` 不等于 previous `id`。
+6. 继续规范化 snapshot 身份字段和目标列 `notNull` 后做全对象比较，证明除 `redeem_code.redeem_deadline_at.notNull: true -> false` 外没有其他 schema 漂移。
+7. 不断言 F-0117 是 journal 末项，也不忽略、重排或重写任何后续迁移。
+
+### RED→GREEN 与失败处理
+
+- RED 在 disposable worktree 中运行：仅向其 `_journal.json` 追加一个 synthetic later entry；当前 `.at(-1)` 断言必须失败，证明根因可复现。该 disposable 改动不得进入任务 diff。
+- GREEN 使用候选测试文件在同一 later-entry fixture 中重跑；F-0117 测试必须通过，证明测试只校验自身局部链关系。
+- 正常仓库目标测试必须继续通过；若唯一匹配、直接前项、相邻 `idx`、snapshot 文件或 `prevId` 任一不成立，测试必须 fail closed 并给出对应 Vitest assertion。
+- 若修正需要共享 helper、新 guard 能力、state/queue 自修改、schema/migration 变更或其他 finding 修复，立即停止；不得扩大本 addendum。
+
+### 验证与 closeout
+
+实现后依次运行：目标测试与 disposable RED/GREEN、完整 unit、lint、typecheck、format、build、P1 manual/pre-commit/pre-push、P0 global、Module pre-commit/pre-push、`git diff --check`、敏感信息和精确文件集检查。focused 结果不得替代最终 closeout full evidence。
+
+两轮复核必须确认：没有削弱历史 migration source 断言；没有接受重复 tag、缺失 predecessor、非相邻 idx、错误 `prevId` 或额外 snapshot diff；没有修改数据库执行、Provider/runtime、P2、PR、force-push 或 deploy 边界。全部通过后，按 standing authorization 创建独立提交、ff-only 合入 `master`、普通 push `origin/master` 并清理分支/worktree，然后关闭 F-0117 并恢复下一 P1 finding。
+
+本 addendum 获用户书面规格复核前，不得调用 writing-plans，也不得修改测试实现。
