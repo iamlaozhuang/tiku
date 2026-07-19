@@ -446,6 +446,74 @@ describe("personal AI generation learning session route handlers", () => {
     },
   );
 
+  it("creates an employee learning session from a persisted personal result without substituting organization ownership", async () => {
+    const repository = createLearningSessionRepository();
+    const resultPublicId = "persisted_paper_result_employee_personal_001";
+    const persistedResult = createPersistedPaperResult(resultPublicId);
+    const resultLookupQueries: unknown[] = [];
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => employeeUserContext,
+        {
+          repository,
+          resultRepository: {
+            async findDraftResultByPublicId(query) {
+              resultLookupQueries.push(query);
+
+              return query.ownerType === "personal" &&
+                query.ownerPublicId === employeeUserContext.userPublicId &&
+                query.actorPublicId === employeeUserContext.userPublicId
+                ? persistedResult
+                : null;
+            },
+          },
+          now: () => new Date("2026-07-12T10:31:00.000Z"),
+          paperSourceQuestionResolver: async () => createPaperSourceQuestions(),
+        },
+      );
+
+    const response = await getLearningSessionCollectionPostHandler(collection)(
+      createPostRequest({
+        sourceResultPublicId: resultPublicId,
+        visibleGeneratedContent: createVisibleGeneratedContent(),
+      }),
+    );
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        status: "created",
+        session: {
+          sessionPublicId: `ai_learning_session_${resultPublicId}`,
+          sourceResultPublicId: resultPublicId,
+          sourceTaskPublicId: persistedResult.taskPublicId,
+          ownerType: "personal",
+          ownerPublicId: employeeUserContext.userPublicId,
+          actorPublicId: employeeUserContext.userPublicId,
+        },
+      },
+    });
+    expect(resultLookupQueries).toEqual([
+      {
+        ownerType: "personal",
+        ownerPublicId: employeeUserContext.userPublicId,
+        actorPublicId: employeeUserContext.userPublicId,
+        resultPublicId,
+      },
+    ]);
+    expect(repository.savedSessions).toHaveLength(1);
+    expect(repository.savedSessions[0]).toMatchObject({
+      ownerType: "personal",
+      ownerPublicId: employeeUserContext.userPublicId,
+      actorPublicId: employeeUserContext.userPublicId,
+    });
+    expect(repository.savedSessions[0]).not.toMatchObject({
+      ownerType: "organization",
+      ownerPublicId: employeeUserContext.organizationPublicId,
+    });
+  });
+
   it("resumes an existing persisted paper session without re-resolving changed question sources", async () => {
     const repository = createLearningSessionRepository();
     const resultPublicId = "persisted_paper_result_resume_001";

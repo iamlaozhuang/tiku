@@ -1,11 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import type {
+  GetPersonalAiGenerationResultOwnerQuery,
+  GetPersonalAiGenerationResultQuery,
   PersonalAiGenerationResultPersistenceRow,
+  PersonalAiGenerationResultLookupRepository,
+  PersonalAiGenerationResultSelectedAuthorizationLookupRepository,
   PersonalAiGenerationResultTaskGateway,
 } from "./personal-ai-generation-result-repository";
 import {
   createPersonalAiGenerationResultByPublicIdCondition,
+  createPersonalAiGenerationResultBySelectedAuthorizationCondition,
   createPersonalAiGenerationResultByTaskCondition,
   createPersonalAiGenerationResultHistoryCondition,
   createPersonalAiGenerationResultRepository,
@@ -166,6 +171,102 @@ function createGateway(
 }
 
 describe("personal AI generation result repository", () => {
+  it("separates exact selected-authorization lookup from owner-only learning lookup", () => {
+    type SelectedAuthorizationQuery = Parameters<
+      PersonalAiGenerationResultSelectedAuthorizationLookupRepository["findDraftResultByPublicId"]
+    >[0];
+    type OwnerOnlyQuery = Parameters<
+      PersonalAiGenerationResultLookupRepository["findDraftResultByPublicId"]
+    >[0];
+
+    expectTypeOf<SelectedAuthorizationQuery>().toEqualTypeOf<GetPersonalAiGenerationResultQuery>();
+    expectTypeOf<OwnerOnlyQuery>().toEqualTypeOf<GetPersonalAiGenerationResultOwnerQuery>();
+  });
+
+  it("builds exact authorization, owner, and actor scoped result history conditions", () => {
+    const condition = createPersonalAiGenerationResultHistoryCondition({
+      authorizationPublicId: "personal_auth_public_exact_170",
+      ownerType: "personal",
+      ownerPublicId: "student_public_170",
+      actorPublicId: "student_public_170",
+    });
+
+    expect(containsText(condition, "authorization_public_id")).toBe(true);
+    expect(containsText(condition, "personal_auth_public_exact_170")).toBe(
+      true,
+    );
+    expect(containsText(condition, "owner_type")).toBe(true);
+    expect(containsText(condition, "personal")).toBe(true);
+    expect(containsText(condition, "actor_public_id")).toBe(true);
+  });
+
+  it("keeps two personal authorization result histories isolated", async () => {
+    const firstAuthorizationResult = createPersistenceRow({
+      public_id: "personal_ai_result_first_authorization",
+      task_public_id: "task_first_authorization",
+    });
+    const secondAuthorizationResult = createPersistenceRow({
+      public_id: "personal_ai_result_second_authorization",
+      task_public_id: "task_second_authorization",
+    });
+    const listResultRows = vi.fn(async (query) =>
+      query.authorizationPublicId === "personal_auth_public_first"
+        ? [firstAuthorizationResult]
+        : query.authorizationPublicId === "personal_auth_public_second"
+          ? [secondAuthorizationResult]
+          : [],
+    );
+    const gateway = {
+      ...createGateway().gateway,
+      listResultRows,
+    };
+    const repository = createPersonalAiGenerationResultRepository(gateway);
+
+    const firstResults = await repository.listDraftResults({
+      authorizationPublicId: "personal_auth_public_first",
+      ownerType: "personal",
+      ownerPublicId: "student_public_170",
+    });
+    const secondResults = await repository.listDraftResults({
+      authorizationPublicId: "personal_auth_public_second",
+      ownerType: "personal",
+      ownerPublicId: "student_public_170",
+    });
+
+    expect(firstResults.map((result) => result.resultPublicId)).toEqual([
+      firstAuthorizationResult.public_id,
+    ]);
+    expect(secondResults.map((result) => result.resultPublicId)).toEqual([
+      secondAuthorizationResult.public_id,
+    ]);
+    expect(listResultRows).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        authorizationPublicId: "personal_auth_public_first",
+      }),
+    );
+    expect(listResultRows).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        authorizationPublicId: "personal_auth_public_second",
+      }),
+    );
+  });
+
+  it("builds exact authorization scoped result detail conditions", () => {
+    const condition =
+      createPersonalAiGenerationResultBySelectedAuthorizationCondition({
+        authorizationPublicId: "org_auth_public_exact_172",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_172",
+        actorPublicId: "employee_user_public_172",
+        resultPublicId: "personal_ai_result_public_172",
+      });
+
+    expect(containsText(condition, "authorization_public_id")).toBe(true);
+    expect(containsText(condition, "org_auth_public_exact_172")).toBe(true);
+  });
+
   it("persists the draft result and succeeded task state in one database transaction", async () => {
     const insertedRow = createPersistenceRow();
     const updateReturning = vi.fn(async () => [
@@ -235,6 +336,7 @@ describe("personal AI generation result repository", () => {
 
   it("builds owner-scoped result history conditions", () => {
     const condition = createPersonalAiGenerationResultHistoryCondition({
+      authorizationPublicId: "personal_auth_public_170",
       ownerPublicId: "student_public_170",
     });
 
@@ -246,6 +348,8 @@ describe("personal AI generation result repository", () => {
 
   it("builds actor-scoped organization result history conditions", () => {
     const condition = createPersonalAiGenerationResultHistoryCondition({
+      authorizationPublicId: "org_auth_public_170",
+      ownerType: "organization",
       ownerPublicId: "organization_public_170",
       actorPublicId: "employee_user_public_170",
     });
@@ -355,6 +459,7 @@ describe("personal AI generation result repository", () => {
     const repository = createPersonalAiGenerationResultRepository(gateway);
 
     const draftResults = await repository.listDraftResults({
+      authorizationPublicId: "personal_auth_public_172",
       ownerPublicId: "student_public_172",
       page: 1,
       pageSize: 3,
@@ -363,6 +468,7 @@ describe("personal AI generation result repository", () => {
     });
 
     expect(listResultRows).toHaveBeenCalledWith({
+      authorizationPublicId: "personal_auth_public_172",
       ownerPublicId: "student_public_172",
       page: 1,
       pageSize: 3,
@@ -398,6 +504,7 @@ describe("personal AI generation result repository", () => {
     const repository = createPersonalAiGenerationResultRepository(gateway);
 
     const draftResults = await repository.listDraftResults({
+      authorizationPublicId: "org_auth_public_172",
       ownerType: "organization",
       ownerPublicId: "organization_public_172",
       actorPublicId: "employee_user_public_a",
@@ -408,6 +515,7 @@ describe("personal AI generation result repository", () => {
     });
 
     expect(listResultRows).toHaveBeenCalledWith({
+      authorizationPublicId: "org_auth_public_172",
       ownerType: "organization",
       ownerPublicId: "organization_public_172",
       actorPublicId: "employee_user_public_a",
@@ -447,6 +555,7 @@ describe("personal AI generation result repository", () => {
     const repository = createPersonalAiGenerationResultRepository(gateway);
 
     const draftResults = await repository.listDraftResults({
+      authorizationPublicId: "personal_auth_public_172",
       ownerPublicId: "student_public_172",
       taskType: "ai_paper_generation",
       page: 1,
@@ -456,6 +565,7 @@ describe("personal AI generation result repository", () => {
     });
 
     expect(listResultRows).toHaveBeenCalledWith({
+      authorizationPublicId: "personal_auth_public_172",
       ownerPublicId: "student_public_172",
       taskType: "ai_paper_generation",
       page: 1,

@@ -28,6 +28,7 @@ export type PersonalAiGenerationRequestOwnerType = Extract<
 >;
 
 export type ListPersonalAiGenerationRequestHistoryQuery = {
+  authorizationPublicId: string;
   ownerType?: PersonalAiGenerationRequestOwnerType;
   ownerPublicId: string;
   actorPublicId?: string;
@@ -86,6 +87,7 @@ export type PersonalAiGenerationRequestRepository = {
 
 export type PersonalAiGenerationRequestTaskGateway = {
   listRequestRows(query: {
+    authorizationPublicId: string;
     ownerType?: PersonalAiGenerationRequestOwnerType;
     ownerPublicId: string;
     actorPublicId?: string;
@@ -96,6 +98,7 @@ export type PersonalAiGenerationRequestTaskGateway = {
     offset: number;
   }): Promise<PersonalAiGenerationRequestPersistenceRow[]>;
   countRequestRows?(query: {
+    authorizationPublicId: string;
     ownerType?: PersonalAiGenerationRequestOwnerType;
     ownerPublicId: string;
     actorPublicId?: string;
@@ -132,12 +135,14 @@ const personalAiGenerationRequestSelection = {
 };
 
 export function createPersonalAiGenerationRequestHistoryCondition(query: {
+  authorizationPublicId: string;
   ownerType?: PersonalAiGenerationRequestOwnerType;
   ownerPublicId: string;
   actorPublicId?: string;
   taskType?: PersonalAiGenerationTaskType;
 }): SQL {
   const conditions = [
+    eq(aiGenerationTask.authorization_public_id, query.authorizationPublicId),
     eq(aiGenerationTask.owner_type, query.ownerType ?? "personal"),
     eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
     query.taskType === undefined
@@ -182,6 +187,7 @@ export function createPersonalAiGenerationRequestRepository(
         query.pageSize ?? query.limit,
       );
       const rows = await gateway.listRequestRows({
+        authorizationPublicId: query.authorizationPublicId,
         ownerType: query.ownerType,
         ownerPublicId: query.ownerPublicId,
         ...(query.actorPublicId === undefined
@@ -240,6 +246,7 @@ export function createPersonalAiGenerationRequestRepository(
         ? undefined
         : async (query) =>
             gateway.countRequestRows?.({
+              authorizationPublicId: query.authorizationPublicId,
               ownerType: query.ownerType,
               ownerPublicId: query.ownerPublicId,
               ...(query.actorPublicId === undefined
@@ -279,6 +286,7 @@ export function createPostgresPersonalAiGenerationRequestRepository(
         .from(aiGenerationTask)
         .where(
           createPersonalAiGenerationRequestHistoryCondition({
+            authorizationPublicId: query.authorizationPublicId,
             ownerType: query.ownerType,
             ownerPublicId: query.ownerPublicId,
             actorPublicId: query.actorPublicId,
@@ -300,6 +308,7 @@ export function createPostgresPersonalAiGenerationRequestRepository(
         .from(aiGenerationTask)
         .where(
           createPersonalAiGenerationRequestHistoryCondition({
+            authorizationPublicId: query.authorizationPublicId,
             ownerType: query.ownerType,
             ownerPublicId: query.ownerPublicId,
             actorPublicId: query.actorPublicId,

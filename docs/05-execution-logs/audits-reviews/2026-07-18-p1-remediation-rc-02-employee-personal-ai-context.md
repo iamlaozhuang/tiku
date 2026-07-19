@@ -2,7 +2,7 @@
 
 ## Review scope
 
-This audit currently covers only the design transition from closed F-0117 to in-progress F-0143. Product implementation, implementation-plan compliance, and final closeout require later review entries.
+This audit covers the design transition and the complete F-0143 product diff. Git closeout remains a later state transition and is not pre-claimed.
 
 ## Transition Disposition
 
@@ -56,9 +56,57 @@ Result: pass
 - Independent re-review decision: `APPROVE`; no remaining Critical, Important, or Minor finding for the transition.
 - Main-thread review decision: pass; the corrections preserve option A, avoid F-0142 behavior, and do not authorize any new high-risk capability.
 
-## Pending final reviews
+## Closeout state
 
-- Written-spec approval
-- Implementation task reviews
-- Whole-branch adversarial review
-- Fresh closeout verification
+- Written-spec approval: complete.
+- Implementation task reviews: complete.
+- Whole-branch adversarial review: complete.
+- Fresh product validation: complete.
+- Governance gates and Git closeout: pending.
+
+## Product Round 1
+
+Decision: APPROVE_PENDING_INDEPENDENT_REVIEW
+
+- Raw ownership and effective generation remain separate first-principles policies. History proves actor-to-authorization ownership only; generation additionally proves current effective advanced edition, exact scope, capability, and the existing production-enablement exception.
+- Generation overwrites every client owner/source/organization/quota fact and fails closed when raw/effective dependencies or exact authorization are missing.
+- Request/result list, count, and detail retain actor plus resolved owner and exact selected authorization constraints; result detail no longer searches a broad page in memory.
+- UI selection owns every read surface, clears old context data before reload, and prevents old context/detail promises from repopulating the new view.
+- Employee-personal learning-session behavior remains available without importing F-0142 lifecycle decisions.
+- Scope review found only the 22 allowlisted product/plan files and zero blocked changes.
+
+## Product Round 2 initial findings
+
+Decision: CHANGES_REQUESTED
+
+- Critical: authorization scope parsing accepted numeric `level` only, while the canonical validator accepted numeric strings. A numeric string could become a null authorization scope, bypass exact scope matching, reach persistence/Provider, and omit selected authorization from the idempotency hash.
+- Important: request/result pagination shared one sequence. Interleaved single-side pagination could stale-return the other handler and leave its loading state permanently unresolved.
+- Minor: the canonical detail repository port accepted an exact/owner-only union, so `authorizationPublicId` was not mandatory at the type boundary.
+- No other functional, security, allowlist, blocked-surface, redaction, or F-0142 scope finding was identified.
+
+## Review fix disposition
+
+Decision: ALL_FINDINGS_CLOSED
+
+- Critical closed: an explicit absent/invalid/valid scope reader now mirrors canonical `level` normalization (`1..5`, number or numeric string). Local-browser generation rejects absent/invalid scope before persistence/Provider. Adversarial tests prove zero writes/calls and distinct idempotency hashes for two same-owner personal authorizations.
+- Important closed: request/result histories use independent sequences. Context/task/combined loads invalidate both; a single pagination action invalidates only its own side. Three delayed-Promise tests cover both pagination orders and pending initial result load.
+- Minor closed: selected-context result detail uses a dedicated exact-authorization repository port; learning-session keeps its explicit owner-only lookup with unchanged source behavior.
+- Main-thread focused verification passed `57/57`, `25/25`, and `43/43` for the three fixes.
+
+## Product Round 2 final rereview
+
+Decision: READY_FOR_GOVERNANCE_CLOSEOUT
+
+- Independent rereview result: `Critical 0 / Important 0 / Minor 0`; no new or omitted finding.
+- Product/implementation-plan diff: 19 tracked modifications plus 3 approved untracked files, all in the F-0143 allowlist. With evidence/audit alignment, the current worktree has 24 allowlisted files total; blocked-file matches remain zero.
+- Final focused suite: `9/9` files, `226/226` tests.
+- Final full unit: `421/421` files, `2773/2773` tests after an unrelated full-load UI timing failure passed both exact-case and complete-file isolation without task-external changes.
+- Lint, typecheck, format, diff check, and the root-installed-dependency directed production build passed; build generated `96/96` static pages.
+- Database, schema, migration, dependency, external Provider, browser/runtime, P2, PR, force push, and deployment boundaries remain unchanged and unexercised.
+- No unresolved product/review blocker remains. This decision authorizes only the already approved governance-gate and Git closeout sequence; any guard failure remains a hard block.
+
+## Final Disposition
+
+Result: pass
+
+The complete product diff passed two-round adversarial review and fresh static validation. Product commit and later Git/state transitions remain governed separately and are not pre-claimed by this review disposition.

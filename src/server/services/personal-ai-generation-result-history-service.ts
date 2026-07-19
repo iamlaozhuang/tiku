@@ -16,7 +16,10 @@ import {
   type PersonalAiGenerationResultDetailQuery,
   type PersonalAiGenerationResultHistoryQuery,
 } from "../models/personal-ai-generation-result-history";
-import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type {
+  PersonalAiGenerationResultRepository,
+  PersonalAiGenerationResultSelectedAuthorizationLookupRepository,
+} from "../repositories/personal-ai-generation-result-repository";
 import {
   normalizePersonalAiGenerationResultDetailQuery,
   normalizePersonalAiGenerationResultHistoryQuery,
@@ -34,10 +37,14 @@ const RESULT_DETAIL_UNAVAILABLE_CODE = 500020;
 const RESULT_DETAIL_UNAVAILABLE_MESSAGE =
   "Personal AI generation result detail is temporarily unavailable.";
 
-type PersonalAiGenerationResultHistoryRepository = Pick<
+export type PersonalAiGenerationResultHistoryRepositoryPort = Pick<
   PersonalAiGenerationResultRepository,
   "countDraftResults" | "listDraftResults"
->;
+> &
+  Pick<
+    PersonalAiGenerationResultSelectedAuthorizationLookupRepository,
+    "findDraftResultByPublicId"
+  >;
 
 export type PersonalAiGenerationResultHistoryService = {
   listDraftResultHistory(
@@ -123,10 +130,11 @@ function buildPersonalAiGenerationResultDetailDto(
 }
 
 async function listDraftResults(
-  repository: PersonalAiGenerationResultHistoryRepository,
+  repository: PersonalAiGenerationResultHistoryRepositoryPort,
   query: PersonalAiGenerationResultHistoryQuery,
 ): Promise<PersonalAiGenerationResultDto[]> {
   return repository.listDraftResults({
+    authorizationPublicId: query.authorizationPublicId,
     ownerType: query.ownerType,
     ownerPublicId: query.ownerPublicId,
     ...(query.actorPublicId === undefined
@@ -141,26 +149,20 @@ async function listDraftResults(
 }
 
 async function findDraftResultDetail(
-  repository: PersonalAiGenerationResultHistoryRepository,
+  repository: PersonalAiGenerationResultHistoryRepositoryPort,
   query: PersonalAiGenerationResultDetailQuery,
 ): Promise<PersonalAiGenerationResultDto | null> {
-  const draftResults = await listDraftResults(repository, {
+  return repository.findDraftResultByPublicId({
+    authorizationPublicId: query.authorizationPublicId,
     ownerType: query.ownerType,
     ownerPublicId: query.ownerPublicId,
-    ...(query.actorPublicId === undefined
-      ? {}
-      : { actorPublicId: query.actorPublicId }),
+    actorPublicId: query.actorPublicId ?? query.ownerPublicId,
+    resultPublicId: query.resultPublicId,
   });
-
-  return (
-    draftResults.find(
-      (draftResult) => draftResult.resultPublicId === query.resultPublicId,
-    ) ?? null
-  );
 }
 
 export function createPersonalAiGenerationResultHistoryService(
-  repository: PersonalAiGenerationResultHistoryRepository,
+  repository: PersonalAiGenerationResultHistoryRepositoryPort,
 ): PersonalAiGenerationResultHistoryService {
   return {
     async listDraftResultHistory(input) {
@@ -183,6 +185,8 @@ export function createPersonalAiGenerationResultHistoryService(
           repository.countDraftResults === undefined
             ? results.length
             : await repository.countDraftResults({
+                authorizationPublicId:
+                  normalizedQuery.value.authorizationPublicId,
                 ownerType: normalizedQuery.value.ownerType,
                 ownerPublicId: normalizedQuery.value.ownerPublicId,
                 ...(normalizedQuery.value.actorPublicId === undefined

@@ -106,6 +106,9 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
     };
   }
 
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
   const actorPublicId = normalizeOptionalText(input.actorPublicId);
   const ownerType = normalizeOwnerType(input.ownerType);
@@ -116,6 +119,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
   const offset = normalizeOffset(input.offset);
 
   if (
+    authorizationPublicId === null ||
     ownerPublicId === null ||
     actorPublicId === null ||
     ownerType === null ||
@@ -134,6 +138,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
   return {
     success: true,
     value: {
+      authorizationPublicId,
       ownerType,
       ownerPublicId,
       actorPublicId,
@@ -156,12 +161,16 @@ export function normalizePersonalAiGenerationResultDetailQuery(
     };
   }
 
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
   const actorPublicId = normalizeOptionalText(input.actorPublicId);
   const ownerType = normalizeOwnerType(input.ownerType);
   const resultPublicId = normalizeRequiredText(input.resultPublicId);
 
   if (
+    authorizationPublicId === null ||
     ownerPublicId === null ||
     actorPublicId === null ||
     ownerType === null ||
@@ -176,6 +185,7 @@ export function normalizePersonalAiGenerationResultDetailQuery(
   return {
     success: true,
     value: {
+      authorizationPublicId,
       ownerType,
       ownerPublicId,
       actorPublicId,

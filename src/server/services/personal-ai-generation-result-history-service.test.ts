@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
-import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type {
+  PersonalAiGenerationResultRepository,
+  PersonalAiGenerationResultSelectedAuthorizationLookupRepository,
+} from "../repositories/personal-ai-generation-result-repository";
 import { createPersonalAiGenerationResultHistoryService } from "./personal-ai-generation-result-history-service";
 
 function createResult(
@@ -38,12 +41,21 @@ function createResult(
 
 function createRepository(
   results: PersonalAiGenerationResultDto[] = [],
-): PersonalAiGenerationResultRepository {
+): PersonalAiGenerationResultRepository &
+  PersonalAiGenerationResultSelectedAuthorizationLookupRepository {
   return {
     listDraftResults: vi.fn(async () => results),
+    findDraftResultByPublicId: vi.fn(
+      async (query) =>
+        results.find(
+          (result) => result.resultPublicId === query.resultPublicId,
+        ) ?? null,
+    ),
     createOrReuseDraftResult: vi.fn(),
   };
 }
+
+const authorizationPublicId = "personal_auth_public_result_history_200";
 
 function createExpectedPrivateUseBoundary() {
   return {
@@ -62,12 +74,97 @@ function createExpectedPrivateUseBoundary() {
 }
 
 describe("personal AI generation result history service", () => {
+  it("requires an exact authorization public id before history repository access", async () => {
+    const repository = createRepository();
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    await expect(
+      service.listDraftResultHistory({
+        authorizationPublicId: "   ",
+        ownerPublicId: "student_public_200",
+      }),
+    ).resolves.toEqual({
+      code: 400044,
+      message: "Invalid personal AI generation result history input.",
+      data: null,
+    });
+    expect(repository.listDraftResults).not.toHaveBeenCalled();
+  });
+
+  it("requires an exact authorization public id before detail repository access", async () => {
+    const repository = createRepository();
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    await expect(
+      service.getDraftResultDetail({
+        authorizationPublicId: "",
+        ownerPublicId: "student_public_200",
+        resultPublicId: "personal_ai_result_public_detail",
+      }),
+    ).resolves.toEqual({
+      code: 400045,
+      message: "Invalid personal AI generation result detail input.",
+      data: null,
+    });
+    expect(repository.findDraftResultByPublicId).not.toHaveBeenCalled();
+  });
+
+  it("propagates the exact authorization id through list, count, and detail lookups", async () => {
+    const result = createResult({
+      resultPublicId: "personal_ai_result_public_exact_auth",
+    });
+    const listDraftResults = vi.fn(async () => [result]);
+    const countDraftResults = vi.fn(async () => 1);
+    const findDraftResultByPublicId = vi.fn(async () => result);
+    const repository = {
+      listDraftResults,
+      countDraftResults,
+      findDraftResultByPublicId,
+    };
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    await service.listDraftResultHistory({
+      authorizationPublicId: "personal_auth_public_exact_200",
+      ownerType: "personal",
+      ownerPublicId: "student_public_200",
+      actorPublicId: "student_public_200",
+    });
+    await service.getDraftResultDetail({
+      authorizationPublicId: "personal_auth_public_exact_200",
+      ownerType: "personal",
+      ownerPublicId: "student_public_200",
+      actorPublicId: "student_public_200",
+      resultPublicId: result.resultPublicId,
+    });
+
+    expect(listDraftResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authorizationPublicId: "personal_auth_public_exact_200",
+      }),
+    );
+    expect(countDraftResults).toHaveBeenCalledWith({
+      authorizationPublicId: "personal_auth_public_exact_200",
+      ownerType: "personal",
+      ownerPublicId: "student_public_200",
+      actorPublicId: "student_public_200",
+      taskType: undefined,
+    });
+    expect(findDraftResultByPublicId).toHaveBeenCalledWith({
+      authorizationPublicId: "personal_auth_public_exact_200",
+      ownerType: "personal",
+      ownerPublicId: "student_public_200",
+      actorPublicId: "student_public_200",
+      resultPublicId: result.resultPublicId,
+    });
+  });
+
   it("returns an empty redacted history in the standard response envelope", async () => {
     const repository = createRepository();
     const service = createPersonalAiGenerationResultHistoryService(repository);
 
     await expect(
       service.listDraftResultHistory({
+        authorizationPublicId,
         ownerPublicId: "student_public_200",
       }),
     ).resolves.toEqual({
@@ -91,6 +188,7 @@ describe("personal AI generation result history service", () => {
     });
 
     expect(repository.listDraftResults).toHaveBeenCalledWith({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       taskType: undefined,
       page: undefined,
@@ -105,6 +203,7 @@ describe("personal AI generation result history service", () => {
     const service = createPersonalAiGenerationResultHistoryService(repository);
 
     const response = await service.listDraftResultHistory({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       taskType: "ai_paper_generation",
       page: 2,
@@ -125,6 +224,7 @@ describe("personal AI generation result history service", () => {
       },
     });
     expect(repository.listDraftResults).toHaveBeenCalledWith({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       taskType: "ai_paper_generation",
       page: 2,
@@ -168,6 +268,7 @@ describe("personal AI generation result history service", () => {
     const service = createPersonalAiGenerationResultHistoryService(repository);
 
     const response = await service.listDraftResultHistory({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       limit: 3,
     });
@@ -183,6 +284,7 @@ describe("personal AI generation result history service", () => {
       status: "blocked",
     });
     expect(repository.listDraftResults).toHaveBeenCalledWith({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       taskType: undefined,
       page: undefined,
@@ -217,6 +319,7 @@ describe("personal AI generation result history service", () => {
     const service = createPersonalAiGenerationResultHistoryService(repository);
 
     const response = await service.getDraftResultDetail({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       resultPublicId: "personal_ai_result_public_detail",
     });
@@ -258,13 +361,11 @@ describe("personal AI generation result history service", () => {
         },
       },
     });
-    expect(repository.listDraftResults).toHaveBeenCalledWith({
+    expect(repository.findDraftResultByPublicId).toHaveBeenCalledWith({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
-      taskType: undefined,
-      page: undefined,
-      pageSize: undefined,
-      limit: undefined,
-      offset: undefined,
+      actorPublicId: "student_public_200",
+      resultPublicId: "personal_ai_result_public_detail",
     });
     expect(serializedResponse).not.toContain(generatedContentKey);
     expect(serializedResponse).not.toContain(omittedGeneratedFixture);
@@ -332,6 +433,7 @@ describe("personal AI generation result history service", () => {
     const service = createPersonalAiGenerationResultHistoryService(repository);
 
     const response = await service.getDraftResultDetail({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       resultPublicId: "personal_ai_result_public_paper_history",
     });
@@ -380,6 +482,7 @@ describe("personal AI generation result history service", () => {
 
     await expect(
       service.getDraftResultDetail({
+        authorizationPublicId,
         ownerPublicId: "student_public_200",
         resultPublicId: "personal_ai_result_public_missing",
       }),
@@ -388,13 +491,11 @@ describe("personal AI generation result history service", () => {
       message: "Personal AI generation result detail was not found.",
       data: null,
     });
-    expect(repository.listDraftResults).toHaveBeenCalledWith({
+    expect(repository.findDraftResultByPublicId).toHaveBeenCalledWith({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
-      taskType: undefined,
-      page: undefined,
-      pageSize: undefined,
-      limit: undefined,
-      offset: undefined,
+      actorPublicId: "student_public_200",
+      resultPublicId: "personal_ai_result_public_missing",
     });
   });
 
@@ -404,6 +505,7 @@ describe("personal AI generation result history service", () => {
 
     await expect(
       service.getDraftResultDetail({
+        authorizationPublicId,
         ownerPublicId: "student_public_200",
         resultPublicId: "",
       }),
@@ -412,17 +514,18 @@ describe("personal AI generation result history service", () => {
       message: "Invalid personal AI generation result detail input.",
       data: null,
     });
-    expect(repository.listDraftResults).not.toHaveBeenCalled();
+    expect(repository.findDraftResultByPublicId).not.toHaveBeenCalled();
   });
 
   it("returns a standard error envelope when detail retrieval fails", async () => {
     const repository = createRepository();
-    vi.mocked(repository.listDraftResults).mockRejectedValueOnce(
+    vi.mocked(repository.findDraftResultByPublicId).mockRejectedValueOnce(
       new Error("database stack with private detail rows"),
     );
     const service = createPersonalAiGenerationResultHistoryService(repository);
 
     const response = await service.getDraftResultDetail({
+      authorizationPublicId,
       ownerPublicId: "student_public_200",
       resultPublicId: "personal_ai_result_public_detail",
     });
@@ -444,6 +547,7 @@ describe("personal AI generation result history service", () => {
 
     await expect(
       service.listDraftResultHistory({
+        authorizationPublicId,
         ownerPublicId: "",
         limit: 0,
       }),
@@ -464,6 +568,7 @@ describe("personal AI generation result history service", () => {
 
     await expect(
       service.listDraftResultHistory({
+        authorizationPublicId,
         ownerPublicId: "student_public_200",
       }),
     ).resolves.toEqual({

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  createPersonalAiGenerationRequestRouteHandlers,
+  createPersonalAiGenerationRequestRouteHandlers as createPersonalAiGenerationRequestRouteHandlersWithoutAuthorizationDefaults,
   createPersonalAiGenerationRequestUserResolver,
+  type PersonalAiGenerationRequestRouteDependencies,
+  type PersonalAiGenerationRequestUserResolver,
 } from "./personal-ai-generation-request-route";
 import { SESSION_COOKIE_NAME } from "../auth/session-cookie";
 import type {
@@ -22,6 +24,11 @@ import type { SessionService } from "./session-service";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
+import type {
+  EffectiveAuthorizationRepository,
+  EffectiveOrgAuthRow,
+  EffectivePersonalAuthRow,
+} from "../repositories/effective-authorization-repository";
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
@@ -135,6 +142,7 @@ function createBaseFlowBody() {
     resultPublicId: null,
     evidenceStatus: "none",
     citationCount: 0,
+    generationParameters: sufficientGroundingContext.generationParameters,
   };
 }
 
@@ -184,9 +192,10 @@ function createRequestRepository(
   } = {},
 ): Pick<
   PersonalAiGenerationRequestRepository,
-  "createOrReuseRequest" | "listRequestHistory"
+  "countRequestHistory" | "createOrReuseRequest" | "listRequestHistory"
 > & {
   calls: Array<{
+    authorizationPublicId: string;
     ownerPublicId: string;
     actorPublicId?: string;
     taskType?: string;
@@ -195,9 +204,16 @@ function createRequestRepository(
     limit?: number;
     offset?: number;
   }>;
+  countCalls: Array<{
+    authorizationPublicId: string;
+    ownerPublicId: string;
+    actorPublicId?: string;
+    taskType?: string;
+  }>;
   createCalls: CreatePersonalAiGenerationRequestInput[];
 } {
   const calls: Array<{
+    authorizationPublicId: string;
     ownerPublicId: string;
     actorPublicId?: string;
     taskType?: string;
@@ -206,15 +222,27 @@ function createRequestRepository(
     limit?: number;
     offset?: number;
   }> = [];
+  const countCalls: Array<{
+    authorizationPublicId: string;
+    ownerPublicId: string;
+    actorPublicId?: string;
+    taskType?: string;
+  }> = [];
   const createCalls: CreatePersonalAiGenerationRequestInput[] = [];
 
   return {
     calls,
+    countCalls,
     createCalls,
     async listRequestHistory(query) {
       calls.push(query);
 
       return historyRows;
+    },
+    async countRequestHistory(query) {
+      countCalls.push(query);
+
+      return historyRows.length;
     },
     async createOrReuseRequest(input) {
       createCalls.push(input);
@@ -309,6 +337,153 @@ function createEffectiveAuthorizationService(
       };
     },
   };
+}
+
+function createPersonalAuthorizationRow(
+  overrides: Partial<EffectivePersonalAuthRow> = {},
+): EffectivePersonalAuthRow {
+  return {
+    id: 101,
+    public_id: "personal_auth_public_123",
+    edition: "advanced",
+    profession: "monopoly",
+    level: 3,
+    starts_at: new Date("2026-07-01T00:00:00.000Z"),
+    expires_at: new Date("2026-08-01T00:00:00.000Z"),
+    status: "active",
+    ...overrides,
+  };
+}
+
+function createOrganizationAuthorizationRow(
+  overrides: Partial<EffectiveOrgAuthRow> = {},
+): EffectiveOrgAuthRow {
+  return {
+    id: 201,
+    public_id: "org_auth_public_123",
+    organization_public_id: employeeUserContext.organizationPublicId,
+    organization_name: "Synthetic organization",
+    organization_status: "active",
+    edition: "advanced",
+    profession: "monopoly",
+    level: 3,
+    starts_at: new Date("2026-07-01T00:00:00.000Z"),
+    expires_at: new Date("2026-08-01T00:00:00.000Z"),
+    status: "active",
+    ...overrides,
+  };
+}
+
+function createAuthorizationRepository(input: {
+  personalAuths?: EffectivePersonalAuthRow[];
+  orgAuths?: EffectiveOrgAuthRow[];
+}): Pick<
+  EffectiveAuthorizationRepository,
+  "listPersonalAuthsByUserPublicId" | "listOrgAuthsByUserPublicId"
+> {
+  return {
+    async listPersonalAuthsByUserPublicId() {
+      return input.personalAuths ?? [];
+    },
+    async listOrgAuthsByUserPublicId() {
+      return input.orgAuths ?? [];
+    },
+  };
+}
+
+function createPersonalEffectiveAuthorizationContext(
+  overrides: Partial<EffectiveAuthorizationContextDto> = {},
+): EffectiveAuthorizationContextDto {
+  return {
+    profession: "monopoly",
+    level: 3,
+    contextDisplayStatus: "display_only",
+    effectiveEdition: "advanced",
+    authorizationSource: "personal_auth",
+    authorizationPublicId: "personal_auth_public_123",
+    ownerType: "personal",
+    ownerPublicId: employeeUserContext.userPublicId,
+    organizationPublicId: null,
+    quotaOwnerType: "personal",
+    quotaOwnerPublicId: employeeUserContext.userPublicId,
+    capabilities: {
+      ...disabledAiCapabilities,
+      canGenerateAiQuestion: true,
+      canGenerateAiPaper: true,
+    },
+    blockedReason: null,
+    ...overrides,
+  };
+}
+
+function createOrganizationEffectiveAuthorizationContext(
+  overrides: Partial<EffectiveAuthorizationContextDto> = {},
+): EffectiveAuthorizationContextDto {
+  return {
+    profession: "monopoly",
+    level: 3,
+    contextDisplayStatus: "display_only",
+    effectiveEdition: "advanced",
+    authorizationSource: "org_auth",
+    authorizationPublicId: "org_auth_public_123",
+    ownerType: "organization",
+    ownerPublicId: employeeUserContext.organizationPublicId,
+    organizationPublicId: employeeUserContext.organizationPublicId,
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+    capabilities: {
+      ...disabledAiCapabilities,
+      canGenerateAiQuestion: true,
+      canGenerateAiPaper: true,
+    },
+    blockedReason: null,
+    ...overrides,
+  };
+}
+
+function createPersonalAiGenerationRequestRouteHandlers(
+  resolveUserContext: PersonalAiGenerationRequestUserResolver,
+  dependencies: PersonalAiGenerationRequestRouteDependencies = {},
+) {
+  return createPersonalAiGenerationRequestRouteHandlersWithoutAuthorizationDefaults(
+    resolveUserContext,
+    {
+      authorizationRepository: createAuthorizationRepository({
+        personalAuths: [createPersonalAuthorizationRow()],
+        orgAuths: [
+          createOrganizationAuthorizationRow(),
+          createOrganizationAuthorizationRow({
+            id: 202,
+            public_id: "org_auth_standard_public_123",
+            edition: "standard",
+          }),
+          createOrganizationAuthorizationRow({
+            id: 203,
+            public_id: "org_auth_advanced_public_123",
+          }),
+          createOrganizationAuthorizationRow({
+            id: 204,
+            public_id: "org_auth_monopoly_public_123",
+          }),
+          createOrganizationAuthorizationRow({
+            id: 205,
+            public_id: "org_auth_marketing_public_456",
+            profession: "marketing",
+            level: 4,
+          }),
+        ],
+      }),
+      effectiveAuthorizationService: createEffectiveAuthorizationService([
+        createPersonalEffectiveAuthorizationContext({
+          ownerPublicId: userContext.userPublicId,
+          quotaOwnerPublicId: userContext.userPublicId,
+        }),
+        createPersonalEffectiveAuthorizationContext(),
+        createOrganizationEffectiveAuthorizationContext(),
+      ]),
+      ...dependencies,
+    },
+  );
 }
 
 function createPaperPlanProviderContent(questionCount: number) {
@@ -721,6 +896,361 @@ describe("personal AI generation request route handlers", () => {
     });
   });
 
+  it("lets an employee select their personal advanced authorization instead of an organization standard authorization", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [createPersonalAuthorizationRow()],
+          orgAuths: [
+            createOrganizationAuthorizationRow({
+              public_id: "org_auth_standard_public_123",
+              edition: "standard",
+            }),
+          ],
+        }),
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          createOrganizationEffectiveAuthorizationContext({
+            authorizationPublicId: "org_auth_standard_public_123",
+            effectiveEdition: "standard",
+            capabilities: disabledAiCapabilities,
+          }),
+          createPersonalEffectiveAuthorizationContext(),
+        ]),
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationPublicId: "personal_auth_public_123",
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: "client_owner_public_tampered",
+        organizationPublicId: "client_organization_public_tampered",
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: "client_quota_owner_public_tampered",
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        requestFlow: {
+          taskRequest: {
+            authorizationSource: "personal_auth",
+            authorizationPublicId: "personal_auth_public_123",
+            actorPublicId: employeeUserContext.userPublicId,
+            ownerType: "personal",
+            ownerPublicId: employeeUserContext.userPublicId,
+            organizationPublicId: null,
+            quotaOwnerType: "personal",
+            quotaOwnerPublicId: employeeUserContext.userPublicId,
+          },
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toEqual([
+      expect.objectContaining({
+        authorizationPublicId: "personal_auth_public_123",
+        actorPublicId: employeeUserContext.userPublicId,
+        ownerType: "personal",
+        ownerPublicId: employeeUserContext.userPublicId,
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: employeeUserContext.userPublicId,
+      }),
+    ]);
+    expect(serializedPayload).not.toContain("client_owner_public_tampered");
+    expect(serializedPayload).not.toContain(
+      "client_organization_public_tampered",
+    );
+    expect(serializedPayload).not.toContain(
+      "client_quota_owner_public_tampered",
+    );
+  });
+
+  it("keeps an employee's personal and organization advanced authorization selections independent", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [createPersonalAuthorizationRow()],
+          orgAuths: [createOrganizationAuthorizationRow()],
+        }),
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          createPersonalEffectiveAuthorizationContext(),
+          createOrganizationEffectiveAuthorizationContext(),
+        ]),
+      },
+    );
+
+    for (const selection of [
+      {
+        authorizationPublicId: "personal_auth_public_123",
+        ownerType: "personal",
+        ownerPublicId: employeeUserContext.userPublicId,
+      },
+      {
+        authorizationPublicId: "org_auth_public_123",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+      },
+    ] as const) {
+      const response = await collection.POST(
+        createPostRequest({
+          ...createBaseFlowBody(),
+          requestPublicId: `request_${selection.authorizationPublicId}`,
+          taskPublicId: `task_${selection.authorizationPublicId}`,
+          authorizationPublicId: selection.authorizationPublicId,
+        }),
+      );
+
+      expect(await response.json()).toMatchObject({
+        code: 0,
+        data: {
+          requestFlow: {
+            taskRequest: {
+              authorizationPublicId: selection.authorizationPublicId,
+              ownerType: selection.ownerType,
+              ownerPublicId: selection.ownerPublicId,
+            },
+          },
+        },
+      });
+    }
+
+    expect(requestRepository.createCalls).toHaveLength(2);
+    expect(
+      requestRepository.createCalls.map((call) => call.authorizationPublicId),
+    ).toEqual(["personal_auth_public_123", "org_auth_public_123"]);
+  });
+
+  it.each([
+    {
+      name: "foreign authorization id",
+      authorizationPublicId: "org_auth_foreign_public_123",
+      personalAuths: [],
+      orgAuths: [],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext({
+        authorizationPublicId: "org_auth_foreign_public_123",
+      }),
+      generationParameters: sufficientGroundingContext.generationParameters,
+    },
+    {
+      name: "authorization for a different current organization",
+      authorizationPublicId: "org_auth_wrong_organization_public_123",
+      personalAuths: [],
+      orgAuths: [
+        createOrganizationAuthorizationRow({
+          public_id: "org_auth_wrong_organization_public_123",
+          organization_public_id: "organization_other_public_456",
+        }),
+      ],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext({
+        authorizationPublicId: "org_auth_wrong_organization_public_123",
+        ownerPublicId: "organization_other_public_456",
+        organizationPublicId: "organization_other_public_456",
+        quotaOwnerPublicId: "organization_other_public_456",
+      }),
+      generationParameters: sufficientGroundingContext.generationParameters,
+    },
+    {
+      name: "standard authorization",
+      authorizationPublicId: "org_auth_standard_public_123",
+      personalAuths: [],
+      orgAuths: [
+        createOrganizationAuthorizationRow({
+          public_id: "org_auth_standard_public_123",
+          edition: "standard",
+        }),
+      ],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext({
+        authorizationPublicId: "org_auth_standard_public_123",
+        effectiveEdition: "standard",
+      }),
+      generationParameters: sufficientGroundingContext.generationParameters,
+    },
+    {
+      name: "wrong profession and level",
+      authorizationPublicId: "org_auth_public_123",
+      personalAuths: [],
+      orgAuths: [createOrganizationAuthorizationRow()],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext(),
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        profession: "marketing" as const,
+        level: 4,
+      },
+    },
+    {
+      name: "numeric-string profession and level outside the selected scope",
+      authorizationPublicId: "org_auth_public_123",
+      personalAuths: [],
+      orgAuths: [createOrganizationAuthorizationRow()],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext(),
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        profession: "marketing" as const,
+        level: "4",
+      },
+    },
+    {
+      name: "missing generation scope",
+      authorizationPublicId: "org_auth_public_123",
+      personalAuths: [],
+      orgAuths: [createOrganizationAuthorizationRow()],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext(),
+      generationParameters: undefined,
+    },
+    {
+      name: "invalid generation scope",
+      authorizationPublicId: "org_auth_public_123",
+      personalAuths: [],
+      orgAuths: [createOrganizationAuthorizationRow()],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext(),
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        level: "invalid-level",
+      },
+    },
+    {
+      name: "missing generation capability",
+      authorizationPublicId: "org_auth_public_123",
+      personalAuths: [],
+      orgAuths: [createOrganizationAuthorizationRow()],
+      effectiveContext: createOrganizationEffectiveAuthorizationContext({
+        capabilities: disabledAiCapabilities,
+      }),
+      generationParameters: sufficientGroundingContext.generationParameters,
+    },
+  ])(
+    "rejects $name before persistence or Provider execution",
+    async ({
+      authorizationPublicId,
+      personalAuths,
+      orgAuths,
+      effectiveContext,
+      generationParameters,
+    }) => {
+      const requestRepository = createRequestRepository();
+      const providerExecutorCalls: unknown[] = [];
+      const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+        async () => employeeUserContext,
+        {
+          requestRepository,
+          authorizationRepository: createAuthorizationRepository({
+            personalAuths,
+            orgAuths,
+          }),
+          effectiveAuthorizationService: createEffectiveAuthorizationService([
+            effectiveContext,
+          ]),
+          runtimeBridgeControl: {
+            bridgeMode: "controlled_runner",
+            explicitLocalSwitchPresent: true,
+            providerExecution: {
+              executionMode: "route_integrated_provider",
+              realProviderExecutionApproved: true,
+              maxRequests: 1,
+              maxRetries: 0,
+              maxOutputTokens: 220,
+              timeoutMs: 30000,
+              resolveGroundingContext: () => sufficientGroundingContext,
+              readProviderCredential: async () => "synthetic-test-credential",
+              executeProviderRequest: async (executionInput) => {
+                providerExecutorCalls.push(executionInput);
+
+                return {
+                  requestCount: 1,
+                  resultStatus: "pass",
+                  failureCategory: null,
+                  durationMs: 37,
+                  usageSummary: null,
+                  providerErrorSummary: null,
+                  visibleGeneratedContent: null,
+                };
+              },
+            },
+          },
+        },
+      );
+
+      const response = await collection.POST(
+        createPostRequest({
+          ...createBaseFlowBody(),
+          authorizationPublicId,
+          generationParameters,
+        }),
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: 403057,
+        message:
+          "Personal AI generation is not available for this authorization.",
+        data: null,
+      });
+      expect(requestRepository.createCalls).toHaveLength(0);
+      expect(providerExecutorCalls).toHaveLength(0);
+    },
+  );
+
+  it.each([
+    {
+      name: "raw ownership repository",
+      dependencies: {
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          createOrganizationEffectiveAuthorizationContext(),
+        ]),
+      },
+    },
+    {
+      name: "effective authorization service",
+      dependencies: {
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [],
+          orgAuths: [createOrganizationAuthorizationRow()],
+        }),
+      },
+    },
+  ])(
+    "fails closed when the canonical POST lacks $name",
+    async ({ dependencies }) => {
+      const requestRepository = createRequestRepository();
+      const { collection } =
+        createPersonalAiGenerationRequestRouteHandlersWithoutAuthorizationDefaults(
+          async () => employeeUserContext,
+          {
+            requestRepository,
+            ...dependencies,
+          },
+        );
+
+      const response = await collection.POST(
+        createPostRequest({
+          ...createBaseFlowBody(),
+          authorizationPublicId: "org_auth_public_123",
+        }),
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: 403057,
+        message:
+          "Personal AI generation is not available for this authorization.",
+        data: null,
+      });
+      expect(requestRepository.createCalls).toHaveLength(0);
+    },
+  );
+
   it("persists employee local browser POST metadata under the organization owner", async () => {
     const requestedAt = new Date("2026-06-12T18:30:00.000Z");
     const requestRepository = createRequestRepository();
@@ -994,6 +1524,64 @@ describe("personal AI generation request route handlers", () => {
     );
   });
 
+  it("isolates a numeric-string scope idempotency key by the selected personal authorization for the same owner", async () => {
+    const requestRepository = createRequestRepository();
+    const personalAuthorizationPublicIds = [
+      "personal_auth_public_123",
+      "personal_auth_public_456",
+    ] as const;
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: personalAuthorizationPublicIds.map(
+            (authorizationPublicId, index) =>
+              createPersonalAuthorizationRow({
+                id: 101 + index,
+                public_id: authorizationPublicId,
+              }),
+          ),
+        }),
+        effectiveAuthorizationService: createEffectiveAuthorizationService(
+          personalAuthorizationPublicIds.map((authorizationPublicId) =>
+            createPersonalEffectiveAuthorizationContext({
+              authorizationPublicId,
+            }),
+          ),
+        ),
+      },
+    );
+
+    for (const authorizationPublicId of personalAuthorizationPublicIds) {
+      const response = await collection.POST(
+        createPostRequest({
+          ...createBaseFlowBody(),
+          requestPublicId: `request_${authorizationPublicId}`,
+          taskPublicId: `task_${authorizationPublicId}`,
+          authorizationPublicId,
+          generationParameters: {
+            ...sufficientGroundingContext.generationParameters,
+            level: "3",
+          },
+        }),
+      );
+
+      expect(response.status).toBe(200);
+    }
+
+    expect(requestRepository.createCalls).toHaveLength(2);
+    expect(requestRepository.createCalls[0]?.idempotencyKeyHash).not.toBe(
+      requestRepository.createCalls[1]?.idempotencyKeyHash,
+    );
+    expect(requestRepository.createCalls[0]?.idempotencyKeyHash).not.toBe(
+      createBaseFlowBody().idempotencyKeyHash,
+    );
+    expect(requestRepository.createCalls[1]?.idempotencyKeyHash).not.toBe(
+      createBaseFlowBody().idempotencyKeyHash,
+    );
+  });
+
   it("allows advanced employee local browser POST when only production enablement is blocked", async () => {
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
@@ -1132,6 +1720,141 @@ describe("personal AI generation request route handlers", () => {
     });
   });
 
+  it.each([
+    {
+      name: "missing selected authorization id",
+      query: "",
+      expectedCode: 400016,
+      expectedMessage: "Invalid personal AI generation request history input.",
+    },
+    {
+      name: "empty selected authorization id",
+      query: "?authorizationPublicId=%20%20",
+      expectedCode: 400016,
+      expectedMessage: "Invalid personal AI generation request history input.",
+    },
+    {
+      name: "foreign selected authorization id",
+      query: "?authorizationPublicId=personal_auth_foreign_public_999",
+      expectedCode: 403057,
+      expectedMessage:
+        "Personal AI generation is not available for this authorization.",
+    },
+  ])(
+    "rejects $name before request history persistence",
+    async ({ query, expectedCode, expectedMessage }) => {
+      const requestRepository = createRequestRepository();
+      const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+        async () => userContext,
+        { requestRepository },
+      );
+
+      const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+        collection,
+      )(createGetRequest(query));
+
+      await expect(response.json()).resolves.toEqual({
+        code: expectedCode,
+        message: expectedMessage,
+        data: null,
+      });
+      expect(requestRepository.calls).toHaveLength(0);
+      expect(requestRepository.countCalls).toHaveLength(0);
+    },
+  );
+
+  it.each(["expired", "cancelled"] as const)(
+    "keeps an employee-owned %s personal authorization history-readable",
+    async (status) => {
+      const requestRepository = createRequestRepository();
+      const { collection } =
+        createPersonalAiGenerationRequestRouteHandlersWithoutAuthorizationDefaults(
+          async () => employeeUserContext,
+          {
+            requestRepository,
+            authorizationRepository: createAuthorizationRepository({
+              personalAuths: [
+                createPersonalAuthorizationRow({
+                  public_id: `personal_auth_${status}_public_123`,
+                  status,
+                  expires_at: new Date("2026-01-01T00:00:00.000Z"),
+                }),
+              ],
+              orgAuths: [],
+            }),
+          },
+        );
+      const staleOwnerPublicId = "stale_owner_public_999";
+
+      const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+        collection,
+      )(
+        createGetRequest(
+          `?authorizationPublicId=personal_auth_${status}_public_123&ownerType=organization&ownerPublicId=${staleOwnerPublicId}&actorPublicId=${staleOwnerPublicId}`,
+        ),
+      );
+      const payload = await response.json();
+
+      expect(payload).toMatchObject({ code: 0, message: "ok", data: [] });
+      expect(requestRepository.calls).toEqual([
+        {
+          authorizationPublicId: `personal_auth_${status}_public_123`,
+          ownerType: "personal",
+          ownerPublicId: employeeUserContext.userPublicId,
+          actorPublicId: employeeUserContext.userPublicId,
+          taskType: undefined,
+          page: 1,
+          pageSize: 10,
+          limit: 10,
+          offset: 0,
+        },
+      ]);
+      expect(requestRepository.countCalls).toEqual([
+        {
+          authorizationPublicId: `personal_auth_${status}_public_123`,
+          ownerType: "personal",
+          ownerPublicId: employeeUserContext.userPublicId,
+          actorPublicId: employeeUserContext.userPublicId,
+          taskType: undefined,
+        },
+      ]);
+      expect(JSON.stringify(requestRepository.calls)).not.toContain(
+        staleOwnerPublicId,
+      );
+    },
+  );
+
+  it("resolves an employee-owned organization authorization to the organization owner", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      { requestRepository },
+    );
+
+    const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+      collection,
+    )(createGetRequest("?authorizationPublicId=org_auth_public_123"));
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: [],
+    });
+    expect(requestRepository.calls).toEqual([
+      {
+        authorizationPublicId: "org_auth_public_123",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        actorPublicId: employeeUserContext.userPublicId,
+        taskType: undefined,
+        page: 1,
+        pageSize: 10,
+        limit: 10,
+        offset: 0,
+      },
+    ]);
+  });
+
   it("returns a session-owned empty request history list without echoing query user ids", async () => {
     const staleQueryUserPublicId = "query_stale_user_public_999";
     const requestRepository = createRequestRepository();
@@ -1144,7 +1867,11 @@ describe("personal AI generation request route handlers", () => {
 
     const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
       collection,
-    )(createGetRequest(`?userPublicId=${staleQueryUserPublicId}&id=701`));
+    )(
+      createGetRequest(
+        `?authorizationPublicId=personal_auth_public_123&userPublicId=${staleQueryUserPublicId}&id=701`,
+      ),
+    );
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
@@ -1162,6 +1889,7 @@ describe("personal AI generation request route handlers", () => {
     });
     expect(requestRepository.calls).toEqual([
       {
+        authorizationPublicId: "personal_auth_public_123",
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
@@ -1190,7 +1918,7 @@ describe("personal AI generation request route handlers", () => {
       collection,
     )(
       createGetRequest(
-        `?userPublicId=${staleQueryUserPublicId}&taskType=ai_question_generation&page=2&pageSize=5`,
+        `?authorizationPublicId=org_auth_public_123&userPublicId=${staleQueryUserPublicId}&taskType=ai_question_generation&page=2&pageSize=5`,
       ),
     );
     const payload = await response.json();
@@ -1209,6 +1937,7 @@ describe("personal AI generation request route handlers", () => {
     });
     expect(requestRepository.calls).toEqual([
       {
+        authorizationPublicId: "org_auth_public_123",
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
         actorPublicId: employeeUserContext.userPublicId,
@@ -1233,11 +1962,16 @@ describe("personal AI generation request route handlers", () => {
 
     const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
       collection,
-    )(createGetRequest("?taskType=ai_paper_generation&page=2&pageSize=5"));
+    )(
+      createGetRequest(
+        "?authorizationPublicId=personal_auth_public_123&taskType=ai_paper_generation&page=2&pageSize=5",
+      ),
+    );
     const payload = await response.json();
 
     expect(requestRepository.calls).toEqual([
       {
+        authorizationPublicId: "personal_auth_public_123",
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
@@ -1285,7 +2019,11 @@ describe("personal AI generation request route handlers", () => {
 
     const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
       collection,
-    )(createGetRequest("?userPublicId=stale_client_user&id=701"));
+    )(
+      createGetRequest(
+        "?authorizationPublicId=personal_auth_public_123&userPublicId=stale_client_user&id=701",
+      ),
+    );
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
@@ -1316,6 +2054,7 @@ describe("personal AI generation request route handlers", () => {
     });
     expect(requestRepository.calls).toEqual([
       {
+        authorizationPublicId: "personal_auth_public_123",
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
@@ -1348,10 +2087,9 @@ describe("personal AI generation request route handlers", () => {
       },
     );
 
-    const response =
-      await getPersonalAiGenerationRequestHistoryRouteHandler(collection)(
-        createGetRequest(),
-      );
+    const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+      collection,
+    )(createGetRequest("?authorizationPublicId=personal_auth_public_123"));
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
@@ -1718,6 +2456,7 @@ describe("personal AI generation request route handlers", () => {
     const response = await collection.POST(
       createPostRequest({
         ...createBaseFlowBody(),
+        authorizationPublicId: "org_auth_public_123",
         authorizationSource: "org_auth",
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
@@ -1849,6 +2588,7 @@ describe("personal AI generation request route handlers", () => {
         ...createBaseFlowBody(),
         taskType: "ai_paper_generation",
         generationParameters: paperGroundingContext.generationParameters,
+        authorizationPublicId: "org_auth_public_123",
         authorizationSource: "org_auth",
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
@@ -1976,6 +2716,7 @@ describe("personal AI generation request route handlers", () => {
         ...createBaseFlowBody(),
         taskType: "ai_paper_generation",
         generationParameters: paperGroundingContext.generationParameters,
+        authorizationPublicId: "org_auth_public_123",
         authorizationSource: "org_auth",
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
@@ -2173,6 +2914,7 @@ describe("personal AI generation request route handlers", () => {
         ...createBaseFlowBody(),
         taskType: "ai_paper_generation",
         generationParameters: paperGroundingContext.generationParameters,
+        authorizationPublicId: "org_auth_public_123",
         authorizationSource: "org_auth",
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
@@ -2833,7 +3575,7 @@ describe("personal AI generation request route handlers", () => {
         answerRecordPublicId: "answer_record_public_123",
         paperPublicId: "paper_public_123",
         mockExamPublicId: null,
-        idempotencyKeyHash: "sha256:personal_generation_route_123",
+        idempotencyKeyHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
         requestedAt,
         resultPublicId: null,
         evidenceStatus: "none",
@@ -2845,6 +3587,9 @@ describe("personal AI generation request route handlers", () => {
         isRuntimeConfigReady: true,
       },
     ]);
+    expect(requestRepository.createCalls[0]?.idempotencyKeyHash).not.toBe(
+      createBaseFlowBody().idempotencyKeyHash,
+    );
     expect(serializedPayload).not.toContain(staleBodyPublicId);
   });
 

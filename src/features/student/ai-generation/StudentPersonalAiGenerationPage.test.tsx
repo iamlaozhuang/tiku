@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -238,6 +239,15 @@ function createPersonalAndOrganizationAuthorizationListPayload(): EffectiveAutho
   };
 }
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
+
 function createResultDetailPayload(
   unsafeEchoFields: Record<string, string> = {},
 ) {
@@ -366,7 +376,7 @@ function mockResultHistoryAndDetailResponses({
 
       if (
         url ===
-        "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501"
+        "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501?authorizationPublicId=authorization_context_ui_501"
       ) {
         return detailResponse;
       }
@@ -427,6 +437,17 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(source).not.toMatch(
       /<ContractField\s+label="(?:evidenceStatus|citationCount|formalAdoptionStatus|isFormalAdoptionBlocked|taskType|persistedAt|requestedAt)"/u,
+    );
+  });
+
+  it("routes successful generation refresh through the sequence-invalidating history loader", () => {
+    const source = readFileSync(
+      "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+      "utf8",
+    );
+
+    expect(source).toMatch(
+      /setExperience\(response\.data\);[\s\S]*?await loadAiGenerationHistories\(\s*taskType,\s*PERSONAL_AI_GENERATION_HISTORY_PAGE,\s*PERSONAL_AI_GENERATION_HISTORY_PAGE,\s*generationAuthorizationContext\.authorizationPublicId,\s*\);/u,
     );
   });
 
@@ -513,7 +534,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(paperTab).toHaveAttribute("aria-selected", "true");
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        "/api/v1/personal-ai-generation-results?taskType=ai_paper_generation&page=1&pageSize=10",
+        "/api/v1/personal-ai-generation-results?taskType=ai_paper_generation&page=1&pageSize=10&authorizationPublicId=organization_authorization_context_ui_502",
         "local-session-token",
         { method: "GET" },
       );
@@ -543,6 +564,679 @@ describe("StudentPersonalAiGenerationPage", () => {
           (requestCall[2] as RequestInit | undefined)?.method === "POST",
       ),
     ).toBe(false);
+  });
+
+  it("prioritizes personal authorization and scopes every initial read and detail URL to its exact id", async () => {
+    const authorizationPayload =
+      createPersonalAndOrganizationAuthorizationListPayload();
+    const personalAuthorizationContext = {
+      ...authorizationPayload.authorizationContexts?.[0],
+      authorizationPublicId: "personal-auth-context/ui?selected=1",
+    };
+    const organizationAuthorizationContext =
+      authorizationPayload.authorizationContexts?.[1];
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              ...authorizationPayload,
+              authorizationContexts: [
+                organizationAuthorizationContext,
+                personalAuthorizationContext,
+              ],
+            },
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        if (url.startsWith("/api/v1/personal-ai-generation-requests?")) {
+          return { code: 0, message: "ok", data: [] };
+        }
+
+        if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+          return {
+            code: 0,
+            message: "ok",
+            data: createResultHistoryPayload(),
+          };
+        }
+
+        if (
+          url.startsWith(
+            "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501?",
+          )
+        ) {
+          return {
+            code: 0,
+            message: "ok",
+            data: createResultDetailPayload(),
+          };
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    const personalContext = await screen.findByRole("radio", {
+      name: "个人授权 · 高级版 · 专卖 3级",
+    });
+    expect(personalContext).toBeChecked();
+
+    await waitFor(() => {
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=personal-auth-context%2Fui%3Fselected%3D1",
+        "local-session-token",
+        { method: "GET" },
+      );
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=personal-auth-context%2Fui%3Fselected%3D1",
+        "local-session-token",
+        { method: "GET" },
+      );
+    });
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "查看结果详情" }),
+    );
+    await waitFor(() => {
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501?authorizationPublicId=personal-auth-context%2Fui%3Fselected%3D1",
+        "local-session-token",
+        { method: "GET" },
+      );
+    });
+
+    const historyReadCountBeforeSameSelection =
+      studentRuntimeApiMock.fetchStudentApi.mock.calls.filter(
+        ([url]) => url.includes("personal-ai-generation-") && url.includes("?"),
+      ).length;
+    fireEvent.click(personalContext);
+    expect(
+      studentRuntimeApiMock.fetchStudentApi.mock.calls.filter(
+        ([url]) => url.includes("personal-ai-generation-") && url.includes("?"),
+      ),
+    ).toHaveLength(historyReadCountBeforeSameSelection);
+  });
+
+  it("ignores delayed personal histories after switching to organization context", async () => {
+    const delayedPersonalRequest = createDeferred<unknown>();
+    const delayedPersonalResult = createDeferred<unknown>();
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createPersonalAndOrganizationAuthorizationListPayload(),
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        const authorizationPublicId = new URL(
+          url,
+          "https://tiku.local",
+        ).searchParams.get("authorizationPublicId");
+        if (authorizationPublicId === "authorization_context_ui_501") {
+          return url.includes("-requests?")
+            ? delayedPersonalRequest.promise
+            : delayedPersonalResult.promise;
+        }
+
+        if (
+          authorizationPublicId === "organization_authorization_context_ui_502"
+        ) {
+          return url.includes("-requests?")
+            ? { code: 0, message: "ok", data: [] }
+            : {
+                code: 0,
+                message: "ok",
+                data: {
+                  ...createResultHistoryPayload(),
+                  results: [
+                    {
+                      ...createResultHistoryPayload().results[0],
+                      contentReference: {
+                        ...createResultHistoryPayload().results[0]
+                          .contentReference,
+                        contentPreviewMasked: "organization history",
+                      },
+                    },
+                  ],
+                },
+              };
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+    const organizationContext = await screen.findByRole("radio", {
+      name: "组织授权 · 高级版 · 专卖 3级",
+    });
+    fireEvent.click(organizationContext);
+
+    expect(await screen.findByText("organization history")).toBeInTheDocument();
+
+    delayedPersonalRequest.resolve({
+      code: 0,
+      message: "ok",
+      data: createRequestHistoryPayload(),
+    });
+    delayedPersonalResult.resolve({
+      code: 0,
+      message: "ok",
+      data: {
+        ...createResultHistoryPayload(),
+        results: [
+          {
+            ...createResultHistoryPayload().results[0],
+            contentReference: {
+              ...createResultHistoryPayload().results[0].contentReference,
+              contentPreviewMasked: "stale personal history",
+            },
+          },
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("stale personal history"),
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("organization history")).toBeInTheDocument();
+  });
+
+  it("clears selected personal result and ignores its delayed detail after context switch", async () => {
+    const delayedPersonalDetail = createDeferred<unknown>();
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createPersonalAndOrganizationAuthorizationListPayload(),
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        if (url.includes("/personal_ai_result_public_ui_501?")) {
+          return delayedPersonalDetail.promise;
+        }
+
+        const authorizationPublicId = new URL(
+          url,
+          "https://tiku.local",
+        ).searchParams.get("authorizationPublicId");
+        if (url.includes("-requests?")) {
+          return { code: 0, message: "ok", data: [] };
+        }
+
+        if (
+          url.includes("-results?") &&
+          authorizationPublicId === "authorization_context_ui_501"
+        ) {
+          return {
+            code: 0,
+            message: "ok",
+            data: createResultHistoryPayload(),
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 11,
+              sortBy: "persistedAt",
+              sortOrder: "desc",
+            },
+          };
+        }
+
+        if (url.includes("-results?")) {
+          return {
+            code: 0,
+            message: "ok",
+            data: { ...createResultHistoryPayload(), results: [] },
+          };
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+    expect(
+      await screen.findByText("masked preview ui 501"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "查看结果详情" }));
+    expect(await screen.findByText("结果详情同步中")).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("radio", { name: "组织授权 · 高级版 · 专卖 3级" }),
+    );
+    expect(screen.queryByText("masked preview ui 501")).not.toBeInTheDocument();
+    expect(screen.queryByText("结果详情同步中")).not.toBeInTheDocument();
+
+    delayedPersonalDetail.resolve({
+      code: 0,
+      message: "ok",
+      data: createResultDetailPayload({
+        unsafeGeneratedEcho: "stale personal detail",
+      }),
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByText("stale personal detail"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("masked preview detail 501"),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("settles request then result pagination independently when their responses interleave", async () => {
+    const delayedRequestPage = createDeferred<unknown>();
+    const delayedResultPage = createDeferred<unknown>();
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        const requestUrl = new URL(url, "https://tiku.local");
+        const page = requestUrl.searchParams.get("page");
+        if (url.includes("-requests?")) {
+          if (page === "2") {
+            return delayedRequestPage.promise;
+          }
+
+          return {
+            code: 0,
+            message: "ok",
+            data: createRequestHistoryPayload(),
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 20,
+              sortBy: "requestedAt",
+              sortOrder: "desc",
+            },
+          };
+        }
+
+        if (url.includes("-results?")) {
+          if (page === "2") {
+            return delayedResultPage.promise;
+          }
+
+          return {
+            code: 0,
+            message: "ok",
+            data: createResultHistoryPayload(),
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 20,
+              sortBy: "persistedAt",
+              sortOrder: "desc",
+            },
+          };
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    const requestPagination = await screen.findByRole("navigation", {
+      name: "AI请求历史分页",
+    });
+    const resultPagination = await screen.findByRole("navigation", {
+      name: "AI生成结果历史分页",
+    });
+    fireEvent.click(
+      within(requestPagination).getByRole("button", { name: "下一页" }),
+    );
+    fireEvent.click(
+      within(resultPagination).getByRole("button", { name: "下一页" }),
+    );
+
+    delayedResultPage.resolve({
+      code: 0,
+      message: "ok",
+      data: {
+        ...createResultHistoryPayload(),
+        results: [
+          {
+            ...createResultHistoryPayload().results[0],
+            contentReference: {
+              ...createResultHistoryPayload().results[0].contentReference,
+              contentPreviewMasked: "result page two after request pagination",
+            },
+          },
+        ],
+      },
+      pagination: {
+        page: 2,
+        pageSize: 10,
+        total: 20,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(
+      await screen.findByText("result page two after request pagination"),
+    ).toBeInTheDocument();
+
+    delayedRequestPage.resolve({
+      code: 0,
+      message: "ok",
+      data: [
+        {
+          ...createRequestHistoryPayload()[0],
+          requestedAt: "2026-06-15T09:00:00.000Z",
+        },
+      ],
+      pagination: {
+        page: 2,
+        pageSize: 10,
+        total: 20,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
+    });
+
+    expect(await screen.findByText("2026年6月15日 17:00")).toBeInTheDocument();
+    expect(screen.queryByText("历史请求同步中")).not.toBeInTheDocument();
+    expect(screen.queryByText("结果历史同步中")).not.toBeInTheDocument();
+    expect(screen.queryByText("2026年6月14日 17:00")).not.toBeInTheDocument();
+    expect(screen.queryByText("masked preview ui 501")).not.toBeInTheDocument();
+  });
+
+  it("settles result then request pagination independently when their responses interleave", async () => {
+    const delayedRequestPage = createDeferred<unknown>();
+    const delayedResultPage = createDeferred<unknown>();
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        const requestUrl = new URL(url, "https://tiku.local");
+        const page = requestUrl.searchParams.get("page");
+        if (url.includes("-requests?")) {
+          if (page === "2") {
+            return delayedRequestPage.promise;
+          }
+
+          return {
+            code: 0,
+            message: "ok",
+            data: createRequestHistoryPayload(),
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 20,
+              sortBy: "requestedAt",
+              sortOrder: "desc",
+            },
+          };
+        }
+
+        if (url.includes("-results?")) {
+          if (page === "2") {
+            return delayedResultPage.promise;
+          }
+
+          return {
+            code: 0,
+            message: "ok",
+            data: createResultHistoryPayload(),
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 20,
+              sortBy: "persistedAt",
+              sortOrder: "desc",
+            },
+          };
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    const requestPagination = await screen.findByRole("navigation", {
+      name: "AI请求历史分页",
+    });
+    const resultPagination = await screen.findByRole("navigation", {
+      name: "AI生成结果历史分页",
+    });
+    fireEvent.click(
+      within(resultPagination).getByRole("button", { name: "下一页" }),
+    );
+    fireEvent.click(
+      within(requestPagination).getByRole("button", { name: "下一页" }),
+    );
+
+    delayedRequestPage.resolve({
+      code: 0,
+      message: "ok",
+      data: [
+        {
+          ...createRequestHistoryPayload()[0],
+          requestedAt: "2026-06-16T09:00:00.000Z",
+        },
+      ],
+      pagination: {
+        page: 2,
+        pageSize: 10,
+        total: 20,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(await screen.findByText("2026年6月16日 17:00")).toBeInTheDocument();
+
+    delayedResultPage.resolve({
+      code: 0,
+      message: "ok",
+      data: {
+        ...createResultHistoryPayload(),
+        results: [
+          {
+            ...createResultHistoryPayload().results[0],
+            contentReference: {
+              ...createResultHistoryPayload().results[0].contentReference,
+              contentPreviewMasked: "result page two before request pagination",
+            },
+          },
+        ],
+      },
+      pagination: {
+        page: 2,
+        pageSize: 10,
+        total: 20,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    });
+
+    expect(
+      await screen.findByText("result page two before request pagination"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("历史请求同步中")).not.toBeInTheDocument();
+    expect(screen.queryByText("结果历史同步中")).not.toBeInTheDocument();
+    expect(screen.queryByText("2026年6月14日 17:00")).not.toBeInTheDocument();
+    expect(screen.queryByText("masked preview ui 501")).not.toBeInTheDocument();
+  });
+
+  it("keeps the initial result load live while request pagination advances", async () => {
+    const delayedInitialResult = createDeferred<unknown>();
+    const delayedRequestPage = createDeferred<unknown>();
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        const requestUrl = new URL(url, "https://tiku.local");
+        const page = requestUrl.searchParams.get("page");
+        if (url.includes("-requests?")) {
+          if (page === "2") {
+            return delayedRequestPage.promise;
+          }
+
+          return {
+            code: 0,
+            message: "ok",
+            data: createRequestHistoryPayload(),
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 20,
+              sortBy: "requestedAt",
+              sortOrder: "desc",
+            },
+          };
+        }
+
+        if (url.includes("-results?")) {
+          return delayedInitialResult.promise;
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    const requestPagination = await screen.findByRole("navigation", {
+      name: "AI请求历史分页",
+    });
+    fireEvent.click(
+      within(requestPagination).getByRole("button", { name: "下一页" }),
+    );
+
+    delayedRequestPage.resolve({
+      code: 0,
+      message: "ok",
+      data: [
+        {
+          ...createRequestHistoryPayload()[0],
+          requestedAt: "2026-06-17T09:00:00.000Z",
+        },
+      ],
+      pagination: {
+        page: 2,
+        pageSize: 10,
+        total: 20,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(await screen.findByText("2026年6月17日 17:00")).toBeInTheDocument();
+
+    delayedInitialResult.resolve({
+      code: 0,
+      message: "ok",
+      data: {
+        ...createResultHistoryPayload(),
+        results: [
+          {
+            ...createResultHistoryPayload().results[0],
+            contentReference: {
+              ...createResultHistoryPayload().results[0].contentReference,
+              contentPreviewMasked:
+                "initial result completed after request page",
+            },
+          },
+        ],
+      },
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 1,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    });
+
+    expect(
+      await screen.findByText("initial result completed after request page"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("历史请求同步中")).not.toBeInTheDocument();
+    expect(screen.queryByText("结果历史同步中")).not.toBeInTheDocument();
   });
 
   it("ignores a stale history response after rapid mode switching", async () => {
@@ -896,7 +1590,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization_context_ui_501",
         "local-session-token",
         {
           method: "GET",
@@ -938,7 +1632,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
+        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization_context_ui_501",
         "local-session-token",
         {
           method: "GET",
@@ -1006,7 +1700,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501",
+        "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501?authorizationPublicId=authorization_context_ui_501",
         "local-session-token",
         {
           method: "GET",

@@ -25,6 +25,8 @@ const personalAiGenerationRequestRouteHandlers =
         createPostgresOrganizationTrainingRepository(),
       runtimeBridgeControl:
         createOwnerPreviewQwenPersonalRuntimeBridgeControl(),
+      authorizationRepository:
+        studentAuthorizationRedeemRuntimeRepositories.effectiveAuthorizationRepository,
       effectiveAuthorizationService: createEffectiveAuthorizationService(
         studentAuthorizationRedeemRuntimeRepositories.effectiveAuthorizationRepository,
       ),

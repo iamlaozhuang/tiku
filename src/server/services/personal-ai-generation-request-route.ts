@@ -41,7 +41,11 @@ import { isRouteIntegratedVisibleGeneratedContentAcceptableForDraft } from "./ro
 import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import type { SessionService } from "./session-service";
 import { resolveAndAssembleAiPaperFromRoute } from "./ai-paper-route-plan-select-wiring-service";
-import { selectAuthorizationObjectScope } from "./authorization-object-scope";
+import {
+  resolveEffectivePersonalAiGenerationAuthorizationContext,
+  resolveOwnedPersonalAiGenerationAuthorizationContext,
+  type PersonalAiGenerationAuthorizationOwnershipRepository,
+} from "./personal-ai-generation-authorization-context";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -64,11 +68,6 @@ type PersonalAiGenerationRequestRouteRepository = Pick<
       "countRequestHistory" | "createOrReuseRequest"
     >
   >;
-
-type PersonalAiGenerationRequestOwnerScope = {
-  ownerType: PersonalAiGenerationRequestOwnerType;
-  ownerPublicId: string;
-};
 
 type PersonalAiGenerationResultPublicIdInput = {
   taskPublicId: string;
@@ -101,6 +100,7 @@ export type PersonalAiGenerationRequestRouteDependencies = {
     EffectiveAuthorizationService,
     "listEffectiveAuthorizations"
   >;
+  authorizationRepository?: PersonalAiGenerationAuthorizationOwnershipRepository;
   now?: () => Date;
 };
 
@@ -167,25 +167,6 @@ function isPersonalAiGenerationRequestUserContext(
   return "userPublicId" in value;
 }
 
-function resolvePersonalAiGenerationRequestOwnerScope(
-  userContext: PersonalAiGenerationRequestUserContext,
-): PersonalAiGenerationRequestOwnerScope {
-  if (
-    userContext.userType === "employee" &&
-    userContext.organizationPublicId !== null
-  ) {
-    return {
-      ownerType: "organization",
-      ownerPublicId: userContext.organizationPublicId,
-    };
-  }
-
-  return {
-    ownerType: "personal",
-    ownerPublicId: userContext.userPublicId,
-  };
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -224,6 +205,7 @@ function normalizePositiveInteger(
 }
 
 function createPersonalAiGenerationHistoryQuery(request: Request): {
+  authorizationPublicId: string | null;
   taskType:
     | CreatePersonalAiGenerationRequestInput["taskType"]
     | undefined
@@ -251,6 +233,9 @@ function createPersonalAiGenerationHistoryQuery(request: Request): {
   );
 
   return {
+    authorizationPublicId: normalizeRequiredText(
+      searchParams.get("authorizationPublicId"),
+    ),
     taskType,
     page,
     pageSize,
@@ -420,31 +405,10 @@ function createRequestInputWithUserContext(
   input: unknown,
   userContext: PersonalAiGenerationRequestUserContext,
 ): Record<string, unknown> {
-  const authorizationContext =
-    userContext.userType === "employee" &&
-    userContext.organizationPublicId !== null
-      ? {
-          authorizationSource: "org_auth",
-          ownerType: "organization",
-          ownerPublicId: userContext.organizationPublicId,
-          organizationPublicId: userContext.organizationPublicId,
-          quotaOwnerType: "organization",
-          quotaOwnerPublicId: userContext.organizationPublicId,
-        }
-      : {
-          authorizationSource: "personal_auth",
-          ownerType: "personal",
-          ownerPublicId: userContext.userPublicId,
-          organizationPublicId: null,
-          quotaOwnerType: "personal",
-          quotaOwnerPublicId: userContext.userPublicId,
-        };
-
   return {
     ...(isRecord(input) ? input : {}),
     userPublicId: userContext.userPublicId,
     actorPublicId: userContext.userPublicId,
-    ...authorizationContext,
   };
 }
 
@@ -468,153 +432,71 @@ function createServerOwnedLocalBrowserRequestInput(
   };
 }
 
-function readAuthorizationContexts(
-  responseData: Awaited<
-    ReturnType<EffectiveAuthorizationService["listEffectiveAuthorizations"]>
-  >["data"],
-): EffectiveAuthorizationContextDto[] {
-  return responseData?.authorizationContexts ?? [];
-}
-
-function hasPersonalAiGenerationCapability(
-  authorizationContext: EffectiveAuthorizationContextDto,
-  taskType: CreatePersonalAiGenerationRequestInput["taskType"],
-): boolean {
-  return taskType === "ai_question_generation"
-    ? authorizationContext.capabilities.canGenerateAiQuestion
-    : authorizationContext.capabilities.canGenerateAiPaper;
-}
-
-function matchesPersonalAiGenerationUserBoundary(
-  authorizationContext: EffectiveAuthorizationContextDto,
-  userContext: PersonalAiGenerationRequestUserContext,
-): boolean {
-  if (userContext.userType === "personal") {
-    return (
-      authorizationContext.authorizationSource === "personal_auth" &&
-      authorizationContext.ownerType === "personal" &&
-      authorizationContext.ownerPublicId === userContext.userPublicId &&
-      authorizationContext.organizationPublicId === null &&
-      authorizationContext.quotaOwnerType === "personal" &&
-      authorizationContext.quotaOwnerPublicId === userContext.userPublicId
-    );
-  }
-
-  if (userContext.organizationPublicId === null) {
-    return false;
-  }
-
-  return (
-    authorizationContext.authorizationSource === "org_auth" &&
-    authorizationContext.ownerType === "organization" &&
-    authorizationContext.ownerPublicId === userContext.organizationPublicId &&
-    authorizationContext.organizationPublicId ===
-      userContext.organizationPublicId &&
-    authorizationContext.quotaOwnerType === "organization" &&
-    authorizationContext.quotaOwnerPublicId === userContext.organizationPublicId
-  );
-}
-
-function isUsablePersonalAiGenerationAuthorizationContext(
-  authorizationContext: EffectiveAuthorizationContextDto,
-  input: {
-    userContext: PersonalAiGenerationRequestUserContext;
-    authorizationPublicId: string;
-    taskType: CreatePersonalAiGenerationRequestInput["taskType"];
-  },
-): boolean {
-  const isRuntimeBlockedReasonAllowed =
-    authorizationContext.blockedReason === null ||
-    authorizationContext.blockedReason === "production_enablement_blocked";
-
-  return (
-    authorizationContext.authorizationPublicId ===
-      input.authorizationPublicId &&
-    authorizationContext.effectiveEdition === "advanced" &&
-    isRuntimeBlockedReasonAllowed &&
-    hasPersonalAiGenerationCapability(authorizationContext, input.taskType) &&
-    matchesPersonalAiGenerationUserBoundary(
-      authorizationContext,
-      input.userContext,
-    )
-  );
-}
-
 type PersonalAiGenerationRequestedAuthorizationScope = {
   profession: Profession;
   level: number;
 };
 
+type PersonalAiGenerationRequestedAuthorizationScopeReadResult =
+  | { status: "absent" }
+  | { status: "invalid" }
+  | {
+      status: "valid";
+      scope: PersonalAiGenerationRequestedAuthorizationScope;
+    };
+
+function normalizePersonalAiGenerationRequestedAuthorizationLevel(
+  value: unknown,
+): number | null {
+  const parsedLevel =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : null;
+
+  return parsedLevel === 1 ||
+    parsedLevel === 2 ||
+    parsedLevel === 3 ||
+    parsedLevel === 4 ||
+    parsedLevel === 5
+    ? parsedLevel
+    : null;
+}
+
 function readPersonalAiGenerationRequestedAuthorizationScope(
   requestInput: Record<string, unknown>,
-): PersonalAiGenerationRequestedAuthorizationScope | null {
+): PersonalAiGenerationRequestedAuthorizationScopeReadResult {
   const generationParameters = requestInput.generationParameters;
 
+  if (generationParameters === null || generationParameters === undefined) {
+    return { status: "absent" };
+  }
+
   if (!isRecord(generationParameters)) {
-    return null;
+    return { status: "invalid" };
   }
 
   const profession = generationParameters.profession;
-  const level = generationParameters.level;
+  const level = normalizePersonalAiGenerationRequestedAuthorizationLevel(
+    generationParameters.level,
+  );
 
   if (
     typeof profession !== "string" ||
     !professionValues.includes(profession as Profession) ||
-    typeof level !== "number" ||
-    !Number.isInteger(level) ||
-    level < 1
+    level === null
   ) {
-    return null;
+    return { status: "invalid" };
   }
 
   return {
-    profession: profession as Profession,
-    level,
+    status: "valid",
+    scope: {
+      profession: profession as Profession,
+      level,
+    },
   };
-}
-
-function selectPersonalAiGenerationAuthorizationContext(input: {
-  authorizationContexts: EffectiveAuthorizationContextDto[];
-  authorizationPublicId: string;
-  requestedScope: PersonalAiGenerationRequestedAuthorizationScope | null;
-  taskType: CreatePersonalAiGenerationRequestInput["taskType"];
-  userContext: PersonalAiGenerationRequestUserContext;
-}): EffectiveAuthorizationContextDto | null {
-  if (input.requestedScope === null) {
-    return (
-      input.authorizationContexts.find((authorizationContext) =>
-        isUsablePersonalAiGenerationAuthorizationContext(authorizationContext, {
-          userContext: input.userContext,
-          authorizationPublicId: input.authorizationPublicId,
-          taskType: input.taskType,
-        }),
-      ) ?? null
-    );
-  }
-
-  const isEmployee = input.userContext.userType === "employee";
-  const ownerPublicId = isEmployee
-    ? input.userContext.organizationPublicId
-    : input.userContext.userPublicId;
-
-  if (ownerPublicId === null) {
-    return null;
-  }
-
-  return selectAuthorizationObjectScope(input.authorizationContexts, {
-    authorizationPublicId: input.authorizationPublicId,
-    authorizationSource: isEmployee ? "org_auth" : "personal_auth",
-    ownerType: isEmployee ? "organization" : "personal",
-    ownerPublicId,
-    organizationPublicId: isEmployee ? ownerPublicId : null,
-    profession: input.requestedScope.profession,
-    level: input.requestedScope.level,
-    requiredCapability:
-      input.taskType === "ai_question_generation"
-        ? "canGenerateAiQuestion"
-        : "canGenerateAiPaper",
-    allowedBlockedReasons: ["production_enablement_blocked"],
-  });
 }
 
 function createRequestInputWithEffectiveAuthorizationContext(
@@ -640,11 +522,18 @@ async function resolvePersonalAiGenerationAuthorizationContext(input: {
   effectiveAuthorizationService:
     | Pick<EffectiveAuthorizationService, "listEffectiveAuthorizations">
     | undefined;
-}): Promise<EffectiveAuthorizationContextDto | null | undefined> {
+  authorizationRepository:
+    | PersonalAiGenerationAuthorizationOwnershipRepository
+    | undefined;
+}): Promise<EffectiveAuthorizationContextDto | null> {
   const effectiveAuthorizationService = input.effectiveAuthorizationService;
+  const authorizationRepository = input.authorizationRepository;
 
-  if (effectiveAuthorizationService === undefined) {
-    return undefined;
+  if (
+    effectiveAuthorizationService === undefined ||
+    authorizationRepository === undefined
+  ) {
+    return null;
   }
 
   const authorizationPublicId = normalizeRequiredText(
@@ -659,25 +548,21 @@ async function resolvePersonalAiGenerationAuthorizationContext(input: {
     return null;
   }
 
-  const authorizationResponse =
-    await effectiveAuthorizationService.listEffectiveAuthorizations({
-      userPublicId: input.userContext.userPublicId,
-    });
+  const requestedScope = readPersonalAiGenerationRequestedAuthorizationScope(
+    input.requestInput,
+  );
 
-  if (authorizationResponse.code !== 0) {
+  if (requestedScope.status !== "valid") {
     return null;
   }
 
-  return selectPersonalAiGenerationAuthorizationContext({
-    authorizationContexts: readAuthorizationContexts(
-      authorizationResponse.data,
-    ),
+  return resolveEffectivePersonalAiGenerationAuthorizationContext({
     authorizationPublicId,
-    requestedScope: readPersonalAiGenerationRequestedAuthorizationScope(
-      input.requestInput,
-    ),
+    requestedScope: requestedScope.scope,
     taskType,
     userContext: input.userContext,
+    authorizationRepository,
+    effectiveAuthorizationService,
   });
 }
 
@@ -754,16 +639,16 @@ function createPersistentRequestInput(
   const requestedAuthorizationScope =
     readPersonalAiGenerationRequestedAuthorizationScope(input);
   const idempotencyKeyHash =
-    requestedAuthorizationScope === null
+    requestedAuthorizationScope.status !== "valid"
       ? clientIdempotencyKeyHash
       : createAuthorizationScopedIdempotencyKeyHash({
           authorizationPublicId,
           clientIdempotencyKeyHash,
-          level: requestedAuthorizationScope.level,
+          level: requestedAuthorizationScope.scope.level,
           organizationPublicId,
           ownerPublicId,
           ownerType,
-          profession: requestedAuthorizationScope.profession,
+          profession: requestedAuthorizationScope.scope.profession,
           taskType,
         });
 
@@ -1127,6 +1012,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
     dependencies.requestRepository ?? emptyRequestRepository;
   const effectiveAuthorizationService =
     dependencies.effectiveAuthorizationService;
+  const authorizationRepository = dependencies.authorizationRepository;
   const now = dependencies.now ?? (() => new Date());
 
   return createRouteHandlersWithErrorEnvelope({
@@ -1146,7 +1032,10 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             const historyQuery =
               createPersonalAiGenerationHistoryQuery(request);
 
-            if (historyQuery.taskType === null) {
+            if (
+              historyQuery.authorizationPublicId === null ||
+              historyQuery.taskType === null
+            ) {
               return createJsonResponse(
                 createErrorResponse(
                   400016,
@@ -1155,11 +1044,35 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               );
             }
 
-            const ownerScope =
-              resolvePersonalAiGenerationRequestOwnerScope(userContext);
+            if (authorizationRepository === undefined) {
+              return createJsonResponse(
+                createErrorResponse(
+                  PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
+                  PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_MESSAGE,
+                ),
+              );
+            }
+
+            const authorizationContext =
+              await resolveOwnedPersonalAiGenerationAuthorizationContext({
+                authorizationPublicId: historyQuery.authorizationPublicId,
+                userContext,
+                authorizationRepository,
+              });
+
+            if (authorizationContext === null) {
+              return createJsonResponse(
+                createErrorResponse(
+                  PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
+                  PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_MESSAGE,
+                ),
+              );
+            }
+
             const history = await requestRepository.listRequestHistory({
-              ownerType: ownerScope.ownerType,
-              ownerPublicId: ownerScope.ownerPublicId,
+              authorizationPublicId: authorizationContext.authorizationPublicId,
+              ownerType: authorizationContext.ownerType,
+              ownerPublicId: authorizationContext.ownerPublicId,
               actorPublicId: userContext.userPublicId,
               taskType: historyQuery.taskType,
               page: historyQuery.page,
@@ -1171,8 +1084,10 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               requestRepository.countRequestHistory === undefined
                 ? history.length
                 : await requestRepository.countRequestHistory({
-                    ownerType: ownerScope.ownerType,
-                    ownerPublicId: ownerScope.ownerPublicId,
+                    authorizationPublicId:
+                      authorizationContext.authorizationPublicId,
+                    ownerType: authorizationContext.ownerType,
+                    ownerPublicId: authorizationContext.ownerPublicId,
                     actorPublicId: userContext.userPublicId,
                     taskType: historyQuery.taskType,
                   });
@@ -1227,6 +1142,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                 requestInput,
                 userContext,
                 effectiveAuthorizationService,
+                authorizationRepository,
               });
 
             if (authorizationContext === null) {
@@ -1239,12 +1155,10 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             }
 
             const authorizedRequestInput =
-              authorizationContext === undefined
-                ? requestInput
-                : createRequestInputWithEffectiveAuthorizationContext(
-                    requestInput,
-                    authorizationContext,
-                  );
+              createRequestInputWithEffectiveAuthorizationContext(
+                requestInput,
+                authorizationContext,
+              );
             const serverOwnedRequestInput =
               createServerOwnedLocalBrowserRequestInput(authorizedRequestInput);
             const localBrowserRequestInput =

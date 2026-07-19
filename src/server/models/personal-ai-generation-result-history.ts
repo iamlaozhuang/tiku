@@ -12,6 +12,7 @@ export type PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus =
   "blocked_without_follow_up_task";
 
 export type PersonalAiGenerationResultHistoryQuery = {
+  authorizationPublicId: string;
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
   actorPublicId?: string;
@@ -23,6 +24,7 @@ export type PersonalAiGenerationResultHistoryQuery = {
 };
 
 export type PersonalAiGenerationResultDetailQuery = {
+  authorizationPublicId: string;
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
   actorPublicId?: string;

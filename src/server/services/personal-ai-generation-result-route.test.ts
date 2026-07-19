@@ -1,11 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
-import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type {
+  EffectiveOrgAuthRow,
+  EffectivePersonalAuthRow,
+} from "../repositories/effective-authorization-repository";
+import type {
+  GetPersonalAiGenerationResultQuery,
+  ListPersonalAiGenerationResultQuery,
+  PersonalAiGenerationResultRepository,
+} from "../repositories/personal-ai-generation-result-repository";
+import type { PersonalAiGenerationAuthorizationOwnershipRepository } from "./personal-ai-generation-authorization-context";
 import { SESSION_COOKIE_NAME } from "../auth/session-cookie";
 import {
   createPersonalAiGenerationResultRouteHandlers,
   createPersonalAiGenerationResultUserResolver,
+  type PersonalAiGenerationResultRouteDependencies,
 } from "./personal-ai-generation-result-route";
 import type { SessionService } from "./session-service";
 
@@ -22,6 +32,9 @@ const employeeUserContext = {
   employeePublicId: "employee_public_123",
   organizationPublicId: "organization_public_123",
 } as const;
+
+const personalAuthorizationPublicId = "personal_auth_result_public_401";
+const organizationAuthorizationPublicId = "org_auth_result_public_402";
 
 function createGetRequest(query = ""): Request {
   return new Request(
@@ -78,8 +91,12 @@ function createResultRepository(
   options: {
     listError?: Error;
   } = {},
-): Pick<PersonalAiGenerationResultRepository, "listDraftResults"> & {
+): Pick<
+  PersonalAiGenerationResultRepository,
+  "countDraftResults" | "listDraftResults"
+> & {
   calls: Array<{
+    authorizationPublicId: string;
     ownerPublicId: string;
     actorPublicId?: string;
     taskType?: string;
@@ -88,8 +105,13 @@ function createResultRepository(
     limit?: number;
     offset?: number;
   }>;
+  detailCalls: GetPersonalAiGenerationResultQuery[];
+  findDraftResultByPublicId(
+    query: GetPersonalAiGenerationResultQuery,
+  ): Promise<PersonalAiGenerationResultDto | null>;
 } {
   const calls: Array<{
+    authorizationPublicId: string;
     ownerPublicId: string;
     actorPublicId?: string;
     taskType?: string;
@@ -98,9 +120,11 @@ function createResultRepository(
     limit?: number;
     offset?: number;
   }> = [];
+  const detailCalls: GetPersonalAiGenerationResultQuery[] = [];
 
   return {
     calls,
+    detailCalls,
     async listDraftResults(query) {
       calls.push(query);
 
@@ -109,6 +133,128 @@ function createResultRepository(
       }
 
       return results;
+    },
+    async countDraftResults() {
+      return results.length;
+    },
+    async findDraftResultByPublicId(query) {
+      detailCalls.push(query);
+
+      if (options.listError !== undefined) {
+        throw options.listError;
+      }
+
+      return (
+        results.find(
+          (result) => result.resultPublicId === query.resultPublicId,
+        ) ?? null
+      );
+    },
+  };
+}
+
+function createPersonalAuthorizationRow(
+  overrides: Partial<EffectivePersonalAuthRow> = {},
+): EffectivePersonalAuthRow {
+  return {
+    id: 401,
+    public_id: personalAuthorizationPublicId,
+    edition: "advanced",
+    profession: "monopoly",
+    level: 3,
+    starts_at: new Date("2026-07-01T00:00:00.000Z"),
+    expires_at: new Date("2026-08-01T00:00:00.000Z"),
+    status: "active",
+    ...overrides,
+  };
+}
+
+function createOrganizationAuthorizationRow(
+  overrides: Partial<EffectiveOrgAuthRow> = {},
+): EffectiveOrgAuthRow {
+  return {
+    id: 402,
+    public_id: organizationAuthorizationPublicId,
+    organization_public_id: employeeUserContext.organizationPublicId,
+    organization_name: "Synthetic organization",
+    organization_status: "active",
+    edition: "advanced",
+    profession: "monopoly",
+    level: 3,
+    starts_at: new Date("2026-07-01T00:00:00.000Z"),
+    expires_at: new Date("2026-08-01T00:00:00.000Z"),
+    status: "active",
+    ...overrides,
+  };
+}
+
+function createAuthorizationRepository(input: {
+  personalAuths?: EffectivePersonalAuthRow[];
+  orgAuths?: EffectiveOrgAuthRow[];
+}): PersonalAiGenerationAuthorizationOwnershipRepository {
+  return {
+    async listPersonalAuthsByUserPublicId() {
+      return input.personalAuths ?? [];
+    },
+    async listOrgAuthsByUserPublicId() {
+      return input.orgAuths ?? [];
+    },
+  };
+}
+
+function createTestResultRouteHandlers(
+  resolveUserContext: Parameters<
+    typeof createPersonalAiGenerationResultRouteHandlers
+  >[0],
+  dependencies: Parameters<
+    typeof createPersonalAiGenerationResultRouteHandlers
+  >[1] = {},
+) {
+  return createPersonalAiGenerationResultRouteHandlers(resolveUserContext, {
+    authorizationRepository: createAuthorizationRepository({
+      personalAuths: [createPersonalAuthorizationRow()],
+      orgAuths: [createOrganizationAuthorizationRow()],
+    }),
+    ...dependencies,
+  });
+}
+
+function createExactResultRepository(input: {
+  results?: Array<{
+    authorizationPublicId: string;
+    result: PersonalAiGenerationResultDto;
+  }>;
+}) {
+  const listCalls: ListPersonalAiGenerationResultQuery[] = [];
+  const detailCalls: GetPersonalAiGenerationResultQuery[] = [];
+  const results = input.results ?? [];
+
+  return {
+    listCalls,
+    detailCalls,
+    async listDraftResults(query: ListPersonalAiGenerationResultQuery) {
+      listCalls.push(query);
+      return results
+        .filter(
+          (entry) =>
+            entry.authorizationPublicId === query.authorizationPublicId,
+        )
+        .map((entry) => entry.result);
+    },
+    async countDraftResults(query: ListPersonalAiGenerationResultQuery) {
+      return results.filter(
+        (entry) => entry.authorizationPublicId === query.authorizationPublicId,
+      ).length;
+    },
+    async findDraftResultByPublicId(query: GetPersonalAiGenerationResultQuery) {
+      detailCalls.push(query);
+      return (
+        results.find(
+          (entry) =>
+            entry.authorizationPublicId === query.authorizationPublicId &&
+            entry.result.resultPublicId === query.resultPublicId,
+        )?.result ?? null
+      );
     },
   };
 }
@@ -160,6 +306,301 @@ function getResultDetailRouteHandler(detail: unknown) {
 }
 
 describe("personal AI generation result route handlers", () => {
+  it.each(["", "   "])(
+    "rejects missing or empty selected authorization %j before result history access",
+    async (authorizationPublicId) => {
+      const resultRepository = createExactResultRepository({});
+      const { collection } = createPersonalAiGenerationResultRouteHandlers(
+        async () => employeeUserContext,
+        {
+          resultRepository,
+          authorizationRepository: createAuthorizationRepository({
+            personalAuths: [createPersonalAuthorizationRow()],
+          }),
+        },
+      );
+      const query =
+        authorizationPublicId.length === 0
+          ? ""
+          : `?authorizationPublicId=${encodeURIComponent(authorizationPublicId)}`;
+
+      const response = await getResultHistoryRouteHandler(collection)(
+        createGetRequest(query),
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: 400044,
+        message: "Invalid personal AI generation result history input.",
+        data: null,
+      });
+      expect(resultRepository.listCalls).toEqual([]);
+    },
+  );
+
+  it("fails closed when the canonical result handler lacks raw ownership dependencies", async () => {
+    const resultRepository = createExactResultRepository({});
+    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      { resultRepository },
+    );
+
+    const response = await getResultHistoryRouteHandler(collection)(
+      createGetRequest(
+        "?authorizationPublicId=personal_auth_result_public_401",
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(resultRepository.listCalls).toEqual([]);
+  });
+
+  it("fails closed when the canonical result detail handler lacks exact lookup", async () => {
+    const listDraftResults = vi.fn(async () => []);
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      {
+        resultRepository: {
+          listDraftResults,
+        } as unknown as PersonalAiGenerationResultRouteDependencies["resultRepository"],
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [createPersonalAuthorizationRow()],
+        }),
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest(
+        "personal_ai_result_public_route_detail",
+        `?authorizationPublicId=${personalAuthorizationPublicId}`,
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_route_detail",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(listDraftResults).not.toHaveBeenCalled();
+  });
+
+  it.each(["", "   "])(
+    "rejects missing or empty selected authorization %j before result detail access",
+    async (authorizationPublicId) => {
+      const resultRepository = createExactResultRepository({});
+      const { detail } = createPersonalAiGenerationResultRouteHandlers(
+        async () => employeeUserContext,
+        {
+          resultRepository,
+          authorizationRepository: createAuthorizationRepository({
+            personalAuths: [createPersonalAuthorizationRow()],
+          }),
+        },
+      );
+      const query =
+        authorizationPublicId.length === 0
+          ? ""
+          : `?authorizationPublicId=${encodeURIComponent(authorizationPublicId)}`;
+
+      const response = await getResultDetailRouteHandler(detail)(
+        createDetailGetRequest("personal_ai_result_public_route_detail", query),
+        {
+          params: Promise.resolve({
+            publicId: "personal_ai_result_public_route_detail",
+          }),
+        },
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: 400045,
+        message: "Invalid personal AI generation result detail input.",
+        data: null,
+      });
+      expect(resultRepository.listCalls).toEqual([]);
+      expect(resultRepository.detailCalls).toEqual([]);
+    },
+  );
+
+  it("rejects a foreign selected authorization before result detail access", async () => {
+    const resultRepository = createExactResultRepository({});
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      {
+        resultRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [createPersonalAuthorizationRow()],
+          orgAuths: [createOrganizationAuthorizationRow()],
+        }),
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest(
+        "personal_ai_result_public_route_detail",
+        "?authorizationPublicId=foreign_auth_public_999",
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_route_detail",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(resultRepository.listCalls).toEqual([]);
+    expect(resultRepository.detailCalls).toEqual([]);
+  });
+
+  it.each([
+    {
+      name: "employee personal",
+      authorizationPublicId: "personal_auth_result_public_401",
+      expectedOwnerType: "personal",
+      expectedOwnerPublicId: employeeUserContext.userPublicId,
+    },
+    {
+      name: "employee organization",
+      authorizationPublicId: "org_auth_result_public_402",
+      expectedOwnerType: "organization",
+      expectedOwnerPublicId: employeeUserContext.organizationPublicId,
+    },
+  ])(
+    "derives $name history owner from the exact raw authorization",
+    async ({
+      authorizationPublicId,
+      expectedOwnerType,
+      expectedOwnerPublicId,
+    }) => {
+      const resultRepository = createExactResultRepository({});
+      const { collection } = createPersonalAiGenerationResultRouteHandlers(
+        async () => employeeUserContext,
+        {
+          resultRepository,
+          authorizationRepository: createAuthorizationRepository({
+            personalAuths: [createPersonalAuthorizationRow()],
+            orgAuths: [createOrganizationAuthorizationRow()],
+          }),
+        },
+      );
+
+      const response = await getResultHistoryRouteHandler(collection)(
+        createGetRequest(
+          `?authorizationPublicId=${encodeURIComponent(authorizationPublicId)}`,
+        ),
+      );
+
+      expect((await response.json()).code).toBe(0);
+      expect(resultRepository.listCalls).toEqual([
+        expect.objectContaining({
+          authorizationPublicId,
+          ownerType: expectedOwnerType,
+          ownerPublicId: expectedOwnerPublicId,
+          actorPublicId: employeeUserContext.userPublicId,
+        }),
+      ]);
+    },
+  );
+
+  it("rejects a foreign selected authorization before result history access", async () => {
+    const resultRepository = createExactResultRepository({});
+    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      {
+        resultRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [createPersonalAuthorizationRow()],
+          orgAuths: [createOrganizationAuthorizationRow()],
+        }),
+      },
+    );
+
+    const response = await getResultHistoryRouteHandler(collection)(
+      createGetRequest("?authorizationPublicId=foreign_auth_public_999"),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(resultRepository.listCalls).toEqual([]);
+  });
+
+  it("returns 404 for a detail owned under another authorization without loading history", async () => {
+    const result = createResult({
+      resultPublicId: "personal_ai_result_other_authorization",
+    });
+    const selectedAuthorizationPublicId =
+      "personal_auth_result_public_selected";
+    const resultRepository = createExactResultRepository({
+      results: [
+        {
+          authorizationPublicId: "personal_auth_result_public_other",
+          result,
+        },
+      ],
+    });
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      {
+        resultRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [
+            createPersonalAuthorizationRow({
+              public_id: selectedAuthorizationPublicId,
+            }),
+            createPersonalAuthorizationRow({
+              id: 403,
+              public_id: "personal_auth_result_public_other",
+            }),
+          ],
+        }),
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest(
+        result.resultPublicId,
+        `?authorizationPublicId=${selectedAuthorizationPublicId}`,
+      ),
+      {
+        params: Promise.resolve({ publicId: result.resultPublicId }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 404045,
+      message: "Personal AI generation result detail was not found.",
+      data: null,
+    });
+    expect(resultRepository.listCalls).toEqual([]);
+    expect(resultRepository.detailCalls).toEqual([
+      {
+        authorizationPublicId: selectedAuthorizationPublicId,
+        ownerType: "personal",
+        ownerPublicId: employeeUserContext.userPublicId,
+        actorPublicId: employeeUserContext.userPublicId,
+        resultPublicId: result.resultPublicId,
+      },
+    ]);
+  });
+
   it("resolves personal user public id from the local session runtime", async () => {
     const observedAuthorizationValues: Array<string | null | undefined> = [];
     const sessionService: Pick<SessionService, "getCurrentSession"> = {
@@ -310,9 +751,7 @@ describe("personal AI generation result route handlers", () => {
   });
 
   it("rejects non-personal sessions from the personal result history path", async () => {
-    const { collection } = createPersonalAiGenerationResultRouteHandlers(
-      async () => null,
-    );
+    const { collection } = createTestResultRouteHandlers(async () => null);
 
     const response =
       await getResultHistoryRouteHandler(collection)(createGetRequest());
@@ -332,7 +771,7 @@ describe("personal AI generation result route handlers", () => {
         omittedFixture: omittedText,
       }),
     ]);
-    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+    const { collection } = createTestResultRouteHandlers(
       async () => userContext,
       {
         resultRepository,
@@ -341,7 +780,7 @@ describe("personal AI generation result route handlers", () => {
 
     const response = await getResultHistoryRouteHandler(collection)(
       createGetRequest(
-        `?userPublicId=${staleQueryUserPublicId}&id=701&limit=5`,
+        `?authorizationPublicId=${personalAuthorizationPublicId}&userPublicId=${staleQueryUserPublicId}&id=701&limit=5`,
       ),
     );
     const payload = await response.json();
@@ -394,6 +833,7 @@ describe("personal AI generation result route handlers", () => {
     });
     expect(resultRepository.calls).toEqual([
       {
+        authorizationPublicId: personalAuthorizationPublicId,
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
@@ -412,7 +852,7 @@ describe("personal AI generation result route handlers", () => {
   it("queries employee result history with the organization owner scope", async () => {
     const staleQueryUserPublicId = "query_stale_employee_result_public_999";
     const resultRepository = createResultRepository();
-    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+    const { collection } = createTestResultRouteHandlers(
       async () => employeeUserContext,
       {
         resultRepository,
@@ -421,7 +861,7 @@ describe("personal AI generation result route handlers", () => {
 
     const response = await getResultHistoryRouteHandler(collection)(
       createGetRequest(
-        `?userPublicId=${staleQueryUserPublicId}&taskType=ai_paper_generation&page=2&pageSize=5`,
+        `?authorizationPublicId=${organizationAuthorizationPublicId}&userPublicId=${staleQueryUserPublicId}&taskType=ai_paper_generation&page=2&pageSize=5`,
       ),
     );
     const payload = await response.json();
@@ -440,6 +880,7 @@ describe("personal AI generation result route handlers", () => {
     });
     expect(resultRepository.calls).toEqual([
       {
+        authorizationPublicId: organizationAuthorizationPublicId,
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
         actorPublicId: employeeUserContext.userPublicId,
@@ -455,7 +896,7 @@ describe("personal AI generation result route handlers", () => {
 
   it("passes task type and pagination query to personal result history repository", async () => {
     const resultRepository = createResultRepository([]);
-    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+    const { collection } = createTestResultRouteHandlers(
       async () => userContext,
       {
         resultRepository,
@@ -463,12 +904,15 @@ describe("personal AI generation result route handlers", () => {
     );
 
     const response = await getResultHistoryRouteHandler(collection)(
-      createGetRequest("?taskType=ai_paper_generation&page=2&pageSize=5"),
+      createGetRequest(
+        `?authorizationPublicId=${personalAuthorizationPublicId}&taskType=ai_paper_generation&page=2&pageSize=5`,
+      ),
     );
     const payload = await response.json();
 
     expect(resultRepository.calls).toEqual([
       {
+        authorizationPublicId: personalAuthorizationPublicId,
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
@@ -494,7 +938,7 @@ describe("personal AI generation result route handlers", () => {
 
   it("rejects invalid limit input before touching the repository", async () => {
     const resultRepository = createResultRepository();
-    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+    const { collection } = createTestResultRouteHandlers(
       async () => userContext,
       {
         resultRepository,
@@ -502,7 +946,9 @@ describe("personal AI generation result route handlers", () => {
     );
 
     const response = await getResultHistoryRouteHandler(collection)(
-      createGetRequest("?limit=invalid"),
+      createGetRequest(
+        `?authorizationPublicId=${personalAuthorizationPublicId}&limit=invalid`,
+      ),
     );
 
     await expect(response.json()).resolves.toEqual({
@@ -517,15 +963,18 @@ describe("personal AI generation result route handlers", () => {
     const resultRepository = createResultRepository([], {
       listError: new Error("database stack with internal connection details"),
     });
-    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+    const { collection } = createTestResultRouteHandlers(
       async () => userContext,
       {
         resultRepository,
       },
     );
 
-    const response =
-      await getResultHistoryRouteHandler(collection)(createGetRequest());
+    const response = await getResultHistoryRouteHandler(collection)(
+      createGetRequest(
+        `?authorizationPublicId=${personalAuthorizationPublicId}`,
+      ),
+    );
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
@@ -552,17 +1001,14 @@ describe("personal AI generation result route handlers", () => {
         [generatedContentKey]: omittedGeneratedText,
       }),
     ]);
-    const { detail } = createPersonalAiGenerationResultRouteHandlers(
-      async () => userContext,
-      {
-        resultRepository,
-      },
-    );
+    const { detail } = createTestResultRouteHandlers(async () => userContext, {
+      resultRepository,
+    });
 
     const response = await getResultDetailRouteHandler(detail)(
       createDetailGetRequest(
         "personal_ai_result_public_route_detail",
-        `?userPublicId=${staleQueryUserPublicId}&id=701`,
+        `?authorizationPublicId=${personalAuthorizationPublicId}&userPublicId=${staleQueryUserPublicId}&id=701`,
       ),
       {
         params: Promise.resolve({
@@ -609,16 +1055,13 @@ describe("personal AI generation result route handlers", () => {
         },
       },
     });
-    expect(resultRepository.calls).toEqual([
+    expect(resultRepository.detailCalls).toEqual([
       {
+        authorizationPublicId: personalAuthorizationPublicId,
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
-        taskType: undefined,
-        page: undefined,
-        pageSize: undefined,
-        limit: undefined,
-        offset: undefined,
+        resultPublicId: "personal_ai_result_public_route_detail",
       },
     ]);
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
@@ -633,7 +1076,7 @@ describe("personal AI generation result route handlers", () => {
         resultPublicId: "personal_ai_result_public_employee_detail",
       }),
     ]);
-    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+    const { detail } = createTestResultRouteHandlers(
       async () => employeeUserContext,
       {
         resultRepository,
@@ -641,7 +1084,10 @@ describe("personal AI generation result route handlers", () => {
     );
 
     const response = await getResultDetailRouteHandler(detail)(
-      createDetailGetRequest("personal_ai_result_public_employee_detail"),
+      createDetailGetRequest(
+        "personal_ai_result_public_employee_detail",
+        `?authorizationPublicId=${organizationAuthorizationPublicId}`,
+      ),
       {
         params: Promise.resolve({
           publicId: "personal_ai_result_public_employee_detail",
@@ -659,24 +1105,19 @@ describe("personal AI generation result route handlers", () => {
         },
       },
     });
-    expect(resultRepository.calls).toEqual([
+    expect(resultRepository.detailCalls).toEqual([
       {
+        authorizationPublicId: organizationAuthorizationPublicId,
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
         actorPublicId: employeeUserContext.userPublicId,
-        taskType: undefined,
-        page: undefined,
-        pageSize: undefined,
-        limit: undefined,
-        offset: undefined,
+        resultPublicId: "personal_ai_result_public_employee_detail",
       },
     ]);
   });
 
   it("rejects non-personal sessions from the personal result detail path", async () => {
-    const { detail } = createPersonalAiGenerationResultRouteHandlers(
-      async () => null,
-    );
+    const { detail } = createTestResultRouteHandlers(async () => null);
 
     const response = await getResultDetailRouteHandler(detail)(
       createDetailGetRequest("personal_ai_result_public_route_detail"),
@@ -700,15 +1141,15 @@ describe("personal AI generation result route handlers", () => {
         resultPublicId: "personal_ai_result_public_route_other",
       }),
     ]);
-    const { detail } = createPersonalAiGenerationResultRouteHandlers(
-      async () => userContext,
-      {
-        resultRepository,
-      },
-    );
+    const { detail } = createTestResultRouteHandlers(async () => userContext, {
+      resultRepository,
+    });
 
     const response = await getResultDetailRouteHandler(detail)(
-      createDetailGetRequest("personal_ai_result_public_route_missing"),
+      createDetailGetRequest(
+        "personal_ai_result_public_route_missing",
+        `?authorizationPublicId=${personalAuthorizationPublicId}`,
+      ),
       {
         params: Promise.resolve({
           publicId: "personal_ai_result_public_route_missing",
@@ -721,16 +1162,13 @@ describe("personal AI generation result route handlers", () => {
       message: "Personal AI generation result detail was not found.",
       data: null,
     });
-    expect(resultRepository.calls).toEqual([
+    expect(resultRepository.detailCalls).toEqual([
       {
+        authorizationPublicId: personalAuthorizationPublicId,
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
-        taskType: undefined,
-        page: undefined,
-        pageSize: undefined,
-        limit: undefined,
-        offset: undefined,
+        resultPublicId: "personal_ai_result_public_route_missing",
       },
     ]);
   });
@@ -739,15 +1177,15 @@ describe("personal AI generation result route handlers", () => {
     const resultRepository = createResultRepository([], {
       listError: new Error("database stack with private detail rows"),
     });
-    const { detail } = createPersonalAiGenerationResultRouteHandlers(
-      async () => userContext,
-      {
-        resultRepository,
-      },
-    );
+    const { detail } = createTestResultRouteHandlers(async () => userContext, {
+      resultRepository,
+    });
 
     const response = await getResultDetailRouteHandler(detail)(
-      createDetailGetRequest("personal_ai_result_public_route_detail"),
+      createDetailGetRequest(
+        "personal_ai_result_public_route_detail",
+        `?authorizationPublicId=${personalAuthorizationPublicId}`,
+      ),
       {
         params: Promise.resolve({
           publicId: "personal_ai_result_public_route_detail",

@@ -1632,7 +1632,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
       if (
         path ===
-        "/api/v1/personal-ai-generation-results/ai-result-public-paper-history-001"
+        "/api/v1/personal-ai-generation-results/ai-result-public-paper-history-001?authorizationPublicId=authorization-context-ui-001"
       ) {
         return {
           ok: true,
@@ -2297,11 +2297,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
     expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[2]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
     expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[3]?.[0])).toBe("/api/v1/sessions");
@@ -2323,11 +2323,11 @@ describe("StudentPersonalAiGenerationPage", () => {
       },
     });
     expect(String(fetchMock.mock.calls[6]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
     expect(fetchMock.mock.calls[6]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[7]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
     expect(fetchMock.mock.calls[7]?.[1]?.method).toBe("GET");
 
@@ -2528,6 +2528,7 @@ describe("StudentPersonalAiGenerationPage", () => {
   it("defaults learner AI to the personal context and uses organization quota only after explicit selection", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const submittedBodies: Record<string, unknown>[] = [];
+    const observedGetUrls: string[] = [];
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
         expect(init?.headers).toMatchObject({
@@ -2547,6 +2548,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
         if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           if (init?.method === "GET") {
+            observedGetUrls.push(String(url));
             return {
               ok: true,
               status: 200,
@@ -2568,6 +2570,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
         if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
+          observedGetUrls.push(String(url));
 
           return {
             ok: true,
@@ -2598,6 +2601,12 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("额度归属确认")).toBeInTheDocument();
     expect(screen.getByLabelText("个人授权 · 高级版 · 专卖 3级")).toBeChecked();
     expect(screen.getByText(/当前将使用个人额度/u)).toBeInTheDocument();
+    expect(observedGetUrls).toEqual(
+      expect.arrayContaining([
+        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=personal-auth-context-dual-001",
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=personal-auth-context-dual-001",
+      ]),
+    );
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
@@ -2614,6 +2623,14 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByLabelText("组织授权 · 高级版 · 专卖 3级"));
     expect(screen.getByText(/当前将使用组织额度/u)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(observedGetUrls).toEqual(
+        expect.arrayContaining([
+          "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=org-auth-context-dual-001",
+          "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=org-auth-context-dual-001",
+        ]),
+      );
+    });
     fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     fireEvent.change(screen.getByLabelText("题源偏好"), {
       target: { value: "优先使用企业题" },
@@ -2981,13 +2998,13 @@ describe("StudentPersonalAiGenerationPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
       "/api/v1/authorizations",
-      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
-      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
       "/api/v1/sessions",
       "/api/v1/authorizations",
       "/api/v1/personal-ai-generation-requests",
-      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
-      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     ]);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
       "GET",
@@ -3363,7 +3380,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(7));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
   });
 
   it("renders a true unauthorized state after the cookie-backed session probe fails when no local token exists", async () => {
@@ -4396,8 +4413,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getAllByText("当前筛选：AI出题").length).toBeGreaterThan(0);
     expect(observedGetUrls).toEqual(
       expect.arrayContaining([
-        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
-        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
       ]),
     );
 
@@ -4407,8 +4424,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     await waitFor(() => {
       expect(observedGetUrls).toEqual(
         expect.arrayContaining([
-          "/api/v1/personal-ai-generation-requests?taskType=ai_paper_generation&page=1&pageSize=10",
-          "/api/v1/personal-ai-generation-results?taskType=ai_paper_generation&page=1&pageSize=10",
+          "/api/v1/personal-ai-generation-requests?taskType=ai_paper_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
+          "/api/v1/personal-ai-generation-results?taskType=ai_paper_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
         ]),
       );
     });

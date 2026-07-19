@@ -4,10 +4,16 @@ import {
 } from "../contracts/api-response";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { AuthContextDto } from "../contracts/auth-contract";
-import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
-import type { PersonalAiGenerationResultOwnerType } from "../models/personal-ai-generation-result";
 import type { SessionService } from "./session-service";
-import { createPersonalAiGenerationResultHistoryService } from "./personal-ai-generation-result-history-service";
+import {
+  createPersonalAiGenerationResultHistoryService,
+  type PersonalAiGenerationResultHistoryRepositoryPort,
+} from "./personal-ai-generation-result-history-service";
+import {
+  resolveOwnedPersonalAiGenerationAuthorizationContext,
+  type OwnedPersonalAiGenerationAuthorizationContext,
+  type PersonalAiGenerationAuthorizationOwnershipRepository,
+} from "./personal-ai-generation-authorization-context";
 import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
@@ -25,15 +31,8 @@ export type PersonalAiGenerationResultUserResolver = (
 ) => Promise<PersonalAiGenerationResultUserContext | null>;
 
 export type PersonalAiGenerationResultRouteDependencies = {
-  resultRepository?: Pick<
-    PersonalAiGenerationResultRepository,
-    "listDraftResults"
-  >;
-};
-
-type PersonalAiGenerationResultOwnerScope = {
-  ownerType: PersonalAiGenerationResultOwnerType;
-  ownerPublicId: string;
+  resultRepository?: PersonalAiGenerationResultHistoryRepositoryPort;
+  authorizationRepository?: PersonalAiGenerationAuthorizationOwnershipRepository;
 };
 
 type ResultDetailRouteContext = {
@@ -42,14 +41,15 @@ type ResultDetailRouteContext = {
   }>;
 };
 
-const emptyResultRepository: Pick<
-  PersonalAiGenerationResultRepository,
-  "listDraftResults"
-> = {
-  async listDraftResults() {
-    return [];
-  },
-};
+const PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE = 403057;
+const PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_MESSAGE =
+  "Personal AI generation is not available for this authorization.";
+const INVALID_RESULT_HISTORY_INPUT_CODE = 400044;
+const INVALID_RESULT_HISTORY_INPUT_MESSAGE =
+  "Invalid personal AI generation result history input.";
+const INVALID_RESULT_DETAIL_INPUT_CODE = 400045;
+const INVALID_RESULT_DETAIL_INPUT_MESSAGE =
+  "Invalid personal AI generation result detail input.";
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -80,23 +80,14 @@ function isPersonalAiGenerationResultUserContext(
   return "userPublicId" in value;
 }
 
-function resolvePersonalAiGenerationResultOwnerScope(
-  userContext: PersonalAiGenerationResultUserContext,
-): PersonalAiGenerationResultOwnerScope {
-  if (
-    userContext.userType === "employee" &&
-    userContext.organizationPublicId !== null
-  ) {
-    return {
-      ownerType: "organization",
-      ownerPublicId: userContext.organizationPublicId,
-    };
+function normalizeRequiredText(value: string | null): string | null {
+  if (value === null) {
+    return null;
   }
 
-  return {
-    ownerType: "personal",
-    ownerPublicId: userContext.userPublicId,
-  };
+  const normalizedValue = value.trim();
+
+  return normalizedValue.length === 0 ? null : normalizedValue;
 }
 
 function readPositiveIntegerInput(
@@ -130,6 +121,7 @@ function readTaskTypeInput(
 function createResultHistoryQuery(
   request: Request,
   userContext: PersonalAiGenerationResultUserContext,
+  authorizationContext: OwnedPersonalAiGenerationAuthorizationContext,
 ) {
   const searchParams = new URL(request.url).searchParams;
   const page = readPositiveIntegerInput(searchParams, "page");
@@ -142,11 +134,11 @@ function createResultHistoryQuery(
       : typeof limit === "number"
         ? limit
         : 10;
-  const ownerScope = resolvePersonalAiGenerationResultOwnerScope(userContext);
 
   return {
-    ownerType: ownerScope.ownerType,
-    ownerPublicId: ownerScope.ownerPublicId,
+    authorizationPublicId: authorizationContext.authorizationPublicId,
+    ownerType: authorizationContext.ownerType,
+    ownerPublicId: authorizationContext.ownerPublicId,
     actorPublicId: userContext.userPublicId,
     taskType: readTaskTypeInput(searchParams),
     page,
@@ -162,16 +154,40 @@ function createResultHistoryQuery(
 async function createResultDetailQuery(
   context: ResultDetailRouteContext,
   userContext: PersonalAiGenerationResultUserContext,
+  authorizationContext: OwnedPersonalAiGenerationAuthorizationContext,
 ) {
   const { publicId } = await context.params;
-  const ownerScope = resolvePersonalAiGenerationResultOwnerScope(userContext);
 
   return {
-    ownerType: ownerScope.ownerType,
-    ownerPublicId: ownerScope.ownerPublicId,
+    authorizationPublicId: authorizationContext.authorizationPublicId,
+    ownerType: authorizationContext.ownerType,
+    ownerPublicId: authorizationContext.ownerPublicId,
     actorPublicId: userContext.userPublicId,
     resultPublicId: publicId,
   };
+}
+
+function readAuthorizationPublicId(request: Request): string | null {
+  return normalizeRequiredText(
+    new URL(request.url).searchParams.get("authorizationPublicId"),
+  );
+}
+
+function isResultRepositoryAvailable(
+  repository: PersonalAiGenerationResultHistoryRepositoryPort | undefined,
+): repository is PersonalAiGenerationResultHistoryRepositoryPort {
+  return (
+    repository !== undefined &&
+    typeof repository.listDraftResults === "function" &&
+    typeof repository.findDraftResultByPublicId === "function"
+  );
+}
+
+function createAuthorizationUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
+    PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_MESSAGE,
+  );
 }
 
 export function createPersonalAiGenerationResultUserResolver(
@@ -216,10 +232,8 @@ export function createPersonalAiGenerationResultRouteHandlers(
   resolveUserContext: PersonalAiGenerationResultUserResolver,
   dependencies: PersonalAiGenerationResultRouteDependencies = {},
 ) {
-  const resultRepository =
-    dependencies.resultRepository ?? emptyResultRepository;
-  const resultHistoryService =
-    createPersonalAiGenerationResultHistoryService(resultRepository);
+  const resultRepository = dependencies.resultRepository;
+  const authorizationRepository = dependencies.authorizationRepository;
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
@@ -234,9 +248,45 @@ export function createPersonalAiGenerationResultRouteHandlers(
             return createJsonResponse(userContext);
           }
 
+          const authorizationPublicId = readAuthorizationPublicId(request);
+
+          if (authorizationPublicId === null) {
+            return createJsonResponse(
+              createErrorResponse(
+                INVALID_RESULT_HISTORY_INPUT_CODE,
+                INVALID_RESULT_HISTORY_INPUT_MESSAGE,
+              ),
+            );
+          }
+
+          if (
+            !isResultRepositoryAvailable(resultRepository) ||
+            authorizationRepository === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext =
+            await resolveOwnedPersonalAiGenerationAuthorizationContext({
+              authorizationPublicId,
+              userContext,
+              authorizationRepository,
+            });
+
+          if (authorizationContext === null) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const resultHistoryService =
+            createPersonalAiGenerationResultHistoryService(resultRepository);
+
           return createJsonResponse(
             await resultHistoryService.listDraftResultHistory(
-              createResultHistoryQuery(request, userContext),
+              createResultHistoryQuery(
+                request,
+                userContext,
+                authorizationContext,
+              ),
             ),
           );
         },
@@ -257,9 +307,45 @@ export function createPersonalAiGenerationResultRouteHandlers(
             return createJsonResponse(userContext);
           }
 
+          const authorizationPublicId = readAuthorizationPublicId(request);
+
+          if (authorizationPublicId === null) {
+            return createJsonResponse(
+              createErrorResponse(
+                INVALID_RESULT_DETAIL_INPUT_CODE,
+                INVALID_RESULT_DETAIL_INPUT_MESSAGE,
+              ),
+            );
+          }
+
+          if (
+            !isResultRepositoryAvailable(resultRepository) ||
+            authorizationRepository === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext =
+            await resolveOwnedPersonalAiGenerationAuthorizationContext({
+              authorizationPublicId,
+              userContext,
+              authorizationRepository,
+            });
+
+          if (authorizationContext === null) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const resultHistoryService =
+            createPersonalAiGenerationResultHistoryService(resultRepository);
+
           return createJsonResponse(
             await resultHistoryService.getDraftResultDetail(
-              await createResultDetailQuery(context, userContext),
+              await createResultDetailQuery(
+                context,
+                userContext,
+                authorizationContext,
+              ),
             ),
           );
         },

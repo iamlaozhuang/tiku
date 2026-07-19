@@ -976,6 +976,7 @@ async function fetchPersonalAiGenerationResultHistory(
   studentSessionValue: StudentSessionRequestToken,
   taskType: StudentPersonalAiGenerationTaskType,
   page: number,
+  authorizationPublicId: string,
 ): Promise<{
   code: number;
   message: string;
@@ -987,6 +988,7 @@ async function fetchPersonalAiGenerationResultHistory(
       "/api/v1/personal-ai-generation-results",
       taskType,
       page,
+      authorizationPublicId,
     ),
     studentSessionValue,
     {
@@ -998,6 +1000,7 @@ async function fetchPersonalAiGenerationResultHistory(
 async function fetchPersonalAiGenerationResultDetail(
   studentSessionValue: StudentSessionRequestToken,
   resultPublicId: string,
+  authorizationPublicId: string,
 ): Promise<{
   code: number;
   message: string;
@@ -1006,7 +1009,7 @@ async function fetchPersonalAiGenerationResultDetail(
   return fetchStudentApi<PersonalAiGenerationResultDetailDto>(
     `/api/v1/personal-ai-generation-results/${encodeURIComponent(
       resultPublicId,
-    )}`,
+    )}?${new URLSearchParams({ authorizationPublicId }).toString()}`,
     studentSessionValue,
     {
       method: "GET",
@@ -1018,6 +1021,7 @@ async function fetchPersonalAiGenerationRequestHistoryForSession(
   studentSessionValue: StudentSessionRequestToken,
   taskType: StudentPersonalAiGenerationTaskType,
   page: number,
+  authorizationPublicId: string,
 ): Promise<{
   code: number;
   message: string;
@@ -1029,6 +1033,7 @@ async function fetchPersonalAiGenerationRequestHistoryForSession(
       "/api/v1/personal-ai-generation-requests",
       taskType,
       page,
+      authorizationPublicId,
     ),
     studentSessionValue,
     {
@@ -1121,11 +1126,13 @@ function createPersonalAiGenerationHistoryPath(
   basePath: string,
   taskType: StudentPersonalAiGenerationTaskType,
   page: number,
+  authorizationPublicId: string,
 ): string {
   const searchParams = new URLSearchParams({
     taskType,
     page: String(page),
     pageSize: String(PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE),
+    authorizationPublicId,
   });
 
   return `${basePath}?${searchParams.toString()}`;
@@ -3410,7 +3417,9 @@ export function StudentPersonalAiGenerationPage() {
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
   const [activeTaskType, setActiveTaskType] =
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
-  const historyLoadSequenceRef = useRef(0);
+  const requestHistoryLoadSequenceRef = useRef(0);
+  const resultHistoryLoadSequenceRef = useRef(0);
+  const resultDetailLoadSequenceRef = useRef(0);
   const [aiQuestionCount, setAiQuestionCount] = useState(
     AI_QUESTION_DEFAULT_QUESTION_COUNT,
   );
@@ -3567,14 +3576,16 @@ export function StudentPersonalAiGenerationPage() {
       }
     }
 
-    async function confirmPersonalAiGenerationAuthorization(): Promise<boolean> {
+    async function confirmPersonalAiGenerationAuthorization(): Promise<
+      string | null
+    > {
       const fetchedAuthorizationContexts =
         await fetchPersonalAiGenerationAuthorizationContexts(
           sessionRequestToken,
         );
 
       if (isCancelled) {
-        return false;
+        return null;
       }
 
       const selectableAuthorizationContexts =
@@ -3584,34 +3595,21 @@ export function StudentPersonalAiGenerationPage() {
 
       if (selectableAuthorizationContexts.length === 0) {
         markUnavailable();
-        return false;
+        return null;
       }
 
+      const initialAuthorizationPublicId =
+        selectDefaultPersonalAiGenerationAuthorizationContext(
+          selectableAuthorizationContexts,
+        )?.authorizationPublicId ?? null;
       setAuthorizationContexts(selectableAuthorizationContexts);
-      setSelectedAuthorizationPublicId((currentAuthorizationPublicId) => {
-        if (
-          currentAuthorizationPublicId !== null &&
-          selectableAuthorizationContexts.some(
-            (authorizationContext) =>
-              authorizationContext.authorizationPublicId ===
-              currentAuthorizationPublicId,
-          )
-        ) {
-          return currentAuthorizationPublicId;
-        }
+      setSelectedAuthorizationPublicId(initialAuthorizationPublicId);
 
-        return (
-          selectDefaultPersonalAiGenerationAuthorizationContext(
-            selectableAuthorizationContexts,
-          )?.authorizationPublicId ?? null
-        );
-      });
-
-      return true;
+      return initialAuthorizationPublicId;
     }
 
-    async function fetchInitialRequestHistory() {
-      const historyLoadSequence = historyLoadSequenceRef.current;
+    async function fetchInitialRequestHistory(authorizationPublicId: string) {
+      const requestHistoryLoadSequence = requestHistoryLoadSequenceRef.current;
 
       try {
         const historyResponse =
@@ -3619,11 +3617,12 @@ export function StudentPersonalAiGenerationPage() {
             sessionRequestToken,
             DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE,
             PERSONAL_AI_GENERATION_HISTORY_PAGE,
+            authorizationPublicId,
           );
 
         if (
           isCancelled ||
-          historyLoadSequence !== historyLoadSequenceRef.current
+          requestHistoryLoadSequence !== requestHistoryLoadSequenceRef.current
         ) {
           return;
         }
@@ -3651,7 +3650,7 @@ export function StudentPersonalAiGenerationPage() {
       } catch {
         if (
           !isCancelled &&
-          historyLoadSequence === historyLoadSequenceRef.current
+          requestHistoryLoadSequence === requestHistoryLoadSequenceRef.current
         ) {
           setHistoryState("error");
           setRequestHistory([]);
@@ -3660,19 +3659,20 @@ export function StudentPersonalAiGenerationPage() {
       }
     }
 
-    async function fetchInitialResultHistory() {
-      const historyLoadSequence = historyLoadSequenceRef.current;
+    async function fetchInitialResultHistory(authorizationPublicId: string) {
+      const resultHistoryLoadSequence = resultHistoryLoadSequenceRef.current;
 
       try {
         const historyResponse = await fetchPersonalAiGenerationResultHistory(
           sessionRequestToken,
           DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE,
           PERSONAL_AI_GENERATION_HISTORY_PAGE,
+          authorizationPublicId,
         );
 
         if (
           isCancelled ||
-          historyLoadSequence !== historyLoadSequenceRef.current
+          resultHistoryLoadSequence !== resultHistoryLoadSequenceRef.current
         ) {
           return;
         }
@@ -3702,7 +3702,7 @@ export function StudentPersonalAiGenerationPage() {
       } catch {
         if (
           !isCancelled &&
-          historyLoadSequence === historyLoadSequenceRef.current
+          resultHistoryLoadSequence === resultHistoryLoadSequenceRef.current
         ) {
           setResultHistoryState("error");
           setResultHistory(null);
@@ -3718,10 +3718,10 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
-      const hasAiAuthorization =
+      const initialAuthorizationPublicId =
         await confirmPersonalAiGenerationAuthorization();
 
-      if (!hasAiAuthorization || isCancelled) {
+      if (initialAuthorizationPublicId === null || isCancelled) {
         return;
       }
 
@@ -3761,8 +3761,8 @@ export function StudentPersonalAiGenerationPage() {
         }
       }
 
-      void fetchInitialRequestHistory();
-      void fetchInitialResultHistory();
+      void fetchInitialRequestHistory(initialAuthorizationPublicId);
+      void fetchInitialResultHistory(initialAuthorizationPublicId);
     }
 
     void loadInitialData();
@@ -3980,84 +3980,12 @@ export function StudentPersonalAiGenerationPage() {
 
       setExperience(response.data);
       setPageState("ready");
-      setHistoryState("loading");
-      setResultHistoryState("loading");
-      setResultDetailState("idle");
-      setResultDetail(null);
-      setSelectedResultPublicId(null);
-
-      try {
-        const historyResponse =
-          await fetchPersonalAiGenerationRequestHistoryForSession(
-            sessionRequestToken,
-            taskType,
-            PERSONAL_AI_GENERATION_HISTORY_PAGE,
-          );
-
-        if (isStudentUnauthorizedResponse(historyResponse)) {
-          markUnavailable();
-          return;
-        }
-
-        if (isStudentAccessDeniedResponse(historyResponse)) {
-          markUnavailable();
-          return;
-        }
-
-        if (historyResponse.code !== 0 || historyResponse.data === null) {
-          setHistoryState("error");
-          setRequestHistory([]);
-          setRequestHistoryPagination(null);
-          return;
-        }
-
-        setRequestHistory(historyResponse.data);
-        setRequestHistoryPagination(historyResponse.pagination ?? null);
-        setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
-      } catch {
-        setHistoryState("error");
-        setRequestHistory([]);
-        setRequestHistoryPagination(null);
-      }
-
-      try {
-        const resultHistoryResponse =
-          await fetchPersonalAiGenerationResultHistory(
-            sessionRequestToken,
-            taskType,
-            PERSONAL_AI_GENERATION_HISTORY_PAGE,
-          );
-
-        if (isStudentUnauthorizedResponse(resultHistoryResponse)) {
-          markUnavailable();
-          return;
-        }
-
-        if (isStudentAccessDeniedResponse(resultHistoryResponse)) {
-          markUnavailable();
-          return;
-        }
-
-        if (
-          resultHistoryResponse.code !== 0 ||
-          resultHistoryResponse.data === null
-        ) {
-          setResultHistoryState("error");
-          setResultHistory(null);
-          setResultHistoryPagination(null);
-          return;
-        }
-
-        setResultHistory(resultHistoryResponse.data);
-        setResultHistoryPagination(resultHistoryResponse.pagination ?? null);
-        setResultHistoryState(
-          resultHistoryResponse.data.results.length === 0 ? "empty" : "ready",
-        );
-      } catch {
-        setResultHistoryState("error");
-        setResultHistory(null);
-        setResultHistoryPagination(null);
-      }
+      await loadAiGenerationHistories(
+        taskType,
+        PERSONAL_AI_GENERATION_HISTORY_PAGE,
+        PERSONAL_AI_GENERATION_HISTORY_PAGE,
+        generationAuthorizationContext.authorizationPublicId,
+      );
     } catch {
       setPageState("error");
       setHistoryState("error");
@@ -4075,7 +4003,13 @@ export function StudentPersonalAiGenerationPage() {
   async function handleOpenPersonalAiGenerationResultDetail(
     resultPublicId: string,
   ) {
+    if (selectedAuthorizationPublicId === null) {
+      return;
+    }
+
     const sessionRequestToken = readStudentSessionRequestToken();
+    const resultDetailLoadSequence = resultDetailLoadSequenceRef.current + 1;
+    resultDetailLoadSequenceRef.current = resultDetailLoadSequence;
 
     function markUnauthorized() {
       setHasSessionToken(false);
@@ -4110,7 +4044,12 @@ export function StudentPersonalAiGenerationPage() {
       const detailResponse = await fetchPersonalAiGenerationResultDetail(
         sessionRequestToken,
         resultPublicId,
+        selectedAuthorizationPublicId,
       );
+
+      if (resultDetailLoadSequence !== resultDetailLoadSequenceRef.current) {
+        return;
+      }
 
       if (isStudentUnauthorizedResponse(detailResponse)) {
         markUnauthorized();
@@ -4140,6 +4079,10 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetail(detailResponse.data);
       setResultDetailState("ready");
     } catch {
+      if (resultDetailLoadSequence !== resultDetailLoadSequenceRef.current) {
+        return;
+      }
+
       setResultDetailState("error");
       setResultDetail(null);
     }
@@ -4151,15 +4094,28 @@ export function StudentPersonalAiGenerationPage() {
 
   async function loadAiGenerationHistories(
     taskType: StudentPersonalAiGenerationTaskType,
-    requestPage = PERSONAL_AI_GENERATION_HISTORY_PAGE,
-    resultPage = PERSONAL_AI_GENERATION_HISTORY_PAGE,
+    requestPage: number,
+    resultPage: number,
+    authorizationPublicId: string | null,
   ) {
-    const historyLoadSequence = historyLoadSequenceRef.current + 1;
-    historyLoadSequenceRef.current = historyLoadSequence;
+    if (authorizationPublicId === null) {
+      return;
+    }
+
+    const requestHistoryLoadSequence =
+      requestHistoryLoadSequenceRef.current + 1;
+    requestHistoryLoadSequenceRef.current = requestHistoryLoadSequence;
+    const resultHistoryLoadSequence = resultHistoryLoadSequenceRef.current + 1;
+    resultHistoryLoadSequenceRef.current = resultHistoryLoadSequence;
+    resultDetailLoadSequenceRef.current += 1;
     const sessionRequestToken = readStudentSessionRequestToken();
 
     setHistoryState("loading");
+    setRequestHistory([]);
+    setRequestHistoryPagination(null);
     setResultHistoryState("loading");
+    setResultHistory(null);
+    setResultHistoryPagination(null);
     setResultDetailState("idle");
     setResultDetail(null);
     setSelectedResultPublicId(null);
@@ -4170,15 +4126,22 @@ export function StudentPersonalAiGenerationPage() {
           sessionRequestToken,
           taskType,
           requestPage,
+          authorizationPublicId,
         ),
         fetchPersonalAiGenerationResultHistory(
           sessionRequestToken,
           taskType,
           resultPage,
+          authorizationPublicId,
         ),
       ]);
 
-    if (historyLoadSequence !== historyLoadSequenceRef.current) {
+    const isRequestHistoryCurrent =
+      requestHistoryLoadSequence === requestHistoryLoadSequenceRef.current;
+    const isResultHistoryCurrent =
+      resultHistoryLoadSequence === resultHistoryLoadSequenceRef.current;
+
+    if (!isRequestHistoryCurrent && !isResultHistoryCurrent) {
       return;
     }
 
@@ -4188,11 +4151,14 @@ export function StudentPersonalAiGenerationPage() {
       data: unknown;
     }> = [];
 
-    if (requestHistoryResult.status === "fulfilled") {
+    if (
+      isRequestHistoryCurrent &&
+      requestHistoryResult.status === "fulfilled"
+    ) {
       historyResponses.push(requestHistoryResult.value);
     }
 
-    if (resultHistoryResult.status === "fulfilled") {
+    if (isResultHistoryCurrent && resultHistoryResult.status === "fulfilled") {
       historyResponses.push(resultHistoryResult.value);
     }
 
@@ -4220,38 +4186,46 @@ export function StudentPersonalAiGenerationPage() {
       return;
     }
 
-    if (
-      requestHistoryResult.status === "rejected" ||
-      requestHistoryResult.value.code !== 0 ||
-      requestHistoryResult.value.data === null
-    ) {
-      setHistoryState("error");
-      setRequestHistory([]);
-      setRequestHistoryPagination(null);
-    } else {
-      setRequestHistory(requestHistoryResult.value.data);
-      setRequestHistoryPagination(
-        requestHistoryResult.value.pagination ?? null,
-      );
-      setHistoryState(
-        requestHistoryResult.value.data.length === 0 ? "empty" : "ready",
-      );
+    if (isRequestHistoryCurrent) {
+      if (
+        requestHistoryResult.status === "rejected" ||
+        requestHistoryResult.value.code !== 0 ||
+        requestHistoryResult.value.data === null
+      ) {
+        setHistoryState("error");
+        setRequestHistory([]);
+        setRequestHistoryPagination(null);
+      } else {
+        setRequestHistory(requestHistoryResult.value.data);
+        setRequestHistoryPagination(
+          requestHistoryResult.value.pagination ?? null,
+        );
+        setHistoryState(
+          requestHistoryResult.value.data.length === 0 ? "empty" : "ready",
+        );
+      }
     }
 
-    if (
-      resultHistoryResult.status === "rejected" ||
-      resultHistoryResult.value.code !== 0 ||
-      resultHistoryResult.value.data === null
-    ) {
-      setResultHistoryState("error");
-      setResultHistory(null);
-      setResultHistoryPagination(null);
-    } else {
-      setResultHistory(resultHistoryResult.value.data);
-      setResultHistoryPagination(resultHistoryResult.value.pagination ?? null);
-      setResultHistoryState(
-        resultHistoryResult.value.data.results.length === 0 ? "empty" : "ready",
-      );
+    if (isResultHistoryCurrent) {
+      if (
+        resultHistoryResult.status === "rejected" ||
+        resultHistoryResult.value.code !== 0 ||
+        resultHistoryResult.value.data === null
+      ) {
+        setResultHistoryState("error");
+        setResultHistory(null);
+        setResultHistoryPagination(null);
+      } else {
+        setResultHistory(resultHistoryResult.value.data);
+        setResultHistoryPagination(
+          resultHistoryResult.value.pagination ?? null,
+        );
+        setResultHistoryState(
+          resultHistoryResult.value.data.results.length === 0
+            ? "empty"
+            : "ready",
+        );
+      }
     }
   }
 
@@ -4270,10 +4244,19 @@ export function StudentPersonalAiGenerationPage() {
     setServerAiLearningSessionQuestions([]);
     setSelectedAiLearningAnswerLabelsByQuestion({});
     setAiLearningAnswerFeedbackByQuestion({});
-    void loadAiGenerationHistories(taskType);
+    void loadAiGenerationHistories(
+      taskType,
+      PERSONAL_AI_GENERATION_HISTORY_PAGE,
+      PERSONAL_AI_GENERATION_HISTORY_PAGE,
+      selectedAuthorizationPublicId,
+    );
   }
 
   function handleSelectAuthorizationContext(authorizationPublicId: string) {
+    if (authorizationPublicId === selectedAuthorizationPublicId) {
+      return;
+    }
+
     setSelectedAuthorizationPublicId(authorizationPublicId);
     setAiQuestionKnowledgeScope((currentState) => ({
       ...currentState,
@@ -4285,6 +4268,12 @@ export function StudentPersonalAiGenerationPage() {
       includeDescendants: false,
       knowledgeNodePublicIds: [],
     }));
+    void loadAiGenerationHistories(
+      activeTaskType,
+      PERSONAL_AI_GENERATION_HISTORY_PAGE,
+      PERSONAL_AI_GENERATION_HISTORY_PAGE,
+      authorizationPublicId,
+    );
   }
 
   function handleChangeAiQuestionCount(value: string) {
@@ -4328,11 +4317,20 @@ export function StudentPersonalAiGenerationPage() {
   }
 
   async function handleChangeRequestHistoryPage(page: number) {
+    if (selectedAuthorizationPublicId === null) {
+      return;
+    }
+
     const sessionRequestToken = readStudentSessionRequestToken();
-    const historyLoadSequence = historyLoadSequenceRef.current + 1;
-    historyLoadSequenceRef.current = historyLoadSequence;
+    const requestHistoryLoadSequence =
+      requestHistoryLoadSequenceRef.current + 1;
+    requestHistoryLoadSequenceRef.current = requestHistoryLoadSequence;
+    resultDetailLoadSequenceRef.current += 1;
 
     setHistoryState("loading");
+    setResultDetailState("idle");
+    setResultDetail(null);
+    setSelectedResultPublicId(null);
 
     try {
       const historyResponse =
@@ -4340,9 +4338,12 @@ export function StudentPersonalAiGenerationPage() {
           sessionRequestToken,
           activeTaskType,
           page,
+          selectedAuthorizationPublicId,
         );
 
-      if (historyLoadSequence !== historyLoadSequenceRef.current) {
+      if (
+        requestHistoryLoadSequence !== requestHistoryLoadSequenceRef.current
+      ) {
         return;
       }
 
@@ -4357,7 +4358,9 @@ export function StudentPersonalAiGenerationPage() {
       setRequestHistoryPagination(historyResponse.pagination ?? null);
       setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
     } catch {
-      if (historyLoadSequence !== historyLoadSequenceRef.current) {
+      if (
+        requestHistoryLoadSequence !== requestHistoryLoadSequenceRef.current
+      ) {
         return;
       }
 
@@ -4368,9 +4371,14 @@ export function StudentPersonalAiGenerationPage() {
   }
 
   async function handleChangeResultHistoryPage(page: number) {
+    if (selectedAuthorizationPublicId === null) {
+      return;
+    }
+
     const sessionRequestToken = readStudentSessionRequestToken();
-    const historyLoadSequence = historyLoadSequenceRef.current + 1;
-    historyLoadSequenceRef.current = historyLoadSequence;
+    const resultHistoryLoadSequence = resultHistoryLoadSequenceRef.current + 1;
+    resultHistoryLoadSequenceRef.current = resultHistoryLoadSequence;
+    resultDetailLoadSequenceRef.current += 1;
 
     setResultHistoryState("loading");
     setResultDetailState("idle");
@@ -4383,9 +4391,10 @@ export function StudentPersonalAiGenerationPage() {
           sessionRequestToken,
           activeTaskType,
           page,
+          selectedAuthorizationPublicId,
         );
 
-      if (historyLoadSequence !== historyLoadSequenceRef.current) {
+      if (resultHistoryLoadSequence !== resultHistoryLoadSequenceRef.current) {
         return;
       }
 
@@ -4405,7 +4414,7 @@ export function StudentPersonalAiGenerationPage() {
         resultHistoryResponse.data.results.length === 0 ? "empty" : "ready",
       );
     } catch {
-      if (historyLoadSequence !== historyLoadSequenceRef.current) {
+      if (resultHistoryLoadSequence !== resultHistoryLoadSequenceRef.current) {
         return;
       }
 
