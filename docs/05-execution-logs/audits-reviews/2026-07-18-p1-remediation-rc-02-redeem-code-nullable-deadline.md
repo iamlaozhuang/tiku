@@ -105,14 +105,14 @@ Result: pass
 Result: approved_for_red_green_execution
 
 - Spec coverage：计划逐项覆盖可追加 local-chain 语义、唯一 tag、predecessor、相邻 idx、动态 previous snapshot、`prevId`、全 snapshot diff、authoritative metadata 零 diff和禁止 terminal 假设。
-- TDD coverage：先在 detached later-entry fixture 复现旧断言失败，再对 authoritative 与同一 fixture 转 GREEN；后续五类 mutation 必须逐一 fail closed。
+- TDD coverage：先在 detached later-entry fixture 复现旧断言失败，再对 authoritative 与同一 fixture 转 GREEN；duplicate tag、missing predecessor、numeric idx gap、string/float invalid idx、wrong `prevId`、extra snapshot drift 六类 mutation 必须逐一 fail closed，later-entry 本身是正常通过路径。
 - Scope review：持久 diff 限于已批准 F-0117 docs/test；disposable journal/snapshot mutation 明确禁止进入提交。state/queue、guards、产品/schema/migration、依赖、数据库与外部能力均 blocked。
 - Closeout review：focused 不替代 full validation；主线程 Round 1 与独立 reviewer Round 2 均为提交前硬门禁；提交、ff-only、pre-push、普通 push、cleanup 顺序明确。
 - Placeholder、类型/路径一致性与命令可执行性自审通过；当前结论只批准开始 Task 7 RED，不声称实现或最终审查完成。
 
 ## Task 7 Implementation Invariant Audit
 
-Result: implementation_pass_pending_controller_reviews
+Result: historical_checkpoint_superseded_by_approved_controller_reviews
 
 - 唯一 tag：按完整 F-0117 migration tag 搜索且要求恰好一项；duplicate mutation 已证明长度 2 时 fail closed。
 - Predecessor 存在：F-0117 必须位于 journal 首项之后，直接前项必须存在且 tag 带 14 位 timestamp 前缀。
@@ -123,13 +123,13 @@ Result: implementation_pass_pending_controller_reviews
 - 后续 entry 可追加：later-entry fixture 保留 synthetic 后候选测试 2/2 passed；测试没有忽略、重排或要求读取后续 entry 内容。
 - Authoritative metadata 零 diff：disposable fixture 清理后，authoritative schema、migration、journal、snapshot 与产品源码均无修改。
 - 权限边界未扩大：state/queue、guards、依赖、数据库、Provider/runtime/browser、P2、PR、force-push、deploy 均未触碰。
-- Review disposition：implementer 对抗式自审通过；主线程 Round 1 与独立 Round 2 由控制器在 checkpoint 后执行并 amend，当前不预先声称最终 Approved。
+- Review disposition：本段保留 implementer checkpoint 的时间顺序；后续主线程 Round 1 与独立 Round 2 复审均 Approved，本段 pending wording 已被 supersede。
 
 ## Task 7 Implementer Adversarial Self-Review
 
 Decision: APPROVE_REVIEW_CHECKPOINT_WITH_BUILD_TOPOLOGY_CONCERN
 
-- 尝试以 later-entry、duplicate tag、missing predecessor、idx gap、wrong `prevId` 与额外 snapshot diff 推翻候选；later-entry 正常通过，其余五个 mutation 均在对应局部不变量处 fail closed，恢复后全部 2/2 passed。
+- 尝试以 later-entry、duplicate tag、missing predecessor、numeric idx gap、string/float invalid idx、wrong `prevId` 与 extra snapshot drift 推翻候选；later-entry 正常通过，其余六类 mutation 均在对应局部不变量处 fail closed，恢复后全部 2/2 passed。
 - 测试只规范化 snapshot `id`、`prevId` 和目标列 `notNull`；`dialect` mutation 证明额外顶层变化不会被掩盖。运行时对象保留 TypeScript 类型未声明的 snapshot 字段，因此全对象比较未被窄类型截断。
 - 动态 previous snapshot 来自 journal 直接前项，不依赖 employee-import tag；F-0117 仍要求唯一 tag、非首项、相邻 idx、current/previous snapshot 存在、`prevId` 一致和完整结构相等。
 - 精确 diff 为 5 个 allowlisted 文件；authoritative migration metadata 与所有 blocked surface 零 diff。disposable fixture 已删除，不在 worktree list 中。
@@ -137,22 +137,52 @@ Decision: APPROVE_REVIEW_CHECKPOINT_WITH_BUILD_TOPOLOGY_CONCERN
 
 ## Task 7 Controller Review Disposition
 
-Decision: APPROVE_PENDING_WHOLE_BRANCH_REVIEW
+Decision: IMPLEMENTATION_REVIEWS_APPROVED_PENDING_STEP_14
 
 - 主线程 Round 1：实现语义与精确范围通过。fresh detached fixture 证明合法 later entry 通过，duplicate tag、missing predecessor、numeric idx gap、wrong `prevId`、额外 snapshot drift 均 fail closed；定向 production build 96/96 pages。
 - 独立 Round 2 初审：Changes requested；Critical 0、Important 1、Minor 1。Important 指出 JSON `idx` 的 TypeScript assertion 不提供运行时保护，字符串拼接可绕过 adjacent-idx；Minor 质疑 review package 末尾完整性。
 - finding disposition：Important 接受并以 current/previous 双 safe-integer 断言整改；主线程与独立 reviewer 均复现字符串 idx 现已 fail closed，独立 reviewer 额外验证浮点 idx fail closed。review package 与 `git diff -U10` 精确一致，统一 diff 的十行 context 边界解释并关闭 Minor。
 - 独立 Round 2 复审：Approved；Critical 0、Important 0、Minor 0。精确 5 文件、authoritative metadata 零 diff、blocked surfaces 零变化、fixture 清理均通过。
 - 主线程复核：pass。剩余 build concern 是 worktree 本地依赖拓扑不完整；root-installed dependency 对同一 authoritative worktree 的生产构建已通过，且没有为掩盖环境问题修改依赖或配置。
-- 当前允许进入整分支最终只读复核；在该复核完成前不声称 Task 7 或 F-0117 closeout 完成，不执行 merge、push 或 cleanup。
+- Task 7 implementation 与两轮 reviews 已完成；整分支 review 的治理文档一致性 finding 按后续专节修复并等待复审。唯一未完成的计划步骤是 Step 14；在复审与 Step 14 实际完成前不声称整分支最终 Approved 或 F-0117 closeout 完成，不执行 merge、push 或 cleanup。
 
 ## Task 7 Round 2 Important Disposition
 
-Decision: FIXED_AND_VERIFIED_PENDING_REREVIEW
+Decision: APPROVED_SUPERSEDED_BY_CONTROLLER_REREVIEW
 
 - Finding：接受。`as Journal` 不验证 JSON runtime shape；字符串 idx 可把加法退化为拼接，使 `"321" === "32" + 1`，削弱相邻 idx fail-closed 保证。
 - Root cause：相邻关系断言信任了 TypeScript assertion，而 journal 是运行时 JSON 边界。修复点必须位于算术前的 runtime numeric invariant，不能只改 type 或期望值。
 - Fix：分别要求 current 与 previous idx 都是 safe integer，再执行 `current === previous + 1`。这同时拒绝字符串、浮点数、NaN、Infinity 与超出安全整数范围的值。
 - TDD/mutation：旧 checkpoint 在双字符串 mutation 下错误 2/2 passed；修复后同 mutation 精确 fail at safe-integer assertion；恢复 numeric idx 后 authoritative 与 later-entry fixture 均 2/2 passed。
 - Scope：tracked amendment 精确限于目标 smoke 与既有 F-0117 evidence/audit；authoritative metadata、产品、guard、state/queue、依赖、数据库与授权语义零变更。
-- Disposition：Important 已由最小 fail-closed 修复关闭，等待独立 reviewer 对 amend 后完整 base..HEAD package 复核；不得在复核前声称 Round 2 final Approved。
+- Disposition：Important 已由最小 fail-closed 修复关闭；独立 reviewer 对 amend 后完整 base..HEAD package 复审 Approved（Critical 0、Important 0、Minor 0），原 pending rereview 状态已被 supersede。
+
+## Task 7 Whole-Branch Documentation Consistency Review
+
+Decision: FINDING_FIXED_PENDING_WHOLE_BRANCH_REREVIEW
+
+- 整分支 reviewer 的唯一 Important 成立：implementation plan 仍把 Task 7 标为 planned、Steps 1-13 未勾选、嵌入候选代码缺少 safe-integer amendment；evidence/audit 末尾仍残留已被复审 supersede 的 pending 状态和过时 mutation 数量。
+- 修复只对齐治理文档：Task 7 顶部状态为 implementation/reviews complete pending Step 14，Steps 1-13 已完成而 Step 14 保持未完成，候选代码补齐 current/previous `Number.isSafeInteger`，并统一六类 fail-closed mutation 与合法 later-entry 正常路径。
+- Evidence 明确保留初审 finding 的时间顺序，同时把已完成的独立 Round 2 复审记录为 superseding disposition；当前 Task 7 状态统一为 `implementation_complete_reviews_approved_pending_merge`。
+- Tracked diff 限于 implementation plan、既有 evidence 与 audit；ignored task report/progress 同步。测试、产品、guards、state/queue、authoritative metadata、依赖与授权语义均未修改。
+- Task 7 implementation/reviews 已完成，但本节不预先声称整分支最终 Approved；整分支 reviewer 必须复审本次 docs alignment。
+- 当前唯一未完成的计划步骤是 Step 14 merge/push/cleanup；本次未执行 Step 14。
+
+## Task 7 Whole-Branch Commit-Separation Review
+
+Decision: FINDING_FIXED_PENDING_WHOLE_BRANCH_REREVIEW
+
+- 第二个 Important 成立：将 post-review 治理文档对齐 amend 进 Step 13 实现提交，会使计划声明的 exact-5 implementation file set 与实际提交文件集不一致。
+- 修复采用 non-destructive soft reset 恢复原实现提交 `f01469c21`，其父仍为 `12e675087`，且提交精确包含 Step 13 声明的 5 个文件；未改测试语义或提交树。
+- implementation plan、evidence、audit 的状态对齐已隔离为独立 docs-only review-fix 提交。该提交不属于 Step 13 implementation file set，不含 test/spec/task-plan、authoritative metadata、guards、state/queue 或其他 blocked surface。
+- 本 disposition 只表示第二个 Important 已修复并等待复审，不表示整分支最终 Approved。整分支最终复审仍 pending；Step 14 merge/push/cleanup 仍 pending 且未执行。
+
+## Task 7 Whole-Branch Final Disposition
+
+Decision: APPROVE_FOR_STEP_14
+
+- 整分支 reviewer 初审的状态一致性 Important 已关闭：Task 7 为 `complete_pending_step_14`，Steps 1-13 complete、Step 14 pending；嵌入实现与 safe-integer amendment、六类 fail-closed mutation 及 Round 2 supersession 一致。
+- 整分支复审的提交文件集 Important 已关闭：实现提交恢复为父 `12e675087` 的 exact-5 `f01469c21`；状态对齐独立为 exact-3 docs-only `3f8f059e3`，测试 blob未改变。
+- 最终独立复审：Ready to merge；Critical 0、Important 0、Minor 0。全范围 6 个批准文件，blocked surfaces 0，review package 与实时 diff 一致。
+- 主线程逐项复核：pass。本 verdict 记录仅 amend 当前 docs-only review-fix commit 的 evidence/audit；不回写或扩大实现提交，不改变任何运行时、数据库、依赖或审批边界。
+- 允许进入 Step 14；仍必须先通过 final P1/P0/Module closeout/pre-push 门禁，再执行 ff-only merge、普通 push 和安全 cleanup。任一门禁失败必须 hard-block，不得修改 guard 绕过。

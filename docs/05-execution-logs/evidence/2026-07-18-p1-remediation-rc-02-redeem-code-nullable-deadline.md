@@ -202,13 +202,13 @@ Result: planning_complete_no_implementation
 
 - 用户已批准 migration smoke 可追加链设计 A，并书面批准对应 closeout addendum。
 - implementation plan 将已递延的 terminal-smoke Minor 收敛为单一 Task 7：先以 disposable later-entry fixture 证明旧断言 RED，再保留唯一 tag、相邻 predecessor/idx、动态 snapshot、`prevId` 与全 snapshot diff 断言转 GREEN。
-- 计划包含 duplicate tag、missing predecessor、non-adjacent idx、wrong `prevId`、额外 snapshot diff 五类 fail-closed mutation，以及 focused/full validation、主线程复核、独立第二轮 reviewer、单一提交、ff-only/push/cleanup 顺序。
+- 计划和 reviewer amendment 实际覆盖六类 fail-closed mutation：duplicate tag、missing predecessor、numeric idx gap、string/float invalid idx、wrong `prevId`、extra snapshot drift；合法 later-entry 是正常通过路径。另包含 focused/full validation、主线程复核、独立第二轮 reviewer、单一提交、ff-only/push/cleanup 顺序。
 - 本 planning commit 只包含 implementation plan 与本 evidence/audit 的新鲜计划复核记录；测试、产品、schema、migration、journal、snapshot、state/queue、guards 均保持零 diff。
 - 未执行数据库、Provider/runtime/browser、P2、PR、force-push 或 deploy；Task 7 RED 尚未开始。
 
 ## Task 7 Closeout Smoke Scope-Correction Evidence
 
-Result: implementation_verified_pending_controller_reviews
+Result: historical_checkpoint_superseded_by_approved_controller_reviews
 
 - 旧实现 RED：在 detached disposable fixture 保留 F-0117 局部链并追加 synthetic later entry 后，目标命令得到 1 file failed、1 test failed / 1 passed；失败精确位于 `journal.entries.at(-1)?.tag`，received 为 later tag，证明永久 terminal 假设会误伤合法后续迁移。
 - 候选实现 GREEN：authoritative worktree 与同一 later-entry fixture 均为 1 file / 2 tests passed。实现按完整 tag 唯一定位 F-0117，动态读取直接 predecessor 与对应 snapshot，不再要求 F-0117 是 journal 末项。
@@ -218,7 +218,7 @@ Result: implementation_verified_pending_controller_reviews
 - Wrong `prevId` mutation：临时零化当前 snapshot `prevId` 后 1 test failed / 1 passed，错误值不等于 previous snapshot id；恢复后 2/2 passed。
 - Extra snapshot diff mutation：临时改变当前 snapshot `dialect` 后 1 test failed / 1 passed，全对象比较显示 `fixture` 不等于 `postgresql`；恢复后 2/2 passed。
 - Disposable fixture 已按 resolved path 边界强制移除并 prune；authoritative journal、snapshot、schema、migration 与产品源码保持零 diff。
-- 主线程 Round 1 与独立 reviewer Round 2 由控制器在 review-checkpoint commit 后执行；本 implementation evidence 不预先声称 Approved，review findings/disposition 将由控制器 amend。
+- 本段记录 implementation checkpoint 当时的待审状态；后续 Controller Review Evidence 已完成主线程 Round 1 与独立 Round 2 复审并 Approved，本段 pending wording 已被 supersede。
 - 未运行 migrate、push、SQL、backfill、seed，未连接、读取或修改数据库；未执行 Provider、runtime/browser、P2、PR、force-push 或 deploy。
 
 ## Task 7 Closeout Full Validation
@@ -238,10 +238,10 @@ Result: pass_with_documented_worktree_dependency_topology_exception
 
 ## Task 7 Controller Review Evidence
 
-Result: pass_pending_whole_branch_review
+Result: implementation_complete_reviews_approved_pending_merge
 
 - 主线程 Round 1 逐项核对 base `12e675087` 到 checkpoint 的精确 diff：持久变更保持 5 个 allowlisted 文件；authoritative migration、journal、snapshot、schema、产品源码、guards、state/queue、package/lockfile 均为零 diff。
-- 主线程在 fresh detached fixture 复验 later-entry 正常路径为 1 file / 2 tests passed；duplicate tag、missing predecessor、non-adjacent numeric idx、wrong `prevId`、额外 snapshot `dialect` 五类 mutation 均 fail closed，恢复后继续 2/2 passed。
+- 主线程在 fresh detached fixture 复验 later-entry 正常路径为 1 file / 2 tests passed；duplicate tag、missing predecessor、numeric idx gap、string/float invalid idx、wrong `prevId`、extra snapshot drift 六类 mutation 均 fail closed，恢复后继续 2/2 passed。
 - 主线程首次审查后从仓库 root-installed dependency 定向构建 authoritative task worktree：exit 0，Turbopack 编译 15.6s、TypeScript 35.6s、96/96 static pages generated；未修改 dependency topology、Next config、package 或 lockfile。
 - 独立 Round 2 初审发现 1 个 Important：`JSON.parse(...) as Journal` 不提供运行时类型保护，previous idx=`"32"` 与 current idx=`"321"` 可通过 JavaScript 字符串拼接绕过相邻性断言。该 finding 经只读复现确认后接受。
 - 整改只在相邻算术前分别加入 `Number.isSafeInteger(current.idx)` 与 `Number.isSafeInteger(previous.idx)` fail-closed 断言；旧候选对字符串变异错误 2/2 passed，整改候选对同一变异 1 failed / 1 passed，证明 RED→GREEN。
@@ -250,10 +250,11 @@ Result: pass_pending_whole_branch_review
 - 新 review package 与实际 `git diff -U10 12e675087..f00362e68` 精确一致；末尾停在十行未变 context 是标准 unified diff 边界，不是字节截断，初审 package 完整性 Minor 已关闭。
 - 整改后 focused、精确 format、`git diff --check`、P1 manual、P0、Module pre-commit 与 amend hooks 均通过；因产品/构建面未变，未重复 full unit/build，沿用本节前述新鲜全量与定向构建证据。
 - 剩余 concern 仅为 task worktree 本地 `node_modules` 不完整的环境拓扑；root dependency 定向构建同一 worktree已通过，不涉及代码、依赖或授权边界，不阻断审查。
+- Task 7 implementation 与两轮 reviews 已完成；当前唯一未完成的计划步骤是 Step 14 merge/push/cleanup，尚未执行。
 
 ## Task 7 Round 2 Safe-Integer Amendment Evidence
 
-Result: important_fixed_and_focused_verified_pending_rereview
+Result: implementation_complete_reviews_approved_pending_merge
 
 - 独立 reviewer 的唯一 Important 成立：`JSON.parse(...) as Journal` 只提供编译期类型，不做运行时校验；previous idx 为字符串 `"32"`、current idx 为字符串 `"321"` 时，旧断言会把 `previousEntry.idx + 1` 拼接为 `"321"` 并错误通过。
 - Mutation RED：从 checkpoint 建立 detached disposable fixture，仅把上述两个 idx 改为字符串；旧 checkpoint 目标测试错误得到 1 file / 2 tests passed，证明 fail-open 路径可稳定复现。
@@ -262,3 +263,25 @@ Result: important_fixed_and_focused_verified_pending_rereview
 - 恢复 numeric idx 并保留 synthetic later entry 后，fixture 为 1 file / 2 tests passed；authoritative worktree 同样为 1 file / 2 tests passed。
 - Fixture 已按 resolved path 边界移除并 prune；authoritative journal、snapshot、schema、migration、产品、guard 与 state/queue 保持零 diff。
 - 本 amendment 只改变 smoke 测试与既有 evidence/audit；生产代码和构建面未变，按控制器裁决不重复 full unit/build，改跑 focused、精确 format、diff、P1 manual、P0 global 与 Module pre-commit。
+- 本段初写时的 pending rereview 已由独立 Round 2 复审 Approved（Critical 0、Important 0、Minor 0）明确 supersede；Task 7 当前只等待 Step 14 merge/push/cleanup。
+
+## Task 7 Whole-Branch Commit-Separation Evidence
+
+Result: docs_only_review_fix_isolated_pending_whole_branch_rereview
+
+- 整分支复审的第二个 Important 已验证：把 post-review 治理状态对齐 amend 进实现提交，会使 Step 13 的 exact-5 文件声明与实际提交不一致。
+- 处置使用 `git reset --soft f01469c21`，未使用 hard reset，未丢失 working tree。重置前 current tree 与 `2dc75e5c1^{tree}` 一致且 worktree clean；重置后 staged/unstaged 合计精确为 implementation plan、既有 evidence、既有 audit 三个文档。
+- 原实现提交 `f01469c21` 已恢复为 branch 上的 exact-5 Task 7 implementation commit，父提交仍为 `12e675087`；测试语义与该提交树均未修改。
+- 本 post-review 状态对齐作为独立 docs-only review-fix 提交，精确包含上述三个治理文档；test/spec/task-plan、authoritative metadata、guards、state/queue、依赖和 blocked surfaces 均无变化。
+- 本提交拆分只关闭文件集一致性 finding，不预先声称整分支最终 Approved；整分支最终复审仍 pending。唯一未完成的计划步骤仍为 Step 14 merge/push/cleanup，本次未执行。
+
+## Task 7 Whole-Branch Final Review Evidence
+
+Result: approved_for_step_14
+
+- 独立整分支 reviewer 对 `f208c8b4d..3f8f059e3` 的规格、计划、实现、review-fix、evidence/audit 与实时 diff 完成最终复审；review package 与实时 diff 一致。
+- 初审唯一 Important 为最终状态记录不一致；整改后复审又发现 implementation commit 被 plan amend 扩为 6 文件。两项 finding 均接受并完成最小治理修复。
+- 最终提交拓扑：`f01469c21` 父为 `12e675087` 且精确 5 个实现文件；`3f8f059e3` 精确 3 个 docs-only review-fix 文件；二者之间测试 blob 相同，整分支唯一 6 个批准文件，blocked diff count 0。
+- 最终 reviewer 结论：Ready to merge；Critical 0、Important 0、Minor 0。主线程复核 exact commit file set、test blob equality、`git diff --check`、focused 2/2 与 blocked surfaces 一致。
+- 本节写入是对已完成 reviewer verdict 的 evidence/audit-only amend；不改变测试、规格、implementation plan、task plan、authoritative metadata、guards、state/queue、依赖或授权语义。
+- 唯一剩余动作是 Step 14：按 closeout 状态机执行最终门禁、ff-only merge、普通 push 与清理；数据库、Provider/runtime/browser、P2、PR、force-push 与 deploy 继续 blocked。
