@@ -346,6 +346,7 @@ activeTasks:
       - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
       - src/features/student/profile/StudentProfileRedeemPage.tsx
       - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts
+      - tests/unit/p1-employee-import-command-migration-source.test.ts
       - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
       - tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
       - tests/unit/phase-21-admin-redeem-code-concurrency.test.ts

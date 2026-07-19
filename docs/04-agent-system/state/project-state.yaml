@@ -692,9 +692,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7
-  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7
-  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7
+  lastKnownMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a
+  lastKnownOriginMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a
+  lastKnownRemoteMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

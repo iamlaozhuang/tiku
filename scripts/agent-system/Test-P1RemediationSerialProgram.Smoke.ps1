@@ -75,6 +75,20 @@ $missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | W
 if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
     throw "P1 guard is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
 }
+$f0117SmokeScopeCorrectionPatterns = @(
+    "p1F0117SmokeScopeCorrectionTaskId",
+    "Test-P1F0117SmokeScopeCorrectionFileSet",
+    "Test-P1F0117SmokeScopeCorrectionAnchors",
+    "p1F0117SmokeScopeCorrectionAuthorization: approved_one_time",
+    "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a",
+    "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_QUEUE_DELTA_INVALID"
+)
+$missingF0117SmokeScopeCorrectionPatterns = @($f0117SmokeScopeCorrectionPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SmokeScopeCorrectionPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0117 smoke scope-correction contract: $($missingF0117SmokeScopeCorrectionPatterns -join ', ')"
+}
 $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-p1-remediation-program-" + [guid]::NewGuid().ToString("N"))
 $bootstrapTask = "p1-remediation-program-bootstrap-2026-07-16"
 $authorizationPath = "authorization.md"
@@ -2694,8 +2708,8 @@ Decision: APPROVE
         throw "P1 guard is missing F-0115 scope-correction marker/mode contract: $($missingF0115ScopeCorrectionPatterns -join ', ')"
     }
     $f0117PreCommitBehaviorOutput = @(& (Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.Smoke.ps1"))
-    if (($f0117PreCommitBehaviorOutput -join "`n") -notmatch "F-0117 P1 and Module pre-commit behavior smoke passed") {
-        throw "P1 smoke did not execute the shared F-0117 pre-commit behavior fixture."
+    if (($f0117PreCommitBehaviorOutput -join "`n") -notmatch "F-0117 smoke scope-correction P1 and Module pre-commit behavior smoke passed") {
+        throw "P1 smoke did not execute the shared F-0117 smoke scope-correction pre-commit behavior fixture."
     }
     Write-Output "P1 remediation serial program guard smoke passed: 15 positive, 81 negative"
 } finally {

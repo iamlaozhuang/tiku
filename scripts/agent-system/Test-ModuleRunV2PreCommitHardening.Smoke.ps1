@@ -114,6 +114,20 @@ $missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | W
 if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
 }
+$f0117SmokeScopeCorrectionPatterns = @(
+    "p1F0117SmokeScopeCorrectionTaskId",
+    "Test-P1F0117SmokeScopeCorrectionFileSet",
+    "Test-P1F0117SmokeScopeCorrectionAnchors",
+    "p1F0117SmokeScopeCorrectionAuthorization: approved_one_time",
+    "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a",
+    "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_QUEUE_DELTA_INVALID"
+)
+$missingF0117SmokeScopeCorrectionPatterns = @($f0117SmokeScopeCorrectionPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SmokeScopeCorrectionPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0117 smoke scope-correction contract: $($missingF0117SmokeScopeCorrectionPatterns -join ', ')"
+}
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 
@@ -1864,6 +1878,14 @@ function Reset-F0117PreCommitBehaviorFixture {
         $sourcePath = Join-Path $f0117BehaviorSourceRoot ($candidatePath -replace "/", "\")
         Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
     }
+    $legacyStatePath = Join-Path $f0117BehaviorRoot "docs\04-agent-system\state\project-state.yaml"
+    $legacyStateText = ([System.IO.File]::ReadAllText($legacyStatePath) -replace "`r`n?", "`n")
+    $legacyStateText = $legacyStateText.Replace("  lastKnownMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownOriginMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownRemoteMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a", "  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7")
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content $legacyStateText
+    $legacyQueuePath = Join-Path $f0117BehaviorRoot "docs\04-agent-system\state\task-queue.yaml"
+    $legacyQueueText = ([System.IO.File]::ReadAllText($legacyQueuePath) -replace "`r`n?", "`n")
+    $legacyQueueText = $legacyQueueText.Replace("      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/p1-employee-import-command-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts", "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts")
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content $legacyQueueText
     & git -C $f0117BehaviorRoot add -- $f0117BehaviorFiles
     if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0117 behavior fixture." }
 }
@@ -1985,7 +2007,7 @@ try {
     Assert-F0117PreCommitBehaviorFailure -Label "product file" -P1Pattern "P1_PROGRAM_(?:ALLOWED_FILES|BLOCKED_FILES)_VIOLATION" -ModulePattern "HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)"
     Reset-F0117PreCommitBehaviorFixture
 
-    Add-Content -LiteralPath $authorizationFullPath -Value "unstaged divergence" -Encoding UTF8
+    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $f0117BehaviorAuthorizationPath -Content ($authorizationText.TrimEnd() + "`nunstaged divergence`n")
     Assert-F0117PreCommitBehaviorFailure -Label "partial stage"
     Reset-F0117PreCommitBehaviorFixture
 
@@ -1999,5 +2021,205 @@ try {
     if (Test-Path -LiteralPath $f0117BehaviorRoot) { Remove-Item -LiteralPath $f0117BehaviorRoot -Recurse -Force }
 }
 
+$f0117SmokeScopeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf117pc-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+$f0117SmokeScopeBaseSha = "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
+$f0117SmokeScopeBranch = "codex/f0117-smoke-scope-correction"
+$f0117SmokeScopeParentTaskId = "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
+$f0117SmokeScopeAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix-authorization.md"
+$f0117SmokeScopeEvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md"
+$f0117SmokeScopeAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md"
+$f0117ProductSmokePath = "tests/unit/p1-employee-import-command-migration-source.test.ts"
+$f0117SmokeScopeFiles = @(
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    $f0117SmokeScopeAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md",
+    $f0117SmokeScopeEvidencePath,
+    $f0117SmokeScopeAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+
+function Remove-F0117SmokeScopePreCommitFixtureRoot {
+    $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\', '/')
+    $fixtureRoot = [System.IO.Path]::GetFullPath($f0117SmokeScopeRoot)
+    $fixtureParent = [System.IO.Path]::GetDirectoryName($fixtureRoot).TrimEnd('\', '/')
+    $fixtureLeaf = [System.IO.Path]::GetFileName($fixtureRoot)
+    if ($fixtureParent -cne $systemTempRoot -or $fixtureLeaf -cnotmatch '^tf117pc-[0-9a-f]{8}$') {
+        throw "F0117_SMOKE_SCOPE_PRECOMMIT_CLEANUP_UNSAFE_PATH"
+    }
+
+    foreach ($attempt in 1..3) {
+        if (-not (Test-Path -LiteralPath $fixtureRoot)) { return }
+        try {
+            Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction Stop
+        } catch {
+            if ($attempt -lt 3) { Start-Sleep -Milliseconds (50 * $attempt) }
+        }
+    }
+    if (Test-Path -LiteralPath $fixtureRoot) { throw "F0117_SMOKE_SCOPE_PRECOMMIT_CLEANUP_FAILED" }
+}
+
+function Reset-F0117SmokeScopePreCommitFixture {
+    & git -C $f0117SmokeScopeRoot reset --hard --quiet $f0117SmokeScopeBaseSha
+    & git -C $f0117SmokeScopeRoot clean -fdx --quiet
+    & git -C $f0117SmokeScopeRoot branch -M $f0117SmokeScopeBranch
+    foreach ($candidatePath in $f0117SmokeScopeFiles) {
+        if ($candidatePath -in @("docs/04-agent-system/state/project-state.yaml", "docs/04-agent-system/state/task-queue.yaml")) {
+            $baseContent = ((& git -C $f0117BehaviorSourceRoot show "${f0117SmokeScopeBaseSha}:$candidatePath") -join "`n")
+            if ($LASTEXITCODE -ne 0) { throw "Failed to read F-0117 smoke scope base fixture file: $candidatePath" }
+            Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $candidatePath -Content $baseContent
+        } else {
+            $sourcePath = Join-Path $f0117BehaviorSourceRoot ($candidatePath -replace "/", "\")
+            if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
+                Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+            }
+        }
+    }
+    $statePath = Join-Path $f0117SmokeScopeRoot "docs\04-agent-system\state\project-state.yaml"
+    $stateText = ([System.IO.File]::ReadAllText($statePath) -replace "`r`n?", "`n")
+    $stateParentShaBlock = "  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7"
+    $stateProjectedShaBlock = "  lastKnownMasterSha: $f0117SmokeScopeBaseSha`n  lastKnownOriginMasterSha: $f0117SmokeScopeBaseSha`n  lastKnownRemoteMasterSha: $f0117SmokeScopeBaseSha"
+    if ([regex]::Matches($stateText, [regex]::Escape($stateParentShaBlock)).Count -ne 1) { throw "F-0117 smoke scope state fixture anchor must occur exactly once." }
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content $stateText.Replace($stateParentShaBlock, $stateProjectedShaBlock)
+    $queuePath = Join-Path $f0117SmokeScopeRoot "docs\04-agent-system\state\task-queue.yaml"
+    $queueText = ([System.IO.File]::ReadAllText($queuePath) -replace "`r`n?", "`n")
+    $queueAnchor = "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts"
+    $queueReplacement = "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - $f0117ProductSmokePath`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts"
+    if ([regex]::Matches($queueText, [regex]::Escape($queueAnchor)).Count -ne 1) { throw "F-0117 smoke scope queue fixture anchor must occur exactly once." }
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content $queueText.Replace($queueAnchor, $queueReplacement)
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $f0117SmokeScopeEvidencePath -Content "# Evidence`n`n## Reading Evidence`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Root-Cause Reproduction`nResult: pass`n`n## TDD Evidence`nResult: pass`n`n## Validation Results`nResult: pass`n"
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $f0117SmokeScopeAuditPath -Content "# Audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`n## Decision`nDecision: APPROVE`n"
+    & git -C $f0117SmokeScopeRoot add -- $f0117SmokeScopeFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage exact F-0117 smoke scope-correction fixture." }
+}
+
+function Assert-F0117SmokeScopePreCommitFailure {
+    param(
+        [string]$Label,
+        [string]$P1Pattern = "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_",
+        [string]$ModulePattern = "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_"
+    )
+    $p1Output = @()
+    $p1Failed = $false
+    try { $p1Output = @(& $p1GuardPath -RepositoryRoot $f0117SmokeScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks 2>&1) } catch { $p1Failed = $true; $p1Output += $_.Exception.Message }
+    $moduleOutput = @()
+    $moduleFailed = $false
+    Push-Location $f0117SmokeScopeRoot
+    try { try { $moduleOutput = @(& $scriptPath 2>&1) } catch { $moduleFailed = $true; $moduleOutput += $_.Exception.Message } } finally { Pop-Location }
+    if (-not $p1Failed -or -not $moduleFailed) { throw "F-0117 smoke scope $Label did not fail both pre-commit guards." }
+    if (($p1Output -join "`n") -notmatch $P1Pattern) { throw "F-0117 smoke scope $Label P1 output missed '$P1Pattern': $($p1Output -join '; ')" }
+    if (($moduleOutput -join "`n") -notmatch $ModulePattern) { throw "F-0117 smoke scope $Label Module output missed '$ModulePattern': $($moduleOutput -join '; ')" }
+}
+
+try {
+    & git clone --quiet --shared --no-checkout $f0117BehaviorSourceRoot $f0117SmokeScopeRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0117 smoke scope pre-commit fixture." }
+    & git -C $f0117SmokeScopeRoot config user.name "F0117 Smoke Scope PreCommit"
+    & git -C $f0117SmokeScopeRoot config user.email "f0117-smoke-scope-precommit@example.invalid"
+    & git -C $f0117SmokeScopeRoot config core.autocrlf false
+    & git -C $f0117SmokeScopeRoot config core.longpaths true
+    & git -C $f0117SmokeScopeRoot switch --quiet -C $f0117SmokeScopeBranch $f0117SmokeScopeBaseSha
+    & git -C $f0117SmokeScopeRoot update-ref refs/remotes/origin/master $f0117SmokeScopeBaseSha
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $p1SmokeScopePositive = @(& $p1GuardPath -RepositoryRoot $f0117SmokeScopeRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    Assert-Contains -Output $p1SmokeScopePositive -Pattern "p1F0117SmokeScopeCorrectionAuthorization: approved_one_time"
+    Push-Location $f0117SmokeScopeRoot
+    try { $moduleSmokeScopePositive = @(& $scriptPath) } finally { Pop-Location }
+    Assert-Contains -Output $moduleSmokeScopePositive -Pattern "preCommitScopeMode: p1_f0117_smoke_scope_correction"
+
+    & git -C $f0117SmokeScopeRoot branch -M codex/wrong-f0117-smoke-scope
+    Assert-F0117SmokeScopePreCommitFailure -Label "wrong branch"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    & git -C $f0117SmokeScopeRoot reset --soft "${f0117SmokeScopeBaseSha}^"
+    Assert-F0117SmokeScopePreCommitFailure -Label "wrong base"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $statePath = Join-Path $f0117SmokeScopeRoot "docs\04-agent-system\state\project-state.yaml"
+    $stateText = [System.IO.File]::ReadAllText($statePath)
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content $stateText.Replace("currentTaskId: $f0117SmokeScopeParentTaskId", "currentTaskId: p1-remediation-rc-02-employee-import-preflight-2026-07-17")
+    & git -C $f0117SmokeScopeRoot add -- "docs/04-agent-system/state/project-state.yaml"
+    Assert-F0117SmokeScopePreCommitFailure -Label "wrong task"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $queuePath = Join-Path $f0117SmokeScopeRoot "docs\04-agent-system\state\task-queue.yaml"
+    $queueText = [System.IO.File]::ReadAllText($queuePath)
+    $statusAnchor = "  - id: $f0117SmokeScopeParentTaskId`n    title: P1 RC-02 redeem_code nullable deadline`n    phase: $f0117SmokeScopeParentTaskId`n    status: in_progress"
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content (($queueText -replace "`r`n?", "`n").Replace($statusAnchor, $statusAnchor.Replace("status: in_progress", "status: ready_for_closeout")))
+    & git -C $f0117SmokeScopeRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+    Assert-F0117SmokeScopePreCommitFailure -Label "wrong status"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $authorizationPath = Join-Path $f0117SmokeScopeRoot ($f0117SmokeScopeAuthorizationPath -replace "/", "\")
+    $authorizationText = [System.IO.File]::ReadAllText($authorizationPath)
+    foreach ($mutation in @(
+        @{ Label = "missing authorization field"; Content = $authorizationText.Replace("replay: hard_block`n", "") },
+        @{ Label = "tampered authorization field"; Content = $authorizationText.Replace("standardMode: hard_block", "standardMode: allow") },
+        @{ Label = "tampered exact file"; Content = $authorizationText.Replace('12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`', '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1`') },
+        @{ Label = "duplicate authorization field"; Content = ($authorizationText.TrimEnd() + "`nstandardMode: hard_block`n") }
+    )) {
+        Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $f0117SmokeScopeAuthorizationPath -Content $mutation.Content
+        & git -C $f0117SmokeScopeRoot add -- $f0117SmokeScopeAuthorizationPath
+        Assert-F0117SmokeScopePreCommitFailure -Label $mutation.Label
+        Reset-F0117SmokeScopePreCommitFixture
+    }
+
+    & git -C $f0117SmokeScopeRoot rm --quiet -f -- $f0117SmokeScopeAuthorizationPath
+    Assert-F0117SmokeScopePreCommitFailure -Label "missing file"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    & git -C $f0117SmokeScopeRoot restore --source=HEAD --staged --worktree -- "docs/04-agent-system/state/project-state.yaml"
+    Assert-F0117SmokeScopePreCommitFailure -Label "missing state" -P1Pattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -ModulePattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    & git -C $f0117SmokeScopeRoot restore --source=HEAD --staged --worktree -- "docs/04-agent-system/state/task-queue.yaml"
+    Assert-F0117SmokeScopePreCommitFailure -Label "missing queue" -P1Pattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -ModulePattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "f0117-smoke-scope-extra.md" -Content "extra"
+    & git -C $f0117SmokeScopeRoot add --sparse -- "f0117-smoke-scope-extra.md"
+    Assert-F0117SmokeScopePreCommitFailure -Label "extra file"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $queueText = [System.IO.File]::ReadAllText((Join-Path $f0117SmokeScopeRoot "docs\04-agent-system\state\task-queue.yaml"))
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content ($queueText.TrimEnd() + "`n# forbidden queue delta`n")
+    & git -C $f0117SmokeScopeRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+    Assert-F0117SmokeScopePreCommitFailure -Label "queue extra delta" -P1Pattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -ModulePattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_QUEUE_DELTA_INVALID"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $stateText = [System.IO.File]::ReadAllText((Join-Path $f0117SmokeScopeRoot "docs\04-agent-system\state\project-state.yaml"))
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content ($stateText.TrimEnd() + "`n# forbidden state delta`n")
+    & git -C $f0117SmokeScopeRoot add -- "docs/04-agent-system/state/project-state.yaml"
+    Assert-F0117SmokeScopePreCommitFailure -Label "state extra delta" -P1Pattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_STATE_DELTA_INVALID" -ModulePattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_STATE_DELTA_INVALID"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $productSmokeSource = Join-Path $f0117BehaviorSourceRoot ($f0117ProductSmokePath -replace "/", "\")
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $f0117ProductSmokePath -Content ([System.IO.File]::ReadAllText($productSmokeSource) + "`n// forbidden governance-bundled product smoke change")
+    & git -C $f0117SmokeScopeRoot add --sparse -- $f0117ProductSmokePath
+    Assert-F0117SmokeScopePreCommitFailure -Label "product smoke content"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    $smokeScopeAuthorizationText = [System.IO.File]::ReadAllText((Join-Path $f0117SmokeScopeRoot ($f0117SmokeScopeAuthorizationPath -replace "/", "\")))
+    Set-F0117PreCommitFixtureFile -Root $f0117SmokeScopeRoot -Path $f0117SmokeScopeAuthorizationPath -Content ($smokeScopeAuthorizationText.TrimEnd() + "`nunstaged divergence`n")
+    Assert-F0117SmokeScopePreCommitFailure -Label "partial stage"
+    Reset-F0117SmokeScopePreCommitFixture
+
+    & git -C $f0117SmokeScopeRoot commit --quiet -m "materialize F-0117 smoke scope candidate"
+    foreach ($candidatePath in $f0117SmokeScopeFiles) {
+        Add-Content -LiteralPath (Join-Path $f0117SmokeScopeRoot ($candidatePath -replace "/", "\")) -Value "# replay probe" -Encoding UTF8
+    }
+    & git -C $f0117SmokeScopeRoot add -- $f0117SmokeScopeFiles
+    Assert-F0117SmokeScopePreCommitFailure -Label "replay"
+} finally {
+    Remove-F0117SmokeScopePreCommitFixtureRoot
+}
+
 Write-Output "F-0117 P1 and Module pre-commit behavior smoke passed"
+Write-Output "F-0117 smoke scope-correction P1 and Module pre-commit behavior smoke passed"
 Write-Output "Module Run v2 pre-commit hardening smoke passed"

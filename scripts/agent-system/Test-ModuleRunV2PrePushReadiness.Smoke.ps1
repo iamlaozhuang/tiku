@@ -116,6 +116,21 @@ $missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | W
 if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
     throw "Module pre-push is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
 }
+$f0117SmokeScopeCorrectionPatterns = @(
+    "p1F0117SmokeScopeCorrectionBaseSha",
+    "p1F0117SmokeScopeCorrectionAuthorizationPath",
+    "p1F0117SmokeScopeCorrectionFiles",
+    "Test-P1F0117SmokeScopeCorrectionTransitionTopology",
+    "p1F0117SmokeScopeCorrectionTransitionTopology: exact_one_parent",
+    "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a",
+    "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_REQUIRES_TRANSITION_ONLY"
+)
+$missingF0117SmokeScopeCorrectionPatterns = @($f0117SmokeScopeCorrectionPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SmokeScopeCorrectionPatterns.Count -gt 0) {
+    throw "Module pre-push is RED for the F-0117 smoke scope-correction contract: $($missingF0117SmokeScopeCorrectionPatterns -join ', ')"
+}
 
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-push readiness script: $scriptPath"
@@ -1084,7 +1099,33 @@ $f0117Files = @(
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
-$f0117FixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-module-f0117-spec-approval-pre-push-" + [guid]::NewGuid().ToString("N"))
+$f0117FixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf117sp-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+
+function Remove-F0117PrePushFixtureRoot {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$ExpectedPrefix,
+        [Parameter(Mandatory = $true)][string]$FailureCode
+    )
+
+    $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\', '/')
+    $fixtureRoot = [System.IO.Path]::GetFullPath($Path)
+    $fixtureParent = [System.IO.Path]::GetDirectoryName($fixtureRoot).TrimEnd('\', '/')
+    $fixtureLeaf = [System.IO.Path]::GetFileName($fixtureRoot)
+    if ($fixtureParent -cne $systemTempRoot -or $fixtureLeaf -cnotmatch "^$([regex]::Escape($ExpectedPrefix))[0-9a-f]{8}$") {
+        throw "${FailureCode}_UNSAFE_PATH"
+    }
+
+    foreach ($attempt in 1..3) {
+        if (-not (Test-Path -LiteralPath $fixtureRoot)) { return }
+        try {
+            Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction Stop
+        } catch {
+            if ($attempt -lt 3) { Start-Sleep -Milliseconds (50 * $attempt) }
+        }
+    }
+    if (Test-Path -LiteralPath $fixtureRoot) { throw $FailureCode }
+}
 
 function Invoke-F0117P1PrePushGuard {
     $headSha = ((& git -C $f0117FixtureRoot rev-parse HEAD) -join "").Trim()
@@ -1116,6 +1157,14 @@ try {
         if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0117 source file: $candidatePath" }
         Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
     }
+    $legacyStatePath = Join-Path $f0117FixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $legacyStateText = ([System.IO.File]::ReadAllText($legacyStatePath) -replace "`r`n?", "`n")
+    $legacyStateText = $legacyStateText.Replace("  lastKnownMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownOriginMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownRemoteMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a", "  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7")
+    Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $f0115PrePushProjectStatePath -Content $legacyStateText
+    $legacyQueuePath = Join-Path $f0117FixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $legacyQueueText = ([System.IO.File]::ReadAllText($legacyQueuePath) -replace "`r`n?", "`n")
+    $legacyQueueText = $legacyQueueText.Replace("      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/p1-employee-import-command-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts", "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts")
+    Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $f0115PrePushQueuePath -Content $legacyQueueText
     & git -C $f0117FixtureRoot add -- $f0117Files
     & git -C $f0117FixtureRoot commit --quiet -m "materialize exact F-0117 spec approval transition"
     if ($LASTEXITCODE -ne 0) { throw "Failed to commit exact F-0117 fixture." }
@@ -1226,7 +1275,173 @@ try {
         Pop-Location
     }
 } finally {
-    if (Test-Path -LiteralPath $f0117FixtureRoot) { Remove-Item -LiteralPath $f0117FixtureRoot -Recurse -Force }
+    Remove-F0117PrePushFixtureRoot -Path $f0117FixtureRoot -ExpectedPrefix "tf117sp-" -FailureCode "F0117_SPEC_APPROVAL_PREPUSH_CLEANUP_FAILED"
 }
 
+$f0117SmokeScopeBaseSha = "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
+$f0117SmokeScopeParentTaskId = "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
+$f0117SmokeScopeAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix-authorization.md"
+$f0117SmokeScopeEvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md"
+$f0117SmokeScopeAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md"
+$f0117SmokeScopeProductSmokePath = "tests/unit/p1-employee-import-command-migration-source.test.ts"
+$f0117SmokeScopeFiles = @(
+    $f0115PrePushProjectStatePath,
+    $f0115PrePushQueuePath,
+    $f0117SmokeScopeAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md",
+    $f0117SmokeScopeEvidencePath,
+    $f0117SmokeScopeAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0117SmokeScopeFixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf117pp-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+
+function Invoke-F0117SmokeScopeP1PrePushGuard {
+    $headSha = ((& git -C $f0117SmokeScopeFixtureRoot rev-parse HEAD) -join "").Trim()
+    $originSha = ((& git -C $f0117SmokeScopeFixtureRoot rev-parse origin/master) -join "").Trim()
+    $originUrl = ((& git -C $f0117SmokeScopeFixtureRoot remote get-url origin) -join "").Trim()
+    & $p1GuardPath -RepositoryRoot $f0117SmokeScopeFixtureRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $originUrl -PushUpdateLines "refs/heads/master $headSha refs/heads/master $originSha" -SkipExternalIntegrityChecks
+}
+
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0117SmokeScopeFixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0117 smoke scope pre-push fixture." }
+    & git -C $f0117SmokeScopeFixtureRoot config user.name "Module F-0117 Smoke Scope"
+    & git -C $f0117SmokeScopeFixtureRoot config user.email "module-f0117-smoke-scope@example.invalid"
+    & git -C $f0117SmokeScopeFixtureRoot config core.autocrlf false
+    & git -C $f0117SmokeScopeFixtureRoot config core.longpaths true
+    & git -C $f0117SmokeScopeFixtureRoot switch --quiet -C master $f0117SmokeScopeBaseSha
+    & git -C $f0117SmokeScopeFixtureRoot update-ref refs/remotes/origin/master $f0117SmokeScopeBaseSha
+    foreach ($candidatePath in $f0117SmokeScopeFiles) {
+        if ($candidatePath -in @($f0115PrePushProjectStatePath, $f0115PrePushQueuePath)) {
+            $baseContent = ((& git -C $f0115PrePushSourceRoot show "${f0117SmokeScopeBaseSha}:$candidatePath") -join "`n")
+            if ($LASTEXITCODE -ne 0) { throw "Failed to read F-0117 smoke scope base fixture file: $candidatePath" }
+            Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $candidatePath -Content $baseContent
+        } else {
+            $sourcePath = Join-Path $f0115PrePushSourceRoot ($candidatePath -replace "/", "\")
+            if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
+                Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+            }
+        }
+    }
+    $stateFullPath = Join-Path $f0117SmokeScopeFixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $stateText = ([System.IO.File]::ReadAllText($stateFullPath) -replace "`r`n?", "`n")
+    $stateParentShaBlock = "  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7"
+    $stateProjectedShaBlock = "  lastKnownMasterSha: $f0117SmokeScopeBaseSha`n  lastKnownOriginMasterSha: $f0117SmokeScopeBaseSha`n  lastKnownRemoteMasterSha: $f0117SmokeScopeBaseSha"
+    if ([regex]::Matches($stateText, [regex]::Escape($stateParentShaBlock)).Count -ne 1) { throw "F-0117 smoke scope pre-push state anchor must occur exactly once." }
+    Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0115PrePushProjectStatePath -Content $stateText.Replace($stateParentShaBlock, $stateProjectedShaBlock)
+    $queueFullPath = Join-Path $f0117SmokeScopeFixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $queueText = ([System.IO.File]::ReadAllText($queueFullPath) -replace "`r`n?", "`n")
+    $queueAnchor = "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts"
+    $queueReplacement = "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - $f0117SmokeScopeProductSmokePath`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts"
+    if ([regex]::Matches($queueText, [regex]::Escape($queueAnchor)).Count -ne 1) { throw "F-0117 smoke scope pre-push queue anchor must occur exactly once." }
+    Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0115PrePushQueuePath -Content $queueText.Replace($queueAnchor, $queueReplacement)
+    Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0117SmokeScopeEvidencePath -Content "# Evidence`n`n## Reading Evidence`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Root-Cause Reproduction`nResult: pass`n`n## TDD Evidence`nResult: pass`n`n## Validation Results`nResult: pass`n"
+    Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0117SmokeScopeAuditPath -Content "# Audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`n## Decision`nDecision: APPROVE`n"
+    & git -C $f0117SmokeScopeFixtureRoot add -- $f0117SmokeScopeFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage exact F-0117 smoke scope pre-push fixture." }
+    & git -C $f0117SmokeScopeFixtureRoot commit --quiet -m "materialize exact F-0117 smoke scope correction"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit exact F-0117 smoke scope pre-push fixture." }
+    $positiveSha = ((& git -C $f0117SmokeScopeFixtureRoot rev-parse HEAD) -join "").Trim()
+    $projectStatePath = Join-Path $f0117SmokeScopeFixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $queuePath = Join-Path $f0117SmokeScopeFixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $matrixPath = Join-Path $f0117SmokeScopeFixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $evidencePath = Join-Path $f0117SmokeScopeFixtureRoot ($f0117SmokeScopeEvidencePath -replace "/", "\")
+    $auditPath = Join-Path $f0117SmokeScopeFixtureRoot ($f0117SmokeScopeAuditPath -replace "/", "\")
+    Push-Location $f0117SmokeScopeFixtureRoot
+    try {
+        $invokeSmokeScope = { param($Mode, $Task = $f0117SmokeScopeParentTaskId) & $scriptPath -TaskId $Task -ProjectStatePath $projectStatePath -QueuePath $queuePath -MatrixPath $matrixPath -EvidencePath $evidencePath -AuditReviewPath $auditPath -SkipRemoteAheadCheck -P1TransitionScopeMode $Mode }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_REQUIRES_TRANSITION_ONLY" -Command { & $invokeSmokeScope standard }
+        $p1PositiveOutput = @(Invoke-F0117SmokeScopeP1PrePushGuard)
+        Assert-Contains -Output $p1PositiveOutput -Pattern "p1F0117SmokeScopeCorrectionAuthorization: approved_one_time"
+        Assert-Contains -Output $p1PositiveOutput -Pattern "p1TransitionScopeMode: transition_only"
+        $positiveOutput = @(& $invokeSmokeScope transition_only)
+        Assert-Contains -Output $positiveOutput -Pattern "p1F0117SmokeScopeCorrectionTransitionTopology: exact_one_parent"
+        Assert-Contains -Output $positiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+        $authorizationFullPath = Join-Path $f0117SmokeScopeFixtureRoot ($f0117SmokeScopeAuthorizationPath -replace "/", "\")
+        $authorizationText = [System.IO.File]::ReadAllText($authorizationFullPath)
+        foreach ($mutation in @(
+            @{ Label = "missing field"; Content = $authorizationText.Replace("replay: hard_block`n", ""); P1 = "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_AUTHORIZATION_INVALID" },
+            @{ Label = "tampered field"; Content = $authorizationText.Replace("standardMode: hard_block", "standardMode: allow"); P1 = "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_AUTHORIZATION_INVALID" },
+            @{ Label = "duplicate field"; Content = ($authorizationText.TrimEnd() + "`nstandardMode: hard_block`n"); P1 = "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_AUTHORIZATION_INVALID" },
+            @{ Label = "tampered file set"; Content = $authorizationText.Replace('12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`', '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1`'); P1 = "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_AUTHORIZATION_FILE_SET_INVALID" }
+        )) {
+            Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0117SmokeScopeAuthorizationPath -Content $mutation.Content
+            & git add -- $f0117SmokeScopeAuthorizationPath; & git commit --quiet --amend --no-edit
+            Invoke-ExpectFailure -ExpectedPattern $mutation.P1 -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_" -Command { & $invokeSmokeScope transition_only }
+            & git reset --hard --quiet $positiveSha
+        }
+
+        & git rm --quiet -- $f0117SmokeScopeAuthorizationPath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_FILE_SET_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        & git checkout $f0117SmokeScopeBaseSha -- $f0115PrePushProjectStatePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_FILE_SET_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        & git checkout $f0117SmokeScopeBaseSha -- $f0115PrePushQueuePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_FILE_SET_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path "f0117-smoke-scope-extra.md" -Content "extra"
+        & git add --sparse -- "f0117-smoke-scope-extra.md"; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_FILE_SET_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        $queueText = [System.IO.File]::ReadAllText($queuePath)
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0115PrePushQueuePath -Content ($queueText.TrimEnd() + "`n# forbidden queue delta`n")
+        & git add -- $f0115PrePushQueuePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_QUEUE_DELTA_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        $stateText = [System.IO.File]::ReadAllText($projectStatePath)
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0115PrePushProjectStatePath -Content ($stateText.TrimEnd() + "`n# forbidden state delta`n")
+        & git add -- $f0115PrePushProjectStatePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_STATE_DELTA_INVALID" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_STATE_DELTA_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        $productSmokeSource = Join-Path $f0115PrePushSourceRoot ($f0117SmokeScopeProductSmokePath -replace "/", "\")
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0117SmokeScopeProductSmokePath -Content ([System.IO.File]::ReadAllText($productSmokeSource) + "`n// forbidden governance-bundled product smoke change")
+        & git add --sparse -- $f0117SmokeScopeProductSmokePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_FILE_SET_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        $secondParent = ((& git rev-parse "${f0117SmokeScopeBaseSha}^") -join "").Trim()
+        $treeSha = ((& git rev-parse "$positiveSha^{tree}") -join "").Trim()
+        $mergeSha = ("multi-parent" | & git commit-tree $treeSha -p $f0117SmokeScopeBaseSha -p $secondParent).Trim()
+        & git update-ref refs/heads/master $mergeSha
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_TOPOLOGY_INVALID" -Command { & $invokeSmokeScope transition_only }
+        & git reset --hard --quiet $positiveSha
+
+        Add-Content -LiteralPath $evidencePath -Value "replay" -Encoding UTF8
+        & git add -- $f0117SmokeScopeEvidencePath; & git commit --quiet -m "attempt F-0117 smoke scope replay"
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CORRECTION_ALREADY_MATERIALIZED" -Command { Invoke-F0117SmokeScopeP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_REPLAY" -Command { & $invokeSmokeScope transition_only }
+
+        & git reset --hard --quiet $f0117SmokeScopeBaseSha
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path "ordinary-drift.md" -Content "ordinary in-progress drift"
+        & git add --sparse -- ordinary-drift.md; & git commit --quiet -m "ordinary in-progress drift"
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT" -Command { & $invokeSmokeScope standard }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    Remove-F0117PrePushFixtureRoot -Path $f0117SmokeScopeFixtureRoot -ExpectedPrefix "tf117pp-" -FailureCode "F0117_SMOKE_SCOPE_PREPUSH_CLEANUP_FAILED"
+}
+
+Write-Output "F-0117 smoke scope-correction pre-push behavior smoke passed"
 Write-Output "Module Run v2 pre-push readiness smoke passed"
