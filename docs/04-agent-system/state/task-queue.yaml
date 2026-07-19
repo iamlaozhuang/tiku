@@ -267,12 +267,12 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16: closed
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
-    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: in_progress
+    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: ready_for_closeout
 activeTasks:
   - id: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     title: P1 RC-02 redeem_code nullable deadline
     phase: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
-    status: in_progress
+    status: ready_for_closeout
     priority: p1
     sequenceOrder: 10
     taskKind: product_remediation
