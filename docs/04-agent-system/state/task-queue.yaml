@@ -270,12 +270,12 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
-    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: in_progress
+    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: ready_for_closeout
 activeTasks:
   - id: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     title: P1 RC-02 employee personal AI selected authorization context
     phase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
-    status: in_progress
+    status: ready_for_closeout
     priority: p1
     sequenceOrder: 11
     taskKind: product_remediation
