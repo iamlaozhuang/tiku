@@ -18,8 +18,9 @@
 | 4. Student preview/confirm    | complete | RED/GREEN 与独立审查 Approved                       |
 | 5. Admin/student UI           | complete | RED/GREEN 与独立审查 Approved                       |
 | 6. 全链 closeout preparation  | complete | 全量验证与治理门禁通过；两轮累计独立审查均 Approved |
+| 7. Migration smoke 可追加链   | planned  | 设计与书面规格已批准；等待 RED→GREEN 执行           |
 
-本表只记录当前执行进度。唯一产品提交、`ready_for_closeout` transition、合入、推送与清理均尚未执行。
+Tasks 1-6 的产品提交、`ready_for_closeout` transition、ff-only 合入、普通推送与原 worktree/短分支清理已经完成。当前重新建立的 F-0117 worktree 只用于 Task 7 closeout smoke scope-correction；不得重开产品实现。
 
 ## Global Constraints
 
@@ -34,6 +35,7 @@
 - preview canonical facts 必须显式包含 null；confirm 必须使用同一 JIT 过期语义。
 - 一次性明文分发、脱敏、edition、并发兑换、幂等和 no-store 边界不得改变。
 - WIP=1。项目“一任务一个产品提交”规则优先于通用 frequent-commit 建议；Task 1-5 只做可复核 TDD checkpoint，Task 6 才创建唯一产品提交。
+- F-0117 migration smoke 必须允许合法后续 journal entry，同时继续拒绝重复 tag、缺失 predecessor、非相邻 idx、错误 snapshot `prevId` 与额外 schema diff。
 
 ## Execution Prerequisite
 
@@ -1010,3 +1012,313 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/T
 ```
 
 Expected: closeout 与 pre-push pass；随后按 task `closeoutPolicy` 执行 ff-only 合入 `master`、普通 push `origin/master`，安全移除 junction 后清理 worktree/短分支。禁止数据库执行、PR、force-push 或 deploy。
+
+### Task 7: F-0117 migration smoke 可追加链 scope-correction
+
+**Files:**
+
+- Modify: `tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`
+- Modify: `docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline-design.md`
+- Modify after GREEN only: `docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md`
+- Modify after GREEN only: `docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md`
+- Modify after GREEN only: `docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md`
+- Disposable fixture only, never commit: `drizzle/meta/_journal.json` and `drizzle/meta/20260718100413_snapshot.json`
+
+**Interfaces:**
+
+- Consumes: F-0117 migration tag `20260718100413_p1_rc_02_redeem_code_nullable_deadline`、journal 中的实际相邻 entry、对应 timestamped snapshots。
+- Produces: 一个只验证 F-0117 局部线性链而不要求其永久为 journal 末项的 migration source smoke；authoritative schema、migration、journal 与 snapshot 零 diff。
+
+- [ ] **Step 1: 物化 Task 7 精确范围与停止条件**
+
+在既有 task plan 末尾追加以下 contract；不得改 state/queue 或任何 guard：
+
+```markdown
+## Task 7 Closeout Smoke Scope-Correction
+
+- Goal: replace the F-0117 journal-terminal assumption with appendable local-chain validation.
+- Allowed files: the approved design addendum, this task plan, existing F-0117 evidence/audit, and `tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`.
+- Blocked files: state/queue, guards/smokes, product/schema/migration/journal/snapshot in the authoritative task worktree, package/lockfile, env, Provider/runtime/browser, P2, PR, deploy.
+- Disposable exception: a detached worktree may temporarily mutate journal/snapshot fixtures for RED/GREEN and adversarial mutation checks; those mutations must never enter a diff or commit.
+- Stop if a shared helper, new guard capability, state transition, schema/migration edit, database execution, another finding repair, or any non-allowlisted persistent file becomes necessary.
+```
+
+Run:
+
+```powershell
+git diff --check
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase pre_commit -SkipExternalIntegrityChecks
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+```
+
+Expected: exact docs-only scope PASS；工作区中没有 test/schema/migration diff。
+
+- [ ] **Step 2: 在 disposable worktree 证明旧 terminal 断言 RED**
+
+从已批准规格提交建立 detached fixture：
+
+```powershell
+$fixture = "D:\tiku\.worktrees\f0117-migration-smoke-red-fixture"
+if (Test-Path -LiteralPath $fixture) { throw "fixture already exists: $fixture" }
+git worktree add --detach $fixture e76abf5c2e346d908d9cfccd84c12f032650bc5e
+```
+
+仅在 fixture 的 `_journal.json` 中把 F-0117 entry 后追加：
+
+```json
+{
+  "idx": 34,
+  "version": "7",
+  "when": 1784394253910,
+  "tag": "20260718110413_fixture_later_migration",
+  "breakpoints": true
+}
+```
+
+使用 `apply_patch` 修改 fixture；禁止用 shell 重写 JSON。随后运行：
+
+```powershell
+& "D:\tiku\node_modules\.bin\vitest.cmd" run tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts --maxWorkers=1
+```
+
+Expected: 1 test PASS、1 test FAIL；失败精确来自 `journal.entries.at(-1)?.tag` 得到 synthetic later tag，证明合法追加会误伤历史 F-0117 smoke。
+
+- [ ] **Step 3: 写入最小可追加链实现**
+
+使用 `apply_patch` 将 authoritative task worktree 中的测试完整收敛为以下内容；不得抽取跨文件 helper：
+
+```ts
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+import { describe, expect, it } from "vitest";
+
+const migrationSuffix = "_p1_rc_02_redeem_code_nullable_deadline.sql";
+
+type Journal = {
+  entries: Array<{ idx: number; tag: string }>;
+};
+
+type Snapshot = {
+  id: string;
+  prevId: string;
+  tables: Record<string, { columns: Record<string, { notNull: boolean }> }>;
+};
+
+function readMigration() {
+  const names = readdirSync(resolve(process.cwd(), "drizzle")).filter((name) =>
+    name.endsWith(migrationSuffix),
+  );
+  expect(names).toHaveLength(1);
+  const name = names[0]!;
+  return {
+    name,
+    source: readFileSync(resolve(process.cwd(), "drizzle", name), "utf8"),
+  };
+}
+
+function readSnapshot(path: string): Snapshot {
+  expect(existsSync(path)).toBe(true);
+  return JSON.parse(readFileSync(path, "utf8")) as Snapshot;
+}
+
+describe("F-0117 redeem_code nullable deadline migration source", () => {
+  it("contains exactly the approved DROP NOT NULL statement", () => {
+    const { name, source } = readMigration();
+    expect(name).toMatch(
+      /^\d{14}_p1_rc_02_redeem_code_nullable_deadline\.sql$/u,
+    );
+    expect(source.replace(/\s+/gu, " ").trim()).toBe(
+      'ALTER TABLE "redeem_code" ALTER COLUMN "redeem_deadline_at" DROP NOT NULL;',
+    );
+    expect(source).not.toMatch(
+      /\b(?:INSERT|UPDATE|DELETE|TRUNCATE|DROP TABLE)\b/iu,
+    );
+  });
+
+  it("changes only redeem_code.redeem_deadline_at in an appendable linear snapshot chain", () => {
+    const { name } = readMigration();
+    const tag = name.slice(0, -4);
+    const journal = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/_journal.json"),
+        "utf8",
+      ),
+    ) as Journal;
+    const matchingEntries = journal.entries
+      .map((entry, index) => ({ entry, index }))
+      .filter(({ entry }) => entry.tag === tag);
+
+    expect(matchingEntries).toHaveLength(1);
+    const currentMatch = matchingEntries[0]!;
+    expect(currentMatch.index).toBeGreaterThan(0);
+
+    const previousEntry = journal.entries[currentMatch.index - 1];
+    expect(previousEntry).toBeDefined();
+    expect(previousEntry!.tag).toMatch(/^\d{14}_/u);
+    expect(currentMatch.entry.idx).toBe(previousEntry!.idx + 1);
+
+    const current = readSnapshot(
+      resolve(process.cwd(), `drizzle/meta/${tag.slice(0, 14)}_snapshot.json`),
+    );
+    const previous = readSnapshot(
+      resolve(
+        process.cwd(),
+        `drizzle/meta/${previousEntry!.tag.slice(0, 14)}_snapshot.json`,
+      ),
+    );
+
+    expect(current.prevId).toBe(previous.id);
+    expect(current.id).not.toBe(previous.id);
+    expect(
+      current.tables["public.redeem_code"]!.columns.redeem_deadline_at!.notNull,
+    ).toBe(false);
+
+    const normalizedCurrent = structuredClone(current);
+    normalizedCurrent.id = previous.id;
+    normalizedCurrent.prevId = previous.prevId;
+    normalizedCurrent.tables[
+      "public.redeem_code"
+    ]!.columns.redeem_deadline_at!.notNull = true;
+    expect(normalizedCurrent).toEqual(previous);
+  });
+});
+```
+
+- [ ] **Step 4: 运行 authoritative 与 later-entry GREEN**
+
+Run in authoritative task worktree:
+
+```powershell
+& "D:\tiku\node_modules\.bin\vitest.cmd" run tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts --maxWorkers=1
+```
+
+Expected: 1 file / 2 tests PASS。
+
+在 Step 2 fixture 中用 `apply_patch` 对同一测试文件应用 Step 3 的完整变更，再运行同一命令。Expected: synthetic later entry 保留时仍为 1 file / 2 tests PASS；fixture journal/snapshot 不得复制回 authoritative worktree。
+
+- [ ] **Step 5: 验证 duplicate tag fail-closed**
+
+在 fixture 中临时把 synthetic entry 的 tag 改为 `20260718100413_p1_rc_02_redeem_code_nullable_deadline`，运行目标测试。
+
+Expected: FAIL，`matchingEntries` 实际长度为 2。随后用 `apply_patch` 恢复 synthetic tag，并确认测试重新 PASS。
+
+- [ ] **Step 6: 验证 missing predecessor 与 non-adjacent idx fail-closed**
+
+先用 `apply_patch` 临时删除 fixture journal 中完整的 idx 32 employee-import entry，运行目标测试。
+
+Expected: FAIL，F-0117 idx 33 不等于新的直接前项 idx 31 + 1。恢复 idx 32 entry 后，再把 F-0117 `idx` 临时改为 35 并重跑。
+
+Expected: FAIL，35 不等于 32 + 1。恢复 idx 33 后确认目标测试 PASS。
+
+- [ ] **Step 7: 验证错误 `prevId` fail-closed**
+
+在 fixture `drizzle/meta/20260718100413_snapshot.json` 中临时把：
+
+```json
+"prevId": "6fda46fa-a6b4-464b-8f84-a049d7d0ece2"
+```
+
+改为：
+
+```json
+"prevId": "00000000-0000-0000-0000-000000000000"
+```
+
+Expected: 目标测试 FAIL，错误值不等于 previous snapshot id。恢复原值后确认 PASS。
+
+- [ ] **Step 8: 验证额外 snapshot diff fail-closed**
+
+在同一 fixture snapshot 中临时把顶层：
+
+```json
+"dialect": "postgresql"
+```
+
+改为：
+
+```json
+"dialect": "fixture"
+```
+
+Expected: 目标测试 FAIL，normalized current 不等于 previous snapshot。恢复 `postgresql` 后确认 PASS。
+
+- [ ] **Step 9: 清理 disposable fixture 并核验 authoritative 精确 diff**
+
+```powershell
+$fixture = "D:\tiku\.worktrees\f0117-migration-smoke-red-fixture"
+$resolvedFixture = [System.IO.Path]::GetFullPath($fixture)
+$resolvedRoot = [System.IO.Path]::GetFullPath("D:\tiku\.worktrees\")
+if (-not $resolvedFixture.StartsWith($resolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+  throw "unsafe fixture path: $resolvedFixture"
+}
+git worktree remove --force $resolvedFixture
+git worktree prune
+git status --short
+git diff --name-only
+```
+
+Expected: fixture 不再出现在 `git worktree list`；authoritative diff 只含 Step 1 计划文档与目标 test，不含 journal/snapshot/schema/product/guard。
+
+- [ ] **Step 10: 写脱敏 evidence/audit 并更新 addendum 状态**
+
+Evidence 必须记录：旧测试在 later-entry fixture 中 RED、候选测试在同 fixture GREEN、四类负向 mutation 均 fail-closed、正常目标测试结果、完整回归命令/计数、两轮 review findings/disposition、无数据库执行声明。不得记录明文 redeem_code、secret、连接字符串或 fixture snapshot 全文。
+
+Audit 必须逐项复核：唯一 tag、predecessor 存在、相邻 idx、动态 previous snapshot、`prevId`、全 snapshot diff、后续 entry 可追加、authoritative migration metadata 零 diff、权限边界未扩大。规格状态只从“等待书面规格复核”更新为“书面规格已批准；Task 7 已验证”且不得重写原产品设计语义。
+
+- [ ] **Step 11: 运行 closeout full validation**
+
+```powershell
+& "D:\tiku\node_modules\.bin\vitest.cmd" run tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts --maxWorkers=1
+npm.cmd run test:unit -- --maxWorkers=1
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run format:check
+npm.cmd run build
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual -SkipExternalIntegrityChecks
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase pre_commit -SkipExternalIntegrityChecks
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+git diff --check
+```
+
+Expected: 全部 exit 0；full unit 0 failed，build 完成全部 static pages。若任何旧测试因合法 later migration 失败，不得恢复 terminal 假设或旧 nullable transport 合同。
+
+- [ ] **Step 12: 执行两轮对抗式复核**
+
+Round 1 由主线程逐项对照规格、计划、exact diff、mutation evidence 和完整门禁，确认没有越界或弱化。Round 2 由未参与实现的独立 reviewer Subagent 尝试证明：后续 entry 被错误忽略、重复 tag 被接受、idx gap 被接受、wrong `prevId` 被接受、额外 schema diff 被规范化掩盖，或 authoritative metadata 被改动。
+
+Expected: 两轮均为 Approved 且无 Critical/Important；任何 blocker 必须补 RED 后修复并重跑受影响门禁。
+
+- [ ] **Step 13: 创建单一 Task 7 实现提交**
+
+```powershell
+$expected = @(
+  "docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md",
+  "docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline-design.md",
+  "docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md",
+  "docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md",
+  "tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts"
+)
+$changed = @(git diff --name-only)
+$unexpected = @($changed | Where-Object { $_ -notin $expected })
+if ($unexpected.Count -gt 0) { throw "unexpected paths: $($unexpected -join ', ')" }
+if (@($changed).Count -ne $expected.Count) { throw "expected exact Task 7 file set" }
+git add -- $expected
+git commit -m "test(p1): make F-0117 migration smoke appendable"
+```
+
+Expected: hook 中 P1/P0/Module 与 lint-staged PASS；commit 精确包含 5 个文件。禁止 `git add .`。
+
+- [ ] **Step 14: ff-only 合入、普通推送并清理隔离资源**
+
+在 `D:\tiku` 先确认 master worktree clean、`master` 是 implementation branch 的祖先、`origin/master` 仍为执行开始时记录的 SHA；任一不满足立即停止。然后：
+
+```powershell
+git merge --ff-only codex/p1-rc02-redeem-code-nullable-deadline
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18 -SkipRemoteAheadCheck
+git push origin master:master
+```
+
+Expected: push hook PASS，`master == origin/master`。确认 task worktree clean 且 resolved path 位于 `D:\tiku\.worktrees\` 后，执行 `git worktree remove`；确认 branch 已合入后执行 `git branch -d codex/p1-rc02-redeem-code-nullable-deadline`。不得 force-push、PR、deploy 或数据库执行。

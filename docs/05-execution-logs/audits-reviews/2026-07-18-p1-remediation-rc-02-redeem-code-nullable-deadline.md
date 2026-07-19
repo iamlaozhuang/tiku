@@ -99,3 +99,13 @@ Decision: APPROVE
 Result: pass
 
 主线程 fresh review 确认：本次 amend 只补齐 Module closeout 所需的标准 evidence anchors 与计划完成标记；产品源码、测试、schema、migration、授权和两轮 review 结论均无变化。state/queue 已恢复 `in_progress`，ready transition 仍须作为后续仅两文件提交执行。
+
+## Task 7 Implementation Plan Review
+
+Result: approved_for_red_green_execution
+
+- Spec coverage：计划逐项覆盖可追加 local-chain 语义、唯一 tag、predecessor、相邻 idx、动态 previous snapshot、`prevId`、全 snapshot diff、authoritative metadata 零 diff和禁止 terminal 假设。
+- TDD coverage：先在 detached later-entry fixture 复现旧断言失败，再对 authoritative 与同一 fixture 转 GREEN；后续五类 mutation 必须逐一 fail closed。
+- Scope review：持久 diff 限于已批准 F-0117 docs/test；disposable journal/snapshot mutation 明确禁止进入提交。state/queue、guards、产品/schema/migration、依赖、数据库与外部能力均 blocked。
+- Closeout review：focused 不替代 full validation；主线程 Round 1 与独立 reviewer Round 2 均为提交前硬门禁；提交、ff-only、pre-push、普通 push、cleanup 顺序明确。
+- Placeholder、类型/路径一致性与命令可执行性自审通过；当前结论只批准开始 Task 7 RED，不声称实现或最终审查完成。

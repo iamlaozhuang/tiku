@@ -195,3 +195,13 @@ Result: pass
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18 -SkipRemoteAheadCheck`：首次在 evidence 修正与 ready transition 同时存在的中间态正确 hard-block 非纯 transition-only 候选；产品 amend 后仅以 state/queue 两文件重新创建 transition 并 fresh retry。
 - `threadRolloverGate: continue_current_thread_after_f0117_closeout_for_narrow_mechanism_efficiency_assessment`。
 - `nextModuleRunCandidate: narrow_governance_efficiency_assessment_before_next_p1_product_task`；只处理声明式 transition/smoke 复用与 terminal-smoke 摩擦，不提前领取下一个产品 finding，不降低任何门禁。
+
+## Task 7 Approved Plan Materialization
+
+Result: planning_complete_no_implementation
+
+- 用户已批准 migration smoke 可追加链设计 A，并书面批准对应 closeout addendum。
+- implementation plan 将已递延的 terminal-smoke Minor 收敛为单一 Task 7：先以 disposable later-entry fixture 证明旧断言 RED，再保留唯一 tag、相邻 predecessor/idx、动态 snapshot、`prevId` 与全 snapshot diff 断言转 GREEN。
+- 计划包含 duplicate tag、missing predecessor、non-adjacent idx、wrong `prevId`、额外 snapshot diff 五类 fail-closed mutation，以及 focused/full validation、主线程复核、独立第二轮 reviewer、单一提交、ff-only/push/cleanup 顺序。
+- 本 planning commit 只包含 implementation plan 与本 evidence/audit 的新鲜计划复核记录；测试、产品、schema、migration、journal、snapshot、state/queue、guards 均保持零 diff。
+- 未执行数据库、Provider/runtime/browser、P2、PR、force-push 或 deploy；Task 7 RED 尚未开始。
