@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+  currentTaskId: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -225,6 +225,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -236,6 +237,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
+    - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -267,12 +269,170 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16: closed
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
-    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: ready_for_closeout
+    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
+    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: in_progress
 activeTasks:
+  - id: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+    title: P1 RC-02 employee personal AI selected authorization context
+    phase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+    status: in_progress
+    priority: p1
+    sequenceOrder: 11
+    taskKind: product_remediation
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-rc02-employee-personal-ai-context
+    worktreePath: D:/tiku/.worktrees/p1-rc02-employee-personal-ai-context
+    dependsOn:
+      - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    approvalSource: current-user-approved-f0143-design-option-a-2026-07-18
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-employee-personal-ai-context-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-02
+    findingIds:
+      - F-0143
+    authorityPath: employee_personal_ai_selected_authorization_context_request_history_result_and_learning_consistency
+    businessInvariant: employee_identity_must_not_override_a_server_revalidated_personal_auth_context_and_personal_ai_history_must_remain_visible_under_that_selected_context
+    adversarialFailureMode: identity_derived_org_scope_can_reject_valid_personal_advanced_hide_personal_history_mix_contexts_or_trust_client_owner_quota_metadata
+    rollbackOrStopCondition: stop_if_f0142_termination_policy_schema_migration_dependency_database_provider_browser_runtime_p2_pr_force_push_deploy_or_other_finding_repair_is_required
+    focusedGates:
+      - employee_personal_advanced_request_uses_personal_owner_and_personal_quota
+      - employee_org_advanced_request_preserves_organization_owner_and_quota
+      - selected_authorization_is_server_revalidated_and_client_owner_metadata_is_ignored
+      - request_and_result_history_filter_by_selected_authorization_context
+      - result_detail_requires_selected_authorization_context
+      - context_switch_reloads_request_and_result_history_without_mixing
+      - employee_personal_result_can_still_create_a_learning_session
+      - standard_or_wrong_scope_selected_authorization_fails_closed_without_persistence_or_provider_execution
+      - personal_and_org_multi_context_regression
+      - full_static_regression
+      - two_round_adversarial_review
+    buildRequired: true
+    fullRegressionPolicy: focused_employee_personal_ai_selected_context_service_route_repository_and_ui_tests_then_unit_lint_typecheck_format_build_and_program_guards
+    protectedDomains:
+      - edition_aware_authorization_source_of_truth
+      - personal_and_organization_quota_ownership
+      - actor_and_owner_object_authorization
+      - ai_generation_provider_and_formal_content_boundaries
+      - f0142_authorization_termination_policy
+      - p0_authorization_and_identity_invariants
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    designPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context-design.md
+    implementationPlanPath: docs/superpowers/plans/2026-07-18-employee-personal-ai-selected-context.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-employee-personal-ai-context-authorization.md
+      - docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context-design.md
+      - docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
+      - docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
+      - docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md
+      - docs/superpowers/plans/2026-07-18-employee-personal-ai-selected-context.md
+      - src/server/services/personal-ai-generation-authorization-context.ts
+      - src/server/services/personal-ai-generation-authorization-context.test.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/services/personal-ai-generation-result-history-service.test.ts
+      - src/server/services/personal-ai-generation-learning-session-route.test.ts
+      - src/server/models/personal-ai-generation-result-history.ts
+      - src/server/validators/personal-ai-generation-result-history.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/repositories/personal-ai-generation-result-repository.test.ts
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/app/api/v1/personal-ai-generation-results/route.ts
+      - src/app/api/v1/personal-ai-generation-results/[publicId]/route.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - src/db/**
+      - src/db/dev-seed.ts
+      - e2e/**
+      - .env*
+      - scripts/**
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: blocked
+      productRuntimeSourceChange: approved_after_spec_review_within_task_allowlist
+      productTestSourceChange: approved_after_spec_review_within_task_allowlist
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_user_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: waiting_for_spec_review
+      reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required
+      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md
+      resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan
+    acceptanceStandards:
+      - A server-revalidated selected authorizationPublicId determines authorization source, owner, organization and quota owner; userType never silently replaces a valid personal_auth context.
+      - An employee with personal advanced and organization standard or advanced authorization can explicitly use personal AI without consuming organization quota, while valid org_auth generation remains organization-owned.
+      - Request history, result history and result detail are filtered by the selected authorization context; switching context cannot mix personal and organization records or hide valid personal history after joining an organization.
+      - Client-supplied owner, organization, authorization source and quota owner fields remain untrusted; generation under a wrong user, organization, scope, edition, capability or authorization public id fails closed before persistence or Provider execution.
+      - History ownership resolution validates only actor-to-authorization ownership and exact context identity; it does not add F-0142 lifecycle, expiry, cancellation, downgrade or continuation policy.
+      - Existing learning-session personal-result lookup remains available for an employee and is protected by regression tests; F-0142 expiry, cancellation, downgrade and continuation policy is not implemented in this task.
+      - F-0143 closes only at static level after focused/full regression and two reviews; no schema, migration, database, dependency, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+    validationCommands:
+      - corepack pnpm@11.9.0 exec vitest run src/server/services/personal-ai-generation-authorization-context.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-result-history-service.test.ts src/server/services/personal-ai-generation-learning-session-route.test.ts src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts --maxWorkers=1
+      - npm.cmd run test:unit -- --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-02-employee-personal-ai-context-2026-07-18 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     title: P1 RC-02 redeem_code nullable deadline
     phase: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
-    status: ready_for_closeout
+    status: closed
     priority: p1
     sequenceOrder: 10
     taskKind: product_remediation

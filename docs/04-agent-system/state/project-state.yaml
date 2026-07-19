@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
-updatedAt: "2026-07-18T05:30:00-07:00"
+currentPhase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+updatedAt: "2026-07-18T22:50:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+  currentTaskId: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -495,6 +495,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -506,6 +507,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
+    - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -537,7 +539,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16: closed
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
-    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: ready_for_closeout
+    p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
+    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -600,6 +603,12 @@ p1RemediationSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -666,23 +675,23 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
-  title: P1 RC-02 redeem_code nullable deadline
-  phase: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
-  status: ready_for_closeout
+  id: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+  title: P1 RC-02 employee personal AI selected authorization context
+  phase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+  status: in_progress
   priority: p1
   taskKind: product_remediation
-  branch: codex/p1-rc02-redeem-code-nullable-deadline
+  branch: codex/p1-rc02-employee-personal-ai-context
   executionProfile: R3
-  planPath: docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline-design.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-redeem-code-nullable-deadline.md
-  nextRequiredTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-implementation-plan
+  planPath: docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context-design.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
+  nextRequiredTaskId: p1-remediation-rc-02-employee-personal-ai-context-implementation-plan
   currentExecutionGate:
-    status: satisfied
-    reason: current_user_approved_written_f0117_spec_2026_07_18
-    approvalRequestPath: docs/superpowers/specs/2026-07-18-redeem-code-nullable-deadline-design.md
-    resumeAction: execute_f0117_redeem_code_nullable_deadline_plan_red_to_green
+    status: waiting_for_spec_review
+    reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required
+    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md
+    resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan
 standingAuthorization:
   id: current-user-approved-p1-remediation-goal-2026-07-16
   source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
@@ -692,9 +701,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a
-  lastKnownOriginMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a
-  lastKnownRemoteMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a
+  lastKnownMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b
+  lastKnownOriginMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b
+  lastKnownRemoteMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass
