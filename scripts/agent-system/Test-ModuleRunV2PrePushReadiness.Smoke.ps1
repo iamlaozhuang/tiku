@@ -1,3 +1,5 @@
+param([switch]$F0117LifecycleFocused)
+
 $ErrorActionPreference = "Stop"
 
 function Assert-Contains {
@@ -130,6 +132,182 @@ $missingF0117SmokeScopeCorrectionPatterns = @($f0117SmokeScopeCorrectionPatterns
 })
 if ($missingF0117SmokeScopeCorrectionPatterns.Count -gt 0) {
     throw "Module pre-push is RED for the F-0117 smoke scope-correction contract: $($missingF0117SmokeScopeCorrectionPatterns -join ', ')"
+}
+$f0117SmokeScopeCloseoutLifecycleHotfixPatterns = @(
+    "p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha",
+    "p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath",
+    "p1F0117SmokeScopeCloseoutLifecycleHotfixFiles",
+    "Test-P1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology",
+    "p1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology: exact_one_parent",
+    "71f150ceef0af54fca8d72db20a4254313630c7f",
+    "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REQUIRES_TRANSITION_ONLY"
+)
+$missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns = @($f0117SmokeScopeCloseoutLifecycleHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns.Count -gt 0) {
+    throw "Module pre-push is RED for the F-0117 smoke scope closeout lifecycle hotfix contract: $($missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns -join ', ')"
+}
+
+if ($F0117LifecycleFocused) {
+    $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+    $baseSha = "71f150ceef0af54fca8d72db20a4254313630c7f"
+    $parentTaskId = "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
+    $authorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix-authorization.md"
+    $evidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md"
+    $auditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md"
+    $projectStateRelativePath = "docs/04-agent-system/state/project-state.yaml"
+    $queueRelativePath = "docs/04-agent-system/state/task-queue.yaml"
+    $matrixRelativePath = "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    $exactFiles = @(
+        $authorizationPath,
+        "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+        $evidencePath,
+        $auditPath,
+        "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+    )
+    $fixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf117lf-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+
+    function Set-F0117LifecycleFocusedFile {
+        param([Parameter(Mandatory = $true)][string]$Path, [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content)
+        $fullPath = Join-Path $fixtureRoot ($Path -replace "/", "\")
+        $directory = Split-Path -Parent $fullPath
+        if (-not (Test-Path -LiteralPath $directory)) { [void][System.IO.Directory]::CreateDirectory($directory) }
+        [System.IO.File]::WriteAllText($fullPath, $Content, [System.Text.UTF8Encoding]::new($false))
+    }
+
+    function Invoke-F0117LifecycleFocusedModule {
+        param([Parameter(Mandatory = $true)][ValidateSet("standard", "transition_only")][string]$Mode, [string]$TaskId = $parentTaskId)
+        & $scriptPath `
+            -TaskId $TaskId `
+            -ProjectStatePath (Join-Path $fixtureRoot ($projectStateRelativePath -replace "/", "\")) `
+            -QueuePath (Join-Path $fixtureRoot ($queueRelativePath -replace "/", "\")) `
+            -MatrixPath (Join-Path $fixtureRoot ($matrixRelativePath -replace "/", "\")) `
+            -EvidencePath (Join-Path $fixtureRoot ($evidencePath -replace "/", "\")) `
+            -AuditReviewPath (Join-Path $fixtureRoot ($auditPath -replace "/", "\")) `
+            -SkipRemoteAheadCheck `
+            -P1TransitionScopeMode $Mode
+    }
+
+    function Invoke-F0117LifecycleFocusedP1 {
+        $headSha = ((& git -C $fixtureRoot rev-parse HEAD) -join "").Trim()
+        $originSha = ((& git -C $fixtureRoot rev-parse origin/master) -join "").Trim()
+        $originUrl = ((& git -C $fixtureRoot remote get-url origin) -join "").Trim()
+        & $p1GuardPath -RepositoryRoot $fixtureRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $originUrl -PushUpdateLines "refs/heads/master $headSha refs/heads/master $originSha" -SkipExternalIntegrityChecks
+    }
+
+    try {
+        & git clone --quiet --shared --no-checkout $sourceRoot $fixtureRoot
+        if ($LASTEXITCODE -ne 0) { throw "Failed to clone focused F-0117 lifecycle fixture." }
+        & git -C $fixtureRoot config user.name "Focused F-0117 Lifecycle"
+        & git -C $fixtureRoot config user.email "focused-f0117-lifecycle@example.invalid"
+        & git -C $fixtureRoot config core.autocrlf false
+        & git -C $fixtureRoot switch --quiet -C master $baseSha
+        & git -C $fixtureRoot update-ref refs/remotes/origin/master $baseSha
+        foreach ($candidatePath in $exactFiles) {
+            $sourcePath = Join-Path $sourceRoot ($candidatePath -replace "/", "\")
+            Set-F0117LifecycleFocusedFile -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+        }
+        Set-F0117LifecycleFocusedFile -Path $evidencePath -Content "# Evidence`n`n## Reading Evidence`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Root-Cause Reproduction`nResult: pass`n`n## TDD Evidence`nResult: pass`n`n## Validation Results`nResult: pass`n"
+        Set-F0117LifecycleFocusedFile -Path $auditPath -Content "# Audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`n## Decision`nDecision: APPROVE`n"
+        & git -C $fixtureRoot add -- $exactFiles
+        & git -C $fixtureRoot commit --quiet -m "focused exact F-0117 lifecycle hotfix"
+        $positiveSha = ((& git -C $fixtureRoot rev-parse HEAD) -join "").Trim()
+        Push-Location $fixtureRoot
+        try {
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REQUIRES_TRANSITION_ONLY" -Command { Invoke-F0117LifecycleFocusedModule -Mode standard }
+            $p1Output = @(Invoke-F0117LifecycleFocusedP1)
+            Assert-Contains -Output $p1Output -Pattern "p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorization: approved_one_time"
+            Assert-Contains -Output $p1Output -Pattern "p1TransitionScopeMode: transition_only"
+            $positiveOutput = @(Invoke-F0117LifecycleFocusedModule -Mode transition_only)
+            Assert-Contains -Output $positiveOutput -Pattern "p1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology: exact_one_parent"
+            Assert-Contains -Output $positiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+            Set-F0117LifecycleFocusedFile -Path "f0117-lifecycle-extra.md" -Content "extra"
+            & git add --sparse -- f0117-lifecycle-extra.md
+            & git commit --quiet --amend --no-edit
+            Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_ALLOWLIST_MISMATCH" -Command { Invoke-F0117LifecycleFocusedP1 }
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_FILE_SET_INVALID" -Command { Invoke-F0117LifecycleFocusedModule -Mode transition_only }
+            & git reset --hard --quiet $positiveSha
+
+            Add-Content -LiteralPath (Join-Path $fixtureRoot ($evidencePath -replace "/", "\")) -Value "replay" -Encoding UTF8
+            & git add -- $evidencePath
+            & git commit --quiet -m "focused F-0117 lifecycle replay"
+            Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_ALREADY_MATERIALIZED" -Command { Invoke-F0117LifecycleFocusedP1 }
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REPLAY" -Command { Invoke-F0117LifecycleFocusedModule -Mode transition_only }
+
+            & git reset --hard --quiet $positiveSha
+            & git update-ref refs/remotes/origin/master $positiveSha
+            Set-F0117LifecycleFocusedFile -Path "later-closeout.md" -Content "later closeout"
+            & git add --sparse -- later-closeout.md
+            & git commit --quiet -m "later normal F-0117 closeout"
+            $queuePath = Join-Path $fixtureRoot ($queueRelativePath -replace "/", "\")
+            $queueText = [System.IO.File]::ReadAllText($queuePath)
+            $taskStatusPattern = "(?ms)(  - id: $([regex]::Escape($parentTaskId))\r?\n.*?    status: )in_progress"
+            if ([regex]::Matches($queueText, $taskStatusPattern).Count -ne 1) { throw "Focused closeout status anchor must occur exactly once." }
+            Set-F0117LifecycleFocusedFile -Path $queueRelativePath -Content ([regex]::Replace($queueText, $taskStatusPattern, '${1}ready_for_closeout'))
+            $syncedOutput = @(Invoke-F0117LifecycleFocusedModule -Mode transition_only)
+            if (($syncedOutput -join "`n") -match 'F0117.*TransitionTopology:\s*exact_one_parent') { throw "Synced identity selected a special F-0117 topology." }
+            Assert-Contains -Output $syncedOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+            $nonF0117TaskId = "p1-remediation-rc-01-account-phone-identity-2026-07-16"
+            $statePath = Join-Path $fixtureRoot ($projectStateRelativePath -replace "/", "\")
+            $stateText = [System.IO.File]::ReadAllText($statePath)
+            $stateCurrentTaskAnchor = "  currentTaskId: $parentTaskId"
+            if ([regex]::Matches($stateText, [regex]::Escape($stateCurrentTaskAnchor)).Count -ne 1) { throw "Focused non-F0117 current task anchor must occur exactly once." }
+            $stateCurrentTaskIdPattern = "(?m)^(currentTask:\r?\n  id: )$([regex]::Escape($parentTaskId))\s*$"
+            if ([regex]::Matches($stateText, $stateCurrentTaskIdPattern).Count -ne 1) { throw "Focused non-F0117 currentTask.id anchor must occur exactly once." }
+            $nonF0117StateText = $stateText.Replace($stateCurrentTaskAnchor, "  currentTaskId: $nonF0117TaskId")
+            $nonF0117StateText = [regex]::Replace($nonF0117StateText, $stateCurrentTaskIdPattern, "`${1}$nonF0117TaskId")
+            Set-F0117LifecycleFocusedFile -Path $projectStateRelativePath -Content $nonF0117StateText
+            Write-Output "focusedCase: f0117_task_non_f0117_state_mismatch"
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { Invoke-F0117LifecycleFocusedModule -Mode transition_only }
+
+            Set-F0117LifecycleFocusedFile -Path $projectStateRelativePath -Content $stateText
+            $nonF0117QueueText = [System.IO.File]::ReadAllText($queuePath)
+            $activeTaskIdAnchor = "  - id: $parentTaskId"
+            if ([regex]::Matches($nonF0117QueueText, [regex]::Escape($activeTaskIdAnchor)).Count -ne 1) { throw "Focused non-F0117 active task anchor must occur exactly once." }
+            Set-F0117LifecycleFocusedFile -Path $queueRelativePath -Content $nonF0117QueueText.Replace($activeTaskIdAnchor, "  - id: $nonF0117TaskId")
+            Write-Output "focusedCase: non_f0117_task_f0117_state_mismatch"
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { Invoke-F0117LifecycleFocusedModule -Mode transition_only -TaskId $nonF0117TaskId }
+
+            & git reset --hard --quiet $positiveSha
+            Set-F0117LifecycleFocusedFile -Path "ordinary-drift.md" -Content "ordinary in-progress drift"
+            & git add --sparse -- ordinary-drift.md
+            & git commit --quiet -m "ordinary in-progress drift"
+            Write-Output "focusedCase: f0117_in_progress_ordinary_drift"
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { Invoke-F0117LifecycleFocusedModule -Mode transition_only }
+        } finally {
+            Pop-Location
+        }
+    } finally {
+        $resolvedFixtureRoot = [System.IO.Path]::GetFullPath($fixtureRoot).TrimEnd('\')
+        $resolvedTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\')
+        if ((Split-Path -Parent $resolvedFixtureRoot).TrimEnd('\') -ne $resolvedTempRoot -or (Split-Path -Leaf $resolvedFixtureRoot) -notmatch '^tf117lf-[0-9a-f]{8}$') {
+            throw "F0117_LIFECYCLE_FOCUSED_CLEANUP_UNSAFE_PATH"
+        }
+        if (Test-Path -LiteralPath $resolvedFixtureRoot) {
+            Get-ChildItem -LiteralPath $resolvedFixtureRoot -Force -Recurse | ForEach-Object {
+                if (-not $_.PSIsContainer -and $_.IsReadOnly) { $_.IsReadOnly = $false }
+            }
+            for ($cleanupAttempt = 1; $cleanupAttempt -le 3 -and (Test-Path -LiteralPath $resolvedFixtureRoot); $cleanupAttempt++) {
+                try {
+                    [System.IO.Directory]::Delete($resolvedFixtureRoot, $true)
+                } catch {
+                    if ($cleanupAttempt -eq 3) { throw }
+                    Start-Sleep -Milliseconds (100 * $cleanupAttempt)
+                }
+            }
+        }
+        if (Test-Path -LiteralPath $resolvedFixtureRoot) { throw "F0117_LIFECYCLE_FOCUSED_CLEANUP_FAILED" }
+    }
+    Write-Output "F-0117 smoke scope closeout lifecycle focused pre-push smoke passed"
+    exit 0
 }
 
 if (-not (Test-Path -LiteralPath $scriptPath)) {
@@ -1363,6 +1541,23 @@ try {
         Assert-Contains -Output $positiveOutput -Pattern "p1F0117SmokeScopeCorrectionTransitionTopology: exact_one_parent"
         Assert-Contains -Output $positiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
 
+        & git update-ref refs/remotes/origin/master $positiveSha
+        $syncedProductSmokeSource = Join-Path $f0115PrePushSourceRoot ($f0117SmokeScopeProductSmokePath -replace "/", "\")
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0117SmokeScopeProductSmokePath -Content ([System.IO.File]::ReadAllText($syncedProductSmokeSource) + "`n// later normal F-0117 closeout change")
+        & git add --sparse -- $f0117SmokeScopeProductSmokePath
+        & git commit --quiet -m "later normal F-0117 closeout"
+        $syncedQueueText = [System.IO.File]::ReadAllText($queuePath)
+        $syncedTaskStatusPattern = "(?ms)(  - id: $([regex]::Escape($f0117SmokeScopeParentTaskId))\r?\n.*?    status: )in_progress"
+        if ([regex]::Matches($syncedQueueText, $syncedTaskStatusPattern).Count -ne 1) { throw "F-0117 synced identity closeout task status anchor must occur exactly once." }
+        Set-F0115PrePushFixtureFile -Root $f0117SmokeScopeFixtureRoot -Path $f0115PrePushQueuePath -Content ([regex]::Replace($syncedQueueText, $syncedTaskStatusPattern, '${1}ready_for_closeout'))
+        $syncedIdentityOutput = @(& $invokeSmokeScope transition_only)
+        if (($syncedIdentityOutput -join "`n") -match [regex]::Escape("p1F0117SmokeScopeCorrectionTransitionTopology: exact_one_parent")) {
+            throw "Synced F-0117 smoke scope identity incorrectly selected the old special topology."
+        }
+        Assert-Contains -Output $syncedIdentityOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+        & git reset --hard --quiet $positiveSha
+        & git update-ref refs/remotes/origin/master $f0117SmokeScopeBaseSha
+
         $authorizationFullPath = Join-Path $f0117SmokeScopeFixtureRoot ($f0117SmokeScopeAuthorizationPath -replace "/", "\")
         $authorizationText = [System.IO.File]::ReadAllText($authorizationFullPath)
         foreach ($mutation in @(
@@ -1443,5 +1638,99 @@ try {
     Remove-F0117PrePushFixtureRoot -Path $f0117SmokeScopeFixtureRoot -ExpectedPrefix "tf117pp-" -FailureCode "F0117_SMOKE_SCOPE_PREPUSH_CLEANUP_FAILED"
 }
 
+$f0117LifecycleBaseSha = "71f150ceef0af54fca8d72db20a4254313630c7f"
+$f0117LifecycleParentTaskId = "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
+$f0117LifecycleAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix-authorization.md"
+$f0117LifecycleEvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md"
+$f0117LifecycleAuditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md"
+$f0117LifecycleFiles = @(
+    $f0117LifecycleAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+    $f0117LifecycleEvidencePath,
+    $f0117LifecycleAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0117LifecycleFixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf117lc-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+
+function Invoke-F0117LifecycleP1PrePushGuard {
+    $headSha = ((& git -C $f0117LifecycleFixtureRoot rev-parse HEAD) -join "").Trim()
+    $originSha = ((& git -C $f0117LifecycleFixtureRoot rev-parse origin/master) -join "").Trim()
+    $originUrl = ((& git -C $f0117LifecycleFixtureRoot remote get-url origin) -join "").Trim()
+    & $p1GuardPath -RepositoryRoot $f0117LifecycleFixtureRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $originUrl -PushUpdateLines "refs/heads/master $headSha refs/heads/master $originSha" -SkipExternalIntegrityChecks
+}
+
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0117LifecycleFixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0117 lifecycle pre-push fixture." }
+    & git -C $f0117LifecycleFixtureRoot config user.name "Module F-0117 Lifecycle"
+    & git -C $f0117LifecycleFixtureRoot config user.email "module-f0117-lifecycle@example.invalid"
+    & git -C $f0117LifecycleFixtureRoot config core.autocrlf false
+    & git -C $f0117LifecycleFixtureRoot config core.longpaths true
+    & git -C $f0117LifecycleFixtureRoot switch --quiet -C master $f0117LifecycleBaseSha
+    & git -C $f0117LifecycleFixtureRoot update-ref refs/remotes/origin/master $f0117LifecycleBaseSha
+    foreach ($candidatePath in $f0117LifecycleFiles) {
+        $sourcePath = Join-Path $f0115PrePushSourceRoot ($candidatePath -replace "/", "\")
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0117 lifecycle source fixture file: $candidatePath" }
+        Set-F0115PrePushFixtureFile -Root $f0117LifecycleFixtureRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+    Set-F0115PrePushFixtureFile -Root $f0117LifecycleFixtureRoot -Path $f0117LifecycleEvidencePath -Content "# Evidence`n`n## Reading Evidence`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Root-Cause Reproduction`nResult: pass`n`n## TDD Evidence`nResult: pass`n`n## Validation Results`nResult: pass`n"
+    Set-F0115PrePushFixtureFile -Root $f0117LifecycleFixtureRoot -Path $f0117LifecycleAuditPath -Content "# Audit`n`n## Round 1`nResult: pass`n`n## Round 2`nResult: pass`n`n## Decision`nDecision: APPROVE`n"
+    & git -C $f0117LifecycleFixtureRoot add -- $f0117LifecycleFiles
+    & git -C $f0117LifecycleFixtureRoot commit --quiet -m "materialize exact F-0117 lifecycle hotfix"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit exact F-0117 lifecycle fixture." }
+    $f0117LifecyclePositiveSha = ((& git -C $f0117LifecycleFixtureRoot rev-parse HEAD) -join "").Trim()
+    $projectStatePath = Join-Path $f0117LifecycleFixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $queuePath = Join-Path $f0117LifecycleFixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $matrixPath = Join-Path $f0117LifecycleFixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $evidencePath = Join-Path $f0117LifecycleFixtureRoot ($f0117LifecycleEvidencePath -replace "/", "\")
+    $auditPath = Join-Path $f0117LifecycleFixtureRoot ($f0117LifecycleAuditPath -replace "/", "\")
+    Push-Location $f0117LifecycleFixtureRoot
+    try {
+        $invokeLifecycle = { param($Mode, $Task = $f0117LifecycleParentTaskId) & $scriptPath -TaskId $Task -ProjectStatePath $projectStatePath -QueuePath $queuePath -MatrixPath $matrixPath -EvidencePath $evidencePath -AuditReviewPath $auditPath -SkipRemoteAheadCheck -P1TransitionScopeMode $Mode }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REQUIRES_TRANSITION_ONLY" -Command { & $invokeLifecycle standard }
+        $p1LifecycleOutput = @(Invoke-F0117LifecycleP1PrePushGuard)
+        Assert-Contains -Output $p1LifecycleOutput -Pattern "p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorization: approved_one_time"
+        Assert-Contains -Output $p1LifecycleOutput -Pattern "p1TransitionScopeMode: transition_only"
+        $lifecycleOutput = @(& $invokeLifecycle transition_only)
+        Assert-Contains -Output $lifecycleOutput -Pattern "p1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology: exact_one_parent"
+        Assert-Contains -Output $lifecycleOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+        Set-F0115PrePushFixtureFile -Root $f0117LifecycleFixtureRoot -Path "f0117-lifecycle-extra.md" -Content "extra"
+        & git add --sparse -- "f0117-lifecycle-extra.md"; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_ALLOWLIST_MISMATCH" -Command { Invoke-F0117LifecycleP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_FILE_SET_INVALID" -Command { & $invokeLifecycle transition_only }
+        & git reset --hard --quiet $f0117LifecyclePositiveSha
+
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_CONTEXT_INVALID" -Command { & $invokeLifecycle transition_only "p1-remediation-rc-02-employee-import-preflight-2026-07-17" }
+
+        $secondParent = ((& git rev-parse "${f0117LifecycleBaseSha}^") -join "").Trim()
+        $treeSha = ((& git rev-parse "$f0117LifecyclePositiveSha^{tree}") -join "").Trim()
+        $mergeSha = ("multi-parent" | & git commit-tree $treeSha -p $f0117LifecycleBaseSha -p $secondParent).Trim()
+        & git update-ref refs/heads/master $mergeSha
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_TOPOLOGY_INVALID" -Command { & $invokeLifecycle transition_only }
+        & git reset --hard --quiet $f0117LifecyclePositiveSha
+
+        Add-Content -LiteralPath $evidencePath -Value "replay" -Encoding UTF8
+        & git add -- $f0117LifecycleEvidencePath; & git commit --quiet -m "attempt F-0117 lifecycle replay"
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_ALREADY_MATERIALIZED" -Command { Invoke-F0117LifecycleP1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REPLAY" -Command { & $invokeLifecycle transition_only }
+
+        & git reset --hard --quiet $f0117LifecycleBaseSha
+        Set-F0115PrePushFixtureFile -Root $f0117LifecycleFixtureRoot -Path "ordinary-lifecycle-drift.md" -Content "ordinary in-progress drift"
+        & git add --sparse -- ordinary-lifecycle-drift.md; & git commit --quiet -m "ordinary lifecycle drift"
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT" -Command { & $invokeLifecycle standard }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    Remove-F0117PrePushFixtureRoot -Path $f0117LifecycleFixtureRoot -ExpectedPrefix "tf117lc-" -FailureCode "F0117_LIFECYCLE_PREPUSH_CLEANUP_FAILED"
+}
+
 Write-Output "F-0117 smoke scope-correction pre-push behavior smoke passed"
+Write-Output "F-0117 smoke scope closeout lifecycle pre-push behavior smoke passed"
 Write-Output "Module Run v2 pre-push readiness smoke passed"

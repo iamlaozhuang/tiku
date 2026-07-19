@@ -164,6 +164,24 @@ New-Variable -Name p1F0117SmokeScopeCorrectionFiles -Option Constant -Value @(
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixTaskId -Option Constant -Value "p1-f0117-smoke-scope-closeout-lifecycle-hotfix-2026-07-18"
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixParentTaskId -Option Constant -Value "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha -Option Constant -Value "71f150ceef0af54fca8d72db20a4254313630c7f"
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixBranch -Option Constant -Value "codex/f0117-smoke-scope-closeout-fix"
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix-authorization.md"
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixHumanApprovalSource -Option Constant -Value "current user approval for an independent F-0117 governance hotfix limited to pre-push orchestration, P1 and Module guards, and smoke tests on 2026-07-18"
+New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixFiles -Option Constant -Value @(
+    $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 
 function Write-Section {
     param(
@@ -870,6 +888,106 @@ function Test-P1F0117SmokeScopeCorrectionTransitionTopology {
     return $script:findings.Count -eq $findingCountBefore
 }
 
+function Test-P1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology {
+    param(
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskStatus,
+        [Parameter(Mandatory = $true)][string]$TaskStatus,
+        [Parameter(Mandatory = $true)][string]$CurrentBranch,
+        [Parameter(Mandatory = $true)][string]$HeadSha,
+        [Parameter(Mandatory = $true)][string]$MasterSha,
+        [Parameter(Mandatory = $true)][string]$OriginMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateOriginMasterSha,
+        [Parameter(Mandatory = $true)][ValidateSet("standard", "transition_only")][string]$TransitionScopeMode
+    )
+
+    $findingCountBefore = $script:findings.Count
+    $committedNameStatus = @(& git diff --name-status --no-renames $p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha $MasterSha)
+    $committedFiles = [System.Collections.Generic.List[string]]::new()
+    foreach ($entry in $committedNameStatus) {
+        if ($entry -notmatch '^([AM])\s+(.+)$') {
+            Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_FILE_SET_INVALID"
+            break
+        }
+        $committedFiles.Add((ConvertTo-NormalizedPath -Path $Matches[2]))
+    }
+    $actualFiles = @($committedFiles | Sort-Object -Unique)
+    $expectedFiles = @($p1F0117SmokeScopeCloseoutLifecycleHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -Unique)
+    if ($LASTEXITCODE -ne 0 -or ($actualFiles -join "|") -cne ($expectedFiles -join "|")) {
+        Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_FILE_SET_INVALID"
+    }
+
+    if ($TaskId -ne $p1F0117SmokeScopeCloseoutLifecycleHotfixParentTaskId `
+        -or $StateCurrentTaskId -ne $p1F0117SmokeScopeCloseoutLifecycleHotfixParentTaskId `
+        -or $StateCurrentTaskStatus -ne "in_progress" `
+        -or $TaskStatus -ne "in_progress" `
+        -or $CurrentBranch -ne "master" `
+        -or $HeadSha -ne $MasterSha `
+        -or $OriginMasterSha -ne $p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha `
+        -or [string]::IsNullOrWhiteSpace($StateMasterSha) `
+        -or $StateMasterSha -ne $StateOriginMasterSha `
+        -or -not (Test-GitAncestor -AncestorSha $StateMasterSha -DescendantSha $OriginMasterSha) `
+        -or $OriginMasterSha -eq $MasterSha) {
+        Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_CONTEXT_INVALID"
+    }
+
+    $headAuthorizationPath = ((& git ls-tree -r --name-only $MasterSha -- $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath) -join "").Trim()
+    $authorizationText = ""
+    $authorizationReadExitCode = $LASTEXITCODE
+    if ($authorizationReadExitCode -ne 0 -or $headAuthorizationPath -ne $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath) {
+        Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_AUTHORIZATION_INVALID"
+    } else {
+        $authorizationText = ((& git show "${MasterSha}:$p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath") -join "`n")
+        $authorizationReadExitCode = $LASTEXITCODE
+    }
+    foreach ($fieldContract in @(
+        @{ Key = 'Status'; Expected = '(?i)^Status:\s*approved\s*$' },
+        @{ Key = 'Task ID'; Expected = "(?i)^Task ID:\s*$([regex]::Escape($p1F0117SmokeScopeCloseoutLifecycleHotfixTaskId))\s*$" },
+        @{ Key = 'Parent task'; Expected = "(?i)^Parent task:\s*$([regex]::Escape($p1F0117SmokeScopeCloseoutLifecycleHotfixParentTaskId))\s*$" },
+        @{ Key = 'Base'; Expected = "(?i)^Base:\s*$([regex]::Escape($p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha))\s*$" },
+        @{ Key = 'Branch'; Expected = "(?i)^Branch:\s*$([regex]::Escape($p1F0117SmokeScopeCloseoutLifecycleHotfixBranch))\s*$" },
+        @{ Key = 'Human approval source'; Expected = "(?i)^Human approval source:\s*$([regex]::Escape($p1F0117SmokeScopeCloseoutLifecycleHotfixHumanApprovalSource))\s*$" },
+        @{ Key = 'Lifecycle contract'; Expected = '(?i)^Lifecycle contract:\s*special_path_only_while_origin_at_base_and_master_is_exact_single_child\s*$' },
+        @{ Key = 'Synced identity disposition'; Expected = '(?i)^Synced identity disposition:\s*generic_closeout_path\s*$' },
+        @{ Key = 'ancestorCheckpoint'; Expected = '(?i)^ancestorCheckpoint:\s*only_after_transition_only_guard_pass\s*$' },
+        @{ Key = 'otherInProgressShaDrift'; Expected = '(?i)^otherInProgressShaDrift:\s*hard_block\s*$' },
+        @{ Key = 'standardMode'; Expected = '(?i)^standardMode:\s*hard_block\s*$' },
+        @{ Key = 'replay'; Expected = '(?i)^replay:\s*hard_block\s*$' }
+    )) {
+        $fieldMatches = @([regex]::Matches($authorizationText, "(?im)^$([regex]::Escape($fieldContract.Key))\s*:.*$"))
+        if ($headAuthorizationPath -eq $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath -and ($authorizationReadExitCode -ne 0 -or $fieldMatches.Count -ne 1 -or $fieldMatches[0].Value -notmatch $fieldContract.Expected)) {
+            Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+    $authorizationFileSection = [regex]::Match($authorizationText, '(?ms)^##\s+Exact Governance Files\s*$\r?\n(.*?)(?=^##\s+|\z)').Groups[1].Value
+    $authorizationFiles = @([regex]::Matches($authorizationFileSection, '(?m)^\s*\d+\.\s+`([^`]+)`\s*$') | ForEach-Object { ConvertTo-NormalizedPath -Path $_.Groups[1].Value })
+    $expectedAuthorizationFiles = @($p1F0117SmokeScopeCloseoutLifecycleHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    if (($authorizationFiles -join "|") -cne ($expectedAuthorizationFiles -join "|")) {
+        Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_AUTHORIZATION_FILE_SET_INVALID"
+    }
+
+    if ($TransitionScopeMode -ne "transition_only") {
+        Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REQUIRES_TRANSITION_ONLY"
+    }
+
+    $headParentParts = @(((& git rev-list --parents -n 1 $MasterSha) -join "").Trim() -split "\s+" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($LASTEXITCODE -ne 0 -or $headParentParts.Count -ne 2 -or $headParentParts[0] -ne $MasterSha -or $headParentParts[1] -ne $p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha) {
+        Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_TOPOLOGY_INVALID"
+    }
+
+    $isReplay = $false
+    foreach ($parentSha in @($headParentParts | Select-Object -Skip 1)) {
+        $parentAuthorizationPath = ((& git ls-tree -r --name-only $parentSha -- $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath) -join "").Trim()
+        if ($LASTEXITCODE -eq 0 -and $parentAuthorizationPath -eq $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath) { $isReplay = $true }
+    }
+    if ($isReplay) { Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_REPLAY" }
+
+    return $script:findings.Count -eq $findingCountBefore
+}
+
 function Invoke-DocsOnlyBatchReadiness {
     param(
         [Parameter(Mandatory = $true)]
@@ -1114,9 +1232,33 @@ $p1F0117SmokeScopeCorrectionIdentityPaths = @(
     "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md"
 )
 $headPaths = @(& git ls-tree -r --name-only $masterSha -- $p1F0117SmokeScopeCorrectionIdentityPaths | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
-$isP1F0117SmokeScopeCorrectionCandidate = @($headPaths | Where-Object { $_ -in $p1F0117SmokeScopeCorrectionIdentityPaths }).Count -gt 0
+$changedF0117SmokeScopeCorrectionIdentityPaths = @(& git diff --name-only --no-renames $originMasterSha $masterSha -- $p1F0117SmokeScopeCorrectionIdentityPaths | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+$isP1F0117SmokeScopeCorrectionCandidate = @($headPaths | Where-Object { $_ -in $p1F0117SmokeScopeCorrectionIdentityPaths }).Count -gt 0 `
+    -and ($originMasterSha -eq $p1F0117SmokeScopeCorrectionBaseSha -or $changedF0117SmokeScopeCorrectionIdentityPaths.Count -gt 0)
+$p1F0117SmokeScopeCloseoutLifecycleHotfixIdentityPaths = @(
+    $p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0117-smoke-scope-closeout-lifecycle-hotfix.md"
+)
+$headF0117SmokeScopeCloseoutLifecycleHotfixPaths = @(& git ls-tree -r --name-only $masterSha -- $p1F0117SmokeScopeCloseoutLifecycleHotfixIdentityPaths | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+$changedF0117SmokeScopeCloseoutLifecycleHotfixIdentityPaths = @(& git diff --name-only --no-renames $originMasterSha $masterSha -- $p1F0117SmokeScopeCloseoutLifecycleHotfixIdentityPaths | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+$isP1F0117SmokeScopeCloseoutLifecycleHotfixCandidate = @($headF0117SmokeScopeCloseoutLifecycleHotfixPaths | Where-Object { $_ -in $p1F0117SmokeScopeCloseoutLifecycleHotfixIdentityPaths }).Count -gt 0 `
+    -and ($originMasterSha -eq $p1F0117SmokeScopeCloseoutLifecycleHotfixBaseSha -or $changedF0117SmokeScopeCloseoutLifecycleHotfixIdentityPaths.Count -gt 0)
 $canUseGenericP1TransitionMasterAncestry = $isP1TransitionScopeMode `
     -and $taskStatus -eq "in_progress" `
+    -and $currentBranch -eq "master" `
+    -and $headSha -eq $masterSha `
+    -and -not [string]::IsNullOrWhiteSpace($originMasterSha) `
+    -and -not [string]::IsNullOrWhiteSpace($stateMasterSha) `
+    -and $stateMasterSha -eq $stateOriginMasterSha `
+    -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $originMasterSha) `
+    -and $originMasterSha -ne $masterSha `
+    -and (Test-GitAncestor -AncestorSha $originMasterSha -DescendantSha $masterSha)
+$canUseP1F0117CloseoutTransitionMasterAncestry = $isP1TransitionScopeMode `
+    -and $TaskId -eq $p1F0117SpecApprovalTransitionHotfixParentTaskId `
+    -and $stateCurrentTaskId -eq $p1F0117SpecApprovalTransitionHotfixParentTaskId `
+    -and $canUseCloseoutShaAncestry `
     -and $currentBranch -eq "master" `
     -and $headSha -eq $masterSha `
     -and -not [string]::IsNullOrWhiteSpace($originMasterSha) `
@@ -1209,12 +1351,33 @@ $isP1F0117SmokeScopeCorrectionTransitionTopology = if ($isP1F0117SmokeScopeCorre
         -TransitionScopeMode $P1TransitionScopeMode
 } else { $false }
 $canUseP1F0117SmokeScopeCorrectionTransitionMasterAncestry = $isP1TransitionScopeMode -and $isP1F0117SmokeScopeCorrectionTransitionTopology
+$isP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology = if ($isP1F0117SmokeScopeCloseoutLifecycleHotfixCandidate) {
+    Test-P1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology `
+        -TaskId $TaskId `
+        -StateCurrentTaskId $stateCurrentTaskId `
+        -StateCurrentTaskStatus $stateCurrentTaskStatus `
+        -TaskStatus $taskStatus `
+        -CurrentBranch $currentBranch `
+        -HeadSha $headSha `
+        -MasterSha $masterSha `
+        -OriginMasterSha $originMasterSha `
+        -StateMasterSha $stateMasterSha `
+        -StateOriginMasterSha $stateOriginMasterSha `
+        -TransitionScopeMode $P1TransitionScopeMode
+} else { $false }
+$canUseP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionMasterAncestry = $isP1TransitionScopeMode -and $isP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology
 $canUseP1TransitionMasterAncestry = if ($isP1F0115TransitionContext) {
     $canUseP1F0115TransitionMasterAncestry -or $canUseP1F0115Phase11TransitionMasterAncestry -or $canUseP1F0115ModulePrecommitHotfixTransitionMasterAncestry -or $canUseP1F0116DesignPathGuardHotfixTransitionMasterAncestry
 } elseif ($isP1F0116TransitionContext) {
     $canUseP1F0116ScopeCorrectionGuardHotfixTransitionMasterAncestry
 } elseif ($isP1F0117TransitionContext) {
-    if ($isP1F0117SmokeScopeCorrectionCandidate) { $canUseP1F0117SmokeScopeCorrectionTransitionMasterAncestry } else { $canUseP1F0117SpecApprovalTransitionHotfixTransitionMasterAncestry }
+    if ($isP1F0117SmokeScopeCloseoutLifecycleHotfixCandidate) {
+        $canUseP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionMasterAncestry
+    } elseif ($isP1F0117SmokeScopeCorrectionCandidate) {
+        $canUseP1F0117SmokeScopeCorrectionTransitionMasterAncestry
+    } else {
+        $canUseP1F0117SpecApprovalTransitionHotfixTransitionMasterAncestry -or $canUseP1F0117CloseoutTransitionMasterAncestry
+    }
 } else {
     $canUseGenericP1TransitionMasterAncestry
 }
@@ -1312,6 +1475,9 @@ if ($isP1F0117TransitionContext) {
     }
     if ($canUseP1F0117SmokeScopeCorrectionTransitionMasterAncestry) {
         Write-Output "p1F0117SmokeScopeCorrectionTransitionTopology: exact_one_parent"
+    }
+    if ($canUseP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionMasterAncestry) {
+        Write-Output "p1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology: exact_one_parent"
     }
 }
 Write-Output "pre-push readiness passed"

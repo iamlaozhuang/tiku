@@ -128,6 +128,20 @@ $missingF0117SmokeScopeCorrectionPatterns = @($f0117SmokeScopeCorrectionPatterns
 if ($missingF0117SmokeScopeCorrectionPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0117 smoke scope-correction contract: $($missingF0117SmokeScopeCorrectionPatterns -join ', ')"
 }
+$f0117SmokeScopeCloseoutLifecycleHotfixPatterns = @(
+    "p1F0117SmokeScopeCloseoutLifecycleHotfixTaskId",
+    "Test-P1F0117SmokeScopeCloseoutLifecycleHotfixFileSet",
+    "Test-P1F0117SmokeScopeCloseoutLifecycleHotfixAnchors",
+    "p1F0117SmokeScopeCloseoutLifecycleHotfixAuthorization: approved_one_time",
+    "71f150ceef0af54fca8d72db20a4254313630c7f",
+    "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CLOSEOUT_LIFECYCLE_HOTFIX_ALLOWLIST_MISMATCH"
+)
+$missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns = @($f0117SmokeScopeCloseoutLifecycleHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0117 smoke scope closeout lifecycle hotfix contract: $($missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns -join ', ')"
+}
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 
