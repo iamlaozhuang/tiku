@@ -64,3 +64,11 @@
 - `Test-P0RemediationGlobalBaseline.ps1`
 - `Test-ModuleRunV2PreCommitHardening.ps1`
 - 书面规格复核后另行编制产品 RED→GREEN、full regression、build 与 closeout 验证计划。
+
+## Task 7 Closeout Smoke Scope-Correction
+
+- Goal: replace the F-0117 journal-terminal assumption with appendable local-chain validation.
+- Allowed files: the approved design addendum, this task plan, existing F-0117 evidence/audit, and `tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`.
+- Blocked files: state/queue, guards/smokes, product/schema/migration/journal/snapshot in the authoritative task worktree, package/lockfile, env, Provider/runtime/browser, P2, PR, deploy.
+- Disposable exception: a detached worktree may temporarily mutate journal/snapshot fixtures for RED/GREEN and adversarial mutation checks; those mutations must never enter a diff or commit.
+- Stop if a shared helper, new guard capability, state transition, schema/migration edit, database execution, another finding repair, or any non-allowlisted persistent file becomes necessary.

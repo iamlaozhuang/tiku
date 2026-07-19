@@ -109,3 +109,50 @@ Result: approved_for_red_green_execution
 - Scope review：持久 diff 限于已批准 F-0117 docs/test；disposable journal/snapshot mutation 明确禁止进入提交。state/queue、guards、产品/schema/migration、依赖、数据库与外部能力均 blocked。
 - Closeout review：focused 不替代 full validation；主线程 Round 1 与独立 reviewer Round 2 均为提交前硬门禁；提交、ff-only、pre-push、普通 push、cleanup 顺序明确。
 - Placeholder、类型/路径一致性与命令可执行性自审通过；当前结论只批准开始 Task 7 RED，不声称实现或最终审查完成。
+
+## Task 7 Implementation Invariant Audit
+
+Result: implementation_pass_pending_controller_reviews
+
+- 唯一 tag：按完整 F-0117 migration tag 搜索且要求恰好一项；duplicate mutation 已证明长度 2 时 fail closed。
+- Predecessor 存在：F-0117 必须位于 journal 首项之后，直接前项必须存在且 tag 带 14 位 timestamp 前缀。
+- 相邻 idx：当前 idx 必须等于直接前项 idx + 1；missing predecessor 与 non-adjacent idx mutation 均已 fail closed。
+- 动态 previous snapshot：由 journal 直接前项 tag 的 14 位 timestamp 定位，不再硬编码 employee-import snapshot。
+- `prevId`：当前 snapshot `prevId` 必须等于动态 previous snapshot `id`，且二者 `id` 不同；wrong mutation 已 fail closed。
+- 全 snapshot diff：只规范化当前/前项身份字段与目标列 `notNull` 后做全对象比较；额外 `dialect` mutation 已 fail closed，不能被规范化掩盖。
+- 后续 entry 可追加：later-entry fixture 保留 synthetic 后候选测试 2/2 passed；测试没有忽略、重排或要求读取后续 entry 内容。
+- Authoritative metadata 零 diff：disposable fixture 清理后，authoritative schema、migration、journal、snapshot 与产品源码均无修改。
+- 权限边界未扩大：state/queue、guards、依赖、数据库、Provider/runtime/browser、P2、PR、force-push、deploy 均未触碰。
+- Review disposition：implementer 对抗式自审通过；主线程 Round 1 与独立 Round 2 由控制器在 checkpoint 后执行并 amend，当前不预先声称最终 Approved。
+
+## Task 7 Implementer Adversarial Self-Review
+
+Decision: APPROVE_REVIEW_CHECKPOINT_WITH_BUILD_TOPOLOGY_CONCERN
+
+- 尝试以 later-entry、duplicate tag、missing predecessor、idx gap、wrong `prevId` 与额外 snapshot diff 推翻候选；later-entry 正常通过，其余五个 mutation 均在对应局部不变量处 fail closed，恢复后全部 2/2 passed。
+- 测试只规范化 snapshot `id`、`prevId` 和目标列 `notNull`；`dialect` mutation 证明额外顶层变化不会被掩盖。运行时对象保留 TypeScript 类型未声明的 snapshot 字段，因此全对象比较未被窄类型截断。
+- 动态 previous snapshot 来自 journal 直接前项，不依赖 employee-import tag；F-0117 仍要求唯一 tag、非首项、相邻 idx、current/previous snapshot 存在、`prevId` 一致和完整结构相等。
+- 精确 diff 为 5 个 allowlisted 文件；authoritative migration metadata 与所有 blocked surface 零 diff。disposable fixture 已删除，不在 worktree list 中。
+- 唯一 concern：task worktree 本地依赖拓扑缺少 `next/package.json`，导致原位 build 命令失败；未越界修复依赖，改用仓库 root-installed dependency 定向构建同一 worktree并成功生成 96/96 static pages。该环境 concern 不影响测试语义，但控制器应在最终 review disposition 中显式确认。
+
+## Task 7 Controller Review Disposition
+
+Decision: APPROVE_PENDING_WHOLE_BRANCH_REVIEW
+
+- 主线程 Round 1：实现语义与精确范围通过。fresh detached fixture 证明合法 later entry 通过，duplicate tag、missing predecessor、numeric idx gap、wrong `prevId`、额外 snapshot drift 均 fail closed；定向 production build 96/96 pages。
+- 独立 Round 2 初审：Changes requested；Critical 0、Important 1、Minor 1。Important 指出 JSON `idx` 的 TypeScript assertion 不提供运行时保护，字符串拼接可绕过 adjacent-idx；Minor 质疑 review package 末尾完整性。
+- finding disposition：Important 接受并以 current/previous 双 safe-integer 断言整改；主线程与独立 reviewer 均复现字符串 idx 现已 fail closed，独立 reviewer 额外验证浮点 idx fail closed。review package 与 `git diff -U10` 精确一致，统一 diff 的十行 context 边界解释并关闭 Minor。
+- 独立 Round 2 复审：Approved；Critical 0、Important 0、Minor 0。精确 5 文件、authoritative metadata 零 diff、blocked surfaces 零变化、fixture 清理均通过。
+- 主线程复核：pass。剩余 build concern 是 worktree 本地依赖拓扑不完整；root-installed dependency 对同一 authoritative worktree 的生产构建已通过，且没有为掩盖环境问题修改依赖或配置。
+- 当前允许进入整分支最终只读复核；在该复核完成前不声称 Task 7 或 F-0117 closeout 完成，不执行 merge、push 或 cleanup。
+
+## Task 7 Round 2 Important Disposition
+
+Decision: FIXED_AND_VERIFIED_PENDING_REREVIEW
+
+- Finding：接受。`as Journal` 不验证 JSON runtime shape；字符串 idx 可把加法退化为拼接，使 `"321" === "32" + 1`，削弱相邻 idx fail-closed 保证。
+- Root cause：相邻关系断言信任了 TypeScript assertion，而 journal 是运行时 JSON 边界。修复点必须位于算术前的 runtime numeric invariant，不能只改 type 或期望值。
+- Fix：分别要求 current 与 previous idx 都是 safe integer，再执行 `current === previous + 1`。这同时拒绝字符串、浮点数、NaN、Infinity 与超出安全整数范围的值。
+- TDD/mutation：旧 checkpoint 在双字符串 mutation 下错误 2/2 passed；修复后同 mutation 精确 fail at safe-integer assertion；恢复 numeric idx 后 authoritative 与 later-entry fixture 均 2/2 passed。
+- Scope：tracked amendment 精确限于目标 smoke 与既有 F-0117 evidence/audit；authoritative metadata、产品、guard、state/queue、依赖、数据库与授权语义零变更。
+- Disposition：Important 已由最小 fail-closed 修复关闭，等待独立 reviewer 对 amend 后完整 base..HEAD package 复核；不得在复核前声称 Round 2 final Approved。

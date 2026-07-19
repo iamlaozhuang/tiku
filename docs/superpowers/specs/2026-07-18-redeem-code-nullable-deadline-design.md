@@ -2,7 +2,7 @@
 
 日期：2026-07-18
 
-状态：F-0117 产品实现已完成；closeout migration smoke appendability 设计 A 已获用户批准，等待书面规格复核
+状态：F-0117 产品实现已完成；closeout migration smoke appendability 书面规格已批准；Task 7 已验证
 
 任务：`p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18`
 

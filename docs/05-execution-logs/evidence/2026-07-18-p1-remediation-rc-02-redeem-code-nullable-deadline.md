@@ -205,3 +205,60 @@ Result: planning_complete_no_implementation
 - 计划包含 duplicate tag、missing predecessor、non-adjacent idx、wrong `prevId`、额外 snapshot diff 五类 fail-closed mutation，以及 focused/full validation、主线程复核、独立第二轮 reviewer、单一提交、ff-only/push/cleanup 顺序。
 - 本 planning commit 只包含 implementation plan 与本 evidence/audit 的新鲜计划复核记录；测试、产品、schema、migration、journal、snapshot、state/queue、guards 均保持零 diff。
 - 未执行数据库、Provider/runtime/browser、P2、PR、force-push 或 deploy；Task 7 RED 尚未开始。
+
+## Task 7 Closeout Smoke Scope-Correction Evidence
+
+Result: implementation_verified_pending_controller_reviews
+
+- 旧实现 RED：在 detached disposable fixture 保留 F-0117 局部链并追加 synthetic later entry 后，目标命令得到 1 file failed、1 test failed / 1 passed；失败精确位于 `journal.entries.at(-1)?.tag`，received 为 later tag，证明永久 terminal 假设会误伤合法后续迁移。
+- 候选实现 GREEN：authoritative worktree 与同一 later-entry fixture 均为 1 file / 2 tests passed。实现按完整 tag 唯一定位 F-0117，动态读取直接 predecessor 与对应 snapshot，不再要求 F-0117 是 journal 末项。
+- Duplicate tag mutation：1 test failed / 1 passed，`matchingEntries` 实际长度 2，fail closed；恢复后 2/2 passed。
+- Missing predecessor mutation：删除直接前项后 1 test failed / 1 passed，F-0117 idx 33 不等于新直接前项 idx 31 + 1；恢复后继续验证。
+- Non-adjacent idx mutation：临时把 F-0117 idx 改为 35 后 1 test failed / 1 passed，35 不等于 predecessor idx 32 + 1；恢复后 2/2 passed。
+- Wrong `prevId` mutation：临时零化当前 snapshot `prevId` 后 1 test failed / 1 passed，错误值不等于 previous snapshot id；恢复后 2/2 passed。
+- Extra snapshot diff mutation：临时改变当前 snapshot `dialect` 后 1 test failed / 1 passed，全对象比较显示 `fixture` 不等于 `postgresql`；恢复后 2/2 passed。
+- Disposable fixture 已按 resolved path 边界强制移除并 prune；authoritative journal、snapshot、schema、migration 与产品源码保持零 diff。
+- 主线程 Round 1 与独立 reviewer Round 2 由控制器在 review-checkpoint commit 后执行；本 implementation evidence 不预先声称 Approved，review findings/disposition 将由控制器 amend。
+- 未运行 migrate、push、SQL、backfill、seed，未连接、读取或修改数据库；未执行 Provider、runtime/browser、P2、PR、force-push 或 deploy。
+
+## Task 7 Closeout Full Validation
+
+Result: pass_with_documented_worktree_dependency_topology_exception
+
+- 目标命令：1 file / 2 tests passed，0 failed，Vitest duration 1.59s。
+- Fresh full unit：420 files / 2701 tests passed，0 failed，Vitest duration 909.87s。
+- `npm.cmd run lint`：exit 0；`npm.cmd run typecheck`：exit 0；`npm.cmd run format:check`：exit 0，全部 tracked/扫描文件符合 Prettier。
+- 从 task worktree 直接执行 `npm.cmd run build` 首次 exit 1；根因证据为该 worktree 的本地 `node_modules` 不含 `next/package.json`，而 Next config 将 Turbopack root 固定为该 worktree。未修改依赖、config、package/lockfile 或 junction 来掩盖环境拓扑。
+- 使用仓库既有、已验证的 root-installed dependency 调用方式，从 `D:/tiku` 执行 `npm.cmd run build -- .worktrees/p1-rc02-redeem-code-nullable-deadline`：exit 0；Turbopack 14.5s 编译成功，TypeScript 30.2s 完成，96/96 static pages generated。构建目标仍为 authoritative task worktree。
+- P1 manual：pass；P1 pre-commit：pass；current task F-0117，materialized task count 11，P1/P2 finding counts 125/18，runtime validation count 21。
+- P0 global：pass；35 P0 findings、143 P1/P2 impacts、21 runtime pending、8 root-cause clusters、0 dependency cycle。
+- Module pre-commit：pass；5/5 文件命中精确 allowlist，sensitive evidence 与 terminology scan 无 finding。
+- `git diff --check`：exit 0；最终 persistent diff 精确 5 文件，不含 authoritative journal、snapshot、schema、migration、产品、guard、state/queue、package/lockfile。
+- 主线程 Round 1 与独立 reviewer Round 2 仍由控制器执行；本节仅记录 implementer closeout validation，不替代两轮 review。
+
+## Task 7 Controller Review Evidence
+
+Result: pass_pending_whole_branch_review
+
+- 主线程 Round 1 逐项核对 base `12e675087` 到 checkpoint 的精确 diff：持久变更保持 5 个 allowlisted 文件；authoritative migration、journal、snapshot、schema、产品源码、guards、state/queue、package/lockfile 均为零 diff。
+- 主线程在 fresh detached fixture 复验 later-entry 正常路径为 1 file / 2 tests passed；duplicate tag、missing predecessor、non-adjacent numeric idx、wrong `prevId`、额外 snapshot `dialect` 五类 mutation 均 fail closed，恢复后继续 2/2 passed。
+- 主线程首次审查后从仓库 root-installed dependency 定向构建 authoritative task worktree：exit 0，Turbopack 编译 15.6s、TypeScript 35.6s、96/96 static pages generated；未修改 dependency topology、Next config、package 或 lockfile。
+- 独立 Round 2 初审发现 1 个 Important：`JSON.parse(...) as Journal` 不提供运行时类型保护，previous idx=`"32"` 与 current idx=`"321"` 可通过 JavaScript 字符串拼接绕过相邻性断言。该 finding 经只读复现确认后接受。
+- 整改只在相邻算术前分别加入 `Number.isSafeInteger(current.idx)` 与 `Number.isSafeInteger(previous.idx)` fail-closed 断言；旧候选对字符串变异错误 2/2 passed，整改候选对同一变异 1 failed / 1 passed，证明 RED→GREEN。
+- 主线程在 fresh detached fixture 独立复验同一字符串 idx 变异：1 failed / 1 passed，失败精确位于 current idx safe-integer 断言；恢复并追加合法 later entry 后 1 file / 2 tests passed。fixture 已在 resolved `.worktrees` 边界内移除并 prune。
+- 独立 Round 2 复审：Approved；Critical 0、Important 0、Minor 0。reviewer 另以浮点 idx 反证并确认 fail closed；authoritative/later-entry 均 pass。
+- 新 review package 与实际 `git diff -U10 12e675087..f00362e68` 精确一致；末尾停在十行未变 context 是标准 unified diff 边界，不是字节截断，初审 package 完整性 Minor 已关闭。
+- 整改后 focused、精确 format、`git diff --check`、P1 manual、P0、Module pre-commit 与 amend hooks 均通过；因产品/构建面未变，未重复 full unit/build，沿用本节前述新鲜全量与定向构建证据。
+- 剩余 concern 仅为 task worktree 本地 `node_modules` 不完整的环境拓扑；root dependency 定向构建同一 worktree已通过，不涉及代码、依赖或授权边界，不阻断审查。
+
+## Task 7 Round 2 Safe-Integer Amendment Evidence
+
+Result: important_fixed_and_focused_verified_pending_rereview
+
+- 独立 reviewer 的唯一 Important 成立：`JSON.parse(...) as Journal` 只提供编译期类型，不做运行时校验；previous idx 为字符串 `"32"`、current idx 为字符串 `"321"` 时，旧断言会把 `previousEntry.idx + 1` 拼接为 `"321"` 并错误通过。
+- Mutation RED：从 checkpoint 建立 detached disposable fixture，仅把上述两个 idx 改为字符串；旧 checkpoint 目标测试错误得到 1 file / 2 tests passed，证明 fail-open 路径可稳定复现。
+- 最小修复：在相邻算术前分别断言 `Number.isSafeInteger(currentMatch.entry.idx)` 与 `Number.isSafeInteger(previousEntry.idx)` 为 true；未修改 Journal 结构、共享 helper 或其他断言。
+- Mutation GREEN：同一字符串 fixture 使用修复后测试得到预期 1 failed / 1 passed，失败精确位于 current idx 安全整数断言；字符串拼接不再能到达相邻算术。
+- 恢复 numeric idx 并保留 synthetic later entry 后，fixture 为 1 file / 2 tests passed；authoritative worktree 同样为 1 file / 2 tests passed。
+- Fixture 已按 resolved path 边界移除并 prune；authoritative journal、snapshot、schema、migration、产品、guard 与 state/queue 保持零 diff。
+- 本 amendment 只改变 smoke 测试与既有 evidence/audit；生产代码和构建面未变，按控制器裁决不重复 full unit/build，改跑 focused、精确 format、diff、P1 manual、P0 global 与 Module pre-commit。

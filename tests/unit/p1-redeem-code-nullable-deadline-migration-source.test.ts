@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -27,6 +27,11 @@ function readMigration() {
   };
 }
 
+function readSnapshot(path: string): Snapshot {
+  expect(existsSync(path)).toBe(true);
+  return JSON.parse(readFileSync(path, "utf8")) as Snapshot;
+}
+
 describe("F-0117 redeem_code nullable deadline migration source", () => {
   it("contains exactly the approved DROP NOT NULL statement", () => {
     const { name, source } = readMigration();
@@ -41,7 +46,7 @@ describe("F-0117 redeem_code nullable deadline migration source", () => {
     );
   });
 
-  it("changes only redeem_code.redeem_deadline_at in a linear snapshot", () => {
+  it("changes only redeem_code.redeem_deadline_at in an appendable linear snapshot chain", () => {
     const { name } = readMigration();
     const tag = name.slice(0, -4);
     const journal = JSON.parse(
@@ -50,23 +55,30 @@ describe("F-0117 redeem_code nullable deadline migration source", () => {
         "utf8",
       ),
     ) as Journal;
-    expect(journal.entries.at(-1)?.tag).toBe(tag);
+    const matchingEntries = journal.entries
+      .map((entry, index) => ({ entry, index }))
+      .filter(({ entry }) => entry.tag === tag);
 
-    const current = JSON.parse(
-      readFileSync(
-        resolve(
-          process.cwd(),
-          `drizzle/meta/${tag.slice(0, 14)}_snapshot.json`,
-        ),
-        "utf8",
+    expect(matchingEntries).toHaveLength(1);
+    const currentMatch = matchingEntries[0]!;
+    expect(currentMatch.index).toBeGreaterThan(0);
+
+    const previousEntry = journal.entries[currentMatch.index - 1];
+    expect(previousEntry).toBeDefined();
+    expect(previousEntry!.tag).toMatch(/^\d{14}_/u);
+    expect(Number.isSafeInteger(currentMatch.entry.idx)).toBe(true);
+    expect(Number.isSafeInteger(previousEntry!.idx)).toBe(true);
+    expect(currentMatch.entry.idx).toBe(previousEntry!.idx + 1);
+
+    const current = readSnapshot(
+      resolve(process.cwd(), `drizzle/meta/${tag.slice(0, 14)}_snapshot.json`),
+    );
+    const previous = readSnapshot(
+      resolve(
+        process.cwd(),
+        `drizzle/meta/${previousEntry!.tag.slice(0, 14)}_snapshot.json`,
       ),
-    ) as Snapshot;
-    const previous = JSON.parse(
-      readFileSync(
-        resolve(process.cwd(), "drizzle/meta/20260717141801_snapshot.json"),
-        "utf8",
-      ),
-    ) as Snapshot;
+    );
 
     expect(current.prevId).toBe(previous.id);
     expect(current.id).not.toBe(previous.id);
