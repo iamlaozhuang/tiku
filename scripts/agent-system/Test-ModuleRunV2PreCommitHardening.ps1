@@ -204,6 +204,29 @@ New-Variable -Name p1F0117SpecApprovalTransitionHotfixFiles -Option Constant -Va
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixTaskId -Option Constant -Value "p1-f0143-spec-approval-transition-hotfix-2026-07-18"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-personal-ai-context-2026-07-18"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixBaseSha -Option Constant -Value "0fe8edae7a7efc00154f5c54227623be55796983"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixBranch -Option Constant -Value "codex/p1-f0143-spec-approval-transition-hotfix"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-spec-approval-transition-hotfix-authorization.md"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixHumanApprovalSource -Option Constant -Value "current user message approving one-time F-0143 spec-approval transition governance hotfix limited to P1/Module guards, corresponding smoke, exact state and evidence/audit; ancestor checkpoint only after transition-only guard passes; other in_progress SHA drift remains hard-blocked on 2026-07-18"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixStandingAuthorizationSource -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixEvidencePath -Option Constant -Value "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixAuditPath -Option Constant -Value "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixFiles -Option Constant -Value @(
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    $p1F0143SpecApprovalTransitionHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    $p1F0143SpecApprovalTransitionHotfixEvidencePath,
+    $p1F0143SpecApprovalTransitionHotfixAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 New-Variable -Name p1F0117SmokeScopeCorrectionTaskId -Option Constant -Value "p1-f0117-smoke-scope-correction-guard-hotfix-2026-07-18"
 New-Variable -Name p1F0117SmokeScopeCorrectionParentTaskId -Option Constant -Value "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
 New-Variable -Name p1F0117SmokeScopeCorrectionBaseSha -Option Constant -Value "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
@@ -1691,6 +1714,150 @@ function Test-P1F0117SpecApprovalTransitionHotfixAnchors {
     if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0117SpecApprovalTransitionHotfixAuthorization: approved_one_time" }
 }
 
+function Test-P1F0143SpecApprovalTransitionHotfixFileSet {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
+
+    $normalizedActualFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $normalizedExpectedFiles = @($p1F0143SpecApprovalTransitionHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $actualFiles = @($normalizedActualFiles | Sort-Object -CaseSensitive -Unique)
+    $expectedFiles = @($normalizedExpectedFiles | Sort-Object -CaseSensitive -Unique)
+    if ($normalizedActualFiles.Count -ne $normalizedExpectedFiles.Count -or $actualFiles.Count -ne $expectedFiles.Count) { return $false }
+    return ($actualFiles -join "|") -ceq ($expectedFiles -join "|")
+}
+
+function Get-P1F0143SpecApprovalTransitionHotfixIndexText {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path)) { return "" }
+    $normalizedPath = ConvertTo-NormalizedPath -Path $Path
+    try {
+        $indexPaths = @(& git -C $RepositoryRoot ls-files --cached -- $normalizedPath)
+        $indexInspectionExitCode = $LASTEXITCODE
+    } catch {
+        return ""
+    }
+    $normalizedIndexPaths = @($indexPaths | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    if ($indexInspectionExitCode -ne 0 -or $normalizedIndexPaths.Count -ne 1 -or $normalizedIndexPaths[0] -cne $normalizedPath) { return "" }
+    return Get-P1F0115ModulePrecommitHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $normalizedPath
+}
+
+function Test-P1F0143SpecApprovalTransitionHotfixAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ProjectStateLines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$QueueLines
+    )
+
+    $findingCountBefore = $script:findings.Count
+    $headSha = ((& git -C $RepositoryRoot rev-parse HEAD) -join "").Trim()
+    $branch = ((& git -C $RepositoryRoot branch --show-current) -join "").Trim()
+    $currentTaskId = Get-CurrentTaskId -Lines $ProjectStateLines
+    $currentTaskStatus = Get-CurrentTaskStatus -Lines $ProjectStateLines
+    $parentTaskBlock = @(Get-TaskBlock -Lines $QueueLines -Id $p1F0143SpecApprovalTransitionHotfixParentTaskId)
+    $parentQueueTaskIdMatches = @([regex]::Matches(($parentTaskBlock -join "`n"), '(?m)^\s*-\s+id:\s*(\S+)\s*$'))
+    $parentQueueTaskId = if ($parentQueueTaskIdMatches.Count -eq 1) { $parentQueueTaskIdMatches[0].Groups[1].Value } else { "" }
+    $parentQueueStatus = if ($parentTaskBlock.Count -gt 0) { Get-ScalarValue -Block $parentTaskBlock -Key "status" } else { "" }
+
+    if ($headSha -cne $p1F0143SpecApprovalTransitionHotfixBaseSha -or $branch -cne $p1F0143SpecApprovalTransitionHotfixBranch -or $currentTaskId -cne $p1F0143SpecApprovalTransitionHotfixParentTaskId -or $currentTaskStatus -cne "in_progress" -or $parentQueueTaskId -cne $p1F0143SpecApprovalTransitionHotfixParentTaskId -or $parentQueueStatus -cne "in_progress") {
+        Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_CONTEXT_INVALID"
+    }
+
+    $stagedNameStatus = @(& git -C $RepositoryRoot diff --cached --name-status --no-renames --diff-filter=ACMRTD)
+    $stagedNameStatusExitCode = $LASTEXITCODE
+    $stagedNameStatusFiles = [System.Collections.Generic.List[string]]::new()
+    $isValidStagedNameStatus = $stagedNameStatusExitCode -eq 0
+    foreach ($stagedEntry in $stagedNameStatus) {
+        $stagedEntryMatch = [regex]::Match($stagedEntry, '^([AM])\t(.+)$')
+        if (-not $stagedEntryMatch.Success) {
+            $isValidStagedNameStatus = $false
+            continue
+        }
+        $stagedNameStatusFiles.Add((ConvertTo-NormalizedPath -Path $stagedEntryMatch.Groups[2].Value))
+    }
+    if (-not $isValidStagedNameStatus -or -not (Test-P1F0143SpecApprovalTransitionHotfixFileSet -Files $stagedNameStatusFiles)) {
+        Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID"
+    }
+
+    & git -C $RepositoryRoot diff --quiet
+    $unstagedTrackedExitCode = $LASTEXITCODE
+    $untrackedFiles = @(& git -C $RepositoryRoot ls-files --others --exclude-standard)
+    if ($unstagedTrackedExitCode -ne 0 -or $LASTEXITCODE -ne 0 -or $untrackedFiles.Count -gt 0) {
+        Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_PARTIAL_STAGE_INVALID"
+    }
+
+    $materializedAuthorizationPath = ((& git -C $RepositoryRoot ls-tree -r --name-only HEAD -- $p1F0143SpecApprovalTransitionHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_PARENT_INSPECTION_FAILED"
+    } elseif ($materializedAuthorizationPath -ceq $p1F0143SpecApprovalTransitionHotfixAuthorizationPath) {
+        Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_ALREADY_MATERIALIZED"
+    }
+
+    $authorizationText = Get-P1F0143SpecApprovalTransitionHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $p1F0143SpecApprovalTransitionHotfixAuthorizationPath
+    foreach ($fieldContract in @(
+        @{ Key = 'Status'; Expected = '^Status:\s*approved\s*$' },
+        @{ Key = 'Human approval source'; Expected = "^Human approval source:\s*$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixHumanApprovalSource))\s*$" },
+        @{ Key = 'Standing hotfix authorization source'; Expected = "^Standing hotfix authorization source:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixStandingAuthorizationSource))[\x60]\s*$" },
+        @{ Key = 'Task ID'; Expected = "^Task ID:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixTaskId))[\x60]\s*$" },
+        @{ Key = 'Parent task'; Expected = "^Parent task:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixParentTaskId))[\x60]\s*$" },
+        @{ Key = 'Base'; Expected = "^Base:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixBaseSha))[\x60]\s*$" },
+        @{ Key = 'Branch'; Expected = "^Branch:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixBranch))[\x60]\s*$" },
+        @{ Key = 'gateProjection'; Expected = '^gateProjection:\s*waiting_for_spec_review_to_satisfied\s*$' },
+        @{ Key = 'ancestorCheckpoint'; Expected = '^ancestorCheckpoint:\s*only_after_transition_only_guard_pass\s*$' },
+        @{ Key = 'otherInProgressShaDrift'; Expected = '^otherInProgressShaDrift:\s*hard_block\s*$' },
+        @{ Key = 'standardMode'; Expected = '^standardMode:\s*hard_block\s*$' },
+        @{ Key = 'noDatabaseExecution'; Expected = '^noDatabaseExecution:\s*required\s*$' }
+    )) {
+        $fieldMatches = @([regex]::Matches($authorizationText, "(?m)^$([regex]::Escape($fieldContract.Key))\s*:.*$"))
+        if ($fieldMatches.Count -ne 1 -or -not [regex]::IsMatch($fieldMatches[0].Value, $fieldContract.Expected)) {
+            Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+
+    $authorizationFileSection = Get-ScopeCorrectionMarkdownSection -Content $authorizationText -HeadingPattern "Exact Files"
+    $authorizationFiles = @([regex]::Matches($authorizationFileSection, '(?m)^\s*\d+\.\s+`([^`]+)`\s*$') | ForEach-Object { ConvertTo-NormalizedPath -Path $_.Groups[1].Value })
+    $expectedAuthorizationFiles = @($p1F0143SpecApprovalTransitionHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    if (($authorizationFiles -join "|") -cne ($expectedAuthorizationFiles -join "|")) {
+        Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID"
+    }
+
+    foreach ($projection in @(
+        @{ Path = "docs/04-agent-system/state/project-state.yaml"; Label = "STATE"; Replacements = @(
+            @{ Anchor = "  currentExecutionGate:`n    status: waiting_for_spec_review`n    reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required`n    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n    resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan"; Replacement = "  currentExecutionGate:`n    status: satisfied`n    reason: current_user_approved_written_f0143_spec_2026_07_18`n    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n    resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green" },
+            @{ Anchor = "  lastKnownMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b`n  lastKnownOriginMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b`n  lastKnownRemoteMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b"; Replacement = "  lastKnownMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983`n  lastKnownOriginMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983`n  lastKnownRemoteMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983" }
+        )},
+        @{ Path = "docs/04-agent-system/state/task-queue.yaml"; Label = "GATE_PROJECTION"; Replacements = @(
+            @{ Anchor = "    currentExecutionGate:`n      status: waiting_for_spec_review`n      reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan"; Replacement = "    currentExecutionGate:`n      status: satisfied`n      reason: current_user_approved_written_f0143_spec_2026_07_18`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green" }
+        )}
+    )) {
+        $parentText = (@(& git -C $RepositoryRoot show "HEAD:$($projection.Path)") -join "`n") -replace "`r`n?", "`n"
+        $parentInspectionExitCode = $LASTEXITCODE
+        $currentText = (Get-P1F0143SpecApprovalTransitionHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $projection.Path) -replace "`r`n?", "`n"
+        $expectedText = $parentText
+        $validProjection = $parentInspectionExitCode -eq 0
+        foreach ($replacement in $projection.Replacements) {
+            if ([regex]::Matches($expectedText, [regex]::Escape($replacement.Anchor)).Count -ne 1) { $validProjection = $false; break }
+            $expectedText = $expectedText.Replace($replacement.Anchor, $replacement.Replacement)
+        }
+        if (-not $validProjection -or $currentText -cne $expectedText) {
+            $projectionFinding = if ($projection.Label -eq "STATE") {
+                "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_STATE_INVALID"
+            } else {
+                "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_GATE_PROJECTION_INVALID"
+            }
+            Add-Finding $projectionFinding
+        }
+    }
+
+    $evidenceText = Get-P1F0143SpecApprovalTransitionHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $p1F0143SpecApprovalTransitionHotfixEvidencePath
+    $auditText = Get-P1F0143SpecApprovalTransitionHotfixIndexText -RepositoryRoot $RepositoryRoot -Path $p1F0143SpecApprovalTransitionHotfixAuditPath
+    Test-P1F0115ModulePrecommitHotfixReviewContract -EvidenceText $evidenceText -AuditText $auditText
+    if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1F0143SpecApprovalTransitionHotfixAuthorization: approved_one_time" }
+}
+
 function Test-P1F0117SmokeScopeCorrectionFileSet {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
 
@@ -2483,11 +2650,27 @@ $isP1F0117SpecApprovalTransitionHotfixCandidate = (-not $isSeedTransactionScope)
     -and "docs/04-agent-system/state/task-queue.yaml" -in $normalizedFilesToScan `
     -and @($normalizedFilesToScan | Where-Object { $_ -in $p1F0117IdentityFiles }).Count -gt 0
 $isP1F0117SpecApprovalTransitionHotfixScope = $isP1F0117SpecApprovalTransitionHotfixCandidate -and (Test-P1F0117SpecApprovalTransitionHotfixFileSet -Files $filesToScan)
-$isP1F0115ScopeCorrectionScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (-not $isP1F0132ScopeCorrectionScope) -and (-not $isP1F0115Phase11ScopeCorrectionScope) -and (-not $isP1F0115ModulePrecommitHotfixScope) -and (-not $isP1F0116DesignPathGuardHotfixScope) -and (-not $isP1F0116ScopeCorrectionGuardHotfixScope) -and (-not $isP1F0117SpecApprovalTransitionHotfixScope) -and (-not $isP1F0117SmokeScopeCorrectionScope) -and (-not $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) -and (Test-P1F0115ScopeCorrectionFileSet -Files $filesToScan)
+$p1F0143IdentityFiles = @(
+    $p1F0143SpecApprovalTransitionHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    $p1F0143SpecApprovalTransitionHotfixEvidencePath,
+    $p1F0143SpecApprovalTransitionHotfixAuditPath
+)
+$isP1F0143SpecApprovalTransitionHotfixCandidate = (-not $isSeedTransactionScope) `
+    -and (-not $isMechanicRepairScope) `
+    -and $normalizedFilesToScan -ccontains "docs/04-agent-system/state/project-state.yaml" `
+    -and $normalizedFilesToScan -ccontains "docs/04-agent-system/state/task-queue.yaml" `
+    -and @($normalizedFilesToScan | Where-Object { $p1F0143IdentityFiles -ccontains $_ }).Count -gt 0
+$isP1F0143SpecApprovalTransitionHotfixScope = $isP1F0143SpecApprovalTransitionHotfixCandidate -and (Test-P1F0143SpecApprovalTransitionHotfixFileSet -Files $filesToScan)
+$isP1F0115ScopeCorrectionScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (-not $isP1TransitionHotfixScope) -and (-not $isP1F0132ScopeCorrectionScope) -and (-not $isP1F0115Phase11ScopeCorrectionScope) -and (-not $isP1F0115ModulePrecommitHotfixScope) -and (-not $isP1F0116DesignPathGuardHotfixScope) -and (-not $isP1F0116ScopeCorrectionGuardHotfixScope) -and (-not $isP1F0117SpecApprovalTransitionHotfixScope) -and (-not $isP1F0143SpecApprovalTransitionHotfixScope) -and (-not $isP1F0117SmokeScopeCorrectionScope) -and (-not $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) -and (Test-P1F0115ScopeCorrectionFileSet -Files $filesToScan)
 $isP1F0115ScopeCorrectionCandidateValid = $false
 $isP1F0117SpecApprovalTransitionHotfixAllowlistMismatch = $isP1F0117SpecApprovalTransitionHotfixCandidate -and -not $isP1F0117SpecApprovalTransitionHotfixScope
 if ($isP1F0117SpecApprovalTransitionHotfixAllowlistMismatch) {
     Add-Finding "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_ALLOWLIST_MISMATCH"
+}
+$isP1F0143SpecApprovalTransitionHotfixAllowlistMismatch = $isP1F0143SpecApprovalTransitionHotfixCandidate -and -not $isP1F0143SpecApprovalTransitionHotfixScope
+if ($isP1F0143SpecApprovalTransitionHotfixAllowlistMismatch) {
+    Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_ALLOWLIST_MISMATCH"
 }
 if ($isP1F0117SmokeScopeCorrectionCandidate -and -not $isP1F0117SmokeScopeCorrectionScope) {
     Add-Finding "HARD_BLOCK_P1_F0117_SMOKE_SCOPE_CORRECTION_ALLOWLIST_MISMATCH"
@@ -2503,7 +2686,7 @@ if ($isDocsOnlyBatchScope -and $isLowRiskExperienceBatchScope) {
     throw "Use either DocsOnlyBatchId or LowRiskExperienceBatchId, not both."
 }
 
-if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0116ScopeCorrectionGuardHotfixScope -and -not $isP1F0117SpecApprovalTransitionHotfixScope -and -not $isP1F0117SmokeScopeCorrectionScope -and -not $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -and -not $isP1F0115ScopeCorrectionScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0116ScopeCorrectionGuardHotfixScope -and -not $isP1F0117SpecApprovalTransitionHotfixScope -and -not $isP1F0143SpecApprovalTransitionHotfixScope -and -not $isP1F0117SmokeScopeCorrectionScope -and -not $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -and -not $isP1F0115ScopeCorrectionScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -2591,6 +2774,10 @@ if ($isSeedTransactionScope) {
     $TaskId = $p1F0117SpecApprovalTransitionHotfixTaskId
     $allowedFiles = @($p1F0117SpecApprovalTransitionHotfixFiles)
     $blockedFiles = @("AGENTS.md", ".husky/**", "package.json", "package-lock.json", "pnpm-lock.yaml", "src/**", "tests/**", "e2e/**", "src/db/schema/**", "drizzle/**", "migrations/**", ".env*", "D:/tiku-readonly-audit/**")
+} elseif ($isP1F0143SpecApprovalTransitionHotfixScope) {
+    $TaskId = $p1F0143SpecApprovalTransitionHotfixTaskId
+    $allowedFiles = @($p1F0143SpecApprovalTransitionHotfixFiles)
+    $blockedFiles = @("AGENTS.md", ".husky/**", "package.json", "package-lock.json", "pnpm-lock.yaml", "src/**", "tests/**", "e2e/**", "src/db/schema/**", "drizzle/**", "migrations/**", ".env*", "D:/tiku-readonly-audit/**")
 } elseif ($isP1F0117SmokeScopeCorrectionScope) {
     $TaskId = $p1F0117SmokeScopeCorrectionTaskId
     $allowedFiles = @($p1F0117SmokeScopeCorrectionFiles)
@@ -2623,7 +2810,7 @@ if ($isSeedTransactionScope) {
 
 Write-Output "taskId: $TaskId"
 if (-not $isP1F0115ScopeCorrectionScope) {
-    Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" } elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" } elseif ($isP1F0115ModulePrecommitHotfixScope) { "p1_f0115_module_precommit_hotfix" } elseif ($isP1F0116DesignPathGuardHotfixScope) { "p1_f0116_designpath_guard_hotfix" } elseif ($isP1F0116ScopeCorrectionGuardHotfixScope) { "p1_f0116_scope_correction_guard_hotfix" } elseif ($isP1F0117SpecApprovalTransitionHotfixScope) { "p1_f0117_spec_approval_transition_hotfix" } elseif ($isP1F0117SmokeScopeCorrectionScope) { "p1_f0117_smoke_scope_correction" } elseif ($isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) { "p1_f0117_smoke_scope_closeout_lifecycle_hotfix" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
+    Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" } elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" } elseif ($isP1F0115ModulePrecommitHotfixScope) { "p1_f0115_module_precommit_hotfix" } elseif ($isP1F0116DesignPathGuardHotfixScope) { "p1_f0116_designpath_guard_hotfix" } elseif ($isP1F0116ScopeCorrectionGuardHotfixScope) { "p1_f0116_scope_correction_guard_hotfix" } elseif ($isP1F0117SpecApprovalTransitionHotfixScope) { "p1_f0117_spec_approval_transition_hotfix" } elseif ($isP1F0143SpecApprovalTransitionHotfixScope) { "p1_f0143_spec_approval_transition_hotfix" } elseif ($isP1F0117SmokeScopeCorrectionScope) { "p1_f0117_smoke_scope_correction" } elseif ($isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) { "p1_f0117_smoke_scope_closeout_lifecycle_hotfix" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
 }
 Write-Output "filesToScan: $($filesToScan.Count)"
 
@@ -2650,7 +2837,7 @@ if ($isLowRiskExperienceBatchScope) {
 }
 
 Write-Section -Title "Requirement SSOT Readiness"
-if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1TransitionHotfixScope -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0116ScopeCorrectionGuardHotfixScope -or $isP1F0117SpecApprovalTransitionHotfixScope -or $isP1F0117SmokeScopeCorrectionScope -or $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -or $isP1F0115ScopeCorrectionScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
+if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1TransitionHotfixScope -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0116ScopeCorrectionGuardHotfixScope -or $isP1F0117SpecApprovalTransitionHotfixScope -or $isP1F0143SpecApprovalTransitionHotfixScope -or $isP1F0117SmokeScopeCorrectionScope -or $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -or $isP1F0115ScopeCorrectionScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
     Write-Output "requirementSsotReadiness: skipped_$(
         if ($isSeedTransactionScope) { "seed_transaction" }
         elseif ($isMechanicRepairScope) { "mechanic_repair" }
@@ -2661,6 +2848,7 @@ if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1TransitionHotfix
         elseif ($isP1F0116DesignPathGuardHotfixScope) { "p1_f0116_designpath_guard_hotfix" }
         elseif ($isP1F0116ScopeCorrectionGuardHotfixScope) { "p1_f0116_scope_correction_guard_hotfix" }
         elseif ($isP1F0117SpecApprovalTransitionHotfixScope) { "p1_f0117_spec_approval_transition_hotfix" }
+        elseif ($isP1F0143SpecApprovalTransitionHotfixScope) { "p1_f0143_spec_approval_transition_hotfix" }
         elseif ($isP1F0117SmokeScopeCorrectionScope) { "p1_f0117_smoke_scope_correction" }
         elseif ($isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) { "p1_f0117_smoke_scope_closeout_lifecycle_hotfix" }
         elseif ($isP1F0115ScopeCorrectionScope) { "p1_f0115_scope_correction" }
@@ -2699,6 +2887,8 @@ if ($SkipScopeScan) {
         Test-P1F0116ScopeCorrectionGuardHotfixAnchors -RepositoryRoot $repositoryRoot -ProjectStateLines $projectStateLines -QueueLines $queueLines
     } elseif ($isP1F0117SpecApprovalTransitionHotfixScope) {
         Test-P1F0117SpecApprovalTransitionHotfixAnchors -RepositoryRoot $repositoryRoot -ProjectStateLines $projectStateLines -QueueLines $queueLines
+    } elseif ($isP1F0143SpecApprovalTransitionHotfixCandidate) {
+        Test-P1F0143SpecApprovalTransitionHotfixAnchors -RepositoryRoot $repositoryRoot -ProjectStateLines $projectStateLines -QueueLines $queueLines
     } elseif ($isP1F0117SmokeScopeCorrectionScope) {
         Test-P1F0117SmokeScopeCorrectionAnchors -RepositoryRoot $repositoryRoot -ProjectStateLines $projectStateLines -QueueLines $queueLines
     } elseif ($isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) {

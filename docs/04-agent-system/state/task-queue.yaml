@@ -388,10 +388,10 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     currentExecutionGate:
-      status: waiting_for_spec_review
-      reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required
+      status: satisfied
+      reason: current_user_approved_written_f0143_spec_2026_07_18
       approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md
-      resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan
+      resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green
     acceptanceStandards:
       - A server-revalidated selected authorizationPublicId determines authorization source, owner, organization and quota owner; userType never silently replaces a valid personal_auth context.
       - An employee with personal advanced and organization standard or advanced authorization can explicitly use personal AI without consuming organization quota, while valid org_auth generation remains organization-owned.

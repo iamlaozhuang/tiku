@@ -44,6 +44,8 @@ function Invoke-ExpectFailure {
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PreCommitHardening.ps1"
 $phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $scriptPath -Raw -Encoding UTF8
+$p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
+$p1GuardText = Get-Content -LiteralPath $p1GuardPath -Raw -Encoding UTF8
 $phase11ScopeCorrectionPatterns = @(
     "p1F0115Phase11ScopeCorrectionTaskId",
     "Test-P1F0115Phase11ScopeCorrectionFileSet",
@@ -114,6 +116,28 @@ $missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | W
 if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
 }
+$f0143SpecApprovalHotfixPatterns = @(
+    "p1F0143SpecApprovalTransitionHotfixTaskId",
+    "Test-P1F0143SpecApprovalTransitionHotfixFileSet",
+    "Test-P1F0143SpecApprovalTransitionHotfixAnchors",
+    "p1F0143SpecApprovalTransitionHotfixAuthorization: approved_one_time",
+    "0fe8edae7a7efc00154f5c54227623be55796983",
+    "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_GATE_PROJECTION_INVALID"
+)
+$missingF0143SpecApprovalHotfixPatterns = @($f0143SpecApprovalHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0143SpecApprovalHotfixPatterns.Count -gt 0) {
+    throw "Module pre-commit is RED for the F-0143 spec-approval transition contract: $($missingF0143SpecApprovalHotfixPatterns -join ', ')"
+}
+foreach ($sourceSpecificContract in @(
+    @{ Label = "P1"; Text = $p1GuardText; Pattern = "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" },
+    @{ Label = "Module pre-commit"; Text = $phase11ScopeCorrectionGuardText; Pattern = "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" }
+)) {
+    if ($sourceSpecificContract.Text -notmatch [regex]::Escape($sourceSpecificContract.Pattern)) {
+        throw "$($sourceSpecificContract.Label) is RED for the F-0143 source-specific contract: $($sourceSpecificContract.Pattern)"
+    }
+}
 $f0117SmokeScopeCorrectionPatterns = @(
     "p1F0117SmokeScopeCorrectionTaskId",
     "Test-P1F0117SmokeScopeCorrectionFileSet",
@@ -142,7 +166,17 @@ $missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns = @($f0117SmokeScopeClose
 if ($missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns.Count -gt 0) {
     throw "Module pre-commit is RED for the F-0117 smoke scope closeout lifecycle hotfix contract: $($missingF0117SmokeScopeCloseoutLifecycleHotfixPatterns -join ', ')"
 }
-$p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
+foreach ($guardContract in @(
+    @{ Label = "P1"; Text = $p1GuardText },
+    @{ Label = "Module pre-commit"; Text = $phase11ScopeCorrectionGuardText }
+)) {
+    $fileSetFunction = [regex]::Match($guardContract.Text, '(?ms)^function Test-P1F0143SpecApprovalTransitionHotfixFileSet\s*\{.*?(?=^function\s+)').Value
+    if ([string]::IsNullOrWhiteSpace($fileSetFunction) `
+        -or $fileSetFunction -notmatch [regex]::Escape('Sort-Object -CaseSensitive -Unique') `
+        -or $fileSetFunction -notmatch [regex]::Escape('$normalizedActualFiles.Count -ne $normalizedExpectedFiles.Count')) {
+        throw "$($guardContract.Label) F-0143 file-set function is not case-duplicate safe."
+    }
+}
 $modulePrePushPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1"
 
 foreach ($requiredScriptPath in @($scriptPath, $p1GuardPath, $modulePrePushPath)) {
@@ -1862,6 +1896,7 @@ function Set-F0117PreCommitFixtureFile {
 
 $f0117BehaviorRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-f0117-precommit-behavior-" + [guid]::NewGuid().ToString("N"))
 $f0117BehaviorBaseSha = "366f17446e9fc75a777ebfe5977ad72db1062eb7"
+$f0117BehaviorTransitionSnapshotSha = "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
 $f0117BehaviorBranch = "codex/p1-f0117-spec-approval-transition-hotfix"
 $f0117BehaviorAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-spec-approval-transition-hotfix-authorization.md"
 $f0117BehaviorFiles = @(
@@ -1889,17 +1924,15 @@ function Reset-F0117PreCommitBehaviorFixture {
     & git -C $f0117BehaviorRoot clean -fdx --quiet
     & git -C $f0117BehaviorRoot branch -M $f0117BehaviorBranch
     foreach ($candidatePath in $f0117BehaviorFiles) {
-        $sourcePath = Join-Path $f0117BehaviorSourceRoot ($candidatePath -replace "/", "\")
-        Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+        if ($candidatePath -in @("docs/04-agent-system/state/project-state.yaml", "docs/04-agent-system/state/task-queue.yaml")) {
+            $candidateContent = ((& git -C $f0117BehaviorSourceRoot show "${f0117BehaviorTransitionSnapshotSha}:$candidatePath") -join "`n")
+            if ($LASTEXITCODE -ne 0) { throw "Missing historical F-0117 transition snapshot file: $candidatePath" }
+        } else {
+            $sourcePath = Join-Path $f0117BehaviorSourceRoot ($candidatePath -replace "/", "\")
+            $candidateContent = [System.IO.File]::ReadAllText($sourcePath)
+        }
+        Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path $candidatePath -Content $candidateContent
     }
-    $legacyStatePath = Join-Path $f0117BehaviorRoot "docs\04-agent-system\state\project-state.yaml"
-    $legacyStateText = ([System.IO.File]::ReadAllText($legacyStatePath) -replace "`r`n?", "`n")
-    $legacyStateText = $legacyStateText.Replace("  lastKnownMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownOriginMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownRemoteMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a", "  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7")
-    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content $legacyStateText
-    $legacyQueuePath = Join-Path $f0117BehaviorRoot "docs\04-agent-system\state\task-queue.yaml"
-    $legacyQueueText = ([System.IO.File]::ReadAllText($legacyQueuePath) -replace "`r`n?", "`n")
-    $legacyQueueText = $legacyQueueText.Replace("      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/p1-employee-import-command-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts", "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts")
-    Set-F0117PreCommitFixtureFile -Root $f0117BehaviorRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content $legacyQueueText
     & git -C $f0117BehaviorRoot add -- $f0117BehaviorFiles
     if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0117 behavior fixture." }
 }
@@ -2033,6 +2066,204 @@ try {
     Assert-F0117PreCommitBehaviorFailure -Label "replay"
 } finally {
     if (Test-Path -LiteralPath $f0117BehaviorRoot) { Remove-Item -LiteralPath $f0117BehaviorRoot -Recurse -Force }
+}
+
+function Set-F0143PreCommitFixtureFile {
+    param([string]$Root, [string]$Path, [string]$Content)
+    $fullPath = Join-Path $Root ($Path -replace "/", "\")
+    $parent = Split-Path -Parent $fullPath
+    if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
+    [System.IO.File]::WriteAllText($fullPath, (($Content -replace "`r`n?", "`n").TrimEnd("`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
+}
+
+$f0143BehaviorRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-f0143-precommit-behavior-" + [guid]::NewGuid().ToString("N"))
+$f0143BehaviorBaseSha = "0fe8edae7a7efc00154f5c54227623be55796983"
+$f0143BehaviorBranch = "codex/p1-f0143-spec-approval-transition-hotfix"
+$f0143BehaviorParentTaskId = "p1-remediation-rc-02-employee-personal-ai-context-2026-07-18"
+$f0143BehaviorAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-spec-approval-transition-hotfix-authorization.md"
+$f0143BehaviorFiles = @(
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    $f0143BehaviorAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0143BehaviorSourceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+
+function Reset-F0143PreCommitBehaviorFixture {
+    & git -C $f0143BehaviorRoot rm --quiet -f --cached --ignore-unmatch --sparse -- f0143-extra.md src/f0143-product.ts *> $null
+    foreach ($probePath in @("f0143-extra.md", "src/f0143-product.ts")) {
+        Remove-Item -LiteralPath (Join-Path $f0143BehaviorRoot ($probePath -replace "/", "\")) -Force -ErrorAction SilentlyContinue
+    }
+    & git -C $f0143BehaviorRoot reset --hard --quiet $f0143BehaviorBaseSha
+    & git -C $f0143BehaviorRoot clean -fdx --quiet
+    & git -C $f0143BehaviorRoot branch -M $f0143BehaviorBranch
+    foreach ($candidatePath in $f0143BehaviorFiles) {
+        $sourcePath = Join-Path $f0143BehaviorSourceRoot ($candidatePath -replace "/", "\")
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0143 source file: $candidatePath" }
+        Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md" -Content "# Fixture evidence`n`n## Root-Cause Reproduction`n`nResult: pass`n`n## TDD Evidence`n`nResult: pass`n`n## Reading Evidence`n`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Validation Results`n`nResult: pass"
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md" -Content "# Fixture audit`n`n## Round 1`n`nResult: pass`n`n## Round 2`n`nResult: pass`n`n## Decision`n`nDecision: APPROVE"
+    & git -C $f0143BehaviorRoot add -- $f0143BehaviorFiles
+    if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0143 behavior fixture." }
+}
+
+function Assert-F0143PreCommitBehaviorFailure {
+    param(
+        [string]$Label,
+        [string]$P1Pattern = "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_",
+        [string]$ModulePattern = "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_"
+    )
+    $p1Failed = $false
+    $p1FailureOutput = @()
+    try { $p1FailureOutput = @(& $p1GuardPath -RepositoryRoot $f0143BehaviorRoot -Phase pre_commit -SkipExternalIntegrityChecks 2>&1) } catch { $p1Failed = $true; $p1FailureOutput += $_.Exception.Message }
+    $moduleFailed = $false
+    $moduleFailureOutput = @()
+    Push-Location $f0143BehaviorRoot
+    try { try { $moduleFailureOutput = @(& $scriptPath 2>&1) } catch { $moduleFailed = $true; $moduleFailureOutput += $_.Exception.Message } } finally { Pop-Location }
+    if (-not $p1Failed -or -not $moduleFailed) { throw "F-0143 $Label did not fail both P1 and Module pre-commit guards." }
+    if (($p1FailureOutput -join "`n") -notmatch $P1Pattern) { throw "F-0143 $Label P1 failure did not contain '$P1Pattern': $($p1FailureOutput -join '; ')" }
+    if (($moduleFailureOutput -join "`n") -notmatch $ModulePattern) { throw "F-0143 $Label Module failure did not contain '$ModulePattern': $($moduleFailureOutput -join '; ')" }
+}
+
+try {
+    & git clone --quiet --shared --no-checkout $f0143BehaviorSourceRoot $f0143BehaviorRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0143 pre-commit behavior fixture." }
+    & git -C $f0143BehaviorRoot config user.name "F0143 PreCommit Behavior Smoke"
+    & git -C $f0143BehaviorRoot config user.email "f0143-precommit@example.invalid"
+    & git -C $f0143BehaviorRoot config core.autocrlf false
+    & git -C $f0143BehaviorRoot config core.longpaths true
+    & git -C $f0143BehaviorRoot sparse-checkout init --no-cone
+    & git -C $f0143BehaviorRoot sparse-checkout set --no-cone -- @(
+        "/.gitattributes",
+        "/docs/04-agent-system/",
+        "/docs/05-execution-logs/acceptance/2026-07-16-p1-*",
+        "/docs/05-execution-logs/acceptance/2026-07-17-p1-*",
+        "/docs/05-execution-logs/acceptance/2026-07-18-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-16-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-17-p1-*",
+        "/docs/05-execution-logs/task-plans/2026-07-18-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-16-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-17-p1-*",
+        "/docs/05-execution-logs/evidence/2026-07-18-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-15-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-16-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-17-p1-*",
+        "/docs/05-execution-logs/audits-reviews/2026-07-18-p1-*",
+        "/scripts/agent-system/"
+    )
+    & git -C $f0143BehaviorRoot switch --quiet -C $f0143BehaviorBranch $f0143BehaviorBaseSha
+    & git -C $f0143BehaviorRoot update-ref refs/remotes/origin/master $f0143BehaviorBaseSha
+    Reset-F0143PreCommitBehaviorFixture
+
+    $p1Positive = @(& $p1GuardPath -RepositoryRoot $f0143BehaviorRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    Assert-Contains -Output $p1Positive -Pattern "p1F0143SpecApprovalTransitionHotfixAuthorization: approved_one_time"
+    Push-Location $f0143BehaviorRoot
+    try { $modulePositive = @(& $scriptPath) } finally { Pop-Location }
+    Assert-Contains -Output $modulePositive -Pattern "preCommitScopeMode: p1_f0143_spec_approval_transition_hotfix"
+
+    & git -C $f0143BehaviorRoot branch -M codex/wrong-f0143-branch
+    Assert-F0143PreCommitBehaviorFailure -Label "wrong branch"
+    Reset-F0143PreCommitBehaviorFixture
+
+    & git -C $f0143BehaviorRoot branch -M Codex/p1-f0143-spec-approval-transition-hotfix
+    Assert-F0143PreCommitBehaviorFailure -Label "branch case only"
+    Reset-F0143PreCommitBehaviorFixture
+
+    & git -C $f0143BehaviorRoot reset --soft "${f0143BehaviorBaseSha}^"
+    Assert-F0143PreCommitBehaviorFailure -Label "wrong base"
+    Reset-F0143PreCommitBehaviorFixture
+
+    $statePath = Join-Path $f0143BehaviorRoot "docs\04-agent-system\state\project-state.yaml"
+    $stateText = [System.IO.File]::ReadAllText($statePath)
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "docs/04-agent-system/state/project-state.yaml" -Content $stateText.Replace("currentTaskId: $f0143BehaviorParentTaskId", "currentTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18")
+    & git -C $f0143BehaviorRoot add -- "docs/04-agent-system/state/project-state.yaml"
+    Assert-F0143PreCommitBehaviorFailure -Label "wrong task"
+    Reset-F0143PreCommitBehaviorFixture
+
+    $queuePath = Join-Path $f0143BehaviorRoot "docs\04-agent-system\state\task-queue.yaml"
+    $queueText = [System.IO.File]::ReadAllText($queuePath)
+    $f0143GateAnchor = "    currentExecutionGate:`n      status: satisfied`n      reason: current_user_approved_written_f0143_spec_2026_07_18`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green"
+    if ([regex]::Matches(($queueText -replace "`r`n?", "`n"), [regex]::Escape($f0143GateAnchor)).Count -ne 1) { throw "F-0143 wrong-gate fixture anchor must occur exactly once." }
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "docs/04-agent-system/state/task-queue.yaml" -Content (($queueText -replace "`r`n?", "`n").Replace($f0143GateAnchor, $f0143GateAnchor.Replace("status: satisfied", "status: waiting_for_spec_review")))
+    & git -C $f0143BehaviorRoot add -- "docs/04-agent-system/state/task-queue.yaml"
+    Assert-F0143PreCommitBehaviorFailure -Label "wrong gate"
+    Reset-F0143PreCommitBehaviorFixture
+
+    $authorizationFullPath = Join-Path $f0143BehaviorRoot ($f0143BehaviorAuthorizationPath -replace "/", "\")
+    $authorizationText = [System.IO.File]::ReadAllText($authorizationFullPath)
+    foreach ($mutation in @(
+        @{ Label = "authorization key case only"; From = 'Status: approved'; To = 'status: approved' },
+        @{ Label = "authorization value case only"; From = 'Status: approved'; To = 'Status: Approved' },
+        @{ Label = "human approval suffix"; From = 'other in_progress SHA drift remains hard-blocked on 2026-07-18'; To = 'other in_progress SHA drift remains hard-blocked on 2026-07-18 rejected' },
+        @{ Label = "authorization branch"; From = 'Branch: `codex/p1-f0143-spec-approval-transition-hotfix`'; To = 'Branch: `codex/wrong-f0143`' },
+        @{ Label = "standing source"; From = '2026-07-16-p1-remediation-program-authorization.md'; To = '2026-07-16-wrong-authorization.md' },
+        @{ Label = "exact files"; From = '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`'; To = '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1`' },
+        @{ Label = "reordered exact files"; From = "11. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1```n12. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1``"; To = "11. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1```n12. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1``" }
+    )) {
+        Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path $f0143BehaviorAuthorizationPath -Content $authorizationText.Replace($mutation.From, $mutation.To)
+        & git -C $f0143BehaviorRoot add -- $f0143BehaviorAuthorizationPath
+        Assert-F0143PreCommitBehaviorFailure -Label $mutation.Label
+        Reset-F0143PreCommitBehaviorFixture
+    }
+
+    foreach ($appendMutation in @(
+        @{ Label = "conflicting authorization field"; Content = "`nstandardMode: allow`n"; P1Pattern = "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID"; ModulePattern = "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID" },
+        @{ Label = "duplicate authorization field"; Content = "`nstandardMode: hard_block`n"; P1Pattern = "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID"; ModulePattern = "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID" },
+        @{ Label = "duplicate exact file"; Content = ("`n" + '13. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`' + "`n"); P1Pattern = "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID"; ModulePattern = "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID" }
+    )) {
+        Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path $f0143BehaviorAuthorizationPath -Content ($authorizationText.TrimEnd() + $appendMutation.Content)
+        & git -C $f0143BehaviorRoot add -- $f0143BehaviorAuthorizationPath
+        Assert-F0143PreCommitBehaviorFailure -Label $appendMutation.Label -P1Pattern $appendMutation.P1Pattern -ModulePattern $appendMutation.ModulePattern
+        Reset-F0143PreCommitBehaviorFixture
+    }
+
+    & git -C $f0143BehaviorRoot rm --quiet -f -- $f0143BehaviorAuthorizationPath
+    Assert-F0143PreCommitBehaviorFailure -Label "missing authorization" -P1Pattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -ModulePattern "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID"
+    Reset-F0143PreCommitBehaviorFixture
+
+    & git -C $f0143BehaviorRoot rm --quiet -f -- "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1"
+    Assert-F0143PreCommitBehaviorFailure -Label "deleted exact guard" -P1Pattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -ModulePattern "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID"
+    Reset-F0143PreCommitBehaviorFixture
+
+    & git -C $f0143BehaviorRoot rm --quiet -f -- .gitattributes
+    Assert-F0143PreCommitBehaviorFailure -Label "extra tracked deletion" -P1Pattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -ModulePattern "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID"
+    Reset-F0143PreCommitBehaviorFixture
+
+    & git -C $f0143BehaviorRoot mv -- "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1" "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.renamed.ps1"
+    Assert-F0143PreCommitBehaviorFailure -Label "renamed exact guard" -P1Pattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -ModulePattern "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID"
+    Reset-F0143PreCommitBehaviorFixture
+
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "f0143-extra.md" -Content "extra"
+    & git -C $f0143BehaviorRoot add --sparse -- f0143-extra.md
+    Assert-F0143PreCommitBehaviorFailure -Label "extra file" -P1Pattern "P1_PROGRAM_ALLOWED_FILES_VIOLATION" -ModulePattern "HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)"
+    Reset-F0143PreCommitBehaviorFixture
+
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "src/f0143-product.ts" -Content "export const forbidden = true;"
+    & git -C $f0143BehaviorRoot add --sparse -- src/f0143-product.ts
+    Assert-F0143PreCommitBehaviorFailure -Label "product file" -P1Pattern "P1_PROGRAM_(?:ALLOWED_FILES|BLOCKED_FILES)_VIOLATION" -ModulePattern "HARD_BLOCK_(?:OUT_OF_SCOPE|BLOCKED_FILE)"
+    Reset-F0143PreCommitBehaviorFixture
+
+    Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path $f0143BehaviorAuthorizationPath -Content ($authorizationText.TrimEnd() + "`nunstaged divergence`n")
+    Assert-F0143PreCommitBehaviorFailure -Label "partial stage"
+    Reset-F0143PreCommitBehaviorFixture
+
+    & git -C $f0143BehaviorRoot commit --quiet -m "materialize F-0143 candidate"
+    foreach ($candidatePath in $f0143BehaviorFiles) {
+        Add-Content -LiteralPath (Join-Path $f0143BehaviorRoot ($candidatePath -replace "/", "\")) -Value "# replay probe" -Encoding UTF8
+    }
+    & git -C $f0143BehaviorRoot add -- $f0143BehaviorFiles
+    Assert-F0143PreCommitBehaviorFailure -Label "replay"
+} finally {
+    if (Test-Path -LiteralPath $f0143BehaviorRoot) { Remove-Item -LiteralPath $f0143BehaviorRoot -Recurse -Force }
 }
 
 $f0117SmokeScopeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf117pc-" + [guid]::NewGuid().ToString("N").Substring(0, 8))

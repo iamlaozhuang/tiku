@@ -143,6 +143,27 @@ New-Variable -Name p1F0117SpecApprovalTransitionHotfixFiles -Option Constant -Va
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixTaskId -Option Constant -Value "p1-f0143-spec-approval-transition-hotfix-2026-07-18"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixParentTaskId -Option Constant -Value "p1-remediation-rc-02-employee-personal-ai-context-2026-07-18"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixBaseSha -Option Constant -Value "0fe8edae7a7efc00154f5c54227623be55796983"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixBranch -Option Constant -Value "codex/p1-f0143-spec-approval-transition-hotfix"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixAuthorizationPath -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-spec-approval-transition-hotfix-authorization.md"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixHumanApprovalSource -Option Constant -Value "current user message approving one-time F-0143 spec-approval transition governance hotfix limited to P1/Module guards, corresponding smoke, exact state and evidence/audit; ancestor checkpoint only after transition-only guard passes; other in_progress SHA drift remains hard-blocked on 2026-07-18"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixStandingAuthorizationSource -Option Constant -Value "docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md"
+New-Variable -Name p1F0143SpecApprovalTransitionHotfixFiles -Option Constant -Value @(
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    $p1F0143SpecApprovalTransitionHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 New-Variable -Name p1F0117SmokeScopeCorrectionTaskId -Option Constant -Value "p1-f0117-smoke-scope-correction-guard-hotfix-2026-07-18"
 New-Variable -Name p1F0117SmokeScopeCorrectionParentTaskId -Option Constant -Value "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
 New-Variable -Name p1F0117SmokeScopeCorrectionBaseSha -Option Constant -Value "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
@@ -775,6 +796,104 @@ function Test-P1F0117SpecApprovalTransitionHotfixTransitionTopology {
     return $true
 }
 
+function Test-P1F0143SpecApprovalTransitionHotfixTransitionTopology {
+    param(
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskId,
+        [Parameter(Mandatory = $true)][string]$StateCurrentTaskStatus,
+        [Parameter(Mandatory = $true)][string]$TaskStatus,
+        [Parameter(Mandatory = $true)][string]$CurrentBranch,
+        [Parameter(Mandatory = $true)][string]$HeadSha,
+        [Parameter(Mandatory = $true)][string]$MasterSha,
+        [Parameter(Mandatory = $true)][string]$OriginMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateMasterSha,
+        [Parameter(Mandatory = $true)][string]$StateOriginMasterSha
+    )
+
+    if ($TaskId -cne $p1F0143SpecApprovalTransitionHotfixParentTaskId `
+        -or $StateCurrentTaskId -cne $p1F0143SpecApprovalTransitionHotfixParentTaskId `
+        -or $StateCurrentTaskStatus -cne "in_progress" `
+        -or $TaskStatus -cne "in_progress" `
+        -or $CurrentBranch -cne "master" `
+        -or $HeadSha -cne $MasterSha `
+        -or $OriginMasterSha -cne $p1F0143SpecApprovalTransitionHotfixBaseSha `
+        -or $StateMasterSha -cne $p1F0143SpecApprovalTransitionHotfixBaseSha `
+        -or $StateOriginMasterSha -cne $p1F0143SpecApprovalTransitionHotfixBaseSha `
+        -or $OriginMasterSha -ceq $MasterSha) {
+        return $false
+    }
+
+    $headParentParts = @(((& git rev-list --parents -n 1 $MasterSha) -join "").Trim() -split "\s+" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($LASTEXITCODE -ne 0 -or $headParentParts.Count -ne 2 -or $headParentParts[0] -cne $MasterSha -or $headParentParts[1] -cne $OriginMasterSha) {
+        return $false
+    }
+
+    $committedNameStatus = @(& git diff-tree --no-commit-id --name-status --no-renames -r $MasterSha)
+    $committedNameStatusExitCode = $LASTEXITCODE
+    $committedFiles = [System.Collections.Generic.List[string]]::new()
+    foreach ($entry in $committedNameStatus) {
+        $entryMatch = [regex]::Match($entry, '^([AM])\t(.+)$')
+        if (-not $entryMatch.Success) { return $false }
+        $committedFiles.Add((ConvertTo-NormalizedPath -Path $entryMatch.Groups[2].Value))
+    }
+    $actualFiles = @($committedFiles | Sort-Object -CaseSensitive -Unique)
+    $expectedFiles = @($p1F0143SpecApprovalTransitionHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -CaseSensitive -Unique)
+    if ($committedNameStatusExitCode -ne 0 -or ($actualFiles -join "|") -cne ($expectedFiles -join "|")) { return $false }
+
+    $parentAuthorizationPath = ((& git ls-tree -r --name-only $OriginMasterSha -- $p1F0143SpecApprovalTransitionHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or -not [string]::IsNullOrWhiteSpace($parentAuthorizationPath)) { return $false }
+    $headAuthorizationPath = ((& git ls-tree -r --name-only $MasterSha -- $p1F0143SpecApprovalTransitionHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or $headAuthorizationPath -cne $p1F0143SpecApprovalTransitionHotfixAuthorizationPath) { return $false }
+
+    $authorizationText = ((& git show "${MasterSha}:$p1F0143SpecApprovalTransitionHotfixAuthorizationPath") -join "`n")
+    $authorizationFieldContracts = @(
+        @{ Key = 'Status'; Expected = '^Status:\s*approved\s*$' },
+        @{ Key = 'Human approval source'; Expected = "^Human approval source:\s*$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixHumanApprovalSource))\s*$" },
+        @{ Key = 'Standing hotfix authorization source'; Expected = "^Standing hotfix authorization source:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixStandingAuthorizationSource))[\x60]\s*$" },
+        @{ Key = 'Task ID'; Expected = "^Task ID:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixTaskId))[\x60]\s*$" },
+        @{ Key = 'Parent task'; Expected = "^Parent task:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixParentTaskId))[\x60]\s*$" },
+        @{ Key = 'Base'; Expected = "^Base:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixBaseSha))[\x60]\s*$" },
+        @{ Key = 'Branch'; Expected = "^Branch:\s*[\x60]$([regex]::Escape($p1F0143SpecApprovalTransitionHotfixBranch))[\x60]\s*$" },
+        @{ Key = 'gateProjection'; Expected = '^gateProjection:\s*waiting_for_spec_review_to_satisfied\s*$' },
+        @{ Key = 'ancestorCheckpoint'; Expected = '^ancestorCheckpoint:\s*only_after_transition_only_guard_pass\s*$' },
+        @{ Key = 'otherInProgressShaDrift'; Expected = '^otherInProgressShaDrift:\s*hard_block\s*$' },
+        @{ Key = 'standardMode'; Expected = '^standardMode:\s*hard_block\s*$' },
+        @{ Key = 'noDatabaseExecution'; Expected = '^noDatabaseExecution:\s*required\s*$' }
+    )
+    foreach ($fieldContract in $authorizationFieldContracts) {
+        $fieldMatches = @([regex]::Matches($authorizationText, "(?m)^$([regex]::Escape($fieldContract.Key))\s*:.*$"))
+        if ($fieldMatches.Count -ne 1 -or -not [regex]::IsMatch($fieldMatches[0].Value, $fieldContract.Expected)) { return $false }
+    }
+
+    $authorizationFileSection = [regex]::Match($authorizationText, '(?ms)^##\s+Exact Files\s*$\r?\n(.*?)(?=^##\s+|\z)').Groups[1].Value
+    $authorizationFiles = @([regex]::Matches($authorizationFileSection, '(?m)^\s*\d+\.\s+`([^`]+)`\s*$') | ForEach-Object { ConvertTo-NormalizedPath -Path $_.Groups[1].Value })
+    $expectedAuthorizationFiles = @($p1F0143SpecApprovalTransitionHotfixFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    if (($authorizationFiles -join "|") -cne ($expectedAuthorizationFiles -join "|")) { return $false }
+
+    foreach ($projection in @(
+        @{ Path = "docs/04-agent-system/state/project-state.yaml"; Replacements = @(
+            @{ Anchor = "  currentExecutionGate:`n    status: waiting_for_spec_review`n    reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required`n    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n    resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan"; Replacement = "  currentExecutionGate:`n    status: satisfied`n    reason: current_user_approved_written_f0143_spec_2026_07_18`n    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n    resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green" },
+            @{ Anchor = "  lastKnownMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b`n  lastKnownOriginMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b`n  lastKnownRemoteMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b"; Replacement = "  lastKnownMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983`n  lastKnownOriginMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983`n  lastKnownRemoteMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983" }
+        )},
+        @{ Path = "docs/04-agent-system/state/task-queue.yaml"; Replacements = @(
+            @{ Anchor = "    currentExecutionGate:`n      status: waiting_for_spec_review`n      reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan"; Replacement = "    currentExecutionGate:`n      status: satisfied`n      reason: current_user_approved_written_f0143_spec_2026_07_18`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green" }
+        )}
+    )) {
+        $parentText = ((& git show "${OriginMasterSha}:$($projection.Path)") -join "`n") -replace "`r`n?", "`n"
+        if ($LASTEXITCODE -ne 0) { return $false }
+        $headText = ((& git show "${MasterSha}:$($projection.Path)") -join "`n") -replace "`r`n?", "`n"
+        if ($LASTEXITCODE -ne 0) { return $false }
+        $expectedText = $parentText
+        foreach ($replacement in $projection.Replacements) {
+            if ([regex]::Matches($expectedText, [regex]::Escape($replacement.Anchor)).Count -ne 1) { return $false }
+            $expectedText = $expectedText.Replace($replacement.Anchor, $replacement.Replacement)
+        }
+        if ($headText -cne $expectedText) { return $false }
+    }
+
+    return $true
+}
+
 function Test-P1F0117SmokeScopeCorrectionTransitionTopology {
     param(
         [Parameter(Mandatory = $true)][string]$TaskId,
@@ -1225,6 +1344,7 @@ $isP1TransitionScopeMode = $P1TransitionScopeMode -eq "transition_only"
 $isP1F0115TransitionContext = $TaskId -eq $p1F0115ScopeCorrectionParentTaskId -or $stateCurrentTaskId -eq $p1F0115ScopeCorrectionParentTaskId
 $isP1F0116TransitionContext = $TaskId -eq $p1F0116ScopeCorrectionGuardHotfixParentTaskId -or $stateCurrentTaskId -eq $p1F0116ScopeCorrectionGuardHotfixParentTaskId
 $isP1F0117TransitionContext = $TaskId -eq $p1F0117SpecApprovalTransitionHotfixParentTaskId -or $stateCurrentTaskId -eq $p1F0117SpecApprovalTransitionHotfixParentTaskId
+$isP1F0143TransitionContext = $TaskId -ieq $p1F0143SpecApprovalTransitionHotfixParentTaskId -or $stateCurrentTaskId -ieq $p1F0143SpecApprovalTransitionHotfixParentTaskId
 $p1F0117SmokeScopeCorrectionIdentityPaths = @(
     $p1F0117SmokeScopeCorrectionAuthorizationPath,
     "docs/05-execution-logs/task-plans/2026-07-18-p1-f0117-smoke-scope-correction-guard-hotfix.md",
@@ -1336,6 +1456,18 @@ $isP1F0117SpecApprovalTransitionHotfixTransitionTopology = Test-P1F0117SpecAppro
     -StateMasterSha $stateMasterSha `
     -StateOriginMasterSha $stateOriginMasterSha
 $canUseP1F0117SpecApprovalTransitionHotfixTransitionMasterAncestry = $isP1TransitionScopeMode -and $isP1F0117SpecApprovalTransitionHotfixTransitionTopology
+$isP1F0143SpecApprovalTransitionHotfixTransitionTopology = Test-P1F0143SpecApprovalTransitionHotfixTransitionTopology `
+    -TaskId $TaskId `
+    -StateCurrentTaskId $stateCurrentTaskId `
+    -StateCurrentTaskStatus $stateCurrentTaskStatus `
+    -TaskStatus $taskStatus `
+    -CurrentBranch $currentBranch `
+    -HeadSha $headSha `
+    -MasterSha $masterSha `
+    -OriginMasterSha $originMasterSha `
+    -StateMasterSha $stateMasterSha `
+    -StateOriginMasterSha $stateOriginMasterSha
+$canUseP1F0143SpecApprovalTransitionHotfixTransitionMasterAncestry = $isP1TransitionScopeMode -and $isP1F0143SpecApprovalTransitionHotfixTransitionTopology
 $isP1F0117SmokeScopeCorrectionTransitionTopology = if ($isP1F0117SmokeScopeCorrectionCandidate) {
     Test-P1F0117SmokeScopeCorrectionTransitionTopology `
         -TaskId $TaskId `
@@ -1378,6 +1510,8 @@ $canUseP1TransitionMasterAncestry = if ($isP1F0115TransitionContext) {
     } else {
         $canUseP1F0117SpecApprovalTransitionHotfixTransitionMasterAncestry -or $canUseP1F0117CloseoutTransitionMasterAncestry
     }
+} elseif ($isP1F0143TransitionContext) {
+    $canUseP1F0143SpecApprovalTransitionHotfixTransitionMasterAncestry
 } else {
     $canUseGenericP1TransitionMasterAncestry
 }
@@ -1386,7 +1520,7 @@ Write-Output "master: $masterSha"
 Write-Output "originMaster: $originMasterSha"
 Write-Output "stateMaster: $stateMasterSha"
 Write-Output "stateOriginMaster: $stateOriginMasterSha"
-if (-not $isP1F0115TransitionContext -and -not $isP1F0116TransitionContext -and -not $isP1F0117TransitionContext) {
+if (-not $isP1F0115TransitionContext -and -not $isP1F0116TransitionContext -and -not $isP1F0117TransitionContext -and -not $isP1F0143TransitionContext) {
     Write-Output "p1TransitionScopeMode: $P1TransitionScopeMode"
 }
 
@@ -1401,6 +1535,9 @@ if ($isP1F0116ScopeCorrectionGuardHotfixTransitionTopology -and -not $isP1Transi
 }
 if ($isP1F0117SpecApprovalTransitionHotfixTransitionTopology -and -not $isP1TransitionScopeMode) {
     Add-Finding "HARD_BLOCK_P1_F0117_SPEC_APPROVAL_TRANSITION_HOTFIX_REQUIRES_TRANSITION_ONLY"
+}
+if ($isP1F0143SpecApprovalTransitionHotfixTransitionTopology -and -not $isP1TransitionScopeMode) {
+    Add-Finding "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_REQUIRES_TRANSITION_ONLY"
 }
 
 if ($stateMasterSha -ne $masterSha) {
@@ -1478,6 +1615,12 @@ if ($isP1F0117TransitionContext) {
     }
     if ($canUseP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionMasterAncestry) {
         Write-Output "p1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology: exact_one_parent"
+    }
+}
+if ($isP1F0143TransitionContext) {
+    Write-Output "p1TransitionScopeMode: $P1TransitionScopeMode"
+    if ($canUseP1F0143SpecApprovalTransitionHotfixTransitionMasterAncestry) {
+        Write-Output "p1F0143SpecApprovalTransitionHotfixTransitionTopology: exact_one_parent"
     }
 }
 Write-Output "pre-push readiness passed"

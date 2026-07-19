@@ -75,6 +75,21 @@ $missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | W
 if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
     throw "P1 guard is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
 }
+$f0143SpecApprovalHotfixPatterns = @(
+    "p1F0143SpecApprovalTransitionHotfixTaskId",
+    "Test-P1F0143SpecApprovalTransitionHotfixFileSet",
+    "Test-P1F0143SpecApprovalTransitionHotfixAnchors",
+    "p1F0143SpecApprovalTransitionHotfixAuthorization: approved_one_time",
+    "0fe8edae7a7efc00154f5c54227623be55796983",
+    "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID",
+    "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_GATE_PROJECTION_INVALID"
+)
+$missingF0143SpecApprovalHotfixPatterns = @($f0143SpecApprovalHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0143SpecApprovalHotfixPatterns.Count -gt 0) {
+    throw "P1 guard is RED for the F-0143 spec-approval transition contract: $($missingF0143SpecApprovalHotfixPatterns -join ', ')"
+}
 $f0117SmokeScopeCorrectionPatterns = @(
     "p1F0117SmokeScopeCorrectionTaskId",
     "Test-P1F0117SmokeScopeCorrectionFileSet",

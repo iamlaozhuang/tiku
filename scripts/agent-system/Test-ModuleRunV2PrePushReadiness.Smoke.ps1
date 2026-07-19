@@ -118,6 +118,21 @@ $missingF0117SpecApprovalHotfixPatterns = @($f0117SpecApprovalHotfixPatterns | W
 if ($missingF0117SpecApprovalHotfixPatterns.Count -gt 0) {
     throw "Module pre-push is RED for the F-0117 spec-approval transition contract: $($missingF0117SpecApprovalHotfixPatterns -join ', ')"
 }
+$f0143SpecApprovalHotfixPatterns = @(
+    "p1F0143SpecApprovalTransitionHotfixBaseSha",
+    "p1F0143SpecApprovalTransitionHotfixAuthorizationPath",
+    "p1F0143SpecApprovalTransitionHotfixFiles",
+    "Test-P1F0143SpecApprovalTransitionHotfixTransitionTopology",
+    "p1F0143SpecApprovalTransitionHotfixTransitionTopology: exact_one_parent",
+    "0fe8edae7a7efc00154f5c54227623be55796983",
+    "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_REQUIRES_TRANSITION_ONLY"
+)
+$missingF0143SpecApprovalHotfixPatterns = @($f0143SpecApprovalHotfixPatterns | Where-Object {
+    $phase11ScopeCorrectionGuardText -notmatch [regex]::Escape($_)
+})
+if ($missingF0143SpecApprovalHotfixPatterns.Count -gt 0) {
+    throw "Module pre-push is RED for the F-0143 spec-approval transition contract: $($missingF0143SpecApprovalHotfixPatterns -join ', ')"
+}
 $f0117SmokeScopeCorrectionPatterns = @(
     "p1F0117SmokeScopeCorrectionBaseSha",
     "p1F0117SmokeScopeCorrectionAuthorizationPath",
@@ -1259,6 +1274,7 @@ try {
 }
 
 $f0117BaseSha = "366f17446e9fc75a777ebfe5977ad72db1062eb7"
+$f0117TransitionSnapshotSha = "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
 $f0117ParentTaskId = "p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18"
 $f0117AuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0117-spec-approval-transition-hotfix-authorization.md"
 $f0117EvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0117-spec-approval-transition-hotfix.md"
@@ -1331,18 +1347,16 @@ try {
     & git -C $f0117FixtureRoot update-ref refs/remotes/origin/master $f0117BaseSha
 
     foreach ($candidatePath in $f0117Files) {
-        $sourcePath = Join-Path $f0115PrePushSourceRoot ($candidatePath -replace "/", "\")
-        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0117 source file: $candidatePath" }
-        Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+        if ($candidatePath -in @($f0115PrePushProjectStatePath, $f0115PrePushQueuePath)) {
+            $candidateContent = ((& git -C $f0115PrePushSourceRoot show "${f0117TransitionSnapshotSha}:$candidatePath") -join "`n")
+            if ($LASTEXITCODE -ne 0) { throw "Missing historical F-0117 transition snapshot file: $candidatePath" }
+        } else {
+            $sourcePath = Join-Path $f0115PrePushSourceRoot ($candidatePath -replace "/", "\")
+            if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0117 source file: $candidatePath" }
+            $candidateContent = [System.IO.File]::ReadAllText($sourcePath)
+        }
+        Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $candidatePath -Content $candidateContent
     }
-    $legacyStatePath = Join-Path $f0117FixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
-    $legacyStateText = ([System.IO.File]::ReadAllText($legacyStatePath) -replace "`r`n?", "`n")
-    $legacyStateText = $legacyStateText.Replace("  lastKnownMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownOriginMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a`n  lastKnownRemoteMasterSha: 3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a", "  lastKnownMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownOriginMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7`n  lastKnownRemoteMasterSha: 366f17446e9fc75a777ebfe5977ad72db1062eb7")
-    Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $f0115PrePushProjectStatePath -Content $legacyStateText
-    $legacyQueuePath = Join-Path $f0117FixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
-    $legacyQueueText = ([System.IO.File]::ReadAllText($legacyQueuePath) -replace "`r`n?", "`n")
-    $legacyQueueText = $legacyQueueText.Replace("      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/p1-employee-import-command-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts", "      - tests/unit/p1-redeem-code-nullable-deadline-migration-source.test.ts`n      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts")
-    Set-F0115PrePushFixtureFile -Root $f0117FixtureRoot -Path $f0115PrePushQueuePath -Content $legacyQueueText
     & git -C $f0117FixtureRoot add -- $f0117Files
     & git -C $f0117FixtureRoot commit --quiet -m "materialize exact F-0117 spec approval transition"
     if ($LASTEXITCODE -ne 0) { throw "Failed to commit exact F-0117 fixture." }
@@ -1454,6 +1468,243 @@ try {
     }
 } finally {
     Remove-F0117PrePushFixtureRoot -Path $f0117FixtureRoot -ExpectedPrefix "tf117sp-" -FailureCode "F0117_SPEC_APPROVAL_PREPUSH_CLEANUP_FAILED"
+}
+
+$f0143BaseSha = "0fe8edae7a7efc00154f5c54227623be55796983"
+$f0143ParentTaskId = "p1-remediation-rc-02-employee-personal-ai-context-2026-07-18"
+$f0143AuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-spec-approval-transition-hotfix-authorization.md"
+$f0143EvidencePath = "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md"
+$f0143AuditPath = "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md"
+$f0143Files = @(
+    $f0115PrePushProjectStatePath,
+    $f0115PrePushQueuePath,
+    $f0143AuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    $f0143EvidencePath,
+    $f0143AuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
+$f0143FixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tf143sp-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+
+function Remove-F0143PrePushFixtureRoot {
+    $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\', '/')
+    $fixtureRoot = [System.IO.Path]::GetFullPath($f0143FixtureRoot)
+    $fixtureParent = [System.IO.Path]::GetDirectoryName($fixtureRoot).TrimEnd('\', '/')
+    $fixtureLeaf = [System.IO.Path]::GetFileName($fixtureRoot)
+    if ($fixtureParent -cne $systemTempRoot -or $fixtureLeaf -cnotmatch '^tf143sp-[0-9a-f]{8}$') {
+        throw "F0143_SPEC_APPROVAL_PREPUSH_CLEANUP_UNSAFE_PATH"
+    }
+    foreach ($attempt in 1..3) {
+        if (-not (Test-Path -LiteralPath $fixtureRoot)) { return }
+        try {
+            Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction Stop
+        } catch {
+            if ($attempt -lt 3) { Start-Sleep -Milliseconds (50 * $attempt) }
+        }
+    }
+    if (Test-Path -LiteralPath $fixtureRoot) { throw "F0143_SPEC_APPROVAL_PREPUSH_CLEANUP_FAILED" }
+}
+
+function Invoke-F0143P1PrePushGuard {
+    $headSha = ((& git -C $f0143FixtureRoot rev-parse HEAD) -join "").Trim()
+    $originSha = ((& git -C $f0143FixtureRoot rev-parse origin/master) -join "").Trim()
+    $originUrl = ((& git -C $f0143FixtureRoot remote get-url origin) -join "").Trim()
+    $pushUpdateLine = "refs/heads/master $headSha refs/heads/master $originSha"
+    & $p1GuardPath `
+        -RepositoryRoot $f0143FixtureRoot `
+        -Phase pre_push `
+        -PushRemoteName origin `
+        -PushRemoteUrl $originUrl `
+        -PushUpdateLines $pushUpdateLine `
+        -SkipExternalIntegrityChecks
+}
+
+try {
+    & git clone --quiet --shared --no-checkout $f0115PrePushSourceRoot $f0143FixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone F-0143 pre-push fixture." }
+    & git -C $f0143FixtureRoot config user.name "Module F-0143 Spec Approval Smoke"
+    & git -C $f0143FixtureRoot config user.email "module-f0143-spec-approval@example.invalid"
+    & git -C $f0143FixtureRoot config core.autocrlf false
+    & git -C $f0143FixtureRoot config core.longpaths true
+    & git -C $f0143FixtureRoot switch --quiet -C master $f0143BaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out exact F-0143 base." }
+    & git -C $f0143FixtureRoot update-ref refs/remotes/origin/master $f0143BaseSha
+
+    foreach ($candidatePath in $f0143Files) {
+        $sourcePath = Join-Path $f0115PrePushSourceRoot ($candidatePath -replace "/", "\")
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0143 source file: $candidatePath" }
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+    Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0143EvidencePath -Content "# Fixture evidence`n`n## Root-Cause Reproduction`n`nResult: pass`n`n## TDD Evidence`n`nResult: pass`n`n## Reading Evidence`n`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Validation Results`n`nResult: pass"
+    Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0143AuditPath -Content "# Fixture audit`n`n## Round 1`n`nResult: pass`n`n## Round 2`n`nResult: pass`n`n## Decision`n`nDecision: APPROVE"
+    & git -C $f0143FixtureRoot add -- $f0143Files
+    & git -C $f0143FixtureRoot commit --quiet -m "materialize exact F-0143 spec approval transition"
+    if ($LASTEXITCODE -ne 0) { throw "Failed to commit exact F-0143 fixture." }
+    $f0143PositiveSha = ((& git -C $f0143FixtureRoot rev-parse HEAD) -join "").Trim()
+    $f0143CommitLine = ((& git -C $f0143FixtureRoot rev-list --parents -n 1 HEAD) -join "").Trim()
+    if ($f0143CommitLine -notmatch "^[0-9a-f]{40} $f0143BaseSha$") { throw "F-0143 fixture is not exact one-parent topology." }
+    $f0143CommittedFiles = @(& git -C $f0143FixtureRoot diff-tree --no-commit-id --name-only -r HEAD | Sort-Object -Unique)
+    if (($f0143CommittedFiles -join "|") -cne (@($f0143Files | Sort-Object -Unique) -join "|")) { throw "F-0143 fixture file set is not exact." }
+
+    $f0143ProjectState = Join-Path $f0143FixtureRoot ($f0115PrePushProjectStatePath -replace "/", "\")
+    $f0143Queue = Join-Path $f0143FixtureRoot ($f0115PrePushQueuePath -replace "/", "\")
+    $f0143Matrix = Join-Path $f0143FixtureRoot ($f0115PrePushMatrixPath -replace "/", "\")
+    $f0143Evidence = Join-Path $f0143FixtureRoot ($f0143EvidencePath -replace "/", "\")
+    $f0143Audit = Join-Path $f0143FixtureRoot ($f0143AuditPath -replace "/", "\")
+
+    Push-Location $f0143FixtureRoot
+    try {
+        $invokeF0143 = { param($Mode, $Task = $f0143ParentTaskId) & $scriptPath -TaskId $Task -ProjectStatePath $f0143ProjectState -QueuePath $f0143Queue -MatrixPath $f0143Matrix -EvidencePath $f0143Evidence -AuditReviewPath $f0143Audit -SkipRemoteAheadCheck -P1TransitionScopeMode $Mode }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_REQUIRES_TRANSITION_ONLY" -Command { & $invokeF0143 standard }
+        $p1PositiveOutput = @(Invoke-F0143P1PrePushGuard)
+        Assert-Contains -Output $p1PositiveOutput -Pattern "p1F0143SpecApprovalTransitionHotfixAuthorization: approved_one_time"
+        Assert-Contains -Output $p1PositiveOutput -Pattern "p1TransitionScopeMode: transition_only"
+        $p1TransitionScopeModeLine = @($p1PositiveOutput | Where-Object { $_ -match '^p1TransitionScopeMode:\s*(\S+)\s*$' })
+        if ($p1TransitionScopeModeLine.Count -ne 1) { throw "F-0143 P1 pre-push did not emit exactly one transition scope mode." }
+        $p1TransitionScopeMode = ([regex]::Match($p1TransitionScopeModeLine[0], '^p1TransitionScopeMode:\s*(\S+)\s*$')).Groups[1].Value
+        $positiveOutput = @(& $invokeF0143 $p1TransitionScopeMode)
+        Assert-Contains -Output $positiveOutput -Pattern "p1F0143SpecApprovalTransitionHotfixTransitionTopology: exact_one_parent"
+        Assert-Contains -Output $positiveOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+
+        $caseChangedParentTaskId = "P1-remediation-rc-02-employee-personal-ai-context-2026-07-18"
+        $projectStateText = [System.IO.File]::ReadAllText($f0143ProjectState)
+        $caseChangedProjectStateText = $projectStateText.Replace("currentTask:`n  id: $f0143ParentTaskId", "currentTask:`n  id: $caseChangedParentTaskId")
+        if ($caseChangedProjectStateText -ceq $projectStateText) { throw "F-0143 case-only state currentTask identity fixture setup failed." }
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0115PrePushProjectStatePath -Content $caseChangedProjectStateText
+        & git add -- $f0115PrePushProjectStatePath; & git commit --quiet --amend --no-edit
+        $caseOnlyIdentityOutput = @()
+        $caseOnlyIdentityFailed = $false
+        try {
+            $caseOnlyIdentityOutput = @(& $invokeF0143 transition_only $caseChangedParentTaskId 2>&1)
+        } catch {
+            $caseOnlyIdentityFailed = $true
+            $caseOnlyIdentityOutput += $_.Exception.Message
+        }
+        if (-not $caseOnlyIdentityFailed -and $LASTEXITCODE -eq 0) {
+            throw "Case-only F-0143 task identities incorrectly used generic transition ancestry."
+        }
+        Assert-Contains -Output $caseOnlyIdentityOutput -Pattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID"
+        if (($caseOnlyIdentityOutput -join "`n") -match "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master") {
+            throw "Case-only F-0143 task identities emitted generic ancestor OK."
+        }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        & git branch -M Master
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_CONTEXT_INVALID pre_push" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git branch -M master
+
+        $authorizationFullPath = Join-Path $f0143FixtureRoot ($f0143AuthorizationPath -replace "/", "\")
+        $authorizationText = [System.IO.File]::ReadAllText($authorizationFullPath)
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0143AuthorizationPath -Content $authorizationText.Replace("standardMode: hard_block", "standardMode: allow")
+        & git add -- $f0143AuthorizationPath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        foreach ($authorizationMutation in @(
+            @{ From = 'Status: approved'; To = 'status: approved'; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ From = 'Status: approved'; To = 'Status: Approved'; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ From = 'other in_progress SHA drift remains hard-blocked on 2026-07-18'; To = 'other in_progress SHA drift remains hard-blocked on 2026-07-18 rejected'; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ From = 'Branch: `codex/p1-f0143-spec-approval-transition-hotfix`'; To = 'Branch: `codex/wrong-f0143`'; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ From = '2026-07-16-p1-remediation-program-authorization.md'; To = '2026-07-16-wrong-authorization.md'; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ From = '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`'; To = '12. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1`'; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID' },
+            @{ From = "11. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1```n12. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1``"; To = "11. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1```n12. ``scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1``"; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID' }
+        )) {
+            Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0143AuthorizationPath -Content $authorizationText.Replace($authorizationMutation.From, $authorizationMutation.To)
+            & git add -- $f0143AuthorizationPath; & git commit --quiet --amend --no-edit
+            Invoke-ExpectFailure -ExpectedPattern $authorizationMutation.P1Pattern -Command { Invoke-F0143P1PrePushGuard }
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+            & git reset --hard --quiet $f0143PositiveSha
+        }
+
+        foreach ($authorizationAppendMutation in @(
+            @{ Content = "`nstandardMode: allow`n"; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ Content = "`nstandardMode: hard_block`n"; P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_INVALID' },
+            @{ Content = ("`n" + '13. `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1`' + "`n"); P1Pattern = 'P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_AUTHORIZATION_FILE_SET_INVALID' }
+        )) {
+            Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0143AuthorizationPath -Content ($authorizationText.TrimEnd() + $authorizationAppendMutation.Content)
+            & git add -- $f0143AuthorizationPath; & git commit --quiet --amend --no-edit
+            Invoke-ExpectFailure -ExpectedPattern $authorizationAppendMutation.P1Pattern -Command { Invoke-F0143P1PrePushGuard }
+            Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+            & git reset --hard --quiet $f0143PositiveSha
+        }
+
+        & git rm --quiet -- $f0143AuthorizationPath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        & git rm --quiet -- "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1"; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        & git rm --quiet -- .gitattributes; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        & git mv -- "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1" "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.renamed.ps1"
+        & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_FILE_SET_INVALID" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path "f0143-extra.md" -Content "extra governance file"
+        & git add --sparse -- f0143-extra.md; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_ALLOWLIST_MISMATCH" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git rm --quiet -f --sparse -- f0143-extra.md
+        & git reset --hard --quiet $f0143PositiveSha
+
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path "src/f0143-product.ts" -Content "export const forbidden = true;"
+        & git add --sparse -- src/f0143-product.ts; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_ALLOWLIST_MISMATCH" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git rm --quiet -f --sparse -- src/f0143-product.ts
+        & git reset --hard --quiet $f0143PositiveSha
+
+        $queueText = [System.IO.File]::ReadAllText($f0143Queue)
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0115PrePushQueuePath -Content "$queueText`n# forbidden gate projection delta"
+        & git add -- $f0115PrePushQueuePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_GATE_PROJECTION_INVALID" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        $projectStateText = [System.IO.File]::ReadAllText($f0143ProjectState)
+        Set-F0115PrePushFixtureFile -Root $f0143FixtureRoot -Path $f0115PrePushProjectStatePath -Content $projectStateText.Replace("currentTaskId: $f0143ParentTaskId", "currentTaskId: p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18")
+        & git add -- $f0115PrePushProjectStatePath; & git commit --quiet --amend --no-edit
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_CONTEXT_INVALID task" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git reset --hard --quiet $f0143PositiveSha
+
+        & git update-ref refs/remotes/origin/master "${f0143BaseSha}^"
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_ALLOWLIST_MISMATCH" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git update-ref refs/remotes/origin/master $f0143BaseSha
+
+        & git switch --quiet -c codex/wrong-f0143-prepush
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_CONTEXT_INVALID pre_push" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        & git switch --quiet master
+
+        Add-Content -LiteralPath $f0143Evidence -Value "ordinary unrelated in-progress SHA drift" -Encoding UTF8
+        & git add -- $f0143EvidencePath; & git commit --quiet -m "ordinary unrelated in-progress SHA drift"
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_CONTEXT_INVALID pre_push" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "P1_PROGRAM_F0143_SPEC_APPROVAL_TRANSITION_HOTFIX_ALREADY_MATERIALIZED" -Command { Invoke-F0143P1PrePushGuard }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command { & $invokeF0143 transition_only }
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT" -Command { & $invokeF0143 standard }
+    } finally {
+        Pop-Location
+    }
+} finally {
+    Remove-F0143PrePushFixtureRoot
 }
 
 $f0117SmokeScopeBaseSha = "3e3c400fe3cc7d41b476d9a5d37b1cc9c52f3e5a"
