@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "taskId": "minimal-safety-kernel-retirement-2026-07-20",
+  "objective": "Atomically replace per-finding governance guards with one minimal safety kernel while preserving product validation, high-risk approval, Git closeout, and the P1 resume anchor.",
+  "allowedFiles": [
+    "AGENTS.md",
+    ".husky/pre-commit",
+    ".husky/pre-push",
+    ".husky/post-commit",
+    "docs/04-agent-system/operating-manual.md",
+    "docs/04-agent-system/sop/minimal-safety-kernel.md",
+    "docs/04-agent-system/sop/task-lifecycle-governance.md",
+    "docs/04-agent-system/sop/automation-loop.md",
+    "docs/04-agent-system/sop/lean-module-run-v3-governance.md",
+    "docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md",
+    "docs/04-agent-system/sop/p1-approved-same-task-transition.md",
+    "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
+    "docs/04-agent-system/sop/repository-hygiene-closeout-checklist.md",
+    "docs/04-agent-system/state/mechanism-source-of-truth-index.yaml",
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    "docs/04-agent-system/state/task-safety.json",
+    "docs/05-execution-logs/task-plans/2026-07-20-minimal-safety-kernel-retirement.md",
+    "scripts/agent-system/Test-MinimalSafetyKernel.ps1",
+    "scripts/agent-system/Test-MinimalSafetyKernel.Smoke.ps1"
+  ],
+  "validationCommands": [
+    {
+      "name": "minimal-safety-kernel-focused",
+      "kind": "test",
+      "executable": "powershell.exe",
+      "arguments": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "./scripts/agent-system/Test-MinimalSafetyKernel.Smoke.ps1",
+        "-Profile",
+        "focused"
+      ]
+    }
+  ],
+  "approvalSources": {
+    "dependency": null,
+    "database": null,
+    "permission": null,
+    "deployment": null,
+    "secretEnv": null
+  },
+  "push": {
+    "target": "origin/master",
+    "requiresFreshApproval": true
+  }
+}

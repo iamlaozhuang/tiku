@@ -1,12 +1,22 @@
 schemaVersion: 1
-generatedByTask: phase-64-advanced-code-stage-seeding-plan
-generatedAt: "2026-07-13T16:00:00-07:00"
-purpose: Lightweight navigation index for Tiku automation governance source-of-truth files. This index does not replace SOPs, state files, task queue entries, evidence, or audit reviews.
+generatedByTask: minimal-safety-kernel-retirement-2026-07-20
+generatedAt: "2026-07-20T10:02:42-07:00"
+purpose: Navigation index for the active minimal safety kernel and read-only historical governance sources.
 mode:
-  current: local_auto_candidate
+  current: minimal_safety_kernel
   modeSourcePath: docs/04-agent-system/state/project-state.yaml
   modeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
 canonicalStateFiles:
+  - id: minimal-safety-kernel-sop
+    path: docs/04-agent-system/sop/minimal-safety-kernel.md
+    role: sole ordinary task execution procedure for scope, validation, high-risk approval, push and closeout invariants
+  - id: task-safety-contract
+    path: docs/04-agent-system/state/task-safety.json
+    role: current task objective, exact allowed files, validation commands, high-risk approval sources and push target
+  - id: minimal-safety-kernel-script
+    path: scripts/agent-system/Test-MinimalSafetyKernel.ps1
+    smokePath: scripts/agent-system/Test-MinimalSafetyKernel.Smoke.ps1
+    role: sole ordinary pre-commit, pre-push and closeout executable guard
   - id: content-admin-platform-b-to-f-serial-plan
     path: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
     role: canonical task order and Lean Module Run v3 R0-R3 execution profiles for the active Content Admin Platform B-F Program; project-state and task-queue are guarded projections
@@ -15,10 +25,10 @@ canonicalStateFiles:
     role: concise human and Codex entry point for current advancement rules, source-of-truth policy, status policy, mechanism budget, push boundary, product closure contribution, blocked gates, and stop rules
   - id: p1-approved-same-task-transition-schema-v1
     path: docs/04-agent-system/state/p1-approved-same-task-transition-schema-v1.yaml
-    role: strict contract and tiku-transition-evidence-v1 machine schema, normalized candidate identity, freshness inputs, and validation profiles
+    role: superseded read-only historical transition schema; never extend or reconnect to hooks
   - id: p1-approved-same-task-transition-sop
     path: docs/04-agent-system/sop/p1-approved-same-task-transition.md
-    role: future approved same-task transition authorization, strict parsing, stage boundary, validation profile, machine evidence, and three-task efficiency observation procedure
+    role: superseded read-only historical transition procedure
   - id: project-state
     path: docs/04-agent-system/state/project-state.yaml
     role: compact current Content Admin Platform Program, current task, recent closeout, standing authorization, repository checkpoint, and history pointers
@@ -71,13 +81,13 @@ canonicalStateFiles:
     path: docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
     role: stage 2 triage summary for active non-terminal blocked queue items; records next-step classification only and does not replace task-queue as the owner of task status or blocked semantics
 factOwnership:
-  - fact: approved same-task transition contract, machine evidence, normalized candidate identity and freshness, validation profiles, and efficiency observation formulas
-    sourcePath: docs/04-agent-system/state/p1-approved-same-task-transition-schema-v1.yaml
+  - fact: ordinary task scope, validation, high-risk approval, push and closeout invariants
+    sourcePath: docs/04-agent-system/state/task-safety.json
     derivedSummaries:
-      - docs/04-agent-system/sop/p1-approved-same-task-transition.md
+      - docs/04-agent-system/sop/minimal-safety-kernel.md
       - docs/04-agent-system/operating-manual.md
-      - scripts/agent-system/P1ApprovedSameTaskTransition.Common.ps1
-    rule: the schema owns the machine shape; the SOP owns execution procedure and formulas; scripts derive strict decisions and must not treat Markdown prose as approval or create a second task-state source.
+      - scripts/agent-system/Test-MinimalSafetyKernel.ps1
+    rule: the task contract supplies data only; the generic kernel owns enforcement and must not gain task, finding, SHA or exact-file constants.
   - fact: Content Admin Platform B-F Program canonical task order, executionProfile, focused gates, build requirement, full regression policy, protected domains, and review mode
     sourcePath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
     derivedSummaries:
@@ -85,12 +95,12 @@ factOwnership:
       - docs/04-agent-system/state/task-queue.yaml
       - scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
     rule: state and queue must project the serial plan order exactly; editing both projections cannot authorize a reorder or a weaker task profile.
-  - fact: task execution state, dependencies, allowed files, blocked files, validation commands, evidence path, audit review path
+  - fact: task scheduling, dependencies, recovery pointer and WIP=1
     sourcePath: docs/04-agent-system/state/task-queue.yaml
     derivedSummaries:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
-    rule: script output is a derived summary and must not be copied into another durable file as a second task-state source.
+    rule: state and queue are scheduling/recovery sources, not commit, push or high-risk authorization.
   - fact: current task pointer, automation mode, standing unattended local closeout approval, standing local E2E validation approval, repository checkpoint, handoff pointer
     sourcePath: docs/04-agent-system/state/project-state.yaml
     derivedSummaries:

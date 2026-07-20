@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-mechanism-execution-compatibility-v2-1-2026-07-19
+  currentTaskId: minimal-safety-kernel-retirement-2026-07-20
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -227,6 +227,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
+    - minimal-safety-kernel-retirement-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -240,13 +241,15 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+    - p1-mechanism-execution-compatibility-v2-1-2026-07-19
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
   postP0MapPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml
   clusterPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml
   runtimeBacklogPath: D:/tiku-readonly-audit/runtime/runtime-validation-backlog.yaml
-  guardScriptPath: scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+  historicalGuardScriptPath: scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+  taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingCounts:
     p1: 125
     p2: 18
@@ -273,12 +276,30 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
     p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
-    p1-mechanism-execution-compatibility-v2-1-2026-07-19: ready_for_closeout
+    p1-mechanism-execution-compatibility-v2-1-2026-07-19: closed
+    minimal-safety-kernel-retirement-2026-07-20: in_progress
 activeTasks:
+  - id: minimal-safety-kernel-retirement-2026-07-20
+    title: Minimal safety kernel retirement
+    phase: minimal-safety-kernel-retirement-2026-07-20
+    status: in_progress
+    priority: governance
+    taskKind: mechanism_hardening
+    productClosureContribution: none
+    branch: codex/minimal-safety-kernel
+    dependsOn:
+      - p1-mechanism-execution-compatibility-v2-1-2026-07-19
+    objective: atomically replace task-specific guards with one generic safety kernel
+    planPath: docs/05-execution-logs/task-plans/2026-07-20-minimal-safety-kernel-retirement.md
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    nextTaskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    productResumeAnchor:
+      findingId: F-0009
+      redStatus: not_started_until_mechanism_closeout
   - id: p1-mechanism-execution-compatibility-v2-1-2026-07-19
     title: P1 mechanism execution compatibility v2.1
     phase: p1-mechanism-execution-compatibility-v2-1-2026-07-19
-    status: ready_for_closeout
+    status: closed
     priority: governance
     sequenceOrder: 12
     taskKind: mechanism_hardening

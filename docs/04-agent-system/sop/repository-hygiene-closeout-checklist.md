@@ -1,8 +1,11 @@
 # Repository Hygiene Closeout Checklist
 
+> **Superseded for ordinary tasks (2026-07-20):** the executable Git closeout invariants now live in
+> `minimal-safety-kernel.md`. This detailed template remains read-only history for Phase 11 tasks.
+
 ## Status
 
-Active for Phase 11 MVP gap tasks.
+Superseded historical Phase 11 template.
 
 ## Purpose
 

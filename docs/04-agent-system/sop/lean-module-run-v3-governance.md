@@ -1,5 +1,8 @@
 # Lean Module Run v3 Governance
 
+> **Superseded/read-only (2026-07-20):** retained for the closed Content Admin Platform program audit. New work uses
+> `minimal-safety-kernel.md` and must not materialize R0-R3 transition machinery.
+
 ## Scope
 
 This SOP governs the active Content Admin Platform B–F Program. It changes execution mechanics only and does not claim

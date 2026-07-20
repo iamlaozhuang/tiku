@@ -1,5 +1,8 @@
 # P1 整改效率循环
 
+> **Superseded/read-only (2026-07-20):** ordinary P1 work now uses `minimal-safety-kernel.md`. The hotfix template and
+> repeated smoke layering below are historical and must not be extended.
+
 ## 目的
 
 本 SOP 只降低重复设计、重复等待和无效复核成本，不降低 P1/Module/P0/ContentAdmin 门禁、证据红线、审批边界、WIP=1、敏感信息保护或 Git closeout 纪律。

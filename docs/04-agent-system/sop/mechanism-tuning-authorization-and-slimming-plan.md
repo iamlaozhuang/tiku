@@ -1,8 +1,11 @@
 # Mechanism Tuning Authorization And Slimming Plan
 
+> **Superseded/read-only (2026-07-20):** the approved outcome is implemented by `minimal-safety-kernel.md`. Profiles,
+> queue orchestration and compatibility layers below must not be extended for ordinary tasks.
+
 ## Status
 
-Planning-only governance record.
+Superseded historical planning record.
 
 This document collects the current consensus for reducing agent workflow friction while preserving Tiku safety, code
 quality, and auditability. It does not directly authorize code implementation, task archival, dev server usage, Browser

@@ -1,5 +1,8 @@
 # P1 Approved Same-Task Transition
 
+> **Superseded/read-only (2026-07-20):** retained for historical audit. New tasks must not use this transition contract,
+> freshness key, transition-only routing or per-task adapter. Use `minimal-safety-kernel.md`.
+
 This procedure governs future `approved_same_task_transition` contract instances. It does not replace historical F-0115/F-0116/F-0117/F-0143 paths or authorize the current bootstrap.
 
 ## Base authorization anchor

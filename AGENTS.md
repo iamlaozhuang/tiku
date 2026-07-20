@@ -155,28 +155,26 @@
 3. **主题切换**：通过 CSS Variables 在根节点切换，禁止在组件 JS 逻辑中硬编码深浅色判断。
 4. **组件结构**：保持组件无状态化，复杂逻辑抽离至 Hooks/Services；避免使用原生 HTML 标签作为组件名。
 
-## AI 智能体执行纪律 (Agent Execution Discipline)
+## AI 智能体执行纪律
 
-1. **品味法则挂载与强制自检**：所有编码与修改工作开始前，必须强制读取 `docs/03-standards/code-taste-ten-commandments.md` 以及 `docs/02-architecture/adr/` 中的架构决策。每次任务结束并向用户交付代码成果前，Agent **必须**在对话流中输出一份简短的【品味合规自检 Checklist】，逐一确认是否违反了“十诫”（例如未使用纯黑色、API返回标准格式等），未经核对单自检校验，严禁声称任务完成。
-2. **强制方案编制**：在开始实际编写业务逻辑前，必须在 `docs/05-execution-logs/task-plans/` 目录下创建执行方案（以 `YYYY-MM-DD-任务描述.md` 命名），明确记录已读取的规范、实现思路及风险防御。
-3. **本地验证门禁**：必须在终端本地执行测试并验证通过，方可通过 Git Hooks 允许代码提交。
-4. **工作区隔离门禁**：任何由 Agent 引入的工具目录（如 `.agent`）、临时缓存或日志生成目录，必须在项目初始化及引入时第一时间加入项目 `.gitignore` 以及相关打包工具（如 Next.js/Tailwind）的扫描黑名单中，严防 AI 产物污染并导致构建体系崩溃。
+本仓库的唯一常规执行入口是 `docs/04-agent-system/sop/minimal-safety-kernel.md` 与
+`scripts/agent-system/Test-MinimalSafetyKernel.ps1`。旧 P1/P0/Module Run guard、transition 合同和 smoke 仅供历史审计，
+不得重新接入 hook，也不得为新 finding/task/SHA/files 增加专属分支。
 
-## 半自动化推进硬性流程
+1. 编码前读取本文件、品味十诫、相关 ADR/需求 SSOT、`task-safety.json`，以及 state/queue 中当前任务与下一任务。
+2. 所有写操作在 `codex/`、`feat/` 或 `fix/` 短分支/worktree 中完成，禁止直接在 `master/main` 开发。
+3. 每个任务先在 `task-safety.json` 声明非空目标、精确 `allowedFiles`、验收命令和高风险批准来源；实际 diff 必须匹配。
+4. 功能或修复使用 TDD；受影响产品代码必须通过 focused tests、lint、typecheck，按影响面追加 build/e2e，不得用无关 full suite 代替 focused 反馈。
+5. 普通任务只需任务合同、终端验证和一次主线程对抗式审查。仅复杂/高风险任务或用户明确要求时创建 task plan/evidence/audit，禁止机械复制三件套。
+6. 依赖、数据库/schema/migration、权限/授权、部署、secret/env、Provider、支付、外部服务、PR、force-push 必须取得对应 fresh approval；依赖变更继续独立提交。
+7. 一任务一可审查提交；仅 ff-only 合入 `master`。Push 必须有 fresh approval，只允许已批准目标；随后验证远端同步并清理短分支/worktree。
+8. state/queue 只用于排期、恢复与 WIP=1，不是 commit/push 授权机；不得为状态切换修改 guard/smoke。
+9. 历史 evidence/audit/旧脚本不得删除或改写。它们标记为 superseded/read-only 后，不进入普通任务默认读取面。
+10. 交付前必须运行新鲜验证并输出简短【品味合规自检 Checklist】；没有命令证据不得声称完成。
 
-1. **禁止直接在 `master` / `main` 上开发**：除非用户明确要求只做只读审查，否则所有修改必须先创建短生命周期分支或 worktree，分支名使用 `codex/`、`feat/`、`fix/` 前缀。
-2. **任务领取以队列为准**：优先读取 `docs/04-agent-system/state/project-state.yaml` 和 `docs/04-agent-system/state/task-queue.yaml`，只处理 `pending` 且依赖已完成的任务；高风险任务必须先取得明确人工批准。
-3. **依赖变更先审批后落地**：新增、删除、升级 npm 包、CLI、外部 SDK、测试框架、云服务配置、数据库迁移工具时，必须先按 `docs/04-agent-system/sop/dependency-introduction-gate.md` 写明理由和 `human approval` 证据，未经批准不得改 `package.json` 或 lockfile。
-4. **证据先于结论**：任务完成前必须运行任务声明的验证命令，并把输出写入 `docs/05-execution-logs/evidence/`。如果 `test` script 缺失，只能声明“lint/typecheck 通过，测试门禁缺失”，禁止声称完整测试通过。
-5. **任务提交屏障**：一个任务默认对应一个可审查提交。任务完成、验证与 evidence 写入后，必须先评估是否适合提交；若继续领取下一任务前仍有未提交改动，必须说明原因并确认这些改动只属于当前任务。严禁把已完成任务的代码、依赖、格式化噪声混入后续任务提交。
-6. **依赖提交隔离**：任何允许的 `package.json` / lockfile 变更必须独立于业务实现提交，提交信息和 evidence 中都必须包含 `human approval` 证据；未经任务队列和人工审批允许，不得把依赖变更顺手带入功能提交。
-7. **Push 决策门禁**：本地合并或提交不等于允许 push。推送 `master` 必须有明确用户批准；该批准可以是当次 fresh approval，也可以是 `project-state.yaml` 中 `standingUnattendedLocalCloseoutApproval` 已物化到任务级 `closeoutPolicy` 的低风险 Module Run v2 closeout 授权。创建/更新 PR、`--force-with-lease`、部署等远端动作仍必须 fresh approval。所有远端动作必须在 evidence 或交付说明中记录推送目标、分支和结果。
-8. **合入后清理隔离资源**：短生命周期分支合入 `master` 后，必须先在 `master` 运行必要门禁并写 evidence，再删除对应 worktree 和已合入分支；残留 `node_modules` 等本地产物只允许在确认路径位于 `.worktrees/` 内后删除。
-9. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。
-10. **PR 基线健康要求**：Stacked PR 必须声明临时 base；前置分支合入 `master` 后，必须将后续 PR 重新对准 `master`，并验证 compare 只包含当前任务文件。若需要重建短生命周期分支，只允许使用 `--force-with-lease`，禁止无保护 force push。
-11. **Fresh checkout 门禁**：格式化、行尾、质量门禁类修正必须在基于目标分支的新 worktree 中验证。仓库行尾策略由 `.gitattributes` 的 `* text=auto eol=lf` 固化，禁止依赖某个本地 Git 配置或旧 worktree 状态声称 `format:check` 健康。
-12. **AI 生成需求与验收基线恢复规则**：任何 AI出题 / AI组卷 任务必须先读 `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`、`docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md`、最新 AI 生成 baseline evidence 和 goal-completion audit，再读取更早的 quick acceptance、MML rerun、能力目录或用例目录残留。若旧文档写有 blocked/gap，但后续基线已明确 closed/superseded，必须按后续基线记录 supersession，不得直接重开旧残留。2026-07-02 第一批 AI 生成 20 类问题以 goal-completion audit 和 acceptance-baseline normalization 为当前关闭入口；无新鲜当前基线失败证据时，禁止重复修复。若稳定需求文档与最新 traceability 无法通过时间序和来源层级消解，必须停止并请用户决策。
-13. **高级版需求读取规则**：凡涉及 `advanced`、`edition`、`effectiveEdition`、`authorization`、`personal_auth`、`org_auth`、`redeem_code`、`auth_upgrade`、quota、组织后台、企业训练、组织统计、保留/日志治理、角色分离、内容后台 AI 草稿/评审或标准/高级版边界的任务，必须先读 `docs/01-requirements/00-index.md`、`docs/01-requirements/advanced-edition/00-index.md`、相关高级版 module/story、最新 traceability，再读取 execution logs。涉及授权或 edition 的任务还必须读 `docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md` 和 ADR-007。`AGENTS.md` 只记录执行纪律和恢复入口，不替代需求 SSOT；若读取后仍有冲突或模糊项，必须停止并请用户决策。
-14. **机制调优与文档瘦身防退化规则**：任何 project-state、task-queue、execution-log、handoff 或机制 SOP 的瘦身任务，只允许减少默认读取面和重复样板，不得削弱质量门禁、审批边界、证据红线、Module Run v2 检查、Git closeout 纪律或敏感信息保护。归档或移动历史记录必须先有任务计划、精确文件/任务清单、索引更新、依赖可解析验证和 evidence/audit；禁止删除证据、改写历史语义、让 active 任务依赖悬空，或把机制提效解释为产品功能完成。
+涉及 AI 生成时，仍以最新 traceability 与 goal-completion audit 为当前基线；涉及 `advanced`、`edition`、
+`authorization`、`personal_auth`、`org_auth`、`redeem_code`、`auth_upgrade` 或 quota 时，仍须读取需求总索引、
+高级版索引、相关 module/story、最新 traceability、edition-aware authorization requirements 与 ADR-007。稳定需求与最新
+traceability 无法消解冲突时停止并请用户决策。
 
 DO NOT send optional commentary

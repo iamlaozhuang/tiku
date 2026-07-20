@@ -1,8 +1,11 @@
 # Task Lifecycle Governance SOP
 
+> **Superseded/read-only (2026-07-20):** ordinary task execution now follows
+> `minimal-safety-kernel.md`. The lifecycle below is historical context and must not be used as hook or commit authority.
+
 ## Status
 
-Active for docs-only automation governance planning.
+Superseded historical reference.
 
 This SOP defines how an individual Tiku task starts, executes, validates, reviews, closes out, and hands off to the next task. It does not approve code-stage queue seeding, product code implementation, dependency changes, schema or migration work, provider work, env/secret work, staging/prod/cloud/deploy work, payment work, external-service work, or Cost Calibration Gate execution.
 

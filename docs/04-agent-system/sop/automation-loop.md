@@ -1,8 +1,11 @@
 # Automation Loop SOP
 
+> **Superseded/read-only (2026-07-20):** ordinary task execution now follows
+> `minimal-safety-kernel.md`. Queue-drain, transition and repeated evidence orchestration below are not hook authority.
+
 ## Status
 
-Draft for Phase 0
+Superseded historical reference.
 
 ## Purpose
 
