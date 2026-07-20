@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+  currentTaskId: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
   currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
@@ -230,6 +230,7 @@ p1RemediationSerialProgram:
     - minimal-safety-kernel-retirement-2026-07-20
     - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
     - p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+    - p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -246,6 +247,7 @@ p1RemediationSerialProgram:
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
     - minimal-safety-kernel-retirement-2026-07-20
     - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    - p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -283,12 +285,45 @@ p1RemediationSerialProgram:
     p1-mechanism-execution-compatibility-v2-1-2026-07-19: closed
     minimal-safety-kernel-retirement-2026-07-20: closed
     p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: closed
-    p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20: in_progress
+    p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20: closed
+    p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20: in_progress
 activeTasks:
+  - id: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
+    title: Lifecycle command atomicity
+    phase: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0015
+    branch: fix/lifecycle-command-atomicity
+    dependsOn:
+      - p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+    objective: close F-0015 by making account disable, organization disable, and org_auth cancellation atomic with their existing access termination, authorization-lineage training blocking, and redacted success audit
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    planPath: docs/superpowers/plans/2026-07-20-lifecycle-command-atomicity.md
+    candidateRootCauseCluster: P1-RC-03
+    findingIds:
+      - F-0015
+    highRiskApproval:
+      category: permission
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: candidate_ready_for_bounded_medium_risk_auto_closeout
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      focused: pass_14_of_14
+      affectedRegression: pass_54_of_54
+      fullUnit: partial_2795_of_2796_one_unrelated_inventory_timeout
+      timedOutTestFocusedRetry: pass_5_of_5
+      lintTypecheckChangedFileFormatBuild: pass
+      p0Baselines: pass
+      mainThreadAdversarialReview: pass
+      entitlementExpansion: false
+      prohibitedSideEffects: false
   - id: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
     title: Personal authorization upgrade target selection
     phase: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0004
@@ -305,7 +340,7 @@ activeTasks:
       category: permission
       status: satisfied_by_bounded_medium_risk_standing_approval
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    executionStage: candidate_ready_for_bounded_medium_risk_auto_closeout
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       focused: pass_7_of_7

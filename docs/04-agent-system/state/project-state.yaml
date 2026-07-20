@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
-updatedAt: "2026-07-20T11:58:25-07:00"
+currentPhase: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
+updatedAt: "2026-07-20T12:31:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+  currentTaskId: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
   currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
@@ -500,6 +500,7 @@ p1RemediationSerialProgram:
     - minimal-safety-kernel-retirement-2026-07-20
     - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
     - p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+    - p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -516,6 +517,7 @@ p1RemediationSerialProgram:
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
     - minimal-safety-kernel-retirement-2026-07-20
     - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    - p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -553,7 +555,8 @@ p1RemediationSerialProgram:
     p1-mechanism-execution-compatibility-v2-1-2026-07-19: closed
     minimal-safety-kernel-retirement-2026-07-20: closed
     p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: closed
-    p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20: in_progress
+    p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20: closed
+    p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -645,6 +648,12 @@ p1RemediationSerialProgram:
       originMasterSync: pass
       worktreeCleanup: pass
       shortBranchCleanup: pass
+    p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
 lastClosedStartupTask:
   id: p1-p2-remediation-startup-package-v1-2026-07-15
   title: P1/P2 remediation startup package v1.0
@@ -706,40 +715,46 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
-  title: Personal authorization upgrade target selection
-  phase: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+  id: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
+  title: Lifecycle command atomicity
+  phase: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0004
-  branch: fix/personal-auth-upgrade-target-selection
+  productClosureContribution: F-0015
+  branch: fix/lifecycle-command-atomicity
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0004
+    - F-0015
   candidateRootCauseCluster: P1-RC-03
   requirementAnchors:
-    - CT-REQ-003
-    - CT-REQ-034
-    - D01
-    - D13
-    - EAA-PERSONAL-UPGRADE-TARGET-SELECT
+    - modules/01-user-auth.md#2
+    - modules/01-user-auth.md#4.3
+    - modules/01-user-auth.md#4.4
+    - role-auth-training-ops-decision-package-D07
+    - ADR-007
   highRiskApproval:
     category: permission
     status: satisfied_by_bounded_medium_risk_standing_approval
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: candidate_ready_for_bounded_medium_risk_auto_closeout
-    reason: focused_7_of_7_affected_56_of_56_lint_typecheck_format_diff_and_main_thread_adversarial_review_passed_without_entitlement_expansion
-    resumeAction: stage_exact_allowlist_bind_standing_approval_to_candidate_tree_commit_ff_only_merge_push_sync_cleanup_then_claim_next_p1
+    reason: focused_14_of_14_affected_54_of_54_lint_typecheck_changed_file_format_build_p0_baselines_and_main_thread_adversarial_review_passed_without_entitlement_expansion
+    resumeAction: stage_exact_allowlist_run_minimal_kernel_precommit_commit_ff_only_merge_push_sync_cleanup_then_run_rc03_residual_disposition
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    tddRed: pass_expected_2_failures_of_6_unique_omission_and_audit_absent
-    focused: pass_7_of_7
-    affectedRegression: pass_56_of_56
+    tddRed: pass_expected_5_failures_of_5
+    focused: pass_14_of_14
+    affectedRegression: pass_54_of_54
+    fullUnit: partial_2795_of_2796_one_unrelated_inventory_timeout
+    timedOutTestFocusedRetry: pass_5_of_5
     lint: pass
     typecheck: pass
-    format: pass
+    changedFileFormat: pass
+    repositoryFormat: preexisting_unrelated_f0117_sdd_files_only
+    build: pass
+    p0GlobalBaseline: pass
+    p0Serial: pass_closed_program
     diffCheck: pass
     mainThreadAdversarialReview: pass
     entitlementExpansion: false

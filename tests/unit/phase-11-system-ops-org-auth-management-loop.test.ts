@@ -123,24 +123,23 @@ function createRepositories(input: {
         ? createOrgAuth()
         : input.createResult;
     },
-    async cancelOrgAuth(publicId) {
-      input.mutationInputs.push({ action: "cancelOrgAuth", publicId });
-
-      return input.cancelResult === undefined
-        ? createOrgAuth({
-            publicId,
-            status: "cancelled",
-            cancelledAt: "2026-05-24T06:35:00.000Z",
-          })
-        : input.cancelResult;
-    },
-    async terminateOrgAuthActiveFlows(publicId) {
+    async cancelOrgAuth(publicId, operator) {
       input.mutationInputs.push({
-        action: "terminateOrgAuthActiveFlows",
+        action: "cancelOrgAuth",
+        operator,
         publicId,
       });
 
-      return { practiceCount: 2, mockExamCount: 1 };
+      return input.cancelResult === undefined
+        ? {
+            data: createOrgAuth({
+              publicId,
+              status: "cancelled",
+              cancelledAt: "2026-05-24T06:35:00.000Z",
+            }),
+            successAuditPersisted: true as const,
+          }
+        : input.cancelResult;
     },
     auditLogRepository: {
       async appendAuditLog(auditLogInput) {
@@ -349,7 +348,7 @@ describe("phase 11 system ops org auth management loop", () => {
     ]);
   });
 
-  it("cancels org_auth and terminates active practice and mock_exam flows", async () => {
+  it("delegates org_auth cancellation and its side effects to one repository command", async () => {
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
@@ -378,22 +377,17 @@ describe("phase 11 system ops org auth management loop", () => {
       },
     });
     expect(mutationInputs).toEqual([
-      { action: "cancelOrgAuth", publicId: "org-auth-public-001" },
       {
-        action: "terminateOrgAuthActiveFlows",
+        action: "cancelOrgAuth",
+        operator: {
+          publicId: "admin-public-001",
+          requestIp: null,
+          role: "ops_admin",
+        },
         publicId: "org-auth-public-001",
       },
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "org_auth.cancel",
-        targetResourceType: "org_auth",
-        targetPublicId: "org-auth-public-001",
-        resultStatus: "success",
-        metadataSummary:
-          "redacted org_auth cancel metadata; terminated practice=2 mock_exam=1",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
   });
 
   it("denies org_auth mutation for content admins without touching authorization records", async () => {

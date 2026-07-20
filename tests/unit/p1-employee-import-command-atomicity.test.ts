@@ -43,9 +43,11 @@ describe("P1 employee import command atomicity static smoke", () => {
     const source = readSource(
       "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
     );
-    const cancelStart = source.indexOf("async cancelOrgAuth(publicId)");
+    const cancelStart = source.indexOf(
+      "async cancelOrgAuth(publicId, operator)",
+    );
     const cancelEnd = source.indexOf(
-      "async terminateOrgAuthActiveFlows(publicId)",
+      "async upgradeOrgAuth(input)",
       cancelStart,
     );
     const cancelSource = source.slice(cancelStart, cancelEnd);

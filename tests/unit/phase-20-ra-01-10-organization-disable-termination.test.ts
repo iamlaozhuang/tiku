@@ -15,11 +15,22 @@ import type { SessionService } from "@/server/services/session-service";
 
 type OrganizationMutationRepositories =
   AdminOrganizationOrgAuthRuntimeRepositories & {
-    disableOrganization?(input: {
-      expectedRevision: number;
-      publicId: string;
-      isCascade: boolean;
-    }): Promise<DisableOrganizationResultDto | null>;
+    disableOrganization?(
+      input: {
+        expectedRevision: number;
+        publicId: string;
+        isCascade: boolean;
+      },
+      operator: {
+        publicId: string;
+        requestIp: string | null;
+        role: string;
+      },
+    ): Promise<
+      | DisableOrganizationResultDto
+      | { data: DisableOrganizationResultDto; successAuditPersisted: true }
+      | null
+    >;
   };
 
 function createAdminSessionService(): Pick<
@@ -111,22 +122,25 @@ function createRepositories(input: {
         },
       };
     },
-    async disableOrganization(disableInput) {
-      input.mutationInputs.push(disableInput);
+    async disableOrganization(disableInput, operator) {
+      input.mutationInputs.push({ ...disableInput, operator });
 
       return {
-        activeFlowTermination: {
-          mockExamCount: 1,
-          practiceCount: 2,
+        data: {
+          activeFlowTermination: {
+            mockExamCount: 1,
+            practiceCount: 2,
+          },
+          affectedOrganizationPublicIds: [
+            disableInput.publicId,
+            "organization-public-child",
+          ],
+          organization: createOrganization({
+            publicId: disableInput.publicId,
+            status: "disabled",
+          }),
         },
-        affectedOrganizationPublicIds: [
-          disableInput.publicId,
-          "organization-public-child",
-        ],
-        organization: createOrganization({
-          publicId: disableInput.publicId,
-          status: "disabled",
-        }),
+        successAuditPersisted: true,
       };
     },
     auditLogRepository: {
@@ -181,19 +195,15 @@ describe("phase 20 RA-01-10 organization disable termination", () => {
       {
         expectedRevision: 1,
         isCascade: true,
+        operator: {
+          publicId: "admin-public-001",
+          requestIp: null,
+          role: "ops_admin",
+        },
         publicId: "organization-public-001",
       },
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "organization.disable",
-        metadataSummary:
-          "redacted organization disable metadata; affected organization=2 terminated practice=2 mock_exam=1",
-        resultStatus: "success",
-        targetPublicId: "organization-public-001",
-        targetResourceType: "organization",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
     expect(JSON.stringify({ auditInputs, payload })).not.toContain(
       "admin-session-value",
     );

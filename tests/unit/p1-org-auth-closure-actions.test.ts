@@ -244,10 +244,7 @@ describe("F-0009 organization authorization closure actions", () => {
       "replaceOrgAuth",
       "expandOrgAuthQuota",
     );
-    const quotaSource = readMethod(
-      "expandOrgAuthQuota",
-      "terminateOrgAuthActiveFlows",
-    );
+    const quotaSource = readMethod("expandOrgAuthQuota", "disableEmployee");
 
     for (const commandSource of [
       upgradeSource,

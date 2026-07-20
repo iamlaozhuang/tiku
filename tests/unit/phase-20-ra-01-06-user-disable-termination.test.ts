@@ -59,10 +59,16 @@ function createAdminFlowRepositories(input: {
           },
         };
       },
-      async disableUser(publicId) {
-        input.mutationInputs.push({ action: "disableUser", publicId });
+      async disableUser(publicId, operator) {
+        input.mutationInputs.push({
+          action: "disableUser",
+          operator,
+          publicId,
+        });
 
-        return publicId === "user-public-001" ? "updated" : "not_found";
+        return publicId === "user-public-001"
+          ? "updated_with_audit"
+          : "not_found";
       },
       async revokeUserSessions(publicId) {
         input.mutationInputs.push({ action: "revokeUserSessions", publicId });
@@ -135,19 +141,17 @@ describe("phase 20 RA-01-06 user disable termination", () => {
       data: null,
     });
     expect(mutationInputs).toEqual([
-      { action: "disableUser", publicId: "user-public-001" },
+      {
+        action: "disableUser",
+        operator: {
+          publicId: "admin-public-001",
+          requestIp: "203.0.113.40",
+          role: "ops_admin",
+        },
+        publicId: "user-public-001",
+      },
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actorRole: "ops_admin",
-        actionType: "user.disable",
-        targetResourceType: "user",
-        targetPublicId: "user-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted user disable metadata",
-        requestIp: "203.0.113.40",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
     expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
       "admin-session-token",
     );

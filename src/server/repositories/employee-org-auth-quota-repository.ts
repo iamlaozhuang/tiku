@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { and, asc, count, eq, gt, inArray, notInArray, sql } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
@@ -9,11 +11,13 @@ import {
 } from "./organization-scope-query";
 
 const {
+  auditLog,
   authSession,
   employee,
   employeeOrgAuth,
   mockExam,
   orgAuth,
+  organizationTrainingAnswer,
   practice,
   user,
 } = databaseSchema;
@@ -30,7 +34,17 @@ export type EmployeeOrgAuthQuotaReservationResult =
 export type EmployeeAccountStatusWithQuotaResult =
   | "not_found"
   | "quota_insufficient"
-  | "updated";
+  | "updated"
+  | "updated_with_audit";
+
+export type EmployeeAccountLifecycleSuccessAudit = {
+  actorPublicId: string;
+  actorRole: string;
+  actionType: "user.disable";
+  metadataSummary: string;
+  requestIp: string | null;
+  targetPublicId: string;
+};
 
 async function lockEmployeeIdentity(
   database: EmployeeOrgAuthQuotaDatabase,
@@ -283,6 +297,7 @@ export async function reconcileCurrentAndDescendantQuotaReservations(
 export async function setEmployeeAccountStatusWithQuota(
   database: EmployeeOrgAuthQuotaDatabase,
   input: {
+    successAudit?: EmployeeAccountLifecycleSuccessAudit;
     status: "active" | "disabled";
     userPublicId: string;
   },
@@ -387,9 +402,45 @@ export async function setEmployeeAccountStatusWithQuota(
             ]),
           ),
         );
+
+      if (row.employee_id !== null && row.organization_id !== null) {
+        await transactionalDatabase
+          .update(organizationTrainingAnswer)
+          .set({
+            organization_training_answer_status: "read_only",
+            updated_at: lifecycleChangedAt,
+          })
+          .where(
+            and(
+              eq(organizationTrainingAnswer.employee_id, row.employee_id),
+              eq(
+                organizationTrainingAnswer.organization_id,
+                row.organization_id,
+              ),
+              eq(
+                organizationTrainingAnswer.organization_training_answer_status,
+                "in_progress",
+              ),
+            ),
+          );
+      }
     }
 
-    return "updated";
+    if (input.successAudit !== undefined) {
+      await transactionalDatabase.insert(auditLog).values({
+        public_id: `audit-log-${randomUUID()}`,
+        actor_public_id: input.successAudit.actorPublicId,
+        actor_role: input.successAudit.actorRole,
+        action_type: input.successAudit.actionType,
+        target_resource_type: "user",
+        target_public_id: input.successAudit.targetPublicId,
+        result_status: "success",
+        metadata_summary: input.successAudit.metadataSummary,
+        request_ip: input.successAudit.requestIp,
+      });
+    }
+
+    return input.successAudit === undefined ? "updated" : "updated_with_audit";
   });
 }
 

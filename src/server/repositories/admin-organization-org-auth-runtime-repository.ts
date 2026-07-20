@@ -119,7 +119,12 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   ): Promise<OrganizationDto | null>;
   disableOrganization?(
     input: NormalizedDisableOrganizationInput & { publicId: string },
-  ): Promise<DisableOrganizationResultDto | null>;
+    operator: OrgAuthClosureCommandOperator,
+  ): Promise<
+    | LifecycleCommandResult<DisableOrganizationResultDto>
+    | DisableOrganizationResultDto
+    | null
+  >;
   enableOrganization?(
     input: NormalizedDisableOrganizationInput & { publicId: string },
   ): Promise<OrganizationDto | null>;
@@ -127,7 +132,10 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   createOrgAuth?(
     input: NormalizedCreateOrgAuthInput,
   ): Promise<OrgAuthDto | null>;
-  cancelOrgAuth?(publicId: string): Promise<OrgAuthDto | null>;
+  cancelOrgAuth?(
+    publicId: string,
+    operator: OrgAuthClosureCommandOperator,
+  ): Promise<LifecycleCommandResult<OrgAuthDto> | OrgAuthDto | null>;
   upgradeOrgAuth?(
     input: OrgAuthManualUpgradeCommandInput,
   ): Promise<OrgAuthClosureMutationResult>;
@@ -140,9 +148,6 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   expandOrgAuthQuota?(
     input: OrgAuthQuotaExpansionCommandInput,
   ): Promise<OrgAuthClosureMutationResult>;
-  terminateOrgAuthActiveFlows?(
-    publicId: string,
-  ): Promise<OrgAuthTerminationResult>;
   disableEmployee?(publicId: string): Promise<boolean>;
   transferEmployee?(
     input: EmployeeTransferInput,
@@ -197,6 +202,11 @@ export type OrgAuthClosureCommandOperator = {
   role: string;
 };
 
+export type LifecycleCommandResult<TData> = {
+  data: TData;
+  successAuditPersisted: true;
+};
+
 export type OrgAuthManualUpgradeCommandInput =
   NormalizedOrgAuthClosureMetadataInput & {
     operator: OrgAuthClosureCommandOperator;
@@ -224,9 +234,10 @@ export type OrgAuthClosureMutationResult =
   | { status: "conflict" | "not_found" }
   | { status: "success"; data: OrgAuthClosureActionResultDto };
 
-export type OrgAuthTerminationResult = {
+type LifecycleTerminationResult = {
   practiceCount: number;
   mockExamCount: number;
+  organizationTrainingAnswerCount: number;
 };
 
 const {
@@ -242,6 +253,7 @@ const {
   orgAuth,
   orgAuthOrganization,
   organizationTrainingAnswer,
+  organizationTrainingVersion,
   organization,
   practice,
   user,
@@ -1040,7 +1052,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         throw error;
       }
     },
-    async disableOrganization(input) {
+    async disableOrganization(input, operator) {
       const database = getDatabase();
       const result = await database.transaction(async (transaction) => {
         const transactionalDatabase =
@@ -1086,29 +1098,47 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           return null;
         }
 
+        const activeFlowTermination = await terminateOrganizationActiveFlows(
+          transactionalDatabase,
+          organizationIds,
+        );
+        const organizationTrainingAnswerCount =
+          await blockOrganizationTrainingAnswers(
+            transactionalDatabase,
+            organizationIds,
+          );
+        const affectedOrganizationPublicIds =
+          await listOrganizationPublicIdsByIds(
+            transactionalDatabase,
+            organizationIds,
+          );
+        const organizationDto = await mapOrganizationMutationRowToDto(
+          transactionalDatabase,
+          disabledOrganization,
+        );
+
+        await appendTransactionalLifecycleAuditLog(transactionalDatabase, {
+          actionType: "organization.disable",
+          metadataSummary: `redacted organization disable metadata; affected organization=${affectedOrganizationPublicIds.length} terminated practice=${activeFlowTermination.practiceCount} mock_exam=${activeFlowTermination.mockExamCount} training_answer=${organizationTrainingAnswerCount}`,
+          operator,
+          targetPublicId: input.publicId,
+          targetResourceType: "organization",
+        });
+
         return {
-          activeFlowTermination: await terminateOrganizationActiveFlows(
-            transactionalDatabase,
-            organizationIds,
-          ),
-          affectedOrganizationPublicIds: await listOrganizationPublicIdsByIds(
-            transactionalDatabase,
-            organizationIds,
-          ),
-          organizationRow: disabledOrganization,
+          data: {
+            activeFlowTermination: {
+              practiceCount: activeFlowTermination.practiceCount,
+              mockExamCount: activeFlowTermination.mockExamCount,
+            },
+            affectedOrganizationPublicIds,
+            organization: organizationDto,
+          },
+          successAuditPersisted: true as const,
         };
       });
 
-      return result === null
-        ? null
-        : {
-            organization: await mapOrganizationMutationRowToDto(
-              database,
-              result.organizationRow,
-            ),
-            activeFlowTermination: result.activeFlowTermination,
-            affectedOrganizationPublicIds: result.affectedOrganizationPublicIds,
-          };
+      return result;
     },
     async enableOrganization(input) {
       const database = getDatabase();
@@ -1317,7 +1347,10 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         });
       });
     },
-    async cancelOrgAuth(publicId) {
+    // Compatibility boundary: async cancelOrgAuth(publicId) adapters may omit
+    // the second operator argument; only the production command returns the
+    // transaction-audit marker consumed by the route service.
+    async cancelOrgAuth(publicId, operator) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const transactionalDatabase =
@@ -1370,17 +1403,43 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
             { id: orgAuthRow.id, edition: orgAuthRow.edition },
           ]);
 
-        return mapOrgAuthMutationRowToDto({
-          ...orgAuthRow,
-          ...getOrgAuthEditionEvaluation(
-            orgAuthRow,
-            editionEvaluationsByOrgAuthId,
-          ),
-          purchaser_organization_public_id:
-            purchaserOrganization?.public_id ?? "",
-          organization_public_ids:
-            organizationPublicIdsByOrgAuthId.get(orgAuthRow.id) ?? [],
+        const activeFlowScope = await findOrgAuthActiveFlowScope(
+          transactionalDatabase,
+          publicId,
+        );
+        const terminatedFlows =
+          activeFlowScope === null
+            ? {
+                mockExamCount: 0,
+                organizationTrainingAnswerCount: 0,
+                practiceCount: 0,
+              }
+            : await terminateOrgAuthActiveFlowsInTransaction(
+                transactionalDatabase,
+                activeFlowScope,
+              );
+
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.cancel",
+          metadataSummary: `redacted org_auth cancel metadata; terminated practice=${terminatedFlows.practiceCount} mock_exam=${terminatedFlows.mockExamCount} training_answer=${terminatedFlows.organizationTrainingAnswerCount}`,
+          operator,
+          targetPublicId: publicId,
         });
+
+        return {
+          data: mapOrgAuthMutationRowToDto({
+            ...orgAuthRow,
+            ...getOrgAuthEditionEvaluation(
+              orgAuthRow,
+              editionEvaluationsByOrgAuthId,
+            ),
+            purchaser_organization_public_id:
+              purchaserOrganization?.public_id ?? "",
+            organization_public_ids:
+              organizationPublicIdsByOrgAuthId.get(orgAuthRow.id) ?? [],
+          }),
+          successAuditPersisted: true as const,
+        };
       });
     },
     async upgradeOrgAuth(input) {
@@ -1816,68 +1875,6 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           },
         };
       });
-    },
-    async terminateOrgAuthActiveFlows(publicId) {
-      const database = getDatabase();
-      const activeFlowScope = await findOrgAuthActiveFlowScope(
-        database,
-        publicId,
-      );
-
-      if (activeFlowScope === null) {
-        return { practiceCount: 0, mockExamCount: 0 };
-      }
-
-      const userIds = await listReservedActiveUserIdsByOrgAuth(
-        database,
-        activeFlowScope.orgAuthId,
-        activeFlowScope.organizationIds,
-      );
-
-      if (userIds.length === 0) {
-        return { practiceCount: 0, mockExamCount: 0 };
-      }
-
-      const now = new Date();
-      const terminatedPractices = await database
-        .update(practice)
-        .set({
-          practice_status: "terminated",
-          terminated_at: now,
-          termination_reason: "authorization_invalid",
-          updated_at: now,
-        })
-        .where(
-          and(
-            inArray(practice.user_id, userIds),
-            eq(practice.profession, activeFlowScope.profession),
-            eq(practice.level, activeFlowScope.level),
-            eq(practice.practice_status, "in_progress"),
-          ),
-        )
-        .returning({ id: practice.id });
-      const terminatedMockExams = await database
-        .update(mockExam)
-        .set({
-          exam_status: "terminated",
-          terminated_at: now,
-          termination_reason: "authorization_invalid",
-          updated_at: now,
-        })
-        .where(
-          and(
-            inArray(mockExam.user_id, userIds),
-            eq(mockExam.profession, activeFlowScope.profession),
-            eq(mockExam.level, activeFlowScope.level),
-            eq(mockExam.exam_status, "in_progress"),
-          ),
-        )
-        .returning({ id: mockExam.id });
-
-      return {
-        practiceCount: terminatedPractices.length,
-        mockExamCount: terminatedMockExams.length,
-      };
     },
     async disableEmployee(publicId) {
       const database = getDatabase();
@@ -3574,7 +3571,9 @@ async function listActiveEmployeeIdsByOrganizationIds(
 async function terminateOrganizationActiveFlows(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   organizationIds: number[],
-): Promise<OrgAuthTerminationResult> {
+): Promise<
+  Pick<LifecycleTerminationResult, "practiceCount" | "mockExamCount">
+> {
   const userIds = await listActiveUserIdsByOrganizationIds(
     database,
     organizationIds,
@@ -3624,6 +3623,34 @@ async function terminateOrganizationActiveFlows(
     practiceCount: terminatedPractices.length,
     mockExamCount: terminatedMockExams.length,
   };
+}
+
+async function blockOrganizationTrainingAnswers(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<number> {
+  if (organizationIds.length === 0) {
+    return 0;
+  }
+
+  const rows = await database
+    .update(organizationTrainingAnswer)
+    .set({
+      organization_training_answer_status: "read_only",
+      updated_at: new Date(),
+    })
+    .where(
+      and(
+        inArray(organizationTrainingAnswer.organization_id, organizationIds),
+        eq(
+          organizationTrainingAnswer.organization_training_answer_status,
+          "in_progress",
+        ),
+      ),
+    )
+    .returning({ id: organizationTrainingAnswer.id });
+
+  return rows.length;
 }
 
 async function findOrgAuthActiveFlowScope(
@@ -3720,6 +3747,100 @@ async function listReservedActiveUserIdsByOrgAuth(
   return rows.map((row) => row.id);
 }
 
+async function terminateOrgAuthActiveFlowsInTransaction(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  activeFlowScope: {
+    orgAuthId: number;
+    organizationIds: number[];
+    profession: (typeof orgAuth.$inferSelect)["profession"];
+    level: number;
+  },
+): Promise<LifecycleTerminationResult> {
+  const userIds = await listReservedActiveUserIdsByOrgAuth(
+    database,
+    activeFlowScope.orgAuthId,
+    activeFlowScope.organizationIds,
+  );
+  const now = new Date();
+  const terminatedPractices =
+    userIds.length === 0
+      ? []
+      : await database
+          .update(practice)
+          .set({
+            practice_status: "terminated",
+            terminated_at: now,
+            termination_reason: "authorization_invalid",
+            updated_at: now,
+          })
+          .where(
+            and(
+              inArray(practice.user_id, userIds),
+              eq(practice.profession, activeFlowScope.profession),
+              eq(practice.level, activeFlowScope.level),
+              eq(practice.practice_status, "in_progress"),
+            ),
+          )
+          .returning({ id: practice.id });
+  const terminatedMockExams =
+    userIds.length === 0
+      ? []
+      : await database
+          .update(mockExam)
+          .set({
+            exam_status: "terminated",
+            terminated_at: now,
+            termination_reason: "authorization_invalid",
+            updated_at: now,
+          })
+          .where(
+            and(
+              inArray(mockExam.user_id, userIds),
+              eq(mockExam.profession, activeFlowScope.profession),
+              eq(mockExam.level, activeFlowScope.level),
+              inArray(mockExam.exam_status, [
+                "in_progress",
+                "scoring",
+                "scoring_partial_failed",
+              ]),
+            ),
+          )
+          .returning({ id: mockExam.id });
+  const blockedTrainingAnswers = await database
+    .update(organizationTrainingAnswer)
+    .set({
+      organization_training_answer_status: "read_only",
+      updated_at: now,
+    })
+    .where(
+      and(
+        eq(
+          organizationTrainingAnswer.organization_training_answer_status,
+          "in_progress",
+        ),
+        inArray(
+          organizationTrainingAnswer.organization_training_version_id,
+          database
+            .select({ id: organizationTrainingVersion.id })
+            .from(organizationTrainingVersion)
+            .where(
+              eq(
+                organizationTrainingVersion.org_auth_id,
+                activeFlowScope.orgAuthId,
+              ),
+            ),
+        ),
+      ),
+    )
+    .returning({ id: organizationTrainingAnswer.id });
+
+  return {
+    practiceCount: terminatedPractices.length,
+    mockExamCount: terminatedMockExams.length,
+    organizationTrainingAnswerCount: blockedTrainingAnswers.length,
+  };
+}
+
 function mapOrgAuthMutationRowToDto(input: {
   public_id: string;
   name: string;
@@ -3796,12 +3917,28 @@ async function appendTransactionalOrgAuthAuditLog(
     targetPublicId: string;
   },
 ): Promise<void> {
+  return appendTransactionalLifecycleAuditLog(database, {
+    ...input,
+    targetResourceType: "org_auth",
+  });
+}
+
+async function appendTransactionalLifecycleAuditLog(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: {
+    actionType: string;
+    metadataSummary: string;
+    operator: OrgAuthClosureCommandOperator;
+    targetPublicId: string;
+    targetResourceType: "organization" | "org_auth";
+  },
+): Promise<void> {
   await database.insert(auditLog).values({
     public_id: `audit-log-${randomUUID()}`,
     actor_public_id: input.operator.publicId,
     actor_role: input.operator.role,
     action_type: input.actionType,
-    target_resource_type: "org_auth",
+    target_resource_type: input.targetResourceType,
     target_public_id: input.targetPublicId,
     result_status: "success",
     metadata_summary: input.metadataSummary,

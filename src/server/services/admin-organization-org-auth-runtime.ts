@@ -32,7 +32,9 @@ import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
+  type LifecycleCommandResult,
   type OrgAuthClosureMutationResult,
+  type OrgAuthClosureCommandOperator,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
 import type { EmployeeImportCommandActor } from "../contracts/employee-import-command-contract";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
@@ -184,7 +186,12 @@ type OrganizationMutationRepositories =
     ): Promise<OrganizationDto | null>;
     disableOrganization?(
       input: NormalizedDisableOrganizationInput & { publicId: string },
-    ): Promise<DisableOrganizationResultDto | null>;
+      operator: OrgAuthClosureCommandOperator,
+    ): Promise<
+      | DisableOrganizationResultDto
+      | LifecycleCommandResult<DisableOrganizationResultDto>
+      | null
+    >;
     enableOrganization?(
       input: NormalizedDisableOrganizationInput & { publicId: string },
     ): Promise<OrganizationDto | null>;
@@ -194,13 +201,23 @@ function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
 }
 
-function formatOrganizationDisableMetadata(
-  result: DisableOrganizationResultDto | null,
-): string {
-  if (result === null) {
-    return "redacted organization disable metadata";
+function unwrapLifecycleCommandResult<TData extends object>(
+  result: LifecycleCommandResult<TData> | TData,
+): { data: TData; successAuditPersisted: boolean } {
+  if (
+    "successAuditPersisted" in result &&
+    result.successAuditPersisted === true &&
+    "data" in result
+  ) {
+    return { data: result.data as TData, successAuditPersisted: true };
   }
 
+  return { data: result as TData, successAuditPersisted: false };
+}
+
+function formatOrganizationDisableMetadata(
+  result: DisableOrganizationResultDto,
+): string {
   const activeFlowTermination = result.activeFlowTermination;
 
   if (activeFlowTermination === undefined) {
@@ -1098,26 +1115,55 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(organizationInputInvalidResponse);
           }
 
-          const result =
-            await organizationMutationRepositories.disableOrganization({
-              expectedRevision: disableInput.value.expectedRevision,
-              publicId,
-              isCascade: disableInput.value.isCascade,
-            });
+          const repositoryResult =
+            await organizationMutationRepositories.disableOrganization(
+              {
+                expectedRevision: disableInput.value.expectedRevision,
+                publicId,
+                isCascade: disableInput.value.isCascade,
+              },
+              {
+                publicId: actorOrError.publicId,
+                requestIp: readRequestIp(request),
+                role: actorOrError.roles[0],
+              },
+            );
 
-          await appendOrganizationAuditLog({
-            request,
-            actor: actorOrError,
-            actionType: "organization.disable",
-            targetPublicId: publicId,
-            resultStatus: result === null ? "failed" : "success",
-            metadataSummary: formatOrganizationDisableMetadata(result),
-          });
+          if (repositoryResult === null) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.disable",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted organization disable metadata",
+            });
+          }
+
+          const commandResult =
+            repositoryResult === null
+              ? null
+              : unwrapLifecycleCommandResult(repositoryResult);
+
+          if (commandResult !== null && !commandResult.successAuditPersisted) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.disable",
+              targetPublicId: publicId,
+              resultStatus: "success",
+              metadataSummary: formatOrganizationDisableMetadata(
+                commandResult.data,
+              ),
+            });
+          }
 
           return createJsonResponse(
-            result === null
+            commandResult === null
               ? organizationTreeConflictResponse
-              : createSuccessResponse<DisableOrganizationResultDto>(result),
+              : createSuccessResponse<DisableOrganizationResultDto>(
+                  commandResult.data,
+                ),
           );
         },
       },
@@ -1586,9 +1632,13 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(orgAuthMutationUnavailableResponse);
           }
 
-          const orgAuth = await repositories.cancelOrgAuth(publicId);
+          const repositoryResult = await repositories.cancelOrgAuth(publicId, {
+            publicId: actorOrError.publicId,
+            requestIp: readRequestIp(request),
+            role: actorOrError.roles[0],
+          });
 
-          if (orgAuth === null) {
+          if (repositoryResult === null) {
             await appendOrgAuthAuditLog({
               request,
               actor: actorOrError,
@@ -1601,19 +1651,20 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(orgAuthNotFoundResponse);
           }
 
-          const terminatedFlows =
-            repositories.terminateOrgAuthActiveFlows === undefined
-              ? { practiceCount: 0, mockExamCount: 0 }
-              : await repositories.terminateOrgAuthActiveFlows(publicId);
+          const commandResult = unwrapLifecycleCommandResult(repositoryResult);
 
-          await appendOrgAuthAuditLog({
-            request,
-            actor: actorOrError,
-            actionType: "org_auth.cancel",
-            targetPublicId: publicId,
-            resultStatus: "success",
-            metadataSummary: `redacted org_auth cancel metadata; terminated practice=${terminatedFlows.practiceCount} mock_exam=${terminatedFlows.mockExamCount}`,
-          });
+          if (!commandResult.successAuditPersisted) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.cancel",
+              targetPublicId: publicId,
+              resultStatus: "success",
+              metadataSummary: "redacted org_auth cancel metadata",
+            });
+          }
+
+          const orgAuth = commandResult.data;
 
           return createJsonResponse(
             createSuccessResponse<OrgAuthResultDto>({

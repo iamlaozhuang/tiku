@@ -1168,7 +1168,14 @@ export function createAdminFlowRuntimeRouteHandlers(
     context: { params: Promise<{ publicId: string }> };
     actionType: "user.disable" | "user.enable";
     mutate:
-      | ((publicId: string) => Promise<UserLifecycleMutationRepositoryResult>)
+      | ((mutationInput: {
+          operator: {
+            publicId: string;
+            requestIp: string | null;
+            role: AdminRole;
+          };
+          publicId: string;
+        }) => Promise<UserLifecycleMutationRepositoryResult>)
       | undefined;
     successMetadataSummary: string;
   }): Promise<Response> {
@@ -1207,21 +1214,31 @@ export function createAdminFlowRuntimeRouteHandlers(
       return createJsonResponse(userLifecycleMutationUnavailableResponse);
     }
 
-    const mutationResult = await input.mutate(publicId);
-    const didMutate = mutationResult === "updated";
-
-    await appendUserLifecycleAuditLog({
-      repositories,
-      request: input.request,
-      actor,
-      actionType: input.actionType,
-      targetPublicId: publicId,
-      resultStatus: didMutate ? "success" : "failed",
-      metadataSummary:
-        mutationResult === "quota_insufficient"
-          ? "redacted user enable quota conflict metadata"
-          : input.successMetadataSummary,
+    const mutationResult = await input.mutate({
+      operator: {
+        publicId: actor.publicId,
+        requestIp: readRequestIp(input.request),
+        role: actor.roles[0],
+      },
+      publicId,
     });
+    const didMutate =
+      mutationResult === "updated" || mutationResult === "updated_with_audit";
+
+    if (mutationResult !== "updated_with_audit") {
+      await appendUserLifecycleAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: publicId,
+        resultStatus: didMutate ? "success" : "failed",
+        metadataSummary:
+          mutationResult === "quota_insufficient"
+            ? "redacted user enable quota conflict metadata"
+            : input.successMetadataSummary,
+      });
+    }
 
     if (mutationResult === "quota_insufficient") {
       return createJsonResponse(userLifecycleQuotaInsufficientResponse);
@@ -1565,7 +1582,14 @@ export function createAdminFlowRuntimeRouteHandlers(
             request,
             context,
             actionType: "user.disable",
-            mutate: repositories.userOrgAuthRepository.disableUser,
+            mutate:
+              repositories.userOrgAuthRepository.disableUser === undefined
+                ? undefined
+                : ({ operator, publicId }) =>
+                    repositories.userOrgAuthRepository.disableUser!(
+                      publicId,
+                      operator,
+                    ),
             successMetadataSummary: "redacted user disable metadata",
           });
         },
@@ -1579,7 +1603,11 @@ export function createAdminFlowRuntimeRouteHandlers(
             request,
             context,
             actionType: "user.enable",
-            mutate: repositories.userOrgAuthRepository.enableUser,
+            mutate:
+              repositories.userOrgAuthRepository.enableUser === undefined
+                ? undefined
+                : ({ publicId }) =>
+                    repositories.userOrgAuthRepository.enableUser!(publicId),
             successMetadataSummary: "redacted user enable metadata",
           });
         },

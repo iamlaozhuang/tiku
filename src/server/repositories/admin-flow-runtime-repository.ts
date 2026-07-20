@@ -67,7 +67,8 @@ export type AdminFlowPage<TData> = TData & {
 export type UserLifecycleMutationRepositoryResult =
   | "not_found"
   | "quota_insufficient"
-  | "updated";
+  | "updated"
+  | "updated_with_audit";
 
 export type AdminUserOrgAuthRuntimeRepository = {
   listAdminAccounts?(
@@ -101,6 +102,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
   ): Promise<boolean>;
   disableUser?(
     publicId: string,
+    operator: UserDisableRepositoryOperator,
   ): Promise<UserLifecycleMutationRepositoryResult>;
   enableUser?(publicId: string): Promise<UserLifecycleMutationRepositoryResult>;
   revokeUserSessions?(publicId: string): Promise<boolean>;
@@ -113,6 +115,12 @@ export type AdminAccountLifecycleRepositoryActor = {
   publicId: string;
   roles: readonly AdminRole[];
   requestIp: string | null;
+};
+
+export type UserDisableRepositoryOperator = {
+  publicId: string;
+  requestIp: string | null;
+  role: AdminRole;
 };
 
 export type AdminAccountUpdateRepositoryInput = {
@@ -1019,8 +1027,15 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
 
       return rows.length > 0;
     },
-    async disableUser(publicId) {
-      return updateUserStatus(getDatabase(), publicId, "disabled");
+    async disableUser(publicId, operator) {
+      return updateUserStatus(getDatabase(), publicId, "disabled", {
+        actorPublicId: operator.publicId,
+        actorRole: operator.role,
+        actionType: "user.disable",
+        metadataSummary: "redacted user disable metadata",
+        requestIp: operator.requestIp,
+        targetPublicId: publicId,
+      });
     },
     async enableUser(publicId) {
       return updateUserStatus(getDatabase(), publicId, "active");
@@ -1530,8 +1545,12 @@ async function updateUserStatus(
   database: AdminFlowRuntimeDatabase,
   publicId: string,
   status: "active" | "disabled",
+  successAudit?: Parameters<
+    typeof setEmployeeAccountStatusWithQuota
+  >[1]["successAudit"],
 ): Promise<UserLifecycleMutationRepositoryResult> {
   return setEmployeeAccountStatusWithQuota(database, {
+    successAudit,
     status,
     userPublicId: publicId,
   });

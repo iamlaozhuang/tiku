@@ -1,17 +1,23 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20",
-  "objective": "Close F-0004 by preserving the existing multi-target explicit selection flow while allowing a single eligible personal_auth target to be resolved transactionally when omitted and writing a redacted audit_log in the same transaction, without schema, dependency, database execution, deployment, secret/env, Provider, or governance-kernel changes.",
+  "taskId": "p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20",
+  "objective": "Close F-0015 by making user disable, organization disable, and org_auth cancellation atomic repository commands that include existing access termination, authorization-lineage organization training blocking, and redacted success audit writes in the same transaction, without expanding entitlement or changing schema, dependencies, persistent data, external services, deployment, secret/env, Provider, or the safety kernel.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/superpowers/plans/2026-07-20-personal-auth-upgrade-target-selection.md",
-    "src/server/repositories/student-authorization-redeem-runtime-repository.ts",
-    "src/server/validators/redeem-code.ts",
-    "src/server/validators/redeem-code.test.ts",
-    "tests/unit/p1-personal-auth-upgrade-target-selection.test.ts",
-    "tests/unit/phase-8-student-authorization-redeem-runtime.test.ts"
+    "docs/superpowers/plans/2026-07-20-lifecycle-command-atomicity.md",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
+    "src/server/repositories/employee-org-auth-quota-repository.ts",
+    "src/server/services/admin-flow-runtime.ts",
+    "src/server/services/admin-organization-org-auth-runtime.ts",
+    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
+    "tests/unit/p1-employee-import-command-atomicity.test.ts",
+    "tests/unit/p1-org-auth-closure-actions.test.ts",
+    "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
+    "tests/unit/phase-20-ra-01-06-user-disable-termination.test.ts",
+    "tests/unit/phase-20-ra-01-10-organization-disable-termination.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -25,7 +31,7 @@
   ],
   "validationCommands": [
     {
-      "name": "personal-auth-upgrade-target-selection-focused",
+      "name": "lifecycle-command-atomicity-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -33,12 +39,14 @@
         "exec",
         "vitest",
         "run",
-        "src/server/validators/redeem-code.test.ts",
-        "tests/unit/p1-personal-auth-upgrade-target-selection.test.ts"
+        "tests/unit/p1-lifecycle-command-atomicity.test.ts",
+        "tests/unit/phase-20-ra-01-06-user-disable-termination.test.ts",
+        "tests/unit/phase-20-ra-01-10-organization-disable-termination.test.ts",
+        "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts"
       ]
     },
     {
-      "name": "personal-auth-upgrade-target-selection-affected-regression",
+      "name": "lifecycle-command-atomicity-affected-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -46,30 +54,40 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/redeem-code-authorization-service.test.ts",
-        "src/server/services/redeem-code-route.test.ts",
-        "tests/unit/phase-8-student-authorization-redeem-runtime.test.ts",
-        "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts",
-        "tests/unit/student-profile-redeem-ui.test.ts"
+        "tests/unit/p1-employee-import-command-atomicity.test.ts",
+        "tests/unit/p1-org-auth-closure-actions.test.ts",
+        "tests/unit/phase-20-ra-01-06-user-disable-termination.test.ts",
+        "tests/unit/phase-20-ra-01-10-organization-disable-termination.test.ts",
+        "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
+        "tests/unit/phase-11-system-ops-organization-management-loop.test.ts",
+        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+        "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
+        "src/server/services/admin-flow-runtime.test.ts"
       ]
     },
     {
-      "name": "personal-auth-upgrade-target-selection-lint",
+      "name": "lifecycle-command-atomicity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/student-authorization-redeem-runtime-repository.ts",
-        "src/server/validators/redeem-code.ts",
-        "src/server/validators/redeem-code.test.ts",
-        "tests/unit/p1-personal-auth-upgrade-target-selection.test.ts",
-        "tests/unit/phase-8-student-authorization-redeem-runtime.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
+        "src/server/repositories/employee-org-auth-quota-repository.ts",
+        "src/server/services/admin-flow-runtime.ts",
+        "src/server/services/admin-organization-org-auth-runtime.ts",
+        "tests/unit/p1-lifecycle-command-atomicity.test.ts",
+        "tests/unit/p1-employee-import-command-atomicity.test.ts",
+        "tests/unit/p1-org-auth-closure-actions.test.ts",
+        "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
+        "tests/unit/phase-20-ra-01-06-user-disable-termination.test.ts",
+        "tests/unit/phase-20-ra-01-10-organization-disable-termination.test.ts"
       ]
     },
     {
-      "name": "personal-auth-upgrade-target-selection-typecheck",
+      "name": "lifecycle-command-atomicity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -84,6 +102,6 @@
   },
   "push": {
     "target": "origin/master",
-    "requiresFreshApproval": true
+    "requiresFreshApproval": false
   }
 }
