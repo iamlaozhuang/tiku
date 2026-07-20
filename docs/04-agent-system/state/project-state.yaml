@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: minimal-safety-kernel-retirement-2026-07-20
-updatedAt: "2026-07-20T10:02:42-07:00"
+currentPhase: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+updatedAt: "2026-07-20T11:48:04-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -470,8 +470,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: minimal-safety-kernel-retirement-2026-07-20
-  currentCandidateClusterId: P1-RC-02
+  currentTaskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+  currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -498,6 +498,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
     - minimal-safety-kernel-retirement-2026-07-20
+    - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -512,6 +513,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
+    - minimal-safety-kernel-retirement-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -547,7 +549,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
     p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
     p1-mechanism-execution-compatibility-v2-1-2026-07-19: closed
-    minimal-safety-kernel-retirement-2026-07-20: in_progress
+    minimal-safety-kernel-retirement-2026-07-20: closed
+    p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -627,6 +630,12 @@ p1RemediationSerialProgram:
       originMasterSync: pass
       worktreeCleanup: pass
       shortBranchCleanup: pass
+    minimal-safety-kernel-retirement-2026-07-20:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
 lastClosedStartupTask:
   id: p1-p2-remediation-startup-package-v1-2026-07-15
   title: P1/P2 remediation startup package v1.0
@@ -688,37 +697,63 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: minimal-safety-kernel-retirement-2026-07-20
-  title: Minimal safety kernel retirement
-  phase: minimal-safety-kernel-retirement-2026-07-20
+  id: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+  title: Organization authorization closure actions
+  phase: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
   status: in_progress
-  priority: governance
-  taskKind: mechanism_hardening
-  productClosureContribution: none
-  branch: codex/minimal-safety-kernel
-  planPath: docs/05-execution-logs/task-plans/2026-07-20-minimal-safety-kernel-retirement.md
+  priority: p1
+  taskKind: product_remediation
+  productClosureContribution: F-0009
+  branch: fix/org-auth-closure-actions
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-  nextRequiredTaskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
-  productResumeAnchor:
-    findingId: F-0009
-    taskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
-    redStatus: not_started_until_mechanism_closeout
+  findingIds:
+    - F-0009
+  candidateRootCauseCluster: P1-RC-03
+  requirementAnchors:
+    - CT-REQ-004
+    - D02
+    - EAA-ORG-MANUAL-UPGRADE
+    - EAA-ORG-OVERLAP-CLOSURE
+  highRiskApproval:
+    category: permission
+    status: pending_candidate_bound_fresh_approval
+    proposedApprovalId: proposed-fresh-permission-approval-f0009-org-auth-closure-actions-2026-07-20
   currentExecutionGate:
-    status: satisfied
-    reason: current_user_approved_atomic_minimal_safety_kernel_replacement_2026_07_20
-    resumeAction: finish_mechanism_closeout_then_claim_f0009_without_more_mechanism_expansion
+    status: candidate_frozen_pending_fresh_permission_and_push_approval
+    reason: focused_and_affected_regression_lint_typecheck_and_main_thread_adversarial_review_passed
+    resumeAction: bind_external_permission_token_to_exact_staged_tree_then_commit_ff_only_merge_ordinary_push_sync_and_cleanup
 standingAuthorization:
-  id: current-user-approved-p1-remediation-goal-2026-07-16
-  source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
-  localCommit: approved_task_scoped
-  fastForwardMerge: approved_master_only
-  push: approved_origin_master_only
-  cleanup: approved_after_remote_sync
+  id: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+  source: current_user_message
+  scope: current_active_p1_goal_low_risk_product_tasks_only
+  localCommit: approved_only_after_exact_diff_validation_and_main_thread_adversarial_review
+  fastForwardMerge: approved_master_only_for_eligible_low_risk_tasks
+  push: approved_canonical_origin_master_only_for_eligible_low_risk_tasks
+  cleanup: approved_after_verified_remote_sync_for_eligible_low_risk_tasks
+  excludedTaskIds:
+    - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+  excludedCategories:
+    - dependency
+    - database
+    - permission
+    - authorization
+    - deployment
+    - secret_env
+    - provider
+    - payment
+    - external_service
+    - pull_request
+    - force_push
+  invalidatedBy:
+    - current_p1_goal_complete_or_cancelled
+    - user_revocation
+    - canonical_origin_change
+    - minimal_safety_kernel_semantic_change
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: fd696676c7cb85aad208bb9df70a020b3c1467be
-  lastKnownOriginMasterSha: fd696676c7cb85aad208bb9df70a020b3c1467be
-  lastKnownRemoteMasterSha: fd696676c7cb85aad208bb9df70a020b3c1467be
+  lastKnownMasterSha: 09938aa9729b44c0fca6a8a632963f8de7530d9c
+  lastKnownOriginMasterSha: 09938aa9729b44c0fca6a8a632963f8de7530d9c
+  lastKnownRemoteMasterSha: 09938aa9729b44c0fca6a8a632963f8de7530d9c
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

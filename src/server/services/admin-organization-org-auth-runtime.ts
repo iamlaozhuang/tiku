@@ -21,6 +21,7 @@ import {
   type OrgAuthListQuery,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
+  OrgAuthClosureActionResultDto,
   OrgAuthDetailResultDto,
   DisableOrganizationResultDto,
   OrgAuthResultDto,
@@ -31,6 +32,7 @@ import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
+  type OrgAuthClosureMutationResult,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
 import type { EmployeeImportCommandActor } from "../contracts/employee-import-command-contract";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
@@ -40,7 +42,13 @@ import {
 } from "./employee-import-command-service";
 import { createPostgresEmployeeImportCommandRepository } from "../repositories/postgres-employee-import-command-repository";
 import { createNoStoreJsonResponse } from "./employee-import-command-route";
-import { normalizeCreateOrgAuthPackageInput } from "../validators/org-auth";
+import {
+  normalizeCreateOrgAuthPackageInput,
+  normalizeOrgAuthClosureMetadataInput,
+  normalizeOrgAuthQuotaExpansionInput,
+  normalizeOrgAuthRenewalInput,
+  normalizeOrgAuthReplacementInput,
+} from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
   normalizeDisableOrganizationInput,
@@ -125,6 +133,10 @@ const orgAuthScopeOverlapResponse = createErrorResponse(
 const orgAuthQuotaExceededResponse = createErrorResponse(
   409006,
   "Org auth quota is exceeded or organization does not exist.",
+);
+const orgAuthClosureConflictResponse = createErrorResponse(
+  409007,
+  "Org auth closure action conflicts with current authorization state.",
 );
 const employeeMutationUnavailableResponse = createErrorResponse(
   503007,
@@ -252,6 +264,12 @@ function canManageOrgAuth(actor: AdminOrganizationOrgAuthActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
+}
+
+function readOrgAuthManagerRole(
+  actor: AdminOrganizationOrgAuthActor,
+): "ops_admin" | "super_admin" {
+  return actor.roles.includes("super_admin") ? "super_admin" : "ops_admin";
 }
 
 function canManageOrganization(actor: AdminOrganizationOrgAuthActor): boolean {
@@ -518,14 +536,22 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   async function appendOrgAuthAuditLog(input: {
     request: Request;
     actor: AdminOrganizationOrgAuthActor;
-    actionType: "org_auth.create" | "org_auth.cancel";
+    actionType:
+      | "org_auth.cancel"
+      | "org_auth.create"
+      | "org_auth.expand_quota"
+      | "org_auth.manual_upgrade"
+      | "org_auth.renew"
+      | "org_auth.replace";
     targetPublicId: string | null;
     resultStatus: "success" | "failed";
     metadataSummary: string;
   }): Promise<void> {
     await repositories.auditLogRepository?.appendAuditLog({
       actorPublicId: input.actor.publicId,
-      actorRole: input.actor.roles[0],
+      actorRole: canManageOrgAuth(input.actor)
+        ? readOrgAuthManagerRole(input.actor)
+        : input.actor.roles[0],
       actionType: input.actionType,
       targetResourceType: "org_auth",
       targetPublicId: input.targetPublicId,
@@ -597,7 +623,13 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
   async function requireOrgAuthManager(
     request: Request,
-    actionType: "org_auth.create" | "org_auth.cancel",
+    actionType:
+      | "org_auth.cancel"
+      | "org_auth.create"
+      | "org_auth.expand_quota"
+      | "org_auth.manual_upgrade"
+      | "org_auth.renew"
+      | "org_auth.replace",
     targetPublicId: string | null,
   ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
     const actor = await resolveAdminActor(request, sessionService);
@@ -647,6 +679,75 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     }
 
     return actor;
+  }
+
+  async function createOrgAuthClosureResponse(input: {
+    actionType:
+      | "org_auth.expand_quota"
+      | "org_auth.manual_upgrade"
+      | "org_auth.renew"
+      | "org_auth.replace";
+    actor: AdminOrganizationOrgAuthActor;
+    publicId: string;
+    request: Request;
+    result: OrgAuthClosureMutationResult;
+  }): Promise<Response> {
+    if (input.result.status === "success") {
+      return createJsonResponse(
+        createSuccessResponse<OrgAuthClosureActionResultDto>(input.result.data),
+      );
+    }
+
+    await appendOrgAuthAuditLog({
+      request: input.request,
+      actor: input.actor,
+      actionType: input.actionType,
+      targetPublicId: input.publicId,
+      resultStatus: "failed",
+      metadataSummary: "redacted org_auth closure conflict metadata",
+    });
+
+    return createJsonResponse(
+      input.result.status === "not_found"
+        ? orgAuthNotFoundResponse
+        : orgAuthClosureConflictResponse,
+    );
+  }
+
+  async function appendOrgAuthClosureInvalidInputAudit(input: {
+    actionType:
+      | "org_auth.expand_quota"
+      | "org_auth.manual_upgrade"
+      | "org_auth.renew"
+      | "org_auth.replace";
+    actor: AdminOrganizationOrgAuthActor;
+    publicId: string;
+    request: Request;
+  }): Promise<void> {
+    await appendOrgAuthAuditLog({
+      ...input,
+      targetPublicId: input.publicId,
+      resultStatus: "failed",
+      metadataSummary: "redacted org_auth invalid input metadata",
+    });
+  }
+
+  async function appendOrgAuthClosureUnavailableAudit(input: {
+    actionType:
+      | "org_auth.expand_quota"
+      | "org_auth.manual_upgrade"
+      | "org_auth.renew"
+      | "org_auth.replace";
+    actor: AdminOrganizationOrgAuthActor;
+    publicId: string;
+    request: Request;
+  }): Promise<void> {
+    await appendOrgAuthAuditLog({
+      ...input,
+      targetPublicId: input.publicId,
+      resultStatus: "failed",
+      metadataSummary: "redacted org_auth closure unavailable metadata",
+    });
   }
 
   async function requireEmployeeImportCommandActor(
@@ -1233,6 +1334,230 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
               ? orgAuthNotFoundResponse
               : createSuccessResponse<OrgAuthDetailResultDto>({ orgAuth }),
           );
+        },
+      },
+      upgrade: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireOrgAuthManager(
+            request,
+            "org_auth.manual_upgrade",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.upgradeOrgAuth === undefined) {
+            await appendOrgAuthClosureUnavailableAudit({
+              actionType: "org_auth.manual_upgrade",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeOrgAuthClosureMetadataInput(
+            await readRequestJson(request),
+          );
+
+          if (!normalizedInput.success) {
+            await appendOrgAuthClosureInvalidInputAudit({
+              actionType: "org_auth.manual_upgrade",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthInputInvalidResponse);
+          }
+
+          const result = await repositories.upgradeOrgAuth({
+            ...normalizedInput.value,
+            operator: {
+              publicId: actorOrError.publicId,
+              requestIp: readRequestIp(request),
+              role: readOrgAuthManagerRole(actorOrError),
+            },
+            publicId,
+          });
+
+          return createOrgAuthClosureResponse({
+            actionType: "org_auth.manual_upgrade",
+            actor: actorOrError,
+            publicId,
+            request,
+            result,
+          });
+        },
+      },
+      renew: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireOrgAuthManager(
+            request,
+            "org_auth.renew",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.renewOrgAuth === undefined) {
+            await appendOrgAuthClosureUnavailableAudit({
+              actionType: "org_auth.renew",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeOrgAuthRenewalInput(
+            await readRequestJson(request),
+          );
+
+          if (!normalizedInput.success) {
+            await appendOrgAuthClosureInvalidInputAudit({
+              actionType: "org_auth.renew",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthInputInvalidResponse);
+          }
+
+          const result = await repositories.renewOrgAuth({
+            ...normalizedInput.value,
+            operator: {
+              publicId: actorOrError.publicId,
+              requestIp: readRequestIp(request),
+              role: readOrgAuthManagerRole(actorOrError),
+            },
+            publicId,
+          });
+
+          return createOrgAuthClosureResponse({
+            actionType: "org_auth.renew",
+            actor: actorOrError,
+            publicId,
+            request,
+            result,
+          });
+        },
+      },
+      replace: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireOrgAuthManager(
+            request,
+            "org_auth.replace",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.replaceOrgAuth === undefined) {
+            await appendOrgAuthClosureUnavailableAudit({
+              actionType: "org_auth.replace",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeOrgAuthReplacementInput(
+            await readRequestJson(request),
+          );
+
+          if (!normalizedInput.success) {
+            await appendOrgAuthClosureInvalidInputAudit({
+              actionType: "org_auth.replace",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthInputInvalidResponse);
+          }
+
+          const result = await repositories.replaceOrgAuth({
+            ...normalizedInput.value,
+            operator: {
+              publicId: actorOrError.publicId,
+              requestIp: readRequestIp(request),
+              role: readOrgAuthManagerRole(actorOrError),
+            },
+            publicId,
+          });
+
+          return createOrgAuthClosureResponse({
+            actionType: "org_auth.replace",
+            actor: actorOrError,
+            publicId,
+            request,
+            result,
+          });
+        },
+      },
+      expandQuota: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireOrgAuthManager(
+            request,
+            "org_auth.expand_quota",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.expandOrgAuthQuota === undefined) {
+            await appendOrgAuthClosureUnavailableAudit({
+              actionType: "org_auth.expand_quota",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeOrgAuthQuotaExpansionInput(
+            await readRequestJson(request),
+          );
+
+          if (!normalizedInput.success) {
+            await appendOrgAuthClosureInvalidInputAudit({
+              actionType: "org_auth.expand_quota",
+              actor: actorOrError,
+              publicId,
+              request,
+            });
+            return createJsonResponse(orgAuthInputInvalidResponse);
+          }
+
+          const result = await repositories.expandOrgAuthQuota({
+            ...normalizedInput.value,
+            operator: {
+              publicId: actorOrError.publicId,
+              requestIp: readRequestIp(request),
+              role: readOrgAuthManagerRole(actorOrError),
+            },
+            publicId,
+          });
+
+          return createOrgAuthClosureResponse({
+            actionType: "org_auth.expand_quota",
+            actor: actorOrError,
+            publicId,
+            request,
+            result,
+          });
         },
       },
       cancel: {

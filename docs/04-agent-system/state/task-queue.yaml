@@ -200,8 +200,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: minimal-safety-kernel-retirement-2026-07-20
-  currentCandidateClusterId: P1-RC-02
+  currentTaskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+  currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -228,6 +228,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
     - minimal-safety-kernel-retirement-2026-07-20
+    - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -242,6 +243,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
+    - minimal-safety-kernel-retirement-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -277,12 +279,33 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
     p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
     p1-mechanism-execution-compatibility-v2-1-2026-07-19: closed
-    minimal-safety-kernel-retirement-2026-07-20: in_progress
+    minimal-safety-kernel-retirement-2026-07-20: closed
+    p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: in_progress
 activeTasks:
+  - id: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    title: Organization authorization closure actions
+    phase: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0009
+    branch: fix/org-auth-closure-actions
+    dependsOn:
+      - minimal-safety-kernel-retirement-2026-07-20
+    objective: close F-0009 with explicit auditable org_auth renewal, upgrade, replacement, and increase-only quota expansion commands
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-03
+    findingIds:
+      - F-0009
+    highRiskApproval:
+      category: permission
+      status: pending_candidate_bound_fresh_approval
+      proposedApprovalId: proposed-fresh-permission-approval-f0009-org-auth-closure-actions-2026-07-20
+    executionStage: candidate_frozen_pending_fresh_permission_and_push_approval
   - id: minimal-safety-kernel-retirement-2026-07-20
     title: Minimal safety kernel retirement
     phase: minimal-safety-kernel-retirement-2026-07-20
-    status: in_progress
+    status: closed
     priority: governance
     taskKind: mechanism_hardening
     productClosureContribution: none
@@ -292,10 +315,6 @@ activeTasks:
     objective: atomically replace task-specific guards with one generic safety kernel
     planPath: docs/05-execution-logs/task-plans/2026-07-20-minimal-safety-kernel-retirement.md
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-    nextTaskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
-    productResumeAnchor:
-      findingId: F-0009
-      redStatus: not_started_until_mechanism_closeout
   - id: p1-mechanism-execution-compatibility-v2-1-2026-07-19
     title: P1 mechanism execution compatibility v2.1
     phase: p1-mechanism-execution-compatibility-v2-1-2026-07-19
@@ -2388,12 +2407,32 @@ activeTasks:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
 standingAuthorization:
-  id: current-user-approved-p1-remediation-goal-2026-07-16
-  source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
-  localCommit: approved_task_scoped
-  fastForwardMerge: approved_master_only
-  push: approved_origin_master_only
-  cleanup: approved_after_remote_sync
+  id: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+  source: current_user_message
+  scope: current_active_p1_goal_low_risk_product_tasks_only
+  localCommit: approved_only_after_exact_diff_validation_and_main_thread_adversarial_review
+  fastForwardMerge: approved_master_only_for_eligible_low_risk_tasks
+  push: approved_canonical_origin_master_only_for_eligible_low_risk_tasks
+  cleanup: approved_after_verified_remote_sync_for_eligible_low_risk_tasks
+  excludedTaskIds:
+    - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+  excludedCategories:
+    - dependency
+    - database
+    - permission
+    - authorization
+    - deployment
+    - secret_env
+    - provider
+    - payment
+    - external_service
+    - pull_request
+    - force_push
+  invalidatedBy:
+    - current_p1_goal_complete_or_cancelled
+    - user_revocation
+    - canonical_origin_change
+    - minimal_safety_kernel_semantic_change
   deployment: blocked_requires_fresh_user_approval
 historyPointers:
   index: docs/04-agent-system/state/active-state-history-index.yaml

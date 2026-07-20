@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { hashPassword } from "better-auth/crypto";
 import {
@@ -13,6 +13,7 @@ import {
   isNull,
   lte,
   lt,
+  ne,
   or,
   sql,
   type SQL,
@@ -41,6 +42,7 @@ import {
 } from "./employee-account-repository";
 import type {
   DisableOrganizationResultDto,
+  OrgAuthClosureActionResultDto,
   OrgAuthDetailDto,
   OrgAuthDto,
   OrgAuthListDto,
@@ -48,7 +50,13 @@ import type {
 } from "../contracts/organization-auth-contract";
 import type { AuthUpgradeStatus, AuthorizationEdition } from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
-import type { NormalizedCreateOrgAuthInput } from "../validators/org-auth";
+import type {
+  NormalizedCreateOrgAuthInput,
+  NormalizedOrgAuthClosureMetadataInput,
+  NormalizedOrgAuthQuotaExpansionInput,
+  NormalizedOrgAuthRenewalInput,
+  NormalizedOrgAuthReplacementInput,
+} from "../validators/org-auth";
 import type {
   NormalizedCreateOrganizationInput,
   NormalizedDisableOrganizationInput,
@@ -120,6 +128,18 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     input: NormalizedCreateOrgAuthInput,
   ): Promise<OrgAuthDto | null>;
   cancelOrgAuth?(publicId: string): Promise<OrgAuthDto | null>;
+  upgradeOrgAuth?(
+    input: OrgAuthManualUpgradeCommandInput,
+  ): Promise<OrgAuthClosureMutationResult>;
+  replaceOrgAuth?(
+    input: OrgAuthReplacementCommandInput,
+  ): Promise<OrgAuthClosureMutationResult>;
+  renewOrgAuth?(
+    input: OrgAuthRenewalCommandInput,
+  ): Promise<OrgAuthClosureMutationResult>;
+  expandOrgAuthQuota?(
+    input: OrgAuthQuotaExpansionCommandInput,
+  ): Promise<OrgAuthClosureMutationResult>;
   terminateOrgAuthActiveFlows?(
     publicId: string,
   ): Promise<OrgAuthTerminationResult>;
@@ -171,12 +191,46 @@ export type AppendEmployeeAuditLogInput = {
   requestIp: string | null;
 };
 
+export type OrgAuthClosureCommandOperator = {
+  publicId: string;
+  requestIp: string | null;
+  role: string;
+};
+
+export type OrgAuthManualUpgradeCommandInput =
+  NormalizedOrgAuthClosureMetadataInput & {
+    operator: OrgAuthClosureCommandOperator;
+    publicId: string;
+  };
+
+export type OrgAuthReplacementCommandInput =
+  NormalizedOrgAuthReplacementInput & {
+    operator: OrgAuthClosureCommandOperator;
+    publicId: string;
+  };
+
+export type OrgAuthRenewalCommandInput = NormalizedOrgAuthRenewalInput & {
+  operator: OrgAuthClosureCommandOperator;
+  publicId: string;
+};
+
+export type OrgAuthQuotaExpansionCommandInput =
+  NormalizedOrgAuthQuotaExpansionInput & {
+    operator: OrgAuthClosureCommandOperator;
+    publicId: string;
+  };
+
+export type OrgAuthClosureMutationResult =
+  | { status: "conflict" | "not_found" }
+  | { status: "success"; data: OrgAuthClosureActionResultDto };
+
 export type OrgAuthTerminationResult = {
   practiceCount: number;
   mockExamCount: number;
 };
 
 const {
+  admin,
   auditLog,
   authAccount,
   authSession,
@@ -206,6 +260,25 @@ type OrganizationMutationRow = {
   contact_phone: string | null;
   remark: string | null;
   revision: number;
+  created_at: Date;
+  updated_at: Date;
+};
+
+type OrgAuthMutationRow = {
+  id: number;
+  public_id: string;
+  name: string;
+  purchaser_organization_id: number;
+  auth_scope_type: OrgAuthDto["authScopeType"];
+  edition: AuthorizationEdition;
+  profession: OrgAuthDto["profession"];
+  level: number;
+  account_quota: number;
+  used_quota: number;
+  starts_at: Date;
+  expires_at: Date;
+  status: OrgAuthDto["status"];
+  cancelled_at: Date | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -316,6 +389,27 @@ function selectOrganizationMutationColumns() {
     revision: organization.revision,
     created_at: organization.created_at,
     updated_at: organization.updated_at,
+  };
+}
+
+function selectOrgAuthMutationColumns() {
+  return {
+    id: orgAuth.id,
+    public_id: orgAuth.public_id,
+    name: orgAuth.name,
+    purchaser_organization_id: orgAuth.purchaser_organization_id,
+    auth_scope_type: orgAuth.auth_scope_type,
+    edition: orgAuth.edition,
+    profession: orgAuth.profession,
+    level: orgAuth.level,
+    account_quota: orgAuth.account_quota,
+    used_quota: orgAuth.used_quota,
+    starts_at: orgAuth.starts_at,
+    expires_at: orgAuth.expires_at,
+    status: orgAuth.status,
+    cancelled_at: orgAuth.cancelled_at,
+    created_at: orgAuth.created_at,
+    updated_at: orgAuth.updated_at,
   };
 }
 
@@ -646,6 +740,24 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         database,
         [{ id: row.id, edition: row.edition }],
       );
+      const timelineRows = await database
+        .select({
+          public_id: auditLog.public_id,
+          actor_role: auditLog.actor_role,
+          action_type: auditLog.action_type,
+          result_status: auditLog.result_status,
+          metadata_summary: auditLog.metadata_summary,
+          created_at: auditLog.created_at,
+        })
+        .from(auditLog)
+        .where(
+          and(
+            eq(auditLog.target_resource_type, "org_auth"),
+            eq(auditLog.target_public_id, publicId),
+          ),
+        )
+        .orderBy(desc(auditLog.created_at))
+        .limit(50);
 
       return {
         ...mapOrgAuthMutationRowToDto({
@@ -680,6 +792,14 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           usedQuota: row.used_quota,
           availableQuota: Math.max(row.account_quota - row.used_quota, 0),
         },
+        timeline: timelineRows.map((timelineRow) => ({
+          publicId: timelineRow.public_id,
+          actorRole: timelineRow.actor_role,
+          actionType: timelineRow.action_type,
+          resultStatus: timelineRow.result_status,
+          metadataSummary: timelineRow.metadata_summary,
+          createdAt: timelineRow.created_at.toISOString(),
+        })),
       };
     },
     async listEmployees(query) {
@@ -1261,6 +1381,440 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           organization_public_ids:
             organizationPublicIdsByOrgAuthId.get(orgAuthRow.id) ?? [],
         });
+      });
+    },
+    async upgradeOrgAuth(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+        await lockOrganizationScopeMutation(transactionalDatabase);
+
+        const now = new Date();
+        const [orgAuthRow] = await transactionalDatabase
+          .select(selectOrgAuthMutationColumns())
+          .from(orgAuth)
+          .where(
+            and(
+              eq(orgAuth.public_id, input.publicId),
+              eq(orgAuth.status, "active"),
+            ),
+          )
+          .limit(1);
+
+        if (orgAuthRow === undefined) {
+          return { status: "not_found" as const };
+        }
+
+        if (
+          orgAuthRow.edition !== "standard" ||
+          orgAuthRow.starts_at > now ||
+          orgAuthRow.expires_at <= now
+        ) {
+          return { status: "conflict" as const };
+        }
+
+        const [operator] = await transactionalDatabase
+          .select({ id: admin.id })
+          .from(admin)
+          .where(
+            and(
+              eq(admin.public_id, input.operator.publicId),
+              eq(admin.status, "active"),
+            ),
+          )
+          .limit(1);
+        const [activeUpgrade] = await transactionalDatabase
+          .select({ id: authUpgrade.id })
+          .from(authUpgrade)
+          .where(
+            and(
+              eq(authUpgrade.org_auth_id, orgAuthRow.id),
+              eq(authUpgrade.status, "active"),
+              lte(authUpgrade.starts_at, now),
+              gt(authUpgrade.expires_at, now),
+              isNull(authUpgrade.revoked_at),
+            ),
+          )
+          .limit(1);
+
+        if (operator === undefined || activeUpgrade !== undefined) {
+          return { status: "conflict" as const };
+        }
+
+        await transactionalDatabase.insert(authUpgrade).values({
+          public_id: `auth-upgrade-${randomUUID()}`,
+          personal_auth_id: null,
+          org_auth_id: orgAuthRow.id,
+          target_edition: "advanced",
+          source_type: "ops_manual",
+          redeem_code_id: null,
+          ops_reference: input.externalReference,
+          ops_note: input.opsNote,
+          operator_admin_id: operator.id,
+          starts_at: now,
+          expires_at: orgAuthRow.expires_at,
+          revoked_at: null,
+          revoked_by_admin_id: null,
+          status: "active",
+          created_at: now,
+          updated_at: now,
+        });
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.manual_upgrade",
+          metadataSummary: `redacted org_auth manual upgrade metadata; ${formatExternalReferenceFingerprint(input.externalReference)}`,
+          operator: input.operator,
+          targetPublicId: input.publicId,
+        });
+
+        return {
+          status: "success" as const,
+          data: {
+            action: "manual_upgrade" as const,
+            orgAuth: await mapOrgAuthMutationRowWithRelatedData(
+              transactionalDatabase,
+              { ...orgAuthRow, updated_at: now },
+            ),
+          },
+        };
+      });
+    },
+    async renewOrgAuth(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+        await lockOrganizationScopeMutation(transactionalDatabase);
+
+        const [previousOrgAuthRow] = await transactionalDatabase
+          .select(selectOrgAuthMutationColumns())
+          .from(orgAuth)
+          .where(eq(orgAuth.public_id, input.publicId))
+          .limit(1);
+
+        if (previousOrgAuthRow === undefined) {
+          return { status: "not_found" as const };
+        }
+
+        if (
+          previousOrgAuthRow.status === "cancelled" ||
+          input.expiresAt <= previousOrgAuthRow.expires_at
+        ) {
+          return { status: "conflict" as const };
+        }
+
+        const [purchaserOrganization] = await transactionalDatabase
+          .select({ id: organization.id, public_id: organization.public_id })
+          .from(organization)
+          .where(
+            eq(organization.id, previousOrgAuthRow.purchaser_organization_id),
+          )
+          .limit(1);
+        const organizationPublicIdsByOrgAuthId =
+          await listOrgAuthOrganizationPublicIds(transactionalDatabase, [
+            previousOrgAuthRow.id,
+          ]);
+
+        if (purchaserOrganization === undefined) {
+          return { status: "conflict" as const };
+        }
+
+        const renewalInput: NormalizedCreateOrgAuthInput = {
+          name: `${previousOrgAuthRow.name}续费`,
+          purchaserOrganizationPublicId: purchaserOrganization.public_id,
+          authScopeType: previousOrgAuthRow.auth_scope_type,
+          profession: previousOrgAuthRow.profession,
+          level: previousOrgAuthRow.level,
+          edition: previousOrgAuthRow.edition,
+          accountQuota: input.accountQuota,
+          startsAt: previousOrgAuthRow.expires_at,
+          expiresAt: input.expiresAt,
+          organizationPublicIds:
+            organizationPublicIdsByOrgAuthId.get(previousOrgAuthRow.id) ?? [],
+        };
+        const organizationIds = await listInputOrganizationIds(
+          transactionalDatabase,
+          renewalInput,
+        );
+        await lockOrgAuthQuotaScope(transactionalDatabase, {
+          level: renewalInput.level,
+          organizationIds,
+          profession: renewalInput.profession,
+        });
+
+        if (
+          organizationIds.length === 0 ||
+          (await hasOverlappingOrgAuthWithOrganizationIds(
+            transactionalDatabase,
+            renewalInput,
+            organizationIds,
+          ))
+        ) {
+          return { status: "conflict" as const };
+        }
+
+        const usedQuota = await countActiveEmployeesByOrganizationIds(
+          transactionalDatabase,
+          organizationIds,
+        );
+
+        if (usedQuota > renewalInput.accountQuota) {
+          return { status: "conflict" as const };
+        }
+
+        const now = new Date();
+        const successorRow = await insertOrgAuthWithScope(
+          transactionalDatabase,
+          renewalInput,
+          purchaserOrganization,
+          organizationIds,
+          usedQuota,
+          now,
+        );
+
+        if (successorRow === null) {
+          throw new Error("Failed to create org auth renewal successor.");
+        }
+
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.renew",
+          metadataSummary: `redacted org_auth renewal metadata; successor=${successorRow.public_id}; ${formatExternalReferenceFingerprint(input.externalReference)}`,
+          operator: input.operator,
+          targetPublicId: input.publicId,
+        });
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.renewal_successor_created",
+          metadataSummary: `redacted org_auth renewal lineage metadata; predecessor=${input.publicId}; ${formatExternalReferenceFingerprint(input.externalReference)}`,
+          operator: input.operator,
+          targetPublicId: successorRow.public_id,
+        });
+
+        return {
+          status: "success" as const,
+          data: {
+            action: "renewal_successor" as const,
+            previousOrgAuth: await mapOrgAuthMutationRowWithRelatedData(
+              transactionalDatabase,
+              previousOrgAuthRow,
+            ),
+            orgAuth: await mapOrgAuthMutationRowWithRelatedData(
+              transactionalDatabase,
+              successorRow,
+            ),
+          },
+        };
+      });
+    },
+    async replaceOrgAuth(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+        await lockOrganizationScopeMutation(transactionalDatabase);
+
+        const [previousOrgAuthRow] = await transactionalDatabase
+          .select(selectOrgAuthMutationColumns())
+          .from(orgAuth)
+          .where(
+            and(
+              eq(orgAuth.public_id, input.publicId),
+              eq(orgAuth.status, "active"),
+            ),
+          )
+          .limit(1);
+
+        if (previousOrgAuthRow === undefined) {
+          return { status: "not_found" as const };
+        }
+
+        const now = new Date();
+
+        if (
+          previousOrgAuthRow.auth_scope_type !==
+            input.replacement.authScopeType ||
+          previousOrgAuthRow.profession !== input.replacement.profession ||
+          previousOrgAuthRow.level !== input.replacement.level ||
+          input.replacement.startsAt > now ||
+          input.replacement.expiresAt <= now
+        ) {
+          return { status: "conflict" as const };
+        }
+
+        const [purchaserOrganization] = await transactionalDatabase
+          .select({ id: organization.id, public_id: organization.public_id })
+          .from(organization)
+          .where(
+            eq(
+              organization.public_id,
+              input.replacement.purchaserOrganizationPublicId,
+            ),
+          )
+          .limit(1);
+
+        if (
+          purchaserOrganization === undefined ||
+          previousOrgAuthRow.purchaser_organization_id !==
+            purchaserOrganization.id
+        ) {
+          return { status: "conflict" as const };
+        }
+
+        const organizationIds = await listInputOrganizationIds(
+          transactionalDatabase,
+          input.replacement,
+        );
+        const previousOrganizationPublicIds =
+          (
+            await listOrgAuthOrganizationPublicIds(transactionalDatabase, [
+              previousOrgAuthRow.id,
+            ])
+          ).get(previousOrgAuthRow.id) ?? [];
+        const replacementOrganizationPublicIds =
+          await listOrganizationPublicIdsByIds(
+            transactionalDatabase,
+            organizationIds,
+          );
+        await lockOrgAuthQuotaScope(transactionalDatabase, {
+          level: input.replacement.level,
+          organizationIds,
+          profession: input.replacement.profession,
+        });
+
+        if (
+          organizationIds.length === 0 ||
+          !haveSameOrganizationIds(
+            previousOrganizationPublicIds,
+            replacementOrganizationPublicIds,
+          ) ||
+          (await hasOverlappingOrgAuthWithOrganizationIds(
+            transactionalDatabase,
+            input.replacement,
+            organizationIds,
+            previousOrgAuthRow.id,
+          ))
+        ) {
+          return { status: "conflict" as const };
+        }
+
+        const usedQuota = await countActiveEmployeesByOrganizationIds(
+          transactionalDatabase,
+          organizationIds,
+        );
+
+        if (usedQuota > input.replacement.accountQuota) {
+          return { status: "conflict" as const };
+        }
+
+        const replacementRow = await insertOrgAuthWithScope(
+          transactionalDatabase,
+          input.replacement,
+          purchaserOrganization,
+          organizationIds,
+          usedQuota,
+          now,
+        );
+
+        if (replacementRow === null) {
+          throw new Error("Failed to create replacement org auth.");
+        }
+
+        const [cancelledOrgAuthRow] = await transactionalDatabase
+          .update(orgAuth)
+          .set({ status: "cancelled", cancelled_at: now, updated_at: now })
+          .where(
+            and(
+              eq(orgAuth.id, previousOrgAuthRow.id),
+              eq(orgAuth.status, "active"),
+            ),
+          )
+          .returning(selectOrgAuthMutationColumns());
+
+        if (cancelledOrgAuthRow === undefined) {
+          throw new Error("Failed to cancel replaced org auth.");
+        }
+
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.replace",
+          metadataSummary: `redacted org_auth replacement metadata; replacement=${replacementRow.public_id}; ${formatExternalReferenceFingerprint(input.externalReference)}`,
+          operator: input.operator,
+          targetPublicId: input.publicId,
+        });
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.replacement_created",
+          metadataSummary: `redacted org_auth replacement lineage metadata; predecessor=${input.publicId}; ${formatExternalReferenceFingerprint(input.externalReference)}`,
+          operator: input.operator,
+          targetPublicId: replacementRow.public_id,
+        });
+
+        return {
+          status: "success" as const,
+          data: {
+            action: "transactional_replacement" as const,
+            previousOrgAuth: await mapOrgAuthMutationRowWithRelatedData(
+              transactionalDatabase,
+              cancelledOrgAuthRow,
+            ),
+            orgAuth: await mapOrgAuthMutationRowWithRelatedData(
+              transactionalDatabase,
+              replacementRow,
+            ),
+          },
+        };
+      });
+    },
+    async expandOrgAuthQuota(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+        await lockOrganizationScopeMutation(transactionalDatabase);
+
+        const now = new Date();
+        const [orgAuthRow] = await transactionalDatabase
+          .update(orgAuth)
+          .set({ account_quota: input.accountQuota, updated_at: now })
+          .where(
+            and(
+              eq(orgAuth.public_id, input.publicId),
+              eq(orgAuth.status, "active"),
+              lt(orgAuth.account_quota, input.accountQuota),
+            ),
+          )
+          .returning(selectOrgAuthMutationColumns());
+
+        if (orgAuthRow === undefined) {
+          const [existingOrgAuth] = await transactionalDatabase
+            .select({ id: orgAuth.id })
+            .from(orgAuth)
+            .where(eq(orgAuth.public_id, input.publicId))
+            .limit(1);
+
+          return {
+            status: existingOrgAuth === undefined ? "not_found" : "conflict",
+          } as const;
+        }
+
+        await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+          actionType: "org_auth.expand_quota",
+          metadataSummary: `redacted org_auth quota expansion metadata; account quota=${input.accountQuota}; ${formatExternalReferenceFingerprint(input.externalReference)}`,
+          operator: input.operator,
+          targetPublicId: input.publicId,
+        });
+
+        return {
+          status: "success" as const,
+          data: {
+            action: "quota_expansion" as const,
+            orgAuth: await mapOrgAuthMutationRowWithRelatedData(
+              transactionalDatabase,
+              orgAuthRow,
+            ),
+          },
+        };
       });
     },
     async terminateOrgAuthActiveFlows(publicId) {
@@ -2766,6 +3320,75 @@ async function listOrganizationPublicIdsByIds(
   return rows.map((row) => row.public_id);
 }
 
+function haveSameOrganizationIds(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  const rightIds = new Set(right);
+
+  return rightIds.size === right.length && left.every((id) => rightIds.has(id));
+}
+
+async function insertOrgAuthWithScope(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: NormalizedCreateOrgAuthInput,
+  purchaserOrganization: { id: number; public_id: string },
+  organizationIds: number[],
+  usedQuota: number,
+  now: Date,
+): Promise<OrgAuthMutationRow | null> {
+  const [orgAuthRow] = await database
+    .insert(orgAuth)
+    .values({
+      public_id: `org-auth-${randomUUID()}`,
+      name: input.name,
+      purchaser_organization_id: purchaserOrganization.id,
+      auth_scope_type: input.authScopeType,
+      edition: input.edition,
+      profession: input.profession,
+      level: input.level,
+      account_quota: input.accountQuota,
+      used_quota: usedQuota,
+      starts_at: input.startsAt,
+      expires_at: input.expiresAt,
+      status: "active",
+      cancelled_at: null,
+      created_at: now,
+      updated_at: now,
+    })
+    .returning(selectOrgAuthMutationColumns());
+
+  if (orgAuthRow === undefined) {
+    return null;
+  }
+
+  if (input.authScopeType === "specified_nodes") {
+    await database.insert(orgAuthOrganization).values(
+      organizationIds.map((organizationId) => ({
+        org_auth_id: orgAuthRow.id,
+        organization_id: organizationId,
+      })),
+    );
+  }
+
+  const employeeIds = await listActiveEmployeeIdsByOrganizationIds(
+    database,
+    organizationIds,
+  );
+
+  if (employeeIds.length > 0) {
+    await database.insert(employeeOrgAuth).values(
+      employeeIds.map((employeeId) => ({
+        employee_id: employeeId,
+        org_auth_id: orgAuthRow.id,
+      })),
+    );
+  }
+
+  return orgAuthRow;
+}
+
 async function listInputOrganizationIds(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   input: NormalizedCreateOrgAuthInput,
@@ -2820,6 +3443,7 @@ async function hasOverlappingOrgAuthWithOrganizationIds(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   input: NormalizedCreateOrgAuthInput,
   organizationIds: number[],
+  excludedOrgAuthId?: number,
 ): Promise<boolean> {
   if (organizationIds.length === 0) {
     return false;
@@ -2845,6 +3469,9 @@ async function hasOverlappingOrgAuthWithOrganizationIds(
         eq(orgAuth.status, "active"),
         eq(orgAuth.profession, input.profession),
         eq(orgAuth.level, input.level),
+        excludedOrgAuthId === undefined
+          ? undefined
+          : ne(orgAuth.id, excludedOrgAuthId),
         lt(orgAuth.starts_at, input.expiresAt),
         gt(orgAuth.expires_at, input.startsAt),
       ),
@@ -3134,6 +3761,61 @@ function mapOrgAuthMutationRowToDto(input: {
     createdAt: input.created_at.toISOString(),
     updatedAt: input.updated_at.toISOString(),
   };
+}
+
+async function mapOrgAuthMutationRowWithRelatedData(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  row: OrgAuthMutationRow,
+): Promise<OrgAuthDto> {
+  const [purchaserOrganization] = await database
+    .select({ public_id: organization.public_id })
+    .from(organization)
+    .where(eq(organization.id, row.purchaser_organization_id))
+    .limit(1);
+  const organizationPublicIdsByOrgAuthId =
+    await listOrgAuthOrganizationPublicIds(database, [row.id]);
+  const editionEvaluationsByOrgAuthId = await listOrgAuthEditionEvaluations(
+    database,
+    [{ id: row.id, edition: row.edition }],
+  );
+
+  return mapOrgAuthMutationRowToDto({
+    ...row,
+    ...getOrgAuthEditionEvaluation(row, editionEvaluationsByOrgAuthId),
+    purchaser_organization_public_id: purchaserOrganization?.public_id ?? "",
+    organization_public_ids: organizationPublicIdsByOrgAuthId.get(row.id) ?? [],
+  });
+}
+
+async function appendTransactionalOrgAuthAuditLog(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: {
+    actionType: string;
+    metadataSummary: string;
+    operator: OrgAuthClosureCommandOperator;
+    targetPublicId: string;
+  },
+): Promise<void> {
+  await database.insert(auditLog).values({
+    public_id: `audit-log-${randomUUID()}`,
+    actor_public_id: input.operator.publicId,
+    actor_role: input.operator.role,
+    action_type: input.actionType,
+    target_resource_type: "org_auth",
+    target_public_id: input.targetPublicId,
+    result_status: "success",
+    metadata_summary: input.metadataSummary,
+    request_ip: input.operator.requestIp,
+  });
+}
+
+function formatExternalReferenceFingerprint(externalReference: string): string {
+  const fingerprint = createHash("sha256")
+    .update(externalReference, "utf8")
+    .digest("hex")
+    .slice(0, 16);
+
+  return `external reference fingerprint=${fingerprint}`;
 }
 
 function createLocalRuntimeDatabase(): AdminOrganizationOrgAuthRuntimeDatabase {

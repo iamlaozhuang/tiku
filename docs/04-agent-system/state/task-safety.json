@@ -1,49 +1,85 @@
 {
   "schemaVersion": 1,
-  "taskId": "minimal-safety-kernel-retirement-2026-07-20",
-  "objective": "Atomically replace per-finding governance guards with one minimal safety kernel while preserving product validation, high-risk approval, Git closeout, and the P1 resume anchor.",
+  "taskId": "p1-remediation-rc-03-org-auth-closure-actions-2026-07-20",
+  "objective": "Close F-0009 by adding explicit, auditable organization authorization renewal-successor, manual-upgrade, transactional-replacement, and increase-only quota-expansion commands and operations UI actions without schema, dependency, database execution, deployment, secret/env, Provider, or governance-kernel changes.",
   "allowedFiles": [
-    "AGENTS.md",
-    ".husky/pre-commit",
-    ".husky/pre-push",
-    ".husky/post-commit",
-    "docs/04-agent-system/operating-manual.md",
-    "docs/04-agent-system/sop/minimal-safety-kernel.md",
-    "docs/04-agent-system/sop/task-lifecycle-governance.md",
-    "docs/04-agent-system/sop/automation-loop.md",
-    "docs/04-agent-system/sop/lean-module-run-v3-governance.md",
-    "docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md",
-    "docs/04-agent-system/sop/p1-approved-same-task-transition.md",
-    "docs/04-agent-system/sop/p1-remediation-efficiency-loop.md",
-    "docs/04-agent-system/sop/repository-hygiene-closeout-checklist.md",
-    "docs/04-agent-system/state/mechanism-source-of-truth-index.yaml",
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/05-execution-logs/task-plans/2026-07-20-minimal-safety-kernel-retirement.md",
-    "scripts/agent-system/Test-MinimalSafetyKernel.ps1",
-    "scripts/agent-system/Test-MinimalSafetyKernel.Smoke.ps1"
+    "src/app/api/v1/org-auths/[publicId]/expand-quota/route.ts",
+    "src/app/api/v1/org-auths/[publicId]/renew/route.ts",
+    "src/app/api/v1/org-auths/[publicId]/replace/route.ts",
+    "src/app/api/v1/org-auths/[publicId]/upgrade/route.ts",
+    "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
+    "src/server/contracts/organization-auth-contract.ts",
+    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
+    "src/server/services/admin-organization-org-auth-runtime.ts",
+    "src/server/validators/org-auth.ts",
+    "tests/unit/p1-org-auth-closure-actions.test.ts"
   ],
   "validationCommands": [
     {
-      "name": "minimal-safety-kernel-focused",
+      "name": "org-auth-closure-actions-focused",
       "kind": "test",
-      "executable": "powershell.exe",
+      "executable": "corepack.cmd",
       "arguments": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "./scripts/agent-system/Test-MinimalSafetyKernel.Smoke.ps1",
-        "-Profile",
-        "focused"
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/p1-org-auth-closure-actions.test.ts"
       ]
+    },
+    {
+      "name": "org-auth-affected-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts",
+        "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
+        "tests/unit/phase-21-authorization-overlap-concurrency-proof.test.ts",
+        "tests/unit/phase-20-ra-06-04-org-auth-detail-route-alignment.test.ts",
+        "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
+        "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
+        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/organization/organization-auth-layering-lifecycle.test.ts"
+      ]
+    },
+    {
+      "name": "org-auth-closure-actions-lint",
+      "kind": "lint",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "eslint",
+        "src/app/api/v1/org-auths/[publicId]/expand-quota/route.ts",
+        "src/app/api/v1/org-auths/[publicId]/renew/route.ts",
+        "src/app/api/v1/org-auths/[publicId]/replace/route.ts",
+        "src/app/api/v1/org-auths/[publicId]/upgrade/route.ts",
+        "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
+        "src/server/contracts/organization-auth-contract.ts",
+        "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
+        "src/server/services/admin-organization-org-auth-runtime.ts",
+        "src/server/validators/org-auth.ts",
+        "tests/unit/p1-org-auth-closure-actions.test.ts"
+      ]
+    },
+    {
+      "name": "org-auth-closure-actions-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     }
   ],
   "approvalSources": {
     "dependency": null,
     "database": null,
-    "permission": null,
+    "permission": "proposed-fresh-permission-approval-f0009-org-auth-closure-actions-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },

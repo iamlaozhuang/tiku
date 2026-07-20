@@ -68,11 +68,14 @@ import {
   type AdminListQuery,
 } from "@/server/contracts/admin-interaction-contract";
 import type {
+  OrgAuthClosureActionResultDto,
   OrgAuthDetailDto,
   DisableOrganizationResultDto,
   OrgAuthListDto,
   OrgAuthDetailResultDto,
   OrgAuthResultDto,
+  OrgAuthDto,
+  OrgAuthTimelineEventDto,
   OrganizationResultDto,
 } from "@/server/contracts/organization-auth-contract";
 import type {
@@ -164,6 +167,22 @@ type OrgAuthFormState = {
   startsAt: string;
 };
 
+type OrgAuthClosureActionKind = "expandQuota" | "renew" | "replace" | "upgrade";
+
+type OrgAuthClosureMetadataInput = {
+  externalReference: string;
+  opsNote: string;
+};
+
+type OrgAuthClosureActionInput =
+  | OrgAuthClosureMetadataInput
+  | (OrgAuthClosureMetadataInput & { accountQuota: number })
+  | (OrgAuthClosureMetadataInput & {
+      accountQuota: number;
+      expiresAt: string;
+    })
+  | (OrgAuthClosureMetadataInput & CreateOrgAuthInput);
+
 type OrganizationFormState = {
   contactName: string;
   contactPhone: string;
@@ -209,6 +228,12 @@ type OrgAuthConfirmationState =
     }
   | {
       kind: "cancelOrgAuth";
+      publicId: string;
+    }
+  | {
+      action: OrgAuthClosureActionKind;
+      input: OrgAuthClosureActionInput;
+      kind: "closeOrgAuth";
       publicId: string;
     }
   | null;
@@ -2275,11 +2300,317 @@ function OrgAuthList({
   );
 }
 
+export function OrgAuthClosureActionPanel({
+  onSubmit,
+  orgAuth,
+}: {
+  onSubmit: (
+    action: OrgAuthClosureActionKind,
+    input: OrgAuthClosureActionInput,
+  ) => void;
+  orgAuth: OrgAuthDto;
+}) {
+  const [action, setAction] = useState<OrgAuthClosureActionKind | null>(null);
+  const [accountQuota, setAccountQuota] = useState(
+    String(orgAuth.accountQuota + 1),
+  );
+  const [edition, setEdition] = useState<AuthorizationEdition>(
+    orgAuth.edition ?? "standard",
+  );
+  const [expiresAt, setExpiresAt] = useState("");
+  const [externalReference, setExternalReference] = useState("");
+  const [name, setName] = useState(`${orgAuth.name}替换`);
+  const [opsNote, setOpsNote] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const normalizedAccountQuota = Number(accountQuota);
+  const hasValidMetadata =
+    externalReference.trim().length > 0 && opsNote.trim().length > 0;
+  const hasValidQuota =
+    Number.isInteger(normalizedAccountQuota) && normalizedAccountQuota > 0;
+  const canSubmit =
+    action !== null &&
+    hasValidMetadata &&
+    (action === "upgrade" || hasValidQuota) &&
+    (action !== "expandQuota" ||
+      normalizedAccountQuota > orgAuth.accountQuota) &&
+    (action !== "renew" ||
+      (expiresAt.length > 0 &&
+        new Date(toStartOfDayIso(expiresAt)) > new Date(orgAuth.expiresAt))) &&
+    (action !== "replace" ||
+      (name.trim().length > 0 &&
+        startsAt.length > 0 &&
+        expiresAt.length > 0 &&
+        new Date(toStartOfDayIso(expiresAt)) >
+          new Date(toStartOfDayIso(startsAt))));
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!canSubmit || action === null) {
+      return;
+    }
+
+    const metadata = {
+      externalReference: externalReference.trim(),
+      opsNote: opsNote.trim(),
+    };
+
+    if (action === "upgrade") {
+      onSubmit(action, metadata);
+      return;
+    }
+
+    if (action === "expandQuota") {
+      onSubmit(action, { ...metadata, accountQuota: normalizedAccountQuota });
+      return;
+    }
+
+    if (action === "renew") {
+      onSubmit(action, {
+        ...metadata,
+        accountQuota: normalizedAccountQuota,
+        expiresAt: toStartOfDayIso(expiresAt),
+      });
+      return;
+    }
+
+    onSubmit(action, {
+      ...metadata,
+      accountQuota: normalizedAccountQuota,
+      authScopeType: orgAuth.authScopeType,
+      edition,
+      expiresAt: toStartOfDayIso(expiresAt),
+      name: name.trim(),
+      organizationPublicIds: orgAuth.organizationPublicIds,
+      purchaserOrganizationPublicId: orgAuth.purchaserOrganizationPublicId,
+      scopeSelections: [
+        { level: orgAuth.level, profession: orgAuth.profession },
+      ],
+      startsAt: toStartOfDayIso(startsAt),
+    });
+  }
+
+  const actionButtons = [
+    { id: "renew" as const, label: "续费接续" },
+    { id: "upgrade" as const, label: "手动升级" },
+    { id: "replace" as const, label: "替换授权" },
+    { id: "expandQuota" as const, label: "增量扩容" },
+  ];
+  const reviewLabelByAction: Record<OrgAuthClosureActionKind, string> = {
+    expandQuota: "复核增量扩容",
+    renew: "复核续费接续",
+    replace: "复核替换授权",
+    upgrade: "复核手动升级",
+  };
+
+  return (
+    <section
+      aria-label="企业授权闭环动作"
+      className="border-border bg-background space-y-3 rounded-md border p-3"
+    >
+      <div>
+        <h4 className="text-text-primary text-sm font-semibold">
+          显式闭环动作
+        </h4>
+        <p className="text-text-muted mt-1 text-xs">
+          系统不会自动合并授权；每次动作都要求外部参考号、运营备注与确认。
+        </p>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {actionButtons.map((actionButton) => (
+          <button
+            key={actionButton.id}
+            className="border-border bg-surface hover:bg-muted inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={
+              actionButton.id === "upgrade" &&
+              (orgAuth.edition !== "standard" ||
+                orgAuth.effectiveEdition === "advanced")
+            }
+            type="button"
+            onClick={() => setAction(actionButton.id)}
+          >
+            {actionButton.label}
+          </button>
+        ))}
+      </div>
+      {action === null ? null : (
+        <form className="space-y-3" onSubmit={handleSubmit}>
+          {action === "renew" || action === "expandQuota" ? (
+            <label className="text-text-secondary grid gap-1 text-sm">
+              新账号额度
+              <input
+                className="border-border bg-background h-9 rounded-md border px-3"
+                min={1}
+                type="number"
+                value={accountQuota}
+                onChange={(event) => setAccountQuota(event.target.value)}
+              />
+            </label>
+          ) : null}
+          {action === "renew" ? (
+            <label className="text-text-secondary grid gap-1 text-sm">
+              新到期日期
+              <input
+                className="border-border bg-background h-9 rounded-md border px-3"
+                type="date"
+                value={expiresAt}
+                onChange={(event) => setExpiresAt(event.target.value)}
+              />
+            </label>
+          ) : null}
+          {action === "replace" ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-text-secondary grid gap-1 text-sm sm:col-span-2">
+                新授权名称
+                <input
+                  className="border-border bg-background h-9 rounded-md border px-3"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </label>
+              <label className="text-text-secondary grid gap-1 text-sm">
+                新授权版本
+                <select
+                  className="border-border bg-background h-9 rounded-md border px-3"
+                  value={edition}
+                  onChange={(event) =>
+                    setEdition(event.target.value as AuthorizationEdition)
+                  }
+                >
+                  <option value="standard">标准版</option>
+                  <option value="advanced">高级版</option>
+                </select>
+              </label>
+              <label className="text-text-secondary grid gap-1 text-sm">
+                新账号额度
+                <input
+                  className="border-border bg-background h-9 rounded-md border px-3"
+                  min={1}
+                  type="number"
+                  value={accountQuota}
+                  onChange={(event) => setAccountQuota(event.target.value)}
+                />
+              </label>
+              <label className="text-text-secondary grid gap-1 text-sm">
+                新开始日期
+                <input
+                  className="border-border bg-background h-9 rounded-md border px-3"
+                  type="date"
+                  value={startsAt}
+                  onChange={(event) => setStartsAt(event.target.value)}
+                />
+              </label>
+              <label className="text-text-secondary grid gap-1 text-sm">
+                新到期日期
+                <input
+                  className="border-border bg-background h-9 rounded-md border px-3"
+                  type="date"
+                  value={expiresAt}
+                  onChange={(event) => setExpiresAt(event.target.value)}
+                />
+              </label>
+            </div>
+          ) : null}
+          <label className="text-text-secondary grid gap-1 text-sm">
+            外部参考号
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3"
+              value={externalReference}
+              onChange={(event) => setExternalReference(event.target.value)}
+            />
+          </label>
+          <label className="text-text-secondary grid gap-1 text-sm">
+            运营备注
+            <textarea
+              className="border-border bg-background min-h-20 rounded-md border px-3 py-2"
+              value={opsNote}
+              onChange={(event) => setOpsNote(event.target.value)}
+            />
+          </label>
+          <button
+            className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={!canSubmit}
+            type="submit"
+          >
+            {reviewLabelByAction[action]}
+          </button>
+        </form>
+      )}
+    </section>
+  );
+}
+
+export function OrgAuthTimeline({
+  events,
+}: {
+  events: OrgAuthTimelineEventDto[];
+}) {
+  const actionLabelByType: Record<string, string> = {
+    "org_auth.cancel": "取消授权",
+    "org_auth.create": "创建授权",
+    "org_auth.expand_quota": "增量扩容",
+    "org_auth.manual_upgrade": "手动升级",
+    "org_auth.renew": "续费接续",
+    "org_auth.renewal_successor_created": "续费接续已创建",
+    "org_auth.replace": "事务替换",
+    "org_auth.replacement_created": "替换授权已创建",
+  };
+
+  return (
+    <section
+      aria-label="企业授权审计时间线"
+      className="border-border space-y-3 rounded-md border p-3"
+    >
+      <div>
+        <h4 className="text-text-primary text-sm font-semibold">审计时间线</h4>
+        <p className="text-text-muted mt-1 text-xs">
+          仅展示脱敏动作、角色、结果与关联摘要。
+        </p>
+      </div>
+      {events.length === 0 ? (
+        <p className="text-text-muted text-sm">暂无可展示的审计事件。</p>
+      ) : (
+        <ol className="space-y-2">
+          {events.map((event) => (
+            <li
+              key={event.publicId}
+              className="bg-muted/40 rounded-md p-3 text-sm"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-text-primary font-medium">
+                  {actionLabelByType[event.actionType] ?? event.actionType}
+                </span>
+                <span className="text-text-muted text-xs">
+                  {formatDate(event.createdAt)}
+                </span>
+              </div>
+              <p className="text-text-secondary mt-1 text-xs">
+                {event.actorRole} /{" "}
+                {event.resultStatus === "success" ? "执行成功" : "执行失败"}
+              </p>
+              {event.metadataSummary === null ? null : (
+                <p className="text-text-muted mt-1 text-xs break-words">
+                  {event.metadataSummary}
+                </p>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
 function OrgAuthDetailPanel({
   onClose,
+  onSubmitClosureAction,
   orgAuth,
 }: {
   onClose: () => void;
+  onSubmitClosureAction: (
+    action: OrgAuthClosureActionKind,
+    input: OrgAuthClosureActionInput,
+  ) => void;
   orgAuth: OrgAuthDetailDto;
 }) {
   return (
@@ -2322,6 +2653,13 @@ function OrgAuthDetailPanel({
             ))}
           </div>
         </div>
+        {orgAuth.status === "active" ? (
+          <OrgAuthClosureActionPanel
+            orgAuth={orgAuth}
+            onSubmit={onSubmitClosureAction}
+          />
+        ) : null}
+        <OrgAuthTimeline events={orgAuth.timeline ?? []} />
       </div>
     </AdminDetailDrawer>
   );
@@ -3252,8 +3590,26 @@ function OrgAuthConfirmationDialog({
   onConfirm: () => void;
 }) {
   const isCreate = confirmationState.kind === "createOrgAuth";
+  const closureAction =
+    confirmationState.kind === "closeOrgAuth" ? confirmationState.action : null;
   const createOrgAuthInput =
     confirmationState.kind === "createOrgAuth" ? confirmationState.input : null;
+  const closureTitleByAction: Record<OrgAuthClosureActionKind, string> = {
+    expandQuota: "确认增量扩容？",
+    renew: "确认创建续费接续？",
+    replace: "确认事务替换授权？",
+    upgrade: "确认手动升级？",
+  };
+  const title = isCreate
+    ? "确认创建企业授权？"
+    : closureAction === null
+      ? "确认取消企业授权？"
+      : closureTitleByAction[closureAction];
+  const confirmLabel = isCreate
+    ? "确认创建"
+    : closureAction === null
+      ? "确认取消"
+      : "确认执行";
 
   return (
     <div
@@ -3267,14 +3623,14 @@ function OrgAuthConfirmationDialog({
             className="text-brand-primary size-4"
             aria-hidden="true"
           />
-          <h2 className="text-text-primary text-base font-semibold">
-            {isCreate ? "确认创建企业授权？" : "确认取消企业授权？"}
-          </h2>
+          <h2 className="text-text-primary text-base font-semibold">{title}</h2>
         </div>
         <p className="text-text-muted text-sm">
           {isCreate
             ? "创建会提交企业公开编号、授权范围、专业等级、额度和有效期，由后端执行重叠校验。"
-            : "取消会终止该企业授权，并由后端处理受影响的练习和模拟考试会话。"}
+            : closureAction === null
+              ? "取消会终止该企业授权，并由后端处理受影响的练习和模拟考试会话。"
+              : "动作将由后端在事务与并发锁内校验，并写入脱敏审计时间线。"}
         </p>
         {createOrgAuthInput === null ? null : (
           <p className="text-text-secondary text-xs">
@@ -3285,14 +3641,14 @@ function OrgAuthConfirmationDialog({
           <button
             type="button"
             className={
-              isCreate
+              isCreate || closureAction !== null
                 ? "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
                 : "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
             }
             data-testid={isCreate ? "org-auth-confirm-action" : undefined}
             onClick={onConfirm}
           >
-            {isCreate ? "确认创建" : "确认取消"}
+            {confirmLabel}
           </button>
           <button
             type="button"
@@ -5159,6 +5515,66 @@ export function AdminOrgAuthPage() {
       return;
     }
 
+    if (confirmationState.kind === "closeOrgAuth") {
+      const closurePathByAction: Record<OrgAuthClosureActionKind, string> = {
+        expandQuota: "expand-quota",
+        renew: "renew",
+        replace: "replace",
+        upgrade: "upgrade",
+      };
+      const closureSuccessMessageByAction: Record<
+        OrgAuthClosureActionKind,
+        string
+      > = {
+        expandQuota: "企业授权额度已扩容",
+        renew: "企业授权续费接续已创建",
+        replace: "企业授权已完成事务替换",
+        upgrade: "企业授权已升级为高级版",
+      };
+      const { action, input, publicId } = confirmationState;
+      const closureResponse = await postAdminApi<OrgAuthClosureActionResultDto>(
+        `/api/v1/org-auths/${publicId}/${closurePathByAction[action]}`,
+        sessionToken,
+        input,
+      );
+
+      setConfirmationState(null);
+
+      if (closureResponse.code !== 0 || closureResponse.data === null) {
+        setToastMessage({
+          message: closureResponse.message,
+          tone: "error",
+        });
+        return;
+      }
+
+      const closureResult = closureResponse.data;
+      setData((currentData) => ({
+        ...currentData,
+        orgAuths: [
+          closureResult.orgAuth,
+          ...currentData.orgAuths
+            .map((orgAuth) =>
+              closureResult.action === "transactional_replacement" &&
+              orgAuth.publicId === closureResult.previousOrgAuth.publicId
+                ? closureResult.previousOrgAuth
+                : orgAuth,
+            )
+            .filter(
+              (orgAuth) => orgAuth.publicId !== closureResult.orgAuth.publicId,
+            ),
+        ],
+      }));
+      setSelectedOrgAuthPublicId(null);
+      setSelectedOrgAuthDetail(null);
+      setOrgAuthListRefreshVersion((version) => version + 1);
+      setToastMessage({
+        message: closureSuccessMessageByAction[action],
+        tone: "success",
+      });
+      return;
+    }
+
     const cancelResponse = await postAdminApi<OrgAuthResultDto>(
       `/api/v1/org-auths/${confirmationState.publicId}/cancel`,
       sessionToken,
@@ -6271,6 +6687,14 @@ export function AdminOrgAuthPage() {
             setSelectedOrgAuthPublicId(null);
             setSelectedOrgAuthDetail(null);
           }}
+          onSubmitClosureAction={(action, input) =>
+            setConfirmationState({
+              action,
+              input,
+              kind: "closeOrgAuth",
+              publicId: selectedOrgAuthDetail.publicId,
+            })
+          }
         />
       )}
 

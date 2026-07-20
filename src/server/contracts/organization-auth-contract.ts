@@ -70,6 +70,15 @@ export type OrgAuthDetailOccupancyDto = {
   availableQuota: number;
 };
 
+export type OrgAuthTimelineEventDto = {
+  actionType: string;
+  actorRole: string;
+  createdAt: string;
+  metadataSummary: string | null;
+  publicId: string;
+  resultStatus: string;
+};
+
 export type OrgAuthDetailDto = OrgAuthDto & {
   purchaserOrganization: Required<
     Pick<
@@ -88,12 +97,41 @@ export type OrgAuthDetailDto = OrgAuthDto & {
     >
   >[];
   occupancy: OrgAuthDetailOccupancyDto;
+  timeline?: OrgAuthTimelineEventDto[];
 };
 
 export type OrgAuthResultDto = {
   orgAuth: OrgAuthDto;
   orgAuths: OrgAuthDto[];
 };
+
+export type OrgAuthManualUpgradeResultDto = {
+  action: "manual_upgrade";
+  orgAuth: OrgAuthDto;
+};
+
+export type OrgAuthReplacementResultDto = {
+  action: "transactional_replacement";
+  orgAuth: OrgAuthDto;
+  previousOrgAuth: OrgAuthDto;
+};
+
+export type OrgAuthRenewalResultDto = {
+  action: "renewal_successor";
+  orgAuth: OrgAuthDto;
+  previousOrgAuth: OrgAuthDto;
+};
+
+export type OrgAuthQuotaExpansionResultDto = {
+  action: "quota_expansion";
+  orgAuth: OrgAuthDto;
+};
+
+export type OrgAuthClosureActionResultDto =
+  | OrgAuthManualUpgradeResultDto
+  | OrgAuthQuotaExpansionResultDto
+  | OrgAuthReplacementResultDto
+  | OrgAuthRenewalResultDto;
 
 export type OrgAuthDetailResultDto = {
   orgAuth: OrgAuthDetailDto;

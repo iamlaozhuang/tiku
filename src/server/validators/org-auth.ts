@@ -29,6 +29,27 @@ export type NormalizedCreateOrgAuthPackageInput = {
   orgAuthInputs: NormalizedCreateOrgAuthInput[];
 };
 
+export type NormalizedOrgAuthClosureMetadataInput = {
+  externalReference: string;
+  opsNote: string;
+};
+
+export type NormalizedOrgAuthQuotaExpansionInput =
+  NormalizedOrgAuthClosureMetadataInput & {
+    accountQuota: number;
+  };
+
+export type NormalizedOrgAuthReplacementInput =
+  NormalizedOrgAuthClosureMetadataInput & {
+    replacement: NormalizedCreateOrgAuthInput;
+  };
+
+export type NormalizedOrgAuthRenewalInput =
+  NormalizedOrgAuthClosureMetadataInput & {
+    accountQuota: number;
+    expiresAt: Date;
+  };
+
 type ValidationResult<TValue> =
   | {
       success: true;
@@ -40,6 +61,8 @@ type ValidationResult<TValue> =
     };
 
 const INVALID_ORG_AUTH_INPUT_MESSAGE = "Invalid org auth input.";
+const MAX_EXTERNAL_REFERENCE_LENGTH = 128;
+const MAX_OPS_NOTE_LENGTH = 1_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -53,6 +76,22 @@ function normalizeRequiredText(value: unknown): string | null {
   const text = value.trim();
 
   return text.length === 0 ? null : text;
+}
+
+function normalizeExternalReference(value: unknown): string | null {
+  const text = normalizeRequiredText(value);
+
+  return text !== null &&
+    text.length <= MAX_EXTERNAL_REFERENCE_LENGTH &&
+    !/[\u0000-\u001f\u007f]/u.test(text)
+    ? text
+    : null;
+}
+
+function normalizeOpsNote(value: unknown): string | null {
+  const text = normalizeRequiredText(value);
+
+  return text !== null && text.length <= MAX_OPS_NOTE_LENGTH ? text : null;
 }
 
 function normalizePositiveInteger(value: unknown): number | null {
@@ -227,4 +266,63 @@ export function normalizeCreateOrgAuthInput(
         value: packageInput.value.orgAuthInputs[0],
       }
     : packageInput;
+}
+
+export function normalizeOrgAuthClosureMetadataInput(
+  input: unknown,
+): ValidationResult<NormalizedOrgAuthClosureMetadataInput> {
+  if (!isRecord(input)) {
+    return { success: false, message: INVALID_ORG_AUTH_INPUT_MESSAGE };
+  }
+
+  const externalReference = normalizeExternalReference(input.externalReference);
+  const opsNote = normalizeOpsNote(input.opsNote);
+
+  return externalReference === null || opsNote === null
+    ? { success: false, message: INVALID_ORG_AUTH_INPUT_MESSAGE }
+    : { success: true, value: { externalReference, opsNote } };
+}
+
+export function normalizeOrgAuthQuotaExpansionInput(
+  input: unknown,
+): ValidationResult<NormalizedOrgAuthQuotaExpansionInput> {
+  const metadata = normalizeOrgAuthClosureMetadataInput(input);
+  const accountQuota = isRecord(input)
+    ? normalizePositiveInteger(input.accountQuota)
+    : null;
+
+  return !metadata.success || accountQuota === null
+    ? { success: false, message: INVALID_ORG_AUTH_INPUT_MESSAGE }
+    : { success: true, value: { ...metadata.value, accountQuota } };
+}
+
+export function normalizeOrgAuthReplacementInput(
+  input: unknown,
+): ValidationResult<NormalizedOrgAuthReplacementInput> {
+  const metadata = normalizeOrgAuthClosureMetadataInput(input);
+  const replacement = normalizeCreateOrgAuthInput(input);
+
+  return !metadata.success || !replacement.success
+    ? { success: false, message: INVALID_ORG_AUTH_INPUT_MESSAGE }
+    : {
+        success: true,
+        value: { ...metadata.value, replacement: replacement.value },
+      };
+}
+
+export function normalizeOrgAuthRenewalInput(
+  input: unknown,
+): ValidationResult<NormalizedOrgAuthRenewalInput> {
+  const metadata = normalizeOrgAuthClosureMetadataInput(input);
+  const accountQuota = isRecord(input)
+    ? normalizePositiveInteger(input.accountQuota)
+    : null;
+  const expiresAt = isRecord(input) ? normalizeDate(input.expiresAt) : null;
+
+  return !metadata.success || accountQuota === null || expiresAt === null
+    ? { success: false, message: INVALID_ORG_AUTH_INPUT_MESSAGE }
+    : {
+        success: true,
+        value: { ...metadata.value, accountQuota, expiresAt },
+      };
 }
