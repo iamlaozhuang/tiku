@@ -1042,21 +1042,25 @@ async function fetchPersonalAiGenerationRequestHistoryForSession(
   );
 }
 
+type PersonalAiLearningSessionRequestBody =
+  | { sourceResultPublicId: string }
+  | {
+      sessionPublicId: string;
+      sourceResultPublicId: string;
+      sourceTaskPublicId: string;
+      ownerType?: "personal" | "organization";
+      ownerPublicId?: string;
+      visibleGeneratedContent: NonNullable<
+        PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["visibleGeneratedContent"]
+      >;
+      paperAssemblyContainer?: StudentAiPaperAssemblyContainer;
+    };
+
 async function fetchCreatePersonalAiLearningSession(
   studentSessionValue: StudentSessionRequestToken,
-  input:
-    | { sourceResultPublicId: string }
-    | {
-        sessionPublicId: string;
-        sourceResultPublicId: string;
-        sourceTaskPublicId: string;
-        ownerType?: "personal" | "organization";
-        ownerPublicId?: string;
-        visibleGeneratedContent: NonNullable<
-          PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["visibleGeneratedContent"]
-        >;
-        paperAssemblyContainer?: StudentAiPaperAssemblyContainer;
-      },
+  input: PersonalAiLearningSessionRequestBody & {
+    authorizationPublicId: string;
+  },
 ): Promise<{
   code: number;
   message: string;
@@ -1078,6 +1082,7 @@ async function fetchCreatePersonalAiLearningSession(
 async function fetchSubmitPersonalAiLearningAnswer(
   studentSessionValue: StudentSessionRequestToken,
   sessionPublicId: string,
+  authorizationPublicId: string,
   input: {
     sessionQuestionPublicId: string;
     selectedOptionLabels: string[];
@@ -1091,7 +1096,7 @@ async function fetchSubmitPersonalAiLearningAnswer(
   return fetchStudentApi<PersonalAiGenerationLearningSessionAnswerFeedbackDto>(
     `/api/v1/personal-ai-generation-learning-sessions/${encodeURIComponent(
       sessionPublicId,
-    )}/answers`,
+    )}/answers?${new URLSearchParams({ authorizationPublicId }).toString()}`,
     studentSessionValue,
     {
       method: "POST",
@@ -1106,6 +1111,7 @@ async function fetchSubmitPersonalAiLearningAnswer(
 async function fetchPersonalAiLearningSessionProgress(
   studentSessionValue: StudentSessionRequestToken,
   sessionPublicId: string,
+  authorizationPublicId: string,
 ): Promise<{
   code: number;
   message: string;
@@ -1114,7 +1120,7 @@ async function fetchPersonalAiLearningSessionProgress(
   return fetchStudentApi<PersonalAiGenerationLearningSessionProgressResultDto>(
     `/api/v1/personal-ai-generation-learning-sessions/${encodeURIComponent(
       sessionPublicId,
-    )}/progress`,
+    )}/progress?${new URLSearchParams({ authorizationPublicId }).toString()}`,
     studentSessionValue,
     {
       method: "GET",
@@ -4631,6 +4637,7 @@ export function StudentPersonalAiGenerationPage() {
       (aiLearningSessionQuestions.length === 0 &&
         paperAssemblyContainer === null) ||
       currentAiLearningSessionPublicId === null ||
+      selectedAuthorizationPublicId === null ||
       experience === null ||
       experience.resultState.resultPublicId === null ||
       visibleGeneratedContent === null
@@ -4664,15 +4671,22 @@ export function StudentPersonalAiGenerationPage() {
   }
 
   async function startOrResumeAiLearningSession(
-    requestBody: Parameters<typeof fetchCreatePersonalAiLearningSession>[1],
+    requestBody: PersonalAiLearningSessionRequestBody,
     resultPublicId: string,
   ): Promise<PersonalAiGenerationLearningSessionQuestionDto[] | null> {
+    if (selectedAuthorizationPublicId === null) {
+      return null;
+    }
+
     setLearningSessionResultPublicId(resultPublicId);
 
     try {
       const sessionResponse = await fetchCreatePersonalAiLearningSession(
         readStudentSessionRequestToken(),
-        requestBody,
+        {
+          ...requestBody,
+          authorizationPublicId: selectedAuthorizationPublicId,
+        },
       );
 
       if (
@@ -4701,6 +4715,7 @@ export function StudentPersonalAiGenerationPage() {
         const progressResponse = await fetchPersonalAiLearningSessionProgress(
           readStudentSessionRequestToken(),
           session.sessionPublicId,
+          selectedAuthorizationPublicId,
         );
 
         if (
@@ -4762,7 +4777,11 @@ export function StudentPersonalAiGenerationPage() {
         ? activeAiLearningSessionQuestions
         : await ensureAiLearningSessionStarted();
 
-    if (sessionQuestions === null || activeAiLearningSessionPublicId === null) {
+    if (
+      sessionQuestions === null ||
+      activeAiLearningSessionPublicId === null ||
+      selectedAuthorizationPublicId === null
+    ) {
       return;
     }
 
@@ -4772,6 +4791,7 @@ export function StudentPersonalAiGenerationPage() {
           fetchSubmitPersonalAiLearningAnswer(
             readStudentSessionRequestToken(),
             activeAiLearningSessionPublicId,
+            selectedAuthorizationPublicId,
             {
               sessionQuestionPublicId: question.sessionQuestionPublicId,
               selectedOptionLabels:
@@ -4825,7 +4845,10 @@ export function StudentPersonalAiGenerationPage() {
       return;
     }
 
-    if (activeAiLearningSessionPublicId === null) {
+    if (
+      activeAiLearningSessionPublicId === null ||
+      selectedAuthorizationPublicId === null
+    ) {
       return;
     }
 
@@ -4833,6 +4856,7 @@ export function StudentPersonalAiGenerationPage() {
       const progressResponse = await fetchPersonalAiLearningSessionProgress(
         readStudentSessionRequestToken(),
         activeAiLearningSessionPublicId,
+        selectedAuthorizationPublicId,
       );
 
       if (

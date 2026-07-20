@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type {
   EffectiveOrgAuthRow,
   EffectivePersonalAuthRow,
@@ -11,9 +12,10 @@ import type {
   PersonalAiGenerationResultRepository,
 } from "../repositories/personal-ai-generation-result-repository";
 import type { PersonalAiGenerationAuthorizationOwnershipRepository } from "./personal-ai-generation-authorization-context";
+import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import { SESSION_COOKIE_NAME } from "../auth/session-cookie";
 import {
-  createPersonalAiGenerationResultRouteHandlers,
+  createPersonalAiGenerationResultRouteHandlers as createBasePersonalAiGenerationResultRouteHandlers,
   createPersonalAiGenerationResultUserResolver,
   type PersonalAiGenerationResultRouteDependencies,
 } from "./personal-ai-generation-result-route";
@@ -37,8 +39,18 @@ const personalAuthorizationPublicId = "personal_auth_result_public_401";
 const organizationAuthorizationPublicId = "org_auth_result_public_402";
 
 function createGetRequest(query = ""): Request {
+  const searchParams = new URLSearchParams(query.replace(/^\?/u, ""));
+
+  if (
+    searchParams.has("authorizationPublicId") &&
+    !searchParams.has("taskType")
+  ) {
+    searchParams.set("taskType", "ai_question_generation");
+  }
+  const normalizedQuery = searchParams.size === 0 ? "" : `?${searchParams}`;
+
   return new Request(
-    `http://localhost/api/v1/personal-ai-generation-results${query}`,
+    `http://localhost/api/v1/personal-ai-generation-results${normalizedQuery}`,
     {
       method: "GET",
     },
@@ -198,6 +210,109 @@ function createAuthorizationRepository(input: {
     },
     async listOrgAuthsByUserPublicId() {
       return input.orgAuths ?? [];
+    },
+  };
+}
+
+function createEffectiveAuthorizationContext(input: {
+  authorizationPublicId: string;
+  authorizationSource: "personal_auth" | "org_auth";
+  ownerPublicId: string;
+  ownerType: "personal" | "organization";
+  organizationPublicId: string | null;
+}): EffectiveAuthorizationContextDto {
+  return {
+    profession: "monopoly",
+    level: 3,
+    contextDisplayStatus: "display_only",
+    effectiveEdition: "advanced",
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    ownerType: input.ownerType,
+    ownerPublicId: input.ownerPublicId,
+    organizationPublicId: input.organizationPublicId,
+    quotaOwnerType:
+      input.ownerType === "organization" ? "organization" : "personal",
+    quotaOwnerPublicId: input.ownerPublicId,
+    capabilities: {
+      canAnswerOrganizationTraining: input.ownerType === "organization",
+      canCreateOrganizationTraining: input.ownerType === "organization",
+      canGenerateAiPaper: true,
+      canGenerateAiQuestion: true,
+      canManageAuthorizationQuota: false,
+      canViewOrganizationTrainingSummary: input.ownerType === "organization",
+    },
+    blockedReason: null,
+  };
+}
+
+function createDefaultEffectiveAuthorizationService(): Pick<
+  EffectiveAuthorizationService,
+  "listEffectiveAuthorizations"
+> {
+  return {
+    async listEffectiveAuthorizations(input) {
+      const authorizationContexts = [
+        createEffectiveAuthorizationContext({
+          authorizationPublicId: personalAuthorizationPublicId,
+          authorizationSource: "personal_auth",
+          ownerPublicId: input.userPublicId,
+          ownerType: "personal",
+          organizationPublicId: null,
+        }),
+        ...(input.userPublicId === employeeUserContext.userPublicId
+          ? [
+              createEffectiveAuthorizationContext({
+                authorizationPublicId: organizationAuthorizationPublicId,
+                authorizationSource: "org_auth",
+                ownerPublicId: employeeUserContext.organizationPublicId,
+                ownerType: "organization",
+                organizationPublicId: employeeUserContext.organizationPublicId,
+              }),
+            ]
+          : []),
+      ];
+
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          authorizations: [],
+          effectiveAuthorizations: [],
+          authorizationContexts,
+        },
+      };
+    },
+  };
+}
+
+function createPersonalAiGenerationResultRouteHandlers(
+  resolveUserContext: Parameters<
+    typeof createBasePersonalAiGenerationResultRouteHandlers
+  >[0],
+  dependencies: PersonalAiGenerationResultRouteDependencies = {},
+) {
+  return createBasePersonalAiGenerationResultRouteHandlers(resolveUserContext, {
+    effectiveAuthorizationService: createDefaultEffectiveAuthorizationService(),
+    ...dependencies,
+  });
+}
+
+function createEffectiveAuthorizationService(): Pick<
+  EffectiveAuthorizationService,
+  "listEffectiveAuthorizations"
+> {
+  return {
+    async listEffectiveAuthorizations() {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          authorizations: [],
+          effectiveAuthorizations: [],
+          authorizationContexts: [],
+        },
+      };
     },
   };
 }
@@ -542,6 +657,85 @@ describe("personal AI generation result route handlers", () => {
     expect(resultRepository.listCalls).toEqual([]);
   });
 
+  it("rejects a raw-owned expired authorization before result history disclosure", async () => {
+    const resultRepository = createExactResultRepository({});
+    const dependencies = {
+      resultRepository,
+      authorizationRepository: createAuthorizationRepository({
+        personalAuths: [
+          createPersonalAuthorizationRow({
+            expires_at: new Date("2026-01-01T00:00:00.000Z"),
+            status: "expired",
+          }),
+        ],
+      }),
+      effectiveAuthorizationService: createEffectiveAuthorizationService(),
+    } as unknown as PersonalAiGenerationResultRouteDependencies;
+    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+      async () => userContext,
+      dependencies,
+    );
+
+    const response = await getResultHistoryRouteHandler(collection)(
+      createGetRequest(
+        `?authorizationPublicId=${personalAuthorizationPublicId}&taskType=ai_question_generation`,
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(resultRepository.listCalls).toEqual([]);
+    expect(resultRepository.detailCalls).toEqual([]);
+  });
+
+  it("rejects a raw-owned expired authorization before returning result detail", async () => {
+    const result = createResult({
+      resultPublicId: "personal_ai_result_expired_auth_detail_001",
+    });
+    const resultRepository = createExactResultRepository({
+      results: [
+        {
+          authorizationPublicId: personalAuthorizationPublicId,
+          result,
+        },
+      ],
+    });
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => userContext,
+      {
+        resultRepository,
+        authorizationRepository: createAuthorizationRepository({
+          personalAuths: [
+            createPersonalAuthorizationRow({
+              expires_at: new Date("2026-01-01T00:00:00.000Z"),
+              status: "expired",
+            }),
+          ],
+        }),
+        effectiveAuthorizationService: createEffectiveAuthorizationService(),
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest(
+        result.resultPublicId,
+        `?authorizationPublicId=${personalAuthorizationPublicId}`,
+      ),
+      { params: Promise.resolve({ publicId: result.resultPublicId }) },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+  });
+
   it("returns 404 for a detail owned under another authorization without loading history", async () => {
     const result = createResult({
       resultPublicId: "personal_ai_result_other_authorization",
@@ -837,7 +1031,7 @@ describe("personal AI generation result route handlers", () => {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
-        taskType: undefined,
+        taskType: "ai_question_generation",
         page: undefined,
         pageSize: undefined,
         limit: 5,

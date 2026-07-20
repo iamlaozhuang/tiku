@@ -13,12 +13,17 @@ import type {
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
-import type { PersonalAiGenerationResultLookupRepository } from "../repositories/personal-ai-generation-result-repository";
+import type { PersonalAiGenerationResultSelectedAuthorizationLookupRepository } from "../repositories/personal-ai-generation-result-repository";
 import type {
   PersonalAiGenerationResultUserContext,
   PersonalAiGenerationResultUserResolver,
 } from "./personal-ai-generation-result-route";
 import { createPersonalAiGenerationLearningSessionService } from "./personal-ai-generation-learning-session-service";
+import {
+  resolveEffectivePersonalAiGenerationAuthorizationContext,
+  type PersonalAiGenerationAuthorizationOwnershipRepository,
+} from "./personal-ai-generation-authorization-context";
+import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
@@ -26,7 +31,12 @@ import {
 
 export type PersonalAiGenerationLearningSessionRouteDependencies = {
   repository?: PersonalAiGenerationLearningSessionRepository;
-  resultRepository?: PersonalAiGenerationResultLookupRepository;
+  resultRepository?: PersonalAiGenerationResultSelectedAuthorizationLookupRepository;
+  authorizationRepository?: PersonalAiGenerationAuthorizationOwnershipRepository;
+  effectiveAuthorizationService?: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >;
   paperSourceQuestionResolver?: PersonalAiGenerationLearningPaperSourceQuestionResolver;
   now?: () => Date;
 };
@@ -94,61 +104,6 @@ function isPersonalAiGenerationResultUserContext(
   return "userPublicId" in value;
 }
 
-function resolveLearningSessionOwnerScope(
-  userContext: PersonalAiGenerationResultUserContext,
-  body: Record<string, unknown>,
-): Pick<
-  PersonalAiGenerationLearningSessionCreationInputDto,
-  "ownerType" | "ownerPublicId" | "actorPublicId"
-> | null {
-  const ownerType = readNullableString(body, "ownerType");
-  const ownerPublicId = readNullableString(body, "ownerPublicId");
-
-  if (ownerType !== null || ownerPublicId !== null) {
-    if (
-      ownerType === "personal" &&
-      ownerPublicId === userContext.userPublicId
-    ) {
-      return {
-        ownerType: "personal",
-        ownerPublicId,
-        actorPublicId: userContext.userPublicId,
-      };
-    }
-
-    if (
-      ownerType === "organization" &&
-      ownerPublicId === userContext.organizationPublicId &&
-      userContext.organizationPublicId !== null
-    ) {
-      return {
-        ownerType: "organization",
-        ownerPublicId: userContext.organizationPublicId,
-        actorPublicId: userContext.userPublicId,
-      };
-    }
-
-    return null;
-  }
-
-  if (
-    userContext.userType === "employee" &&
-    userContext.organizationPublicId !== null
-  ) {
-    return {
-      ownerType: "organization",
-      ownerPublicId: userContext.organizationPublicId,
-      actorPublicId: userContext.userPublicId,
-    };
-  }
-
-  return {
-    ownerType: "personal",
-    ownerPublicId: userContext.userPublicId,
-    actorPublicId: userContext.userPublicId,
-  };
-}
-
 async function readJsonObject(
   request: Request,
 ): Promise<Record<string, unknown> | null> {
@@ -210,17 +165,10 @@ function readVisibleGeneratedContent(
     : null;
 }
 
-function readPaperAssemblyContainer(
-  body: Record<string, unknown>,
-): AiPaperPlanAndSelectContainerDto | null {
-  const value = body.paperAssemblyContainer;
-
-  return isRecord(value) && Array.isArray(value.sections)
-    ? (value as AiPaperPlanAndSelectContainerDto)
-    : null;
-}
-
 type LearningSessionCreationRouteInput =
+  | {
+      kind: "authorization_unavailable";
+    }
   | {
       kind: "generated_questions";
       input: PersonalAiGenerationLearningSessionCreationInputDto;
@@ -243,9 +191,10 @@ function createLearningSessionPublicId(resultPublicId: string): string {
 }
 
 async function findPersistedLearningResult(input: {
+  authorizationPublicId: string;
   userContext: PersonalAiGenerationResultUserContext;
   resultPublicId: string;
-  resultRepository: PersonalAiGenerationResultLookupRepository;
+  resultRepository: PersonalAiGenerationResultSelectedAuthorizationLookupRepository;
 }): Promise<PersistedLearningResult | null> {
   const ownerScopes: PersistedLearningResult["ownerScope"][] = [
     {
@@ -269,6 +218,7 @@ async function findPersistedLearningResult(input: {
   for (const ownerScope of ownerScopes) {
     const result = await input.resultRepository.findDraftResultByPublicId({
       ...ownerScope,
+      authorizationPublicId: input.authorizationPublicId,
       resultPublicId: input.resultPublicId,
     });
 
@@ -281,11 +231,17 @@ async function findPersistedLearningResult(input: {
 }
 
 async function createPersistedLearningSessionInput(input: {
+  authorizationPublicId: string;
+  authorizationRepository: PersonalAiGenerationAuthorizationOwnershipRepository;
   body: Record<string, unknown>;
+  effectiveAuthorizationService: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >;
   userContext: PersonalAiGenerationResultUserContext;
   resultPublicId: string;
   learningSessionRepository: PersonalAiGenerationLearningSessionRepository;
-  resultRepository: PersonalAiGenerationResultLookupRepository;
+  resultRepository: PersonalAiGenerationResultSelectedAuthorizationLookupRepository;
   paperSourceQuestionResolver:
     | PersonalAiGenerationLearningPaperSourceQuestionResolver
     | undefined;
@@ -298,6 +254,24 @@ async function createPersistedLearningSessionInput(input: {
   }
 
   const { result, ownerScope } = persistedLearningResult;
+  const authorizationContext =
+    await resolveEffectivePersonalAiGenerationAuthorizationContext({
+      authorizationPublicId: input.authorizationPublicId,
+      requestedScope: null,
+      taskType: result.taskType,
+      userContext: input.userContext,
+      authorizationRepository: input.authorizationRepository,
+      effectiveAuthorizationService: input.effectiveAuthorizationService,
+    });
+
+  if (
+    authorizationContext === null ||
+    authorizationContext.ownerType !== ownerScope.ownerType ||
+    authorizationContext.ownerPublicId !== ownerScope.ownerPublicId
+  ) {
+    return { kind: "authorization_unavailable" };
+  }
+
   const sessionPublicId = createLearningSessionPublicId(result.resultPublicId);
 
   if (result.taskType === "ai_question_generation") {
@@ -374,7 +348,15 @@ async function createLearningSessionInput(input: {
   paperSourceQuestionResolver:
     | PersonalAiGenerationLearningPaperSourceQuestionResolver
     | undefined;
-  resultRepository: PersonalAiGenerationResultLookupRepository | undefined;
+  resultRepository:
+    | PersonalAiGenerationResultSelectedAuthorizationLookupRepository
+    | undefined;
+  authorizationRepository:
+    | PersonalAiGenerationAuthorizationOwnershipRepository
+    | undefined;
+  effectiveAuthorizationService:
+    | Pick<EffectiveAuthorizationService, "listEffectiveAuthorizations">
+    | undefined;
   now: () => Date;
 }): Promise<LearningSessionCreationRouteInput | null> {
   const body = await readJsonObject(input.request);
@@ -384,79 +366,111 @@ async function createLearningSessionInput(input: {
   }
 
   const sourceResultPublicId = readRequiredString(body, "sourceResultPublicId");
+  const authorizationPublicId = readRequiredString(
+    body,
+    "authorizationPublicId",
+  );
 
-  if (sourceResultPublicId === null) {
+  if (sourceResultPublicId === null || authorizationPublicId === null) {
     return null;
   }
-
-  if (input.resultRepository !== undefined) {
-    return createPersistedLearningSessionInput({
-      body,
-      userContext: input.userContext,
-      resultPublicId: sourceResultPublicId,
-      learningSessionRepository: input.learningSessionRepository,
-      resultRepository: input.resultRepository,
-      paperSourceQuestionResolver: input.paperSourceQuestionResolver,
-      now: input.now,
-    });
-  }
-
-  const sessionPublicId = readRequiredString(body, "sessionPublicId");
-  const sourceTaskPublicId = readRequiredString(body, "sourceTaskPublicId");
-  const visibleGeneratedContent = readVisibleGeneratedContent(body);
-  const paperAssemblyContainer = readPaperAssemblyContainer(body);
-  const ownerScope = resolveLearningSessionOwnerScope(input.userContext, body);
 
   if (
-    sessionPublicId === null ||
-    sourceResultPublicId === null ||
-    sourceTaskPublicId === null ||
-    visibleGeneratedContent === null ||
-    ownerScope === null
+    input.resultRepository === undefined ||
+    input.authorizationRepository === undefined ||
+    input.effectiveAuthorizationService === undefined
   ) {
+    return { kind: "authorization_unavailable" };
+  }
+
+  return createPersistedLearningSessionInput({
+    authorizationPublicId,
+    authorizationRepository: input.authorizationRepository,
+    body,
+    effectiveAuthorizationService: input.effectiveAuthorizationService,
+    userContext: input.userContext,
+    resultPublicId: sourceResultPublicId,
+    learningSessionRepository: input.learningSessionRepository,
+    resultRepository: input.resultRepository,
+    paperSourceQuestionResolver: input.paperSourceQuestionResolver,
+    now: input.now,
+  });
+}
+
+function readAuthorizationPublicId(request: Request): string | null {
+  const value = new URL(request.url).searchParams.get("authorizationPublicId");
+
+  if (value === null) {
     return null;
   }
 
-  if (paperAssemblyContainer !== null) {
-    const sourceQuestions =
-      input.paperSourceQuestionResolver === undefined
-        ? []
-        : await input.paperSourceQuestionResolver({
-            userContext: input.userContext,
-            ownerScope,
-            sourceResultPublicId,
-            sourceTaskPublicId,
-            paperAssemblyContainer,
-          });
-    const groundingSummary = visibleGeneratedContent.groundingSummary;
+  const normalizedValue = value.trim();
 
-    return {
-      kind: "paper_assembly",
-      input: {
-        sessionPublicId,
-        sourceResultPublicId,
-        sourceTaskPublicId,
-        evidenceStatus: groundingSummary?.evidenceStatus ?? "none",
-        citationCount: groundingSummary?.citationCount ?? 0,
-        paperAssemblyContainer,
-        sourceQuestions,
-        createdAt: input.now(),
-        ...ownerScope,
-      },
-    };
+  return normalizedValue.length === 0 ? null : normalizedValue;
+}
+
+function createAuthorizationUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    403057,
+    "Personal AI generation is not available for this authorization.",
+  );
+}
+
+async function resolveLearningSessionAuthorization(input: {
+  authorizationPublicId: string;
+  sessionPublicId: string;
+  userContext: PersonalAiGenerationResultUserContext;
+  repository: PersonalAiGenerationLearningSessionRepository;
+  resultRepository: PersonalAiGenerationResultSelectedAuthorizationLookupRepository;
+  authorizationRepository: PersonalAiGenerationAuthorizationOwnershipRepository;
+  effectiveAuthorizationService: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >;
+}): Promise<boolean> {
+  const session = await input.repository.findSessionByPublicId(
+    input.sessionPublicId,
+  );
+
+  if (
+    session === null ||
+    session.sourceResultPublicId === null ||
+    session.actorPublicId !== input.userContext.userPublicId ||
+    (session.ownerType === "personal" &&
+      session.ownerPublicId !== input.userContext.userPublicId) ||
+    (session.ownerType === "organization" &&
+      session.ownerPublicId !== input.userContext.organizationPublicId)
+  ) {
+    return false;
   }
 
-  return {
-    kind: "generated_questions",
-    input: {
-      sessionPublicId,
-      sourceResultPublicId,
-      sourceTaskPublicId,
-      visibleGeneratedContent,
-      createdAt: input.now(),
-      ...ownerScope,
-    },
-  };
+  const result = await input.resultRepository.findDraftResultByPublicId({
+    authorizationPublicId: input.authorizationPublicId,
+    ownerType: session.ownerType,
+    ownerPublicId: session.ownerPublicId,
+    actorPublicId: input.userContext.userPublicId,
+    resultPublicId: session.sourceResultPublicId,
+  });
+
+  if (result === null) {
+    return false;
+  }
+
+  const authorizationContext =
+    await resolveEffectivePersonalAiGenerationAuthorizationContext({
+      authorizationPublicId: input.authorizationPublicId,
+      requestedScope: null,
+      taskType: result.taskType,
+      userContext: input.userContext,
+      authorizationRepository: input.authorizationRepository,
+      effectiveAuthorizationService: input.effectiveAuthorizationService,
+    });
+
+  return (
+    authorizationContext !== null &&
+    authorizationContext.ownerType === session.ownerType &&
+    authorizationContext.ownerPublicId === session.ownerPublicId
+  );
 }
 
 async function createAnswerInput(input: {
@@ -523,6 +537,9 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
             paperSourceQuestionResolver:
               dependencies.paperSourceQuestionResolver,
             resultRepository: dependencies.resultRepository,
+            authorizationRepository: dependencies.authorizationRepository,
+            effectiveAuthorizationService:
+              dependencies.effectiveAuthorizationService,
             now,
           });
 
@@ -533,6 +550,10 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
                 "Invalid personal AI learning session input.",
               ),
             );
+          }
+
+          if (creationInput.kind === "authorization_unavailable") {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
           }
 
           return createJsonResponse(
@@ -565,6 +586,26 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
           }
 
           const { publicId } = await context.params;
+          const authorizationPublicId = readAuthorizationPublicId(request);
+
+          if (
+            authorizationPublicId === null ||
+            dependencies.resultRepository === undefined ||
+            dependencies.authorizationRepository === undefined ||
+            dependencies.effectiveAuthorizationService === undefined ||
+            !(await resolveLearningSessionAuthorization({
+              authorizationPublicId,
+              sessionPublicId: publicId,
+              userContext,
+              repository,
+              resultRepository: dependencies.resultRepository,
+              authorizationRepository: dependencies.authorizationRepository,
+              effectiveAuthorizationService:
+                dependencies.effectiveAuthorizationService,
+            }))
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
 
           return createJsonResponse(
             createSuccessResponse(
@@ -607,6 +648,27 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
                 "Invalid personal AI learning answer input.",
               ),
             );
+          }
+
+          const authorizationPublicId = readAuthorizationPublicId(request);
+
+          if (
+            authorizationPublicId === null ||
+            dependencies.resultRepository === undefined ||
+            dependencies.authorizationRepository === undefined ||
+            dependencies.effectiveAuthorizationService === undefined ||
+            !(await resolveLearningSessionAuthorization({
+              authorizationPublicId,
+              sessionPublicId: answerInput.sessionPublicId,
+              userContext,
+              repository,
+              resultRepository: dependencies.resultRepository,
+              authorizationRepository: dependencies.authorizationRepository,
+              effectiveAuthorizationService:
+                dependencies.effectiveAuthorizationService,
+            }))
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
           }
 
           return createJsonResponse(

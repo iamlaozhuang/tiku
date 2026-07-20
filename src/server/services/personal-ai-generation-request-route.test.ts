@@ -160,8 +160,18 @@ function createPostRequest(body: Record<string, unknown>): Request {
 }
 
 function createGetRequest(query = ""): Request {
+  const searchParams = new URLSearchParams(query.replace(/^\?/u, ""));
+
+  if (
+    searchParams.has("authorizationPublicId") &&
+    !searchParams.has("taskType")
+  ) {
+    searchParams.set("taskType", "ai_question_generation");
+  }
+  const normalizedQuery = searchParams.size === 0 ? "" : `?${searchParams}`;
+
   return new Request(
-    `http://localhost/api/v1/personal-ai-generation-requests${query}`,
+    `http://localhost/api/v1/personal-ai-generation-requests${normalizedQuery}`,
     {
       method: "GET",
     },
@@ -1764,7 +1774,7 @@ describe("personal AI generation request route handlers", () => {
   );
 
   it.each(["expired", "cancelled"] as const)(
-    "keeps an employee-owned %s personal authorization history-readable",
+    "rejects an employee-owned %s personal authorization before request history disclosure",
     async (status) => {
       const requestRepository = createRequestRepository();
       const { collection } =
@@ -1782,6 +1792,9 @@ describe("personal AI generation request route handlers", () => {
               ],
               orgAuths: [],
             }),
+            effectiveAuthorizationService: createEffectiveAuthorizationService(
+              [],
+            ),
           },
         );
       const staleOwnerPublicId = "stale_owner_public_999";
@@ -1790,37 +1803,19 @@ describe("personal AI generation request route handlers", () => {
         collection,
       )(
         createGetRequest(
-          `?authorizationPublicId=personal_auth_${status}_public_123&ownerType=organization&ownerPublicId=${staleOwnerPublicId}&actorPublicId=${staleOwnerPublicId}`,
+          `?authorizationPublicId=personal_auth_${status}_public_123&taskType=ai_question_generation&ownerType=organization&ownerPublicId=${staleOwnerPublicId}&actorPublicId=${staleOwnerPublicId}`,
         ),
       );
       const payload = await response.json();
 
-      expect(payload).toMatchObject({ code: 0, message: "ok", data: [] });
-      expect(requestRepository.calls).toEqual([
-        {
-          authorizationPublicId: `personal_auth_${status}_public_123`,
-          ownerType: "personal",
-          ownerPublicId: employeeUserContext.userPublicId,
-          actorPublicId: employeeUserContext.userPublicId,
-          taskType: undefined,
-          page: 1,
-          pageSize: 10,
-          limit: 10,
-          offset: 0,
-        },
-      ]);
-      expect(requestRepository.countCalls).toEqual([
-        {
-          authorizationPublicId: `personal_auth_${status}_public_123`,
-          ownerType: "personal",
-          ownerPublicId: employeeUserContext.userPublicId,
-          actorPublicId: employeeUserContext.userPublicId,
-          taskType: undefined,
-        },
-      ]);
-      expect(JSON.stringify(requestRepository.calls)).not.toContain(
-        staleOwnerPublicId,
-      );
+      expect(payload).toEqual({
+        code: 403057,
+        message:
+          "Personal AI generation is not available for this authorization.",
+        data: null,
+      });
+      expect(requestRepository.calls).toEqual([]);
+      expect(requestRepository.countCalls).toEqual([]);
     },
   );
 
@@ -1846,7 +1841,7 @@ describe("personal AI generation request route handlers", () => {
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
         actorPublicId: employeeUserContext.userPublicId,
-        taskType: undefined,
+        taskType: "ai_question_generation",
         page: 1,
         pageSize: 10,
         limit: 10,
@@ -1893,7 +1888,7 @@ describe("personal AI generation request route handlers", () => {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
-        taskType: undefined,
+        taskType: "ai_question_generation",
         page: 1,
         pageSize: 10,
         limit: 10,
@@ -2058,7 +2053,7 @@ describe("personal AI generation request route handlers", () => {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         actorPublicId: userContext.userPublicId,
-        taskType: undefined,
+        taskType: "ai_question_generation",
         page: 1,
         pageSize: 10,
         limit: 10,

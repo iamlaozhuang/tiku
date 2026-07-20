@@ -1429,7 +1429,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           }
 
           if (
-            url ===
+            new URL(url, "http://localhost").pathname ===
             `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`
           ) {
             return {
@@ -1460,10 +1460,13 @@ describe("StudentPersonalAiGenerationPage", () => {
         await screen.findByText("服务端恢复的自测题目"),
       ).toBeInTheDocument();
       expect(postBodies).toEqual([
-        { sourceResultPublicId: paperHistory.resultPublicId },
+        {
+          authorizationPublicId: "authorization_context_ui_501",
+          sourceResultPublicId: paperHistory.resultPublicId,
+        },
       ]);
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=authorization_context_ui_501`,
         "local-session-token",
         { method: "GET" },
       );

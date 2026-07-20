@@ -556,7 +556,10 @@ p1RemediationSerialProgram:
     minimal-safety-kernel-retirement-2026-07-20: closed
     p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: closed
     p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20: closed
-    p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20: in_progress
+    p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20: closed
+    p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20: closed
+    p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20: closed
+    p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -715,17 +718,17 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
-  title: Organization portal authorization read model
-  phase: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
+  id: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+  title: Personal AI active authorization context consumption
+  phase: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0119
-  branch: fix/organization-portal-authorization-read-model
+  productClosureContribution: F-0142
+  branch: fix/personal-ai-history-effective-authorization
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0119
+    - F-0142
   candidateRootCauseCluster: P1-RC-03
   requirementAnchors:
     - traceability/2026-06-21-org-auth-scope-product-decision.md
@@ -737,37 +740,43 @@ currentTask:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: candidate_ready_for_bounded_medium_risk_auto_closeout
-    reason: focused_14_of_14_affected_17_of_17_lint_typecheck_format_diff_p0_baseline_and_main_thread_adversarial_review_passed_without_entitlement_expansion
-    resumeAction: stage exact allowlist run minimal kernel precommit commit ff-only merge canonical push sync cleanup then continue RC03
+    reason: focused_99_of_99_affected_99_of_99_lint_typecheck_build_format_diff_p0_baselines_and_main_thread_adversarial_review_passed_without_entitlement_expansion_or_prohibited_side_effects
+    resumeAction: stage_exact_allowlist_bind_standing_approval_to_candidate_tree_run_minimal_kernel_commit_ff_only_merge_canonical_push_sync_cleanup_then_continue_RC03
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    tddRed: pass_initial_4_of_4_and_adversarial_followup_3_of_4_expected_failures
-    focused: pass_14_of_14
-    affectedRegression: pass_17_of_17
-    fullUnitBuildE2e: not_triggered_narrow_readonly_projection_with_direct_route_and_ui_coverage
+    tddRed: pass_4_expected_failures_before_green
+    focused: pass_99_of_99
+    affectedRegression: pass_99_of_99
+    fullUnitBuildE2e: build_pass_e2e_not_triggered_route_and_ui_contracts_have_direct_coverage
     lint: pass
     typecheck: pass
     changedFileFormat: pass
-    p0GlobalBaseline: pass
+    p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending
+    p0SerialBaseline: pass_closed_program
     diffCheck: pass
-    mainThreadAdversarialReview: pass
+    mainThreadAdversarialReview: pass_after_correcting_false_positive_to_prove_session_exists_before_authorization_expiry
     entitlementExpansion: false
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     realExternalCall: false
     extraFiles: false
   previousTaskCloseout:
-    taskId: p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
-    findingId: F-0112
-    commit: 32f728b50b5df897da3b383b69e4840c1e61af30
+    taskId: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
+    findingId: F-0119
+    commit: 28126093ec2b76fa9a529069a6f71fcff6c699fc
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   rc03ResidualDisposition:
     F-0088: separate_requires_fresh_schema_migration_approval_when_scheduled
     F-0112: separate_closed_32f728b50b5df897da3b383b69e4840c1e61af30
-    F-0119: separate_current_task
-    F-0140: separate
+    F-0119: separate_closed_28126093ec2b76fa9a529069a6f71fcff6c699fc
+    F-0140: covered_by_current_master_user_row_lock_and_transactional_effective_upgrade_recheck
     F-0141: separate
-    F-0142: separate
+    F-0142: separate_current_task
+  frozenScopeExpansionApproval:
+    source: current_user_message
+    files:
+      - tests/unit/phase-11-system-ops-user-management-loop.test.ts
+      - tests/unit/phase-11-system-ops-organization-management-loop.test.ts
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20
   source: current_user_message

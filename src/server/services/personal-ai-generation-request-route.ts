@@ -43,7 +43,6 @@ import type { SessionService } from "./session-service";
 import { resolveAndAssembleAiPaperFromRoute } from "./ai-paper-route-plan-select-wiring-service";
 import {
   resolveEffectivePersonalAiGenerationAuthorizationContext,
-  resolveOwnedPersonalAiGenerationAuthorizationContext,
   type PersonalAiGenerationAuthorizationOwnershipRepository,
 } from "./personal-ai-generation-authorization-context";
 
@@ -1031,10 +1030,12 @@ export function createPersonalAiGenerationRequestRouteHandlers(
           try {
             const historyQuery =
               createPersonalAiGenerationHistoryQuery(request);
+            const taskType = historyQuery.taskType;
 
             if (
               historyQuery.authorizationPublicId === null ||
-              historyQuery.taskType === null
+              (taskType !== "ai_question_generation" &&
+                taskType !== "ai_paper_generation")
             ) {
               return createJsonResponse(
                 createErrorResponse(
@@ -1044,7 +1045,10 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               );
             }
 
-            if (authorizationRepository === undefined) {
+            if (
+              authorizationRepository === undefined ||
+              effectiveAuthorizationService === undefined
+            ) {
               return createJsonResponse(
                 createErrorResponse(
                   PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
@@ -1054,13 +1058,28 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             }
 
             const authorizationContext =
-              await resolveOwnedPersonalAiGenerationAuthorizationContext({
+              await resolveEffectivePersonalAiGenerationAuthorizationContext({
                 authorizationPublicId: historyQuery.authorizationPublicId,
+                requestedScope: null,
+                taskType,
                 userContext,
                 authorizationRepository,
+                effectiveAuthorizationService,
               });
 
             if (authorizationContext === null) {
+              return createJsonResponse(
+                createErrorResponse(
+                  PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
+                  PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_MESSAGE,
+                ),
+              );
+            }
+
+            if (
+              authorizationContext.ownerType !== "personal" &&
+              authorizationContext.ownerType !== "organization"
+            ) {
               return createJsonResponse(
                 createErrorResponse(
                   PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
@@ -1074,7 +1093,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               ownerType: authorizationContext.ownerType,
               ownerPublicId: authorizationContext.ownerPublicId,
               actorPublicId: userContext.userPublicId,
-              taskType: historyQuery.taskType,
+              taskType,
               page: historyQuery.page,
               pageSize: historyQuery.pageSize,
               limit: historyQuery.limit,
@@ -1089,7 +1108,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                     ownerType: authorizationContext.ownerType,
                     ownerPublicId: authorizationContext.ownerPublicId,
                     actorPublicId: userContext.userPublicId,
-                    taskType: historyQuery.taskType,
+                    taskType,
                   });
 
             return createJsonResponse(

@@ -5,6 +5,7 @@ import {
   createPersonalAiGenerationResultRouteHandlers,
   createPersonalAiGenerationResultUserResolver,
 } from "@/server/services/personal-ai-generation-result-route";
+import { createEffectiveAuthorizationService } from "@/server/services/effective-authorization-service";
 
 const studentAuthorizationRedeemRuntimeRepositories =
   createPostgresStudentAuthorizationRedeemRuntimeRepositories();
@@ -16,6 +17,9 @@ const personalAiGenerationResultRouteHandlers =
       resultRepository: createPostgresPersonalAiGenerationResultRepository(),
       authorizationRepository:
         studentAuthorizationRedeemRuntimeRepositories.effectiveAuthorizationRepository,
+      effectiveAuthorizationService: createEffectiveAuthorizationService(
+        studentAuthorizationRedeemRuntimeRepositories.effectiveAuthorizationRepository,
+      ),
     },
   );
 

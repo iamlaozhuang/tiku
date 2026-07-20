@@ -10,10 +10,12 @@ import {
   type PersonalAiGenerationResultHistoryRepositoryPort,
 } from "./personal-ai-generation-result-history-service";
 import {
+  resolveEffectivePersonalAiGenerationAuthorizationContext,
   resolveOwnedPersonalAiGenerationAuthorizationContext,
   type OwnedPersonalAiGenerationAuthorizationContext,
   type PersonalAiGenerationAuthorizationOwnershipRepository,
 } from "./personal-ai-generation-authorization-context";
+import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
@@ -33,6 +35,10 @@ export type PersonalAiGenerationResultUserResolver = (
 export type PersonalAiGenerationResultRouteDependencies = {
   resultRepository?: PersonalAiGenerationResultHistoryRepositoryPort;
   authorizationRepository?: PersonalAiGenerationAuthorizationOwnershipRepository;
+  effectiveAuthorizationService?: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >;
 };
 
 type ResultDetailRouteContext = {
@@ -234,6 +240,8 @@ export function createPersonalAiGenerationResultRouteHandlers(
 ) {
   const resultRepository = dependencies.resultRepository;
   const authorizationRepository = dependencies.authorizationRepository;
+  const effectiveAuthorizationService =
+    dependencies.effectiveAuthorizationService;
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
@@ -249,8 +257,13 @@ export function createPersonalAiGenerationResultRouteHandlers(
           }
 
           const authorizationPublicId = readAuthorizationPublicId(request);
+          const taskType = readTaskTypeInput(new URL(request.url).searchParams);
 
-          if (authorizationPublicId === null) {
+          if (
+            authorizationPublicId === null ||
+            (taskType !== "ai_question_generation" &&
+              taskType !== "ai_paper_generation")
+          ) {
             return createJsonResponse(
               createErrorResponse(
                 INVALID_RESULT_HISTORY_INPUT_CODE,
@@ -261,21 +274,45 @@ export function createPersonalAiGenerationResultRouteHandlers(
 
           if (
             !isResultRepositoryAvailable(resultRepository) ||
-            authorizationRepository === undefined
+            authorizationRepository === undefined ||
+            effectiveAuthorizationService === undefined
           ) {
             return createJsonResponse(createAuthorizationUnavailableResponse());
           }
 
           const authorizationContext =
-            await resolveOwnedPersonalAiGenerationAuthorizationContext({
+            await resolveEffectivePersonalAiGenerationAuthorizationContext({
               authorizationPublicId,
+              requestedScope: null,
+              taskType,
               userContext,
               authorizationRepository,
+              effectiveAuthorizationService,
             });
 
           if (authorizationContext === null) {
             return createJsonResponse(createAuthorizationUnavailableResponse());
           }
+
+          const ownerType = authorizationContext.ownerType;
+          const quotaOwnerType = authorizationContext.quotaOwnerType;
+
+          if (
+            (ownerType !== "personal" && ownerType !== "organization") ||
+            (quotaOwnerType !== "personal" && quotaOwnerType !== "organization")
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+          const ownedAuthorizationContext: OwnedPersonalAiGenerationAuthorizationContext =
+            {
+              authorizationSource: authorizationContext.authorizationSource,
+              authorizationPublicId: authorizationContext.authorizationPublicId,
+              ownerType,
+              ownerPublicId: authorizationContext.ownerPublicId,
+              organizationPublicId: authorizationContext.organizationPublicId,
+              quotaOwnerType,
+              quotaOwnerPublicId: authorizationContext.quotaOwnerPublicId,
+            };
 
           const resultHistoryService =
             createPersonalAiGenerationResultHistoryService(resultRepository);
@@ -285,7 +322,7 @@ export function createPersonalAiGenerationResultRouteHandlers(
               createResultHistoryQuery(
                 request,
                 userContext,
-                authorizationContext,
+                ownedAuthorizationContext,
               ),
             ),
           );
@@ -320,7 +357,8 @@ export function createPersonalAiGenerationResultRouteHandlers(
 
           if (
             !isResultRepositoryAvailable(resultRepository) ||
-            authorizationRepository === undefined
+            authorizationRepository === undefined ||
+            effectiveAuthorizationService === undefined
           ) {
             return createJsonResponse(createAuthorizationUnavailableResponse());
           }
@@ -339,15 +377,35 @@ export function createPersonalAiGenerationResultRouteHandlers(
           const resultHistoryService =
             createPersonalAiGenerationResultHistoryService(resultRepository);
 
-          return createJsonResponse(
+          const resultResponse =
             await resultHistoryService.getDraftResultDetail(
               await createResultDetailQuery(
                 context,
                 userContext,
                 authorizationContext,
               ),
-            ),
-          );
+            );
+          const result = resultResponse.data?.result;
+
+          if (result !== undefined) {
+            const effectiveAuthorizationContext =
+              await resolveEffectivePersonalAiGenerationAuthorizationContext({
+                authorizationPublicId,
+                requestedScope: null,
+                taskType: result.taskType,
+                userContext,
+                authorizationRepository,
+                effectiveAuthorizationService,
+              });
+
+            if (effectiveAuthorizationContext === null) {
+              return createJsonResponse(
+                createAuthorizationUnavailableResponse(),
+              );
+            }
+          }
+
+          return createJsonResponse(resultResponse);
         },
       ),
     },

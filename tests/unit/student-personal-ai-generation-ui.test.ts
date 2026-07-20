@@ -980,8 +980,9 @@ async function handlePersonalAiLearningSessionFetch(input: {
   state: PersonalAiLearningSessionMockState;
 }): Promise<PersonalAiLearningSessionFetchResponse | null> {
   const basePath = "/api/v1/personal-ai-generation-learning-sessions";
+  const routePath = new URL(input.path, "http://localhost").pathname;
 
-  if (input.path === basePath) {
+  if (routePath === basePath) {
     expect(input.init?.method).toBe("POST");
     expect(input.init?.headers).toMatchObject({
       authorization: "Bearer unit-test-session-token",
@@ -1043,8 +1044,8 @@ async function handlePersonalAiLearningSessionFetch(input: {
   const progressSuffix = "/progress";
 
   if (
-    input.path.startsWith(`${basePath}/`) &&
-    input.path.endsWith(answersSuffix)
+    routePath.startsWith(`${basePath}/`) &&
+    routePath.endsWith(answersSuffix)
   ) {
     expect(input.init?.method).toBe("POST");
     expect(input.init?.headers).toMatchObject({
@@ -1052,7 +1053,7 @@ async function handlePersonalAiLearningSessionFetch(input: {
       "content-type": "application/json",
     });
 
-    const sessionPublicId = input.path.slice(
+    const sessionPublicId = routePath.slice(
       `${basePath}/`.length,
       -answersSuffix.length,
     );
@@ -1091,8 +1092,8 @@ async function handlePersonalAiLearningSessionFetch(input: {
   }
 
   if (
-    input.path.startsWith(`${basePath}/`) &&
-    input.path.endsWith(progressSuffix)
+    routePath.startsWith(`${basePath}/`) &&
+    routePath.endsWith(progressSuffix)
   ) {
     expect(input.init?.method).toBe("GET");
     expect(input.init?.headers).toMatchObject({
@@ -1100,7 +1101,7 @@ async function handlePersonalAiLearningSessionFetch(input: {
     });
 
     input.onProgressUrl?.(input.path);
-    const sessionPublicId = input.path.slice(
+    const sessionPublicId = routePath.slice(
       `${basePath}/`.length,
       -progressSuffix.length,
     );
@@ -4577,7 +4578,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         }
 
         if (
-          path ===
+          new URL(path, "http://localhost").pathname ===
           `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/answers`
         ) {
           answerSubmitBodies.push(JSON.parse(String(init?.body)));
@@ -4596,7 +4597,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         }
 
         if (
-          path ===
+          new URL(path, "http://localhost").pathname ===
           `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`
         ) {
           progressUrls.push(path);
@@ -4648,6 +4649,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
     expect(sessionCreateBodies[0]).toMatchObject({
+      authorizationPublicId: "authorization-context-ui-001",
       sessionPublicId,
       sourceResultPublicId,
       sourceTaskPublicId,
@@ -4672,8 +4674,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "查看解析" }));
     await waitFor(() =>
       expect(progressUrls).toEqual([
-        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
-        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=authorization-context-ui-001`,
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=authorization-context-ui-001`,
       ]),
     );
     expect(document.body.textContent).not.toContain("unit-test-session-token");
@@ -5072,7 +5074,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         }
 
         if (
-          path ===
+          new URL(path, "http://localhost").pathname ===
           `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/answers`
         ) {
           answerSubmitBodies.push(JSON.parse(String(init?.body)));
@@ -5091,7 +5093,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         }
 
         if (
-          path ===
+          new URL(path, "http://localhost").pathname ===
           `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`
         ) {
           return {
@@ -5142,7 +5144,12 @@ describe("StudentPersonalAiGenerationPage", () => {
       await screen.findByText("synthetic server employee paper stem"),
     ).toBeInTheDocument();
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
-    expect(sessionCreateBodies).toEqual([{ sourceResultPublicId }]);
+    expect(sessionCreateBodies).toEqual([
+      {
+        authorizationPublicId: "org-auth-context-api-001",
+        sourceResultPublicId,
+      },
+    ]);
 
     fireEvent.click(
       screen.getByRole("radio", {

@@ -9,7 +9,13 @@ import type {
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
-import { createPersonalAiGenerationLearningSessionRouteHandlers } from "./personal-ai-generation-learning-session-route";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import type {
+  EffectiveOrgAuthRow,
+  EffectivePersonalAuthRow,
+} from "../repositories/effective-authorization-repository";
+import { createPersonalAiGenerationLearningSessionRouteHandlers as createBasePersonalAiGenerationLearningSessionRouteHandlers } from "./personal-ai-generation-learning-session-route";
+import type { PersonalAiGenerationLearningSessionRouteDependencies } from "./personal-ai-generation-learning-session-route";
 
 const personalUserContext = {
   userPublicId: "learner_route_student_public_001",
@@ -24,6 +30,9 @@ const employeeUserContext = {
   employeePublicId: "learner_route_employee_record_public_001",
   organizationPublicId: "learner_route_organization_public_001",
 } as const;
+
+const personalAuthorizationPublicId = "personal_auth_learning_active_001";
+const organizationAuthorizationPublicId = "org_auth_learning_active_001";
 
 function createVisibleGeneratedContent(): AiGenerationRouteIntegratedVisibleGeneratedContent {
   return {
@@ -214,7 +223,10 @@ function createPostRequest(body: Record<string, unknown>): Request {
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        authorizationPublicId: personalAuthorizationPublicId,
+        ...body,
+      }),
     },
   );
 }
@@ -224,7 +236,7 @@ function createAnswerPostRequest(
   body: Record<string, unknown>,
 ): Request {
   return new Request(
-    `http://localhost/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/answers`,
+    `http://localhost/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/answers?authorizationPublicId=${personalAuthorizationPublicId}`,
     {
       method: "POST",
       headers: {
@@ -237,7 +249,7 @@ function createAnswerPostRequest(
 
 function createProgressGetRequest(sessionPublicId: string): Request {
   return new Request(
-    `http://localhost/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
+    `http://localhost/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=${personalAuthorizationPublicId}`,
     {
       method: "GET",
     },
@@ -279,6 +291,147 @@ function createLearningSessionRepository(): PersonalAiGenerationLearningSessionR
       );
     },
   };
+}
+
+function createDefaultLearningResult(
+  resultPublicId: string,
+): PersonalAiGenerationResultDto {
+  return {
+    ...createPersistedPaperResult(resultPublicId),
+    taskType: "ai_question_generation",
+    taskPublicId: resultPublicId.replace(
+      "ai_generation_result_",
+      "ai_generation_task_",
+    ),
+    paperAssembly: null,
+  };
+}
+
+function createEffectiveAuthorizationContext(input: {
+  authorizationPublicId: string;
+  authorizationSource: "personal_auth" | "org_auth";
+  ownerPublicId: string;
+  ownerType: "personal" | "organization";
+  organizationPublicId: string | null;
+}): EffectiveAuthorizationContextDto {
+  return {
+    profession: "marketing",
+    level: 3,
+    contextDisplayStatus: "display_only",
+    effectiveEdition: "advanced",
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    ownerType: input.ownerType,
+    ownerPublicId: input.ownerPublicId,
+    organizationPublicId: input.organizationPublicId,
+    quotaOwnerType:
+      input.ownerType === "organization" ? "organization" : "personal",
+    quotaOwnerPublicId: input.ownerPublicId,
+    capabilities: {
+      canAnswerOrganizationTraining: input.ownerType === "organization",
+      canCreateOrganizationTraining: input.ownerType === "organization",
+      canGenerateAiPaper: true,
+      canGenerateAiQuestion: true,
+      canManageAuthorizationQuota: false,
+      canViewOrganizationTrainingSummary: input.ownerType === "organization",
+    },
+    blockedReason: null,
+  };
+}
+
+function createPersonalAiGenerationLearningSessionRouteHandlers(
+  resolveUserContext: Parameters<
+    typeof createBasePersonalAiGenerationLearningSessionRouteHandlers
+  >[0],
+  dependencies: PersonalAiGenerationLearningSessionRouteDependencies = {},
+) {
+  const personalAuth: EffectivePersonalAuthRow = {
+    id: 1,
+    public_id: personalAuthorizationPublicId,
+    edition: "advanced",
+    profession: "marketing",
+    level: 3,
+    starts_at: new Date("2026-07-01T00:00:00.000Z"),
+    expires_at: new Date("2026-08-01T00:00:00.000Z"),
+    status: "active",
+  };
+  const orgAuth: EffectiveOrgAuthRow = {
+    id: 2,
+    public_id: organizationAuthorizationPublicId,
+    organization_public_id: employeeUserContext.organizationPublicId,
+    organization_name: "Synthetic organization",
+    organization_status: "active",
+    edition: "advanced",
+    profession: "marketing",
+    level: 3,
+    starts_at: new Date("2026-07-01T00:00:00.000Z"),
+    expires_at: new Date("2026-08-01T00:00:00.000Z"),
+    status: "active",
+  };
+
+  return createBasePersonalAiGenerationLearningSessionRouteHandlers(
+    resolveUserContext,
+    {
+      resultRepository: {
+        async findDraftResultByPublicId(query) {
+          if (
+            (query.authorizationPublicId === personalAuthorizationPublicId &&
+              query.ownerType !== "personal") ||
+            (query.authorizationPublicId ===
+              organizationAuthorizationPublicId &&
+              query.ownerType !== "organization")
+          ) {
+            return null;
+          }
+
+          return createDefaultLearningResult(query.resultPublicId);
+        },
+      },
+      authorizationRepository: {
+        async listPersonalAuthsByUserPublicId() {
+          return [personalAuth];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [orgAuth];
+        },
+      },
+      effectiveAuthorizationService: {
+        async listEffectiveAuthorizations(input) {
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              authorizations: [],
+              effectiveAuthorizations: [],
+              authorizationContexts: [
+                createEffectiveAuthorizationContext({
+                  authorizationPublicId: personalAuthorizationPublicId,
+                  authorizationSource: "personal_auth",
+                  ownerPublicId: input.userPublicId,
+                  ownerType: "personal",
+                  organizationPublicId: null,
+                }),
+                ...(input.userPublicId === employeeUserContext.userPublicId
+                  ? [
+                      createEffectiveAuthorizationContext({
+                        authorizationPublicId:
+                          organizationAuthorizationPublicId,
+                        authorizationSource: "org_auth",
+                        ownerPublicId: employeeUserContext.organizationPublicId,
+                        ownerType: "organization",
+                        organizationPublicId:
+                          employeeUserContext.organizationPublicId,
+                      }),
+                    ]
+                  : []),
+              ],
+            },
+          };
+        },
+      },
+      ...dependencies,
+    },
+  );
 }
 
 function getLearningSessionCollectionPostHandler(collection: unknown) {
@@ -330,6 +483,161 @@ function getLearningSessionAnswerPostHandler(answers: unknown) {
 }
 
 describe("personal AI generation learning session route handlers", () => {
+  it("rejects an ineffective selected authorization before creating a learning session", async () => {
+    const repository = createLearningSessionRepository();
+    const dependencies = {
+      repository,
+      authorizationRepository: {
+        async listPersonalAuthsByUserPublicId() {
+          return [
+            {
+              id: 3,
+              public_id: "expired_personal_auth_public_001",
+              edition: "advanced" as const,
+              profession: "marketing",
+              level: 3,
+              starts_at: new Date("2026-01-01T00:00:00.000Z"),
+              expires_at: new Date("2026-02-01T00:00:00.000Z"),
+              status: "expired" as const,
+            },
+          ];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [];
+        },
+      },
+      effectiveAuthorizationService: {
+        async listEffectiveAuthorizations() {
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              authorizations: [],
+              effectiveAuthorizations: [],
+              authorizationContexts: [],
+            },
+          };
+        },
+      },
+    } as unknown as PersonalAiGenerationLearningSessionRouteDependencies;
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        dependencies,
+      );
+
+    const response = await getLearningSessionCollectionPostHandler(collection)(
+      createPostRequest({
+        authorizationPublicId: "expired_personal_auth_public_001",
+        sessionPublicId: "ai_learning_session_expired_auth_001",
+        sourceResultPublicId: "ai_generation_result_expired_auth_001",
+        sourceTaskPublicId: "ai_generation_task_expired_auth_001",
+        visibleGeneratedContent: createVisibleGeneratedContent(),
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(repository.savedSessions).toEqual([]);
+  });
+
+  it("rejects progress and answer consumption after the selected authorization becomes ineffective", async () => {
+    const repository = createLearningSessionRepository();
+    const activeHandlers =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        { repository },
+      );
+    const sourceResultPublicId = "ai_generation_result_expired_resume_001";
+    const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+
+    const creationResponse = await getLearningSessionCollectionPostHandler(
+      activeHandlers.collection,
+    )(
+      createPostRequest({
+        sourceResultPublicId,
+        visibleGeneratedContent: createVisibleGeneratedContent(),
+      }),
+    );
+
+    expect((await creationResponse.json()).code).toBe(0);
+    expect(repository.savedSessions).toHaveLength(1);
+
+    const ineffectiveHandlers =
+      createBasePersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        {
+          repository,
+          resultRepository: {
+            async findDraftResultByPublicId(query) {
+              return createDefaultLearningResult(query.resultPublicId);
+            },
+          },
+          authorizationRepository: {
+            async listPersonalAuthsByUserPublicId() {
+              return [
+                {
+                  id: 3,
+                  public_id: personalAuthorizationPublicId,
+                  edition: "advanced",
+                  profession: "marketing",
+                  level: 3,
+                  starts_at: new Date("2026-01-01T00:00:00.000Z"),
+                  expires_at: new Date("2026-02-01T00:00:00.000Z"),
+                  status: "expired",
+                },
+              ];
+            },
+            async listOrgAuthsByUserPublicId() {
+              return [];
+            },
+          },
+          effectiveAuthorizationService: {
+            async listEffectiveAuthorizations() {
+              return {
+                code: 0,
+                message: "ok",
+                data: {
+                  authorizations: [],
+                  effectiveAuthorizations: [],
+                  authorizationContexts: [],
+                },
+              };
+            },
+          },
+        },
+      );
+    const answerResponse = await getLearningSessionAnswerPostHandler(
+      ineffectiveHandlers.answers,
+    )(
+      createAnswerPostRequest(sessionPublicId, {
+        sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+        selectedOptionLabels: ["A"],
+        textAnswer: null,
+      }),
+      { params: Promise.resolve({ publicId: sessionPublicId }) },
+    );
+    const progressResponse = await getLearningSessionProgressGetHandler(
+      ineffectiveHandlers.progress,
+    )(createProgressGetRequest(sessionPublicId), {
+      params: Promise.resolve({ publicId: sessionPublicId }),
+    });
+
+    for (const response of [answerResponse, progressResponse]) {
+      await expect(response.json()).resolves.toEqual({
+        code: 403057,
+        message:
+          "Personal AI generation is not available for this authorization.",
+        data: null,
+      });
+    }
+    expect(repository.savedAnswerFeedbacks).toEqual([]);
+  });
+
   it.each([
     {
       label: "personal advanced learner",
@@ -380,6 +688,10 @@ describe("personal AI generation learning session route handlers", () => {
         collection,
       )(
         createPostRequest({
+          authorizationPublicId:
+            ownerType === "organization"
+              ? organizationAuthorizationPublicId
+              : personalAuthorizationPublicId,
           sourceResultPublicId: resultPublicId,
           sessionPublicId: "browser_supplied_session_must_be_ignored",
           sourceTaskPublicId: "browser_supplied_task_must_be_ignored",
@@ -410,6 +722,7 @@ describe("personal AI generation learning session route handlers", () => {
         ownerType === "personal"
           ? [
               {
+                authorizationPublicId: personalAuthorizationPublicId,
                 ownerType,
                 ownerPublicId,
                 actorPublicId: userContext.userPublicId,
@@ -418,12 +731,14 @@ describe("personal AI generation learning session route handlers", () => {
             ]
           : [
               {
+                authorizationPublicId: organizationAuthorizationPublicId,
                 ownerType: "personal",
                 ownerPublicId: userContext.userPublicId,
                 actorPublicId: userContext.userPublicId,
                 resultPublicId,
               },
               {
+                authorizationPublicId: organizationAuthorizationPublicId,
                 ownerType,
                 ownerPublicId,
                 actorPublicId: userContext.userPublicId,
@@ -496,6 +811,7 @@ describe("personal AI generation learning session route handlers", () => {
     });
     expect(resultLookupQueries).toEqual([
       {
+        authorizationPublicId: personalAuthorizationPublicId,
         ownerType: "personal",
         ownerPublicId: employeeUserContext.userPublicId,
         actorPublicId: employeeUserContext.userPublicId,
@@ -574,6 +890,13 @@ describe("personal AI generation learning session route handlers", () => {
         async () => employeeUserContext,
         {
           repository,
+          resultRepository: {
+            async findDraftResultByPublicId(query) {
+              return query.ownerType === "organization"
+                ? createPersistedPaperResult(query.resultPublicId)
+                : null;
+            },
+          },
           now: () => new Date("2026-07-06T04:00:00.000Z"),
           paperSourceQuestionResolver: async ({ paperAssemblyContainer }) => {
             resolverCalls.push(paperAssemblyContainer);
@@ -584,6 +907,7 @@ describe("personal AI generation learning session route handlers", () => {
 
     const response = await getLearningSessionCollectionPostHandler(collection)(
       createPostRequest({
+        authorizationPublicId: organizationAuthorizationPublicId,
         sessionPublicId: "ai_paper_learning_session_route_001",
         sourceResultPublicId: "ai_generation_result_route_paper_001",
         sourceTaskPublicId: "ai_generation_task_route_paper_001",
@@ -607,7 +931,8 @@ describe("personal AI generation learning session route handlers", () => {
         status: "created",
         blockReason: null,
         session: {
-          sessionPublicId: "ai_paper_learning_session_route_001",
+          sessionPublicId:
+            "ai_learning_session_ai_generation_result_route_paper_001",
           ownerType: "organization",
           ownerPublicId: employeeUserContext.organizationPublicId,
           actorPublicId: employeeUserContext.userPublicId,
@@ -639,6 +964,13 @@ describe("personal AI generation learning session route handlers", () => {
         async () => personalUserContext,
         {
           repository,
+          resultRepository: {
+            async findDraftResultByPublicId(query) {
+              return query.ownerType === "personal"
+                ? createPersistedPaperResult(query.resultPublicId)
+                : null;
+            },
+          },
           now: () => new Date("2026-07-06T04:01:00.000Z"),
           paperSourceQuestionResolver: async () =>
             createPaperSourceQuestions().slice(0, 1),
@@ -733,7 +1065,7 @@ describe("personal AI generation learning session route handlers", () => {
         status: "created",
         blockReason: null,
         session: {
-          sessionPublicId: "ai_learning_session_route_001",
+          sessionPublicId: "ai_learning_session_ai_generation_result_route_001",
           ownerType: "personal",
           ownerPublicId: personalUserContext.userPublicId,
           actorPublicId: personalUserContext.userPublicId,
@@ -768,6 +1100,7 @@ describe("personal AI generation learning session route handlers", () => {
 
     const response = await getLearningSessionCollectionPostHandler(collection)(
       createPostRequest({
+        authorizationPublicId: organizationAuthorizationPublicId,
         sessionPublicId: "ai_learning_session_route_employee_001",
         sourceResultPublicId: "ai_generation_result_route_employee_001",
         sourceTaskPublicId: "ai_generation_task_route_employee_001",
@@ -836,7 +1169,7 @@ describe("personal AI generation learning session route handlers", () => {
     });
   });
 
-  it("rejects learner AI session creation when requested owner is outside the user scope", async () => {
+  it("ignores a client owner claim outside the user scope and derives ownership from the persisted result", async () => {
     const { collection } =
       createPersonalAiGenerationLearningSessionRouteHandlers(
         async () => employeeUserContext,
@@ -857,10 +1190,16 @@ describe("personal AI generation learning session route handlers", () => {
       }),
     );
 
-    await expect(response.json()).resolves.toEqual({
-      code: 400056,
-      message: "Invalid personal AI learning session input.",
-      data: null,
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        status: "created",
+        session: {
+          ownerType: "personal",
+          ownerPublicId: employeeUserContext.userPublicId,
+          actorPublicId: employeeUserContext.userPublicId,
+        },
+      },
     });
   });
 
@@ -884,23 +1223,25 @@ describe("personal AI generation learning session route handlers", () => {
       }),
     );
 
+    const sessionPublicId =
+      "ai_learning_session_ai_generation_result_route_progress_001";
     const answerResponse = await getLearningSessionAnswerPostHandler(answers)(
-      createAnswerPostRequest("ai_learning_session_route_progress_001", {
-        sessionQuestionPublicId: "ai_learning_session_route_progress_001_q_1",
+      createAnswerPostRequest(sessionPublicId, {
+        sessionQuestionPublicId: `${sessionPublicId}_q_1`,
         selectedOptionLabels: ["A"],
         textAnswer: null,
       }),
       {
         params: Promise.resolve({
-          publicId: "ai_learning_session_route_progress_001",
+          publicId: sessionPublicId,
         }),
       },
     );
     const progressResponse = await getLearningSessionProgressGetHandler(
       progress,
-    )(createProgressGetRequest("ai_learning_session_route_progress_001"), {
+    )(createProgressGetRequest(sessionPublicId), {
       params: Promise.resolve({
-        publicId: "ai_learning_session_route_progress_001",
+        publicId: sessionPublicId,
       }),
     });
 
