@@ -95,12 +95,41 @@ Important: 0 open; 1 found and corrected during C5 review
 
 ## C6 Main Review And Independent Final Review
 
+### 2026-07-20 approved manual-hash self-integrity correction focused review
+
+- Exact changed set is four staged `M` files: P1 manual guard, Module pre-commit adapter, paired evidence and paired audit. No state/queue, product, schema/migration, database, dependency, Provider/runtime, P2, PR, force-push, deploy or hook files changed.
+- Cross-runtime focused GREEN passed: P1 and Module pre-commit each exited `0` in Windows PowerShell 5.1 and `pwsh`; both emitted the one-time correction marker and no generic transition finding.
+- The adapter requires the approved base/origin SHAs, correction branch, clean worktree, exact five-path ordinal/case-sensitive `M` set, ready-for-closeout findingless projection and both machine markers. The pre-push recognition is limited to the same committed correction and does not alter standard mode, ancestor policy, ordinary SHA drift hard-block or approval/evidence validation.
+- The staged manual-contract normalized tree hash is recomputed from staged blobs after normalizing all three self-hash fields, preventing arbitrary guard semantics within the exact allowlist.
+- The committed manual ready-contract self-integrity hash is refreshed after the pre-push adapter recognition; earlier values are historical stale metadata only.
+- This is governance-only and contributes no product closure. Parser, diff and final adversarial checks remain required before normal commit/merge/push/cleanup.
+- Decision: APPROVE_MANUAL_HASH_CORRECTION_SCOPE
+
 Decision: main_review_pass_full_pending
+
+### 2026-07-20 approved committed manual-hash pre-push recognition review
+
+- Decision: APPROVE_COMMITTED_MANUAL_HASH_CORRECTION_SCOPE
+- The additional route is exact and one-time: five `M` paths only, the fixed correction parent/origin/branch, clean worktree, and P1 `transition_only` handoff. It is not a generic approved transition and does not authorize ancestor use outside this candidate.
+- No ordinary SHA drift, standard-mode ancestor, topology, authorization, evidence, product, state/queue, database/provider/runtime/P2/PR/force-push/deploy or hook-bypass boundary changed.
+
+### 2026-07-20 manual-hash correction cross-runtime focused review
+
+- Windows PowerShell 5.1 and `pwsh` 7 P1/Module pre-commit runs both exited `0` on the exact five-path staged candidate.
+- Adversarial boundary remains fail-closed: any extra/duplicate/non-`M` path, wrong base/origin/branch/parent, dirty worktree, stale hash, missing machine marker, ordinary SHA drift or standard-mode request is rejected.
+- Decision: APPROVE_MANUAL_HASH_CORRECTION_FOCUSED_SCOPE
+
+### 2026-07-20 approved manual-hash self-integrity correction focused review
+
+- Exact changed set is four staged `M` files: P1 manual guard, Module pre-commit adapter, paired evidence and paired audit. No state/queue, product, schema/migration, database, dependency, Provider/runtime, P2, PR, force-push, deploy or hook files changed.
+- Cross-runtime focused GREEN passed: P1 and Module pre-commit each exited `0` in Windows PowerShell 5.1 and `pwsh`; both emitted the one-time correction marker and no generic transition finding.
+- The adapter requires the approved base/origin SHAs, correction branch, clean worktree, exact five-path ordinal/case-sensitive `M` set, ready-for-closeout findingless projection and both machine markers. The pre-push recognition is limited to the same committed correction and does not alter manual standard mode, ancestor policy, ordinary SHA drift hard-block or approval/evidence validation.
+- This is governance-only and contributes no product closure. Parser, diff, adversarial review and existing C7 closeout gates remain required before normal commit/merge/push/cleanup.
 
 ### 2026-07-20 pre-commit correction hash refresh audit
 
 - Review correction: the Module pre-commit candidate now performs ordinal, case-sensitive uniqueness validation on every staged status path before comparing the exact eight-file allowlist. This closes duplicate and case-variant path ambiguity without widening the channel.
-- The resulting normalized pre-commit correction tree hash is `9b5c22c2d2b3e06114a35181fb7cb9b55e33d26becca3b6e15fb681cf6c289ad`; the prior `869027...`, `976911...`, `cbe21...` and `4a74...` values are stale intermediate evidence only. The manual contract hash remains `2f2ed63744146859b1047218f59223913f681b994b83527439b09def26d14dc9`.
+- The resulting normalized pre-commit correction tree hash is `9b5c22c2d2b3e06114a35181fb7cb9b55e33d26becca3b6e15fb681cf6c289ad`; the prior `869027...`, `976911...`, `cbe21...` and `4a74...` values are stale intermediate evidence only. The final manual contract hash is `b7ce770393c7fbe215a35c9cb046951f86886d22cb120fc0675f78a36ea63051`.
 - The untracked `manual-hash-probe.ps1` residue was removed. Required final status is the exact eight staged `M` paths with no unstaged or untracked files. Ordinary SHA drift, topology, approval/evidence, ancestor and hook-bypass hard-blocks remain unchanged.
 - Independent reviewer recheck: uniqueness increment passes; the initial recheck found the stale hash and untracked helper. Both were corrected; direct staged P1/Module pre-commit rerun now passes with the final hash and clean-residue checks.
 
@@ -118,14 +147,14 @@ Decision: main_review_pass_independent_final_pending
 ### 2026-07-20 cross-runtime hash determinism audit
 
 - Independent review blocker reproduced: native `git show` text decoding yielded different hash anchors under Windows PowerShell 5.1 and `pwsh` 7. The correction now reads UTF-8 from the clean, drift-checked worktree; the existing exact staged status and clean-index checks ensure this is the staged candidate, not an alternate source.
-- The same normalized hash `4a74b26686922eee5f7442cc7e8e5776b48ff4b473493568f70c66475dd549db` was independently computed by both runtimes. This is a compatibility fix only; no security boundary was relaxed.
+- The same normalized hash `9b5c22c2d2b3e06114a35181fb7cb9b55e33d26becca3b6e15fb681cf6c289ad` was independently computed by both runtimes. This is a compatibility fix only; no security boundary was relaxed.
 - Independent final review must recheck this cross-runtime result before commit. No closeout action has occurred.
 
 Decision: cross_runtime_hash_review_pending
 
 ### 2026-07-20 cross-runtime final revalidation
 
-- Windows PowerShell 5.1 and `pwsh` 7 both passed the staged P1 pre-commit anchor and emitted `p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time` with the same normalized hash `4a74b266...`.
+- Windows PowerShell 5.1 and `pwsh` 7 both passed the staged P1 pre-commit anchor and emitted `p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time` with the same normalized hash `9b5c22c2...`.
 - Both runtimes passed Module pre-commit with `preCommitScopeMode: p1_mechanism_bootstrap_scope_correction`; exact eight-path scope and all hard-blocks remain unchanged.
 - The UTF-8 worktree read is safe only after the same function's clean-index/untracked checks; it does not create a second authorization source or allow staged/worktree divergence.
 - Independent reviewer recheck is now the sole pending gate.
@@ -139,6 +168,25 @@ Decision: cross_runtime_revalidation_pass_independent_final_pending
 - Final independent reviewer result: `Critical=0 / Important=0 / Minor=0 / PASS`. No blocker remains before normal commit and existing closeout policy.
 
 Decision: APPROVE_SCOPE
+
+### 2026-07-20 post-merge manual gate blocker audit
+
+- Main-thread post-merge manual gate on `master` failed in both PowerShell runtimes with `P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID`; the committed script's manual self-hash is stale (`2f2ed637...` vs recomputed `b7ce770393c7fbe215a35c9cb046951f86886d22cb120fc0675f78a36ea63051`).
+- The prepared correction is limited to the same P1 script plus evidence/plan/audit metadata in the isolated worktree; it is not committed. No push, cleanup, state/queue closeout or Goal resume occurred.
+- Unique blocker: the consumed one-time pre-commit channel cannot legally authorize a new post-merge correction because its base/transition anchor is already consumed. No hook bypass or stale manual result is accepted.
+
+Decision: BLOCKED_MANUAL_HASH_REAUTH_REQUIRED
+
+### 2026-07-20 approved manual-hash self-integrity correction audit
+
+- manualHashSelfIntegrityCorrection: approved_one_time
+- manualHashSelfIntegrityBaseSha: 47ff1e1391d01d6907c934e33796264dfb3b12de
+- manualHashSelfIntegrityOriginMasterSha: d0b71842657f8f4df7e72d5fa6514b94d20b2de4
+- Approval scope: one new, exact pre-commit channel for the stale manual self-hash only. Exact files are the P1 guard, Module pre-commit adapter, evidence and audit; no other domain is authorized.
+- Anchors: candidate base `47ff1e1391d01d6907c934e33796264dfb3b12de`, expected origin/master `d0b71842657f8f4df7e72d5fa6514b94d20b2de4`, branch `codex/p1-mechanism-bootstrap-manual-recognition`, task `ready_for_closeout`, `findingIds: []`, `productClosureContribution: none`.
+- Required fail-closed checks: exact four staged `M` paths, no unstaged/untracked files, strict approval markers in both evidence/audit, manual hash literal `b7ce770...`, ordinary drift/topology/ancestor hard-blocks and no hook bypass.
+
+Decision: APPROVE_MANUAL_HASH_CORRECTION_SCOPE
 
 ### 2026-07-20 pre-commit scope-correction audit
 
@@ -554,3 +602,9 @@ Decision: main_review_pass_full_pending
 - Closeout blocker: normal pre-commit exited `1 / 14.219s` with `P1_PROGRAM_APPROVED_SAME_TASK_TRANSITION_INVALID`, review-not-final findings, and task branch/worktree binding mismatches. This is the single blocker: the existing pre-commit contract has no legal manual-only channel for a six-file correction after the mechanism task's ready-for-closeout state-only transition. The task is stopped here; no commit, merge, push, cleanup or Goal transition occurred.
 
 Decision: main_review_pass_full_pending
+
+### 2026-07-20 approved committed manual-hash pre-push recognition review
+
+- Decision: APPROVE_COMMITTED_MANUAL_HASH_CORRECTION_SCOPE
+- The additional route is exact and one-time: five `M` paths only, the fixed correction parent/origin/branch, clean worktree, and P1 `transition_only` handoff. It is not a generic approved transition and does not authorize ancestor use outside this candidate.
+- No ordinary SHA drift, standard-mode ancestor, topology, authorization, evidence, product, state/queue, database/provider/runtime/P2/PR/force-push/deploy or hook-bypass boundary changed.

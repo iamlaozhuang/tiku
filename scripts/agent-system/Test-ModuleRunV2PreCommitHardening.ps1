@@ -66,6 +66,48 @@ $p1MechanismBootstrapPreCommitScopeCorrectionFiles = @(
     "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
     "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1"
 )
+$p1MechanismBootstrapManualHashCorrectionBaseSha = "47ff1e1391d01d6907c934e33796264dfb3b12de"
+$p1MechanismBootstrapManualHashCorrectionOriginMasterSha = "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+$p1MechanismBootstrapManualHashCorrectionBranch = "codex/p1-mechanism-bootstrap-manual-recognition"
+$p1MechanismBootstrapManualHashCorrectionFiles = @(
+    "docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1"
+)
+
+function Test-P1MechanismBootstrapManualHashCorrectionCandidate {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$Files,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ProjectStateLines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$QueueLines
+    )
+    $normalized = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $expected = @($p1MechanismBootstrapManualHashCorrectionFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    if ((@($normalized | Sort-Object -CaseSensitive) -join '|') -cne (@($expected | Sort-Object -CaseSensitive) -join '|')) { return $false }
+    $statusLines = @(& git --no-optional-locks -C $RepositoryRoot diff --cached --name-status --no-renames --diff-filter=ACMRTD)
+    if ($LASTEXITCODE -ne 0 -or $statusLines.Count -ne $expected.Count) { return $false }
+    $statusPaths = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in $statusLines) {
+        $match = [regex]::Match(([string]$line), '^M\t(.+)$')
+        if (-not $match.Success) { return $false }
+        $statusPaths.Add((ConvertTo-NormalizedPath -Path $match.Groups[1].Value))
+    }
+    if ($statusPaths.Count -ne @($statusPaths | Sort-Object -CaseSensitive -Unique).Count -or (@($statusPaths | Sort-Object -CaseSensitive) -join '|') -cne (@($expected | Sort-Object -CaseSensitive) -join '|')) { return $false }
+    if (@(& git --no-optional-locks -C $RepositoryRoot diff --name-only --no-renames).Count -ne 0 -or @(& git --no-optional-locks -C $RepositoryRoot ls-files --others --exclude-standard).Count -ne 0) { return $false }
+    $taskId = Get-CurrentTaskId -Lines $ProjectStateLines
+    $queueTask = @(Get-TaskBlock -Lines $QueueLines -Id $taskId)
+    if ($taskId -cne 'p1-mechanism-execution-compatibility-v2-1-2026-07-19' -or (Get-CurrentTaskStatus -Lines $ProjectStateLines) -notin @('in_progress', 'ready_for_closeout') -or $queueTask.Count -eq 0 -or (Get-ScalarValue -Block $queueTask -Key 'status') -cne 'ready_for_closeout' -or (Get-ScalarValue -Block $queueTask -Key 'taskKind') -cne 'mechanism_hardening' -or (Get-ScalarValue -Block $queueTask -Key 'findingIds') -cne '[]' -or (Get-ScalarValue -Block $queueTask -Key 'productClosureContribution') -cne 'none') { return $false }
+    $head = ((& git -C $RepositoryRoot rev-parse HEAD) -join '').Trim(); $origin = ((& git -C $RepositoryRoot rev-parse origin/master) -join '').Trim(); $branch = ((& git -C $RepositoryRoot branch --show-current) -join '').Trim()
+    if ($head -cne $p1MechanismBootstrapManualHashCorrectionBaseSha -or $origin -cne $p1MechanismBootstrapManualHashCorrectionOriginMasterSha -or $branch -cne $p1MechanismBootstrapManualHashCorrectionBranch) { return $false }
+    foreach ($path in @('docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md','docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md')) {
+        $text = Get-Content -LiteralPath (Join-Path $RepositoryRoot ($path -replace '/', '\')) -Raw -Encoding UTF8
+        if ($text -notmatch '(?m)^\s*-\s+manualHashSelfIntegrityCorrection:\s*approved_one_time\s*$' -or $text -notmatch ('(?m)^\s*-\s+manualHashSelfIntegrityBaseSha:\s*' + [regex]::Escape($p1MechanismBootstrapManualHashCorrectionBaseSha) + '\s*$') -or $text -notmatch ('(?m)^\s*-\s+manualHashSelfIntegrityOriginMasterSha:\s*' + [regex]::Escape($p1MechanismBootstrapManualHashCorrectionOriginMasterSha) + '\s*$')) { return $false }
+    }
+    return $true
+}
 
 function Test-P1MechanismBootstrapPreCommitScopeCorrectionCandidate {
     param(
@@ -2682,12 +2724,13 @@ $queueLines = @(Get-Content -Path $QueuePath)
 $matrixContent = Get-Content -Path $MatrixPath -Raw
 $filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
 $isP1MechanismBootstrapPreCommitScopeCorrection = Test-P1MechanismBootstrapPreCommitScopeCorrectionCandidate -RepositoryRoot $repositoryRoot -Files $filesToScan -ProjectStateLines $projectStateLines -QueueLines $queueLines
+$isP1MechanismBootstrapManualHashCorrection = Test-P1MechanismBootstrapManualHashCorrectionCandidate -RepositoryRoot $repositoryRoot -Files $filesToScan -ProjectStateLines $projectStateLines -QueueLines $queueLines
 # C4-ADAPTER-ROUTING-BEGIN
 $p1ApprovedSameTaskTransitionAutomatic = $null
 $p1ApprovedSameTaskTransitionIsExactBootstrap = (Get-CurrentTaskId -Lines $projectStateLines) -ceq "p1-mechanism-execution-compatibility-v2-1-2026-07-19" `
     -and (Test-P1AstMechanismBootstrapFileSet -Files $filesToScan)
 $p1ApprovedSameTaskTransitionNameStatus = @()
-if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapPreCommitScopeCorrection) {
+if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapPreCommitScopeCorrection -and -not $isP1MechanismBootstrapManualHashCorrection) {
     $p1ApprovedSameTaskTransitionNameStatus = @(Get-P1ApprovedSameTaskTransitionPreCommitNameStatus -RepositoryRoot $repositoryRoot)
 }
 $p1ApprovedSameTaskTransitionHistoricalExactRoutes = [ordered]@{
@@ -2706,7 +2749,7 @@ $p1ApprovedSameTaskTransitionHistoricalExactRoutes = [ordered]@{
 $p1ApprovedSameTaskTransitionHistoricalExactRoute = Select-P1ApprovedSameTaskTransitionHistoricalExactRoute `
     -NameStatusRecords $p1ApprovedSameTaskTransitionNameStatus `
     -HistoricalRoutes $p1ApprovedSameTaskTransitionHistoricalExactRoutes
-if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapPreCommitScopeCorrection -and -not $p1ApprovedSameTaskTransitionHistoricalExactRoute.Claimed) {
+if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapPreCommitScopeCorrection -and -not $isP1MechanismBootstrapManualHashCorrection -and -not $p1ApprovedSameTaskTransitionHistoricalExactRoute.Claimed) {
     $p1ApprovedSameTaskTransitionAutomatic = Get-P1ApprovedSameTaskTransitionStageInputs `
         -RepositoryRoot $repositoryRoot `
         -Phase pre_commit `
@@ -2807,7 +2850,7 @@ if ($isDocsOnlyBatchScope -and $isLowRiskExperienceBatchScope) {
     throw "Use either DocsOnlyBatchId or LowRiskExperienceBatchId, not both."
 }
 
-if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0116ScopeCorrectionGuardHotfixScope -and -not $isP1F0117SpecApprovalTransitionHotfixScope -and -not $isP1F0143SpecApprovalTransitionHotfixScope -and -not $isP1F0117SmokeScopeCorrectionScope -and -not $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -and -not $isP1F0115ScopeCorrectionScope -and -not $isP1MechanismBootstrapPreCommitScopeCorrection -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isP1F0132ScopeCorrectionScope -and -not $isP1F0115Phase11ScopeCorrectionScope -and -not $isP1F0115ModulePrecommitHotfixScope -and -not $isP1F0116DesignPathGuardHotfixScope -and -not $isP1F0116ScopeCorrectionGuardHotfixScope -and -not $isP1F0117SpecApprovalTransitionHotfixScope -and -not $isP1F0143SpecApprovalTransitionHotfixScope -and -not $isP1F0117SmokeScopeCorrectionScope -and -not $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -and -not $isP1F0115ScopeCorrectionScope -and -not $isP1MechanismBootstrapPreCommitScopeCorrection -and -not $isP1MechanismBootstrapManualHashCorrection -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -2867,6 +2910,10 @@ if ($isSeedTransactionScope) {
         "paper_assets/**",
         "docs/01-requirements/stories/**"
     )
+} elseif ($isP1MechanismBootstrapManualHashCorrection) {
+    $TaskId = "p1-mechanism-execution-compatibility-v2-1-2026-07-19"
+    $allowedFiles = @($p1MechanismBootstrapManualHashCorrectionFiles)
+    $blockedFiles = @("AGENTS.md", ".husky/**", "package.json", "package-lock.json", "pnpm-lock.yaml", "src/**", "tests/**", "e2e/**", "src/db/schema/**", "drizzle/**", "migrations/**", ".env*", "D:/tiku-readonly-audit/**")
 } elseif ($isP1MechanismBootstrapPreCommitScopeCorrection) {
     $TaskId = $p1MechanismBootstrapPreCommitScopeCorrectionTaskId
     $allowedFiles = @($p1MechanismBootstrapPreCommitScopeCorrectionFiles)
@@ -2935,7 +2982,7 @@ if ($isSeedTransactionScope) {
 
 Write-Output "taskId: $TaskId"
 if (-not $isP1F0115ScopeCorrectionScope) {
-    Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1MechanismBootstrapPreCommitScopeCorrection) { "p1_mechanism_bootstrap_scope_correction" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" } elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" } elseif ($isP1F0115ModulePrecommitHotfixScope) { "p1_f0115_module_precommit_hotfix" } elseif ($isP1F0116DesignPathGuardHotfixScope) { "p1_f0116_designpath_guard_hotfix" } elseif ($isP1F0116ScopeCorrectionGuardHotfixScope) { "p1_f0116_scope_correction_guard_hotfix" } elseif ($isP1F0117SpecApprovalTransitionHotfixScope) { "p1_f0117_spec_approval_transition_hotfix" } elseif ($isP1F0143SpecApprovalTransitionHotfixScope) { "p1_f0143_spec_approval_transition_hotfix" } elseif ($isP1F0117SmokeScopeCorrectionScope) { "p1_f0117_smoke_scope_correction" } elseif ($isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) { "p1_f0117_smoke_scope_closeout_lifecycle_hotfix" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
+    Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1MechanismBootstrapManualHashCorrection) { "p1_mechanism_bootstrap_manual_hash_correction" } elseif ($isP1MechanismBootstrapPreCommitScopeCorrection) { "p1_mechanism_bootstrap_scope_correction" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isP1F0132ScopeCorrectionScope) { "p1_f0132_scope_correction" } elseif ($isP1F0115Phase11ScopeCorrectionScope) { "p1_f0115_phase11_scope_correction" } elseif ($isP1F0115ModulePrecommitHotfixScope) { "p1_f0115_module_precommit_hotfix" } elseif ($isP1F0116DesignPathGuardHotfixScope) { "p1_f0116_designpath_guard_hotfix" } elseif ($isP1F0116ScopeCorrectionGuardHotfixScope) { "p1_f0116_scope_correction_guard_hotfix" } elseif ($isP1F0117SpecApprovalTransitionHotfixScope) { "p1_f0117_spec_approval_transition_hotfix" } elseif ($isP1F0143SpecApprovalTransitionHotfixScope) { "p1_f0143_spec_approval_transition_hotfix" } elseif ($isP1F0117SmokeScopeCorrectionScope) { "p1_f0117_smoke_scope_correction" } elseif ($isP1F0117SmokeScopeCloseoutLifecycleHotfixScope) { "p1_f0117_smoke_scope_closeout_lifecycle_hotfix" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
 }
 Write-Output "filesToScan: $($filesToScan.Count)"
 
@@ -2962,9 +3009,10 @@ if ($isLowRiskExperienceBatchScope) {
 }
 
 Write-Section -Title "Requirement SSOT Readiness"
-if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1MechanismBootstrapPreCommitScopeCorrection -or $isP1TransitionHotfixScope -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0116ScopeCorrectionGuardHotfixScope -or $isP1F0117SpecApprovalTransitionHotfixScope -or $isP1F0143SpecApprovalTransitionHotfixScope -or $isP1F0117SmokeScopeCorrectionScope -or $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -or $isP1F0115ScopeCorrectionScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
+if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1MechanismBootstrapPreCommitScopeCorrection -or $isP1MechanismBootstrapManualHashCorrection -or $isP1TransitionHotfixScope -or $isP1F0132ScopeCorrectionScope -or $isP1F0115Phase11ScopeCorrectionScope -or $isP1F0115ModulePrecommitHotfixScope -or $isP1F0116DesignPathGuardHotfixScope -or $isP1F0116ScopeCorrectionGuardHotfixScope -or $isP1F0117SpecApprovalTransitionHotfixScope -or $isP1F0143SpecApprovalTransitionHotfixScope -or $isP1F0117SmokeScopeCorrectionScope -or $isP1F0117SmokeScopeCloseoutLifecycleHotfixScope -or $isP1F0115ScopeCorrectionScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
     Write-Output "requirementSsotReadiness: skipped_$(
         if ($isSeedTransactionScope) { "seed_transaction" }
+        elseif ($isP1MechanismBootstrapManualHashCorrection) { "p1_mechanism_bootstrap_manual_hash_correction" }
         elseif ($isP1MechanismBootstrapPreCommitScopeCorrection) { "p1_mechanism_bootstrap_scope_correction" }
         elseif ($isMechanicRepairScope) { "mechanic_repair" }
         elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" }
@@ -2999,6 +3047,8 @@ if ($SkipScopeScan) {
         Test-SeedTransactionAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
     } elseif ($isMechanicRepairScope) {
         Test-MechanicRepairAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
+    } elseif ($isP1MechanismBootstrapManualHashCorrection) {
+        Write-Output "P1 mechanism bootstrap manual-hash self-integrity correction anchors delegated to the P1 guard."
     } elseif ($isP1MechanismBootstrapPreCommitScopeCorrection) {
         Write-Output "P1 mechanism bootstrap pre-commit scope-correction anchors delegated to the P1 guard."
     } elseif ($isP1TransitionHotfixScope) {
@@ -3067,5 +3117,9 @@ if ($isP1F0115ScopeCorrectionScope -and $isP1F0115ScopeCorrectionCandidateValid)
 if ($isP1MechanismBootstrapPreCommitScopeCorrection) {
     Write-Output "preCommitScopeMode: p1_mechanism_bootstrap_scope_correction"
     Write-Output "p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time"
+}
+if ($isP1MechanismBootstrapManualHashCorrection) {
+    Write-Output "preCommitScopeMode: p1_mechanism_bootstrap_manual_hash_correction"
+    Write-Output "p1MechanismBootstrapManualHashCorrection: approved_one_time"
 }
 Write-Output "pre-commit hardening passed"

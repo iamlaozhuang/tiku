@@ -219,6 +219,41 @@ New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixFiles -Option Constan
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
+New-Variable -Name p1MechanismBootstrapTaskId -Option Constant -Value "p1-mechanism-execution-compatibility-v2-1-2026-07-19"
+New-Variable -Name p1MechanismBootstrapManualHashCorrectionBaseSha -Option Constant -Value "47ff1e1391d01d6907c934e33796264dfb3b12de"
+New-Variable -Name p1MechanismBootstrapManualHashCorrectionOriginMasterSha -Option Constant -Value "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+New-Variable -Name p1MechanismBootstrapManualHashCorrectionFiles -Option Constant -Value @(
+    "docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1"
+)
+
+function Test-P1MechanismBootstrapManualHashCorrectionCommittedCandidate {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$HeadSha,
+        [Parameter(Mandatory = $true)][string]$OriginMasterSha
+    )
+    if ($TaskId -cne $p1MechanismBootstrapTaskId -or $OriginMasterSha -cne $p1MechanismBootstrapManualHashCorrectionOriginMasterSha) { return $false }
+    $parents = @(((& git -C $Root rev-list --parents -n 1 $HeadSha) -join '').Trim() -split '\s+')
+    if ($parents.Count -ne 2 -or $parents[1] -cne $p1MechanismBootstrapManualHashCorrectionBaseSha `
+        -or ((& git -C $Root branch --show-current) -join '').Trim() -cne 'master' `
+        -or @(& git --no-optional-locks -C $Root status --porcelain --untracked-files=all).Count -ne 0) { return $false }
+    $records = @(& git --no-optional-locks -C $Root diff-tree --no-commit-id --name-status --no-renames -r $HeadSha)
+    $expected = @($p1MechanismBootstrapManualHashCorrectionFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ } | Sort-Object -CaseSensitive)
+    $actual = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in $records) {
+        $match = [regex]::Match(([string]$line), '^([AM])\t(.+)$')
+        if (-not $match.Success -or $match.Groups[1].Value -cne 'M') { return $false }
+        $actual.Add((ConvertTo-NormalizedPath -Path $match.Groups[2].Value))
+    }
+    return $actual.Count -eq $expected.Count `
+        -and (@($actual | Sort-Object -CaseSensitive -Unique).Count -eq $actual.Count) `
+        -and ((@($actual | Sort-Object -CaseSensitive) -join '|') -ceq ($expected -join '|'))
+}
 
 function Write-Section {
     param(
@@ -1357,6 +1392,11 @@ $p1ApprovedSameTaskTransitionNameStatus = @(& git diff --name-status --no-rename
 $p1ApprovedSameTaskTransitionPaths = @((Get-P1ApprovedSameTaskTransitionCanonicalFiles -NameStatusRecords $p1ApprovedSameTaskTransitionNameStatus) | ForEach-Object { $_.Path })
 $p1ApprovedSameTaskTransitionIsExactBootstrap = $TaskId -ceq "p1-mechanism-execution-compatibility-v2-1-2026-07-19" `
     -and (Test-P1AstMechanismBootstrapFileSet -Files $p1ApprovedSameTaskTransitionPaths)
+$isP1MechanismBootstrapManualHashCorrectionCandidate = Test-P1MechanismBootstrapManualHashCorrectionCommittedCandidate `
+    -Root ((& git rev-parse --show-toplevel) -join '').Trim() `
+    -TaskId $TaskId `
+    -HeadSha $masterSha `
+    -OriginMasterSha $originMasterSha
 $p1ApprovedSameTaskTransitionHistoricalExactRoutes = [ordered]@{
     "p1_f0115_scope_correction" = $p1F0115ScopeCorrectionFiles
     "p1_f0115_phase11_scope_correction" = $p1F0115Phase11ScopeCorrectionFiles
@@ -1371,7 +1411,7 @@ $p1ApprovedSameTaskTransitionHistoricalExactRoutes = [ordered]@{
 $p1ApprovedSameTaskTransitionHistoricalExactRoute = Select-P1ApprovedSameTaskTransitionHistoricalExactRoute `
     -NameStatusRecords $p1ApprovedSameTaskTransitionNameStatus `
     -HistoricalRoutes $p1ApprovedSameTaskTransitionHistoricalExactRoutes
-if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $p1ApprovedSameTaskTransitionHistoricalExactRoute.Claimed) {
+if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapManualHashCorrectionCandidate -and -not $p1ApprovedSameTaskTransitionHistoricalExactRoute.Claimed) {
     $p1ApprovedSameTaskTransitionAutomatic = Get-P1ApprovedSameTaskTransitionStageInputs `
         -RepositoryRoot ((& git rev-parse --show-toplevel) -join "").Trim() `
         -Phase pre_push `
@@ -1435,6 +1475,7 @@ $canUseGenericP1TransitionMasterAncestry = $isP1TransitionScopeMode `
     -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $originMasterSha) `
     -and $originMasterSha -ne $masterSha `
     -and (Test-GitAncestor -AncestorSha $originMasterSha -DescendantSha $masterSha)
+$canUseP1MechanismBootstrapManualHashCorrectionMasterAncestry = $isP1TransitionScopeMode -and $isP1MechanismBootstrapManualHashCorrectionCandidate
 $canUseP1F0117CloseoutTransitionMasterAncestry = $isP1TransitionScopeMode `
     -and $TaskId -eq $p1F0117SpecApprovalTransitionHotfixParentTaskId `
     -and $stateCurrentTaskId -eq $p1F0117SpecApprovalTransitionHotfixParentTaskId `
@@ -1558,7 +1599,9 @@ $isP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology = if ($isP1F0117Sm
         -TransitionScopeMode $P1TransitionScopeMode
 } else { $false }
 $canUseP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionMasterAncestry = $isP1TransitionScopeMode -and $isP1F0117SmokeScopeCloseoutLifecycleHotfixTransitionTopology
-$canUseP1TransitionMasterAncestry = if ($isP1F0115TransitionContext) {
+$canUseP1TransitionMasterAncestry = if ($isP1MechanismBootstrapManualHashCorrectionCandidate) {
+    $canUseP1MechanismBootstrapManualHashCorrectionMasterAncestry
+} elseif ($isP1F0115TransitionContext) {
     $canUseP1F0115TransitionMasterAncestry -or $canUseP1F0115Phase11TransitionMasterAncestry -or $canUseP1F0115ModulePrecommitHotfixTransitionMasterAncestry -or $canUseP1F0116DesignPathGuardHotfixTransitionMasterAncestry
 } elseif ($isP1F0116TransitionContext) {
     $canUseP1F0116ScopeCorrectionGuardHotfixTransitionMasterAncestry
