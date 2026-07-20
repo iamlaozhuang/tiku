@@ -1693,3 +1693,12 @@ The only production behavior change is exact manual recognition of the current f
 - Windows PowerShell 5.1 and `pwsh` 7 P1 pre-commit each exited `0` with `p1MechanismBootstrapManualHashCorrection: approved_one_time`, `p1ProgramGuardResult: pass`, and no generic transition finding.
 - Windows PowerShell 5.1 and `pwsh` 7 Module pre-commit each exited `0` with `preCommitScopeMode: p1_mechanism_bootstrap_manual_hash_correction`; the five-path allowlist was enforced and requirement-SSOT skipping remained limited to this exact candidate.
 - Hash self-integrity was recomputed from staged/committed UTF-8 content after normalizing all three self-hash fields; no hook bypass, ordinary drift relaxation or unrelated file was admitted.
+
+### 2026-07-20 approved manual parent-anchor follow-up
+
+- manualParentAnchorFollowup: approved_one_time
+- manualHashSelfIntegrityCorrection: approved_one_time
+- manualHashSelfIntegrityBaseSha: ea0c265884d67c948fefd8b61ce570f0e9f86b1e
+- manualHashSelfIntegrityOriginMasterSha: ea0c265884d67c948fefd8b61ce570f0e9f86b1e
+- Exact allowlist remains the same five governance paths: P1 guard, Module pre-commit guard, Module pre-push guard, evidence and audit. No product/state/queue/permission change is authorized.
+- Follow-up purpose is only to bind the next commit's parent anchor and manual contract to the already-pushed governance commit; ordinary SHA drift, topology, ancestor, replay and hook bypass remain hard-blocked.

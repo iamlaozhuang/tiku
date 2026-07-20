@@ -113,6 +113,22 @@ Decision: main_review_pass_full_pending
 - The additional route is exact and one-time: five `M` paths only, the fixed correction parent/origin/branch, clean worktree, and P1 `transition_only` handoff. It is not a generic approved transition and does not authorize ancestor use outside this candidate.
 - No ordinary SHA drift, standard-mode ancestor, topology, authorization, evidence, product, state/queue, database/provider/runtime/P2/PR/force-push/deploy or hook-bypass boundary changed.
 
+### 2026-07-20 approved manual parent-anchor follow-up current review
+
+- Decision: APPROVE_MANUAL_PARENT_ANCHOR_FOLLOWUP_SCOPE
+- manualParentAnchorFollowup: approved_one_time
+- manualHashSelfIntegrityCorrection: approved_one_time
+- manualHashSelfIntegrityBaseSha: ea0c265884d67c948fefd8b61ce570f0e9f86b1e
+- manualHashSelfIntegrityOriginMasterSha: ea0c265884d67c948fefd8b61ce570f0e9f86b1e
+- Exact five governance files remain the complete allowlist; the next commit must be single-parented by `ea0c265884d67c948fefd8b61ce570f0e9f86b1e`. Any mismatch, extra file, replay, ordinary drift or standard-mode ancestor request remains fail-closed.
+
+### 2026-07-20 approved manual parent-anchor follow-up review
+
+- Decision: APPROVE_MANUAL_PARENT_ANCHOR_FOLLOWUP_SCOPE
+- Follow-up base and expected origin are both `ea0c265884d67c948fefd8b61ce570f0e9f86b1e`; the resulting single parent must equal that SHA.
+- Exact five governance files remain the complete allowlist. No product/state/queue/permission, provider, runtime, P2, PR, force-push, deploy or hook-bypass capability is added.
+- Any mismatch, extra file, replay, ordinary drift or standard-mode ancestor request remains fail-closed.
+
 ### 2026-07-20 manual-hash correction cross-runtime focused review
 
 - Windows PowerShell 5.1 and `pwsh` 7 P1/Module pre-commit runs both exited `0` on the exact five-path staged candidate.

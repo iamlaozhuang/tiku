@@ -220,8 +220,8 @@ New-Variable -Name p1F0117SmokeScopeCloseoutLifecycleHotfixFiles -Option Constan
     "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
 )
 New-Variable -Name p1MechanismBootstrapTaskId -Option Constant -Value "p1-mechanism-execution-compatibility-v2-1-2026-07-19"
-New-Variable -Name p1MechanismBootstrapManualHashCorrectionBaseSha -Option Constant -Value "47ff1e1391d01d6907c934e33796264dfb3b12de"
-New-Variable -Name p1MechanismBootstrapManualHashCorrectionOriginMasterSha -Option Constant -Value "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+New-Variable -Name p1MechanismBootstrapManualHashCorrectionBaseSha -Option Constant -Value "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
+New-Variable -Name p1MechanismBootstrapManualHashCorrectionOriginMasterSha -Option Constant -Value "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
 New-Variable -Name p1MechanismBootstrapManualHashCorrectionFiles -Option Constant -Value @(
     "docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
     "docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",

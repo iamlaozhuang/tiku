@@ -304,12 +304,12 @@ $p1MechanismBootstrapManualStateProjectionSha256 = "7e2ab40716befb5c03d5d975eb85
 $p1MechanismBootstrapManualQueueProjectionSha256 = "159dd861f4a6931935b39d526df439a0b1f70ce5eb2ba855981084dccb38b273"
 $p1MechanismBootstrapManualReadyStateProjectionSha256 = "0d9a1e077b2ee3e733cfca4f8b557c12e064104e124603be9276acb53e216433"
 $p1MechanismBootstrapManualReadyQueueProjectionSha256 = "23180e26cfbf64e7ff33dc93d1b8abe0fd8107aaeb04525f84d5686282cae9d4"
-$p1MechanismBootstrapManualContractParentSha = "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
-$p1MechanismBootstrapManualContractTreeSha256 = "03458880b9017446aceeb49df244eae0890cb448ea0e2be0f33147b3460e0216"
-$p1MechanismBootstrapManualHashCorrectionBaseSha = "47ff1e1391d01d6907c934e33796264dfb3b12de"
-$p1MechanismBootstrapManualHashCorrectionOriginMasterSha = "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+$p1MechanismBootstrapManualContractParentSha = "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
+$p1MechanismBootstrapManualContractTreeSha256 = "c9b6f649078662e887163d9af7aa17f7113ad07c3468f1268ad289daeb85e301"
+$p1MechanismBootstrapManualHashCorrectionBaseSha = "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
+$p1MechanismBootstrapManualHashCorrectionOriginMasterSha = "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
 $p1MechanismBootstrapManualHashCorrectionBranch = "codex/p1-mechanism-bootstrap-manual-recognition"
-$p1MechanismBootstrapManualHashCorrectionTreeSha256 = "e6ac3bb94637ea43f092bb5999414a57e9b3c9fb9cb8a5d12779b14d4966f45b"
+$p1MechanismBootstrapManualHashCorrectionTreeSha256 = "73f7ded2e458d2b6d6cfdff8fbdec9c0e1c5a19e8e9069d8d5ea80082e2a7d65"
 $p1MechanismBootstrapManualHashCorrectionFiles = @(
     "docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
     "docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",

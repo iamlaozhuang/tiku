@@ -66,8 +66,8 @@ $p1MechanismBootstrapPreCommitScopeCorrectionFiles = @(
     "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
     "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1"
 )
-$p1MechanismBootstrapManualHashCorrectionBaseSha = "47ff1e1391d01d6907c934e33796264dfb3b12de"
-$p1MechanismBootstrapManualHashCorrectionOriginMasterSha = "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+$p1MechanismBootstrapManualHashCorrectionBaseSha = "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
+$p1MechanismBootstrapManualHashCorrectionOriginMasterSha = "ea0c265884d67c948fefd8b61ce570f0e9f86b1e"
 $p1MechanismBootstrapManualHashCorrectionBranch = "codex/p1-mechanism-bootstrap-manual-recognition"
 $p1MechanismBootstrapManualHashCorrectionFiles = @(
     "docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
