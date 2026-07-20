@@ -1224,24 +1224,22 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
 
         await lockOrganizationScopeMutation(transactionalDatabase);
 
-        const [purchaserOrganization] = await transactionalDatabase
-          .select({ id: organization.id, public_id: organization.public_id })
-          .from(organization)
-          .where(
-            eq(organization.public_id, input.purchaserOrganizationPublicId),
-          )
-          .limit(1);
+        const purchaserOrganization = await lockActiveOrganizationByPublicId(
+          transactionalDatabase,
+          input.purchaserOrganizationPublicId,
+        );
 
-        if (purchaserOrganization === undefined) {
+        if (purchaserOrganization === null) {
           return null;
         }
 
-        const organizationIds = await listInputOrganizationIds(
+        const organizationIds = await resolveLockedOrganizationIdsForCreate(
           transactionalDatabase,
           input,
+          purchaserOrganization.id,
         );
 
-        if (organizationIds.length === 0) {
+        if (organizationIds === null || organizationIds.length === 0) {
           return null;
         }
 
@@ -3384,6 +3382,63 @@ async function insertOrgAuthWithScope(
   }
 
   return orgAuthRow;
+}
+
+async function resolveLockedOrganizationIdsForCreate(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: NormalizedCreateOrgAuthInput,
+  purchaserOrganizationId: number,
+): Promise<number[] | null> {
+  if (input.authScopeType !== "specified_nodes") {
+    return listOrganizationAndDescendantIds(database, purchaserOrganizationId);
+  }
+
+  const distinctOrganizationPublicIds = [
+    ...new Set(input.organizationPublicIds),
+  ];
+  const query = database
+    .select({
+      id: organization.id,
+      public_id: organization.public_id,
+      status: organization.status,
+    })
+    .from(organization)
+    .where(inArray(organization.public_id, distinctOrganizationPublicIds));
+  const rows = await query.for("update");
+
+  if (
+    rows.length !== distinctOrganizationPublicIds.length ||
+    rows.some((row) => row.status !== "active")
+  ) {
+    return null;
+  }
+
+  return rows.map((row) => row.id);
+}
+
+async function lockActiveOrganizationByPublicId(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationPublicId: string,
+): Promise<{ id: number; public_id: string } | null> {
+  const query = database
+    .select({
+      id: organization.id,
+      public_id: organization.public_id,
+      status: organization.status,
+    })
+    .from(organization)
+    .where(eq(organization.public_id, organizationPublicId))
+    .limit(1);
+  const [organizationRow] = await query.for("update");
+
+  if (organizationRow === undefined || organizationRow.status !== "active") {
+    return null;
+  }
+
+  return {
+    id: organizationRow.id,
+    public_id: organizationRow.public_id,
+  };
 }
 
 async function listInputOrganizationIds(

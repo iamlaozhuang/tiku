@@ -715,23 +715,21 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
-  title: Lifecycle command atomicity
-  phase: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
+  id: p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
+  title: org_auth specified node validation
+  phase: p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0015
-  branch: fix/lifecycle-command-atomicity
+  productClosureContribution: F-0112
+  branch: fix/org-auth-specified-node-validation
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0015
+    - F-0112
   candidateRootCauseCluster: P1-RC-03
   requirementAnchors:
-    - modules/01-user-auth.md#2
-    - modules/01-user-auth.md#4.3
     - modules/01-user-auth.md#4.4
-    - role-auth-training-ops-decision-package-D07
+    - modules/06-admin-ops.md#4.3
     - ADR-007
   highRiskApproval:
     category: permission
@@ -739,22 +737,18 @@ currentTask:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: candidate_ready_for_bounded_medium_risk_auto_closeout
-    reason: focused_14_of_14_affected_54_of_54_lint_typecheck_changed_file_format_build_p0_baselines_and_main_thread_adversarial_review_passed_without_entitlement_expansion
-    resumeAction: stage_exact_allowlist_run_minimal_kernel_precommit_commit_ff_only_merge_push_sync_cleanup_then_run_rc03_residual_disposition
+    reason: focused_9_of_9_affected_44_of_44_lint_typecheck_format_diff_p0_baseline_and_main_thread_adversarial_review_passed_without_entitlement_expansion
+    resumeAction: stage exact allowlist run minimal kernel precommit commit ff-only merge canonical push sync cleanup then continue RC03
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    tddRed: pass_expected_5_failures_of_5
-    focused: pass_14_of_14
-    affectedRegression: pass_54_of_54
-    fullUnit: partial_2795_of_2796_one_unrelated_inventory_timeout
-    timedOutTestFocusedRetry: pass_5_of_5
+    tddRed: pass_expected_4_failures_of_4
+    focused: pass_9_of_9
+    affectedRegression: pass_44_of_44
+    fullUnit: timed_out_after_600_seconds_single_attempt_without_test_failure_result_not_repeated
     lint: pass
     typecheck: pass
     changedFileFormat: pass
-    repositoryFormat: preexisting_unrelated_f0117_sdd_files_only
-    build: pass
     p0GlobalBaseline: pass
-    p0Serial: pass_closed_program
     diffCheck: pass
     mainThreadAdversarialReview: pass
     entitlementExpansion: false
@@ -762,6 +756,18 @@ currentTask:
     persistentDatabaseExecution: false
     realExternalCall: false
     extraFiles: false
+  previousTaskCloseout:
+    taskId: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
+    findingId: F-0015
+    commit: 93bea7b592da892d75c60bf5804c6df146c8b366
+    status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+  rc03ResidualDisposition:
+    F-0088: separate_requires_fresh_schema_migration_approval_when_scheduled
+    F-0112: separate_current_task
+    F-0119: separate
+    F-0140: separate
+    F-0141: separate
+    F-0142: separate
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20
   source: current_user_message
