@@ -99,27 +99,29 @@ function createOverviewResponse(): ApiResponse<OrganizationPortalOverviewDto> {
         status: "active" as const,
       },
     ],
-    authorization: {
-      packageName: "营销专套组织授权",
-      sourceEdition: "standard" as const,
-      effectiveEdition: "standard" as const,
-      status: "active" as const,
-      startsAt: "2026-07-01T00:00:00.000Z",
-      expiresAt: "2027-07-01T00:00:00.000Z",
-      accountQuota: 20,
-      usedQuota: 4,
-      availableQuota: 16,
-      authScopeType: "specified_nodes",
-      scopes: [
-        {
-          profession: "marketing" as const,
-          level: 3,
-          subject: null,
-          organizationCount: 1,
-        },
-      ],
-      upgradeStatus: "none" as const,
-    },
+    authorizations: [
+      {
+        packageName: "营销专套组织授权",
+        sourceEdition: "standard" as const,
+        effectiveEdition: "standard" as const,
+        status: "active" as const,
+        startsAt: "2026-07-01T00:00:00.000Z",
+        expiresAt: "2027-07-01T00:00:00.000Z",
+        accountQuota: 20,
+        usedQuota: 4,
+        availableQuota: 16,
+        authScopeType: "specified_nodes",
+        scopes: [
+          {
+            profession: "marketing" as const,
+            level: 3,
+            subject: null,
+            organizationCount: 1,
+          },
+        ],
+        upgradeStatus: "none" as const,
+      },
+    ],
     boundary: {
       isReadonly: true as const,
       mutationOwnerLabel: "平台运营",
@@ -161,6 +163,7 @@ function createThenableQuery(rows: unknown[]) {
     innerJoin: vi.fn(() => query),
     leftJoin: vi.fn(() => query),
     where: vi.fn(() => query),
+    groupBy: vi.fn(() => query),
     orderBy: vi.fn(() => query),
     limit: vi.fn(async () => rows),
     then<TResult1 = unknown[], TResult2 = never>(
@@ -290,7 +293,7 @@ describe("organization portal overview route", () => {
       effectiveEdition: "standard",
       organizationPublicId: "organization_scope_public_003",
     });
-    expect(payload.data.authorization.effectiveEdition).toBe("standard");
+    expect(payload.data.authorizations[0].effectiveEdition).toBe("standard");
   });
 
   it("denies sessions without organization-admin role before reading data", async () => {
@@ -391,6 +394,7 @@ describe("organization portal overview route", () => {
               expires_at: new Date("2027-07-01T00:00:00.000Z"),
               status: "active",
               upgrade_status: "active",
+              organization_count: 1,
             },
           ]);
         }
@@ -403,7 +407,6 @@ describe("organization portal overview route", () => {
     });
 
     const overview = await repository.readOverview({
-      authorizationPublicId: null,
       now: new Date("2026-07-08T10:00:00.000Z"),
       organizationPublicId: "organization_scope_public_001",
       updatedAt: "2026-07-08T10:00:00.000Z",

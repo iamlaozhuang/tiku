@@ -1,4 +1,15 @@
-import { and, asc, count, desc, eq, gt, isNull, lte, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  gt,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
@@ -71,8 +82,7 @@ async function readOrganizationPortalOverview(
     organizationId: organizationRow.id,
   });
   const employees = await readEmployeePreview(database, organizationRow.id);
-  const authorization = await readAuthorizationOverview(database, {
-    authorizationPublicId: input.authorizationPublicId,
+  const authorizations = await readAuthorizationOverviews(database, {
     now: input.now,
     organizationId: organizationRow.id,
   });
@@ -85,7 +95,7 @@ async function readOrganizationPortalOverview(
     },
     employeeSummary,
     employees,
-    authorization,
+    authorizations,
     boundary: {
       isReadonly: true,
       mutationOwnerLabel: "平台运营",
@@ -164,27 +174,15 @@ async function readEmployeePreview(
   }));
 }
 
-async function readAuthorizationOverview(
+async function readAuthorizationOverviews(
   database: OrganizationPortalOverviewRuntimeDatabase,
   input: {
-    authorizationPublicId: string | null;
     now: Date;
     organizationId: number;
   },
-): Promise<OrganizationPortalOverviewDto["authorization"]> {
-  const authIdentityCondition =
-    input.authorizationPublicId === null
-      ? undefined
-      : eq(orgAuth.public_id, input.authorizationPublicId);
-  const activeFallbackCondition =
-    input.authorizationPublicId === null
-      ? and(
-          eq(orgAuth.status, "active"),
-          lte(orgAuth.starts_at, input.now),
-          gt(orgAuth.expires_at, input.now),
-        )
-      : undefined;
-  const [row] = await database
+): Promise<OrganizationPortalOverviewDto["authorizations"]> {
+  const comparisonTimestamp = input.now.toISOString();
+  const rows = await database
     .select({
       id: orgAuth.id,
       purchaser_organization_id: orgAuth.purchaser_organization_id,
@@ -193,7 +191,8 @@ async function readAuthorizationOverview(
       source_edition: orgAuth.edition,
       effective_edition: sql<"standard" | "advanced">`
         case
-          when ${orgAuth.edition} = 'advanced' or ${authUpgrade.id} is not null
+          when ${orgAuth.edition} = 'advanced'
+            or coalesce(bool_or(${authUpgrade.id} is not null), false)
           then 'advanced'
           else 'standard'
         end
@@ -204,8 +203,25 @@ async function readAuthorizationOverview(
       used_quota: orgAuth.used_quota,
       starts_at: orgAuth.starts_at,
       expires_at: orgAuth.expires_at,
-      status: orgAuth.status,
-      upgrade_status: authUpgrade.status,
+      status: sql<"active" | "cancelled" | "expired" | "not_started">`
+        case
+          when ${orgAuth.status} = 'cancelled' then 'cancelled'
+          when ${orgAuth.status} = 'expired'
+            or ${orgAuth.expires_at} <= ${comparisonTimestamp}::timestamptz
+          then 'expired'
+          when ${orgAuth.starts_at} > ${comparisonTimestamp}::timestamptz
+          then 'not_started'
+          else 'active'
+        end
+      `,
+      upgrade_status: sql<"active" | null>`
+        case
+          when coalesce(bool_or(${authUpgrade.id} is not null), false)
+          then 'active'
+          else null
+        end
+      `,
+      organization_count: countDistinct(organization.id),
     })
     .from(orgAuth)
     .leftJoin(
@@ -219,51 +235,58 @@ async function readAuthorizationOverview(
         gt(authUpgrade.expires_at, input.now),
       ),
     )
+    .innerJoin(
+      organization,
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
+    )
     .where(
-      and(
-        createOrgAuthCoversOrganizationCondition({
-          authScopeType: orgAuth.auth_scope_type,
-          orgAuthId: orgAuth.id,
-          organizationId: input.organizationId,
-          purchaserOrganizationId: orgAuth.purchaser_organization_id,
-        }),
-        authIdentityCondition,
-        activeFallbackCondition,
-      ),
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: input.organizationId,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
+    )
+    .groupBy(
+      orgAuth.id,
+      orgAuth.purchaser_organization_id,
+      orgAuth.name,
+      orgAuth.auth_scope_type,
+      orgAuth.edition,
+      orgAuth.profession,
+      orgAuth.level,
+      orgAuth.account_quota,
+      orgAuth.used_quota,
+      orgAuth.starts_at,
+      orgAuth.expires_at,
+      orgAuth.status,
     )
     .orderBy(
       sql`
         case
-          when ${orgAuth.edition} = 'advanced' or ${authUpgrade.id} is not null
+          when ${orgAuth.status} = 'active'
+            and ${orgAuth.starts_at} <= ${comparisonTimestamp}::timestamptz
+            and ${orgAuth.expires_at} > ${comparisonTimestamp}::timestamptz
           then 0
-          else 1
+          when ${orgAuth.status} = 'active'
+            and ${orgAuth.starts_at} > ${comparisonTimestamp}::timestamptz
+          then 1
+          when ${orgAuth.status} = 'expired'
+            or ${orgAuth.expires_at} <= ${comparisonTimestamp}::timestamptz
+          then 2
+          else 3
         end
       `,
       desc(orgAuth.expires_at),
-    )
-    .limit(1);
-
-  if (row === undefined) {
-    return null;
-  }
-
-  const [coveredOrganizationCountRow] = await database
-    .select({ value: count() })
-    .from(organization)
-    .where(
-      createOrgAuthCoversOrganizationCondition({
-        authScopeType: row.auth_scope_type,
-        orgAuthId: row.id,
-        organizationId: organization.id,
-        purchaserOrganizationId: row.purchaser_organization_id,
-      }),
+      desc(orgAuth.starts_at),
+      desc(orgAuth.id),
     );
-  const organizationCount = Math.max(
-    coveredOrganizationCountRow?.value ?? 0,
-    1,
-  );
-
-  return {
+  return rows.map((row) => ({
     packageName: row.name,
     sourceEdition: row.source_edition,
     effectiveEdition: row.effective_edition,
@@ -279,11 +302,11 @@ async function readAuthorizationOverview(
         profession: row.profession,
         level: row.level,
         subject: null,
-        organizationCount,
+        organizationCount: Math.max(row.organization_count, 1),
       },
     ],
     upgradeStatus: row.upgrade_status ?? "none",
-  };
+  }));
 }
 
 function createLocalRuntimeDatabase(): OrganizationPortalOverviewRuntimeDatabase {

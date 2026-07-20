@@ -1,14 +1,19 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20",
-  "objective": "Close F-0112 by resolving and locking the active purchaser and the complete distinct specified organization input set inside the org_auth creation transaction, failing closed before any authorization, quota, employee binding, or audit mutation when any requested organization is missing, disabled, or changes concurrently, without expanding entitlement or changing schema, dependencies, persistent data, external services, deployment, secret/env, Provider, or the safety kernel.",
+  "taskId": "p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20",
+  "objective": "Close F-0119 by separating organization workspace admission from its authorization support read model so the portal returns and renders every org_auth record covering the session organization, including concurrent active scopes and expired or cancelled history, without trusting a session-selected authorization ID, hiding atomic scope/quota/term differences, expanding entitlement, or changing schema, dependencies, persistent data, external services, deployment, secret/env, Provider, or the safety kernel.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/superpowers/plans/2026-07-20-org-auth-specified-node-validation.md",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "tests/unit/p1-org-auth-specified-node-validation.test.ts"
+    "docs/superpowers/plans/2026-07-20-organization-portal-authorization-read-model.md",
+    "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
+    "src/server/contracts/organization-portal-overview-contract.ts",
+    "src/server/repositories/organization-portal-overview-repository.ts",
+    "src/server/services/organization-portal-overview-route.test.ts",
+    "src/server/services/organization-portal-overview-service.ts",
+    "tests/unit/organization-portal-admin-entry-surface.test.ts",
+    "tests/unit/p1-organization-portal-authorization-read-model.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -22,7 +27,7 @@
   ],
   "validationCommands": [
     {
-      "name": "org-auth-specified-node-validation-focused",
+      "name": "organization-portal-authorization-read-model-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -30,13 +35,13 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-org-auth-specified-node-validation.test.ts",
-        "tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts",
-        "tests/unit/phase-21-authorization-overlap-concurrency-proof.test.ts"
+        "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
+        "src/server/services/organization-portal-overview-route.test.ts",
+        "tests/unit/organization-portal-admin-entry-surface.test.ts"
       ]
     },
     {
-      "name": "org-auth-specified-node-validation-affected-regression",
+      "name": "organization-portal-authorization-read-model-affected-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -44,25 +49,30 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
-        "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts"
+        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
+        "tests/unit/organization-portal-admin-entry-surface.test.ts",
+        "src/server/services/organization-portal-overview-route.test.ts"
       ]
     },
     {
-      "name": "org-auth-specified-node-validation-lint",
+      "name": "organization-portal-authorization-read-model-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-        "tests/unit/p1-org-auth-specified-node-validation.test.ts"
+        "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
+        "src/server/contracts/organization-portal-overview-contract.ts",
+        "src/server/repositories/organization-portal-overview-repository.ts",
+        "src/server/services/organization-portal-overview-route.test.ts",
+        "src/server/services/organization-portal-overview-service.ts",
+        "tests/unit/organization-portal-admin-entry-surface.test.ts",
+        "tests/unit/p1-organization-portal-authorization-read-model.test.ts"
       ]
     },
     {
-      "name": "org-auth-specified-node-validation-typecheck",
+      "name": "organization-portal-authorization-read-model-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]

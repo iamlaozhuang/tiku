@@ -40,7 +40,7 @@ export type OrganizationPortalAuthorizationDto = {
   packageName: string;
   sourceEdition: AuthorizationEdition;
   effectiveEdition: AuthorizationEdition;
-  status: AuthStatus;
+  status: AuthStatus | "not_started";
   startsAt: string;
   expiresAt: string;
   accountQuota: number;
@@ -61,7 +61,7 @@ export type OrganizationPortalOverviewDto = {
   organization: OrganizationPortalOverviewOrganizationDto;
   employeeSummary: OrganizationPortalEmployeeSummaryDto;
   employees: OrganizationPortalEmployeeDto[];
-  authorization: OrganizationPortalAuthorizationDto | null;
+  authorizations: OrganizationPortalAuthorizationDto[];
   boundary: OrganizationPortalBoundaryDto;
   updatedAt: string;
 };

@@ -715,21 +715,21 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
-  title: org_auth specified node validation
-  phase: p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
+  id: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
+  title: Organization portal authorization read model
+  phase: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0112
-  branch: fix/org-auth-specified-node-validation
+  productClosureContribution: F-0119
+  branch: fix/organization-portal-authorization-read-model
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0112
+    - F-0119
   candidateRootCauseCluster: P1-RC-03
   requirementAnchors:
-    - modules/01-user-auth.md#4.4
-    - modules/06-admin-ops.md#4.3
+    - traceability/2026-06-21-org-auth-scope-product-decision.md
+    - traceability/2026-07-02-role-auth-training-ops-decision-package.md#D09
     - ADR-007
   highRiskApproval:
     category: permission
@@ -737,14 +737,14 @@ currentTask:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: candidate_ready_for_bounded_medium_risk_auto_closeout
-    reason: focused_9_of_9_affected_44_of_44_lint_typecheck_format_diff_p0_baseline_and_main_thread_adversarial_review_passed_without_entitlement_expansion
+    reason: focused_14_of_14_affected_17_of_17_lint_typecheck_format_diff_p0_baseline_and_main_thread_adversarial_review_passed_without_entitlement_expansion
     resumeAction: stage exact allowlist run minimal kernel precommit commit ff-only merge canonical push sync cleanup then continue RC03
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    tddRed: pass_expected_4_failures_of_4
-    focused: pass_9_of_9
-    affectedRegression: pass_44_of_44
-    fullUnit: timed_out_after_600_seconds_single_attempt_without_test_failure_result_not_repeated
+    tddRed: pass_initial_4_of_4_and_adversarial_followup_3_of_4_expected_failures
+    focused: pass_14_of_14
+    affectedRegression: pass_17_of_17
+    fullUnitBuildE2e: not_triggered_narrow_readonly_projection_with_direct_route_and_ui_coverage
     lint: pass
     typecheck: pass
     changedFileFormat: pass
@@ -757,14 +757,14 @@ currentTask:
     realExternalCall: false
     extraFiles: false
   previousTaskCloseout:
-    taskId: p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
-    findingId: F-0015
-    commit: 93bea7b592da892d75c60bf5804c6df146c8b366
+    taskId: p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
+    findingId: F-0112
+    commit: 32f728b50b5df897da3b383b69e4840c1e61af30
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   rc03ResidualDisposition:
     F-0088: separate_requires_fresh_schema_migration_approval_when_scheduled
-    F-0112: separate_current_task
-    F-0119: separate
+    F-0112: separate_closed_32f728b50b5df897da3b383b69e4840c1e61af30
+    F-0119: separate_current_task
     F-0140: separate
     F-0141: separate
     F-0142: separate

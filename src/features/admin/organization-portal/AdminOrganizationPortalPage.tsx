@@ -108,6 +108,7 @@ const authorizationStatusLabels = {
   active: "生效中",
   cancelled: "已取消",
   expired: "已过期",
+  not_started: "待生效",
 } as const;
 
 const editionLabels = {
@@ -291,7 +292,9 @@ export function AdminOrganizationPortalPage() {
           employeeSummary={overviewData.employeeSummary}
           employees={overviewData.employees}
         />
-        <AuthorizationOverviewCard authorization={overviewData.authorization} />
+        <AuthorizationOverviewCard
+          authorizations={overviewData.authorizations}
+        />
       </section>
 
       {hasAdvancedAccess ? (
@@ -377,11 +380,11 @@ function EmployeeOverviewCard({
 }
 
 function AuthorizationOverviewCard({
-  authorization,
+  authorizations,
 }: {
-  authorization: OrganizationPortalAuthorizationDto | null;
+  authorizations: OrganizationPortalAuthorizationDto[];
 }) {
-  if (authorization === null) {
+  if (authorizations.length === 0) {
     return (
       <article
         className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
@@ -392,7 +395,7 @@ function AuthorizationOverviewCard({
           授权状态
         </span>
         <p className="text-text-secondary text-sm leading-6">
-          当前组织暂无可展示的有效授权。授权开通、续期或调整请联系平台运营。
+          当前组织暂无授权记录。授权开通、续期或调整请联系平台运营。
         </p>
         <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-3 py-1 text-xs font-medium">
           状态查看
@@ -410,43 +413,53 @@ function AuthorizationOverviewCard({
         <ShieldCheck aria-hidden="true" className="size-4" />
         授权状态
       </span>
-      <div className="space-y-1">
-        <h2 className="text-text-primary text-base font-semibold">
-          {authorization.packageName}
-        </h2>
-        <p className="text-text-secondary text-sm">
-          {authorizationStatusLabels[authorization.status]}
-          <span className="mx-2">·</span>
-          {formatDate(authorization.startsAt)} 至{" "}
-          {formatDate(authorization.expiresAt)}
-        </p>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <MetricBlock
-          label="当前版本"
-          value={editionLabels[authorization.effectiveEdition]}
-        />
-        <MetricBlock
-          label="原始版本"
-          value={editionLabels[authorization.sourceEdition]}
-        />
-        <MetricBlock
-          label="额度"
-          value={`${authorization.usedQuota}/${authorization.accountQuota}`}
-        />
-        <MetricBlock
-          label="剩余"
-          value={String(authorization.availableQuota)}
-        />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {authorization.scopes.map((scope, index) => (
-          <span
-            className="bg-muted text-text-primary rounded-md px-3 py-1 text-xs font-medium"
-            key={`${scope.profession}-${scope.level}-${index}`}
+      <div className="grid gap-4">
+        {authorizations.map((authorization, authorizationIndex) => (
+          <section
+            className="border-border grid gap-3 rounded-md border p-3"
+            data-testid="organization-portal-authorization-row"
+            key={`${authorization.packageName}-${authorization.startsAt}-${authorizationIndex}`}
           >
-            {professionLabels[scope.profession]} {scope.level}级
-          </span>
+            <div className="space-y-1">
+              <h2 className="text-text-primary text-base font-semibold">
+                {authorization.packageName}
+              </h2>
+              <p className="text-text-secondary text-sm">
+                {authorizationStatusLabels[authorization.status]}
+                <span className="mx-2">·</span>
+                {formatDate(authorization.startsAt)} 至{" "}
+                {formatDate(authorization.expiresAt)}
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <MetricBlock
+                label="当前版本"
+                value={editionLabels[authorization.effectiveEdition]}
+              />
+              <MetricBlock
+                label="原始版本"
+                value={editionLabels[authorization.sourceEdition]}
+              />
+              <MetricBlock
+                label="额度"
+                value={`${authorization.usedQuota}/${authorization.accountQuota}`}
+              />
+              <MetricBlock
+                label="剩余"
+                value={String(authorization.availableQuota)}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {authorization.scopes.map((scope, index) => (
+                <span
+                  className="bg-muted text-text-primary rounded-md px-3 py-1 text-xs font-medium"
+                  key={`${scope.profession}-${scope.level}-${index}`}
+                >
+                  {professionLabels[scope.profession]} {scope.level}级
+                </span>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
       <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-3 py-1 text-xs font-medium">

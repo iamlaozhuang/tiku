@@ -92,27 +92,92 @@ const advancedOrganizationPortalOverviewPayload = {
         status: "disabled",
       },
     ],
-    authorization: {
-      packageName: "营销专套组织授权",
-      sourceEdition: "standard",
-      effectiveEdition: "advanced",
-      status: "active",
-      startsAt: "2026-07-01T00:00:00.000Z",
-      expiresAt: "2027-07-01T00:00:00.000Z",
-      accountQuota: 30,
-      usedQuota: 12,
-      availableQuota: 18,
-      authScopeType: "specified_nodes",
-      scopes: [
-        {
-          profession: "marketing",
-          level: 3,
-          subject: null,
-          organizationCount: 1,
-        },
-      ],
-      upgradeStatus: "active",
-    },
+    authorizations: [
+      {
+        packageName: "营销专套组织授权",
+        sourceEdition: "standard",
+        effectiveEdition: "advanced",
+        status: "active",
+        startsAt: "2026-07-01T00:00:00.000Z",
+        expiresAt: "2027-07-01T00:00:00.000Z",
+        accountQuota: 30,
+        usedQuota: 12,
+        availableQuota: 18,
+        authScopeType: "specified_nodes",
+        scopes: [
+          {
+            profession: "marketing",
+            level: 3,
+            subject: null,
+            organizationCount: 1,
+          },
+        ],
+        upgradeStatus: "active",
+      },
+      {
+        packageName: "物流历史组织授权",
+        sourceEdition: "standard",
+        effectiveEdition: "standard",
+        status: "expired",
+        startsAt: "2025-07-01T00:00:00.000Z",
+        expiresAt: "2026-07-01T00:00:00.000Z",
+        accountQuota: 12,
+        usedQuota: 5,
+        availableQuota: 7,
+        authScopeType: "current_and_descendants",
+        scopes: [
+          {
+            profession: "logistics",
+            level: 4,
+            subject: null,
+            organizationCount: 3,
+          },
+        ],
+        upgradeStatus: "none",
+      },
+      {
+        packageName: "专卖已取消组织授权",
+        sourceEdition: "advanced",
+        effectiveEdition: "advanced",
+        status: "cancelled",
+        startsAt: "2026-01-01T00:00:00.000Z",
+        expiresAt: "2027-01-01T00:00:00.000Z",
+        accountQuota: 8,
+        usedQuota: 2,
+        availableQuota: 6,
+        authScopeType: "specified_nodes",
+        scopes: [
+          {
+            profession: "monopoly",
+            level: 2,
+            subject: null,
+            organizationCount: 1,
+          },
+        ],
+        upgradeStatus: "none",
+      },
+      {
+        packageName: "营销待生效组织授权",
+        sourceEdition: "standard",
+        effectiveEdition: "standard",
+        status: "not_started",
+        startsAt: "2027-07-02T00:00:00.000Z",
+        expiresAt: "2028-07-01T00:00:00.000Z",
+        accountQuota: 20,
+        usedQuota: 0,
+        availableQuota: 20,
+        authScopeType: "specified_nodes",
+        scopes: [
+          {
+            profession: "marketing",
+            level: 4,
+            subject: null,
+            organizationCount: 1,
+          },
+        ],
+        upgradeStatus: "none",
+      },
+    ],
     boundary: {
       isReadonly: true,
       mutationOwnerLabel: "平台运营",
@@ -144,27 +209,29 @@ const standardOrganizationPortalOverviewPayload = {
         status: "active",
       },
     ],
-    authorization: {
-      packageName: "标准组织授权",
-      sourceEdition: "standard",
-      effectiveEdition: "standard",
-      status: "active",
-      startsAt: "2026-07-01T00:00:00.000Z",
-      expiresAt: "2027-07-01T00:00:00.000Z",
-      accountQuota: 10,
-      usedQuota: 2,
-      availableQuota: 8,
-      authScopeType: "specified_nodes",
-      scopes: [
-        {
-          profession: "marketing",
-          level: 3,
-          subject: null,
-          organizationCount: 1,
-        },
-      ],
-      upgradeStatus: "none",
-    },
+    authorizations: [
+      {
+        packageName: "标准组织授权",
+        sourceEdition: "standard",
+        effectiveEdition: "standard",
+        status: "active",
+        startsAt: "2026-07-01T00:00:00.000Z",
+        expiresAt: "2027-07-01T00:00:00.000Z",
+        accountQuota: 10,
+        usedQuota: 2,
+        availableQuota: 8,
+        authScopeType: "specified_nodes",
+        scopes: [
+          {
+            profession: "marketing",
+            level: 3,
+            subject: null,
+            organizationCount: 1,
+          },
+        ],
+        upgradeStatus: "none",
+      },
+    ],
     boundary: {
       isReadonly: true,
       mutationOwnerLabel: "平台运营",
@@ -290,6 +357,20 @@ describe("AdminOrganizationPortalPage", () => {
     expect(portalShell).toHaveTextContent("额度 12/30");
     expect(portalShell).toHaveTextContent("剩余 18");
     expect(portalShell).toHaveTextContent("营销 3级");
+    expect(portalShell).toHaveTextContent("物流历史组织授权");
+    expect(portalShell).toHaveTextContent("已过期");
+    expect(portalShell).toHaveTextContent("物流 4级");
+    expect(portalShell).toHaveTextContent("专卖已取消组织授权");
+    expect(portalShell).toHaveTextContent("已取消");
+    expect(portalShell).toHaveTextContent("专卖 2级");
+    expect(portalShell).toHaveTextContent("营销待生效组织授权");
+    expect(portalShell).toHaveTextContent("待生效");
+    expect(portalShell).toHaveTextContent("营销 4级");
+    expect(
+      within(portalShell).getAllByTestId(
+        "organization-portal-authorization-row",
+      ),
+    ).toHaveLength(4);
     expect(portalShell).toHaveTextContent("当前组织范围");
     expect(portalShell).toHaveTextContent("高级版组织后台");
     expect(portalShell).not.toHaveTextContent("organization-portal-scope-001");

@@ -20,7 +20,6 @@ export type OrganizationPortalOverviewAdminContext = {
 };
 
 export type OrganizationPortalOverviewRepositoryInput = {
-  authorizationPublicId: string | null;
   now: Date;
   organizationPublicId: string;
   updatedAt: string;
@@ -48,7 +47,6 @@ export async function buildOrganizationPortalOverviewFromRepository({
   ApiResponse<OrganizationPortalOverviewDto | null>
 > {
   const overview = await repository.readOverview({
-    authorizationPublicId: adminContext.authorizationPublicId,
     now,
     organizationPublicId: adminContext.organizationPublicId,
     updatedAt,
