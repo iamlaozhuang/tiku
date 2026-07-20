@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+  currentTaskId: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
   currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
@@ -229,6 +229,7 @@ p1RemediationSerialProgram:
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
     - minimal-safety-kernel-retirement-2026-07-20
     - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    - p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -244,6 +245,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     - p1-mechanism-execution-compatibility-v2-1-2026-07-19
     - minimal-safety-kernel-retirement-2026-07-20
+    - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -280,12 +282,42 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
     p1-mechanism-execution-compatibility-v2-1-2026-07-19: closed
     minimal-safety-kernel-retirement-2026-07-20: closed
-    p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: in_progress
+    p1-remediation-rc-03-org-auth-closure-actions-2026-07-20: closed
+    p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20: in_progress
 activeTasks:
+  - id: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+    title: Personal authorization upgrade target selection
+    phase: p1-remediation-rc-03-personal-auth-upgrade-target-selection-2026-07-20
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0004
+    branch: fix/personal-auth-upgrade-target-selection
+    dependsOn:
+      - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
+    objective: close F-0004 by preserving explicit selection for multiple personal_auth upgrade targets, allowing omitted selection only for one eligible target, and recording the successful target in a redacted transactional audit
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    planPath: docs/superpowers/plans/2026-07-20-personal-auth-upgrade-target-selection.md
+    candidateRootCauseCluster: P1-RC-03
+    findingIds:
+      - F-0004
+    highRiskApproval:
+      category: permission
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: candidate_ready_for_bounded_medium_risk_auto_closeout
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      focused: pass_7_of_7
+      affectedRegression: pass_56_of_56
+      lintTypecheckFormatDiff: pass
+      mainThreadAdversarialReview: pass
+      entitlementExpansion: false
+      prohibitedSideEffects: false
   - id: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
     title: Organization authorization closure actions
     phase: p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0009
@@ -301,7 +333,7 @@ activeTasks:
       category: permission
       status: pending_candidate_bound_fresh_approval
       proposedApprovalId: proposed-fresh-permission-approval-f0009-org-auth-closure-actions-2026-07-20
-    executionStage: candidate_frozen_pending_fresh_permission_and_push_approval
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   - id: minimal-safety-kernel-retirement-2026-07-20
     title: Minimal safety kernel retirement
     phase: minimal-safety-kernel-retirement-2026-07-20
@@ -2406,6 +2438,27 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
+boundedMediumRiskStandingAuthorization:
+  id: standing-bounded-medium-risk-closeout-approval-2026-07-20
+  source: current_user_message
+  scope: current_active_p1_goal_permission_authorization_contraction_database_application_logic_provider_adapter_pure_logic_and_local_isolated_validation
+  closeout: approved_only_after_exact_scope_green_validation_main_thread_adversarial_review_and_no_entitlement_expansion
+  push: approved_canonical_origin_master_only_with_one_use_tiku_push_approved
+  excludes:
+    - role_or_permission_or_scope_or_quota_or_default_capability_expansion
+    - schema_or_migration_change
+    - persistent_database_write_or_real_data_access
+    - dependency_or_lockfile_change
+    - real_provider_or_external_service_call
+    - credential_or_secret_env_or_service_configuration
+    - deployment_or_pull_request_or_force_push_or_noncanonical_remote
+    - subagent_or_independent_reviewer
+    - allowed_file_expansion_after_freeze
+  invalidatedBy:
+    - current_p1_goal_complete_or_cancelled
+    - user_revocation
+    - canonical_origin_change
+    - minimal_safety_kernel_semantic_change
 standingAuthorization:
   id: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
   source: current_user_message

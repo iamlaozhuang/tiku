@@ -44,11 +44,13 @@ export function normalizeRedeemCodeConfirmationInput(
 
   const previewVersion =
     typeof input.previewVersion === "string" ? input.previewVersion.trim() : "";
-  const targetPersonalAuthPublicId = input.targetPersonalAuthPublicId;
+  const targetPersonalAuthPublicId =
+    input.targetPersonalAuthPublicId === undefined
+      ? null
+      : input.targetPersonalAuthPublicId;
 
   if (
     !PREVIEW_VERSION_PATTERN.test(previewVersion) ||
-    !("targetPersonalAuthPublicId" in input) ||
     !(
       targetPersonalAuthPublicId === null ||
       (typeof targetPersonalAuthPublicId === "string" &&

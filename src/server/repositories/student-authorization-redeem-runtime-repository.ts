@@ -43,6 +43,7 @@ const {
   employee,
   employeeOrgAuth,
   authUpgrade,
+  auditLog,
   organization,
   orgAuth,
   personalAuth,
@@ -254,12 +255,12 @@ async function confirmRedeemCodeForUser(
   createAuthUpgradePublicId: () => string,
 ): Promise<ConfirmRedeemCodeForUserResult> {
   return database.transaction(async (transaction) => {
-    const userId = await findActiveUserIdByPublicIdForUpdate(
+    const redeemUser = await findActiveUserIdByPublicIdForUpdate(
       transaction,
       input.userPublicId,
     );
 
-    if (userId === null) {
+    if (redeemUser === null) {
       return { status: "not_found" };
     }
 
@@ -279,12 +280,12 @@ async function confirmRedeemCodeForUser(
     ) {
       if (
         redeemCodeRow.status === "used" &&
-        redeemCodeRow.used_by_user_id === userId &&
+        redeemCodeRow.used_by_user_id === redeemUser.id &&
         redeemCodeRow.used_at !== null
       ) {
         const recoveredPersonalAuth = await recoverCommittedRedeemCodeOutcome(
           transaction,
-          userId,
+          redeemUser.id,
           redeemCodeRow,
         );
 
@@ -313,7 +314,7 @@ async function confirmRedeemCodeForUser(
 
     const previewFacts = await loadRedeemCodePreviewFacts(
       transaction,
-      userId,
+      redeemUser.id,
       redeemCodeRow,
       input.confirmedAt,
       true,
@@ -333,14 +334,19 @@ async function confirmRedeemCodeForUser(
     }
 
     if (redeemCodeRow.redeem_code_type === "edition_upgrade") {
+      const resolvedTargetPersonalAuthPublicId =
+        input.targetPersonalAuthPublicId ??
+        (preview.data.upgradeTargets.length === 1
+          ? preview.data.upgradeTargets[0]?.personalAuthPublicId
+          : undefined);
       const targetPersonalAuth = previewFacts.activePersonalAuths.find(
         (personalAuth) =>
-          personalAuth.public_id === input.targetPersonalAuthPublicId &&
+          personalAuth.public_id === resolvedTargetPersonalAuthPublicId &&
           personalAuth.edition === "standard",
       );
       const isEligibleTarget = preview.data.upgradeTargets.some(
         (target) =>
-          target.personalAuthPublicId === input.targetPersonalAuthPublicId,
+          target.personalAuthPublicId === resolvedTargetPersonalAuthPublicId,
       );
 
       if (targetPersonalAuth === undefined || !isEligibleTarget) {
@@ -349,7 +355,7 @@ async function confirmRedeemCodeForUser(
 
       const redeemedCode = await consumeUnusedRedeemCodeForUser(
         transaction,
-        userId,
+        redeemUser.id,
         redeemCodeRow.id,
         input.confirmedAt,
       );
@@ -358,10 +364,11 @@ async function confirmRedeemCodeForUser(
         return { status: "used" };
       }
 
+      const authUpgradePublicId = createAuthUpgradePublicId();
       const [row] = await transaction
         .insert(authUpgrade)
         .values({
-          public_id: createAuthUpgradePublicId(),
+          public_id: authUpgradePublicId,
           personal_auth_id: targetPersonalAuth.id,
           target_edition: "advanced",
           source_type: "redeem_code",
@@ -378,6 +385,18 @@ async function confirmRedeemCodeForUser(
         throw new Error("Auth upgrade insert did not return a row.");
       }
 
+      await transaction.insert(auditLog).values({
+        public_id: `audit-log-${randomUUID()}`,
+        actor_public_id: input.userPublicId,
+        actor_role:
+          redeemUser.user_type === "employee" ? "employee" : "student",
+        action_type: "personal_auth.upgrade_by_redeem_code",
+        target_resource_type: "personal_auth",
+        target_public_id: targetPersonalAuth.public_id,
+        result_status: "success",
+        metadata_summary: `auth upgrade public id=${authUpgradePublicId}; redeem code public id=${redeemCodeRow.public_id}`,
+      });
+
       return {
         status: "redeemed",
         personalAuth: toPersonalAuthAccessRow(targetPersonalAuth),
@@ -390,7 +409,7 @@ async function confirmRedeemCodeForUser(
 
     const redeemedCode = await consumeUnusedRedeemCodeForUser(
       transaction,
-      userId,
+      redeemUser.id,
       redeemCodeRow.id,
       input.confirmedAt,
     );
@@ -408,7 +427,7 @@ async function confirmRedeemCodeForUser(
       .insert(personalAuth)
       .values({
         public_id: createPersonalAuthPublicId(),
-        user_id: userId,
+        user_id: redeemUser.id,
         redeem_code_id: redeemCodeRow.id,
         edition,
         profession: redeemedCode.profession,
@@ -746,15 +765,17 @@ async function findActiveUserIdByPublicId(
 async function findActiveUserIdByPublicIdForUpdate(
   database: StudentAuthorizationRedeemRuntimeDatabase,
   userPublicId: string,
-): Promise<number | null> {
+): Promise<{ id: number; user_type: "employee" | "personal" } | null> {
   const [row] = await database
-    .select({ id: user.id })
+    .select({ id: user.id, user_type: user.user_type })
     .from(user)
     .where(and(eq(user.public_id, userPublicId), eq(user.status, "active")))
     .for("update")
     .limit(1);
 
-  return row?.id ?? null;
+  return row?.user_type === "employee" || row?.user_type === "personal"
+    ? row
+    : null;
 }
 
 function addDays(value: Date, dayCount: number): Date {

@@ -30,13 +30,29 @@ describe("redeem code validator", () => {
     });
   });
 
-  it("requires preview version and an explicit personal authorization target", () => {
+  it("requires preview version and normalizes an omitted personal authorization target", () => {
     expect(
       normalizeRedeemCodeConfirmationInput({
         code: " abcd2345 ",
         previewVersion:
           "sha256:1111111111111111111111111111111111111111111111111111111111111111",
         targetPersonalAuthPublicId: null,
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        code: "ABCD2345",
+        previewVersion:
+          "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        targetPersonalAuthPublicId: null,
+      },
+    });
+
+    expect(
+      normalizeRedeemCodeConfirmationInput({
+        code: "ABCD2345",
+        previewVersion:
+          "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       }),
     ).toEqual({
       success: true,

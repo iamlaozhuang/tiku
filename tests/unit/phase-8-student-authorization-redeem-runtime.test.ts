@@ -232,7 +232,9 @@ function createJitConfirmationRepository(
       selectCount += 1;
 
       return new StubRowQuery<unknown>(
-        selectCount === 1 ? [{ id: 101 }] : [redeemCodeRow],
+        selectCount === 1
+          ? [{ id: 101, user_type: "personal" }]
+          : [redeemCodeRow],
       );
     },
   };
