@@ -471,41 +471,71 @@ async function fetchAuthorizationContextsFailClosed(): Promise<
 }
 
 function canShowAiTraining(
-  authorizationContexts: EffectiveAuthorizationContextDto[],
+  authorizationContext: EffectiveAuthorizationContextDto | null,
 ): boolean {
-  return authorizationContexts.some(
-    (authorizationContext) =>
-      authorizationContext.effectiveEdition === "advanced" &&
-      (authorizationContext.capabilities.canGenerateAiQuestion ||
-        authorizationContext.capabilities.canGenerateAiPaper),
+  return (
+    authorizationContext !== null &&
+    authorizationContext.effectiveEdition === "advanced" &&
+    (authorizationContext.capabilities.canGenerateAiQuestion ||
+      authorizationContext.capabilities.canGenerateAiPaper)
   );
 }
 
 function canShowOrganizationTraining(
-  authorizationContexts: EffectiveAuthorizationContextDto[],
+  authorizationContext: EffectiveAuthorizationContextDto | null,
 ): boolean {
-  return authorizationContexts.some(
+  return (
+    authorizationContext !== null &&
+    authorizationContext.effectiveEdition === "advanced" &&
+    authorizationContext.capabilities.canAnswerOrganizationTraining
+  );
+}
+
+function selectAuthorizationContextsForScope(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+  selectedScope: StudentPaperScopeDto | null,
+): EffectiveAuthorizationContextDto[] {
+  if (selectedScope === null) {
+    return [];
+  }
+
+  return authorizationContexts.filter(
     (authorizationContext) =>
-      authorizationContext.effectiveEdition === "advanced" &&
-      authorizationContext.capabilities.canAnswerOrganizationTraining,
+      authorizationContext.profession === selectedScope.profession &&
+      authorizationContext.level === selectedScope.level,
   );
 }
 
 function selectAuthorizationContextForScope(
   authorizationContexts: EffectiveAuthorizationContextDto[],
   selectedScope: StudentPaperScopeDto | null,
+  selectedAuthorizationPublicId: string | null,
 ): EffectiveAuthorizationContextDto | null {
-  if (selectedScope === null) {
-    return null;
+  const scopeAuthorizationContexts = selectAuthorizationContextsForScope(
+    authorizationContexts,
+    selectedScope,
+  );
+
+  if (selectedAuthorizationPublicId !== null) {
+    return (
+      scopeAuthorizationContexts.find(
+        (authorizationContext) =>
+          authorizationContext.authorizationPublicId ===
+          selectedAuthorizationPublicId,
+      ) ?? null
+    );
   }
 
-  return (
-    authorizationContexts.find(
-      (authorizationContext) =>
-        authorizationContext.profession === selectedScope.profession &&
-        authorizationContext.level === selectedScope.level,
-    ) ?? null
-  );
+  return scopeAuthorizationContexts.length === 1
+    ? scopeAuthorizationContexts[0]
+    : null;
+}
+
+function createAuthorizationContextPath(
+  pathname: string,
+  authorizationPublicId: string,
+): string {
+  return `${pathname}?${new URLSearchParams({ authorizationPublicId }).toString()}`;
 }
 
 function StudentHomeStatusMessage({
@@ -680,7 +710,7 @@ function StudentHomeContextBand({
     <section
       data-testid="student-home-context-band"
       aria-label="当前学习上下文"
-      className="bg-surface ring-border grid gap-3 rounded-xl p-4 shadow-sm ring-1 sm:grid-cols-4"
+      className="bg-surface ring-border grid gap-3 rounded-xl p-4 shadow-sm ring-1 sm:grid-cols-5"
     >
       <div className="min-w-0 space-y-1">
         <p className="text-text-muted text-xs font-medium">当前学习上下文</p>
@@ -690,7 +720,7 @@ function StudentHomeContextBand({
         <p className="text-text-muted text-xs font-medium">授权来源</p>
         <p className="text-text-primary text-sm font-semibold">
           {authorizationContext === null
-            ? "授权上下文待同步"
+            ? "请选择具体授权"
             : formatAuthorizationSourceLabel(
                 authorizationContext.authorizationSource,
               )}
@@ -714,7 +744,96 @@ function StudentHomeContextBand({
             : formatQuotaOwnerLabel(authorizationContext.quotaOwnerType)}
         </p>
       </div>
+      <div className="min-w-0 space-y-1">
+        <p className="text-text-muted text-xs font-medium">有效期</p>
+        {authorizationContext === null ? (
+          <p className="text-text-primary text-sm font-semibold">待选择</p>
+        ) : (
+          <Link
+            className="text-brand-primary inline-flex text-sm font-semibold transition-transform active:scale-[0.98]"
+            href={createAuthorizationContextPath(
+              "/profile",
+              authorizationContext.authorizationPublicId,
+            )}
+          >
+            {authorizationContext.expiresAt == null
+              ? "长期有效"
+              : authorizationContext.expiresAt.slice(0, 10)}
+            {" · 查看权益"}
+          </Link>
+        )}
+      </div>
     </section>
+  );
+}
+
+function StudentHomeAuthorizationContextSelector({
+  authorizationContexts,
+  onSelect,
+  selectedAuthorizationPublicId,
+}: {
+  authorizationContexts: EffectiveAuthorizationContextDto[];
+  onSelect: (authorizationPublicId: string) => void;
+  selectedAuthorizationPublicId: string | null;
+}) {
+  if (authorizationContexts.length === 0) {
+    return null;
+  }
+
+  return (
+    <fieldset
+      aria-label="当前范围授权上下文"
+      className="grid gap-2 sm:grid-cols-2"
+    >
+      <legend className="text-text-secondary mb-2 text-sm font-medium">
+        {authorizationContexts.length === 1
+          ? "当前范围授权"
+          : "请选择当前范围使用的具体授权"}
+      </legend>
+      {authorizationContexts.map((authorizationContext) => {
+        const contextLabel = [
+          formatAuthorizationSourceLabel(
+            authorizationContext.authorizationSource,
+          ),
+          formatEffectiveEditionLabel(authorizationContext.effectiveEdition),
+          formatScopeLabel(authorizationContext),
+        ].join(" · ");
+
+        return (
+          <label
+            className="border-border bg-surface flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm"
+            key={authorizationContext.authorizationPublicId}
+          >
+            <input
+              aria-label={contextLabel}
+              checked={
+                selectedAuthorizationPublicId ===
+                authorizationContext.authorizationPublicId
+              }
+              className="mt-1 size-4 accent-current"
+              name="student-home-authorization-context"
+              onChange={() =>
+                onSelect(authorizationContext.authorizationPublicId)
+              }
+              type="radio"
+            />
+            <span className="min-w-0 space-y-1">
+              <span className="text-text-primary block font-medium">
+                {contextLabel}
+              </span>
+              <span className="text-text-secondary block text-xs">
+                到期：
+                {authorizationContext.expiresAt == null
+                  ? "长期有效"
+                  : authorizationContext.expiresAt.slice(0, 10)}
+                {" · "}
+                {formatQuotaOwnerLabel(authorizationContext.quotaOwnerType)}
+              </span>
+            </span>
+          </label>
+        );
+      })}
+    </fieldset>
   );
 }
 
@@ -747,10 +866,6 @@ export function StudentHomePage({
   const displayPapers = papers ?? runtimePapers;
   const displayAuthorizationContexts =
     authorizationContexts ?? runtimeAuthorizationContexts;
-  const showAiTraining = canShowAiTraining(displayAuthorizationContexts);
-  const showOrganizationTraining = canShowOrganizationTraining(
-    displayAuthorizationContexts,
-  );
   const initialScope = findInitialScope(
     displayScopes,
     effectiveRememberedScope,
@@ -761,6 +876,54 @@ export function StudentHomePage({
   const selectedScope =
     displayScopes.find((scope) => createScopeKey(scope) === selectedScopeKey) ??
     initialScope;
+  const [selectedAuthorizationPublicId, setSelectedAuthorizationPublicId] =
+    useState<string | null>(
+      () =>
+        selectAuthorizationContextForScope(
+          displayAuthorizationContexts,
+          initialScope,
+          null,
+        )?.authorizationPublicId ?? null,
+    );
+  const scopeAuthorizationContexts = useMemo(
+    () =>
+      selectAuthorizationContextsForScope(
+        displayAuthorizationContexts,
+        selectedScope,
+      ),
+    [displayAuthorizationContexts, selectedScope],
+  );
+  const selectedAuthorizationContext = useMemo(
+    () =>
+      selectAuthorizationContextForScope(
+        displayAuthorizationContexts,
+        selectedScope,
+        selectedAuthorizationPublicId,
+      ),
+    [
+      displayAuthorizationContexts,
+      selectedAuthorizationPublicId,
+      selectedScope,
+    ],
+  );
+  const showAiTraining = canShowAiTraining(selectedAuthorizationContext);
+  const showOrganizationTraining = canShowOrganizationTraining(
+    selectedAuthorizationContext,
+  );
+  const aiTrainingPath =
+    showAiTraining && selectedAuthorizationContext !== null
+      ? createAuthorizationContextPath(
+          "/ai-generation",
+          selectedAuthorizationContext.authorizationPublicId,
+        )
+      : null;
+  const organizationTrainingPath =
+    showOrganizationTraining && selectedAuthorizationContext !== null
+      ? createAuthorizationContextPath(
+          "/organization-training",
+          selectedAuthorizationContext.authorizationPublicId,
+        )
+      : null;
   const subjectGroups = useMemo(
     () => selectSubjectGroups(displayPapers, selectedScope),
     [displayPapers, selectedScope],
@@ -773,15 +936,6 @@ export function StudentHomePage({
     displayScopes,
     authExpiryReminderDismissals,
   );
-  const selectedAuthorizationContext = useMemo(
-    () =>
-      selectAuthorizationContextForScope(
-        displayAuthorizationContexts,
-        selectedScope,
-      ),
-    [displayAuthorizationContexts, selectedScope],
-  );
-
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
       return;
@@ -825,6 +979,13 @@ export function StudentHomePage({
         setRuntimeScopes(nextScopes);
         setSelectedScopeKey(
           nextScope === null ? "" : createScopeKey(nextScope),
+        );
+        setSelectedAuthorizationPublicId(
+          selectAuthorizationContextForScope(
+            nextAuthorizationContexts,
+            nextScope,
+            null,
+          )?.authorizationPublicId ?? null,
         );
 
         if (nextScope === null) {
@@ -875,9 +1036,18 @@ export function StudentHomePage({
 
   async function handleSelectScope(scope: StudentPaperScopeDto) {
     const scopeKey = createScopeKey(scope);
+    const nextAuthorizationContexts = selectAuthorizationContextsForScope(
+      displayAuthorizationContexts,
+      scope,
+    );
 
     writeStudentHomeSelectedScope(scope);
     setSelectedScopeKey(scopeKey);
+    setSelectedAuthorizationPublicId(
+      nextAuthorizationContexts.length === 1
+        ? nextAuthorizationContexts[0].authorizationPublicId
+        : null,
+    );
 
     if (!isRuntimeMode) {
       return;
@@ -905,6 +1075,19 @@ export function StudentHomePage({
     } catch {
       setRuntimeState("error");
     }
+  }
+
+  function handleSelectAuthorizationContext(authorizationPublicId: string) {
+    if (
+      !scopeAuthorizationContexts.some(
+        (authorizationContext) =>
+          authorizationContext.authorizationPublicId === authorizationPublicId,
+      )
+    ) {
+      return;
+    }
+
+    setSelectedAuthorizationPublicId(authorizationPublicId);
   }
 
   function handleDismissAuthExpiryReminder(reminderKey: string) {
@@ -986,18 +1169,18 @@ export function StudentHomePage({
             <Ticket className="size-4" aria-hidden="true" />
             兑换卡密
           </Link>
-          {showAiTraining ? (
+          {aiTrainingPath !== null ? (
             <Link
-              href="/ai-generation"
+              href={aiTrainingPath}
               className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
             >
               <BrainCircuit className="size-4" aria-hidden="true" />
               AI训练
             </Link>
           ) : null}
-          {showOrganizationTraining ? (
+          {organizationTrainingPath !== null ? (
             <Link
-              href="/organization-training"
+              href={organizationTrainingPath}
               className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
             >
               <Building2 className="size-4" aria-hidden="true" />
@@ -1048,6 +1231,14 @@ export function StudentHomePage({
           );
         })}
       </div>
+
+      <StudentHomeAuthorizationContextSelector
+        authorizationContexts={scopeAuthorizationContexts}
+        onSelect={handleSelectAuthorizationContext}
+        selectedAuthorizationPublicId={
+          selectedAuthorizationContext?.authorizationPublicId ?? null
+        }
+      />
 
       {visiblePaperCount === 0 ? (
         <StudentHomeStatusMessage

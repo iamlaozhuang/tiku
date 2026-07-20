@@ -6,7 +6,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   StudentProfilePage,
@@ -311,7 +311,90 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+beforeEach(() => {
+  window.history.replaceState({}, "", "/profile");
+});
+
 describe("StudentProfilePage", () => {
+  it("does not label the first row as current when multiple authorization contexts lack an exact selection", async () => {
+    const firstContext = authorizationPayload.data.authorizationContexts[0];
+    mockProfileFetchWithPayloads({
+      authorization: {
+        ...authorizationPayload,
+        data: {
+          ...authorizationPayload.data,
+          authorizationContexts: [
+            {
+              ...firstContext,
+              authorizationPublicId: "personal-auth-profile-standard-001",
+              edition: "standard",
+              effectiveEdition: "standard",
+              upgradeStatus: "none",
+            },
+            {
+              ...firstContext,
+              authorizationPublicId: "personal-auth-profile-advanced-002",
+              edition: "advanced",
+              effectiveEdition: "advanced",
+              upgradeStatus: "none",
+            },
+          ],
+        },
+      },
+    });
+
+    render(createElement(StudentProfilePage));
+
+    expect(
+      await screen.findByTestId("student-profile-current-authorization"),
+    ).toHaveTextContent("请选择当前授权");
+  });
+
+  it("shows the exact authorization context carried from the learner home", async () => {
+    const firstContext = authorizationPayload.data.authorizationContexts[0];
+    window.history.replaceState(
+      {},
+      "",
+      "/profile?authorizationPublicId=personal-auth-profile-advanced-002",
+    );
+    mockProfileFetchWithPayloads({
+      authorization: {
+        ...authorizationPayload,
+        data: {
+          ...authorizationPayload.data,
+          authorizationContexts: [
+            {
+              ...firstContext,
+              authorizationPublicId: "personal-auth-profile-standard-001",
+              edition: "standard",
+              effectiveEdition: "standard",
+              upgradeStatus: "none",
+            },
+            {
+              ...firstContext,
+              authorizationPublicId: "personal-auth-profile-advanced-002",
+              edition: "advanced",
+              effectiveEdition: "advanced",
+              upgradeStatus: "none",
+              expiresAt: null,
+            },
+          ],
+        },
+      },
+    });
+
+    render(createElement(StudentProfilePage));
+
+    const currentAuthorization = await screen.findByTestId(
+      "student-profile-current-authorization",
+    );
+    expect(currentAuthorization).toHaveTextContent("当前权益");
+    expect(currentAuthorization).toHaveTextContent("高级版");
+    expect(currentAuthorization).toHaveTextContent("到期未设置");
+    expect(currentAuthorization).not.toHaveTextContent("2026-08-22");
+    expect(currentAuthorization).not.toHaveTextContent("请选择当前授权");
+  });
+
   it("renders an unauthorized state after the server session check fails", async () => {
     const fetchMock = vi.fn(async () =>
       createJsonResponse({

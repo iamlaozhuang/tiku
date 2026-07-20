@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+  currentTaskId: null
   currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
@@ -234,6 +234,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
     - p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
     - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+    - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -254,6 +255,8 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
     - p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20
     - p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
+    - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+    - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -295,47 +298,61 @@ p1RemediationSerialProgram:
     p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20: closed
     p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20: closed
     p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20: closed
-    p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: in_progress
+    p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: closed
+    p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20: closed
 activeTasks:
-  - id: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
-    title: Personal AI active authorization context consumption
-    phase: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
-    status: in_progress
+  - id: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+    title: Explicit learner authorization context selection
+    phase: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+    status: closed
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0142
-    branch: fix/personal-ai-history-effective-authorization
+    productClosureContribution: F-0141
+    branch: fix/student-authorization-context-selection
     dependsOn:
-      - p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
-    objective: close F-0142 by requiring the exact selected authorization to remain an effective advanced AI-capable context before personal AI history, result, or learning-session data can be consumed
+      - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+    objective: close F-0141 by requiring one exact explicit authorization context across learner home profile and AI training while allowing default only for a sole candidate
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-    planPath: docs/superpowers/plans/2026-07-20-personal-ai-active-context-consumption.md
+    planPath: docs/superpowers/plans/2026-07-20-explicit-learner-authorization-context-selection.md
     candidateRootCauseCluster: P1-RC-03
     findingIds:
-      - F-0142
+      - F-0141
     highRiskApproval:
       category: permission
       status: satisfied_by_bounded_medium_risk_standing_approval
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    executionStage: candidate_ready_for_bounded_medium_risk_auto_closeout
-    frozenScopeExpansionApproval:
-      source: current_user_message
-      files:
-        - tests/unit/phase-11-system-ops-user-management-loop.test.ts
-        - tests/unit/phase-11-system-ops-organization-management-loop.test.ts
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      tddRed: pass_4_expected_failures_before_green
-      focused: pass_99_of_99
-      affectedRegression: pass_99_of_99
-      build: pass
-      e2e: not_triggered_route_and_ui_contracts_have_direct_coverage
+      tddRed: pass_expected_5_failures_then_adversarial_exact_expiry_red
+      focused: pass_61_of_61
+      affectedRegression: pass_39_of_39
+      systemOpsRegression: pass_9_of_9
+      build: pass_96_static_pages
       lintTypecheckChangedFileFormatDiff: pass
-      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending
+      p0GlobalBaseline: pass
       p0SerialBaseline: pass_closed_program
-      mainThreadAdversarialReview: pass_after_correcting_false_positive_to_prove_session_exists_before_authorization_expiry
+      mainThreadAdversarialReview: pass
       entitlementExpansion: false
       prohibitedSideEffects: false
+    closeout:
+      commit: finalized_by_commit_containing_this_state
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+  - id: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+    title: Personal AI active authorization context consumption
+    phase: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0142
+    branch: fix/personal-ai-history-effective-authorization
+    candidateRootCauseCluster: P1-RC-03
+    findingIds:
+      - F-0142
+    closeout:
+      commit: 2a60414276c2636492dbb98d07a0127a44385505
+      status: committed_ff_only_merged_pushed_synced_and_cleaned
   - id: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
     title: Organization portal authorization read model
     phase: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20

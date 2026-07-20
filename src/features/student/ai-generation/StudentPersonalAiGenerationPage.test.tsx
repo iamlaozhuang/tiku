@@ -405,6 +405,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState({}, "", "/ai-generation");
     studentRuntimeApiMock.getStoredStudentSessionToken.mockReturnValue(
       "local-session-token",
     );
@@ -518,8 +519,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       await screen.findByText("AI 生成服务当前未开放"),
     ).toBeInTheDocument();
-    expect(screen.getByText("企业员工 AI 训练")).toBeInTheDocument();
-    expect(screen.queryByText("个人 AI 训练")).not.toBeInTheDocument();
+    expect(screen.getByText("个人 AI 训练")).toBeInTheDocument();
+    expect(screen.getByText(/请先确认一个具体授权/u)).toBeInTheDocument();
 
     const organizationContext = screen.getByRole("radio", {
       name: "组织授权 · 高级版 · 专卖 3级",
@@ -527,6 +528,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(organizationContext).not.toBeDisabled();
     fireEvent.click(organizationContext);
     expect(organizationContext).toBeChecked();
+    expect(screen.getByText("企业员工 AI 训练")).toBeInTheDocument();
 
     const paperTab = screen.getByRole("tab", { name: "AI组卷" });
     expect(paperTab).not.toBeDisabled();
@@ -566,7 +568,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     ).toBe(false);
   });
 
-  it("prioritizes personal authorization and scopes every initial read and detail URL to its exact id", async () => {
+  it("requires explicit selection among multiple contexts before scoped history reads", async () => {
     const authorizationPayload =
       createPersonalAndOrganizationAuthorizationListPayload();
     const personalAuthorizationContext = {
@@ -633,7 +635,23 @@ describe("StudentPersonalAiGenerationPage", () => {
     const personalContext = await screen.findByRole("radio", {
       name: "个人授权 · 高级版 · 专卖 3级",
     });
+    const organizationContext = screen.getByRole("radio", {
+      name: "组织授权 · 高级版 · 专卖 3级",
+    });
+
+    expect(personalContext).not.toBeChecked();
+    expect(organizationContext).not.toBeChecked();
+    expect(
+      studentRuntimeApiMock.fetchStudentApi.mock.calls.some(([url]) =>
+        url.startsWith("/api/v1/personal-ai-generation-requests?"),
+      ),
+    ).toBe(false);
+
+    fireEvent.click(personalContext);
     expect(personalContext).toBeChecked();
+    expect(
+      new URL(window.location.href).searchParams.get("authorizationPublicId"),
+    ).toBe("personal-auth-context/ui?selected=1");
 
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
@@ -669,6 +687,42 @@ describe("StudentPersonalAiGenerationPage", () => {
         ([url]) => url.includes("personal-ai-generation-") && url.includes("?"),
       ),
     ).toHaveLength(historyReadCountBeforeSameSelection);
+  });
+
+  it("honors an exact authorization context carried by a home deep link", async () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/ai-generation?authorizationPublicId=organization_authorization_context_ui_502",
+    );
+    mockAuthorizationAndResultHistoryResponse(
+      {
+        code: 0,
+        message: "ok",
+        data: createResultHistoryPayload(),
+      },
+      undefined,
+      {
+        authorizationPayload:
+          createPersonalAndOrganizationAuthorizationListPayload(),
+        generationAvailability: "closed",
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    expect(
+      await screen.findByRole("radio", {
+        name: "组织授权 · 高级版 · 专卖 3级",
+      }),
+    ).toBeChecked();
+    await waitFor(() => {
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=organization_authorization_context_ui_502",
+        "local-session-token",
+        { method: "GET" },
+      );
+    });
   });
 
   it("ignores delayed personal histories after switching to organization context", async () => {
@@ -833,6 +887,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
 
     render(<StudentPersonalAiGenerationPage />);
+    fireEvent.click(
+      await screen.findByRole("radio", {
+        name: "个人授权 · 高级版 · 专卖 3级",
+      }),
+    );
     expect(
       await screen.findByText("masked preview ui 501"),
     ).toBeInTheDocument();

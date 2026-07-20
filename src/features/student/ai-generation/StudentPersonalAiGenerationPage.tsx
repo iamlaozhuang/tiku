@@ -816,19 +816,6 @@ function readPersonalAiGenerationAuthorizationContexts(
   );
 }
 
-function selectDefaultPersonalAiGenerationAuthorizationContext(
-  authorizationContexts: EffectiveAuthorizationContextDto[],
-): EffectiveAuthorizationContextDto | null {
-  return (
-    authorizationContexts.find(
-      (authorizationContext) =>
-        authorizationContext.authorizationSource === "personal_auth",
-    ) ??
-    authorizationContexts[0] ??
-    null
-  );
-}
-
 function selectPersonalAiGenerationAuthorizationContext(
   authorizationContexts: EffectiveAuthorizationContextDto[],
   taskType: StudentPersonalAiGenerationTaskType,
@@ -836,9 +823,7 @@ function selectPersonalAiGenerationAuthorizationContext(
 ): EffectiveAuthorizationContextDto | null {
   const selectedAuthorizationContext =
     selectedAuthorizationPublicId === null
-      ? selectDefaultPersonalAiGenerationAuthorizationContext(
-          authorizationContexts,
-        )
+      ? null
       : (authorizationContexts.find(
           (authorizationContext) =>
             authorizationContext.authorizationPublicId ===
@@ -855,6 +840,35 @@ function selectPersonalAiGenerationAuthorizationContext(
   )
     ? selectedAuthorizationContext
     : null;
+}
+
+function readAuthorizationPublicIdFromLocation(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const authorizationPublicId = new URLSearchParams(window.location.search).get(
+    "authorizationPublicId",
+  );
+  const normalizedAuthorizationPublicId = authorizationPublicId?.trim() ?? "";
+
+  return normalizedAuthorizationPublicId.length === 0
+    ? null
+    : normalizedAuthorizationPublicId;
+}
+
+function writeAuthorizationPublicIdToLocation(authorizationPublicId: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set("authorizationPublicId", authorizationPublicId);
+  window.history.replaceState(
+    window.history.state,
+    "",
+    currentUrl.pathname + currentUrl.search + currentUrl.hash,
+  );
 }
 
 function createStudentGenerationParameters(
@@ -1405,10 +1419,7 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
       (authorizationContext) =>
         authorizationContext.authorizationPublicId ===
         selectedAuthorizationPublicId,
-    ) ??
-    selectDefaultPersonalAiGenerationAuthorizationContext(
-      authorizationContexts,
-    );
+    ) ?? null;
 
   if (authorizationContexts.length === 0) {
     return null;
@@ -1421,8 +1432,8 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
           授权上下文
         </h2>
         <p className="text-text-secondary text-sm leading-6">
-          选择本次 AI训练
-          使用的授权范围；个人学习默认使用个人授权，组织额度需手动选择。
+          选择本次
+          AI训练使用的具体授权；仅有一个候选时可默认，多授权时不会自动切换版本或额度。
         </p>
       </div>
 
@@ -1481,7 +1492,14 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
         })}
       </fieldset>
 
-      {selectedAuthorizationContext !== null ? (
+      {selectedAuthorizationContext === null ? (
+        <p
+          className="border-border text-text-secondary mt-3 rounded-lg border border-dashed px-3 py-3 text-sm"
+          role="status"
+        >
+          请先确认一个具体授权，再查看历史或使用生成设置。
+        </p>
+      ) : (
         <div className="bg-muted mt-3 rounded-lg px-3 py-3">
           <p className="text-text-primary text-sm font-medium">额度归属确认</p>
           <p className="text-text-secondary mt-1 text-sm leading-6">
@@ -1492,7 +1510,7 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
             {selectedAuthorizationContext.level}级。
           </p>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
@@ -3472,8 +3490,11 @@ export function StudentPersonalAiGenerationPage() {
   const [authorizationContexts, setAuthorizationContexts] = useState<
     EffectiveAuthorizationContextDto[]
   >([]);
+  const [requestedAuthorizationPublicIdAtMount] = useState(
+    readAuthorizationPublicIdFromLocation,
+  );
   const [selectedAuthorizationPublicId, setSelectedAuthorizationPublicId] =
-    useState<string | null>(null);
+    useState<string | null>(requestedAuthorizationPublicIdAtMount);
   const [studentAiKnowledgeNodeOptions, setStudentAiKnowledgeNodeOptions] =
     useState<StudentAiKnowledgeNodeOption[]>([]);
   const [studentAiKnowledgeNodeLoadState, setStudentAiKnowledgeNodeLoadState] =
@@ -3482,6 +3503,7 @@ export function StudentPersonalAiGenerationPage() {
   useEffect(() => {
     const sessionRequestToken = readStudentSessionRequestToken();
     let isCancelled = false;
+    let hasSelectableAuthorizationContext = false;
 
     function markUnauthorized() {
       setHasSessionToken(false);
@@ -3604,12 +3626,39 @@ export function StudentPersonalAiGenerationPage() {
         return null;
       }
 
+      hasSelectableAuthorizationContext = true;
+
+      const exactRequestedAuthorizationContext =
+        requestedAuthorizationPublicIdAtMount === null
+          ? null
+          : (selectableAuthorizationContexts.find(
+              (authorizationContext) =>
+                authorizationContext.authorizationPublicId ===
+                requestedAuthorizationPublicIdAtMount,
+            ) ?? null);
+      const soleAuthorizationContext =
+        requestedAuthorizationPublicIdAtMount === null &&
+        fetchedAuthorizationContexts.length === 1 &&
+        selectableAuthorizationContexts.length === 1
+          ? selectableAuthorizationContexts[0]
+          : null;
       const initialAuthorizationPublicId =
-        selectDefaultPersonalAiGenerationAuthorizationContext(
-          selectableAuthorizationContexts,
-        )?.authorizationPublicId ?? null;
+        exactRequestedAuthorizationContext?.authorizationPublicId ??
+        soleAuthorizationContext?.authorizationPublicId ??
+        null;
       setAuthorizationContexts(selectableAuthorizationContexts);
       setSelectedAuthorizationPublicId(initialAuthorizationPublicId);
+
+      if (initialAuthorizationPublicId === null) {
+        setHistoryState("empty");
+        setRequestHistory([]);
+        setRequestHistoryPagination(null);
+        setResultHistoryState("empty");
+        setResultHistory(null);
+        setResultHistoryPagination(null);
+      } else {
+        writeAuthorizationPublicIdToLocation(initialAuthorizationPublicId);
+      }
 
       return initialAuthorizationPublicId;
     }
@@ -3727,7 +3776,7 @@ export function StudentPersonalAiGenerationPage() {
       const initialAuthorizationPublicId =
         await confirmPersonalAiGenerationAuthorization();
 
-      if (initialAuthorizationPublicId === null || isCancelled) {
+      if (!hasSelectableAuthorizationContext || isCancelled) {
         return;
       }
 
@@ -3767,6 +3816,10 @@ export function StudentPersonalAiGenerationPage() {
         }
       }
 
+      if (initialAuthorizationPublicId === null || isCancelled) {
+        return;
+      }
+
       void fetchInitialRequestHistory(initialAuthorizationPublicId);
       void fetchInitialResultHistory(initialAuthorizationPublicId);
     }
@@ -3776,7 +3829,7 @@ export function StudentPersonalAiGenerationPage() {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [requestedAuthorizationPublicIdAtMount]);
 
   async function handleSubmitPersonalAiGenerationRequest(
     taskType: StudentPersonalAiGenerationTaskType,
@@ -4264,6 +4317,7 @@ export function StudentPersonalAiGenerationPage() {
     }
 
     setSelectedAuthorizationPublicId(authorizationPublicId);
+    writeAuthorizationPublicIdToLocation(authorizationPublicId);
     setAiQuestionKnowledgeScope((currentState) => ({
       ...currentState,
       includeDescendants: false,
@@ -4432,6 +4486,7 @@ export function StudentPersonalAiGenerationPage() {
 
   const isAiGenerationBaseActionDisabled =
     !hasSessionToken ||
+    selectedAuthorizationPublicId === null ||
     generationAvailabilityState !== "available" ||
     pageState === "checking" ||
     pageState === "loading" ||
@@ -4448,9 +4503,16 @@ export function StudentPersonalAiGenerationPage() {
     pageState !== "unavailable";
   const shouldShowAuthorizationContextSelector =
     shouldShowAiGenerationDetailControls && authorizationContexts.length > 0;
-  const isOrganizationEmployeeAiTraining = authorizationContexts.some(
-    (authorizationContext) => authorizationContext.ownerType === "organization",
-  );
+  const selectedAuthorizationContext =
+    selectedAuthorizationPublicId === null
+      ? null
+      : (authorizationContexts.find(
+          (authorizationContext) =>
+            authorizationContext.authorizationPublicId ===
+            selectedAuthorizationPublicId,
+        ) ?? null);
+  const isOrganizationEmployeeAiTraining =
+    selectedAuthorizationContext?.ownerType === "organization";
   const hasLocalAiGenerationExperience =
     pageState === "ready" &&
     experience !== null &&

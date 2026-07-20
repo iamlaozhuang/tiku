@@ -334,20 +334,70 @@ function ProfileHeader({
   );
 }
 
-function ProfileCurrentAuthorization({
-  authorizationContexts,
-  effectiveAuthorizations,
-}: {
-  authorizationContexts: EditionAwareAuthorizationContextDto[];
-  effectiveAuthorizations: EffectiveAuthorizationDto[];
-}) {
-  const primaryAuthorizationContext = authorizationContexts[0] ?? null;
-  const primaryEffectiveAuthorization = effectiveAuthorizations[0] ?? null;
+function readSelectedAuthorizationPublicId(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
 
-  if (
-    primaryAuthorizationContext === null &&
-    primaryEffectiveAuthorization === null
-  ) {
+  const authorizationPublicId = new URLSearchParams(window.location.search).get(
+    "authorizationPublicId",
+  );
+  const normalizedAuthorizationPublicId = authorizationPublicId?.trim() ?? "";
+
+  return normalizedAuthorizationPublicId.length === 0
+    ? null
+    : normalizedAuthorizationPublicId;
+}
+
+function selectProfileAuthorizationContext(
+  authorizationContexts: EditionAwareAuthorizationContextDto[],
+  selectedAuthorizationPublicId: string | null,
+): EditionAwareAuthorizationContextDto | null {
+  if (selectedAuthorizationPublicId !== null) {
+    return (
+      authorizationContexts.find(
+        (authorizationContext) =>
+          authorizationContext.authorizationPublicId ===
+          selectedAuthorizationPublicId,
+      ) ?? null
+    );
+  }
+
+  return authorizationContexts.length === 1 ? authorizationContexts[0] : null;
+}
+
+function ProfileCurrentAuthorization({
+  authorizationContext,
+  effectiveAuthorization,
+  selectionRequired,
+}: {
+  authorizationContext: EditionAwareAuthorizationContextDto | null;
+  effectiveAuthorization: EffectiveAuthorizationDto | null;
+  selectionRequired: boolean;
+}) {
+  if (selectionRequired) {
+    return (
+      <section
+        className="border-border bg-surface rounded-xl border border-dashed p-4"
+        data-testid="student-profile-current-authorization"
+      >
+        <p className="text-text-primary text-sm font-semibold">
+          请选择当前授权
+        </p>
+        <p className="text-text-secondary mt-1 text-sm leading-6">
+          当前账号有多个授权上下文，个人中心不会把列表首条冒充当前权益。请从学员首页确认具体授权后查看。
+        </p>
+        <Link
+          className="text-brand-primary mt-3 inline-flex text-sm font-medium transition-transform active:scale-[0.98]"
+          href="/home"
+        >
+          返回学员首页选择
+        </Link>
+      </section>
+    );
+  }
+
+  if (authorizationContext === null && effectiveAuthorization === null) {
     return (
       <section
         className="border-border text-text-secondary rounded-xl border border-dashed p-4 text-sm"
@@ -359,31 +409,31 @@ function ProfileCurrentAuthorization({
   }
 
   const sourceLabel =
-    primaryAuthorizationContext === null
-      ? primaryEffectiveAuthorization?.authorizationTypes
+    authorizationContext === null
+      ? effectiveAuthorization?.authorizationTypes
           .map(
             (authorizationType) => authorizationTypeLabels[authorizationType],
           )
           .join("、")
-      : authorizationTypeLabels[
-          primaryAuthorizationContext.authorizationSource
-        ];
+      : authorizationTypeLabels[authorizationContext.authorizationSource];
   const scopeLabel =
-    primaryAuthorizationContext === null
-      ? formatScopeLabel(primaryEffectiveAuthorization)
-      : formatScopeLabel(primaryAuthorizationContext);
+    authorizationContext === null
+      ? effectiveAuthorization === null
+        ? "授权范围待同步"
+        : formatScopeLabel(effectiveAuthorization)
+      : formatScopeLabel(authorizationContext);
   const editionLabel =
-    primaryAuthorizationContext === null
+    authorizationContext === null
       ? "版本待同步"
-      : editionLabels[primaryAuthorizationContext.effectiveEdition];
+      : editionLabels[authorizationContext.effectiveEdition];
   const quotaOwnerLabel =
-    primaryAuthorizationContext === null
+    authorizationContext === null
       ? "额度待同步"
-      : formatQuotaOwnerLabel(primaryAuthorizationContext.quotaOwnerType);
+      : formatQuotaOwnerLabel(authorizationContext.quotaOwnerType);
   const expiresAt =
-    primaryAuthorizationContext?.expiresAt ??
-    primaryEffectiveAuthorization?.expiresAt ??
-    null;
+    authorizationContext === null
+      ? (effectiveAuthorization?.expiresAt ?? null)
+      : authorizationContext.expiresAt;
 
   return (
     <section
@@ -896,6 +946,9 @@ export function StudentProfilePage() {
   const [authorizationContexts, setAuthorizationContexts] = useState<
     EditionAwareAuthorizationContextDto[]
   >([]);
+  const [selectedAuthorizationPublicId] = useState(
+    readSelectedAuthorizationPublicId,
+  );
   const [personalAuths, setPersonalAuths] = useState<PersonalAuthDto[]>([]);
 
   useEffect(() => {
@@ -1010,6 +1063,22 @@ export function StudentProfilePage() {
   const showPrimaryRedeemLink = !isEmployeeUser(authContext);
   const showPersonalRedeemPreparation =
     showPrimaryRedeemLink && personalAuths.length === 0;
+  const selectedAuthorizationContext = selectProfileAuthorizationContext(
+    authorizationContexts,
+    selectedAuthorizationPublicId,
+  );
+  const selectedEffectiveAuthorization =
+    selectedAuthorizationContext === null
+      ? authorizationContexts.length === 0 &&
+        effectiveAuthorizations.length === 1
+        ? effectiveAuthorizations[0]
+        : null
+      : (effectiveAuthorizations.find(
+          (effectiveAuthorization) =>
+            effectiveAuthorization.profession ===
+              selectedAuthorizationContext.profession &&
+            effectiveAuthorization.level === selectedAuthorizationContext.level,
+        ) ?? null);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -1019,8 +1088,12 @@ export function StudentProfilePage() {
         onLogout={handleLogout}
       />
       <ProfileCurrentAuthorization
-        authorizationContexts={authorizationContexts}
-        effectiveAuthorizations={effectiveAuthorizations}
+        authorizationContext={selectedAuthorizationContext}
+        effectiveAuthorization={selectedEffectiveAuthorization}
+        selectionRequired={
+          authorizationContexts.length > 0 &&
+          selectedAuthorizationContext === null
+        }
       />
       <ProfileNavLinks showRedeemLink={showPrimaryRedeemLink} />
       <ProfileAuthorizationDetails

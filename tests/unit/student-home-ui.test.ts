@@ -111,9 +111,90 @@ describe("StudentHomePage", () => {
 
     expect(screen.getByRole("link", { name: "AI训练" })).toHaveAttribute(
       "href",
-      "/ai-generation",
+      "/ai-generation?authorizationPublicId=personal-auth-advanced-ui-001",
     );
     expect(screen.queryByRole("link", { name: "企业训练" })).toBeNull();
+    expect(screen.getByRole("link", { name: /查看权益/u })).toHaveAttribute(
+      "href",
+      "/profile?authorizationPublicId=personal-auth-advanced-ui-001",
+    );
+  });
+
+  it("does not borrow an advanced AI entry from another selected scope", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+        authorizationContexts: [
+          createAuthorizationContext({
+            authorizationPublicId: "personal-auth-marketing-standard-ui-001",
+          }),
+          createAuthorizationContext({
+            profession: "monopoly",
+            authorizationPublicId: "personal-auth-monopoly-advanced-ui-001",
+            edition: "advanced",
+            effectiveEdition: "advanced",
+            capabilities: {
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+            },
+          }),
+        ],
+      } satisfies StudentHomePagePropsWithAuthorizationContexts),
+    );
+
+    expect(screen.queryByRole("link", { name: "AI训练" })).toBeNull();
+    expect(screen.getByTestId("student-home-context-band")).toHaveTextContent(
+      "标准版",
+    );
+  });
+
+  it("requires an explicit exact authorization selection when one scope has multiple contexts", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+        authorizationContexts: [
+          createAuthorizationContext({
+            authorizationPublicId: "personal-auth-marketing-standard-ui-001",
+          }),
+          createAuthorizationContext({
+            authorizationPublicId: "personal-auth-marketing-advanced-ui-002",
+            edition: "advanced",
+            effectiveEdition: "advanced",
+            expiresAt: "2027-01-31T15:59:59Z",
+            capabilities: {
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+            },
+          }),
+        ],
+      } satisfies StudentHomePagePropsWithAuthorizationContexts),
+    );
+
+    expect(screen.getByTestId("student-home-context-band")).toHaveTextContent(
+      "请选择具体授权",
+    );
+    expect(screen.queryByRole("link", { name: "AI训练" })).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /个人授权 · 高级版 · 营销 3级/u,
+      }),
+    );
+
+    expect(screen.getByRole("link", { name: "AI训练" })).toHaveAttribute(
+      "href",
+      "/ai-generation?authorizationPublicId=personal-auth-marketing-advanced-ui-002",
+    );
   });
 
   it("shows AI and organization training entries for advanced organization employee capabilities", () => {
@@ -148,11 +229,11 @@ describe("StudentHomePage", () => {
 
     expect(screen.getByRole("link", { name: "AI训练" })).toHaveAttribute(
       "href",
-      "/ai-generation",
+      "/ai-generation?authorizationPublicId=org-auth-advanced-ui-001",
     );
     expect(screen.getByRole("link", { name: "企业训练" })).toHaveAttribute(
       "href",
-      "/organization-training",
+      "/organization-training?authorizationPublicId=org-auth-advanced-ui-001",
     );
   });
 
@@ -544,11 +625,11 @@ describe("StudentHomePage", () => {
 
     expect(await screen.findByRole("link", { name: "AI训练" })).toHaveAttribute(
       "href",
-      "/ai-generation",
+      "/ai-generation?authorizationPublicId=org-auth-runtime-ui-001",
     );
     expect(screen.getByRole("link", { name: "企业训练" })).toHaveAttribute(
       "href",
-      "/organization-training",
+      "/organization-training?authorizationPublicId=org-auth-runtime-ui-001",
     );
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));

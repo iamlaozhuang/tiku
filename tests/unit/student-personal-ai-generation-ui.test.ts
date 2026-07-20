@@ -7,7 +7,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StudentPersonalAiGenerationPage } from "@/features/student/ai-generation/StudentPersonalAiGenerationPage";
 import { COOKIE_BACKED_SESSION_MARKER } from "@/features/student/studentRuntimeApi";
@@ -1237,6 +1237,10 @@ afterEach(() => {
   localStorage.clear();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+});
+
+beforeEach(() => {
+  window.history.replaceState({}, "", "/ai-generation");
 });
 
 describe("StudentPersonalAiGenerationPage", () => {
@@ -2526,7 +2530,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
   });
 
-  it("defaults learner AI to the personal context and uses organization quota only after explicit selection", async () => {
+  it("requires explicit learner context and uses the selected quota owner", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const submittedBodies: Record<string, unknown>[] = [];
     const observedGetUrls: string[] = [];
@@ -2597,10 +2601,23 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     render(createElement(StudentPersonalAiGenerationPage));
 
-    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "请先确认一个具体授权，再查看历史或使用生成设置。",
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText("授权上下文")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("个人授权 · 高级版 · 专卖 3级"),
+    ).not.toBeChecked();
+    expect(
+      screen.getByLabelText("组织授权 · 高级版 · 专卖 3级"),
+    ).not.toBeChecked();
+    expect(observedGetUrls).toEqual([]);
+
+    fireEvent.click(screen.getByLabelText("个人授权 · 高级版 · 专卖 3级"));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     expect(screen.getByText("额度归属确认")).toBeInTheDocument();
-    expect(screen.getByLabelText("个人授权 · 高级版 · 专卖 3级")).toBeChecked();
     expect(screen.getByText(/当前将使用个人额度/u)).toBeInTheDocument();
     expect(observedGetUrls).toEqual(
       expect.arrayContaining([
@@ -4850,6 +4867,12 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     render(createElement(StudentPersonalAiGenerationPage));
 
+    expect(
+      await screen.findByText(
+        "请先确认一个具体授权，再查看历史或使用生成设置。",
+      ),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("个人授权 · 高级版 · 专卖 3级"));
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
     expect(

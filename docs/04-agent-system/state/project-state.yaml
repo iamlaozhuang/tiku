@@ -559,7 +559,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20: closed
     p1-remediation-rc-03-org-auth-specified-node-validation-2026-07-20: closed
     p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20: closed
-    p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: in_progress
+    p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: closed
+    p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20: closed
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -718,65 +719,65 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
-  title: Personal AI active authorization context consumption
-  phase: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
-  status: in_progress
+  id: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+  title: Explicit learner authorization context selection
+  phase: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+  status: closed
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0142
-  branch: fix/personal-ai-history-effective-authorization
+  productClosureContribution: F-0141
+  branch: fix/student-authorization-context-selection
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0142
+    - F-0141
   candidateRootCauseCluster: P1-RC-03
   requirementAnchors:
-    - traceability/2026-06-21-org-auth-scope-product-decision.md
-    - traceability/2026-07-02-role-auth-training-ops-decision-package.md#D09
+    - advanced-edition/edition-aware-authorization-requirements.md#authorization-context-and-quota-ownership
+    - traceability/2026-07-07-full-role-uiux-batch-4-personal-students.md#personal-authorization-context-should-be-visible-before-the-work-area
     - ADR-007
   highRiskApproval:
     category: permission
     status: satisfied_by_bounded_medium_risk_standing_approval
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
-    status: candidate_ready_for_bounded_medium_risk_auto_closeout
-    reason: focused_99_of_99_affected_99_of_99_lint_typecheck_build_format_diff_p0_baselines_and_main_thread_adversarial_review_passed_without_entitlement_expansion_or_prohibited_side_effects
-    resumeAction: stage_exact_allowlist_bind_standing_approval_to_candidate_tree_run_minimal_kernel_commit_ff_only_merge_canonical_push_sync_cleanup_then_continue_RC03
+    status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    reason: exact_or_sole_authorization_context_now_drives_home_profile_ai_entry_history_generation_and_quota_owner_without_entitlement_expansion
+    resumeAction: request_fresh_schema_migration_approval_before_scheduling_f0088_or_continue_the_next_executable_p1_cluster
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    tddRed: pass_4_expected_failures_before_green
-    focused: pass_99_of_99
-    affectedRegression: pass_99_of_99
-    fullUnitBuildE2e: build_pass_e2e_not_triggered_route_and_ui_contracts_have_direct_coverage
+    tddRed: pass_expected_5_failures_then_adversarial_exact_expiry_red
+    focused: pass_61_of_61
+    affectedRegression: pass_39_of_39
+    systemOpsRegression: pass_9_of_9
+    fullUnitBuildE2e: impact_build_pass_96_static_pages_e2e_not_required
     lint: pass
     typecheck: pass
     changedFileFormat: pass
-    p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending
+    p0GlobalBaseline: pass_35_p0_findings_143_p1_p2_impacts_0_dependency_cycles
     p0SerialBaseline: pass_closed_program
     diffCheck: pass
-    mainThreadAdversarialReview: pass_after_correcting_false_positive_to_prove_session_exists_before_authorization_expiry
+    mainThreadAdversarialReview: pass_exact_selection_invalid_deep_link_no_silent_quota_switch_and_no_expiry_fallback
     entitlementExpansion: false
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     realExternalCall: false
     extraFiles: false
+  closeout:
+    commit: finalized_by_commit_containing_this_state
+    status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   previousTaskCloseout:
-    taskId: p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
-    findingId: F-0119
-    commit: 28126093ec2b76fa9a529069a6f71fcff6c699fc
+    taskId: p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
+    findingId: F-0142
+    commit: 2a60414276c2636492dbb98d07a0127a44385505
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   rc03ResidualDisposition:
     F-0088: separate_requires_fresh_schema_migration_approval_when_scheduled
     F-0112: separate_closed_32f728b50b5df897da3b383b69e4840c1e61af30
     F-0119: separate_closed_28126093ec2b76fa9a529069a6f71fcff6c699fc
     F-0140: covered_by_current_master_user_row_lock_and_transactional_effective_upgrade_recheck
-    F-0141: separate
-    F-0142: separate_current_task
-  frozenScopeExpansionApproval:
-    source: current_user_message
-    files:
-      - tests/unit/phase-11-system-ops-user-management-loop.test.ts
-      - tests/unit/phase-11-system-ops-organization-management-loop.test.ts
+    F-0141: separate_closed_by_commit_containing_this_state
+    F-0142: separate_closed_2a60414276c2636492dbb98d07a0127a44385505
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20
   source: current_user_message
