@@ -1,5 +1,18 @@
 $ErrorActionPreference = "Stop"
 
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-BEGIN
+$preCommitMechanismScopeCorrectionGuardText = Get-Content -LiteralPath (Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.ps1") -Raw -Encoding UTF8
+$preCommitMechanismScopeCorrectionSmokeMarkers = @(
+    "Test-P1MechanismBootstrapPreCommitScopeCorrectionCandidate",
+    "p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time",
+    "HARD_BLOCK_APPROVED_SAME_TASK_TRANSITION_INVALID"
+)
+$missingPreCommitMechanismScopeCorrectionSmokeMarkers = @($preCommitMechanismScopeCorrectionSmokeMarkers | Where-Object { -not $preCommitMechanismScopeCorrectionGuardText.Contains($_) })
+if ($missingPreCommitMechanismScopeCorrectionSmokeMarkers.Count -gt 0) {
+    throw "Module pre-commit mechanism scope-correction RED: $($missingPreCommitMechanismScopeCorrectionSmokeMarkers -join ', ')"
+}
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-END
+
 function Assert-Contains {
     param(
         [Parameter(Mandatory = $true)]

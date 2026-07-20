@@ -97,6 +97,60 @@ Important: 0 open; 1 found and corrected during C5 review
 
 Decision: main_review_pass_full_pending
 
+### 2026-07-20 pre-commit correction hash refresh audit
+
+- Review correction: the Module pre-commit candidate now performs ordinal, case-sensitive uniqueness validation on every staged status path before comparing the exact eight-file allowlist. This closes duplicate and case-variant path ambiguity without widening the channel.
+- The resulting normalized pre-commit correction tree hash is `9b5c22c2d2b3e06114a35181fb7cb9b55e33d26becca3b6e15fb681cf6c289ad`; the prior `869027...`, `976911...`, `cbe21...` and `4a74...` values are stale intermediate evidence only. The manual contract hash remains `2f2ed63744146859b1047218f59223913f681b994b83527439b09def26d14dc9`.
+- The untracked `manual-hash-probe.ps1` residue was removed. Required final status is the exact eight staged `M` paths with no unstaged or untracked files. Ordinary SHA drift, topology, approval/evidence, ancestor and hook-bypass hard-blocks remain unchanged.
+- Independent reviewer recheck: uniqueness increment passes; the initial recheck found the stale hash and untracked helper. Both were corrected; direct staged P1/Module pre-commit rerun now passes with the final hash and clean-residue checks.
+
+Decision: hash_refresh_review_pass
+
+### 2026-07-20 final staged revalidation audit
+
+- Main-thread adversarial decision: PASS for the narrow pre-commit channel. The Module adapter's ordinal exact status-path uniqueness check prevents duplicate/case-variant allowlist ambiguity; the P1 anchor independently enforces exact eight `M` paths, clean index/worktree, fixed topology, ready state/queue projection, authorization, review/evidence contracts and the final normalized hash.
+- Direct staged P1 and Module pre-commit gates passed with their one-time approval markers. Four-file PowerShell parser errors are `0`, staged diff check passes, and related temporary residue is `0`.
+- Safety invariants rechecked: ordinary SHA drift, transition topology, standard ancestor, missing/conflicting approval or evidence, extra/deleted/renamed/product files, manual/pre-push semantics and hook bypass remain hard-blocked. No state/queue/product/dependency/schema/database/provider/runtime/P2/PR/force-push/deploy file is in the exact allowlist.
+- Independent final reviewer recheck remains pending; this audit does not self-approve production review or closeout actions.
+
+Decision: main_review_pass_independent_final_pending
+
+### 2026-07-20 cross-runtime hash determinism audit
+
+- Independent review blocker reproduced: native `git show` text decoding yielded different hash anchors under Windows PowerShell 5.1 and `pwsh` 7. The correction now reads UTF-8 from the clean, drift-checked worktree; the existing exact staged status and clean-index checks ensure this is the staged candidate, not an alternate source.
+- The same normalized hash `4a74b26686922eee5f7442cc7e8e5776b48ff4b473493568f70c66475dd549db` was independently computed by both runtimes. This is a compatibility fix only; no security boundary was relaxed.
+- Independent final review must recheck this cross-runtime result before commit. No closeout action has occurred.
+
+Decision: cross_runtime_hash_review_pending
+
+### 2026-07-20 cross-runtime final revalidation
+
+- Windows PowerShell 5.1 and `pwsh` 7 both passed the staged P1 pre-commit anchor and emitted `p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time` with the same normalized hash `4a74b266...`.
+- Both runtimes passed Module pre-commit with `preCommitScopeMode: p1_mechanism_bootstrap_scope_correction`; exact eight-path scope and all hard-blocks remain unchanged.
+- The UTF-8 worktree read is safe only after the same function's clean-index/untracked checks; it does not create a second authorization source or allow staged/worktree divergence.
+- Independent reviewer recheck is now the sole pending gate.
+
+Decision: cross_runtime_revalidation_pass_independent_final_pending
+
+### 2026-07-20 raw-byte index hash final audit
+
+- The final implementation reads the staged blob through .NET raw bytes with strict UTF-8 decoding; no allowlist, route, topology, approval, ancestor, drift or hook semantics changed.
+- Independent implementation verification: Windows PowerShell 5.1 P1 pre-commit `exit 0 / 11.5s`; `pwsh` 7 P1 pre-commit `exit 0 / 11.7s`; Module pre-commit `exit 0 / 4.0s` and `4.3s`; all bind the final hash `9b5c22c2d2b3e06114a35181fb7cb9b55e33d26becca3b6e15fb681cf6c289ad`.
+- Final independent reviewer result: `Critical=0 / Important=0 / Minor=0 / PASS`. No blocker remains before normal commit and existing closeout policy.
+
+Decision: APPROVE_SCOPE
+
+### 2026-07-20 pre-commit scope-correction audit
+
+- Scope decision: APPROVE_SCOPE for one exact pre-commit-only correction channel under the current user authorization. The allowlist is frozen to the eight existing `M` files in the task plan; state/queue, pre-push and all product or deployment domains remain blocked.
+- First-principles blocker: the old pre-commit route interpreted the approved ready-for-closeout mechanism correction as a generic/self-modifying transition. The legal repair is a dedicated exact candidate predicate and anchor validator, not a bypass or a relaxation of generic transition checks.
+- Adversarial REDs reproduced and corrected: PowerShell exact-file comparison precedence, blank-line array binding in the Module adapter, and the Module adapter's false-candidate route. Each failure stayed fail-closed and emitted no one-time approval marker until the exact candidate and anchors were valid.
+- GREEN evidence: P1 staged pre-commit and Module staged pre-commit both emitted the one-time approval markers; P1 full smoke passed `15 positive / 81 negative` in `737.3s`; Module pre-commit smoke passed in `920s` and exercised both the mechanism pre-commit positive and ordinary-drift/topology negatives.
+- Invariants rechecked: manual mode remains `standard`; pre-push code and smoke are unchanged; ordinary SHA drift, transition topology, ancestor policy, authorization/evidence, exact A/M file status and all P1/P0/Module hard-blocks remain enforced. The two tree hashes are separated so manual committed-contract recognition cannot be confused with the pre-commit correction tree.
+- Current review status: this append is not an independent approval. Main-thread adversarial review and the one independent final review remain required; production review remains `PENDING`; no commit, merge, push, cleanup or next product RED has started.
+
+Decision: pre_commit_scope_correction_green_review_pending
+
 ### C6 final closeout readiness and C7 entry
 
 - The final focused run (`158.296s / 940 cases`), three serial full matrices, all post-full gates, scoped format/diff and exact-scope/residue checks are green; no full run was parallelized.
@@ -485,5 +539,18 @@ Decision: implementation_complete_review_pending
 - Final focused GREEN is `exit 0 / 163.653s / 950 cases / 5 markers`, below `<=180s`; source RED `1.648s / case 271`, historical-freeze RED `0.996s / case 5`, and targeted `0.382s` remain retained.
 - Docs-only strict freeze is stable across two independent parses: `ParserValid=True`, only `P1_AST_EVIDENCE_REVIEW_PENDING`; canonical identity/freshness, fixture hash, 44 commands and 18 files are recorded in the machine block, with review remaining externally `PENDING`.
 - Boundary: prior full outputs are stale after this correction. The only next entry is serial P1 full; independent final review and C7 remain prohibited.
+
+Decision: main_review_pass_full_pending
+
+### 2026-07-20 narrow manual-stage contract recognition audit
+
+- Scope decision: APPROVE_SCOPE for one manual-only adapter correction and its smoke coverage. The change is limited to recognizing the already-materialized `mechanism_hardening` task with literal `findingIds: []`, `productClosureContribution: none`, and `ready_for_closeout`; it does not create a new finding-specific exception.
+- First-principles review: a clean synchronized `master` cannot expose the old in-progress bootstrap worktree/name-status. The correction therefore binds manual recognition to the exact parent, branch, origin sync, clean status, exact 18-path A/M diff, fixed ready projections, existing authorization/plan/evidence/audit contracts, and a normalized contract tree hash. Failure at any binding remains fail-closed.
+- Adversarial review: ordinary worktree drift and non-`master` topology were exercised and rejected with `P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID`; manual remains `standard` and cannot obtain an ancestor checkpoint. No generic/legacy fallback, hook bypass, pre-commit/pre-push semantic change, or authorization/evidence relaxation is present.
+- Evidence review: P1 smoke exited `0 / 744358ms / 15 positive / 81 negative`; parser and diff checks passed; no temporary probe roots remain. This audit records a governance correction only; it does not approve product closure, commit, merge, push, or next-task RED by itself.
+- Review status: main-thread adversarial review pending; independent final reviewer pending; existing C7 closeout policy remains the sole authority for commit, ff-only merge, ordinary push, cleanup and Goal resumption.
+- A documentation-bound manual probe after the evidence/audit/authorization append exited `0 / 28.4s` with `p1ProgramGuardResult: pass` and `p1TransitionScopeMode: standard`; the duplicate `Status:` key introduced by the draft authorization note was caught by the strict authorization parser and corrected to `Approval state:` before this passing rerun.
+- Independent final review: `Critical=0 / Important=0 / Minor=0 / PASS`; the reviewer found no ordinary SHA-drift/topology/authorization/evidence/ancestor relaxation, hook bypass, pre-commit/pre-push change, product change or scope expansion.
+- Closeout blocker: normal pre-commit exited `1 / 14.219s` with `P1_PROGRAM_APPROVED_SAME_TASK_TRANSITION_INVALID`, review-not-final findings, and task branch/worktree binding mismatches. This is the single blocker: the existing pre-commit contract has no legal manual-only channel for a six-file correction after the mechanism task's ready-for-closeout state-only transition. The task is stopped here; no commit, merge, push, cleanup or Goal transition occurred.
 
 Decision: main_review_pass_full_pending

@@ -56,6 +56,18 @@ Future transition authorization: the candidate contract cannot authorize itself;
 
 No `.husky/**`, product source/test, dependency/lockfile, schema/migration, database, Provider, runtime/browser, P2, PR, force push, deploy, secret/env, Cost Calibration Gate, historical hardcode migration or ordinary drift exception is authorized.
 
+## Narrow manual-stage contract recognition correction (2026-07-20)
+
+Approval state: approved
+
+The current user approved one narrow manual-stage correction: recognize the already-materialized, findingless mechanism-bootstrap contract after its `ready_for_closeout` state-only transition and add the corresponding smoke coverage. This approval does not change pre-commit or pre-push routing, ordinary in-progress SHA-drift hard-blocks, transition topology, authorization, evidence or ancestor policy. It grants no hook bypass, scope expansion, product closure, database/schema/dependency/Provider/runtime/P2/PR/force-push/deploy permission.
+
+## One-time pre-commit scope-correction channel (2026-07-20)
+
+Approval state: approved
+
+The current user approved one one-time, exact-allowlist pre-commit scope-correction channel for the same already-materialized findingless mechanism contract. The channel is limited to the exact current branch `codex/p1-mechanism-bootstrap-manual-recognition`, parent/HEAD `d0b71842657f8f4df7e72d5fa6514b94d20b2de4`, origin/master equality, clean index/worktree, and these eight `M` paths only: this authorization record, the mechanism task plan/evidence/audit records, the P1 guard/smoke, and the Module pre-commit guard/smoke. It does not authorize state/queue edits, pre-push changes, ordinary SHA drift, transition topology changes, ancestor permission, hook bypass, approval/evidence weakening, product closure, schema/migration/database/dependency/Provider/runtime/P2/PR/force-push/deploy work.
+
 ## C3 Resumed Focused Budget Authorization
 
 The user freshly approved the same `mechanism_hardening` task to resume at C3 with a new 90-minute focused budget window beginning at `2026-07-19T08:03:58.1040109-07:00` and ending at `2026-07-19T09:33:58.1040109-07:00`.

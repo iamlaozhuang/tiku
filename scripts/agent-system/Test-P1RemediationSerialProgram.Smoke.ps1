@@ -6,6 +6,187 @@ $guardPath = Join-Path $PSScriptRoot "Test-P1RemediationSerialProgram.ps1"
 $modulePreCommitGuardPath = Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.ps1"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $guardPath -Raw -Encoding UTF8
+# C6-MANUAL-CONTRACT-RECOGNITION-BEGIN
+$manualMechanismContractMarkers = @(
+    "p1MechanismBootstrapManualContractTreeSha256",
+    "Get-P1MechanismBootstrapCommittedManualContractTreeSha256",
+    "P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID"
+)
+$missingManualMechanismContractMarkers = @($manualMechanismContractMarkers | Where-Object { -not $phase11ScopeCorrectionGuardText.Contains($_) })
+if ($missingManualMechanismContractMarkers.Count -gt 0) {
+    throw "P1 manual mechanism contract recognition RED: $($missingManualMechanismContractMarkers -join ', ')"
+}
+# C6-MANUAL-CONTRACT-RECOGNITION-END
+
+# C6-MANUAL-CONTRACT-RECOGNITION-RUNTIME-BEGIN
+$manualMechanismContractProbeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-manual-contract-" + [guid]::NewGuid().ToString("N"))
+try {
+    & git -c core.longpaths=true -c core.fsmonitor=false -c maintenance.auto=false -c gc.auto=0 clone --quiet --shared --no-checkout $repositoryRoot $manualMechanismContractProbeRoot
+    if ($LASTEXITCODE -ne 0) { throw "Unable to create committed manual mechanism contract probe." }
+    & git -C $manualMechanismContractProbeRoot -c core.longpaths=true -c core.fsmonitor=false checkout --quiet HEAD
+    if ($LASTEXITCODE -ne 0) { throw "Unable to materialize committed manual mechanism contract probe." }
+    & git -C $manualMechanismContractProbeRoot branch -M master
+    if ($LASTEXITCODE -ne 0) { throw "Unable to bind committed manual mechanism contract probe to master." }
+    & git -C $manualMechanismContractProbeRoot config core.autocrlf false
+    if ($LASTEXITCODE -ne 0) { throw "Unable to stabilize manual mechanism contract probe line endings." }
+    foreach ($manualMechanismContractProbePath in @(
+            "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+            "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+            "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+            "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1"
+        )) {
+        $manualMechanismContractProbeSourcePath = Join-Path $repositoryRoot ($manualMechanismContractProbePath -replace '/', '\')
+        $manualMechanismContractProbeDestinationPath = Join-Path $manualMechanismContractProbeRoot ($manualMechanismContractProbePath -replace '/', '\')
+        Copy-Item -LiteralPath $manualMechanismContractProbeSourcePath -Destination $manualMechanismContractProbeDestinationPath -Force
+    }
+    & git -C $manualMechanismContractProbeRoot config user.name "P1 Manual Mechanism Contract Smoke"
+    & git -C $manualMechanismContractProbeRoot config user.email "p1-manual-mechanism-contract-smoke@example.invalid"
+    & git -C $manualMechanismContractProbeRoot add -- scripts/agent-system/Test-P1RemediationSerialProgram.ps1 scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+    & git -C $manualMechanismContractProbeRoot commit --quiet -m "test committed manual mechanism contract"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to commit manual mechanism contract probe." }
+    $manualMechanismContractProbeHead = ((& git -C $manualMechanismContractProbeRoot rev-parse HEAD) -join '').Trim()
+    & git -C $manualMechanismContractProbeRoot update-ref refs/remotes/origin/master $manualMechanismContractProbeHead
+    if ($LASTEXITCODE -ne 0) { throw "Unable to bind manual mechanism contract probe remote checkpoint." }
+    function Invoke-ManualMechanismContractProbe {
+        param([Parameter(Mandatory = $true)][string]$ProbeRoot)
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $output = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $guardPath -RepositoryRoot $ProbeRoot -Phase manual 2>&1)
+            $exitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        return [pscustomobject]@{ ExitCode = $exitCode; Output = @($output) }
+    }
+    $manualMechanismContractProbeResult = Invoke-ManualMechanismContractProbe -ProbeRoot $manualMechanismContractProbeRoot
+    $manualMechanismContractProbeOutput = @($manualMechanismContractProbeResult.Output)
+    if ($manualMechanismContractProbeResult.ExitCode -ne 0 -or ($manualMechanismContractProbeOutput -join "`n") -notmatch "p1MechanismBootstrapAuthorization: approved_one_time") {
+        throw "P1 committed manual mechanism contract probe RED:`n$($manualMechanismContractProbeOutput -join "`n")"
+    }
+    if (($manualMechanismContractProbeOutput -join "`n") -notmatch "p1TransitionScopeMode: standard") {
+        throw "P1 committed manual mechanism contract probe incorrectly changed manual scope mode."
+    }
+    Add-Content -LiteralPath (Join-Path $manualMechanismContractProbeRoot "scripts/agent-system/Test-P1RemediationSerialProgram.ps1") -Value "# manual contract ordinary drift negative" -Encoding UTF8
+    $manualMechanismContractDirtyResult = Invoke-ManualMechanismContractProbe -ProbeRoot $manualMechanismContractProbeRoot
+    $manualMechanismContractDirtyOutput = @($manualMechanismContractDirtyResult.Output)
+    if ($manualMechanismContractDirtyResult.ExitCode -eq 0 -or ($manualMechanismContractDirtyOutput -join "`n") -notmatch "P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID") {
+        throw "P1 committed manual mechanism contract ordinary-drift negative unexpectedly passed."
+    }
+    & git -C $manualMechanismContractProbeRoot checkout --quiet -- scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+    & git -C $manualMechanismContractProbeRoot branch -M codex/manual-contract-negative
+    $manualMechanismContractBranchResult = Invoke-ManualMechanismContractProbe -ProbeRoot $manualMechanismContractProbeRoot
+    $manualMechanismContractBranchOutput = @($manualMechanismContractBranchResult.Output)
+    if ($manualMechanismContractBranchResult.ExitCode -eq 0 -or ($manualMechanismContractBranchOutput -join "`n") -notmatch "P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID") {
+        throw "P1 committed manual mechanism contract branch-topology negative unexpectedly passed."
+    }
+    & git -C $manualMechanismContractProbeRoot branch -M master
+} finally {
+    if (Test-Path -LiteralPath $manualMechanismContractProbeRoot) {
+        $resolvedManualMechanismContractProbeRoot = [System.IO.Path]::GetFullPath($manualMechanismContractProbeRoot)
+        $tempPrefix = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+        if (-not $resolvedManualMechanismContractProbeRoot.StartsWith($tempPrefix, [System.StringComparison]::OrdinalIgnoreCase) -or [System.IO.Path]::GetFileName($resolvedManualMechanismContractProbeRoot) -notmatch '^tiku-manual-contract-[0-9a-f]{32}$') {
+            throw "P1 manual mechanism contract probe cleanup boundary invalid: $resolvedManualMechanismContractProbeRoot"
+        }
+        $longManualMechanismContractProbeRoot = "\\?\$resolvedManualMechanismContractProbeRoot"
+        try {
+            foreach ($probeFile in [System.IO.Directory]::EnumerateFiles($longManualMechanismContractProbeRoot, "*", [System.IO.SearchOption]::AllDirectories)) {
+                [System.IO.File]::SetAttributes($probeFile, [System.IO.FileAttributes]::Normal)
+            }
+        } catch [System.IO.DirectoryNotFoundException] {
+        }
+        if ([System.IO.Directory]::Exists($longManualMechanismContractProbeRoot)) {
+            [System.IO.Directory]::Delete($longManualMechanismContractProbeRoot, $true)
+        }
+    }
+}
+# C6-MANUAL-CONTRACT-RECOGNITION-RUNTIME-END
+
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-BEGIN
+$preCommitMechanismScopeCorrectionMarkers = @(
+    "isP1MechanismBootstrapPreCommitScopeCorrectionCandidate",
+    "Test-P1MechanismBootstrapPreCommitScopeCorrectionAnchors",
+    "P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID"
+)
+$missingPreCommitMechanismScopeCorrectionMarkers = @($preCommitMechanismScopeCorrectionMarkers | Where-Object { -not $phase11ScopeCorrectionGuardText.Contains($_) })
+if ($missingPreCommitMechanismScopeCorrectionMarkers.Count -gt 0) {
+    throw "P1 pre-commit mechanism scope-correction RED: $($missingPreCommitMechanismScopeCorrectionMarkers -join ', ')"
+}
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-END
+
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-RUNTIME-BEGIN
+$preCommitMechanismScopeCorrectionProbeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-precommit-scope-correction-" + [guid]::NewGuid().ToString("N"))
+try {
+    & git -c core.longpaths=true -c core.fsmonitor=false -c maintenance.auto=false -c gc.auto=0 clone --quiet --shared --no-checkout $repositoryRoot $preCommitMechanismScopeCorrectionProbeRoot
+    if ($LASTEXITCODE -ne 0) { throw "Unable to create pre-commit mechanism scope-correction probe." }
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot -c core.longpaths=true -c core.fsmonitor=false checkout --quiet HEAD
+    if ($LASTEXITCODE -ne 0) { throw "Unable to materialize pre-commit mechanism scope-correction probe." }
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot branch -M codex/p1-mechanism-bootstrap-manual-recognition
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot config core.autocrlf false
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot config user.name "P1 Mechanism Pre-Commit Scope Correction Smoke"
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot config user.email "p1-mechanism-precommit-scope-correction@example.invalid"
+    $preCommitMechanismScopeCorrectionFiles = @(
+        "docs/05-execution-logs/acceptance/2026-07-19-p1-mechanism-execution-compatibility-v2-1-authorization.md",
+        "docs/05-execution-logs/task-plans/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+        "docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+        "docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+        "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1"
+    )
+    foreach ($preCommitMechanismScopeCorrectionPath in $preCommitMechanismScopeCorrectionFiles) {
+        Copy-Item -LiteralPath (Join-Path $repositoryRoot ($preCommitMechanismScopeCorrectionPath -replace '/', '\')) -Destination (Join-Path $preCommitMechanismScopeCorrectionProbeRoot ($preCommitMechanismScopeCorrectionPath -replace '/', '\')) -Force
+    }
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot add -- $preCommitMechanismScopeCorrectionFiles
+    $preCommitMechanismScopeCorrectionProbeHead = ((& git -C $preCommitMechanismScopeCorrectionProbeRoot rev-parse HEAD) -join '').Trim()
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot update-ref refs/remotes/origin/master $preCommitMechanismScopeCorrectionProbeHead
+    function Invoke-PreCommitMechanismScopeCorrectionGuard {
+        param([Parameter(Mandatory = $true)][string]$ProbeRoot, [Parameter(Mandatory = $true)][string]$ScriptPath)
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $output = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ScriptPath -RepositoryRoot $ProbeRoot -Phase pre_commit 2>&1)
+            $exitCode = $LASTEXITCODE
+        } finally { $ErrorActionPreference = $previousErrorActionPreference }
+        return [pscustomobject]@{ ExitCode = $exitCode; Output = @($output) }
+    }
+    $preCommitMechanismScopeCorrectionProbe = Invoke-PreCommitMechanismScopeCorrectionGuard -ProbeRoot $preCommitMechanismScopeCorrectionProbeRoot -ScriptPath (Join-Path $preCommitMechanismScopeCorrectionProbeRoot "scripts/agent-system/Test-P1RemediationSerialProgram.ps1")
+    $preCommitMechanismScopeCorrectionProbeOutput = @($preCommitMechanismScopeCorrectionProbe.Output)
+    if ($preCommitMechanismScopeCorrectionProbe.ExitCode -ne 0 -or ($preCommitMechanismScopeCorrectionProbeOutput -join "`n") -notmatch "p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time") {
+        throw "P1 pre-commit mechanism scope-correction positive probe RED:`n$($preCommitMechanismScopeCorrectionProbeOutput -join "`n")"
+    }
+    Push-Location $preCommitMechanismScopeCorrectionProbeRoot
+    try {
+        $preCommitMechanismModuleOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File "./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1" 2>&1)
+        if ($LASTEXITCODE -ne 0 -or ($preCommitMechanismModuleOutput -join "`n") -notmatch "p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time") {
+            throw "Module pre-commit mechanism scope-correction positive probe RED:`n$($preCommitMechanismModuleOutput -join "`n")"
+        }
+    } finally { Pop-Location }
+    Add-Content -LiteralPath (Join-Path $preCommitMechanismScopeCorrectionProbeRoot "scripts/agent-system/Test-P1RemediationSerialProgram.ps1") -Value "# pre-commit mechanism scope-correction ordinary drift negative" -Encoding UTF8
+    $preCommitMechanismScopeCorrectionDirty = Invoke-PreCommitMechanismScopeCorrectionGuard -ProbeRoot $preCommitMechanismScopeCorrectionProbeRoot -ScriptPath (Join-Path $preCommitMechanismScopeCorrectionProbeRoot "scripts/agent-system/Test-P1RemediationSerialProgram.ps1")
+    if ($preCommitMechanismScopeCorrectionDirty.ExitCode -eq 0 -or ($preCommitMechanismScopeCorrectionDirty.Output -join "`n") -notmatch "P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID") {
+        throw "P1 pre-commit mechanism scope-correction ordinary-drift negative unexpectedly passed."
+    }
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot checkout --quiet -- scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot branch -M codex/wrong-mechanism-scope-correction
+    $preCommitMechanismScopeCorrectionBranch = Invoke-PreCommitMechanismScopeCorrectionGuard -ProbeRoot $preCommitMechanismScopeCorrectionProbeRoot -ScriptPath (Join-Path $preCommitMechanismScopeCorrectionProbeRoot "scripts/agent-system/Test-P1RemediationSerialProgram.ps1")
+    if ($preCommitMechanismScopeCorrectionBranch.ExitCode -eq 0 -or ($preCommitMechanismScopeCorrectionBranch.Output -join "`n") -notmatch "P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID") {
+        throw "P1 pre-commit mechanism scope-correction branch negative unexpectedly passed."
+    }
+    & git -C $preCommitMechanismScopeCorrectionProbeRoot branch -M codex/p1-mechanism-bootstrap-manual-recognition
+} finally {
+    if (Test-Path -LiteralPath $preCommitMechanismScopeCorrectionProbeRoot) {
+        $resolvedPreCommitMechanismScopeCorrectionProbeRoot = [System.IO.Path]::GetFullPath($preCommitMechanismScopeCorrectionProbeRoot)
+        $tempPrefix = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+        if (-not $resolvedPreCommitMechanismScopeCorrectionProbeRoot.StartsWith($tempPrefix, [System.StringComparison]::OrdinalIgnoreCase) -or [System.IO.Path]::GetFileName($resolvedPreCommitMechanismScopeCorrectionProbeRoot) -notmatch '^tiku-precommit-scope-correction-[0-9a-f]{32}$') { throw "Pre-commit mechanism scope-correction cleanup boundary invalid: $resolvedPreCommitMechanismScopeCorrectionProbeRoot" }
+        $longPreCommitMechanismScopeCorrectionProbeRoot = "\\?\$resolvedPreCommitMechanismScopeCorrectionProbeRoot"
+        try { foreach ($probeFile in [System.IO.Directory]::EnumerateFiles($longPreCommitMechanismScopeCorrectionProbeRoot, "*", [System.IO.SearchOption]::AllDirectories)) { [System.IO.File]::SetAttributes($probeFile, [System.IO.FileAttributes]::Normal) } } catch [System.IO.DirectoryNotFoundException] { }
+        if ([System.IO.Directory]::Exists($longPreCommitMechanismScopeCorrectionProbeRoot)) { [System.IO.Directory]::Delete($longPreCommitMechanismScopeCorrectionProbeRoot, $true) }
+    }
+}
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-RUNTIME-END
+
 # C4-ADAPTER-CONSISTENCY-BEGIN
 $approvedSameTaskTransitionAdapterMarkers = @("P1ApprovedSameTaskTransition.Common.ps1", "Get-P1ApprovedSameTaskTransitionStageInputs", "p1ApprovedSameTaskTransitionAutomatic", "function Invoke-P1ApprovedSameTaskTransitionAdapter", "Read-P1ApprovedSameTaskTransitionContract", "Test-P1ApprovedSameTaskTransition", "p1ApprovedSameTaskTransitionCoreFinding")
 $missingApprovedSameTaskTransitionAdapterMarkers = @($approvedSameTaskTransitionAdapterMarkers | Where-Object { -not $phase11ScopeCorrectionGuardText.Contains($_) })

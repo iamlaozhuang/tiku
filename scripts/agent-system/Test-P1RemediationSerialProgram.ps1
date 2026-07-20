@@ -302,6 +302,39 @@ $p1MechanismBootstrapStateProjectionSha256 = "7ab62eaa2ee80b753b7b44108fa8dd3344
 $p1MechanismBootstrapQueueProjectionSha256 = "1a39e78f8fe8e79bd735437f0ec2d11b3e3f98cb3eaa678141ff40819e34f48a"
 $p1MechanismBootstrapManualStateProjectionSha256 = "7e2ab40716befb5c03d5d975eb852bc96d6b89711a9b7a4222b062120a70bcb3"
 $p1MechanismBootstrapManualQueueProjectionSha256 = "159dd861f4a6931935b39d526df439a0b1f70ce5eb2ba855981084dccb38b273"
+$p1MechanismBootstrapManualReadyStateProjectionSha256 = "0d9a1e077b2ee3e733cfca4f8b557c12e064104e124603be9276acb53e216433"
+$p1MechanismBootstrapManualReadyQueueProjectionSha256 = "23180e26cfbf64e7ff33dc93d1b8abe0fd8107aaeb04525f84d5686282cae9d4"
+$p1MechanismBootstrapManualContractParentSha = "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+$p1MechanismBootstrapManualContractTreeSha256 = "2f2ed63744146859b1047218f59223913f681b994b83527439b09def26d14dc9"
+$p1MechanismBootstrapPreCommitCorrectionTreeSha256 = "9b5c22c2d2b3e06114a35181fb7cb9b55e33d26becca3b6e15fb681cf6c289ad"
+$p1MechanismBootstrapPreCommitCorrectionBaseSha = "d0b71842657f8f4df7e72d5fa6514b94d20b2de4"
+$p1MechanismBootstrapPreCommitCorrectionBranch = "codex/p1-mechanism-bootstrap-manual-recognition"
+$p1MechanismBootstrapPreCommitCorrectionFiles = @(
+    $p1MechanismBootstrapAuthorizationPath,
+    $p1MechanismBootstrapPlanPath,
+    $p1MechanismBootstrapEvidencePath,
+    $p1MechanismBootstrapAuditPath,
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1"
+)
+$p1MechanismBootstrapManualContractFiles = @(
+    "docs/04-agent-system/operating-manual.md",
+    "docs/04-agent-system/sop/p1-approved-same-task-transition.md",
+    "docs/04-agent-system/state/mechanism-source-of-truth-index.yaml",
+    "docs/04-agent-system/state/p1-approved-same-task-transition-schema-v1.yaml",
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    "scripts/agent-system/P1ApprovedSameTaskTransition.Common.ps1",
+    "scripts/agent-system/Test-P1ApprovedSameTaskTransition.Smoke.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 $p1MechanismBootstrapFiles = @(
     "docs/04-agent-system/operating-manual.md",
     "docs/04-agent-system/sop/p1-approved-same-task-transition.md",
@@ -1862,6 +1895,203 @@ function Get-P1MechanismBootstrapManualNameStatus {
     }
 }
 
+function Get-P1MechanismBootstrapPreCommitCorrectionNameStatus {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $records = [System.Collections.Generic.List[object]]::new()
+    $isValid = $true
+    $lines = @(& git --no-optional-locks -C $Root diff --cached --name-status --no-renames --diff-filter=ACMRTD)
+    if ($LASTEXITCODE -ne 0) { $isValid = $false }
+    foreach ($line in $lines) {
+        $match = [regex]::Match(([string]$line), '^([AM])\t(.+)$')
+        if (-not $match.Success) {
+            $isValid = $false
+            continue
+        }
+        $records.Add([pscustomobject]@{
+                Status = $match.Groups[1].Value
+                Path = ConvertTo-NormalizedPath -Path $match.Groups[2].Value
+            })
+    }
+    $expected = @($p1MechanismBootstrapPreCommitCorrectionFiles | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $actual = @($records | ForEach-Object { $_.Path })
+    if ($records.Count -ne $expected.Count -or $actual.Count -ne @($actual | Sort-Object -CaseSensitive -Unique).Count) { $isValid = $false }
+    $actualCanonical = @($actual | Sort-Object -CaseSensitive) -join "|"
+    $expectedCanonical = @($expected | Sort-Object -CaseSensitive) -join "|"
+    if ($actualCanonical -cne $expectedCanonical) { $isValid = $false }
+    foreach ($record in $records) {
+        if ($record.Status -cne "M") { $isValid = $false }
+    }
+    return [pscustomobject]@{ Valid = [bool]$isValid; Records = @($records); Files = @($actual) }
+}
+
+function Get-P1MechanismBootstrapCommittedManualNameStatus {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $records = [System.Collections.Generic.List[object]]::new()
+    $files = [System.Collections.Generic.List[string]]::new()
+    $isValid = $true
+    $nameStatusLines = @(& git --no-optional-locks -C $Root diff --name-status --no-renames $p1MechanismBootstrapBaseSha HEAD)
+    if ($LASTEXITCODE -ne 0) { $isValid = $false }
+    foreach ($nameStatusLine in $nameStatusLines) {
+        $match = [regex]::Match(([string]$nameStatusLine), '^([AM])	(.+)$')
+        if (-not $match.Success) {
+            $isValid = $false
+            continue
+        }
+        $status = $match.Groups[1].Value
+        $path = ConvertTo-NormalizedPath -Path $match.Groups[2].Value
+        $files.Add($path)
+        $records.Add([pscustomobject]@{ Status = $status; Path = $path })
+    }
+
+    $expectedStatusByPath = @{}
+    foreach ($expectedPath in $p1MechanismBootstrapFiles) {
+        $normalizedExpectedPath = ConvertTo-NormalizedPath -Path $expectedPath
+        $baseMaterializedPath = ((& git -C $Root ls-tree --name-only $p1MechanismBootstrapBaseSha -- $normalizedExpectedPath) -join '').Trim()
+        if ($LASTEXITCODE -ne 0) { $isValid = $false }
+        $expectedStatusByPath[$normalizedExpectedPath] = if ($baseMaterializedPath -ceq $normalizedExpectedPath) { 'M' } else { 'A' }
+    }
+    if (-not (Test-P1MechanismBootstrapFileSet -Files @($files))) { $isValid = $false }
+    if ($records.Count -ne $p1MechanismBootstrapFiles.Count) { $isValid = $false }
+    foreach ($record in $records) {
+        if (-not $expectedStatusByPath.ContainsKey($record.Path) -or $expectedStatusByPath[$record.Path] -cne $record.Status) { $isValid = $false }
+    }
+
+    return [pscustomobject]@{
+        Valid = [bool]$isValid
+        Files = @($files)
+        Records = @($records)
+    }
+}
+
+function Get-P1MechanismBootstrapCommittedManualContractTreeSha256 {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $nameStatus = Get-P1MechanismBootstrapCommittedManualNameStatus -Root $Root
+    if (-not $nameStatus.Valid) { return '' }
+    $records = [System.Collections.Generic.List[string]]::new()
+    foreach ($path in ($p1MechanismBootstrapManualContractFiles | Sort-Object -CaseSensitive)) {
+        $fullPath = Join-Path $Root ($path -replace '/', '\')
+        if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) { return '' }
+        $text = Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8
+        if ($path -ceq 'scripts/agent-system/Test-P1RemediationSerialProgram.ps1') {
+            $text = [regex]::Replace($text, '(?m)^\$p1MechanismBootstrapManualContractTreeSha256\s*=\s*"[^"]*"\s*$', '$p1MechanismBootstrapManualContractTreeSha256 = ""')
+        }
+        $sha256 = Get-P1MechanismBootstrapNormalizedTextSha256 -Text $text
+        $status = @($nameStatus.Records | Where-Object { $_.Path -ceq $path } | Select-Object -ExpandProperty Status)
+        if ($status.Count -ne 1) { return '' }
+        $records.Add("$status`t$path`t$sha256")
+    }
+    return Get-P1MechanismBootstrapNormalizedTextSha256 -Text ("p1-mechanism-bootstrap-manual-contract-v1`ncount=$($records.Count)`n$($records -join "`n")`n")
+}
+
+function Get-P1MechanismBootstrapGitIndexText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = "git"
+    $startInfo.WorkingDirectory = $Root
+    $startInfo.Arguments = "show :$Path"
+    $startInfo.UseShellExecute = $false
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.CreateNoWindow = $true
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    $output = [System.IO.MemoryStream]::new()
+    try {
+        if (-not $process.Start()) { return [pscustomobject]@{ Valid = $false; Text = "" } }
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $process.StandardOutput.BaseStream.CopyTo($output)
+        $process.WaitForExit()
+        $stderrTask.GetAwaiter().GetResult() | Out-Null
+        if ($process.ExitCode -ne 0) { return [pscustomobject]@{ Valid = $false; Text = "" } }
+        try {
+            $text = [System.Text.UTF8Encoding]::new($false, $true).GetString($output.ToArray())
+        } catch {
+            return [pscustomobject]@{ Valid = $false; Text = "" }
+        }
+        return [pscustomobject]@{ Valid = $true; Text = $text }
+    } finally {
+        $output.Dispose()
+        $process.Dispose()
+    }
+}
+
+function Get-P1MechanismBootstrapPreCommitCorrectionTreeSha256 {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $records = [System.Collections.Generic.List[string]]::new()
+    foreach ($path in ($p1MechanismBootstrapManualContractFiles | Sort-Object -CaseSensitive)) {
+        # Read staged blob bytes directly so native stdout decoding cannot vary by PowerShell runtime.
+        $indexText = Get-P1MechanismBootstrapGitIndexText -Root $Root -Path $path
+        if (-not $indexText.Valid) { return '' }
+        $text = $indexText.Text
+        if ($path -ceq 'scripts/agent-system/Test-P1RemediationSerialProgram.ps1') {
+            $text = [regex]::Replace($text, '(?m)^\$p1MechanismBootstrapManualContractTreeSha256\s*=\s*"[^"]*"\s*$', '$p1MechanismBootstrapManualContractTreeSha256 = ""')
+            $text = [regex]::Replace($text, '(?m)^\$p1MechanismBootstrapPreCommitCorrectionTreeSha256\s*=\s*"[^"]*"\s*$', '$p1MechanismBootstrapPreCommitCorrectionTreeSha256 = ""')
+        }
+        $baseMaterializedPath = ((& git -C $Root ls-tree --name-only $p1MechanismBootstrapBaseSha -- $path) -join '').Trim()
+        if ($LASTEXITCODE -ne 0) { return '' }
+        $status = if ($baseMaterializedPath -ceq $path) { 'M' } else { 'A' }
+        $records.Add("$status`t$path`t$(Get-P1MechanismBootstrapNormalizedTextSha256 -Text $text)")
+    }
+    return Get-P1MechanismBootstrapNormalizedTextSha256 -Text ("p1-mechanism-bootstrap-manual-contract-v1`ncount=$($records.Count)`n$($records -join "`n")`n")
+}
+
+function Test-P1MechanismBootstrapPreCommitScopeCorrectionAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$CurrentTaskId,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$CurrentTaskBlock
+    )
+
+    $findingCountBefore = $script:findings.Count
+    $headSha = ((& git -C $Root rev-parse HEAD) -join '').Trim()
+    $originMasterSha = ((& git -C $Root rev-parse origin/master) -join '').Trim()
+    $branch = ((& git -C $Root branch --show-current) -join '').Trim()
+    $staged = Get-P1MechanismBootstrapPreCommitCorrectionNameStatus -Root $Root
+    $unstaged = @(& git --no-optional-locks -C $Root diff --name-only --no-renames)
+    $untracked = @(& git --no-optional-locks -C $Root ls-files --others --exclude-standard)
+    if (-not $staged.Valid -or $headSha -cne $p1MechanismBootstrapPreCommitCorrectionBaseSha -or $originMasterSha -cne $headSha -or $branch -cne $p1MechanismBootstrapPreCommitCorrectionBranch -or $unstaged.Count -ne 0 -or $untracked.Count -ne 0) {
+        Add-Finding 'P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID'
+    }
+    if ($CurrentTaskId -cne $p1MechanismBootstrapTaskId `
+        -or (Get-ScalarValue -Block $CurrentTaskBlock -Key 'status') -cne 'ready_for_closeout' `
+        -or (Get-ScalarValue -Block $CurrentTaskBlock -Key 'taskKind') -cne 'mechanism_hardening' `
+        -or (Get-ScalarValue -Block $CurrentTaskBlock -Key 'findingIds') -cne '[]' `
+        -or @(Get-ListValues -Block $CurrentTaskBlock -Key 'findingIds').Count -ne 0 `
+        -or (Get-ScalarValue -Block $CurrentTaskBlock -Key 'productClosureContribution') -cne 'none') {
+        Add-Finding 'P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID'
+    }
+    $stateText = Get-Content -LiteralPath (Join-Path $Root $ProjectStatePath) -Raw -Encoding UTF8
+    $queueText = Get-Content -LiteralPath (Join-Path $Root $QueuePath) -Raw -Encoding UTF8
+    if ((Get-P1MechanismBootstrapNormalizedTextSha256 -Text $stateText) -cne $p1MechanismBootstrapManualReadyStateProjectionSha256 -or (Get-P1MechanismBootstrapNormalizedTextSha256 -Text $queueText) -cne $p1MechanismBootstrapManualReadyQueueProjectionSha256) {
+        Add-Finding 'P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID'
+    }
+    $authorizationPath = Join-Path $Root $p1MechanismBootstrapAuthorizationPath
+    $authorizationText = Get-Content -LiteralPath $authorizationPath -Raw -Encoding UTF8
+    foreach ($pattern in @(
+            '(?m)^Approval state:\s*approved\s*$',
+            '(?m)^The current user approved one one-time, exact-allowlist pre-commit scope-correction channel',
+            ('(?m)^The current user approved.*`codex/p1-mechanism-bootstrap-manual-recognition`'),
+            ('(?m)^The current user approved.*`' + [regex]::Escape($p1MechanismBootstrapPreCommitCorrectionBaseSha) + '`')
+        )) {
+        if ($authorizationText -notmatch $pattern) { Add-Finding 'P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID' }
+    }
+    $currentEvidenceText = Get-Content -LiteralPath (Join-Path $Root $p1MechanismBootstrapEvidencePath) -Raw -Encoding UTF8
+    $currentAuditText = Get-Content -LiteralPath (Join-Path $Root $p1MechanismBootstrapAuditPath) -Raw -Encoding UTF8
+    Test-ScopeFreezeReviewContract -EvidenceText $currentEvidenceText -AuditText $currentAuditText -TaskId $p1MechanismBootstrapTaskId
+    if ((Get-P1MechanismBootstrapPreCommitCorrectionTreeSha256 -Root $Root) -cne $p1MechanismBootstrapPreCommitCorrectionTreeSha256) {
+        Add-Finding 'P1_PROGRAM_MECHANISM_BOOTSTRAP_PRE_COMMIT_SCOPE_CORRECTION_INVALID'
+    }
+    if ($script:findings.Count -eq $findingCountBefore) { Write-Output 'p1MechanismBootstrapPreCommitScopeCorrection: approved_one_time' }
+}
+
 function Test-P1MechanismBootstrapAnchors {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
@@ -1874,7 +2104,17 @@ function Test-P1MechanismBootstrapAnchors {
     $headSha = ((& git -C $Root rev-parse HEAD) -join "").Trim()
     $branch = ((& git -C $Root branch --show-current) -join "").Trim()
     $parentReference = "HEAD"
-    if ($CurrentPhase -ceq "manual") {
+    $isCommittedManualContract = $CurrentPhase -ceq "manual" -and (Get-ScalarValue -Block $CurrentTaskBlock -Key "status") -ceq "ready_for_closeout"
+    if ($isCommittedManualContract) {
+        $headParents = @(((& git -C $Root rev-list --parents -n 1 HEAD) -join "").Trim() -split '\s+')
+        $originMasterSha = ((& git -C $Root rev-parse origin/master) -join "").Trim()
+        $worktreeStatus = @(& git -C $Root status --porcelain --untracked-files=all)
+        if ($headParents.Count -ne 2 -or $headParents[1] -cne $p1MechanismBootstrapManualContractParentSha `
+            -or $originMasterSha -cne $headSha -or $branch -cne "master" -or $worktreeStatus.Count -ne 0) {
+            Add-Finding "P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID"
+        }
+        $parentReference = $p1MechanismBootstrapBaseSha
+    } elseif ($CurrentPhase -ceq "manual") {
         if ($headSha -cne $p1MechanismBootstrapBaseSha -or $branch -cne $p1MechanismBootstrapBranch) {
             Add-Finding "P1_PROGRAM_MECHANISM_BOOTSTRAP_CONTEXT_INVALID manual"
         }
@@ -1900,7 +2140,10 @@ function Test-P1MechanismBootstrapAnchors {
     }
 
     $manualNameStatus = $null
-    $nameStatusLines = if ($CurrentPhase -ceq "manual") {
+    $nameStatusLines = if ($isCommittedManualContract) {
+        $manualNameStatus = Get-P1MechanismBootstrapCommittedManualNameStatus -Root $Root
+        @($manualNameStatus.Records | ForEach-Object { "$($_.Status)`t$($_.Path)" })
+    } elseif ($CurrentPhase -ceq "manual") {
         $manualNameStatus = Get-P1MechanismBootstrapManualNameStatus -Root $Root
         @($manualNameStatus.Records | ForEach-Object { "$($_.Status)`t$($_.Path)" })
     } elseif ($CurrentPhase -ceq "pre_commit") {
@@ -1975,8 +2218,8 @@ function Test-P1MechanismBootstrapAnchors {
     } else {
         Get-P1F0143SpecApprovalTransitionHotfixSnapshotFileText -Root $Root -Snapshot $contentSnapshot -Path "docs/04-agent-system/state/task-queue.yaml"
     }
-    $expectedStateProjectionSha256 = if ($CurrentPhase -ceq "manual") { $p1MechanismBootstrapManualStateProjectionSha256 } else { $p1MechanismBootstrapStateProjectionSha256 }
-    $expectedQueueProjectionSha256 = if ($CurrentPhase -ceq "manual") { $p1MechanismBootstrapManualQueueProjectionSha256 } else { $p1MechanismBootstrapQueueProjectionSha256 }
+    $expectedStateProjectionSha256 = if ($isCommittedManualContract) { $p1MechanismBootstrapManualReadyStateProjectionSha256 } elseif ($CurrentPhase -ceq "manual") { $p1MechanismBootstrapManualStateProjectionSha256 } else { $p1MechanismBootstrapStateProjectionSha256 }
+    $expectedQueueProjectionSha256 = if ($isCommittedManualContract) { $p1MechanismBootstrapManualReadyQueueProjectionSha256 } elseif ($CurrentPhase -ceq "manual") { $p1MechanismBootstrapManualQueueProjectionSha256 } else { $p1MechanismBootstrapQueueProjectionSha256 }
     if ((Get-P1MechanismBootstrapNormalizedTextSha256 -Text $stateProjectionText) -cne $expectedStateProjectionSha256 `
         -or (Get-P1MechanismBootstrapNormalizedTextSha256 -Text $queueProjectionText) -cne $expectedQueueProjectionSha256) {
         Add-Finding "P1_PROGRAM_MECHANISM_BOOTSTRAP_PROJECTION_INVALID"
@@ -2016,6 +2259,10 @@ function Test-P1MechanismBootstrapAnchors {
         $currentEvidenceText = Get-Content -LiteralPath (Join-Path $Root $p1MechanismBootstrapEvidencePath) -Raw -Encoding UTF8
         $currentAuditText = Get-Content -LiteralPath (Join-Path $Root $p1MechanismBootstrapAuditPath) -Raw -Encoding UTF8
         Test-ScopeFreezeReviewContract -EvidenceText $currentEvidenceText -AuditText $currentAuditText -TaskId $p1MechanismBootstrapTaskId
+    }
+
+    if ($isCommittedManualContract -and (Get-P1MechanismBootstrapCommittedManualContractTreeSha256 -Root $Root) -cne $p1MechanismBootstrapManualContractTreeSha256) {
+        Add-Finding "P1_PROGRAM_MECHANISM_BOOTSTRAP_MANUAL_CONTRACT_INVALID"
     }
 
     if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1MechanismBootstrapAuthorization: approved_one_time" }
@@ -2853,6 +3100,7 @@ $currentQueueTask = @($activeTasks | Where-Object { $_.Id -eq $stateCurrentTaskI
 $taskBlock = if ($currentQueueTask.Count -eq 1) { @($currentQueueTask[0].Block) } else { @() }
 $filesToCheck = @()
 $isP1MechanismBootstrapManualCandidate = $false
+$isP1MechanismBootstrapManualExistingContract = $false
 $isP1MechanismBootstrapManualContextValid = $false
 $isP1MechanismBootstrapManualNameStatusValid = $false
 if ($stateStatus -eq "in_progress") {
@@ -2867,9 +3115,11 @@ if ($stateStatus -eq "in_progress") {
     if ($isP1MechanismBootstrapManualCandidate) {
         $manualFindingIds = @(Get-ListValues -Block $taskBlock -Key "findingIds")
         $manualDependsOn = @(Get-ListValues -Block $taskBlock -Key "dependsOn")
+        $manualTaskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
         $manualTaskWorktreePath = Get-ScalarValue -Block $taskBlock -Key "worktreePath"
         $manualCanonicalTaskWorktreePath = if ([string]::IsNullOrWhiteSpace($manualTaskWorktreePath)) { "" } else { Get-CanonicalPath -Root $RepositoryRoot -Path $manualTaskWorktreePath }
         $manualCanonicalRepositoryRoot = Get-CanonicalPath -Root $RepositoryRoot -Path $RepositoryRoot
+        $isP1MechanismBootstrapManualExistingContract = $manualTaskStatus -ceq "ready_for_closeout"
         $isP1MechanismBootstrapManualContextValid = (Get-ScalarValue -Block $taskBlock -Key "taskKind") -ceq "mechanism_hardening" `
             -and (Get-ScalarValue -Block $taskBlock -Key "productClosureContribution") -ceq "none" `
             -and (Get-ScalarValue -Block $taskBlock -Key "findingIds") -ceq "[]" `
@@ -2877,8 +3127,7 @@ if ($stateStatus -eq "in_progress") {
             -and $manualDependsOn.Count -eq 1 `
             -and $manualDependsOn[0] -ceq $p1MechanismBootstrapParentTaskId `
             -and (Get-ScalarValue -Block $taskBlock -Key "branch") -ceq $p1MechanismBootstrapBranch `
-            -and -not [string]::IsNullOrWhiteSpace($manualCanonicalTaskWorktreePath) `
-            -and $manualCanonicalTaskWorktreePath -ieq $manualCanonicalRepositoryRoot `
+            -and (($isP1MechanismBootstrapManualExistingContract -and $manualTaskStatus -ceq "ready_for_closeout") -or (-not $isP1MechanismBootstrapManualExistingContract -and -not [string]::IsNullOrWhiteSpace($manualCanonicalTaskWorktreePath) -and $manualCanonicalTaskWorktreePath -ieq $manualCanonicalRepositoryRoot)) `
             -and (ConvertTo-NormalizedPath -Path $ProjectStatePath) -ceq "docs/04-agent-system/state/project-state.yaml" `
             -and (ConvertTo-NormalizedPath -Path $QueuePath) -ceq "docs/04-agent-system/state/task-queue.yaml" `
             -and (Get-ScalarValue -Block $taskBlock -Key "freshApprovalSource") -ceq $p1MechanismBootstrapAuthorizationPath `
@@ -2889,10 +3138,16 @@ if ($stateStatus -eq "in_progress") {
             Add-Finding "P1_PROGRAM_MECHANISM_BOOTSTRAP_CONTEXT_INVALID manual"
         }
 
-        $manualNameStatus = Get-P1MechanismBootstrapManualNameStatus -Root $RepositoryRoot
-        $filesToCheck = @($manualNameStatus.Files)
-        $isP1MechanismBootstrapManualNameStatusValid = $manualNameStatus.Valid `
-            -and (Test-P1MechanismBootstrapFileSet -Files $filesToCheck)
+        if ($isP1MechanismBootstrapManualExistingContract) {
+            $manualNameStatus = Get-P1MechanismBootstrapCommittedManualNameStatus -Root $RepositoryRoot
+            $isP1MechanismBootstrapManualNameStatusValid = $manualNameStatus.Valid
+            $filesToCheck = @()
+        } else {
+            $manualNameStatus = Get-P1MechanismBootstrapManualNameStatus -Root $RepositoryRoot
+            $filesToCheck = @($manualNameStatus.Files)
+            $isP1MechanismBootstrapManualNameStatusValid = $manualNameStatus.Valid `
+                -and (Test-P1MechanismBootstrapFileSet -Files $filesToCheck)
+        }
         if (-not $isP1MechanismBootstrapManualNameStatusValid) {
             Add-Finding "P1_PROGRAM_MECHANISM_BOOTSTRAP_FILE_SET_INVALID"
         }
@@ -2900,12 +3155,18 @@ if ($stateStatus -eq "in_progress") {
 # C6-MANUAL-MECHANISM-BOOTSTRAP-END
 }
 $normalizedFilesToCheck = @($filesToCheck | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-BEGIN
+$isP1MechanismBootstrapPreCommitScopeCorrectionCandidate = $Phase -ceq 'pre_commit' `
+    -and $stateCurrentTaskId -ceq $p1MechanismBootstrapTaskId `
+    -and (Get-ScalarValue -Block $taskBlock -Key 'status') -ceq 'ready_for_closeout' `
+    -and (Get-P1MechanismBootstrapPreCommitCorrectionNameStatus -Root $RepositoryRoot).Valid
+# C6-PRE-COMMIT-MECHANISM-SCOPE-CORRECTION-END
 # C4-ADAPTER-ROUTING-BEGIN
 $p1ApprovedSameTaskTransitionAutomatic = $null
 $p1ApprovedSameTaskTransitionIsExactBootstrap = $stateCurrentTaskId -ceq "p1-mechanism-execution-compatibility-v2-1-2026-07-19" `
     -and (Test-P1AstMechanismBootstrapFileSet -Files $normalizedFilesToCheck)
 $p1ApprovedSameTaskTransitionNameStatus = @()
-if ($Phase -in @("pre_commit", "pre_push") -and -not $SkipGitChecks -and -not $p1ApprovedSameTaskTransitionIsExactBootstrap) {
+if ($Phase -in @("pre_commit", "pre_push") -and -not $SkipGitChecks -and -not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapPreCommitScopeCorrectionCandidate) {
     $p1ApprovedSameTaskTransitionNameStatus = @(if ($Phase -eq "pre_commit") {
             Get-P1ApprovedSameTaskTransitionPreCommitNameStatus -RepositoryRoot $RepositoryRoot
         } else {
@@ -2928,7 +3189,7 @@ $p1ApprovedSameTaskTransitionHistoricalExactRoutes = [ordered]@{
 $p1ApprovedSameTaskTransitionHistoricalExactRoute = Select-P1ApprovedSameTaskTransitionHistoricalExactRoute `
     -NameStatusRecords $p1ApprovedSameTaskTransitionNameStatus `
     -HistoricalRoutes $p1ApprovedSameTaskTransitionHistoricalExactRoutes
-if ($Phase -in @("pre_commit", "pre_push") -and -not $SkipGitChecks -and -not $p1ApprovedSameTaskTransitionIsExactBootstrap `
+if ($Phase -in @("pre_commit", "pre_push") -and -not $SkipGitChecks -and -not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $isP1MechanismBootstrapPreCommitScopeCorrectionCandidate `
     -and -not $p1ApprovedSameTaskTransitionHistoricalExactRoute.Claimed) {
     $p1ApprovedSameTaskTransitionAutomatic = Get-P1ApprovedSameTaskTransitionStageInputs `
         -RepositoryRoot $RepositoryRoot `
@@ -3025,11 +3286,13 @@ $isP1MechanismBootstrapStageCandidate = @("pre_commit", "pre_push") -ccontains $
     -and $normalizedFilesToCheck -ccontains "docs/04-agent-system/state/project-state.yaml" `
     -and $normalizedFilesToCheck -ccontains "docs/04-agent-system/state/task-queue.yaml" `
     -and @($normalizedFilesToCheck | Where-Object { $p1MechanismBootstrapIdentityFiles -ccontains $_ }).Count -gt 0
-$isP1MechanismBootstrapCandidate = $isP1MechanismBootstrapStageCandidate -or $isP1MechanismBootstrapManualCandidate
+$isP1MechanismBootstrapCandidate = $isP1MechanismBootstrapStageCandidate -or $isP1MechanismBootstrapManualCandidate -or $isP1MechanismBootstrapPreCommitScopeCorrectionCandidate
 $isP1MechanismBootstrapScope = if ($isP1MechanismBootstrapManualCandidate) {
     $isP1MechanismBootstrapManualContextValid `
         -and $isP1MechanismBootstrapManualNameStatusValid `
-        -and (Test-P1MechanismBootstrapFileSet -Files $filesToCheck)
+        -and ($isP1MechanismBootstrapManualExistingContract -or (Test-P1MechanismBootstrapFileSet -Files $filesToCheck))
+} elseif ($isP1MechanismBootstrapPreCommitScopeCorrectionCandidate) {
+    $true
 } else {
     $isP1MechanismBootstrapStageCandidate -and (Test-P1MechanismBootstrapFileSet -Files $filesToCheck)
 }
@@ -3074,7 +3337,9 @@ if ($isP1F0117SpecApprovalTransitionHotfixScope) {
 if ($isP1F0143SpecApprovalTransitionHotfixCandidate) {
     Test-P1F0143SpecApprovalTransitionHotfixAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
 }
-if ($isP1MechanismBootstrapCandidate) {
+if ($isP1MechanismBootstrapPreCommitScopeCorrectionCandidate) {
+    Test-P1MechanismBootstrapPreCommitScopeCorrectionAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock
+} elseif ($isP1MechanismBootstrapCandidate) {
     Test-P1MechanismBootstrapAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
 }
 if ($isP1F0117SmokeScopeCorrectionScope) {
