@@ -273,12 +273,12 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
     p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
-    p1-mechanism-execution-compatibility-v2-1-2026-07-19: in_progress
+    p1-mechanism-execution-compatibility-v2-1-2026-07-19: ready_for_closeout
 activeTasks:
   - id: p1-mechanism-execution-compatibility-v2-1-2026-07-19
     title: P1 mechanism execution compatibility v2.1
     phase: p1-mechanism-execution-compatibility-v2-1-2026-07-19
-    status: in_progress
+    status: ready_for_closeout
     priority: governance
     sequenceOrder: 12
     taskKind: mechanism_hardening
