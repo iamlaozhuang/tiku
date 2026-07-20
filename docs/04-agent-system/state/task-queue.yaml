@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+  currentTaskId: p1-mechanism-execution-compatibility-v2-1-2026-07-19
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -226,6 +226,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+    - p1-mechanism-execution-compatibility-v2-1-2026-07-19
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -238,6 +239,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -270,12 +272,135 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
-    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: ready_for_closeout
+    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
+    p1-mechanism-execution-compatibility-v2-1-2026-07-19: in_progress
 activeTasks:
+  - id: p1-mechanism-execution-compatibility-v2-1-2026-07-19
+    title: P1 mechanism execution compatibility v2.1
+    phase: p1-mechanism-execution-compatibility-v2-1-2026-07-19
+    status: in_progress
+    priority: governance
+    sequenceOrder: 12
+    taskKind: mechanism_hardening
+    productClosureContribution: none
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-mechanism-execution-compatibility-v2-1
+    worktreePath: D:/tiku/.worktrees/p1-mechanism-execution-compatibility-v2-1
+    dependsOn:
+      - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+    approvalSource: current-user-approved-p1-mechanism-execution-compatibility-v2-1-bootstrap-2026-07-19
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-19-p1-mechanism-execution-compatibility-v2-1-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-02
+    findingIds: []
+    authorityPath: p1_mechanism_execution_compatibility_v2_1_charter_and_bootstrap_authorization
+    businessInvariant: p1_wip_remains_one_while_f0143_closes_and_the_non_product_mechanism_successor_is_materialized
+    adversarialFailureMode: generic_or_historical_fallback_can_accept_wrong_context_files_topology_or_ordinary_sha_drift
+    rollbackOrStopCondition: stop_if_focused_green_requires_scope_expansion_blocked_files_hook_bypass_or_quality_gate_reduction
+    focusedGates:
+      - historical_exact_path_and_finding_code_characterization
+      - one_time_non_finding_specific_bootstrap
+      - empty_finding_mechanism_successor_only
+      - exact_am_file_set
+      - ordinary_drift_and_standard_ancestor_hard_block
+    buildRequired: false
+    fullRegressionPolicy: focused_then_single_fresh_full_mechanism_matrix
+    protectedDomains:
+      - p1_finding_identity
+      - p1_wip_one
+      - p0_and_module_quality_gates
+      - approval_and_evidence_boundaries
+      - git_closeout_topology
+    reviewMode: checkpoint_main_thread_review_then_one_independent_final_review
+    planPath: docs/05-execution-logs/task-plans/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+    allowedFiles:
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/p1-approved-same-task-transition.md
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/p1-approved-same-task-transition-schema-v1.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-19-p1-mechanism-execution-compatibility-v2-1-authorization.md
+      - docs/05-execution-logs/task-plans/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+      - docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+      - docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+      - scripts/agent-system/P1ApprovedSameTaskTransition.Common.ps1
+      - scripts/agent-system/Test-P1ApprovedSameTaskTransition.Smoke.ps1
+      - scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+      - scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+    blockedFiles:
+      - AGENTS.md
+      - .husky/**
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - src/db/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: approved_task_allowlist
+      productRuntimeSourceChange: blocked
+      productTestSourceChange: blocked
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_user_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: satisfied
+      reason: current_user_approved_one_time_non_finding_specific_bootstrap_2026_07_19
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-19-p1-mechanism-execution-compatibility-v2-1-authorization.md
+      resumeAction: execute_c1_to_c5_then_full_review_and_closeout_without_product_red
+    acceptanceStandards:
+      - F-0143 closes atomically while exactly one findingless mechanism successor becomes active.
+      - The successor contributes no product closure and never adds a completed finding identity.
+      - Historical paths, finding codes, ordinary drift, standard mode, topology and exact file negatives remain hard-blocked.
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1ApprovedSameTaskTransition.Smoke.ps1 -Profile focused
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
     title: P1 RC-02 employee personal AI selected authorization context
     phase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
-    status: ready_for_closeout
+    status: closed
     priority: p1
     sequenceOrder: 11
     taskKind: product_remediation

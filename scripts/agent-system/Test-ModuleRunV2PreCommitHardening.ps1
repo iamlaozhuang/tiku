@@ -36,6 +36,22 @@
 )
 
 $ErrorActionPreference = "Stop"
+# C4-ADAPTER-IMPLEMENTATION-BEGIN
+$p1ApprovedSameTaskTransitionCommonPath = Join-Path $PSScriptRoot "P1ApprovedSameTaskTransition.Common.ps1"
+. $p1ApprovedSameTaskTransitionCommonPath
+
+function Invoke-P1ApprovedSameTaskTransitionAdapter {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$ContractText,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$SourcePath,
+        [Parameter(Mandatory = $true)][System.Collections.IDictionary]$Facts
+    )
+    $contract = Read-P1ApprovedSameTaskTransitionContract -Text $ContractText -SourcePath $SourcePath
+    return Test-P1ApprovedSameTaskTransition -Contract $contract -Facts $Facts
+}
+
+# C4-ADAPTER-IMPLEMENTATION-END
+
 $p1TransitionHotfixTaskId = "p1-prepush-transition-ancestor-gate-hotfix-2026-07-16"
 $p1TransitionHotfixParentTaskId = "p1-remediation-program-bootstrap-2026-07-16"
 $p1TransitionHotfixBaseSha = "4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3"
@@ -2609,6 +2625,54 @@ $projectStateLines = @(Get-Content -Path $ProjectStatePath)
 $queueLines = @(Get-Content -Path $QueuePath)
 $matrixContent = Get-Content -Path $MatrixPath -Raw
 $filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
+# C4-ADAPTER-ROUTING-BEGIN
+$p1ApprovedSameTaskTransitionAutomatic = $null
+$p1ApprovedSameTaskTransitionIsExactBootstrap = (Get-CurrentTaskId -Lines $projectStateLines) -ceq "p1-mechanism-execution-compatibility-v2-1-2026-07-19" `
+    -and (Test-P1AstMechanismBootstrapFileSet -Files $filesToScan)
+$p1ApprovedSameTaskTransitionNameStatus = @()
+if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap) {
+    $p1ApprovedSameTaskTransitionNameStatus = @(Get-P1ApprovedSameTaskTransitionPreCommitNameStatus -RepositoryRoot $repositoryRoot)
+}
+$p1ApprovedSameTaskTransitionHistoricalExactRoutes = [ordered]@{
+    "p1_transition_hotfix" = $p1TransitionHotfixFiles
+    "p1_f0132_scope_correction" = $p1F0132ScopeCorrectionFiles
+    "p1_f0115_phase11_scope_correction" = $p1F0115Phase11ScopeCorrectionFiles
+    "p1_f0115_module_precommit_hotfix" = $p1F0115ModulePrecommitHotfixFiles
+    "p1_f0116_designpath_guard_hotfix" = $p1F0116DesignPathGuardHotfixFiles
+    "p1_f0116_scope_correction_guard_hotfix" = $p1F0116ScopeCorrectionGuardHotfixFiles
+    "p1_f0117_spec_approval_transition_hotfix" = $p1F0117SpecApprovalTransitionHotfixFiles
+    "p1_f0143_spec_approval_transition_hotfix" = $p1F0143SpecApprovalTransitionHotfixFiles
+    "p1_f0117_smoke_scope_correction" = $p1F0117SmokeScopeCorrectionFiles
+    "p1_f0117_smoke_scope_closeout_lifecycle_hotfix" = $p1F0117SmokeScopeCloseoutLifecycleHotfixFiles
+    "p1_f0115_scope_correction" = $p1F0115ScopeCorrectionFiles
+}
+$p1ApprovedSameTaskTransitionHistoricalExactRoute = Select-P1ApprovedSameTaskTransitionHistoricalExactRoute `
+    -NameStatusRecords $p1ApprovedSameTaskTransitionNameStatus `
+    -HistoricalRoutes $p1ApprovedSameTaskTransitionHistoricalExactRoutes
+if (-not $p1ApprovedSameTaskTransitionIsExactBootstrap -and -not $p1ApprovedSameTaskTransitionHistoricalExactRoute.Claimed) {
+    $p1ApprovedSameTaskTransitionAutomatic = Get-P1ApprovedSameTaskTransitionStageInputs `
+        -RepositoryRoot $repositoryRoot `
+        -Phase pre_commit `
+        -NameStatusRecords $p1ApprovedSameTaskTransitionNameStatus `
+        -BaseReference "origin/master" `
+        -CandidateReference ":" `
+        -Branch ((& git -C $repositoryRoot branch --show-current) -join "").Trim() `
+        -StatePath (($ProjectStatePath -replace '\\', '/').TrimStart('./')) `
+        -QueuePath (($QueuePath -replace '\\', '/').TrimStart('./'))
+}
+if ($null -ne $p1ApprovedSameTaskTransitionAutomatic -and $p1ApprovedSameTaskTransitionAutomatic.Requested) {
+    $p1ApprovedSameTaskTransitionDecision = Invoke-P1ApprovedSameTaskTransitionAdapter `
+        -ContractText $p1ApprovedSameTaskTransitionAutomatic.ContractText `
+        -SourcePath $p1ApprovedSameTaskTransitionAutomatic.SourcePath `
+        -Facts $p1ApprovedSameTaskTransitionAutomatic.Facts
+    foreach ($code in @($p1ApprovedSameTaskTransitionDecision.FindingCodes)) { Write-Output "p1ApprovedSameTaskTransitionCoreFinding: $code" }
+    if (-not $p1ApprovedSameTaskTransitionDecision.Recognized -or -not $p1ApprovedSameTaskTransitionDecision.Valid) {
+        Add-Finding "HARD_BLOCK_APPROVED_SAME_TASK_TRANSITION_INVALID $(@($p1ApprovedSameTaskTransitionDecision.FindingCodes) -join ',')"
+    } else {
+        Write-Output "p1ApprovedSameTaskTransitionMode: $($p1ApprovedSameTaskTransitionDecision.Mode)"
+    }
+}
+# C4-ADAPTER-ROUTING-END
 $isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
 $isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepairFileSet -Files $filesToScan)
 $isP1TransitionHotfixScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (Test-P1TransitionHotfixFileSet -Files $filesToScan)

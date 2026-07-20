@@ -13,6 +13,12 @@ canonicalStateFiles:
   - id: operating-manual
     path: docs/04-agent-system/operating-manual.md
     role: concise human and Codex entry point for current advancement rules, source-of-truth policy, status policy, mechanism budget, push boundary, product closure contribution, blocked gates, and stop rules
+  - id: p1-approved-same-task-transition-schema-v1
+    path: docs/04-agent-system/state/p1-approved-same-task-transition-schema-v1.yaml
+    role: strict contract and tiku-transition-evidence-v1 machine schema, normalized candidate identity, freshness inputs, and validation profiles
+  - id: p1-approved-same-task-transition-sop
+    path: docs/04-agent-system/sop/p1-approved-same-task-transition.md
+    role: future approved same-task transition authorization, strict parsing, stage boundary, validation profile, machine evidence, and three-task efficiency observation procedure
   - id: project-state
     path: docs/04-agent-system/state/project-state.yaml
     role: compact current Content Admin Platform Program, current task, recent closeout, standing authorization, repository checkpoint, and history pointers
@@ -65,6 +71,13 @@ canonicalStateFiles:
     path: docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
     role: stage 2 triage summary for active non-terminal blocked queue items; records next-step classification only and does not replace task-queue as the owner of task status or blocked semantics
 factOwnership:
+  - fact: approved same-task transition contract, machine evidence, normalized candidate identity and freshness, validation profiles, and efficiency observation formulas
+    sourcePath: docs/04-agent-system/state/p1-approved-same-task-transition-schema-v1.yaml
+    derivedSummaries:
+      - docs/04-agent-system/sop/p1-approved-same-task-transition.md
+      - docs/04-agent-system/operating-manual.md
+      - scripts/agent-system/P1ApprovedSameTaskTransition.Common.ps1
+    rule: the schema owns the machine shape; the SOP owns execution procedure and formulas; scripts derive strict decisions and must not treat Markdown prose as approval or create a second task-state source.
   - fact: Content Admin Platform B-F Program canonical task order, executionProfile, focused gates, build requirement, full regression policy, protected domains, and review mode
     sourcePath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
     derivedSummaries:

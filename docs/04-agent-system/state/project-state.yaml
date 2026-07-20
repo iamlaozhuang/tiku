@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
-updatedAt: "2026-07-18T22:50:00-07:00"
+currentPhase: p1-mechanism-execution-compatibility-v2-1-2026-07-19
+updatedAt: "2026-07-19T06:47:14-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+  currentTaskId: p1-mechanism-execution-compatibility-v2-1-2026-07-19
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -496,6 +496,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
     - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
+    - p1-mechanism-execution-compatibility-v2-1-2026-07-19
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -508,6 +509,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-02-employee-creation-atomicity-2026-07-16
     - p1-remediation-rc-02-employee-import-preflight-2026-07-17
     - p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18
+    - p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -540,7 +542,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-02-employee-creation-atomicity-2026-07-16: closed
     p1-remediation-rc-02-employee-import-preflight-2026-07-17: closed
     p1-remediation-rc-02-redeem-code-nullable-deadline-2026-07-18: closed
-    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: ready_for_closeout
+    p1-remediation-rc-02-employee-personal-ai-context-2026-07-18: closed
+    p1-mechanism-execution-compatibility-v2-1-2026-07-19: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -609,6 +612,12 @@ p1RemediationSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     p1-remediation-rc-02-employee-personal-ai-context-2026-07-18:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    p1-mechanism-execution-compatibility-v2-1-2026-07-19:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -675,23 +684,24 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
-  title: P1 RC-02 employee personal AI selected authorization context
-  phase: p1-remediation-rc-02-employee-personal-ai-context-2026-07-18
-  status: ready_for_closeout
-  priority: p1
-  taskKind: product_remediation
-  branch: codex/p1-rc02-employee-personal-ai-context
+  id: p1-mechanism-execution-compatibility-v2-1-2026-07-19
+  title: P1 mechanism execution compatibility v2.1
+  phase: p1-mechanism-execution-compatibility-v2-1-2026-07-19
+  status: in_progress
+  priority: governance
+  taskKind: mechanism_hardening
+  productClosureContribution: none
+  branch: codex/p1-mechanism-execution-compatibility-v2-1
   executionProfile: R3
-  planPath: docs/05-execution-logs/task-plans/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context-design.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-18-p1-remediation-rc-02-employee-personal-ai-context.md
-  nextRequiredTaskId: p1-remediation-rc-02-employee-personal-ai-context-implementation-plan
+  planPath: docs/05-execution-logs/task-plans/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-19-p1-mechanism-execution-compatibility-v2-1.md
+  nextRequiredTaskId: c2-strict-contract-red
   currentExecutionGate:
     status: satisfied
-    reason: current_user_approved_written_f0143_spec_2026_07_18
-    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md
-    resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green
+    reason: current_user_approved_one_time_non_finding_specific_bootstrap_2026_07_19
+    approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-19-p1-mechanism-execution-compatibility-v2-1-authorization.md
+    resumeAction: execute_c1_to_c5_without_starting_next_product_red
 standingAuthorization:
   id: current-user-approved-p1-remediation-goal-2026-07-16
   source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
@@ -701,9 +711,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983
-  lastKnownOriginMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983
-  lastKnownRemoteMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983
+  lastKnownMasterSha: 61303d935e58e65103563fcb0fa865d7bfb6cf3e
+  lastKnownOriginMasterSha: 61303d935e58e65103563fcb0fa865d7bfb6cf3e
+  lastKnownRemoteMasterSha: 61303d935e58e65103563fcb0fa865d7bfb6cf3e
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

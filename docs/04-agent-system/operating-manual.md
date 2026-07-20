@@ -217,6 +217,20 @@ Every runner or dispatcher terminal stop must emit a compact stop card in additi
 screen and state why execution stopped, whether automated recovery is allowed, the single recommended next command, and
 whether durable state was written or intentionally skipped with accounting.
 
+## Approved same-task transition profiles
+
+Future `approved_same_task_transition` work uses the strict contract, machine-evidence schema, and selection rules in
+`docs/04-agent-system/sop/p1-approved-same-task-transition.md`. The four profiles are `focused`, `full`,
+`contract-instance-only`, and `docs-only`.
+
+Behavior development uses `focused`; frozen parser/schema/guard/fixture changes require serial `full` validation in the
+later full-review checkpoint. An exact contract plus state/queue projection uses `contract-instance-only`. Prose,
+indexes, and evidence use `docs-only` only when the machine schema, parser, guards, and fixture have not changed.
+Focused success never replaces real pre-commit, pre-push, merge, push, or closeout gates.
+
+The next three P1 product tasks record `## P1 Mechanism Efficiency Observation` in their own evidence using the SOP
+template. The current mechanism task provides formulas and the recovery entry only; it does not prefill future results.
+
 ## Completion Standard
 
 Every task closeout must record:

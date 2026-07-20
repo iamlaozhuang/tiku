@@ -6,6 +6,11 @@ $guardPath = Join-Path $PSScriptRoot "Test-P1RemediationSerialProgram.ps1"
 $modulePreCommitGuardPath = Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.ps1"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $guardPath -Raw -Encoding UTF8
+# C4-ADAPTER-CONSISTENCY-BEGIN
+$approvedSameTaskTransitionAdapterMarkers = @("P1ApprovedSameTaskTransition.Common.ps1", "Get-P1ApprovedSameTaskTransitionStageInputs", "p1ApprovedSameTaskTransitionAutomatic", "function Invoke-P1ApprovedSameTaskTransitionAdapter", "Read-P1ApprovedSameTaskTransitionContract", "Test-P1ApprovedSameTaskTransition", "p1ApprovedSameTaskTransitionCoreFinding")
+$missingApprovedSameTaskTransitionAdapterMarkers = @($approvedSameTaskTransitionAdapterMarkers | Where-Object { -not $phase11ScopeCorrectionGuardText.Contains($_) })
+if ($missingApprovedSameTaskTransitionAdapterMarkers.Count -gt 0) { throw "P1 guard adapter consistency RED: $($missingApprovedSameTaskTransitionAdapterMarkers -join ', ')" }
+# C4-ADAPTER-CONSISTENCY-END
 $phase11ScopeCorrectionPatterns = @(
     "p1F0115Phase11ScopeCorrectionTaskId",
     "Test-P1F0115Phase11ScopeCorrectionFileSet",
@@ -2436,24 +2441,140 @@ Decision: APPROVE_SCOPE
     }
     if (-not $moduleHotfixReplayFailed) { throw "F-0115 Module hotfix replay unexpectedly passed." }
 
-    $originalGitIndexFile = [Environment]::GetEnvironmentVariable("GIT_INDEX_FILE", [EnvironmentVariableTarget]::Process)
-    $activeIndexPath = $originalGitIndexFile
-    if ($null -eq $activeIndexPath) {
-        $activeIndexPath = ((& git -C $repositoryRoot rev-parse --git-path index) -join "").Trim()
-        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($activeIndexPath)) { throw "Unable to resolve active Git index for cross-repository isolation fixture." }
-        if (-not [System.IO.Path]::IsPathRooted($activeIndexPath)) { $activeIndexPath = Join-Path $repositoryRoot $activeIndexPath }
+    # C6-FIXTURE-HERMETICITY-BEGIN
+    function Remove-C6ShortTempRoot {
+        param([Parameter(Mandatory = $true)][string]$Root)
+
+        $resolvedRoot = [System.IO.Path]::GetFullPath($Root)
+        $resolvedTempPrefix = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+        $rootName = [System.IO.Path]::GetFileName($resolvedRoot)
+        if (-not $resolvedRoot.StartsWith($resolvedTempPrefix, [System.StringComparison]::OrdinalIgnoreCase) `
+            -or $rootName -notmatch '^tiku-c6[mi]-[0-9a-f]{32}$') {
+            throw "P1_C6_TEMP_CLEANUP_BOUNDARY_INVALID root=$resolvedRoot"
+        }
+
+        $longRoot = "\\?\$resolvedRoot"
+        for ($cleanupAttempt = 1; $cleanupAttempt -le 5; $cleanupAttempt++) {
+            if (-not [System.IO.Directory]::Exists($longRoot)) { return }
+            try {
+                try {
+                    foreach ($fixtureFile in [System.IO.Directory]::EnumerateFiles($longRoot, "*", [System.IO.SearchOption]::AllDirectories)) {
+                        [System.IO.File]::SetAttributes($fixtureFile, [System.IO.FileAttributes]::Normal)
+                    }
+                } catch [System.IO.DirectoryNotFoundException] {
+                    # A child may disappear while the recursive enumerator advances; the root check below remains authoritative.
+                }
+                [System.IO.Directory]::Delete($longRoot, $true)
+            } catch [System.IO.DirectoryNotFoundException] {
+                # A concurrent child/root disappearance is benign only when the final root assertion succeeds.
+            } catch [System.IO.IOException] {
+                if ($cleanupAttempt -eq 5) { throw }
+            } catch [System.UnauthorizedAccessException] {
+                if ($cleanupAttempt -eq 5) { throw }
+            }
+            if (-not [System.IO.Directory]::Exists($longRoot)) { return }
+            if ($cleanupAttempt -lt 5) { Start-Sleep -Milliseconds (50 * $cleanupAttempt) }
+        }
+        throw "P1_C6_TEMP_CLEANUP_INCOMPLETE root=$resolvedRoot"
     }
+
+    $isolatedManualAuditRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-c6m-" + [guid]::NewGuid().ToString("N"))
+    $foreignIndexRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-c6i-" + [guid]::NewGuid().ToString("N"))
+    $committedBaselineSha = "61303d935e58e65103563fcb0fa865d7bfb6cf3e"
+
+    $originalGitIndexFile = [Environment]::GetEnvironmentVariable("GIT_INDEX_FILE", [EnvironmentVariableTarget]::Process)
     try {
-        [Environment]::SetEnvironmentVariable("GIT_INDEX_FILE", $activeIndexPath, [EnvironmentVariableTarget]::Process)
-        $isolatedAuditOutput = @(& $guardPath -RepositoryRoot $repositoryRoot -Phase manual)
+        Remove-Item -LiteralPath "Env:GIT_INDEX_FILE" -ErrorAction SilentlyContinue
+        & git -c core.longpaths=true -c core.fsmonitor=false -c maintenance.auto=false -c gc.auto=0 clone --quiet --no-local --no-checkout $repositoryRoot $isolatedManualAuditRoot
+        if ($LASTEXITCODE -ne 0) { throw "Unable to create self-contained committed manual audit clone." }
+        & git -C $isolatedManualAuditRoot config core.longpaths true
+        & git -C $isolatedManualAuditRoot config core.autocrlf false
+        & git -C $isolatedManualAuditRoot config core.fsmonitor false
+        & git -C $isolatedManualAuditRoot config core.untrackedCache false
+        & git -C $isolatedManualAuditRoot config maintenance.auto false
+        & git -C $isolatedManualAuditRoot config gc.auto 0
+        & git -C $isolatedManualAuditRoot config gc.autoDetach false
+        $isolatedAlternatesPath = Join-Path $isolatedManualAuditRoot ".git/objects/info/alternates"
+        if (Test-Path -LiteralPath $isolatedAlternatesPath) { throw "Committed manual audit clone unexpectedly uses Git alternates." }
+        & git -C $isolatedManualAuditRoot -c core.longpaths=true -c core.fsmonitor=false checkout --quiet --detach $committedBaselineSha
+        if ($LASTEXITCODE -ne 0) { throw "Unable to check out committed manual audit baseline." }
+        $isolatedManualAuditHead = ((& git -C $isolatedManualAuditRoot rev-parse HEAD) -join "").Trim()
+        $isolatedManualAuditStatus = @(& git -C $isolatedManualAuditRoot -c core.fsmonitor=false status --porcelain=v1 --untracked-files=all)
+        if ($isolatedManualAuditHead -cne $committedBaselineSha -or $isolatedManualAuditStatus.Count -ne 0) {
+            throw "Committed manual audit baseline is not exact and clean."
+        }
+        foreach ($isolatedRequiredArtifact in @(
+                "docs/04-agent-system/state/project-state.yaml",
+                "docs/04-agent-system/state/task-queue.yaml",
+                "docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md",
+                "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md",
+                "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml",
+                "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml",
+                "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml"
+            )) {
+            if (-not (Test-Path -LiteralPath (Join-Path $isolatedManualAuditRoot ($isolatedRequiredArtifact -replace "/", "\")) -PathType Leaf)) {
+                throw "Committed manual audit baseline is missing canonical artifact: $isolatedRequiredArtifact"
+            }
+        }
+
+        New-Item -ItemType Directory -Path $foreignIndexRoot | Out-Null
+        Set-Content -LiteralPath (Join-Path $foreignIndexRoot "foreign-index-sentinel.txt") -Value "foreign index" -Encoding UTF8
+        & git -C $foreignIndexRoot init -b master *> $null
+        & git -C $foreignIndexRoot config user.name "P1 Foreign Index Smoke"
+        & git -C $foreignIndexRoot config user.email "p1-foreign-index-smoke@example.invalid"
+        & git -C $foreignIndexRoot config core.autocrlf false
+        & git -C $foreignIndexRoot config core.fsmonitor false
+        & git -C $foreignIndexRoot config core.untrackedCache false
+        & git -C $foreignIndexRoot config maintenance.auto false
+        & git -C $foreignIndexRoot config gc.auto 0
+        & git -C $foreignIndexRoot config gc.autoDetach false
+        & git -C $foreignIndexRoot add foreign-index-sentinel.txt
+        & git -C $foreignIndexRoot -c core.fsmonitor=false -c maintenance.auto=false -c gc.auto=0 commit --quiet -m "create foreign index fixture"
+        if ($LASTEXITCODE -ne 0) { throw "Unable to commit foreign Git index fixture." }
+        if (@(& git -C $foreignIndexRoot -c core.fsmonitor=false status --porcelain=v1 --untracked-files=all).Count -ne 0) {
+            throw "Foreign Git index fixture is not clean after commit."
+        }
+
+        $foreignIndexPath = ((& git -C $foreignIndexRoot rev-parse --git-path index) -join "").Trim()
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($foreignIndexPath)) { throw "Unable to resolve foreign Git index." }
+        if (-not [System.IO.Path]::IsPathRooted($foreignIndexPath)) { $foreignIndexPath = Join-Path $foreignIndexRoot $foreignIndexPath }
+        $foreignIndexPath = [System.IO.Path]::GetFullPath($foreignIndexPath)
+        $foreignGitPrefix = [System.IO.Path]::GetFullPath(((& git -C $foreignIndexRoot rev-parse --absolute-git-dir) -join "").Trim()).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+        $manualAuditGitPrefix = [System.IO.Path]::GetFullPath(((& git -C $isolatedManualAuditRoot rev-parse --absolute-git-dir) -join "").Trim()).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+        if (-not $foreignIndexPath.StartsWith($foreignGitPrefix, [System.StringComparison]::OrdinalIgnoreCase) `
+            -or $foreignIndexPath.StartsWith($manualAuditGitPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Cross-repository isolation fixture did not use a genuinely foreign Git index."
+        }
+
+        [Environment]::SetEnvironmentVariable("GIT_INDEX_FILE", $foreignIndexPath, [EnvironmentVariableTarget]::Process)
+        $isolatedAuditOutput = @(
+            & $guardPath `
+                -RepositoryRoot $isolatedManualAuditRoot `
+                -ProjectStatePath "docs/04-agent-system/state/project-state.yaml" `
+                -QueuePath "docs/04-agent-system/state/task-queue.yaml" `
+                -Phase manual
+        )
         if (($isolatedAuditOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Cross-repository Git environment isolation fixture failed." }
+        if (($isolatedAuditOutput -join "`n") -notmatch "p1TransitionScopeMode: standard") { throw "Committed manual audit fixture did not remain in standard scope mode." }
     } finally {
         if ($null -ne $originalGitIndexFile) {
             [Environment]::SetEnvironmentVariable("GIT_INDEX_FILE", $originalGitIndexFile, [EnvironmentVariableTarget]::Process)
         } else {
             Remove-Item -LiteralPath "Env:GIT_INDEX_FILE" -ErrorAction SilentlyContinue
         }
+        $isolatedFixtureCleanupFailures = [System.Collections.Generic.List[string]]::new()
+        foreach ($isolatedFixtureRoot in @($isolatedManualAuditRoot, $foreignIndexRoot)) {
+            try {
+                Remove-C6ShortTempRoot -Root $isolatedFixtureRoot
+            } catch {
+                $isolatedFixtureCleanupFailures.Add($_.Exception.Message)
+            }
+        }
+        if ($isolatedFixtureCleanupFailures.Count -gt 0) {
+            throw "P1_C6_TEMP_CLEANUP_FAILED $($isolatedFixtureCleanupFailures -join '; ')"
+        }
     }
+    # C6-FIXTURE-HERMETICITY-END
 
     $f0116HotfixRoot = Join-Path $smokeRoot "f0116-designpath-guard-hotfix"
     $f0116HotfixBaseSha = "ce6aef7b30c82f459ccfdc06782eda9bc720c15d"
@@ -2735,10 +2856,6 @@ Decision: APPROVE
     if ($missingF0115ScopeCorrectionPatterns.Count -gt 0) {
         Write-Output "Existing P1 remediation smoke regression passed: 8 positive, 48 negative"
         throw "P1 guard is missing F-0115 scope-correction marker/mode contract: $($missingF0115ScopeCorrectionPatterns -join ', ')"
-    }
-    $f0117PreCommitBehaviorOutput = @(& (Join-Path $PSScriptRoot "Test-ModuleRunV2PreCommitHardening.Smoke.ps1"))
-    if (($f0117PreCommitBehaviorOutput -join "`n") -notmatch "F-0117 smoke scope-correction P1 and Module pre-commit behavior smoke passed") {
-        throw "P1 smoke did not execute the shared F-0117 smoke scope-correction pre-commit behavior fixture."
     }
     Write-Output "P1 remediation serial program guard smoke passed: 15 positive, 81 negative"
 } finally {

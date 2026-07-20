@@ -1,0 +1,285 @@
+schemaVersion: 1
+contract:
+  fenceName: tiku-approved-same-task-transition-v1
+  encoding: utf8_without_bom
+  lineEnding: lf
+  rawFirst: true
+  ordinalCaseSensitive: true
+  unknownFields: reject
+  duplicateFields: reject
+  requiredScalarKeys:
+    - schemaVersion
+    - transitionType
+    - transitionId
+    - taskId
+    - parentTaskId
+    - baseSha
+    - branch
+    - authorizationId
+    - authorizationSource
+    - standingAuthorizationSource
+    - statePath
+    - stateFromSha256
+    - stateToSha256
+    - queuePath
+    - queueFromSha256
+    - queueToSha256
+    - fileCount
+    - singleParent
+    - singleCommit
+    - oneTime
+    - ancestorCheckpointPolicy
+    - ordinaryDriftPolicy
+    - standardModePolicy
+    - databaseExecutionPolicy
+    - permissionExpansionPolicy
+  exactValues:
+    schemaVersion: "1"
+    transitionType: approved_same_task_transition
+    singleParent: "true"
+    singleCommit: "true"
+    oneTime: "true"
+    ancestorCheckpointPolicy: transition_only_exact_one_parent
+    ordinaryDriftPolicy: hard_block
+    standardModePolicy: hard_block
+    databaseExecutionPolicy: blocked
+    permissionExpansionPolicy: blocked
+  files:
+    indexPattern: file.NNN.path_and_status
+    firstIndex: "001"
+    contiguous: true
+    ordered: true
+    ordinalSorted: true
+    fileCountFormat: positive_decimal
+    maximum: 999
+    fileCountMustEqualIndexedPairs: true
+    rawRecordMaximum: 999
+    allowedStatuses:
+      - A
+      - M
+    productPaths: reject
+  scalarFormats:
+    baseShaPattern: lowercase_hex_40
+    sha256Pattern: lowercase_hex_64
+    sha256Fields:
+      - stateFromSha256
+      - stateToSha256
+      - queueFromSha256
+      - queueToSha256
+authorization:
+  baseAuthorizationRequired: true
+  baseStandingAuthorizationRequired: true
+  candidateSelfAuthorization: reject
+recognition:
+  strategy: wide_recognition_strict_validation
+  reservedMarker: approved_same_task_transition
+  contractPathCandidate: true
+  projectionCandidate: true
+topology:
+  singleParent: true
+  singleCommit: true
+  ancestorMustMatchBase: true
+  remoteBaselineMustMatchBase: true
+  replay: reject
+validationFacts:
+  baseAnchoredExpectedNameStatusRecords: true
+  expectedNameStatusRecords:
+    required: true
+    type: ordered_name_status_list
+    ordinalSorted: true
+    exactMatchRequiredAgainst:
+      - contractFiles
+      - actualNameStatusRecords
+  candidateFileSha256ByPath:
+    required: true
+    type: ordinal_path_to_lowercase_sha256
+    exactPathCountMatch: true
+    maximum: 999
+    sha256Pattern: lowercase_hex_64
+    contractRawHashBinding: true
+    projectionToHashBinding: true
+  requiredFileRoles:
+    distinct: true
+    allMustBePresent: true
+    paths:
+      - statePath
+      - queuePath
+      - contractSourcePath
+  requiredBooleanFacts:
+    - BaseAuthorizationPresent
+    - StandingAuthorizationPresent
+    - StateProjectionMatches
+    - QueueProjectionMatches
+    - SingleParent
+    - SingleCommit
+    - AncestorMatches
+    - RemoteBaselineMatches
+    - AncestorCheckpointAuthorized
+    - TransitionConsumed
+    - OrdinaryDrift
+    - StandardMode
+    - CandidateAuthorizationPresent
+    - CandidateStatusApproved
+    - CandidateCloseoutPolicyAuthorization
+    - CandidateProjectionPresent
+    - ReservedMarkerPresent
+  strictIntegerFacts:
+    - ParentCount
+    - CommitCount
+coreFindingCodes:
+  - P1_AST_CONTRACT_BLOCK_INVALID
+  - P1_AST_FIELD_INVALID
+  - P1_AST_AUTHORIZATION_INVALID
+  - P1_AST_CONTEXT_INVALID
+  - P1_AST_PROJECTION_INVALID
+  - P1_AST_FILE_SET_INVALID
+  - P1_AST_TOPOLOGY_INVALID
+  - P1_AST_REPLAY_BLOCKED
+  - P1_AST_ORDINARY_DRIFT_BLOCKED
+  - P1_AST_STANDARD_MODE_BLOCKED
+evidence:
+  fenceName: tiku-transition-evidence-v1
+  encoding: utf8_without_bom
+  lineEnding: lf
+  rawFirst: true
+  ordinalCaseSensitive: true
+  unknownFields: reject
+  duplicateFields: reject
+  duplicateBlocks: reject
+  requiredScalarKeys:
+    - schemaVersion
+    - recordType
+    - taskId
+    - transitionId
+    - authorizationId
+    - authorizationSource
+    - baseSha
+    - candidateIdentityType
+    - candidateIdentity
+    - branch
+    - stateFromSha256
+    - stateToSha256
+    - queueFromSha256
+    - queueToSha256
+    - reviewDecision
+    - validationProfile
+    - freshnessKey
+    - commandCount
+    - positiveCount
+    - negativeCount
+    - validatorSha256
+    - p1AdapterSha256
+    - preCommitAdapterSha256
+    - prePushAdapterSha256
+    - fixtureSha256
+    - fileCount
+  exactValues:
+    schemaVersion: "1"
+    recordType: transition_evidence
+  reviewDecisions:
+    - APPROVE
+    - PENDING
+  trustedReviewFacts:
+    reviewDecisionFact: ReviewDecision
+    reviewInputKindFact: ReviewInputKind
+    reviewInputKinds:
+      - production
+      - synthetic
+    machineDecisionMustMatchExternalFact: true
+    syntheticKindAllowedOnlyForFixtureInput: true
+    markdownOrMachineSelfAssertionIsAuthority: false
+  trustedContextBindings:
+    schemaVersion: SchemaVersion
+    taskId: TaskId
+    transitionId: TransitionId
+    authorizationId: AuthorizationId
+    authorizationSource: AuthorizationSource
+    baseSha: BaseSha
+    candidateIdentityType: CandidateIdentityType
+    branch: Branch
+    stateFromSha256: StateFromSha256
+    stateToSha256: StateProjectionSha256
+    queueFromSha256: QueueFromSha256
+    queueToSha256: QueueProjectionSha256
+    validationProfile: ValidationProfile
+    validatorSha256: CommonSha256
+    p1AdapterSha256: P1AdapterSha256
+    preCommitAdapterSha256: PreCommitAdapterSha256
+    prePushAdapterSha256: PrePushAdapterSha256
+    fixtureSha256: FixtureSha256
+  trustedContextFactType: exact_string
+  missingOrMismatchedTrustedContext: reject
+  candidateIdentityTypes:
+    - normalized_tree_hash
+    - commit_sha
+  candidateIdentityNormalization: clear_machine_self_fields
+  clearedMachineFields:
+    - candidateIdentity
+    - freshnessKey
+  commands:
+    indexPattern: command.NNN.name_exitCode_durationMs
+    firstIndex: "001"
+    contiguous: true
+    commandCountMustEqualIndexedTriples: true
+    maximum: 999
+    acceptedCommandMustOccurExactlyOnce: true
+    nonNegativeDecimalFields:
+      - exitCode
+      - durationMs
+  files:
+    indexPattern: file.NNN.path_and_status
+    firstIndex: "001"
+    contiguous: true
+    ordered: true
+    ordinalSorted: true
+    fileCountMustEqualIndexedPairs: true
+    maximum: 999
+    allowedStatuses:
+      - A
+      - M
+    trustedNameStatusRecordsFact: NameStatusRecords
+    exactTrustedCountOrderPathAndStatus: true
+    missingOrInvalidTrustedFileFacts: reject
+  nonNegativeDecimalFields:
+    - commandCount
+    - positiveCount
+    - negativeCount
+    - fileCount
+  sha256Fields:
+    - stateFromSha256
+    - stateToSha256
+    - queueFromSha256
+    - queueToSha256
+    - freshnessKey
+    - validatorSha256
+    - p1AdapterSha256
+    - preCommitAdapterSha256
+    - prePushAdapterSha256
+    - fixtureSha256
+  freshnessFieldOrder:
+    - candidateIdentity
+    - baseSha
+    - schemaVersion
+    - validatorSha256
+    - p1AdapterSha256
+    - preCommitAdapterSha256
+    - prePushAdapterSha256
+    - fixtureSha256
+    - stateProjectionSha256
+    - queueProjectionSha256
+    - validationProfile
+    - exactCommand
+  validationProfiles:
+    - focused
+    - full
+    - contract-instance-only
+    - docs-only
+  findingCodes:
+    - P1_AST_EVIDENCE_BLOCK_INVALID
+    - P1_AST_EVIDENCE_FIELD_INVALID
+    - P1_AST_EVIDENCE_COMMAND_SET_INVALID
+    - P1_AST_EVIDENCE_FILE_SET_INVALID
+    - P1_AST_EVIDENCE_REVIEW_PENDING
+    - P1_AST_EVIDENCE_CONTEXT_INVALID
+    - P1_AST_EVIDENCE_CANDIDATE_INVALID
+    - P1_AST_EVIDENCE_FRESHNESS_INVALID

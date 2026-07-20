@@ -44,6 +44,11 @@ function Invoke-ExpectFailure {
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PreCommitHardening.ps1"
 $phase11ScopeCorrectionGuardText = Get-Content -LiteralPath $scriptPath -Raw -Encoding UTF8
+# C4-ADAPTER-CONSISTENCY-BEGIN
+$approvedSameTaskTransitionAdapterMarkers = @("P1ApprovedSameTaskTransition.Common.ps1", "Get-P1ApprovedSameTaskTransitionStageInputs", "p1ApprovedSameTaskTransitionAutomatic", "function Invoke-P1ApprovedSameTaskTransitionAdapter", "Read-P1ApprovedSameTaskTransitionContract", "Test-P1ApprovedSameTaskTransition", "p1ApprovedSameTaskTransitionCoreFinding")
+$missingApprovedSameTaskTransitionAdapterMarkers = @($approvedSameTaskTransitionAdapterMarkers | Where-Object { -not $phase11ScopeCorrectionGuardText.Contains($_) })
+if ($missingApprovedSameTaskTransitionAdapterMarkers.Count -gt 0) { throw "Module pre-commit adapter consistency RED: $($missingApprovedSameTaskTransitionAdapterMarkers -join ', ')" }
+# C4-ADAPTER-CONSISTENCY-END
 $p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 $p1GuardText = Get-Content -LiteralPath $p1GuardPath -Raw -Encoding UTF8
 $phase11ScopeCorrectionPatterns = @(
@@ -2081,9 +2086,24 @@ $f0143BehaviorBaseSha = "0fe8edae7a7efc00154f5c54227623be55796983"
 $f0143BehaviorBranch = "codex/p1-f0143-spec-approval-transition-hotfix"
 $f0143BehaviorParentTaskId = "p1-remediation-rc-02-employee-personal-ai-context-2026-07-18"
 $f0143BehaviorAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-18-p1-f0143-spec-approval-transition-hotfix-authorization.md"
+# C6-F0143-FIXTURE-PROJECTION-BEGIN
+$f0143BehaviorStatePath = "docs/04-agent-system/state/project-state.yaml"
+$f0143BehaviorQueuePath = "docs/04-agent-system/state/task-queue.yaml"
+$f0143BehaviorCurrentCandidateFiles = @(
+    $f0143BehaviorAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1"
+)
 $f0143BehaviorFiles = @(
-    "docs/04-agent-system/state/project-state.yaml",
-    "docs/04-agent-system/state/task-queue.yaml",
+    $f0143BehaviorStatePath,
+    $f0143BehaviorQueuePath,
     $f0143BehaviorAuthorizationPath,
     "docs/05-execution-logs/task-plans/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
     "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md",
@@ -2105,16 +2125,60 @@ function Reset-F0143PreCommitBehaviorFixture {
     & git -C $f0143BehaviorRoot reset --hard --quiet $f0143BehaviorBaseSha
     & git -C $f0143BehaviorRoot clean -fdx --quiet
     & git -C $f0143BehaviorRoot branch -M $f0143BehaviorBranch
-    foreach ($candidatePath in $f0143BehaviorFiles) {
+    foreach ($candidatePath in $f0143BehaviorCurrentCandidateFiles) {
         $sourcePath = Join-Path $f0143BehaviorSourceRoot ($candidatePath -replace "/", "\")
         if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { throw "Missing F-0143 source file: $candidatePath" }
         Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path $candidatePath -Content ([System.IO.File]::ReadAllText($sourcePath))
+    }
+
+    $f0143BehaviorStateText = @(& git -C $f0143BehaviorRoot show "${f0143BehaviorBaseSha}:$f0143BehaviorStatePath") -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to read F-0143 fixed-base state fixture." }
+    $f0143BehaviorQueueText = @(& git -C $f0143BehaviorRoot show "${f0143BehaviorBaseSha}:$f0143BehaviorQueuePath") -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to read F-0143 fixed-base queue fixture." }
+
+    foreach ($projection in @(
+            @{
+                Label = "state"
+                Path = $f0143BehaviorStatePath
+                Text = $f0143BehaviorStateText
+                Replacements = @(
+                    @{
+                        Anchor = "  currentExecutionGate:`n    status: waiting_for_spec_review`n    reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required`n    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n    resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan"
+                        Replacement = "  currentExecutionGate:`n    status: satisfied`n    reason: current_user_approved_written_f0143_spec_2026_07_18`n    approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n    resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green"
+                    },
+                    @{
+                        Anchor = "  lastKnownMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b`n  lastKnownOriginMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b`n  lastKnownRemoteMasterSha: 4f63c3c17731cbc686bb234b89a64c31f36ab03b"
+                        Replacement = "  lastKnownMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983`n  lastKnownOriginMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983`n  lastKnownRemoteMasterSha: 0fe8edae7a7efc00154f5c54227623be55796983"
+                    }
+                )
+            },
+            @{
+                Label = "queue"
+                Path = $f0143BehaviorQueuePath
+                Text = $f0143BehaviorQueueText
+                Replacements = @(
+                    @{
+                        Anchor = "    currentExecutionGate:`n      status: waiting_for_spec_review`n      reason: current_user_approved_f0143_option_a_but_written_spec_review_is_required`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: review_written_f0143_selected_context_spec_then_write_implementation_plan"
+                        Replacement = "    currentExecutionGate:`n      status: satisfied`n      reason: current_user_approved_written_f0143_spec_2026_07_18`n      approvalRequestPath: docs/superpowers/specs/2026-07-18-employee-personal-ai-selected-context-design.md`n      resumeAction: execute_f0143_employee_personal_ai_selected_context_plan_red_to_green"
+                    }
+                )
+            }
+        )) {
+        $projectedText = ($projection.Text -replace "`r`n?", "`n")
+        foreach ($replacement in $projection.Replacements) {
+            if ([regex]::Matches($projectedText, [regex]::Escape($replacement.Anchor)).Count -ne 1) {
+                throw "F-0143 fixed-base $($projection.Label) projection anchor is not exact."
+            }
+            $projectedText = $projectedText.Replace($replacement.Anchor, $replacement.Replacement)
+        }
+        Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path $projection.Path -Content $projectedText
     }
     Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "docs/05-execution-logs/evidence/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md" -Content "# Fixture evidence`n`n## Root-Cause Reproduction`n`nResult: pass`n`n## TDD Evidence`n`nResult: pass`n`n## Reading Evidence`n`nstatus: complete`nconflictsFound: false`ntargetSourceReviewed: true`ntargetTestsReviewed: true`nanalogousImplementationReviewed: true`nCost Calibration Gate remains blocked.`n`n## Validation Results`n`nResult: pass"
     Set-F0143PreCommitFixtureFile -Root $f0143BehaviorRoot -Path "docs/05-execution-logs/audits-reviews/2026-07-18-p1-f0143-spec-approval-transition-hotfix.md" -Content "# Fixture audit`n`n## Round 1`n`nResult: pass`n`n## Round 2`n`nResult: pass`n`n## Decision`n`nDecision: APPROVE"
     & git -C $f0143BehaviorRoot add -- $f0143BehaviorFiles
     if ($LASTEXITCODE -ne 0) { throw "Failed to stage F-0143 behavior fixture." }
 }
+# C6-F0143-FIXTURE-PROJECTION-END
 
 function Assert-F0143PreCommitBehaviorFailure {
     param(
