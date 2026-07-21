@@ -691,6 +691,11 @@ export function createAdminFlowRuntimeRouteHandlers(
 
     const result = await repositories.userOrgAuthRepository.createAdminAccount(
       createInput.value,
+      {
+        publicId: actor.publicId,
+        roles: actor.roles,
+        requestIp: readRequestIp(request),
+      },
     );
 
     if (result.status === "conflict") {
@@ -722,15 +727,6 @@ export function createAdminFlowRuntimeRouteHandlers(
 
       return createJsonResponse(organizationNotFoundResponse);
     }
-
-    await appendAdminAccountCreationAuditLog({
-      repositories,
-      request,
-      actor,
-      resultStatus: "success",
-      targetPublicId: result.adminAccount.publicId,
-      metadataSummary: "redacted admin account creation metadata",
-    });
 
     return createJsonResponse(
       createSuccessResponse<AdminAccountCreationResultDto>({

@@ -64,6 +64,7 @@ function createAdminSessionService(
 function createRepositories(input: {
   auditInputs: unknown[];
   createInputs: unknown[];
+  creationActors?: unknown[];
   createStatus?:
     | "created"
     | "admin_phone_exists"
@@ -84,8 +85,9 @@ function createRepositories(input: {
           },
         };
       },
-      async createAdminAccount(createInput) {
+      async createAdminAccount(createInput, actor) {
         input.createInputs.push(createInput);
+        input.creationActors?.push(actor);
 
         if (input.createStatus === "admin_phone_exists") {
           return {
@@ -179,7 +181,12 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
   it("allows super_admin to create ops_admin and content_admin accounts through the governed route without returning secrets", async () => {
     const auditInputs: unknown[] = [];
     const createInputs: unknown[] = [];
-    const repositories = createRepositories({ auditInputs, createInputs });
+    const creationActors: unknown[] = [];
+    const repositories = createRepositories({
+      auditInputs,
+      createInputs,
+      creationActors,
+    });
 
     const opsResponse = await postAdminAccount({
       body: createAdminAccountRequestBody({
@@ -221,24 +228,26 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
     });
     expect(contentPayload.data.adminAccount.adminRole).toBe("content_admin");
     expect(createInputs).toHaveLength(2);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "admin_account.create",
-        actorRole: "super_admin",
-        metadataSummary: "redacted admin account creation metadata",
-        resultStatus: "success",
-        targetResourceType: "admin",
-      }),
-      expect.objectContaining({
-        actionType: "admin_account.create",
-        actorRole: "super_admin",
-        metadataSummary: "redacted admin account creation metadata",
-        resultStatus: "success",
-        targetResourceType: "admin",
-      }),
+    expect(auditInputs).toEqual([]);
+    expect(creationActors).toEqual([
+      {
+        publicId: "admin-public-super_admin",
+        roles: ["super_admin"],
+        requestIp: null,
+      },
+      {
+        publicId: "admin-public-super_admin",
+        roles: ["super_admin"],
+        requestIp: null,
+      },
     ]);
     expect(
-      JSON.stringify({ opsPayload, contentPayload, auditInputs }),
+      JSON.stringify({
+        opsPayload,
+        contentPayload,
+        auditInputs,
+        creationActors,
+      }),
     ).not.toMatch(
       /CreatedPass2026|password|hash|admin-session-token|authUserId|internal/i,
     );
@@ -247,6 +256,7 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
   it("allows ops_admin to create organization admins only with an organization binding", async () => {
     const auditInputs: unknown[] = [];
     const createInputs: unknown[] = [];
+    const creationActors: unknown[] = [];
     const response = await postAdminAccount({
       body: createAdminAccountRequestBody({
         adminRole: "org_standard_admin",
@@ -254,7 +264,11 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
         organizationPublicId: "organization-public-boundary",
         phone: "13900009006",
       }),
-      repositories: createRepositories({ auditInputs, createInputs }),
+      repositories: createRepositories({
+        auditInputs,
+        createInputs,
+        creationActors,
+      }),
       role: "ops_admin",
     });
 
@@ -282,16 +296,17 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
         organizationPublicId: "organization-public-boundary",
       }),
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "admin_account.create",
-        actorRole: "ops_admin",
-        metadataSummary: "redacted admin account creation metadata",
-        resultStatus: "success",
-        targetResourceType: "admin",
-      }),
+    expect(auditInputs).toEqual([]);
+    expect(creationActors).toEqual([
+      {
+        publicId: "admin-public-ops_admin",
+        roles: ["ops_admin"],
+        requestIp: null,
+      },
     ]);
-    expect(JSON.stringify({ payload, auditInputs })).not.toMatch(
+    expect(
+      JSON.stringify({ payload, auditInputs, creationActors }),
+    ).not.toMatch(
       /CreatedPass2026|password|hash|admin-session-token|13900009006/i,
     );
   });

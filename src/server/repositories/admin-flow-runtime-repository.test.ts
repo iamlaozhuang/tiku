@@ -8,9 +8,11 @@ import {
 import { sql } from "drizzle-orm";
 import {
   admin as adminTable,
+  adminRoleAssignment as adminRoleAssignmentTable,
   auditLog as auditLogTable,
   authAccount as authAccountTable,
   authSession as authSessionTable,
+  authUser as authUserTable,
   user as userTable,
 } from "@/db/schema";
 
@@ -250,6 +252,72 @@ function createAdminCreationConflictDatabase() {
   return { database, events };
 }
 
+function createAdminCreationDatabase(input?: { auditFailure?: boolean }) {
+  const events: string[] = [];
+  const auditValues: unknown[] = [];
+  const selectRows = [[], []] as unknown[][];
+  let selectIndex = 0;
+  const transaction = {
+    async execute() {
+      events.push("lock_identity");
+      return [];
+    },
+    select() {
+      const rows = selectRows[selectIndex];
+
+      if (rows === undefined) {
+        throw new Error(`Unexpected creation select ${selectIndex + 1}.`);
+      }
+
+      selectIndex += 1;
+      return createAwaitableSelectBuilder(rows);
+    },
+    insert(table: unknown) {
+      const event =
+        table === authUserTable
+          ? "insert_auth_user"
+          : table === authAccountTable
+            ? "insert_auth_account"
+            : table === adminTable
+              ? "insert_admin"
+              : table === adminRoleAssignmentTable
+                ? "insert_admin_role"
+                : table === auditLogTable
+                  ? "insert_audit"
+                  : "insert_other";
+
+      events.push(event);
+
+      return {
+        values(values: unknown) {
+          if (table === auditLogTable) {
+            auditValues.push(values);
+
+            if (input?.auditFailure === true) {
+              throw new Error("simulated admin creation audit failure");
+            }
+          }
+
+          return {
+            async returning() {
+              return table === adminTable ? [{ id: 101 }] : [];
+            },
+          };
+        },
+      };
+    },
+  };
+  const database = {
+    async transaction<T>(
+      callback: (transactionValue: typeof transaction) => Promise<T>,
+    ) {
+      return callback(transaction);
+    },
+  };
+
+  return { auditValues, database, events };
+}
+
 function createUserPasswordResetDatabase(input?: {
   auditFailure?: boolean;
   sessionFailure?: boolean;
@@ -331,6 +399,80 @@ function createUserPasswordResetDatabase(input?: {
 }
 
 describe("admin flow runtime repository backend accounts", () => {
+  it("writes the redacted creation audit after account rows in the same transaction", async () => {
+    const fixture = createAdminCreationDatabase();
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.createAdminAccount?.(
+        {
+          phone: "13900000009",
+          name: "Created Admin",
+          [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
+          adminRole: "content_admin",
+          organizationPublicId: null,
+        },
+        {
+          publicId: "admin-public-operator",
+          roles: ["super_admin"],
+          requestIp: "127.0.0.1",
+        },
+      ),
+    ).resolves.toMatchObject({
+      status: "created",
+      adminAccount: { adminRole: "content_admin" },
+    });
+    expect(fixture.events).toEqual([
+      "lock_identity",
+      "insert_auth_user",
+      "insert_auth_account",
+      "insert_admin",
+      "insert_admin_role",
+      "insert_audit",
+    ]);
+    expect(fixture.auditValues).toEqual([
+      expect.objectContaining({
+        action_type: "admin_account.create",
+        actor_public_id: "admin-public-operator",
+        actor_role: "super_admin",
+        metadata_summary: "redacted admin account creation metadata",
+        request_ip: "127.0.0.1",
+        result_status: "success",
+        target_resource_type: "admin",
+      }),
+    ]);
+    expect(JSON.stringify(fixture.auditValues)).not.toMatch(
+      /13900000009|abc12345|password|hash/i,
+    );
+  });
+
+  it("propagates creation audit failure from the account transaction", async () => {
+    const fixture = createAdminCreationDatabase({ auditFailure: true });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.createAdminAccount?.(
+        {
+          phone: "13900000009",
+          name: "Created Admin",
+          [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
+          adminRole: "content_admin",
+          organizationPublicId: null,
+        },
+        {
+          publicId: "admin-public-operator",
+          roles: ["super_admin"],
+          requestIp: null,
+        },
+      ),
+    ).rejects.toThrow("simulated admin creation audit failure");
+    expect(fixture.events.at(-1)).toBe("insert_audit");
+  });
+
   it("checks the administrator phone conflict under the shared transaction lock", async () => {
     const fixture = createAdminCreationConflictDatabase();
     const repositories = createPostgresAdminFlowRuntimeRepositories({
@@ -338,13 +480,20 @@ describe("admin flow runtime repository backend accounts", () => {
     });
 
     await expect(
-      repositories.userOrgAuthRepository.createAdminAccount?.({
-        phone: "13900000008",
-        name: "Existing Admin",
-        [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
-        adminRole: "content_admin",
-        organizationPublicId: null,
-      }),
+      repositories.userOrgAuthRepository.createAdminAccount?.(
+        {
+          phone: "13900000008",
+          name: "Existing Admin",
+          [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
+          adminRole: "content_admin",
+          organizationPublicId: null,
+        },
+        {
+          publicId: "admin-public-operator",
+          roles: ["super_admin"],
+          requestIp: null,
+        },
+      ),
     ).resolves.toEqual({
       reason: "admin_phone_exists",
       status: "conflict",

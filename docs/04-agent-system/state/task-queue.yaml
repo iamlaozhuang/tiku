@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
+  currentTaskId: p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -243,6 +243,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-student-home-pagination-2026-07-20
     - p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
+    - p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -272,6 +273,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
     - p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
+    - p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -327,7 +329,72 @@ p1RemediationSerialProgram:
     p1-execution-policy-capsule-v1-2026-07-21: closed
     p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21: closed
+    p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21: closed
 activeTasks:
+  - id: p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
+    title: Admin account creation audit atomicity
+    phase: p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0031_admin_account_creation_partition
+    branch: fix/admin-account-creation-audit-atomicity
+    objective: close only the admin-account creation database partition of F-0031 by sharing one transaction with its redacted success audit while preserving existing role and organization authorization semantics
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0031
+    highRiskApproval:
+      category: bounded_permission_and_database_application_transaction_logic
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
+    partitionBoundary:
+      included:
+        - admin_account_creation_database_mutation
+      alreadyCovered:
+        - admin_account_update_disable_enable_and_password_reset
+        - user_password_reset
+        - question_and_material_database_mutations
+        - paper_and_paper_question_database_mutations
+      excluded:
+        - paper_asset_filesystem_mutations
+        - resource_mutations
+        - knowledge_node_mutations
+    findingDisposition:
+      F-0031: in_progress_admin_account_creation_partition_closed_resource_knowledge_and_paper_asset_partitions_pending
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      preflightIncludedTestFiles: 9
+      inTaskTestOnlyExpansionCount: 0
+      tddRed: expected_3_failures_transaction_actor_context_and_duplicate_success_audit
+      adversarialRed: expected_1_failure_creation_audit_summary_drift
+      focused: passed_36_of_36
+      affectedRegression: passed_47_of_47
+      lint: passed_exact_affected_files
+      typecheck: passed
+      build: passed_97_static_pages
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullProfile: pass_build_p0_global_p0_serial_format_and_diff
+      mainThreadAdversarialReview: passed_atomic_success_audit_failure_propagation_redaction_and_unchanged_role_semantics
+      entitlementExpansion: false
+      roleOrAuthorizationSemanticChange: false
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
+    closeout:
+      commit: finalized_by_commit_containing_this_state
+      status: ready_for_commit_ff_only_merge_push_sync_and_cleanup
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
+      findingId: F-0031_paper_database_partition
+      commit: 77ab8f8b3cca298d1a22a3821c0e7f3ac39ca74e
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   - id: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
     title: Paper database audit atomicity
     phase: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21

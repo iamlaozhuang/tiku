@@ -1,24 +1,22 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21",
-  "objective": "Close only the database-backed paper and paper_question partition of F-0031 by committing each successful mutation and its redacted audit_log row in one repository transaction; explicitly exclude paper_asset filesystem operations and all remaining admin/resource/knowledge partitions.",
+  "taskId": "p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21",
+  "objective": "Close only the admin-account creation database partition of F-0031 by committing the credential, admin, role/organization binding, and redacted audit_log row in one repository transaction; preserve all existing role and organization authorization semantics and do not claim resource, knowledge, or paper_asset partitions closed.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/content-mutation-audit.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/services/paper-draft-service.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "tests/unit/paper-draft-repository-composition-guard.test.ts",
-    "tests/unit/paper-draft-repository-archive-termination.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
-    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-    "tests/unit/question-paper/question-paper-rest-layering.test.ts"
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/services/admin-flow-runtime.ts",
+    "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
+    "src/server/repositories/admin-flow-runtime-repository.test.ts",
+    "src/server/services/admin-flow-runtime.test.ts",
+    "tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts",
+    "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts",
+    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts",
+    "tests/unit/p0-rc-01-admin-account-migration-source.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -27,13 +25,11 @@
     ".env*",
     "drizzle/**",
     "src/db/schema/**",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/local-paper-asset-storage.ts",
     "scripts/**"
   ],
   "validationCommands": [
     {
-      "name": "paper-database-audit-atomicity-focused",
+      "name": "admin-account-creation-audit-atomicity-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -41,13 +37,14 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-        "src/server/repositories/paper-draft-repository.test.ts"
+        "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
+        "src/server/repositories/admin-flow-runtime-repository.test.ts",
+        "src/server/services/admin-flow-runtime.test.ts",
+        "tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts"
       ]
     },
     {
-      "name": "paper-database-audit-atomicity-regression",
+      "name": "admin-account-creation-audit-atomicity-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -55,38 +52,36 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/paper-draft-repository-composition-guard.test.ts",
-        "tests/unit/paper-draft-repository-archive-termination.test.ts",
-        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
-        "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts",
-        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-        "tests/unit/question-paper/question-paper-rest-layering.test.ts"
+        "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts",
+        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+        "tests/unit/phase-11-system-ops-organization-management-loop.test.ts",
+        "tests/unit/p0-rc-01-admin-account-migration-source.test.ts"
       ]
     },
     {
-      "name": "paper-database-audit-atomicity-lint",
+      "name": "admin-account-creation-audit-atomicity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/content-mutation-audit.ts",
-        "src/server/repositories/paper-draft-repository.ts",
-        "src/server/services/paper-draft-service.ts",
-        "src/server/services/paper-composition-lifecycle-runtime.ts",
-        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/server/services/admin-flow-runtime.ts",
+        "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
+        "src/server/services/admin-flow-runtime.test.ts",
+        "tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts"
       ]
     },
     {
-      "name": "paper-database-audit-atomicity-typecheck",
+      "name": "admin-account-creation-audit-atomicity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "paper-database-audit-atomicity-build",
+      "name": "admin-account-creation-audit-atomicity-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -95,7 +90,7 @@
   "approvalSources": {
     "dependency": null,
     "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": null,
+    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },

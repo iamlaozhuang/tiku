@@ -82,6 +82,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
   getUserPhoneForDisclosure?(publicId: string): Promise<string | null>;
   createAdminAccount?(
     input: AdminAccountCreationInputDto,
+    actor: AdminAccountLifecycleRepositoryActor,
   ): Promise<AdminAccountCreationRepositoryResult>;
   getAdminAccountDetail?(
     publicId: string,
@@ -866,7 +867,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
 
       return userRow?.phone ?? null;
     },
-    async createAdminAccount(input) {
+    async createAdminAccount(input, actor) {
       const database = getDatabase();
       const targetOrganizationRow =
         input.organizationPublicId === null
@@ -970,6 +971,16 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
               organization_id: targetOrganizationRow.id,
             });
           }
+
+          await appendAtomicAdminAccountAudit({
+            transaction,
+            actor,
+            actionType: "admin_account.create",
+            metadataSummary: "redacted admin account creation metadata",
+            targetPublicId: adminPublicId,
+            now,
+          });
+
           return null;
         },
       );
@@ -1192,10 +1203,12 @@ async function appendAtomicAdminAccountAudit(input: {
   transaction: AdminFlowRuntimeTransaction;
   actor: AdminAccountLifecycleRepositoryActor;
   actionType:
+    | "admin_account.create"
     | "admin_account.update"
     | "admin_account.disable"
     | "admin_account.enable"
     | "admin_account.reset_password";
+  metadataSummary?: string;
   targetPublicId: string;
   now: Date;
 }): Promise<void> {
@@ -1204,7 +1217,8 @@ async function appendAtomicAdminAccountAudit(input: {
     actor_public_id: input.actor.publicId,
     actor_role: input.actor.roles[0] ?? "unknown",
     created_at: input.now,
-    metadata_summary: `redacted ${input.actionType} metadata`,
+    metadata_summary:
+      input.metadataSummary ?? `redacted ${input.actionType} metadata`,
     public_id: `audit-log-${randomUUID()}`,
     request_ip: input.actor.requestIp,
     result_status: "success",
