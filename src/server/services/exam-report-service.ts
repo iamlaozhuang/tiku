@@ -1026,6 +1026,8 @@ export function createExamReportService(
         await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
           {
             userPublicId: userContext.userPublicId,
+            profession: report.profession,
+            level: report.level,
             answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,
             mockExamPublicId: report.mock_exam_public_id,
             questionPublicId: selectedAnswerRecord?.question_public_id ?? null,

@@ -128,9 +128,9 @@ function createRepositories(): AdminAiAuditLogRuntimeRepositories {
       const aiCallLog = {
         publicId: "ai-call-log-dev-mock-001",
         userPublicId: input.userPublicId,
-        organizationPublicId: null,
-        profession: null,
-        level: null,
+        organizationPublicId: input.organizationPublicId ?? null,
+        profession: input.profession ?? null,
+        level: input.level ?? null,
         aiFuncType: input.aiFuncType,
         callStatus: input.callStatus,
         providerDisplayName: input.modelConfigSnapshot.providerDisplayName,
@@ -231,6 +231,9 @@ describe("phase 7 AI mock provider and log runtime smoke", () => {
 
     const aiResult = await aiRuntime.generateLearningSuggestion({
       userPublicId: "user-dev-student",
+      organizationPublicId: "organization-public-001",
+      profession: "monopoly",
+      level: 3,
       answerRecordPublicId: "answer-record-dev-001",
       mockExamPublicId: "mock-exam-dev-001",
       questionPublicId: "question-dev-single-choice",
@@ -250,6 +253,11 @@ describe("phase 7 AI mock provider and log runtime smoke", () => {
 
     expect(aiResult.learningSuggestion).toContain("本地模拟学习建议");
     expect(aiResult.aiCallLog.publicId).toBe("ai-call-log-dev-mock-001");
+    expect(aiResult.aiCallLog).toMatchObject({
+      organizationPublicId: "organization-public-001",
+      profession: "monopoly",
+      level: 3,
+    });
 
     const modelConfigsResponse = await handlers.modelConfigs.GET(
       new Request("http://localhost/api/v1/model-configs", {

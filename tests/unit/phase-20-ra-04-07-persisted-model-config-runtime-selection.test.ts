@@ -204,6 +204,8 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
     expect(appendedAiCallLogs).toHaveLength(1);
     expect(appendedAiScoringAttempts).toHaveLength(1);
     expect(appendedAiCallLogs[0]).toMatchObject({
+      profession: "marketing",
+      level: 3,
       modelConfigSnapshot: {
         modelConfigPublicId: "model-config-admin-scoring",
         modelName: "admin-managed-scoring-model",

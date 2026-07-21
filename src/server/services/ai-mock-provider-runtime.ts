@@ -17,6 +17,9 @@ export type AiMockProviderPromptTemplateSnapshot = {
 
 export type LearningSuggestionMockContext = {
   userPublicId: string;
+  organizationPublicId?: string | null;
+  profession?: AppendAiCallLogInput["profession"];
+  level?: number | null;
   answerRecordPublicId: string | null;
   mockExamPublicId: string | null;
   questionPublicId: string | null;
@@ -70,6 +73,9 @@ export function createAiMockProviderRuntime(
       });
       const aiCallLogInput = {
         userPublicId: context.userPublicId,
+        organizationPublicId: context.organizationPublicId ?? null,
+        profession: context.profession ?? null,
+        level: context.level ?? null,
         answerRecordPublicId: context.answerRecordPublicId,
         mockExamPublicId: context.mockExamPublicId,
         questionPublicId: context.questionPublicId,

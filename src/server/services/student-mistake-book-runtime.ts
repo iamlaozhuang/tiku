@@ -252,6 +252,9 @@ export function createGovernedMistakeBookAiExplanationRuntime(input: {
       if (result.aiCallLogDraft !== null) {
         await aiCallLogRepository.appendAiCallLog({
           userPublicId: context.userPublicId,
+          organizationPublicId: null,
+          profession: readSnapshotProfession(context.questionSnapshot),
+          level: readSnapshotLevel(context.questionSnapshot),
           answerRecordPublicId: null,
           mockExamPublicId: null,
           questionPublicId: context.questionPublicId,

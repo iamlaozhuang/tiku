@@ -1025,6 +1025,10 @@ describe("exam report service", () => {
       data: null,
     });
     expect(capturedContexts).toHaveLength(1);
+    expect(capturedContexts[0]).toMatchObject({
+      profession: "monopoly",
+      level: 3,
+    });
     expect(updateInputs).toEqual([
       {
         userPublicId: "user_public_123",

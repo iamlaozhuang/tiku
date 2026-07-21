@@ -1,30 +1,25 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21",
-  "objective": "Advance F-0038 with a reviewable foundation partition: persist nullable organization, profession, level, and captured estimated-cost facts on ai_call_log; apply organization/user/profession/level/function/status/time filters and authoritative count in PostgreSQL; and aggregate day/month summaries over the full filtered relation instead of a 100-row page. This task does not claim producer propagation, pricing-source semantics, UI completion, or full F-0038 closure.",
+  "taskId": "p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21",
+  "objective": "Advance F-0038 without claiming closure by propagating already-authoritative profession and level facts, plus any explicitly supplied organization fact, through the existing AI scoring, explanation, and learning-suggestion append paths. Do not derive new authorization context, pricing, or entitlement semantics and do not call a real Provider.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260721220000_p1_rc_04_ai_call_log_fact_query.sql",
-    "drizzle/meta/20260721220000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/admin-ai-audit-log-ops-contract.ts",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts",
-    "src/server/services/admin-ai-audit-log-ops-route.ts",
-    "src/server/services/ai-call-log/route-handlers.ts",
-    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-    "tests/unit/p1-admin-log-pagination-total.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+    "src/server/services/student-flow-runtime.ts",
+    "src/server/services/student-mistake-book-runtime.ts",
+    "src/server/services/ai-mock-provider-runtime.ts",
+    "src/server/services/exam-report-service.ts",
+    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
+    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
     "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-    "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts",
-    "src/server/mappers/ai-rag-mapper.test.ts",
-    "src/server/models/ai-rag.test.ts"
+    "src/server/services/exam-report-service.test.ts",
+    "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
+    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+    "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -32,78 +27,61 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
+    "src/db/**",
+    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "src/server/services/student-flow-runtime.ts",
-    "src/server/services/student-mistake-book-runtime.ts",
-    "src/server/services/ai-mock-provider-runtime.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
+    "src/server/services/*authorization*",
+    "src/server/services/*auth*",
     "src/features/**",
+    "src/app/**",
     "e2e/**"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260721220000_p1_rc_04_ai_call_log_fact_query.sql",
-    "drizzle/meta/20260721220000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/admin-ai-audit-log-ops-contract.ts",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts",
-    "src/server/services/admin-ai-audit-log-ops-route.ts",
-    "src/server/services/ai-call-log/route-handlers.ts",
-    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts"
+    "src/server/services/student-flow-runtime.ts",
+    "src/server/services/student-mistake-book-runtime.ts",
+    "src/server/services/ai-mock-provider-runtime.ts",
+    "src/server/services/exam-report-service.ts",
+    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-admin-log-pagination-total.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
+    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
     "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-    "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts",
-    "src/server/mappers/ai-rag-mapper.test.ts",
-    "src/server/models/ai-rag.test.ts"
+    "src/server/services/exam-report-service.test.ts",
+    "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
+    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+    "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiCaller": "Admin AI call-log pages already consume the shared contract; UI changes are excluded from this foundation partition.",
-    "apiHandler": "src/server/services/ai-call-log/route-handlers.ts is the canonical /api/v1/ai-call-logs handler and currently summarizes only the already paginated list result.",
-    "compatibilityHandler": "src/server/services/admin-ai-audit-log-ops-route.ts is retained as a compatibility path and currently drops all filters except page, pageSize, and keyword.",
-    "adapter": "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts is the direct canonical adapter over the admin runtime repository and currently exposes list only.",
-    "service": "src/server/services/admin-ai-audit-log-ops-service.ts normalizes the compatibility query and delegates; no change is expected for this partition.",
-    "repository": "src/server/repositories/admin-ai-audit-log-runtime-repository.ts hardcodes missing dimensions and zero cost, rejects organization/profession/level filters, and summarizes only the first 100 list rows.",
-    "schema": "src/db/schema/ai-rag.ts ai_call_log currently lacks organization_public_id, profession, level, and estimated_cost_cny.",
-    "producerBoundary": "All production append callers are deliberately blocked for this foundation partition; producer context propagation and a pricing SSOT remain separate F-0038 acceptance work.",
-    "directChainExpansion": {
-      "authorization": "P1_EXECUTION_POLICY_CAPSULE_V1_1 same-task direct authoritative-chain allowance",
-      "reason": "The canonical summary endpoint was proven to paginate before aggregation; the adapter and route handler are direct caller/callee files required to consume the approved SQL summary without changing business scope.",
-      "addedProductFiles": [
-        "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts",
-        "src/server/services/ai-call-log/route-handlers.ts"
-      ],
-      "addedProductFileCount": 2,
-      "sameTaskRootCauseRiskAndDomain": true,
-      "newCapabilityOrHighRiskCategory": false
-    },
+    "aiScoring": "MockExamAiScoringRuntimeContext already contains authoritative profession and level, but student-flow-runtime omits both from appendAiCallLog.",
+    "aiExplanation": "MistakeBookAiExplanationRuntimeContext carries a question snapshot already parsed for RAG profession and level, but student-mistake-book-runtime omits them from appendAiCallLog.",
+    "learningSuggestion": "ExamReportRow already contains authoritative profession and level; exam-report-service omits them from LearningSuggestionMockContext, and ai-mock-provider-runtime omits optional dimension fields from appendAiCallLog.",
+    "organizationBoundary": "Current learner service contexts expose no authoritative organizationPublicId. This task propagates an explicitly supplied optional value only and does not expand session or authorization context.",
+    "costBoundary": "No approved pricing SSOT exists. estimatedCostCny remains null and cost-source semantics stay outside this task.",
+    "providerBoundary": "Only deterministic context-to-log input propagation changes. Tests inject local fake runners/providers; no real Provider, credential, configuration, or external call is permitted.",
     "directTests": [
-      "src/db/schema/ai-rag.test.ts",
-      "tests/unit/p1-admin-log-pagination-total.test.ts",
-      "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-      "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-      "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+      "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
+      "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
       "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-      "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts",
-      "src/server/mappers/ai-rag-mapper.test.ts",
-      "src/server/models/ai-rag.test.ts"
+      "src/server/services/exam-report-service.test.ts",
+      "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+      "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+      "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
+      "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+      "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
     ]
   },
   "validationCommands": [
     {
-      "name": "ai-call-log-fact-query-focused",
+      "name": "ai-call-log-dimension-propagation-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -111,114 +89,82 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts"
-      ]
-    },
-    {
-      "name": "ai-call-log-fact-query-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-admin-log-pagination-total.test.ts",
-        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+        "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
         "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-        "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts",
-        "src/server/mappers/ai-rag-mapper.test.ts",
-        "src/server/models/ai-rag.test.ts"
+        "src/server/services/exam-report-service.test.ts"
       ]
     },
     {
-      "name": "ai-call-log-fact-query-lint",
+      "name": "ai-call-log-dimension-propagation-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
+        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+        "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
+      ]
+    },
+    {
+      "name": "ai-call-log-dimension-propagation-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/contracts/admin-ai-audit-log-ops-contract.ts",
-        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-        "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts",
-        "src/server/services/admin-ai-audit-log-ops-route.ts",
-        "src/server/services/ai-call-log/route-handlers.ts",
-        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-        "tests/unit/p1-admin-log-pagination-total.test.ts",
-        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+        "src/server/services/student-flow-runtime.ts",
+        "src/server/services/student-mistake-book-runtime.ts",
+        "src/server/services/ai-mock-provider-runtime.ts",
+        "src/server/services/exam-report-service.ts",
+        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+        "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
         "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-        "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts",
-        "src/server/mappers/ai-rag-mapper.test.ts",
-        "src/server/models/ai-rag.test.ts"
+        "src/server/services/exam-report-service.test.ts",
+        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
+        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+        "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
       ]
     },
     {
-      "name": "ai-call-log-fact-query-typecheck",
+      "name": "ai-call-log-dimension-propagation-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "ai-call-log-fact-query-build",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "fresh-schema-start-f0038-ai-call-log-fact-query-foundation-2026-07-21",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "approvalEnvelope": {
-    "approvalId": "fresh-schema-start-f0038-ai-call-log-fact-query-foundation-2026-07-21",
-    "status": "approved_task_bound_conditional_closeout",
-    "taskId": "p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21",
-    "rootCause": "ai_call_log_schema_drops_fact_dimensions_and_repository_filters_or_aggregates_an_incomplete_page",
-    "riskCategory": "schema_migration_source_and_database_application_logic",
-    "baseSha": "4fa858af54ab6f6581bb45f501c1e1c146a05679",
-    "conditionalCloseout": true,
-    "requestedOperations": [
-      "schema_and_migration_source_implementation_without_execution",
-      "offline_drizzle_generation",
-      "product_and_test_implementation",
-      "validation_and_main_thread_adversarial_review",
-      "one_reviewable_commit",
-      "ff_only_merge_to_master",
-      "one_ordinary_push_to_canonical_origin_master",
-      "sync_verification",
-      "short_branch_cleanup"
-    ],
-    "explicitlyForbidden": [
-      "migration_execution",
-      "persistent_database_write_or_real_data_access",
-      "producer_or_ui_scope_in_this_partition",
-      "pricing_source_semantics_in_this_partition",
-      "dependency_or_lockfile_change",
-      "permission_or_entitlement_change",
-      "provider_or_external_service_call",
-      "secret_or_env_change",
-      "deployment",
-      "pull_request",
-      "force_push",
-      "noncanonical_remote",
-      "subagent"
-    ],
-    "canonicalPushTarget": "https://github.com/iamlaozhuang/tiku.git#refs/heads/master",
-    "approvalFingerprint": "p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21|ai_call_log_schema_drops_fact_dimensions_and_repository_filters_or_aggregates_an_incomplete_page|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|4fa858af54ab6f6581bb45f501c1e1c146a05679"
+  "standingApprovals": [
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
+  "riskClassification": {
+    "category": "bounded_provider_adapter_pure_logic_and_database_input_propagation",
+    "eligibleForStandingCloseout": true,
+    "noEntitlementExpansion": true,
+    "noSchemaMigrationOrDatabaseExecution": true,
+    "noRealProviderExternalCallOrCredential": true,
+    "noDependencyConfigurationOrMechanismChange": true
   },
   "push": {
     "target": "origin/master",
-    "requiresFreshApproval": true
+    "requiresFreshApproval": false,
+    "standingApprovalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

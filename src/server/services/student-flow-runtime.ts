@@ -323,6 +323,8 @@ export function createDefaultAiScoringRuntime(
       if (result.aiCallLogDraft !== null) {
         const aiCallLog = await aiCallLogRepository.appendAiCallLog({
           userPublicId: context.userPublicId,
+          profession: context.profession,
+          level: context.level,
           answerRecordPublicId: context.answerRecordPublicId,
           mockExamPublicId: context.mockExamPublicId,
           questionPublicId: context.questionPublicId,
