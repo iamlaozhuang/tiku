@@ -253,6 +253,13 @@
       "when": 1784629451965,
       "tag": "20260721110000_p1_rc_04_resource_upload_saga",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1784658600000,
+      "tag": "20260721183000_p1_rc_04_paper_asset_upload_saga",
+      "breakpoints": true
     }
   ]
 }

@@ -48,25 +48,53 @@ function createSessionService(): Pick<SessionService, "getCurrentSession"> {
 function createRepositories(
   capturedPaperAssetInputs: unknown[],
 ): PaperCompositionLifecycleRuntimeRepositories {
+  let preparedInput:
+    | Parameters<
+        NonNullable<PaperAssetRepository["preparePaperAssetUpload"]>
+      >[0]
+    | undefined;
   const paperAssetRepository: PaperAssetRepository = {
-    async listPaperAssets() {
-      return { rows: [], total: 0 };
-    },
-    async createPaperAsset(input) {
+    async preparePaperAssetUpload(input) {
+      preparedInput = input;
       capturedPaperAssetInputs.push(input);
 
       return {
-        id: 1,
-        public_id: "paper-asset-local-upload-001",
-        paper_public_id: input.paperPublicId,
-        paper_attachment_usage: input.paperAttachmentUsage,
-        file_name: input.fileName,
-        object_key: input.objectKey,
-        content_type: input.contentType,
-        file_size_byte: input.fileSizeByte,
-        file_hash: input.fileHash,
-        created_at: createdAt,
+        status: "prepared",
+        operation: {
+          publicId: "paper-asset-upload-operation-local-001",
+          paperAssetPublicId: "paper-asset-local-upload-001",
+          objectKey: input.objectKey,
+        },
       };
+    },
+    async markPaperAssetUploadFileStored() {
+      return true;
+    },
+    async completePaperAssetUpload() {
+      if (preparedInput === undefined) {
+        throw new Error("Paper asset upload was not prepared.");
+      }
+
+      return {
+        status: "completed",
+        replayed: false,
+        paperAsset: {
+          id: 1,
+          public_id: "paper-asset-local-upload-001",
+          paper_public_id: preparedInput.paperPublicId,
+          paper_attachment_usage: preparedInput.paperAttachmentUsage,
+          file_name: preparedInput.fileName,
+          object_key: preparedInput.objectKey,
+          content_type: preparedInput.contentType,
+          file_size_byte: preparedInput.fileSizeByte,
+          file_hash: preparedInput.fileHash,
+          created_at: createdAt,
+        },
+      };
+    },
+    async recordPaperAssetUploadFailure() {},
+    async listPaperAssets() {
+      return { rows: [], total: 0 };
     },
     async findPaperAssetByPublicId() {
       return null;
@@ -165,13 +193,18 @@ describe("phase 11 local file upload storage adapter", () => {
     });
     expect(capturedPaperAssetInputs).toEqual([
       expect.objectContaining({
-        commandPublicId: "paper-asset-command-local-upload-001",
+        actorPublicId: "admin-content-public",
+        idempotencyKeyHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+        requestFingerprint: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
         fileName: "local-paper-source.md",
         objectKey: expect.stringMatching(
           /^dev\/paper-asset\/marketing\/\d{6}\/[a-f0-9]{64}\.md$/,
         ),
       }),
     ]);
+    expect(JSON.stringify(capturedPaperAssetInputs)).not.toContain(
+      "paper-asset-command-local-upload-001",
+    );
     expect(serializedPayload).not.toContain("objectKey");
     expect(serializedPayload).not.toContain(storageRoot);
   });

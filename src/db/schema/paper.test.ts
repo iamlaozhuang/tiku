@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
 
+import * as paperSchema from "./paper";
+
 import {
   paper,
   paperCommand,
@@ -26,6 +28,50 @@ function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
 }
 
 describe("paper schema question_type enum", () => {
+  it("persists a resumable paper_asset upload operation", () => {
+    const uploadOperation = (paperSchema as unknown as Record<string, unknown>)
+      .paperAssetUploadOperation;
+
+    expect(uploadOperation).toBeDefined();
+    expect(paperSchema.paperAssetUploadOperationStatusValues).toEqual([
+      "pending",
+      "file_stored",
+      "completed",
+      "failed",
+    ]);
+    expect(getTableName(uploadOperation as never)).toBe(
+      "paper_asset_upload_operation",
+    );
+    expect(getColumnNames(uploadOperation as never)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "actor_admin_id",
+        "paper_id",
+        "paper_asset_id",
+        "paper_asset_public_id",
+        "idempotency_key_hash",
+        "request_fingerprint",
+        "object_key",
+        "operation_status",
+        "last_failure_message_digest",
+        "file_stored_at",
+        "completed_at",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getIndexNames(uploadOperation as never)).toEqual(
+      expect.arrayContaining([
+        "udx_paper_asset_upload_operation_public_id",
+        "udx_paper_asset_upload_operation_idempotency_key_hash",
+        "udx_paper_asset_upload_operation_paper_asset_public_id",
+        "udx_paper_asset_upload_operation_paper_asset_id",
+        "idx_paper_asset_upload_operation_status_updated_at",
+      ]),
+    );
+  });
+
   it("registers all MVP question types", () => {
     expect(questionTypeValues).toEqual([
       "single_choice",

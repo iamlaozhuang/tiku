@@ -1,3 +1,7 @@
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -255,7 +259,49 @@ function createPaperAssetRepository(
   deleteMutationContexts: unknown[] = [],
   createMutationContexts: unknown[] = [],
 ): PaperAssetRepository {
+  let preparedInput:
+    | Parameters<
+        NonNullable<PaperAssetRepository["preparePaperAssetUpload"]>
+      >[0]
+    | undefined;
+
   return {
+    async preparePaperAssetUpload(input) {
+      preparedInput = input;
+
+      return {
+        status: "prepared",
+        operation: {
+          publicId: "paper-asset-upload-operation-phase-9",
+          paperAssetPublicId: "paper-asset-public-001",
+          objectKey: input.objectKey,
+        },
+      };
+    },
+    async markPaperAssetUploadFileStored() {
+      return true;
+    },
+    async completePaperAssetUpload(input) {
+      if (preparedInput === undefined) {
+        throw new Error("Paper asset upload was not prepared.");
+      }
+
+      createMutationContexts.push(input.mutationContext);
+      return {
+        status: "completed",
+        replayed: false,
+        paperAsset: createPaperAsset({
+          paper_public_id: preparedInput.paperPublicId,
+          paper_attachment_usage: preparedInput.paperAttachmentUsage,
+          file_name: preparedInput.fileName,
+          object_key: preparedInput.objectKey,
+          content_type: preparedInput.contentType,
+          file_size_byte: preparedInput.fileSizeByte,
+          file_hash: preparedInput.fileHash,
+        }),
+      };
+    },
+    async recordPaperAssetUploadFailure() {},
     async listPaperAssets(query) {
       return {
         rows: [
@@ -265,18 +311,6 @@ function createPaperAssetRepository(
         ],
         total: 1,
       };
-    },
-    async createPaperAsset(input, context) {
-      createMutationContexts.push(context);
-      return createPaperAsset({
-        paper_public_id: input.paperPublicId,
-        paper_attachment_usage: input.paperAttachmentUsage,
-        file_name: input.fileName,
-        object_key: input.objectKey,
-        content_type: input.contentType,
-        file_size_byte: input.fileSizeByte,
-        file_hash: input.fileHash,
-      });
     },
     async findPaperAssetByPublicId(publicId) {
       return createPaperAsset({ public_id: publicId });
@@ -324,12 +358,10 @@ const paperAssetInput = {
   commandPublicId: "paper-asset-command-phase-9-001",
   paperPublicId: "paper-public-001",
   paperAttachmentUsage: "paper_source",
+  profession: "monopoly",
   fileName: "monopoly-theory.pdf",
-  objectKey:
-    "dev/paper-asset/monopoly/202605/abc123def4567890abc123def4567890.pdf",
   contentType: "application/pdf",
-  fileSizeByte: 2048,
-  fileHash: "abc123def4567890abc123def4567890",
+  fileContent: "controlled phase 9 paper asset",
 };
 
 describe("phase 9 paper composition lifecycle runtime", () => {
@@ -659,10 +691,14 @@ describe("phase 9 paper composition lifecycle runtime", () => {
   });
 
   it("manages paper_asset metadata without exposing object keys or secrets", async () => {
+    const storageRoot = await mkdtemp(
+      join(tmpdir(), "tiku-phase-9-paper-asset-"),
+    );
     const auditLogEntries: unknown[] = [];
     const paperAssetDeleteMutationContexts: unknown[] = [];
     const paperAssetCreateMutationContexts: unknown[] = [];
     const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+      localPaperAssetStorageRoot: storageRoot,
       repositories: createRepositories(
         auditLogEntries,
         [],
@@ -675,12 +711,25 @@ describe("phase 9 paper composition lifecycle runtime", () => {
     const paperAssetContext = {
       params: Promise.resolve({ publicId: "paper-asset-public-001" }),
     };
+    const formData = new FormData();
+
+    formData.set("commandPublicId", paperAssetInput.commandPublicId);
+    formData.set("paperPublicId", paperAssetInput.paperPublicId);
+    formData.set("paperAttachmentUsage", paperAssetInput.paperAttachmentUsage);
+    formData.set("profession", paperAssetInput.profession);
+    formData.set("fileName", paperAssetInput.fileName);
+    formData.set(
+      "file",
+      new File([paperAssetInput.fileContent], paperAssetInput.fileName, {
+        type: paperAssetInput.contentType,
+      }),
+    );
 
     const createAssetResponse = await handlers.paperAssets.collection.POST(
       new Request("http://localhost/api/v1/paper-assets", {
         method: "POST",
         headers,
-        body: JSON.stringify(paperAssetInput),
+        body: formData,
       }),
     );
     const listAssetResponse = await handlers.paperAssets.collection.GET(

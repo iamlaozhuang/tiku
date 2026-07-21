@@ -1,13 +1,16 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
-import { and, asc, count, desc, eq, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 
-import { admin, auditLog, paper, paperAsset, paperCommand } from "@/db/schema";
-import type { PaperAttachmentUsage } from "../models/paper";
-import type {
-  NormalizedCreatePaperAssetInput,
-  NormalizedPaperAssetListInput,
-} from "../validators/paper-asset";
+import {
+  admin,
+  auditLog,
+  paper,
+  paperAsset,
+  paperAssetUploadOperation,
+} from "@/db/schema";
+import type { PaperAttachmentUsage, Profession } from "../models/paper";
+import type { NormalizedPaperAssetListInput } from "../validators/paper-asset";
 import {
   createLazyRuntimeDatabaseGetter,
   type RuntimeDatabase,
@@ -52,26 +55,65 @@ export type PaperAssetCreateMutationContext = {
   };
 };
 
-type PaperAssetCommandClaim =
-  | { kind: "claimed"; id: number }
-  | { kind: "replay"; resultPublicId: string }
-  | { kind: "conflict" };
+export type PreparePaperAssetUploadInput = {
+  operationPublicId: string;
+  paperAssetPublicId: string;
+  actorPublicId: string;
+  idempotencyKeyHash: string;
+  requestFingerprint: string;
+  paperPublicId: string;
+  paperAttachmentUsage: PaperAttachmentUsage;
+  profession: Profession;
+  fileName: string;
+  objectKey: string;
+  contentType: string;
+  fileSizeByte: number;
+  fileHash: string;
+};
 
-export class PaperAssetCommandConflictError extends Error {
-  constructor() {
-    super("Paper asset command conflicts with an existing request.");
-    this.name = "PaperAssetCommandConflictError";
-  }
-}
+export type PreparePaperAssetUploadResult =
+  | {
+      status: "prepared";
+      operation: {
+        publicId: string;
+        paperAssetPublicId: string;
+        objectKey: string;
+      };
+    }
+  | { status: "completed"; paperAsset: PaperAssetAccessRow }
+  | { status: "not_found" }
+  | { status: "invalid_scope" }
+  | { status: "conflict"; reason: "request_mismatch" | "invalid_state" };
+
+export type CompletePaperAssetUploadInput = {
+  operationPublicId: string;
+  requestFingerprint: string;
+  mutationContext: PaperAssetCreateMutationContext;
+};
+
+export type CompletePaperAssetUploadResult =
+  | {
+      status: "completed";
+      paperAsset: PaperAssetAccessRow;
+      replayed: boolean;
+    }
+  | { status: "conflict" };
 
 export type PaperAssetRepository = {
+  preparePaperAssetUpload?(
+    input: PreparePaperAssetUploadInput,
+  ): Promise<PreparePaperAssetUploadResult>;
+  markPaperAssetUploadFileStored?(operationPublicId: string): Promise<boolean>;
+  completePaperAssetUpload?(
+    input: CompletePaperAssetUploadInput,
+  ): Promise<CompletePaperAssetUploadResult>;
+  recordPaperAssetUploadFailure?(input: {
+    operationPublicId: string;
+    failureMessageDigest: string;
+  }): Promise<void>;
   listPaperAssets(
     query: NormalizedPaperAssetListInput,
   ): Promise<PaperAssetListResult>;
-  createPaperAsset(
-    input: NormalizedCreatePaperAssetInput,
-    context: PaperAssetCreateMutationContext,
-  ): Promise<PaperAssetAccessRow | null>;
   findPaperAssetByPublicId(
     publicId: string,
   ): Promise<PaperAssetAccessRow | null>;
@@ -90,6 +132,22 @@ export function createPostgresPaperAssetRepository(
   );
 
   return {
+    async preparePaperAssetUpload(input) {
+      return preparePaperAssetUpload(getDatabase(), input);
+    },
+
+    async markPaperAssetUploadFileStored(operationPublicId) {
+      return markPaperAssetUploadFileStored(getDatabase(), operationPublicId);
+    },
+
+    async completePaperAssetUpload(input) {
+      return completePaperAssetUpload(getDatabase(), input);
+    },
+
+    async recordPaperAssetUploadFailure(input) {
+      return recordPaperAssetUploadFailure(getDatabase(), input);
+    },
+
     async listPaperAssets(queryInput) {
       const database = getDatabase();
       const conditions = createPaperAssetConditions(queryInput);
@@ -124,80 +182,6 @@ export function createPostgresPaperAssetRepository(
       };
     },
 
-    async createPaperAsset(input, context) {
-      const database = getDatabase();
-      return database.transaction(async (transaction) => {
-        const scopedDatabase = transaction as RuntimeDatabase;
-        const actorAdminId = await resolveActorAdminId(scopedDatabase, context);
-        const paperId = await resolvePaperId(
-          scopedDatabase,
-          input.paperPublicId,
-        );
-
-        if (paperId === null) {
-          return null;
-        }
-
-        const requestHash = createPaperAssetRequestHash(input);
-        const commandClaim = await claimPaperAssetCreateCommand(
-          scopedDatabase,
-          {
-            actorAdminId,
-            commandKind: "paper_asset.create",
-            commandPublicId: input.commandPublicId,
-            paperId,
-            requestHash,
-          },
-        );
-
-        if (commandClaim.kind === "replay") {
-          const replayedPaperAsset = await findPaperAssetByPublicId(
-            scopedDatabase,
-            commandClaim.resultPublicId,
-          );
-
-          if (replayedPaperAsset !== null) {
-            return replayedPaperAsset;
-          }
-        }
-
-        if (commandClaim.kind !== "claimed") {
-          throw new PaperAssetCommandConflictError();
-        }
-
-        const [row] = await scopedDatabase
-          .insert(paperAsset)
-          .values({
-            content_type: input.contentType,
-            created_by_admin_id: actorAdminId,
-            file_hash: input.fileHash,
-            file_name: input.fileName,
-            file_size_byte: input.fileSizeByte,
-            object_key: input.objectKey,
-            paper_attachment_usage: input.paperAttachmentUsage,
-            paper_id: paperId,
-            public_id: `paper-asset-${randomUUID()}`,
-          })
-          .returning({ public_id: paperAsset.public_id });
-
-        if (row === undefined) {
-          throw new Error("Paper asset insert did not return a row.");
-        }
-
-        await appendPaperAssetCreateAuditLog(
-          scopedDatabase,
-          context,
-          row.public_id,
-        );
-        await completePaperAssetCreateCommand(scopedDatabase, {
-          commandId: commandClaim.id,
-          resultPublicId: row.public_id,
-        });
-
-        return findPaperAssetByPublicId(scopedDatabase, row.public_id);
-      });
-    },
-
     async findPaperAssetByPublicId(publicId) {
       return findPaperAssetByPublicId(getDatabase(), publicId);
     },
@@ -226,80 +210,313 @@ export function createPostgresPaperAssetRepository(
   };
 }
 
-export function createPaperAssetRequestHash(
-  input: NormalizedCreatePaperAssetInput,
-): string {
-  return createHash("sha256")
-    .update(
-      JSON.stringify({
-        contentType: input.contentType,
-        fileHash: input.fileHash,
-        fileName: input.fileName,
-        fileSizeByte: input.fileSizeByte,
-        objectKey: input.objectKey,
-        paperAttachmentUsage: input.paperAttachmentUsage,
-        paperPublicId: input.paperPublicId,
-      }),
-    )
-    .digest("hex");
+async function preparePaperAssetUpload(
+  database: RuntimeDatabase,
+  input: PreparePaperAssetUploadInput,
+): Promise<PreparePaperAssetUploadResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const actorAdminId = await resolveActorAdminIdByPublicId(
+      scopedDatabase,
+      input.actorPublicId,
+    );
+    const paperRow = await resolvePaperForUpload(
+      scopedDatabase,
+      input.paperPublicId,
+    );
+
+    if (paperRow === null) {
+      return { status: "not_found" };
+    }
+
+    if (paperRow.profession !== input.profession) {
+      return { status: "invalid_scope" };
+    }
+
+    const [insertedOperation] = await scopedDatabase
+      .insert(paperAssetUploadOperation)
+      .values({
+        public_id: input.operationPublicId,
+        actor_admin_id: actorAdminId,
+        paper_id: paperRow.id,
+        paper_asset_public_id: input.paperAssetPublicId,
+        idempotency_key_hash: input.idempotencyKeyHash,
+        request_fingerprint: input.requestFingerprint,
+        paper_attachment_usage: input.paperAttachmentUsage,
+        file_name: input.fileName,
+        object_key: input.objectKey,
+        content_type: input.contentType,
+        file_size_byte: input.fileSizeByte,
+        file_hash: input.fileHash,
+        operation_status: "pending",
+      })
+      .onConflictDoNothing({
+        target: paperAssetUploadOperation.idempotency_key_hash,
+      })
+      .returning({
+        public_id: paperAssetUploadOperation.public_id,
+        actor_admin_id: paperAssetUploadOperation.actor_admin_id,
+        paper_id: paperAssetUploadOperation.paper_id,
+        paper_asset_id: paperAssetUploadOperation.paper_asset_id,
+        paper_asset_public_id: paperAssetUploadOperation.paper_asset_public_id,
+        request_fingerprint: paperAssetUploadOperation.request_fingerprint,
+        object_key: paperAssetUploadOperation.object_key,
+        operation_status: paperAssetUploadOperation.operation_status,
+      });
+    const operationRow =
+      insertedOperation ??
+      (
+        await scopedDatabase
+          .select({
+            public_id: paperAssetUploadOperation.public_id,
+            actor_admin_id: paperAssetUploadOperation.actor_admin_id,
+            paper_id: paperAssetUploadOperation.paper_id,
+            paper_asset_id: paperAssetUploadOperation.paper_asset_id,
+            paper_asset_public_id:
+              paperAssetUploadOperation.paper_asset_public_id,
+            request_fingerprint: paperAssetUploadOperation.request_fingerprint,
+            object_key: paperAssetUploadOperation.object_key,
+            operation_status: paperAssetUploadOperation.operation_status,
+          })
+          .from(paperAssetUploadOperation)
+          .where(
+            eq(
+              paperAssetUploadOperation.idempotency_key_hash,
+              input.idempotencyKeyHash,
+            ),
+          )
+          .limit(1)
+          .for("update")
+      )[0];
+
+    if (
+      operationRow === undefined ||
+      operationRow.actor_admin_id !== actorAdminId ||
+      operationRow.paper_id !== paperRow.id ||
+      operationRow.request_fingerprint !== input.requestFingerprint
+    ) {
+      return { status: "conflict", reason: "request_mismatch" };
+    }
+
+    if (operationRow.operation_status === "completed") {
+      if (operationRow.paper_asset_id === null) {
+        return { status: "conflict", reason: "invalid_state" };
+      }
+
+      const completedPaperAsset = await findPaperAssetById(
+        scopedDatabase,
+        operationRow.paper_asset_id,
+      );
+
+      return completedPaperAsset === null
+        ? { status: "conflict", reason: "invalid_state" }
+        : { status: "completed", paperAsset: completedPaperAsset };
+    }
+
+    if (operationRow.operation_status === "failed") {
+      await scopedDatabase
+        .update(paperAssetUploadOperation)
+        .set({
+          operation_status: "pending",
+          file_stored_at: null,
+          last_failure_message_digest: null,
+          updated_at: new Date(),
+        })
+        .where(eq(paperAssetUploadOperation.public_id, operationRow.public_id));
+    }
+
+    return {
+      status: "prepared",
+      operation: {
+        publicId: operationRow.public_id,
+        paperAssetPublicId: operationRow.paper_asset_public_id,
+        objectKey: operationRow.object_key,
+      },
+    };
+  });
 }
 
-async function claimPaperAssetCreateCommand(
+async function markPaperAssetUploadFileStored(
   database: RuntimeDatabase,
-  input: {
-    actorAdminId: number;
-    commandKind: "paper_asset.create";
-    commandPublicId: string;
-    paperId: number;
-    requestHash: string;
-  },
-): Promise<PaperAssetCommandClaim> {
-  const [inserted] = await database
-    .insert(paperCommand)
-    .values({
-      actor_admin_id: input.actorAdminId,
-      command_kind: input.commandKind,
-      paper_id: input.paperId,
-      public_id: input.commandPublicId,
-      request_hash: input.requestHash,
+  operationPublicId: string,
+): Promise<boolean> {
+  const [operationRow] = await database
+    .update(paperAssetUploadOperation)
+    .set({
+      operation_status: "file_stored",
+      file_stored_at: new Date(),
+      last_failure_message_digest: null,
+      updated_at: new Date(),
     })
-    .onConflictDoNothing({ target: paperCommand.public_id })
-    .returning({ id: paperCommand.id });
+    .where(
+      and(
+        eq(paperAssetUploadOperation.public_id, operationPublicId),
+        inArray(paperAssetUploadOperation.operation_status, [
+          "pending",
+          "file_stored",
+        ]),
+      ),
+    )
+    .returning({ public_id: paperAssetUploadOperation.public_id });
 
-  if (inserted !== undefined) {
-    return { kind: "claimed", id: inserted.id };
+  if (operationRow !== undefined) {
+    return true;
   }
 
-  const [existing] = await database
-    .select({
-      actor_admin_id: paperCommand.actor_admin_id,
-      command_kind: paperCommand.command_kind,
-      paper_id: paperCommand.paper_id,
-      request_hash: paperCommand.request_hash,
-      result_public_id: paperCommand.result_public_id,
-    })
-    .from(paperCommand)
-    .where(eq(paperCommand.public_id, input.commandPublicId))
+  const [completedOperation] = await database
+    .select({ operation_status: paperAssetUploadOperation.operation_status })
+    .from(paperAssetUploadOperation)
+    .where(eq(paperAssetUploadOperation.public_id, operationPublicId))
     .limit(1);
 
-  return existing !== undefined &&
-    existing.actor_admin_id === input.actorAdminId &&
-    existing.command_kind === input.commandKind &&
-    existing.paper_id === input.paperId &&
-    existing.request_hash === input.requestHash &&
-    existing.result_public_id !== null
-    ? { kind: "replay", resultPublicId: existing.result_public_id }
-    : { kind: "conflict" };
+  return completedOperation?.operation_status === "completed";
 }
 
-async function completePaperAssetCreateCommand(
+async function recordPaperAssetUploadFailure(
   database: RuntimeDatabase,
-  input: { commandId: number; resultPublicId: string },
+  input: { operationPublicId: string; failureMessageDigest: string },
 ): Promise<void> {
   await database
-    .update(paperCommand)
-    .set({ result_public_id: input.resultPublicId })
-    .where(eq(paperCommand.id, input.commandId));
+    .update(paperAssetUploadOperation)
+    .set({
+      operation_status: "failed",
+      last_failure_message_digest: input.failureMessageDigest,
+      updated_at: new Date(),
+    })
+    .where(
+      and(
+        eq(paperAssetUploadOperation.public_id, input.operationPublicId),
+        inArray(paperAssetUploadOperation.operation_status, [
+          "pending",
+          "file_stored",
+          "failed",
+        ]),
+      ),
+    );
+}
+
+async function completePaperAssetUpload(
+  database: RuntimeDatabase,
+  input: CompletePaperAssetUploadInput,
+): Promise<CompletePaperAssetUploadResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const actorAdminId = await resolveActorAdminIdByPublicId(
+      scopedDatabase,
+      input.mutationContext.actorPublicId,
+    );
+    const [operationRow] = await scopedDatabase
+      .select({
+        id: paperAssetUploadOperation.id,
+        actor_admin_id: paperAssetUploadOperation.actor_admin_id,
+        paper_id: paperAssetUploadOperation.paper_id,
+        paper_asset_id: paperAssetUploadOperation.paper_asset_id,
+        paper_asset_public_id: paperAssetUploadOperation.paper_asset_public_id,
+        request_fingerprint: paperAssetUploadOperation.request_fingerprint,
+        paper_attachment_usage:
+          paperAssetUploadOperation.paper_attachment_usage,
+        file_name: paperAssetUploadOperation.file_name,
+        object_key: paperAssetUploadOperation.object_key,
+        content_type: paperAssetUploadOperation.content_type,
+        file_size_byte: paperAssetUploadOperation.file_size_byte,
+        file_hash: paperAssetUploadOperation.file_hash,
+        operation_status: paperAssetUploadOperation.operation_status,
+      })
+      .from(paperAssetUploadOperation)
+      .where(eq(paperAssetUploadOperation.public_id, input.operationPublicId))
+      .limit(1)
+      .for("update");
+
+    if (
+      operationRow === undefined ||
+      operationRow.actor_admin_id !== actorAdminId ||
+      operationRow.request_fingerprint !== input.requestFingerprint ||
+      input.mutationContext.auditLog.actionType !== "paper_asset.create"
+    ) {
+      return { status: "conflict" };
+    }
+
+    if (operationRow.operation_status === "completed") {
+      const completedPaperAsset =
+        operationRow.paper_asset_id === null
+          ? null
+          : await findPaperAssetById(
+              scopedDatabase,
+              operationRow.paper_asset_id,
+            );
+
+      return completedPaperAsset === null
+        ? { status: "conflict" }
+        : {
+            status: "completed",
+            paperAsset: completedPaperAsset,
+            replayed: true,
+          };
+    }
+
+    if (operationRow.operation_status !== "file_stored") {
+      return { status: "conflict" };
+    }
+
+    const [insertedPaperAsset] = await scopedDatabase
+      .insert(paperAsset)
+      .values({
+        public_id: operationRow.paper_asset_public_id,
+        paper_id: operationRow.paper_id,
+        paper_attachment_usage: operationRow.paper_attachment_usage,
+        file_name: operationRow.file_name,
+        object_key: operationRow.object_key,
+        content_type: operationRow.content_type,
+        file_size_byte: operationRow.file_size_byte,
+        file_hash: operationRow.file_hash,
+        created_by_admin_id: actorAdminId,
+      })
+      .returning({
+        id: paperAsset.id,
+        public_id: paperAsset.public_id,
+      });
+
+    if (insertedPaperAsset === undefined) {
+      throw new Error("Paper asset insert did not return a row.");
+    }
+
+    await appendPaperAssetCreateAuditLog(
+      scopedDatabase,
+      {
+        ...input.mutationContext,
+        auditLog: {
+          ...input.mutationContext.auditLog,
+          metadataSummary: "redacted paper_asset mutation metadata",
+        },
+      },
+      insertedPaperAsset.public_id,
+    );
+    await scopedDatabase
+      .update(paperAssetUploadOperation)
+      .set({
+        operation_status: "completed",
+        paper_asset_id: insertedPaperAsset.id,
+        completed_at: new Date(),
+        last_failure_message_digest: null,
+        updated_at: new Date(),
+      })
+      .where(eq(paperAssetUploadOperation.id, operationRow.id));
+
+    const completedPaperAsset = await findPaperAssetById(
+      scopedDatabase,
+      insertedPaperAsset.id,
+    );
+
+    if (completedPaperAsset === null) {
+      throw new Error("Completed paper asset could not be reloaded.");
+    }
+
+    return {
+      status: "completed",
+      paperAsset: completedPaperAsset,
+      replayed: false,
+    };
+  });
 }
 
 async function appendPaperAssetCreateAuditLog(
@@ -395,27 +612,52 @@ async function findPaperAssetByPublicId(
   return row ?? null;
 }
 
-async function resolvePaperId(
+async function findPaperAssetById(
+  database: RuntimeDatabase,
+  id: number,
+): Promise<PaperAssetAccessRow | null> {
+  const [row] = await database
+    .select({
+      id: paperAsset.id,
+      public_id: paperAsset.public_id,
+      paper_public_id: paper.public_id,
+      paper_attachment_usage: paperAsset.paper_attachment_usage,
+      file_name: paperAsset.file_name,
+      object_key: paperAsset.object_key,
+      content_type: paperAsset.content_type,
+      file_size_byte: paperAsset.file_size_byte,
+      file_hash: paperAsset.file_hash,
+      created_at: paperAsset.created_at,
+    })
+    .from(paperAsset)
+    .innerJoin(paper, eq(paper.id, paperAsset.paper_id))
+    .where(eq(paperAsset.id, id))
+    .limit(1);
+
+  return row ?? null;
+}
+
+async function resolvePaperForUpload(
   database: RuntimeDatabase,
   publicId: string,
-): Promise<number | null> {
+): Promise<{ id: number; profession: Profession } | null> {
   const [row] = await database
-    .select({ id: paper.id })
+    .select({ id: paper.id, profession: paper.profession })
     .from(paper)
     .where(eq(paper.public_id, publicId))
     .limit(1);
 
-  return row?.id ?? null;
+  return row ?? null;
 }
 
-async function resolveActorAdminId(
+async function resolveActorAdminIdByPublicId(
   database: RuntimeDatabase,
-  context: PaperAssetCreateMutationContext,
+  actorPublicId: string,
 ): Promise<number> {
   const [row] = await database
     .select({ id: admin.id })
     .from(admin)
-    .where(eq(admin.public_id, context.actorPublicId))
+    .where(eq(admin.public_id, actorPublicId))
     .limit(1);
 
   if (row === undefined) {

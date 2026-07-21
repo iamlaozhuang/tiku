@@ -24,7 +24,7 @@ import {
   type PaperAttachmentUsage,
   type Profession,
 } from "../models/paper";
-import { storeLocalPaperAssetFile } from "./local-paper-asset-storage";
+import { prepareLocalPaperAssetFile } from "./local-paper-asset-storage";
 import { createPaperAssetService } from "./paper-asset-service";
 import { createPaperDraftService } from "./paper-draft-service";
 import {
@@ -227,15 +227,15 @@ async function readPaperAssetMutationInput(
   }
 
   return {
-    ...(await storeLocalPaperAssetFile({
+    commandPublicId,
+    preparedFile: await prepareLocalPaperAssetFile({
       file,
       fileName,
       paperAttachmentUsage,
       paperPublicId,
       profession,
-      storageRoot,
-    })),
-    commandPublicId,
+    }),
+    storageRoot,
   };
 }
 

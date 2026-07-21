@@ -1,13 +1,9 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { admin, auditLog, paper, paperAsset, paperCommand } from "@/db/schema";
-import {
-  createPostgresPaperAssetRepository,
-  PaperAssetCommandConflictError,
-} from "@/server/repositories/paper-asset-repository";
 import { createPaperAssetService } from "@/server/services/paper-asset-service";
 import { normalizeCreatePaperAssetInput } from "@/server/validators/paper-asset";
 
@@ -71,11 +67,20 @@ describe("F-0031 paper_asset multipart create idempotency and audit atomicity", 
   });
 
   it("returns a stable conflict response for a reused command with different input", async () => {
+    const fileBytes = Buffer.from("paper asset conflict");
+    const fileHash = createHash("sha256").update(fileBytes).digest("hex");
     const service = createPaperAssetService(
       {
-        async createPaperAsset() {
-          throw new PaperAssetCommandConflictError();
+        async preparePaperAssetUpload() {
+          return { status: "conflict", reason: "request_mismatch" };
         },
+        async markPaperAssetUploadFileStored() {
+          return true;
+        },
+        async completePaperAssetUpload() {
+          throw new Error("Conflicted upload must not complete.");
+        },
+        async recordPaperAssetUploadFailure() {},
       } as never,
       {
         mutationContext: {
@@ -90,112 +95,61 @@ describe("F-0031 paper_asset multipart create idempotency and audit atomicity", 
       },
     );
 
-    await expect(service.createPaperAsset(validInput)).resolves.toEqual({
+    await expect(
+      service.createPaperAsset({
+        commandPublicId,
+        preparedFile: {
+          bytes: fileBytes,
+          paperPublicId: validInput.paperPublicId,
+          paperAttachmentUsage: validInput.paperAttachmentUsage,
+          profession: "marketing",
+          fileName: validInput.fileName,
+          objectKey: `dev/paper-asset/marketing/202607/${fileHash}.md`,
+          contentType: validInput.contentType,
+          fileSizeByte: fileBytes.byteLength,
+          fileHash,
+        },
+      }),
+    ).resolves.toEqual({
       code: 409208,
       message: "Paper asset command conflicts with an existing request.",
       data: null,
     });
   });
 
-  it("claims the existing paper_command and commits asset audit and completion in one transaction", () => {
-    const createStart = repositorySource.indexOf("async createPaperAsset");
-    const createSource = repositorySource.slice(
-      createStart,
-      repositorySource.indexOf("async findPaperAssetByPublicId", createStart),
+  it("commits the asset audit and operation completion in one transaction", () => {
+    const completeStart = repositorySource.indexOf(
+      "async function completePaperAssetUpload",
     );
+    const completeSource = repositorySource.slice(completeStart);
 
-    expect(createStart).toBeGreaterThan(-1);
-    expect(createSource).toContain("database.transaction(async (transaction)");
-    expect(createSource).toContain("claimPaperAssetCreateCommand(");
-    expect(createSource).toContain("appendPaperAssetCreateAuditLog(");
-    expect(createSource).toContain("completePaperAssetCreateCommand(");
-    expect(createSource).toContain('commandKind: "paper_asset.create"');
-  });
-
-  it("propagates create audit failure before command completion in the same transaction", async () => {
-    const auditFailure = new Error("audit unavailable");
-    const update = vi.fn();
-    const transactionDatabase = {
-      select: vi.fn(() => ({
-        from(table: unknown) {
-          return {
-            where() {
-              return {
-                async limit() {
-                  if (table === admin) return [{ id: 11 }];
-                  if (table === paper) return [{ id: 22 }];
-                  return [];
-                },
-              };
-            },
-          };
-        },
-      })),
-      insert: vi.fn((table: unknown) => {
-        if (table === paperCommand) {
-          return {
-            values: () => ({
-              onConflictDoNothing: () => ({
-                returning: async () => [{ id: 33 }],
-              }),
-            }),
-          };
-        }
-
-        if (table === paperAsset) {
-          return {
-            values: () => ({
-              returning: async () => [
-                { public_id: "paper-asset-public-created" },
-              ],
-            }),
-          };
-        }
-
-        expect(table).toBe(auditLog);
-        return {
-          async values() {
-            throw auditFailure;
-          },
-        };
-      }),
-      update,
-    };
-    const transaction = vi.fn(
-      async (callback: (database: unknown) => Promise<unknown>) =>
-        callback(transactionDatabase),
+    expect(completeStart).toBeGreaterThan(-1);
+    expect(completeSource).toContain(
+      "database.transaction(async (transaction)",
     );
-    const repository = createPostgresPaperAssetRepository({
-      createDatabase: () => ({ transaction }) as never,
-    });
-
-    await expect(
-      repository.createPaperAsset(validInput, {
-        actorPublicId: "admin-public-1",
-        auditLog: {
-          actorRole: "content_admin",
-          actionType: "paper_asset.create",
-          metadataSummary: "redacted paper_asset mutation metadata",
-          requestIp: null,
-        },
-      }),
-    ).rejects.toBe(auditFailure);
-    expect(transaction).toHaveBeenCalledOnce();
-    expect(update).not.toHaveBeenCalled();
+    expect(completeSource).toContain(".insert(paperAsset)");
+    expect(completeSource).toContain("appendPaperAssetCreateAuditLog(");
+    expect(completeSource).toContain('operation_status: "completed"');
+    expect(completeSource.indexOf(".insert(paperAsset)")).toBeLessThan(
+      completeSource.indexOf("appendPaperAssetCreateAuditLog("),
+    );
+    expect(
+      completeSource.indexOf("appendPaperAssetCreateAuditLog("),
+    ).toBeLessThan(completeSource.indexOf('operation_status: "completed"'));
   });
 
   it("binds replay to actor command and request identity without duplicating the asset", () => {
-    expect(repositorySource).toContain("createPaperAssetRequestHash(");
     expect(repositorySource).toContain(
-      "existing.actor_admin_id === input.actorAdminId",
+      "operationRow.actor_admin_id !== actorAdminId",
+    );
+    expect(repositorySource).toContain("operationRow.paper_id !== paperRow.id");
+    expect(repositorySource).toContain(
+      "operationRow.request_fingerprint !== input.requestFingerprint",
     );
     expect(repositorySource).toContain(
-      "existing.request_hash === input.requestHash",
+      "target: paperAssetUploadOperation.idempotency_key_hash",
     );
-    expect(repositorySource).toMatch(
-      /findPaperAssetByPublicId\(\s*scopedDatabase,\s*commandClaim\.resultPublicId,?\s*\)/u,
-    );
-    expect(repositorySource).toContain("PaperAssetCommandConflictError");
+    expect(repositorySource).not.toContain("PaperAssetCommandConflictError");
   });
 
   it("writes a fixed redacted create audit and keeps external audit only for failed create", () => {

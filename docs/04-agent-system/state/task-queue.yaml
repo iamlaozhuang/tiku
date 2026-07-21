@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
+  currentTaskId: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -250,6 +250,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-resource-upload-saga-2026-07-21
     - p1-execution-policy-capsule-v1-1-2026-07-21
     - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
+    - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -285,6 +286,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-resource-upload-saga-2026-07-21
     - p1-execution-policy-capsule-v1-1-2026-07-21
+    - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -346,12 +348,80 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-resource-upload-saga-2026-07-21: closed
     p1-execution-policy-capsule-v1-1-2026-07-21: closed
-    p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: in_progress
+    p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
+    p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: in_progress
 activeTasks:
+  - id: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+    title: Paper asset upload saga
+    phase: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0031_paper_asset_durable_file_lifecycle_partition
+    branch: fix/paper-asset-upload-saga
+    objective: close paper_asset durable file lifecycle with a persistent upload operation and resumable transactional completion
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0031
+    highRiskApproval:
+      category: schema_migration_source_and_database_application_logic
+      approvalId: fresh-schema-start-f0031-paper-asset-upload-saga-2026-07-21
+      status: approved_task_bound_conditional_closeout
+      conditionalCloseout: true
+      baseSha: 18f460500ade1117cfe96d656d859581def433d2
+    executionStage: verified_conditional_closeout_ready_for_single_commit_ff_only_push_sync_cleanup
+    partitionBoundary:
+      included:
+        - persistent_paper_asset_upload_operation
+        - stable_operation_owned_object_path
+        - actor_and_request_bound_idempotent_replay
+        - resumable_file_store_state
+        - transactional_paper_asset_redacted_audit_and_operation_completion
+      excluded:
+        - local_resource_catalog_adapter
+        - migration_execution
+        - persistent_database_execution
+        - provider_or_external_service_calls
+        - permission_or_entitlement_change
+    approvalFingerprint: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21|paper_asset_file_write_precedes_durable_operation_and_transactional_asset_audit_completion|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|18f460500ade1117cfe96d656d859581def433d2
+    verificationEvidence:
+      tddRed: expected_5_contract_and_adversarial_failures_before_green
+      focused: passed_22_of_22
+      affectedRegression: passed_34_of_34
+      lint: passed_exact_affected_typescript_files
+      typecheck: passed
+      drizzleMigrationCheck: passed_source_only_without_database_connection_or_execution
+      stateParse: passed_strict_json_and_yaml
+      formatter: passed_exact_applicable_files_after_pre_freeze_write
+      build: passed_97_static_pages
+      diffCheck: passed
+      mainThreadAdversarialReview: passed_operation_before_file_write_actor_paper_request_bound_replay_stable_operation_path_transactional_asset_audit_completion_fixed_redaction_legacy_bypass_removed_no_entitlement_real_database_external_call_or_extra_file
+    conditionalCloseoutProjection:
+      currentState: verified_uncommitted_candidate_on_approved_short_branch
+      triggerConditions:
+        - final_frozen_tree_validation_green
+        - base_and_canonical_remote_unchanged
+        - minimal_safety_kernel_commit_path_green
+      projectedOutcome:
+        - one_reviewable_commit
+        - ff_only_merge_to_master
+        - one_ordinary_push_to_canonical_origin_master
+        - master_origin_sync_and_clean_verification
+        - short_branch_cleanup
+    metrics:
+      mandatoryFreshApprovals: 1
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 2
+      productValueTime: terminal_clock_not_reconstructable_product_analysis_tdd_and_implementation_completed
+      mechanismOverhead: terminal_clock_not_reconstructable_includes_two_approval_wait_turns_and_one_validation_selection_correction
+      guardSmokeChanges: 0
+      approvalIdMismatch: 0
   - id: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
     title: Paper asset create idempotency and audit atomicity
     phase: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0031_paper_asset_create_database_partition
@@ -368,7 +438,7 @@ activeTasks:
       persistentDatabaseExecution: false
       entitlementExpansion: false
       realExternalCall: false
-    executionStage: verified_ready_for_conditional_closeout
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     partitionBoundary:
       included:
         - paper_asset_create_database_mutation
@@ -381,7 +451,7 @@ activeTasks:
         - persistent_database_execution
         - provider_or_external_service_calls
     findingDisposition:
-      F-0031: paper_asset_create_database_partition_ready_to_close_file_lifecycle_and_local_catalog_remain_open
+      F-0031: paper_asset_create_database_partition_closed_file_lifecycle_and_local_catalog_remain_open
     verificationEvidence:
       preflightIncludedTestFiles: 8
       inTaskTestOnlyExpansionCount: 0
@@ -392,11 +462,14 @@ activeTasks:
       typecheck: passed
       build: passed_97_static_pages
       mainThreadAdversarialReview: passed_actor_and_request_bound_replay_transactional_asset_audit_command_completion_redaction_conflict_fail_closed_no_entitlement_schema_real_database_or_external_call_and_explicit_file_lifecycle_boundary
-    conditionalCloseoutProjection:
-      currentState: product_candidate_verified_not_yet_committed_or_pushed
-      trigger: standing_authorization_scope_commit_hook_ff_only_canonical_push_sync_and_cleanup_all_succeed
-      projectedOutcome: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      actualPushSyncEvidence: terminal_only_after_success
+    closeout:
+      commit: 18f460500ade1117cfe96d656d859581def433d2
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
     applicableStandingApprovals:
       - standing-bounded-medium-risk-closeout-approval-2026-07-20
       - standing-test-only-allowlist-expansion-2026-07-21
@@ -406,7 +479,7 @@ activeTasks:
       candidateReapprovals: 0
       approvalWaitTurns: 0
       productValueTime: 15m
-      mechanismOverhead: 3m_to_candidate_freeze_closeout_terminal_time_pending
+      mechanismOverhead: 4m_including_closeout
       guardSmokeChanges: 0
   - id: p1-execution-policy-capsule-v1-1-2026-07-21
     title: P1 execution policy capsule v1.1

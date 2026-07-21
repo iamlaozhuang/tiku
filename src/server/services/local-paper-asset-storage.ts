@@ -21,6 +21,17 @@ export type StoredLocalPaperAssetMetadata = Omit<
   "commandPublicId"
 >;
 
+export type PreparedLocalPaperAssetFile = StoredLocalPaperAssetMetadata & {
+  bytes: Buffer;
+  profession: Profession;
+};
+
+export type StorePreparedLocalPaperAssetFileInput = {
+  preparedFile: PreparedLocalPaperAssetFile;
+  objectKey?: string;
+  storageRoot?: string;
+};
+
 export type StoreLocalResourceFileInput = {
   file: File;
   fileName?: string;
@@ -99,6 +110,29 @@ export async function storeLocalPaperAssetFile({
   storageRoot = defaultLocalUploadStorageRoot,
   uploadedAt = new Date(),
 }: StoreLocalPaperAssetFileInput): Promise<StoredLocalPaperAssetMetadata> {
+  const preparedFile = await prepareLocalPaperAssetFile({
+    file,
+    fileName: inputFileName,
+    paperAttachmentUsage,
+    paperPublicId,
+    profession,
+    uploadedAt,
+  });
+
+  return storePreparedLocalPaperAssetFile({ preparedFile, storageRoot });
+}
+
+export async function prepareLocalPaperAssetFile({
+  file,
+  fileName: inputFileName,
+  paperAttachmentUsage,
+  paperPublicId,
+  profession,
+  uploadedAt = new Date(),
+}: Omit<
+  StoreLocalPaperAssetFileInput,
+  "storageRoot"
+>): Promise<PreparedLocalPaperAssetFile> {
   const fileName = normalizeFileName(inputFileName ?? file.name);
   const bytes = Buffer.from(await file.arrayBuffer());
   const fileHash = createHash("sha256").update(bytes).digest("hex");
@@ -110,12 +144,9 @@ export async function storeLocalPaperAssetFile({
     formatYearMonth(uploadedAt),
     `${fileHash}.${extension}`,
   ].join("/");
-  const targetPath = resolveInsideStorageRoot(storageRoot, objectKey);
-
-  await mkdir(dirname(targetPath), { recursive: true });
-  await writeFile(targetPath, bytes);
 
   return {
+    bytes,
     paperPublicId,
     paperAttachmentUsage,
     fileName,
@@ -123,6 +154,42 @@ export async function storeLocalPaperAssetFile({
     contentType: file.type || "application/octet-stream",
     fileSizeByte: bytes.byteLength,
     fileHash,
+    profession,
+  };
+}
+
+export async function storePreparedLocalPaperAssetFile({
+  preparedFile,
+  objectKey = preparedFile.objectKey,
+  storageRoot = defaultLocalUploadStorageRoot,
+}: StorePreparedLocalPaperAssetFileInput): Promise<StoredLocalPaperAssetMetadata> {
+  const objectKeySegments = objectKey.split("/");
+  const expectedFileName = `${preparedFile.fileHash}.${normalizeExtension(preparedFile.fileName)}`;
+
+  if (
+    objectKeySegments.length !== 5 ||
+    objectKeySegments[0] !== "dev" ||
+    objectKeySegments[1] !== "paper-asset" ||
+    objectKeySegments[2] !== preparedFile.profession ||
+    !/^\d{6}$/u.test(objectKeySegments[3] ?? "") ||
+    objectKeySegments[4] !== expectedFileName
+  ) {
+    throw new Error("Prepared paper_asset storage identity mismatch.");
+  }
+
+  const targetPath = resolveInsideStorageRoot(storageRoot, objectKey);
+
+  await mkdir(dirname(targetPath), { recursive: true });
+  await writeFile(targetPath, preparedFile.bytes);
+
+  return {
+    paperPublicId: preparedFile.paperPublicId,
+    paperAttachmentUsage: preparedFile.paperAttachmentUsage,
+    fileName: preparedFile.fileName,
+    objectKey,
+    contentType: preparedFile.contentType,
+    fileSizeByte: preparedFile.fileSizeByte,
+    fileHash: preparedFile.fileHash,
   };
 }
 

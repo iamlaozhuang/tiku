@@ -71,6 +71,12 @@ export const paperAttachmentUsageValues = [
   "answer_sheet",
   "other",
 ] as const;
+export const paperAssetUploadOperationStatusValues = [
+  "pending",
+  "file_stored",
+  "completed",
+  "failed",
+] as const;
 
 export const subjectEnum = pgEnum("subject", subjectValues);
 export const questionTypeEnum = pgEnum("question_type", questionTypeValues);
@@ -92,6 +98,10 @@ export const paperTypeEnum = pgEnum("paper_type", paperTypeValues);
 export const paperAttachmentUsageEnum = pgEnum(
   "paper_attachment_usage",
   paperAttachmentUsageValues,
+);
+export const paperAssetUploadOperationStatusEnum = pgEnum(
+  "paper_asset_upload_operation_status",
+  paperAssetUploadOperationStatusValues,
 );
 
 export const material = pgTable(
@@ -475,6 +485,59 @@ export const paperAsset = pgTable(
       table.paper_attachment_usage,
     ),
     index("idx_paper_asset_file_hash").on(table.file_hash),
+  ],
+);
+
+export const paperAssetUploadOperation = pgTable(
+  "paper_asset_upload_operation",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    actor_admin_id: adminIdColumn("actor_admin_id"),
+    paper_id: bigint("paper_id", { mode: "number" })
+      .notNull()
+      .references(() => paper.id, { onDelete: "cascade" }),
+    paper_asset_id: bigint("paper_asset_id", { mode: "number" }).references(
+      () => paperAsset.id,
+      { onDelete: "set null" },
+    ),
+    paper_asset_public_id: text("paper_asset_public_id").notNull(),
+    idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    request_fingerprint: text("request_fingerprint").notNull(),
+    paper_attachment_usage: paperAttachmentUsageEnum(
+      "paper_attachment_usage",
+    ).notNull(),
+    file_name: text("file_name").notNull(),
+    object_key: text("object_key").notNull(),
+    content_type: text("content_type").notNull(),
+    file_size_byte: bigint("file_size_byte", { mode: "number" }).notNull(),
+    file_hash: text("file_hash").notNull(),
+    operation_status: paperAssetUploadOperationStatusEnum("operation_status")
+      .default("pending")
+      .notNull(),
+    last_failure_message_digest: text("last_failure_message_digest"),
+    file_stored_at: nullableTimestampColumn("file_stored_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_paper_asset_upload_operation_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_paper_asset_upload_operation_idempotency_key_hash").on(
+      table.idempotency_key_hash,
+    ),
+    uniqueIndex("udx_paper_asset_upload_operation_paper_asset_public_id").on(
+      table.paper_asset_public_id,
+    ),
+    uniqueIndex("udx_paper_asset_upload_operation_paper_asset_id").on(
+      table.paper_asset_id,
+    ),
+    index("idx_paper_asset_upload_operation_status_updated_at").on(
+      table.operation_status,
+      table.updated_at,
+    ),
   ],
 );
 

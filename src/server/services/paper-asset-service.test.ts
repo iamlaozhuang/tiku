@@ -1,3 +1,8 @@
+import { createHash } from "node:crypto";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { createPaperAssetService } from "./paper-asset-service";
@@ -30,23 +35,52 @@ function createPaperAsset(
 function createRepository(
   overrides: Partial<PaperAssetRepository> = {},
 ): PaperAssetRepository {
+  let preparedInput:
+    | Parameters<
+        NonNullable<PaperAssetRepository["preparePaperAssetUpload"]>
+      >[0]
+    | undefined;
+
   return {
+    async preparePaperAssetUpload(input) {
+      preparedInput = input;
+      return {
+        status: "prepared",
+        operation: {
+          publicId: "paper-asset-upload-operation-service-test",
+          paperAssetPublicId: "paper_asset_public_123",
+          objectKey: input.objectKey,
+        },
+      };
+    },
+    async markPaperAssetUploadFileStored() {
+      return true;
+    },
+    async completePaperAssetUpload() {
+      if (preparedInput === undefined) {
+        throw new Error("Paper asset upload was not prepared.");
+      }
+
+      return {
+        status: "completed",
+        replayed: false,
+        paperAsset: createPaperAsset({
+          paper_public_id: preparedInput.paperPublicId,
+          paper_attachment_usage: preparedInput.paperAttachmentUsage,
+          file_name: preparedInput.fileName,
+          object_key: preparedInput.objectKey,
+          content_type: preparedInput.contentType,
+          file_size_byte: preparedInput.fileSizeByte,
+          file_hash: preparedInput.fileHash,
+        }),
+      };
+    },
+    async recordPaperAssetUploadFailure() {},
     async listPaperAssets() {
       return {
         total: 1,
         rows: [createPaperAsset()],
       };
-    },
-    async createPaperAsset(input) {
-      return createPaperAsset({
-        paper_public_id: input.paperPublicId,
-        paper_attachment_usage: input.paperAttachmentUsage,
-        file_name: input.fileName,
-        object_key: input.objectKey,
-        content_type: input.contentType,
-        file_size_byte: input.fileSizeByte,
-        file_hash: input.fileHash,
-      });
     },
     async findPaperAssetByPublicId(publicId) {
       return createPaperAsset({
@@ -119,6 +153,11 @@ describe("paper asset service", () => {
   });
 
   it("creates and reads paper_attachment_usage metadata with standard DTO fields", async () => {
+    const fileBytes = Buffer.from("analysis-pdf");
+    const fileHash = createHash("sha256").update(fileBytes).digest("hex");
+    const storageRoot = await mkdtemp(
+      join(tmpdir(), "tiku-paper-service-test-"),
+    );
     const service = createPaperAssetService(createRepository(), {
       mutationContext: {
         actorPublicId: "admin_public_content",
@@ -134,14 +173,18 @@ describe("paper asset service", () => {
     await expect(
       service.createPaperAsset({
         commandPublicId: "paper-asset-command-service-test",
-        paperPublicId: "paper_public_123",
-        paperAttachmentUsage: "answer_analysis",
-        fileName: "analysis.pdf",
-        objectKey:
-          "dev/paper-asset/logistics/202605/feedfacefeedfacefeedfacefeedface.pdf",
-        contentType: "application/pdf",
-        fileSizeByte: 4096,
-        fileHash: "feedfacefeedfacefeedfacefeedface",
+        storageRoot,
+        preparedFile: {
+          bytes: fileBytes,
+          paperPublicId: "paper_public_123",
+          paperAttachmentUsage: "answer_analysis",
+          profession: "logistics",
+          fileName: "analysis.pdf",
+          objectKey: `dev/paper-asset/logistics/202605/${fileHash}.pdf`,
+          contentType: "application/pdf",
+          fileSizeByte: fileBytes.byteLength,
+          fileHash,
+        },
       }),
     ).resolves.toEqual({
       code: 0,
@@ -153,8 +196,8 @@ describe("paper asset service", () => {
           paperAttachmentUsage: "answer_analysis",
           fileName: "analysis.pdf",
           contentType: "application/pdf",
-          fileSizeByte: 4096,
-          fileHash: "feedfacefeedfacefeedfacefeedface",
+          fileSizeByte: fileBytes.byteLength,
+          fileHash,
           createdAt: "2026-05-19T06:00:00.000Z",
         },
       },
