@@ -29,6 +29,7 @@ import type {
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminLifecyclePageResult,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingSourceContextAttachmentDto,
@@ -112,6 +113,51 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
     async (): Promise<OrganizationTrainingPublishedVersionDto[]> => [
       createEmployeeVisibleVersion(),
     ],
+  ),
+  readAdminLifecyclePage: vi.fn(
+    async (): Promise<OrganizationTrainingAdminLifecyclePageResult> => ({
+      items: [
+        {
+          publicId: "organization_training_version_route_401",
+          resourceType: "organization_training_version" as const,
+          organizationPublicId: "organization_route_public_401",
+          profession: "logistics" as const,
+          level: 4,
+          subject: "theory" as const,
+          title: "Route published training",
+          description: null,
+          questionCount: 1,
+          totalScore: 5,
+          activityAt: "2026-06-16T10:00:00.000Z",
+          status: "published" as const,
+          sourceKind: "unknown" as const,
+          contentKind: "unknown" as const,
+          availableActions: ["take_down", "copy_to_new_draft"] as const,
+        },
+        {
+          publicId: "organization_training_draft_route_401",
+          resourceType: "organization_training_draft" as const,
+          organizationPublicId: "organization_route_public_401",
+          authorizationPublicId: "org_auth_route_public_401",
+          profession: "logistics" as const,
+          level: 4,
+          subject: "theory" as const,
+          title: "Route draft training",
+          description: "Route draft description",
+          revision: 1,
+          questionCount: 0,
+          totalScore: 0,
+          activityAt: "2026-06-15T10:00:00.000Z",
+          status: "draft" as const,
+          sourceKind: "manual_group" as const,
+          contentKind: "question_training" as const,
+          availableActions: ["publish"] as const,
+        },
+      ],
+      total: 2,
+      integrityStatus: "complete" as const,
+      warningCode: null,
+    }),
   ),
   listAdminLifecycleSourceMetadata: vi.fn(
     async (): Promise<
@@ -410,6 +456,55 @@ function createEmployeeVisibleVersion(
     },
     ...overrides,
   });
+}
+
+function createAdminLifecyclePageResult(
+  overrides: Partial<OrganizationTrainingAdminLifecyclePageResult> = {},
+): OrganizationTrainingAdminLifecyclePageResult {
+  return {
+    items: [
+      {
+        publicId: "organization_training_version_route_401",
+        resourceType: "organization_training_version",
+        organizationPublicId: "organization_route_public_401",
+        profession: "logistics",
+        level: 4,
+        subject: "theory",
+        title: "Route published training",
+        description: null,
+        questionCount: 1,
+        totalScore: 5,
+        activityAt: "2026-06-16T10:00:00.000Z",
+        status: "published",
+        sourceKind: "unknown",
+        contentKind: "unknown",
+        availableActions: ["take_down", "copy_to_new_draft"],
+      },
+      {
+        publicId: "organization_training_draft_route_401",
+        resourceType: "organization_training_draft",
+        organizationPublicId: "organization_route_public_401",
+        authorizationPublicId: "org_auth_route_public_401",
+        profession: "logistics",
+        level: 4,
+        subject: "theory",
+        title: "Route draft training",
+        description: "Route draft description",
+        revision: 1,
+        questionCount: 0,
+        totalScore: 0,
+        activityAt: "2026-06-15T10:00:00.000Z",
+        status: "draft",
+        sourceKind: "manual_group",
+        contentKind: "question_training",
+        availableActions: ["publish"],
+      },
+    ],
+    total: 2,
+    integrityStatus: "complete",
+    warningCode: null,
+    ...overrides,
+  };
 }
 
 function createPublicEmployeeVisibleVersion(
@@ -880,6 +975,10 @@ describe("organization training draft source-context route handlers", () => {
     runtimeRepositoryMock.listAdminLifecycleVersions.mockResolvedValue([
       createEmployeeVisibleVersion(),
     ]);
+    runtimeRepositoryMock.readAdminLifecyclePage.mockClear();
+    runtimeRepositoryMock.readAdminLifecyclePage.mockResolvedValue(
+      createAdminLifecyclePageResult(),
+    );
     runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockClear();
     runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockResolvedValue(
       [],
@@ -944,6 +1043,17 @@ describe("organization training draft source-context route handlers", () => {
         redactionStatus: "metadata_only",
         items: [
           {
+            publicId: "organization_training_version_route_401",
+            resourceType: "organization_training_version",
+            organizationPublicId: "organization_route_public_401",
+            profession: "logistics",
+            level: 4,
+            subject: "theory",
+            status: "published",
+            activityAt: "2026-06-16T10:00:00.000Z",
+            availableActions: ["take_down", "copy_to_new_draft"],
+          },
+          {
             publicId: "organization_training_draft_route_401",
             resourceType: "organization_training_draft",
             organizationPublicId: "organization_route_public_401",
@@ -953,40 +1063,35 @@ describe("organization training draft source-context route handlers", () => {
             subject: "theory",
             title: "Route draft training",
             status: "draft",
+            activityAt: "2026-06-15T10:00:00.000Z",
             availableActions: ["publish"],
-          },
-          {
-            publicId: "organization_training_version_route_401",
-            resourceType: "organization_training_version",
-            organizationPublicId: "organization_route_public_401",
-            profession: "logistics",
-            level: 4,
-            subject: "theory",
-            status: "published",
-            availableActions: ["take_down", "copy_to_new_draft"],
           },
         ],
       },
     });
     expect(JSON.stringify(payload)).not.toMatch(/"id":/u);
-    expect(runtimeRepositoryMock.listAdminLifecycleDrafts).toHaveBeenCalledWith(
-      {
-        visibleOrganizationPublicIds: ["organization_route_public_401"],
-      },
-    );
+    expect(runtimeRepositoryMock.readAdminLifecyclePage).toHaveBeenCalledWith({
+      visibleOrganizationPublicIds: ["organization_route_public_401"],
+      page: 1,
+      pageSize: 20,
+      status: "all",
+      sourceKind: "all",
+      contentKind: "all",
+    });
+    expect(
+      runtimeRepositoryMock.listAdminLifecycleDrafts,
+    ).not.toHaveBeenCalled();
     expect(
       runtimeRepositoryMock.listAdminLifecycleVersions,
-    ).toHaveBeenCalledWith({
-      visibleOrganizationPublicIds: ["organization_route_public_401"],
-    });
+    ).not.toHaveBeenCalled();
   });
 
   it("returns a redacted partial-integrity warning when historical admin versions are isolated", async () => {
-    runtimeRepositoryMock.listAdminLifecycleVersions.mockResolvedValueOnce({
-      versions: [createEmployeeVisibleVersion()],
+    runtimeRepositoryMock.readAdminLifecyclePage.mockResolvedValueOnce({
+      ...createAdminLifecyclePageResult(),
       integrityStatus: "partial",
       warningCode: "historical_version_unavailable",
-    } as never);
+    });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService: createCurrentSessionService({
         code: 0,
@@ -1008,10 +1113,10 @@ describe("organization training draft source-context route handlers", () => {
         warningCode: "historical_version_unavailable",
         items: [
           expect.objectContaining({
-            publicId: "organization_training_draft_route_401",
+            publicId: "organization_training_version_route_401",
           }),
           expect.objectContaining({
-            publicId: "organization_training_version_route_401",
+            publicId: "organization_training_draft_route_401",
           }),
         ],
       },
@@ -1021,6 +1126,20 @@ describe("organization training draft source-context route handlers", () => {
   });
 
   it("filters and paginates organization training lifecycle read model by source and content kind", async () => {
+    runtimeRepositoryMock.readAdminLifecyclePage.mockResolvedValueOnce({
+      items: [
+        {
+          ...createAdminLifecyclePageResult().items[1],
+          publicId: "organization_training_draft_ai_paper_route_401",
+          title: "AI paper training draft",
+          sourceKind: "ai_paper",
+          contentKind: "paper_training",
+        },
+      ],
+      total: 1,
+      integrityStatus: "complete",
+      warningCode: null,
+    });
     runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValue([
       createManualDraftDto({
         publicId: "organization_training_draft_ai_question_route_401",
@@ -1091,7 +1210,7 @@ describe("organization training draft source-context route handlers", () => {
 
     const response = await handlers.manualDraft.GET(
       new Request(
-        "http://localhost/api/v1/organization-trainings?sourceKind=ai_paper&contentKind=paper_training&page=1&pageSize=2",
+        "http://localhost/api/v1/organization-trainings?sourceKind=ai_paper&contentKind=paper_training&page=1&pageSize=50",
         {
           headers: {
             authorization: "Bearer organization_training_route_session_401",
@@ -1106,9 +1225,9 @@ describe("organization training draft source-context route handlers", () => {
       message: "ok",
       pagination: {
         page: 1,
-        pageSize: 2,
+        pageSize: 50,
         total: 1,
-        sortBy: "createdAt",
+        sortBy: "activityAt",
         sortOrder: "desc",
       },
       data: {
@@ -1126,16 +1245,13 @@ describe("organization training draft source-context route handlers", () => {
     expect(JSON.stringify(payload)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput|"id":/u,
     );
-    expect(
-      runtimeRepositoryMock.listAdminLifecycleSourceMetadata,
-    ).toHaveBeenCalledWith({
-      draftPublicIds: [
-        "organization_training_draft_ai_question_route_401",
-        "organization_training_draft_ai_paper_route_401",
-        "organization_training_draft_platform_route_401",
-        "organization_training_draft_manual_route_401",
-        "organization_training_draft_unknown_route_401",
-      ],
+    expect(runtimeRepositoryMock.readAdminLifecyclePage).toHaveBeenCalledWith({
+      visibleOrganizationPublicIds: ["organization_route_public_401"],
+      page: 1,
+      pageSize: 50,
+      status: "all",
+      sourceKind: "ai_paper",
+      contentKind: "paper_training",
     });
   });
 

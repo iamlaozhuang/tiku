@@ -846,7 +846,7 @@ describe("AdminOrganizationTrainingPage", () => {
             page: Number.parseInt(searchParams.get("page") ?? "1", 10),
             pageSize: 10,
             total: filteredItems.length,
-            sortBy: "createdAt",
+            sortBy: "activityAt",
             sortOrder: "desc",
           },
         });
@@ -946,7 +946,7 @@ describe("AdminOrganizationTrainingPage", () => {
   });
 
   it("paginates organization training lifecycle rows near the active filter", async () => {
-    const lifecycleItems = Array.from({ length: 12 }, (_, index) => ({
+    const lifecycleItems = Array.from({ length: 22 }, (_, index) => ({
       publicId: `organization-training-draft-page-ui-${index + 1}`,
       resourceType: "organization_training_draft",
       organizationPublicId: "organization-admin-scope-001",
@@ -996,9 +996,9 @@ describe("AdminOrganizationTrainingPage", () => {
     render(createElement(AdminOrganizationTrainingPage));
 
     expect(await screen.findByText("分页训练 01")).toBeInTheDocument();
-    expect(screen.getByText("显示 1-10 / 共 12 条训练")).toBeInTheDocument();
+    expect(screen.getByText("显示 1-20 / 共 22 条训练")).toBeInTheDocument();
     expect(screen.getByText("第 1 / 2 页")).toBeInTheDocument();
-    expect(screen.queryByText("分页训练 11")).toBeNull();
+    expect(screen.queryByText("分页训练 21")).toBeNull();
 
     fireEvent.click(screen.getAllByRole("button", { name: "继续配置" })[0]);
 
@@ -1010,7 +1010,7 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "下一页" }));
 
     const listPanel = screen.getByRole("region", { name: "企业训练列表" });
-    expect(await screen.findByText("分页训练 11")).toBeInTheDocument();
+    expect(await screen.findByText("分页训练 21")).toBeInTheDocument();
     expect(within(listPanel).queryByText("分页训练 01")).toBeNull();
     expect(screen.queryByRole("dialog", { name: "训练详情" })).toBeNull();
     expect(screen.getByText("第 2 / 2 页")).toBeInTheDocument();
@@ -1019,7 +1019,7 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "上一页" }));
 
     expect(await screen.findByText("分页训练 01")).toBeInTheDocument();
-    expect(within(listPanel).queryByText("分页训练 11")).toBeNull();
+    expect(within(listPanel).queryByText("分页训练 21")).toBeNull();
     expect(screen.getByRole("button", { name: "上一页" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "已发布" }));
@@ -2295,7 +2295,7 @@ describe("AdminOrganizationTrainingPage", () => {
     window.history.replaceState(
       null,
       "",
-      "/organization/organization-training?status=published&sourceKind=ai_paper&contentKind=paper_training&page=2",
+      "/organization/organization-training?status=published&sourceKind=ai_paper&contentKind=paper_training&page=2&pageSize=50",
     );
     const requestedQueries: string[] = [];
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
@@ -2325,7 +2325,7 @@ describe("AdminOrganizationTrainingPage", () => {
             integrityStatus: "complete",
             warningCode: null,
           },
-          pagination: { page: 2, pageSize: 10, total: 42 },
+          pagination: { page: 2, pageSize: 50, total: 120 },
         });
       }
 
@@ -2341,16 +2341,29 @@ describe("AdminOrganizationTrainingPage", () => {
 
     await waitFor(() =>
       expect(requestedQueries).toContain(
-        "page=2&pageSize=10&status=published&sourceKind=ai_paper&contentKind=paper_training",
+        "page=2&pageSize=50&status=published&sourceKind=ai_paper&contentKind=paper_training",
       ),
     );
+    expect(
+      screen.getByRole("combobox", { name: "企业训练每页条数" }),
+    ).toHaveValue("50");
     expect(screen.getByRole("button", { name: "已发布" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
     expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
-      "第 2 / 5 页",
+      "第 2 / 3 页",
     );
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "企业训练每页条数" }),
+      { target: { value: "100" } },
+    );
+    await waitFor(() => {
+      const searchParams = new URLSearchParams(window.location.search);
+      expect(searchParams.get("pageSize")).toBe("100");
+      expect(searchParams.get("page")).toBeNull();
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "草稿" }));
     await waitFor(() => {
@@ -2362,7 +2375,7 @@ describe("AdminOrganizationTrainingPage", () => {
     window.history.pushState(
       null,
       "",
-      "/organization/organization-training?status=taken_down&sourceKind=manual_group&contentKind=question_training&page=3",
+      "/organization/organization-training?status=taken_down&sourceKind=manual_group&contentKind=question_training&page=3&pageSize=100",
     );
     fireEvent(window, new PopStateEvent("popstate"));
     await waitFor(() =>
@@ -2372,7 +2385,7 @@ describe("AdminOrganizationTrainingPage", () => {
       ),
     );
     expect(requestedQueries.at(-1)).toBe(
-      "page=3&pageSize=10&status=taken_down&sourceKind=manual_group&contentKind=question_training",
+      "page=3&pageSize=100&status=taken_down&sourceKind=manual_group&contentKind=question_training",
     );
   });
 

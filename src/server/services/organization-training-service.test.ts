@@ -995,6 +995,7 @@ describe("organization training service", () => {
               trueFalse: 0,
               shortAnswer: 0,
             },
+            activityAt: fixedNow.toISOString(),
             status: "draft",
             sourceKind: "manual_group",
             contentKind: "question_training",
@@ -1011,6 +1012,7 @@ describe("organization training service", () => {
             description: null,
             questionCount: 2,
             totalScore: 5,
+            activityAt: fixedNow.toISOString(),
             status: "published",
             sourceKind: "unknown",
             contentKind: "unknown",
@@ -1027,6 +1029,7 @@ describe("organization training service", () => {
             description: null,
             questionCount: 2,
             totalScore: 5,
+            activityAt: fixedNow.toISOString(),
             status: "taken_down",
             sourceKind: "unknown",
             contentKind: "unknown",
@@ -1039,9 +1042,9 @@ describe("organization training service", () => {
       },
       pagination: {
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
         total: 3,
-        sortBy: "createdAt",
+        sortBy: "activityAt",
         sortOrder: "desc",
       },
     });
@@ -1051,6 +1054,73 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain(analysis);
     expect(serializedResult).not.toContain(protectedPayloadMarker);
     expect(serializedResult).not.toContain(privateRowData);
+  });
+
+  it("orders interleaved draft and version activity globally with deterministic tie-breakers", () => {
+    const createLifecycleDraft = (
+      publicId: string,
+      createdAt: string,
+    ): OrganizationTrainingDraftDto => ({
+      publicId,
+      sourceTaskPublicId: null,
+      organizationPublicId: "organization_public_123",
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_123",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: publicId,
+      description: null,
+      questionCount: 0,
+      totalScore: 0,
+      questionTypeSummary: {
+        singleChoice: 0,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 0,
+      },
+      evidenceStatus: "none",
+      validationStatus: "needs_review",
+      retentionStatus: "active",
+      createdAt,
+      expiresAt: null,
+    });
+    const result = buildOrganizationTrainingAdminLifecycleFlowReadModel({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      drafts: [
+        createLifecycleDraft(
+          "training_draft_older",
+          "2026-06-15T10:00:00.000Z",
+        ),
+        createLifecycleDraft("training_draft_tie", "2026-06-15T12:00:00.000Z"),
+      ],
+      versions: [
+        createPublishedVersion({
+          publicId: "training_version_newest",
+          publishedAt: "2026-06-15T14:00:00.000Z",
+        }),
+        createPublishedVersion({
+          publicId: "training_version_tie",
+          publishedAt: "2026-06-15T12:00:00.000Z",
+        }),
+      ],
+    });
+
+    expect(result.data.items.map((item) => item.publicId)).toEqual([
+      "training_version_newest",
+      "training_draft_tie",
+      "training_version_tie",
+      "training_draft_older",
+    ]);
+    expect(result.data.items.map((item) => item.activityAt)).toEqual([
+      "2026-06-15T14:00:00.000Z",
+      "2026-06-15T12:00:00.000Z",
+      "2026-06-15T12:00:00.000Z",
+      "2026-06-15T10:00:00.000Z",
+    ]);
   });
 
   it("builds an admin-safe published training detail with collapsed answer and evidence summaries", () => {

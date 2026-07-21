@@ -317,7 +317,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20: closed
     p1-remediation-rc-04-learner-history-pagination-2026-07-20: closed
     p1-remediation-rc-04-student-home-pagination-2026-07-20: closed
-    p1-remediation-rc-04-admin-log-pagination-total-2026-07-20: in_progress
+    p1-remediation-rc-04-admin-log-pagination-total-2026-07-20: closed
+    p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21: in_progress
 activeTasks:
   - id: p1-remediation-rc-04-student-home-pagination-2026-07-20
     title: Student home paper pagination
@@ -420,7 +421,7 @@ activeTasks:
   - id: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
     title: Admin log pagination total
     phase: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0021
@@ -436,7 +437,7 @@ activeTasks:
       category: bounded_database_application_query_logic
       status: satisfied_by_bounded_medium_risk_standing_approval
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    executionStage: candidate_preparation
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       allowedFilesExpansionApproval: fresh-allowed-files-f0021-admin-log-pagination-total-2026-07-20
@@ -453,9 +454,9 @@ activeTasks:
       typecheck: passed_after_one_test_annotation_fix
       build: passed_97_static_pages
       changedFileFormatDiff: passed
-      p0GlobalBaseline: pending_single_closeout_full_run
-      p0SerialBaseline: pending_single_closeout_full_run
-      fullProfile: pending_once_after_candidate_freeze
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullProfile: passed_once_after_candidate_freeze
       mainThreadAdversarialReview: passed_no_blocker_before_freeze
       entitlementExpansion: false
       schemaMigrationSourceChange: false
@@ -468,7 +469,12 @@ activeTasks:
       postApprovalCandidateTreeChanges: 0
       repeatedBlockerReports: 0
       validationRetryCount: 2_regression_mock_contract_and_test_type_annotation
-      fullRuns: 0
+      fullRuns: 1
+    closeout:
+      commit: 2282e12e98c6f9cf12058c568048496b6ccddb74
+      candidateTree: cc4656385a1d3be3ac0de37d0c3cd8626b822a71
+      status: committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     previousTaskCloseout:
       taskId: p1-remediation-rc-04-student-home-pagination-2026-07-20
       findingId: F-0019
@@ -477,6 +483,71 @@ activeTasks:
       candidateTree: 20281951ade8c68e44e2aa44dc874a776615281c
       focused: passed_21_of_21
       affectedRegression: passed_16_of_16
+      build: passed_97_static_pages
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullRuns: 1
+      mechanismScriptChanges: 0
+  - id: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
+    title: Organization training lifecycle pagination
+    phase: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0022
+    branch: fix/organization-training-lifecycle-pagination
+    dependsOn:
+      - p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
+    objective: close F-0022 with one bounded homogeneous database projection, stable global lifecycle ordering, real filtered count, and URL-recoverable 20/50/100 pagination
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0022
+    highRiskApproval:
+      category: bounded_database_application_query_logic
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: verified_candidate_ready_for_commit
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      preflightIncludedTestFiles: 8
+      inTaskTestOnlyExpansionCount: 0
+      testOnlyExpansionApprovalRequests: 0
+      weakenedTestAssertions: 0
+      postFreezeTestScopeChanges: 0
+      tddRed: passed_8_expected_failures_of_149
+      focused: passed_149_of_149
+      affectedRegression: passed_19_of_19
+      lint: passed_exact_affected_files_zero_warnings_after_obsolete_reader_cleanup
+      typecheck: passed
+      build: passed_97_static_pages
+      changedFileFormatDiff: passed_pre_and_post_full
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullProfile: passed_once_after_product_candidate_freeze
+      candidateTreeBeforeCloseoutEvidence: 14b42bed3b9dec26e892b7291c6fea39c09651c2
+      mainThreadAdversarialReview: passed_no_unbounded_alternate_get_no_n_plus_one_no_scope_or_integrity_regression
+      entitlementExpansion: false
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
+      approvalRequests: 0
+      approvalIdMismatch: 0
+      postApprovalCandidateTreeChanges: 0
+      repeatedBlockerReports: 0
+      validationRetryCount: 1
+      fullRuns: 1
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
+      findingId: F-0021
+      commit: 2282e12e98c6f9cf12058c568048496b6ccddb74
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      candidateTree: cc4656385a1d3be3ac0de37d0c3cd8626b822a71
+      focused: passed_4_of_4
+      affectedRegression: passed_12_of_12
       build: passed_97_static_pages
       p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
       p0SerialBaseline: pass_closed_program

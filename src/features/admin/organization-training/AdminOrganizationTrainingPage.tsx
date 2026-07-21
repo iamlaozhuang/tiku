@@ -47,6 +47,7 @@ import {
   createOrganizationTrainingListSearch,
   parseOrganizationTrainingListSearch,
   type OrganizationTrainingLifecycleContentKindFilter,
+  type OrganizationTrainingLifecyclePageSize,
   type OrganizationTrainingLifecycleSourceKindFilter,
   type OrganizationTrainingLifecycleStatusFilter,
 } from "./organization-training-list-url";
@@ -229,7 +230,7 @@ const lifecycleContentKindFilters: {
   { label: "未知形态", value: "unknown" },
 ];
 
-const organizationTrainingListPageSize = 10;
+const organizationTrainingListPageSizeOptions = [20, 50, 100] as const;
 
 function resolveOrganizationTrainingLoadState(authContext: AuthContextDto): {
   capabilitySummary: AdminWorkspaceCapabilitySummary;
@@ -281,17 +282,19 @@ async function fetchAdminOrganizationTrainingApi<TData>(
 function createAdminLifecycleListPath({
   contentKind,
   page,
+  pageSize,
   sourceKind,
   status,
 }: {
   contentKind: OrganizationTrainingLifecycleContentKindFilter;
   page: number;
+  pageSize: OrganizationTrainingLifecyclePageSize;
   sourceKind: OrganizationTrainingLifecycleSourceKindFilter;
   status: OrganizationTrainingLifecycleStatusFilter;
 }) {
   const searchParams = new URLSearchParams({
     page: String(page),
-    pageSize: String(organizationTrainingListPageSize),
+    pageSize: String(pageSize),
     status,
     sourceKind,
     contentKind,
@@ -323,6 +326,7 @@ function createLifecycleItemFromDraft(
     questionCount: draft.questionCount,
     totalScore: draft.totalScore,
     questionTypeSummary: draft.questionTypeSummary,
+    activityAt: draft.createdAt,
     status: "draft",
     sourceKind: isManualDraft ? "manual_group" : "unknown",
     contentKind: isManualDraft ? "question_training" : "unknown",
@@ -344,6 +348,7 @@ function createLifecycleItemFromVersion(
     description: version.description,
     questionCount: version.questionCount,
     totalScore: version.totalScore,
+    activityAt: version.publishedAt,
     status: version.status,
     sourceKind: "unknown",
     contentKind: "unknown",
@@ -485,11 +490,13 @@ function upsertLifecycleItem(
     (currentItem) => currentItem.publicId === item.publicId,
   );
 
-  return itemExists
+  const nextItems = itemExists
     ? items.map((currentItem) =>
         currentItem.publicId === item.publicId ? item : currentItem,
       )
     : [item, ...items];
+
+  return [...nextItems].sort(compareLifecycleItems);
 }
 
 function replaceLifecycleItem(
@@ -497,9 +504,32 @@ function replaceLifecycleItem(
   sourcePublicId: string,
   item: OrganizationTrainingAdminLifecycleItemDto,
 ) {
-  return items.map((currentItem) =>
-    currentItem.publicId === sourcePublicId ? item : currentItem,
+  return items
+    .map((currentItem) =>
+      currentItem.publicId === sourcePublicId ? item : currentItem,
+    )
+    .sort(compareLifecycleItems);
+}
+
+function compareLifecycleItems(
+  leftItem: OrganizationTrainingAdminLifecycleItemDto,
+  rightItem: OrganizationTrainingAdminLifecycleItemDto,
+) {
+  const activityOrder = String(rightItem.activityAt ?? "").localeCompare(
+    String(leftItem.activityAt ?? ""),
   );
+
+  if (activityOrder !== 0) {
+    return activityOrder;
+  }
+
+  const resourceTypeOrder = leftItem.resourceType.localeCompare(
+    rightItem.resourceType,
+  );
+
+  return resourceTypeOrder !== 0
+    ? resourceTypeOrder
+    : leftItem.publicId.localeCompare(rightItem.publicId);
 }
 
 function normalizePublishScope(rawValue: string, organizationPublicId: string) {
@@ -934,6 +964,9 @@ export function AdminOrganizationTrainingPage() {
   const [selectedLifecyclePage, setSelectedLifecyclePage] = useState(
     initialLifecycleUrlState.page,
   );
+  const [selectedLifecyclePageSize, setSelectedLifecyclePageSize] = useState(
+    initialLifecycleUrlState.pageSize,
+  );
   const [selectedPublishDraft, setSelectedPublishDraft] =
     useState<OrganizationTrainingAdminLifecycleItemDto | null>(null);
   const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
@@ -962,6 +995,7 @@ export function AdminOrganizationTrainingPage() {
     const search = createOrganizationTrainingListSearch({
       contentKind: selectedLifecycleContentKindFilter,
       page: selectedLifecyclePage,
+      pageSize: selectedLifecyclePageSize,
       sourceKind: selectedLifecycleSourceKindFilter,
       status: selectedLifecycleStatusFilter,
     });
@@ -973,6 +1007,7 @@ export function AdminOrganizationTrainingPage() {
   }, [
     selectedLifecycleContentKindFilter,
     selectedLifecyclePage,
+    selectedLifecyclePageSize,
     selectedLifecycleSourceKindFilter,
     selectedLifecycleStatusFilter,
   ]);
@@ -985,6 +1020,7 @@ export function AdminOrganizationTrainingPage() {
 
       setSelectedLifecycleContentKindFilter(restoredState.contentKind);
       setSelectedLifecyclePage(restoredState.page);
+      setSelectedLifecyclePageSize(restoredState.pageSize);
       setSelectedLifecycleSourceKindFilter(restoredState.sourceKind);
       setSelectedLifecycleStatusFilter(restoredState.status);
     }
@@ -1070,6 +1106,7 @@ export function AdminOrganizationTrainingPage() {
             createAdminLifecycleListPath({
               contentKind: selectedLifecycleContentKindFilter,
               page: selectedLifecyclePage,
+              pageSize: selectedLifecyclePageSize,
               sourceKind: selectedLifecycleSourceKindFilter,
               status: selectedLifecycleStatusFilter,
             }),
@@ -1139,6 +1176,7 @@ export function AdminOrganizationTrainingPage() {
     trainingListReloadSerial,
     selectedLifecycleContentKindFilter,
     selectedLifecyclePage,
+    selectedLifecyclePageSize,
     selectedLifecycleSourceKindFilter,
     selectedLifecycleStatusFilter,
   ]);
@@ -1506,6 +1544,7 @@ export function AdminOrganizationTrainingPage() {
         pagination={trainingPagination}
         selectedContentKindFilter={selectedLifecycleContentKindFilter}
         selectedPage={selectedLifecyclePage}
+        selectedPageSize={selectedLifecyclePageSize}
         selectedSourceKindFilter={selectedLifecycleSourceKindFilter}
         selectedStatusFilter={selectedLifecycleStatusFilter}
         isSubmitting={isSubmitting}
@@ -1523,6 +1562,10 @@ export function AdminOrganizationTrainingPage() {
           setSelectedLifecyclePage(1);
         }}
         onSelectPage={setSelectedLifecyclePage}
+        onSelectPageSize={(pageSize) => {
+          setSelectedLifecyclePageSize(pageSize);
+          setSelectedLifecyclePage(1);
+        }}
         onSelectSourceKindFilter={(filter) => {
           setSelectedLifecycleSourceKindFilter(filter);
           setSelectedLifecyclePage(1);
@@ -1614,6 +1657,7 @@ function TrainingListPanel({
   pagination,
   selectedContentKindFilter,
   selectedPage,
+  selectedPageSize,
   selectedSourceKindFilter,
   selectedStatusFilter,
   onCreateTraining,
@@ -1622,6 +1666,7 @@ function TrainingListPanel({
   onCopyVersionToDraft,
   onSelectContentKindFilter,
   onSelectPage,
+  onSelectPageSize,
   onSelectSourceKindFilter,
   onSelectStatusFilter,
   onPublishDraft,
@@ -1636,6 +1681,7 @@ function TrainingListPanel({
   pagination: ApiPagination | null;
   selectedContentKindFilter: OrganizationTrainingLifecycleContentKindFilter;
   selectedPage: number;
+  selectedPageSize: OrganizationTrainingLifecyclePageSize;
   selectedSourceKindFilter: OrganizationTrainingLifecycleSourceKindFilter;
   selectedStatusFilter: OrganizationTrainingLifecycleStatusFilter;
   onCreateTraining: () => void;
@@ -1650,6 +1696,7 @@ function TrainingListPanel({
     filter: OrganizationTrainingLifecycleContentKindFilter,
   ) => void;
   onSelectPage: (page: number) => void;
+  onSelectPageSize: (pageSize: OrganizationTrainingLifecyclePageSize) => void;
   onSelectSourceKindFilter: (
     filter: OrganizationTrainingLifecycleSourceKindFilter,
   ) => void;
@@ -1681,16 +1728,15 @@ function TrainingListPanel({
   const totalItemCount = pagination?.total ?? filteredItems.length;
   const totalPageCount = Math.max(
     1,
-    Math.ceil(totalItemCount / organizationTrainingListPageSize),
+    Math.ceil(totalItemCount / selectedPageSize),
   );
   const clampedSelectedPage = Math.min(selectedPage, totalPageCount);
-  const firstVisibleItemIndex =
-    (clampedSelectedPage - 1) * organizationTrainingListPageSize;
+  const firstVisibleItemIndex = (clampedSelectedPage - 1) * selectedPageSize;
   const paginatedItems =
     pagination === null
       ? filteredItems.slice(
           firstVisibleItemIndex,
-          firstVisibleItemIndex + organizationTrainingListPageSize,
+          firstVisibleItemIndex + selectedPageSize,
         )
       : filteredItems;
   const selectedDetailItem =
@@ -1937,11 +1983,33 @@ function TrainingListPanel({
         )}
       </div>
       {shouldShowLifecycleControls ? (
-        <div className="mt-3">
+        <div className="mt-3 space-y-3">
+          <label className="text-text-secondary flex items-center gap-2 text-sm">
+            每页
+            <select
+              aria-label="企业训练每页条数"
+              className="border-input bg-surface h-8 rounded-md border px-2 text-sm"
+              value={selectedPageSize}
+              onChange={(event) => {
+                clearSelectedDetail();
+                onSelectPageSize(
+                  Number(
+                    event.target.value,
+                  ) as OrganizationTrainingLifecyclePageSize,
+                );
+              }}
+            >
+              {organizationTrainingListPageSizeOptions.map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </label>
           <AdminPagination
             itemLabel="条训练"
             page={clampedSelectedPage}
-            pageSize={pagination?.pageSize ?? organizationTrainingListPageSize}
+            pageSize={pagination?.pageSize ?? selectedPageSize}
             total={totalItemCount}
             onPageChange={(page) => {
               clearSelectedDetail();

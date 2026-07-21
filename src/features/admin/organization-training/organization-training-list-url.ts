@@ -17,9 +17,12 @@ export type OrganizationTrainingLifecycleContentKindFilter =
   | "all"
   | OrganizationTrainingAdminLifecycleContentKind;
 
+export type OrganizationTrainingLifecyclePageSize = 20 | 50 | 100;
+
 export type OrganizationTrainingListUrlState = {
   contentKind: OrganizationTrainingLifecycleContentKindFilter;
   page: number;
+  pageSize: OrganizationTrainingLifecyclePageSize;
   sourceKind: OrganizationTrainingLifecycleSourceKindFilter;
   status: OrganizationTrainingLifecycleStatusFilter;
 };
@@ -39,6 +42,19 @@ const allowedContentKinds = [
   "paper_training",
   "unknown",
 ] as const;
+const allowedPageSizes = [20, 50, 100] as const;
+
+function parsePageSize(
+  value: string | null,
+): OrganizationTrainingLifecyclePageSize {
+  const parsedValue = Number(value);
+
+  return allowedPageSizes.includes(
+    parsedValue as OrganizationTrainingLifecyclePageSize,
+  )
+    ? (parsedValue as OrganizationTrainingLifecyclePageSize)
+    : 20;
+}
 
 function parseAllowedValue<TValue extends string>(
   value: string | null,
@@ -61,6 +77,7 @@ export function parseOrganizationTrainingListSearch(
       "all",
     ),
     page: Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1,
+    pageSize: parsePageSize(searchParams.get("pageSize")),
     sourceKind: parseAllowedValue(
       searchParams.get("sourceKind"),
       allowedSourceKinds,
@@ -77,6 +94,7 @@ export function parseOrganizationTrainingListSearch(
 export function createOrganizationTrainingListSearch({
   contentKind,
   page,
+  pageSize,
   sourceKind,
   status,
 }: OrganizationTrainingListUrlState): string {
@@ -85,6 +103,7 @@ export function createOrganizationTrainingListSearch({
   if (status !== "all") searchParams.set("status", status);
   if (sourceKind !== "all") searchParams.set("sourceKind", sourceKind);
   if (contentKind !== "all") searchParams.set("contentKind", contentKind);
+  if (pageSize !== 20) searchParams.set("pageSize", String(pageSize));
   if (page > 1) searchParams.set("page", String(page));
 
   return searchParams.toString();

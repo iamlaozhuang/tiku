@@ -18,6 +18,7 @@ import type {
 } from "../contracts/organization-training-contract";
 import {
   createOrganizationTrainingRepository,
+  createOrganizationTrainingAdminLifecyclePageSql,
   createOrganizationTrainingVisibleOrganizationPublicIdArraySql,
   createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingEmployeeAnswerLookupInput,
@@ -51,6 +52,135 @@ describe("organization training visible organization SQL", () => {
     expect(query.params).not.toEqual([
       ["organization_public_123", "organization_branch_public_456"],
     ]);
+  });
+
+  it("preserves a large filtered total while returning only the bounded requested page", async () => {
+    const execute = vi.fn(async () => [
+      {
+        public_id: "training_version_page_101",
+        resource_type: "organization_training_version",
+        organization_public_id: "organization_public_123",
+        authorization_public_id: null,
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Newest published training",
+        description: null,
+        revision: null,
+        question_count: 2,
+        total_score: "5",
+        question_type_summary: null,
+        activity_at: new Date("2026-07-21T10:00:00.000Z"),
+        status: "published",
+        source_kind: "ai_paper",
+        content_kind: "paper_training",
+        total: 10_000,
+        invalid_version_total: 1,
+      },
+    ]);
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => ({ execute }) as never,
+    });
+
+    const result = await repository.readAdminLifecyclePage({
+      visibleOrganizationPublicIds: ["organization_public_123"],
+      page: 6,
+      pageSize: 20,
+      status: "all",
+      sourceKind: "all",
+      contentKind: "all",
+    });
+
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      items: [
+        expect.objectContaining({
+          publicId: "training_version_page_101",
+          activityAt: "2026-07-21T10:00:00.000Z",
+          availableActions: ["take_down", "copy_to_new_draft"],
+        }),
+      ],
+      total: 10_000,
+      integrityStatus: "partial",
+      warningCode: "historical_version_unavailable",
+    });
+  });
+
+  it("returns an empty out-of-range page without losing the real filtered total", async () => {
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () =>
+        ({
+          execute: vi.fn(async () => [
+            {
+              public_id: null,
+              resource_type: null,
+              organization_public_id: null,
+              authorization_public_id: null,
+              profession: null,
+              level: null,
+              subject: null,
+              title: null,
+              description: null,
+              revision: null,
+              question_count: null,
+              total_score: null,
+              question_type_summary: null,
+              activity_at: null,
+              status: null,
+              source_kind: null,
+              content_kind: null,
+              total: 10_000,
+              invalid_version_total: 0,
+            },
+          ]),
+        }) as never,
+    });
+
+    await expect(
+      repository.readAdminLifecyclePage({
+        visibleOrganizationPublicIds: ["organization_public_123"],
+        page: 501,
+        pageSize: 20,
+        status: "all",
+        sourceKind: "all",
+        contentKind: "all",
+      }),
+    ).resolves.toEqual({
+      items: [],
+      total: 10_000,
+      integrityStatus: "complete",
+      warningCode: null,
+    });
+  });
+
+  it("builds one bounded homogeneous admin lifecycle projection with a real count and stable tie-breakers", () => {
+    const query = new PgDialect().sqlToQuery(
+      createOrganizationTrainingAdminLifecyclePageSql({
+        visibleOrganizationPublicIds: ["organization_public_123"],
+        page: 3,
+        pageSize: 50,
+        status: "published",
+        sourceKind: "ai_paper",
+        contentKind: "paper_training",
+      }),
+    );
+
+    expect(query.sql).toMatch(/union all/u);
+    expect(query.sql).toMatch(/count\(\*\)/u);
+    expect(query.sql).toMatch(
+      /order by activity_at desc, resource_type asc, public_id asc/u,
+    );
+    expect(query.sql).toMatch(/limit \$\d+ offset \$\d+/u);
+    expect(query.params).toEqual(
+      expect.arrayContaining([
+        "organization_public_123",
+        "published",
+        "ai_paper",
+        "paper_training",
+        50,
+        100,
+      ]),
+    );
   });
 });
 

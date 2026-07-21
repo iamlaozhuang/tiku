@@ -211,6 +211,7 @@ export type OrganizationTrainingAdminLifecycleItemDto = {
   questionCount?: number;
   totalScore?: number;
   questionTypeSummary?: OrganizationTrainingQuestionTypeSummary;
+  activityAt: string;
   status: "draft" | OrganizationTrainingVersionStatus;
   sourceKind: OrganizationTrainingAdminLifecycleSourceKind;
   contentKind: OrganizationTrainingAdminLifecycleContentKind;
@@ -220,6 +221,13 @@ export type OrganizationTrainingAdminLifecycleItemDto = {
 export type OrganizationTrainingAdminLifecycleFlowDto = {
   items: OrganizationTrainingAdminLifecycleItemDto[];
   redactionStatus: "metadata_only";
+  integrityStatus: OrganizationTrainingVersionListIntegrityStatus;
+  warningCode: OrganizationTrainingVersionListWarningCode | null;
+};
+
+export type OrganizationTrainingAdminLifecyclePageResult = {
+  items: OrganizationTrainingAdminLifecycleItemDto[];
+  total: number;
   integrityStatus: OrganizationTrainingVersionListIntegrityStatus;
   warningCode: OrganizationTrainingVersionListWarningCode | null;
 };

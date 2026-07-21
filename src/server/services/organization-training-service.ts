@@ -15,6 +15,7 @@ import type {
   EmployeeOrganizationTrainingScoreSummaryDto,
   OrganizationTrainingAdminDetailDto,
   OrganizationTrainingAdminLifecycleFlowDto,
+  OrganizationTrainingAdminLifecyclePageResult,
   OrganizationTrainingAdminLifecycleContentKind,
   OrganizationTrainingAdminLifecycleItemDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
@@ -244,6 +245,12 @@ export type OrganizationTrainingAdminLifecycleFlowReadModelInput = {
   warningCode?: OrganizationTrainingVersionListWarningCode | null;
 };
 
+export type OrganizationTrainingAdminLifecyclePageReadModelInput = {
+  adminContext: OrganizationTrainingAdminContext;
+  pageResult: OrganizationTrainingAdminLifecyclePageResult;
+  query: OrganizationTrainingAdminLifecycleQuery;
+};
+
 export type OrganizationTrainingAdminDetailReadModelInput =
   | {
       adminContext: OrganizationTrainingAdminContext;
@@ -292,7 +299,7 @@ export type OrganizationTrainingAdminLifecycleContentKindFilter =
 
 export type OrganizationTrainingAdminLifecycleQuery = {
   page: number;
-  pageSize: number;
+  pageSize: 20 | 50 | 100;
   status: OrganizationTrainingAdminLifecycleStatusFilter;
   sourceKind: OrganizationTrainingAdminLifecycleSourceKindFilter;
   contentKind: OrganizationTrainingAdminLifecycleContentKindFilter;
@@ -833,7 +840,8 @@ function normalizeAdminLifecycleQuery(
 ): OrganizationTrainingAdminLifecycleQuery {
   return {
     page: Math.max(1, Math.floor(query?.page ?? 1)),
-    pageSize: Math.min(50, Math.max(1, Math.floor(query?.pageSize ?? 10))),
+    pageSize:
+      query?.pageSize === 50 || query?.pageSize === 100 ? query.pageSize : 20,
     status: query?.status ?? "all",
     sourceKind: query?.sourceKind ?? "all",
     contentKind: query?.contentKind ?? "all",
@@ -920,6 +928,7 @@ function buildDraftLifecycleItem(
     questionCount: draft.questionCount,
     totalScore: draft.totalScore,
     questionTypeSummary: copyQuestionTypeSummary(draft.questionTypeSummary),
+    activityAt: draft.createdAt,
     status: "draft",
     sourceKind: kind.sourceKind,
     contentKind: kind.contentKind,
@@ -955,11 +964,31 @@ function buildVersionLifecycleItem(
     description: version.description,
     questionCount: version.questionCount,
     totalScore: version.totalScore,
+    activityAt: version.publishedAt,
     status: version.status,
     sourceKind: kind.sourceKind,
     contentKind: kind.contentKind,
     availableActions: [...availableActions],
   };
+}
+
+function compareAdminLifecycleItems(
+  leftItem: OrganizationTrainingAdminLifecycleItemDto,
+  rightItem: OrganizationTrainingAdminLifecycleItemDto,
+): number {
+  const activityOrder = rightItem.activityAt.localeCompare(leftItem.activityAt);
+
+  if (activityOrder !== 0) {
+    return activityOrder;
+  }
+
+  const resourceTypeOrder = leftItem.resourceType.localeCompare(
+    rightItem.resourceType,
+  );
+
+  return resourceTypeOrder !== 0
+    ? resourceTypeOrder
+    : leftItem.publicId.localeCompare(rightItem.publicId);
 }
 
 function matchesAdminLifecycleQuery(
@@ -1000,9 +1029,9 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
       ),
     )
     .map((version) => buildVersionLifecycleItem(version, sourceMetadataMap));
-  const filteredItems = [...draftItems, ...versionItems].filter((item) =>
-    matchesAdminLifecycleQuery(item, query),
-  );
+  const filteredItems = [...draftItems, ...versionItems]
+    .filter((item) => matchesAdminLifecycleQuery(item, query))
+    .sort(compareAdminLifecycleItems);
   const startIndex = (query.page - 1) * query.pageSize;
 
   return createPaginatedResponse(
@@ -1016,7 +1045,32 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
       page: query.page,
       pageSize: query.pageSize,
       total: filteredItems.length,
-      sortBy: "createdAt",
+      sortBy: "activityAt",
+      sortOrder: "desc",
+    },
+  );
+}
+
+export function buildOrganizationTrainingAdminLifecyclePageReadModel(
+  input: OrganizationTrainingAdminLifecyclePageReadModelInput,
+): ApiResponse<OrganizationTrainingAdminLifecycleFlowDto> {
+  const query = normalizeAdminLifecycleQuery(input.query);
+  const visibleItems = input.pageResult.items.filter((item) =>
+    isOrganizationVisibleToAdmin(item.organizationPublicId, input.adminContext),
+  );
+
+  return createPaginatedResponse(
+    {
+      items: visibleItems,
+      redactionStatus: "metadata_only",
+      integrityStatus: input.pageResult.integrityStatus,
+      warningCode: input.pageResult.warningCode,
+    },
+    {
+      page: query.page,
+      pageSize: query.pageSize,
+      total: input.pageResult.total,
+      sortBy: "activityAt",
       sortOrder: "desc",
     },
   );

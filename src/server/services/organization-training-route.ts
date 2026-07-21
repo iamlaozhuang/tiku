@@ -14,6 +14,7 @@ import type {
   OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminLifecyclePageResult,
   OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -62,7 +63,7 @@ import {
 } from "../validators/organization-training";
 import {
   buildOrganizationTrainingAdminDetailReadModel,
-  buildOrganizationTrainingAdminLifecycleFlowReadModel,
+  buildOrganizationTrainingAdminLifecyclePageReadModel,
   createOrganizationTrainingService,
   organizationTrainingDraftSaveBlockedMessage,
   organizationTrainingEmployeeAnswerBlockedMessage,
@@ -151,9 +152,9 @@ export type OrganizationTrainingVisibleOrganizationScopeResolver = (
 ) => Promise<readonly string[] | null>;
 
 export type OrganizationTrainingRouteOptions = {
+  readAdminLifecyclePage?: OrganizationTrainingAdminLifecyclePageReader;
   listAdminLifecycleDrafts?: OrganizationTrainingAdminLifecycleDraftsReader;
   listAdminLifecycleSourceMetadata?: OrganizationTrainingAdminLifecycleSourceMetadataReader;
-  listAdminLifecycleVersions?: OrganizationTrainingAdminLifecycleVersionsReader;
   listEmployeeVisibleVersions?: OrganizationTrainingEmployeeVisibleVersionsReader;
   lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
   resolveEmployeeAnswer?: OrganizationTrainingEmployeeAnswerResolver;
@@ -198,7 +199,7 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
   | "listAdminLifecycleDrafts"
   | "listAdminLifecycleSourceMetadata"
-  | "listAdminLifecycleVersions"
+  | "readAdminLifecyclePage"
   | "resolveAdminDetailVersion"
   | "resolveAdminDraftDetailQuestions"
   | "listEmployeeVisibleVersions"
@@ -239,6 +240,15 @@ export type OrganizationTrainingAdminLifecycleReaderInput = {
   adminContext: OrganizationTrainingAdminContext;
 };
 
+export type OrganizationTrainingAdminLifecyclePageReaderInput =
+  OrganizationTrainingAdminLifecycleReaderInput & {
+    query: OrganizationTrainingAdminLifecycleQuery;
+  };
+
+export type OrganizationTrainingAdminLifecyclePageReader = (
+  input: OrganizationTrainingAdminLifecyclePageReaderInput,
+) => Promise<OrganizationTrainingAdminLifecyclePageResult>;
+
 export type OrganizationTrainingAdminLifecycleSourceMetadataReaderInput = {
   request: Request;
   adminContext: OrganizationTrainingAdminContext;
@@ -248,13 +258,6 @@ export type OrganizationTrainingAdminLifecycleSourceMetadataReaderInput = {
 export type OrganizationTrainingAdminLifecycleDraftsReader = (
   input: OrganizationTrainingAdminLifecycleReaderInput,
 ) => Promise<OrganizationTrainingDraftDto[]>;
-
-export type OrganizationTrainingAdminLifecycleVersionsReader = (
-  input: OrganizationTrainingAdminLifecycleReaderInput,
-) => Promise<
-  | OrganizationTrainingPublishedVersionDto[]
-  | OrganizationTrainingVersionListReadResult
->;
 
 export type OrganizationTrainingAdminLifecycleSourceMetadataReader = (
   input: OrganizationTrainingAdminLifecycleSourceMetadataReaderInput,
@@ -557,16 +560,16 @@ async function defaultListAdminLifecycleDrafts(): Promise<
   return [];
 }
 
-async function defaultListAdminLifecycleVersions(): Promise<
-  OrganizationTrainingPublishedVersionDto[]
-> {
-  return [];
-}
-
 async function defaultListAdminLifecycleSourceMetadata(): Promise<
   OrganizationTrainingAdminLifecycleSourceMetadataDto[]
 > {
   return [];
+}
+
+async function defaultReadAdminLifecyclePage(): Promise<never> {
+  throw new Error(
+    "Organization training admin lifecycle page reader is unavailable.",
+  );
 }
 
 async function defaultListEmployeeVisibleVersions(): Promise<
@@ -655,10 +658,14 @@ function normalizeAdminLifecycleQuery(
 
   return {
     page: normalizePositiveIntegerQueryParam(searchParams.get("page"), 1),
-    pageSize: Math.min(
-      50,
-      normalizePositiveIntegerQueryParam(searchParams.get("pageSize"), 10),
-    ),
+    pageSize: (() => {
+      const pageSize = normalizePositiveIntegerQueryParam(
+        searchParams.get("pageSize"),
+        20,
+      );
+
+      return pageSize === 50 || pageSize === 100 ? pageSize : 20;
+    })(),
     status: normalizeAdminLifecycleStatusFilter(searchParams.get("status")),
     sourceKind: normalizeAdminLifecycleSourceKindFilter(
       searchParams.get("sourceKind"),
@@ -1155,22 +1162,14 @@ function createRepositoryBackedAdminLifecycleDraftsReader(
     });
 }
 
-function createRepositoryBackedAdminLifecycleVersionsReader(
-  repository: Pick<
-    OrganizationTrainingRepository,
-    "listAdminLifecycleVersions"
-  > &
-    Partial<Pick<OrganizationTrainingRepository, "readAdminLifecycleVersions">>,
-): OrganizationTrainingAdminLifecycleVersionsReader {
-  return async ({ adminContext }) => {
-    const input = {
+function createRepositoryBackedAdminLifecyclePageReader(
+  repository: Pick<OrganizationTrainingRepository, "readAdminLifecyclePage">,
+): OrganizationTrainingAdminLifecyclePageReader {
+  return async ({ adminContext, query }) =>
+    repository.readAdminLifecyclePage({
       visibleOrganizationPublicIds: adminContext.visibleOrganizationPublicIds,
-    };
-
-    return repository.readAdminLifecycleVersions === undefined
-      ? repository.listAdminLifecycleVersions(input)
-      : repository.readAdminLifecycleVersions(input);
-  };
+      ...query,
+    });
 }
 
 function createRepositoryBackedAdminLifecycleSourceMetadataReader(
@@ -1834,8 +1833,8 @@ export function createOrganizationTrainingRouteHandlers(
     defaultEmployeeAnswerServiceResult;
   const listAdminLifecycleDrafts =
     options.listAdminLifecycleDrafts ?? defaultListAdminLifecycleDrafts;
-  const listAdminLifecycleVersions =
-    options.listAdminLifecycleVersions ?? defaultListAdminLifecycleVersions;
+  const readAdminLifecyclePage =
+    options.readAdminLifecyclePage ?? defaultReadAdminLifecyclePage;
   const listAdminLifecycleSourceMetadata =
     options.listAdminLifecycleSourceMetadata ??
     defaultListAdminLifecycleSourceMetadata;
@@ -2064,40 +2063,18 @@ export function createOrganizationTrainingRouteHandlers(
         }
 
         const query = normalizeAdminLifecycleQuery(request);
-        const [drafts, versionReadValue] = await Promise.all([
-          listAdminLifecycleDrafts({
-            request,
-            adminContext,
-          }),
-          listAdminLifecycleVersions({
-            request,
-            adminContext,
-          }),
-        ]);
-        const versionReadResult =
-          normalizeVersionListReadResult(versionReadValue);
-        const versions = versionReadResult.versions;
-        const draftPublicIds = [
-          ...new Set([
-            ...drafts.map((draft) => draft.publicId),
-            ...versions.map((version) => version.draftPublicId),
-          ]),
-        ];
-        const sourceMetadata = await listAdminLifecycleSourceMetadata({
+
+        const pageResult = await readAdminLifecyclePage({
           request,
           adminContext,
-          draftPublicIds,
+          query,
         });
 
         return createJsonResponse(
-          buildOrganizationTrainingAdminLifecycleFlowReadModel({
+          buildOrganizationTrainingAdminLifecyclePageReadModel({
             adminContext,
-            drafts,
-            versions,
-            sourceMetadata,
+            pageResult,
             query,
-            integrityStatus: versionReadResult.integrityStatus,
-            warningCode: versionReadResult.warningCode,
           }),
         );
       },
@@ -2857,9 +2834,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const listAdminLifecycleDrafts =
     options.listAdminLifecycleDrafts ??
     createRepositoryBackedAdminLifecycleDraftsReader(repository);
-  const listAdminLifecycleVersions =
-    options.listAdminLifecycleVersions ??
-    createRepositoryBackedAdminLifecycleVersionsReader(repository);
+  const readAdminLifecyclePage =
+    options.readAdminLifecyclePage ??
+    createRepositoryBackedAdminLifecyclePageReader(repository);
   const listAdminLifecycleSourceMetadata =
     options.listAdminLifecycleSourceMetadata ??
     createRepositoryBackedAdminLifecycleSourceMetadataReader(repository);
@@ -2903,7 +2880,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       resolveVersionOrganizationPublicId,
       resolveEmployeeContext,
       listAdminLifecycleDrafts,
-      listAdminLifecycleVersions,
+      readAdminLifecyclePage,
       listAdminLifecycleSourceMetadata,
       listEmployeeVisibleVersions,
       resolveAdminDetailVersion,

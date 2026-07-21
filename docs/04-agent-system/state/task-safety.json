@@ -1,21 +1,25 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-admin-log-pagination-total-2026-07-20",
-  "objective": "Close F-0021 by making audit_log and ai_call_log list filtering, counting, ordering, and pagination operate on the same complete query set; preserve repository-authoritative totals through services and canonical adapters so pages beyond the first remain reachable, while retaining redaction and fail-closed behavior. Do not change schema/migrations, dependencies, authorization, Provider/external services, safety mechanisms, deployment, secret/env, or execute a persistent database write.",
+  "taskId": "p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21",
+  "objective": "Close F-0022 by replacing the unbounded draft-then-version organization-training admin list with one bounded homogeneous database projection that applies scope and lifecycle filters before a real count, uses stable global activity-time ordering, and returns only the requested page; align service, route, UI, and URL state to the 20/50/100 page-size contract. Preserve metadata-only redaction, historical-version fail-closed integrity warnings, organization scope, and existing lifecycle actions. Do not change schema/migrations, dependencies, entitlement or authorization semantics, Provider/external services, safety mechanisms, deployment, secret/env, or execute a persistent database write.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts",
-    "src/server/repositories/audit-log/postgres-audit-log-repository.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "src/server/services/admin-flow-runtime.ts",
-    "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts",
-    "tests/unit/p1-admin-log-pagination-total.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
+    "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
+    "src/features/admin/organization-training/organization-training-list-url.test.ts",
+    "src/features/admin/organization-training/organization-training-list-url.ts",
+    "src/server/contracts/organization-training-contract.ts",
+    "src/server/repositories/organization-training-repository.test.ts",
+    "src/server/repositories/organization-training-repository.ts",
+    "src/server/services/organization-training-route.test.ts",
+    "src/server/services/organization-training-route.ts",
+    "src/server/services/organization-training-service.test.ts",
+    "src/server/services/organization-training-service.ts",
+    "tests/unit/admin-student-uiux-consistency-closeout.test.ts",
+    "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
+    "tests/unit/organization-training-admin-entry-surface.test.ts",
+    "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -28,7 +32,7 @@
   ],
   "validationCommands": [
     {
-      "name": "admin-log-pagination-total-focused",
+      "name": "organization-training-lifecycle-pagination-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -36,11 +40,15 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-admin-log-pagination-total.test.ts"
+        "src/features/admin/organization-training/organization-training-list-url.test.ts",
+        "src/server/repositories/organization-training-repository.test.ts",
+        "src/server/services/organization-training-service.test.ts",
+        "src/server/services/organization-training-route.test.ts",
+        "tests/unit/organization-training-admin-entry-surface.test.ts"
       ]
     },
     {
-      "name": "admin-log-pagination-total-regression",
+      "name": "organization-training-lifecycle-pagination-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -48,30 +56,34 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts"
+        "tests/unit/p0-rc-08-organization-training-integrity.test.ts",
+        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
+        "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
       ]
     },
     {
-      "name": "admin-log-pagination-total-lint",
+      "name": "organization-training-lifecycle-pagination-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts",
-        "src/server/repositories/audit-log/postgres-audit-log-repository.ts",
-        "src/server/services/admin-ai-audit-log-runtime.ts",
-        "src/server/services/admin-flow-runtime.ts",
-        "tests/unit/p1-admin-log-pagination-total.test.ts"
+        "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
+        "src/features/admin/organization-training/organization-training-list-url.test.ts",
+        "src/features/admin/organization-training/organization-training-list-url.ts",
+        "src/server/contracts/organization-training-contract.ts",
+        "src/server/repositories/organization-training-repository.test.ts",
+        "src/server/repositories/organization-training-repository.ts",
+        "src/server/services/organization-training-route.test.ts",
+        "src/server/services/organization-training-route.ts",
+        "src/server/services/organization-training-service.test.ts",
+        "src/server/services/organization-training-service.ts",
+        "tests/unit/organization-training-admin-entry-surface.test.ts"
       ]
     },
     {
-      "name": "admin-log-pagination-total-typecheck",
+      "name": "organization-training-lifecycle-pagination-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]

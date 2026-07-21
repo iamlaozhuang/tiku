@@ -40,6 +40,8 @@ import { lockEmployeeIdentity } from "./employee-org-auth-quota-repository";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminLifecycleItemDto,
+  OrganizationTrainingAdminLifecyclePageResult,
   OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
@@ -117,6 +119,17 @@ export type OrganizationTrainingVersionOrganizationLookupInput = {
 export type OrganizationTrainingAdminLifecycleListInput = {
   visibleOrganizationPublicIds: readonly string[];
 };
+
+export type OrganizationTrainingAdminLifecyclePageInput =
+  OrganizationTrainingAdminLifecycleListInput & {
+    page: number;
+    pageSize: 20 | 50 | 100;
+    status: "all" | "draft" | "published" | "taken_down";
+    sourceKind: "all" | OrganizationTrainingAdminLifecycleItemDto["sourceKind"];
+    contentKind:
+      | "all"
+      | OrganizationTrainingAdminLifecycleItemDto["contentKind"];
+  };
 
 export type OrganizationTrainingAdminLifecycleSourceMetadataListInput = {
   draftPublicIds: readonly string[];
@@ -373,6 +386,9 @@ export type OrganizationTrainingVersionGateway = {
   listAdminLifecycleVersions(
     input: OrganizationTrainingAdminLifecycleListInput,
   ): Promise<OrganizationTrainingVersionRow[]>;
+  readAdminLifecyclePage?(
+    input: OrganizationTrainingAdminLifecyclePageInput,
+  ): Promise<OrganizationTrainingAdminLifecyclePageResult>;
   listAdminLifecycleSourceMetadata(
     input: OrganizationTrainingAdminLifecycleSourceMetadataListInput,
   ): Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]>;
@@ -457,6 +473,9 @@ export type OrganizationTrainingRepository = {
   readAdminLifecycleVersions(
     input: OrganizationTrainingAdminLifecycleListInput,
   ): Promise<OrganizationTrainingVersionListReadResult>;
+  readAdminLifecyclePage(
+    input: OrganizationTrainingAdminLifecyclePageInput,
+  ): Promise<OrganizationTrainingAdminLifecyclePageResult>;
   listAdminLifecycleSourceMetadata(
     input: OrganizationTrainingAdminLifecycleSourceMetadataListInput,
   ): Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]>;
@@ -931,6 +950,32 @@ export function createOrganizationTrainingRepository(
 
     readAdminLifecycleVersions,
 
+    async readAdminLifecyclePage(input) {
+      const visibleOrganizationPublicIds = normalizeAdminLifecycleListInput(
+        input.visibleOrganizationPublicIds,
+      );
+
+      if (visibleOrganizationPublicIds === null) {
+        return {
+          items: [],
+          total: 0,
+          integrityStatus: "complete",
+          warningCode: null,
+        };
+      }
+
+      if (gateway.readAdminLifecyclePage === undefined) {
+        throw new Error(
+          "organization training admin lifecycle page reader is unavailable.",
+        );
+      }
+
+      return gateway.readAdminLifecyclePage({
+        ...input,
+        visibleOrganizationPublicIds,
+      });
+    },
+
     async listAdminLifecycleSourceMetadata(input) {
       const normalizedDraftPublicIds = normalizePublicIdList(
         input.draftPublicIds,
@@ -1227,6 +1272,9 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async listAdminLifecycleVersions(input) {
       return listAdminLifecycleVersions(getDatabase(), input);
+    },
+    async readAdminLifecyclePage(input) {
+      return readAdminLifecyclePage(getDatabase(), input);
     },
     async listAdminLifecycleSourceMetadata(input) {
       return listAdminLifecycleSourceMetadata(getDatabase(), input);
@@ -3860,6 +3908,278 @@ async function findEmployeeAnswerByVersionPublicId(
     .limit(1);
 
   return (row as OrganizationTrainingAnswerRow | undefined) ?? null;
+}
+
+type OrganizationTrainingAdminLifecyclePageRow = {
+  public_id: string | null;
+  resource_type:
+    | OrganizationTrainingAdminLifecycleItemDto["resourceType"]
+    | null;
+  organization_public_id: string | null;
+  authorization_public_id: string | null;
+  profession: OrganizationTrainingAdminLifecycleItemDto["profession"] | null;
+  level: number | null;
+  subject: OrganizationTrainingAdminLifecycleItemDto["subject"] | null;
+  title: string | null;
+  description: string | null;
+  revision: number | null;
+  question_count: number | null;
+  total_score: number | string | null;
+  question_type_summary:
+    | OrganizationTrainingDraftDto["questionTypeSummary"]
+    | null;
+  activity_at: Date | string | null;
+  status: OrganizationTrainingAdminLifecycleItemDto["status"] | null;
+  source_kind: OrganizationTrainingAdminLifecycleItemDto["sourceKind"] | null;
+  content_kind: OrganizationTrainingAdminLifecycleItemDto["contentKind"] | null;
+  total: number | string;
+  invalid_version_total: number | string;
+};
+
+export function createOrganizationTrainingAdminLifecyclePageSql(
+  input: OrganizationTrainingAdminLifecyclePageInput,
+): SQL {
+  const visibleOrganizationPublicIds =
+    createOrganizationTrainingVisibleOrganizationPublicIdArraySql(
+      input.visibleOrganizationPublicIds,
+    );
+  const offset = (input.page - 1) * input.pageSize;
+
+  return sql`
+    with source_metadata as (
+      select distinct on (draft.id)
+        draft.id as draft_id,
+        draft.public_id as draft_public_id,
+        draft.source_task_public_id,
+        draft.source_version_public_id,
+        source_context.source_type,
+        case
+          when task_metadata.workspace = 'organization'
+            and task_metadata.generation_kind in ('question', 'paper')
+            then task_metadata.generation_kind
+          else null
+        end as generation_kind
+      from organization_training_draft draft
+      left join organization_training_source_context source_context
+        on source_context.organization_training_draft_id = draft.id
+      left join admin_ai_generation_task_metadata task_metadata
+        on task_metadata.task_public_id = draft.source_task_public_id
+      where draft.organization_public_id = any(${visibleOrganizationPublicIds})
+      order by
+        draft.id,
+        case
+          when source_context.source_type = 'organization_ai_result'
+            and task_metadata.workspace = 'organization'
+            and task_metadata.generation_kind in ('question', 'paper') then 4
+          when source_context.source_type = 'paper' then 3
+          when source_context.source_type is null
+            and draft.source_task_public_id is null
+            and draft.source_version_public_id is null then 2
+          else 1
+        end desc,
+        source_context.id desc nulls last
+    ), lifecycle as (
+      select
+        draft.public_id,
+        'organization_training_draft'::text as resource_type,
+        draft.organization_public_id,
+        draft.authorization_public_id,
+        draft.profession::text as profession,
+        draft.level,
+        draft.subject::text as subject,
+        draft.title,
+        draft.description,
+        draft.revision,
+        draft.question_count,
+        draft.total_score::text as total_score,
+        draft.question_type_summary,
+        draft.created_at as activity_at,
+        'draft'::text as status,
+        case
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'question' then 'ai_question'
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'paper' then 'ai_paper'
+          when metadata.source_type = 'paper' then 'platform_paper'
+          when metadata.source_type is null
+            and metadata.source_task_public_id is null
+            and metadata.source_version_public_id is null then 'manual_group'
+          else 'unknown'
+        end::text as source_kind,
+        case
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'question' then 'question_training'
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'paper' then 'paper_training'
+          when metadata.source_type = 'paper' then 'paper_training'
+          when metadata.source_type is null
+            and metadata.source_task_public_id is null
+            and metadata.source_version_public_id is null then 'question_training'
+          else 'unknown'
+        end::text as content_kind
+      from organization_training_draft draft
+      inner join source_metadata metadata on metadata.draft_id = draft.id
+      where draft.organization_public_id = any(${visibleOrganizationPublicIds})
+        and draft.retention_status = 'active'
+        and draft.draft_status = 'draft'
+
+      union all
+
+      select
+        version.public_id,
+        'organization_training_version'::text as resource_type,
+        version.organization_public_id,
+        null::text as authorization_public_id,
+        version.profession::text as profession,
+        version.level,
+        version.subject::text as subject,
+        version.title,
+        version.description,
+        null::integer as revision,
+        version.question_count,
+        version.total_score::text as total_score,
+        null::jsonb as question_type_summary,
+        version.published_at as activity_at,
+        version.version_status::text as status,
+        case
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'question' then 'ai_question'
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'paper' then 'ai_paper'
+          when metadata.source_type = 'paper' then 'platform_paper'
+          else 'unknown'
+        end::text as source_kind,
+        case
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'question' then 'question_training'
+          when metadata.source_type = 'organization_ai_result'
+            and metadata.generation_kind = 'paper' then 'paper_training'
+          when metadata.source_type = 'paper' then 'paper_training'
+          else 'unknown'
+        end::text as content_kind
+      from organization_training_version version
+      left join source_metadata metadata
+        on metadata.draft_public_id = version.draft_public_id
+      where version.organization_public_id = any(${visibleOrganizationPublicIds})
+        and version.publish_scope_snapshot is not null
+        and version.published_at is not null
+    ), filtered_lifecycle as (
+      select *
+      from lifecycle
+      where (${input.status} = 'all' or status = ${input.status})
+        and (${input.sourceKind} = 'all' or source_kind = ${input.sourceKind})
+        and (${input.contentKind} = 'all' or content_kind = ${input.contentKind})
+    ), invalid_version_summary as (
+      select count(*)::integer as invalid_version_total
+      from organization_training_version version
+      where version.organization_public_id = any(${visibleOrganizationPublicIds})
+        and (
+          version.publish_scope_snapshot is null
+          or version.published_at is null
+        )
+    ), summary as (
+      select
+        count(*)::integer as total,
+        invalid_version_summary.invalid_version_total
+      from filtered_lifecycle
+      cross join invalid_version_summary
+      group by invalid_version_summary.invalid_version_total
+    ), page_rows as (
+      select *
+      from filtered_lifecycle
+      order by activity_at desc, resource_type asc, public_id asc
+      limit ${input.pageSize} offset ${offset}
+    )
+    select
+      page_rows.*,
+      summary.total,
+      summary.invalid_version_total
+    from summary
+    left join page_rows on true
+    order by
+      page_rows.activity_at desc nulls last,
+      page_rows.resource_type asc nulls last,
+      page_rows.public_id asc nulls last
+  `;
+}
+
+async function readAdminLifecyclePage(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingAdminLifecyclePageInput,
+): Promise<OrganizationTrainingAdminLifecyclePageResult> {
+  const rows = await (
+    database as unknown as {
+      execute<TRow extends Record<string, unknown>>(
+        query: SQL,
+      ): Promise<TRow[]>;
+    }
+  ).execute<OrganizationTrainingAdminLifecyclePageRow>(
+    createOrganizationTrainingAdminLifecyclePageSql(input),
+  );
+  const summaryRow = rows[0];
+  const invalidVersionTotal = Number(summaryRow?.invalid_version_total ?? 0);
+  const items = rows.flatMap((row) => {
+    if (
+      row.public_id === null ||
+      row.resource_type === null ||
+      row.organization_public_id === null ||
+      row.title === null ||
+      row.activity_at === null ||
+      row.status === null ||
+      row.source_kind === null ||
+      row.content_kind === null
+    ) {
+      return [];
+    }
+
+    const availableActions =
+      row.resource_type === "organization_training_draft"
+        ? (["publish"] as const)
+        : row.status === "published"
+          ? (["take_down", "copy_to_new_draft"] as const)
+          : (["copy_to_new_draft"] as const);
+    const item: OrganizationTrainingAdminLifecycleItemDto = {
+      publicId: row.public_id,
+      resourceType: row.resource_type,
+      organizationPublicId: row.organization_public_id,
+      ...(row.authorization_public_id === null
+        ? {}
+        : { authorizationPublicId: row.authorization_public_id }),
+      ...(row.profession === null ? {} : { profession: row.profession }),
+      ...(row.level === null ? {} : { level: row.level }),
+      ...(row.subject === null ? {} : { subject: row.subject }),
+      title: row.title,
+      description: row.description,
+      ...(row.revision === null ? {} : { revision: row.revision }),
+      ...(row.question_count === null
+        ? {}
+        : { questionCount: row.question_count }),
+      ...(row.total_score === null
+        ? {}
+        : { totalScore: Number(row.total_score) }),
+      ...(row.question_type_summary === null
+        ? {}
+        : { questionTypeSummary: row.question_type_summary }),
+      activityAt:
+        row.activity_at instanceof Date
+          ? row.activity_at.toISOString()
+          : new Date(row.activity_at).toISOString(),
+      status: row.status,
+      sourceKind: row.source_kind,
+      contentKind: row.content_kind,
+      availableActions: [...availableActions],
+    };
+
+    return [item];
+  });
+
+  return {
+    items,
+    total: Number(summaryRow?.total ?? 0),
+    integrityStatus: invalidVersionTotal > 0 ? "partial" : "complete",
+    warningCode:
+      invalidVersionTotal > 0 ? "historical_version_unavailable" : null,
+  };
 }
 
 async function listAdminLifecycleDrafts(
