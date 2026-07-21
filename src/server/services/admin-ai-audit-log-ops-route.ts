@@ -2,6 +2,7 @@ import type {
   AdminAiAuditLogListQuery,
   AdminAiAuditLogPageSize,
 } from "../contracts/admin-ai-audit-log-ops-contract";
+import { createAdminAiAuditLogListQuery } from "../contracts/admin-ai-audit-log-ops-contract";
 import type {
   AdminAiAuditLogApiResponse,
   AdminAiAuditLogOpsService,
@@ -25,14 +26,44 @@ function readListQuery(request: Request): Partial<AdminAiAuditLogListQuery> {
   const page = Number(searchParams.get("page"));
   const pageSize = Number(searchParams.get("pageSize"));
   const keyword = searchParams.get("keyword");
+  const level = Number(searchParams.get("level"));
+  const sortBy = searchParams.get("sortBy");
   const safePageSize: AdminAiAuditLogPageSize =
     pageSize === 50 || pageSize === 100 ? pageSize : 20;
 
-  return {
+  return createAdminAiAuditLogListQuery({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: safePageSize,
     keyword,
-  };
+    aiFuncType: searchParams.get("aiFuncType") ?? undefined,
+    callStatus: searchParams.get("callStatus") ?? undefined,
+    profession: searchParams.get("profession") ?? undefined,
+    level: Number.isInteger(level) && level > 0 ? level : null,
+    organizationPublicId: readOptionalText(
+      searchParams.get("organizationPublicId"),
+    ),
+    userPublicId: readOptionalText(searchParams.get("userPublicId")),
+    fromStartedAt: readIsoTimestamp(searchParams.get("fromStartedAt")),
+    toStartedAt: readIsoTimestamp(searchParams.get("toStartedAt")),
+    bucketType: searchParams.get("bucketType") === "month" ? "month" : "day",
+    sortBy:
+      sortBy === "completedAt" || sortBy === "startedAt" ? sortBy : "startedAt",
+    sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+  });
+}
+
+function readOptionalText(value: string | null): string | null {
+  const normalized = value?.trim() ?? "";
+
+  return normalized.length > 0 && normalized.length <= 128 ? normalized : null;
+}
+
+function readIsoTimestamp(value: string | null): string | null {
+  if (value === null || !Number.isFinite(Date.parse(value))) {
+    return null;
+  }
+
+  return new Date(value).toISOString();
 }
 
 export function createAdminAiAuditLogOpsRouteHandlers(

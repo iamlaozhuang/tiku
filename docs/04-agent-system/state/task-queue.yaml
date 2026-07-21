@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-contact-config-persistence-2026-07-21
+  currentTaskId: p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -253,6 +253,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
     - p1-remediation-rc-04-f0031-static-closure-2026-07-21
     - p1-remediation-rc-04-contact-config-persistence-2026-07-21
+    - p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -291,6 +292,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
     - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
     - p1-remediation-rc-04-f0031-static-closure-2026-07-21
+    - p1-remediation-rc-04-contact-config-persistence-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -355,42 +357,72 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
-    p1-remediation-rc-04-contact-config-persistence-2026-07-21: in_progress
+    p1-remediation-rc-04-contact-config-persistence-2026-07-21: closed
+    p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-contact-config-persistence-2026-07-21
-    title: Contact config durable authoritative read model
-    phase: p1-remediation-rc-04-contact-config-persistence-2026-07-21
+  - id: p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
+    title: AI call log durable fact and full-query foundation
+    phase: p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
     status: in_progress
     priority: p1
-    taskKind: product_remediation
-    productClosureContribution: F-0034
-    branch: fix/contact-config-persistence
-    objective: persist the unique contact_config and QR media, atomically enforce revision and redacted audit updates, and make admin plus learner purchase guidance consume the same durable read model
+    taskKind: product_remediation_partition
+    productClosureContribution: F-0038_foundation_only_not_closed
+    branch: fix/ai-call-log-fact-query-foundation
+    objective: persist currently discarded AI call facts and move filters, authoritative count, and complete day/month aggregation into PostgreSQL without yet claiming producer, pricing-source, UI, or F-0038 closure
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-04
     findingIds:
-      - F-0034
-    executionStage: candidate_frozen_conditional_closeout_authorized
+      - F-0038
+    executionStage: verified_ready_for_conditional_closeout
     highRiskApproval:
       category: schema_migration_source_and_database_application_logic
-      approvalId: fresh-schema-start-f0034-contact-config-persistence-2026-07-21
+      approvalId: fresh-schema-start-f0038-ai-call-log-fact-query-foundation-2026-07-21
       status: approved_task_bound_conditional_closeout
       conditionalCloseout: true
-      baseSha: 82ff0adebaed5f8220082f5a1602ca01000acbdb
+      baseSha: 4fa858af54ab6f6581bb45f501c1e1c146a05679
     partitionBoundary:
       included:
-        - singleton_durable_contact_config_and_revision
-        - durable_qr_image_bytes_and_metadata
-        - transactional_update_and_redacted_audit
-        - operations_admin_and_learner_shared_read_model
-        - optimistic_concurrency_fail_closed
+        - nullable_durable_organization_profession_level_and_captured_cost_facts
+        - database_filters_and_authoritative_count
+        - full_filtered_relation_day_and_month_aggregation
+        - removal_of_hardcoded_null_zero_and_100_row_summary_limit
       excluded:
+        - producer_context_propagation
+        - pricing_source_semantics
+        - admin_ui_completion
         - migration_execution
         - persistent_database_execution
-        - permission_or_entitlement_change
-        - provider_or_external_service_calls
-        - dependency_or_configuration_change
-    approvalFingerprint: p1-remediation-rc-04-contact-config-persistence-2026-07-21|in_memory_contact_config_and_hardcoded_learner_consumer_diverge_without_durable_audited_revisioned_source|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|82ff0adebaed5f8220082f5a1602ca01000acbdb
+        - full_F0038_closure
+    directChainExpansion:
+      authorization: P1_EXECUTION_POLICY_CAPSULE_V1_1
+      addedProductFiles:
+        - src/server/repositories/ai-call-log/postgres-ai-call-log-repository.ts
+        - src/server/services/ai-call-log/route-handlers.ts
+      addedProductFileCount: 2
+      evidence: canonical_summary_route_paginates_before_aggregation_and_adapter_is_its_direct_repository_boundary
+      status: within_same_task_direct_chain_allowance
+    tddRed:
+      command: corepack.cmd pnpm@10.15.1 exec vitest run tests/unit/p1-ai-call-log-fact-query-foundation.test.ts
+      result: failed_as_expected_5_of_5
+      failureBoundary: missing_fact_columns_append_persistence_database_filters_full_relation_aggregation_and_canonical_summary_delegation
+    verificationEvidence:
+      focused: passed_41_of_41
+      affectedRegression: passed_45_of_45
+      lint: pass
+      typecheck: pass
+      drizzleCheck: pass_source_only_no_database_execution
+      build: passed_98_static_pages
+      format: applied_before_freeze
+      diffCheck: pass
+      firstKernelAttempt: stopped_after_test_lint_typecheck_green_because_drizzle_kit_is_not_an_allowed_declared_subcommand
+    adversarialReview:
+      durableFactsReplaceHardcodedNullAndZero: pass
+      listAndCountShareAllFactAndTimeFilters: pass
+      fullRelationAggregationRemoves100RowCap: pass
+      dayAndMonthBucketsReachCanonicalRoute: pass
+      historicalRowsRemainHonestNullableFacts: pass
+      producerPricingUiAndFullFindingClosureExcluded: pass
+      noMigrationExecutionRealDatabaseDependencyPermissionProviderOrExtraFiles: pass
     conditionalCloseoutProjection:
       currentStatus: validated_uncommitted_candidate
       triggerConditions:
@@ -403,20 +435,54 @@ activeTasks:
       mandatoryFreshApprovals: 1
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
+      validationRetryCount: 1
       approvalWaitTurns: 3
-      productValueTime: 10m_first_principles_TDD_implementation_and_preflight_validation
-      mechanismOverhead: 4m_active_scope_materialization_plus_3_external_approval_wait_turns
+      productValueTime: 11m_root_cause_TDD_schema_query_and_route_implementation
+      mechanismOverhead: 6m_contract_materialization_scope_checks_validation_profile_correction_and_external_approval_wait
       guardSmokeChanges: 0
       approvalIdMismatch: 0
+    testOnlyAllowlistExpansion:
+      authorization: standing-test-only-allowlist-expansion-2026-07-21
+      addedFiles:
+        - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+        - src/server/mappers/ai-rag-mapper.test.ts
+        - src/server/models/ai-rag.test.ts
+      reason: direct route regression plus schema-inferred AiCallLogRow fixtures exposed by typecheck
+    approvalFingerprint: p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21|ai_call_log_schema_drops_fact_dimensions_and_repository_filters_or_aggregates_an_incomplete_page|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|4fa858af54ab6f6581bb45f501c1e1c146a05679
     previousTaskCloseout:
-      taskId: p1-remediation-rc-04-f0031-static-closure-2026-07-21
-      findingId: F-0031
-      commit: 82ff0adebaed5f8220082f5a1602ca01000acbdb
+      taskId: p1-remediation-rc-04-contact-config-persistence-2026-07-21
+      findingId: F-0034
+      commit: 4fa858af54ab6f6581bb45f501c1e1c146a05679
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: fresh-schema-start-f0034-contact-config-persistence-2026-07-21
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
       worktreeCleanup: pass
+      verification:
+        tddRed: passed_5_expected_failures
+        focused: passed_15_of_15
+        affectedRegression: passed_37_of_37
+        lint: pass
+        typecheck: pass
+        drizzleCheck: pass_source_only_no_database_execution
+        build: passed_98_static_pages
+        minimalSafetyKernelCommit: pass
+      adversarialReview:
+        durableSourceOfTruth: pass
+        optimisticConcurrencyFailClosed: pass
+        transactionalRedactedAudit: pass
+        adminLearnerSharedRepository: pass
+        noDatabaseExecutionPermissionProviderDependencyOrExtraFiles: pass
+      metrics:
+        mandatoryFreshApprovals: 1
+        preventableScopeMissApprovals: 0
+        candidateReapprovals: 0
+        approvalWaitTurns: 3
+        validationRetryCount: 1
+        productValueTime: 10m_first_principles_TDD_implementation_and_preflight_validation
+        mechanismOverhead: 4m_scope_materialization_and_commit_hook_format_retry_plus_external_wait
+        guardSmokeChanges: 0
   - id: p1-remediation-rc-04-f0031-static-closure-2026-07-21
     title: F-0031 production boundary static closure
     phase: p1-remediation-rc-04-f0031-static-closure-2026-07-21

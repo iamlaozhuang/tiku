@@ -12,19 +12,32 @@ import {
   type AiCallLogListDto,
   type AiCallLogSummaryListDto,
 } from "@/server/contracts/ai-call-log/log-governance-contract";
+import type { AiCallLogCostSummaryDto } from "@/server/contracts/admin-ai-audit-log-ops-contract";
 import {
   mapAiCallLogRecordToDto,
   summarizeAiCallLogRecords,
 } from "@/server/mappers/ai-call-log/ai-call-log-mapper";
-import { createPostgresAiCallLogRepository } from "@/server/repositories/ai-call-log/postgres-ai-call-log-repository";
+import {
+  createPostgresAiCallLogRepository,
+  type AiCallLogFactQuery,
+  type PostgresAiCallLogRepository,
+} from "@/server/repositories/ai-call-log/postgres-ai-call-log-repository";
 import type { AiCallLogRepository } from "@/server/repositories/ai-call-log/ai-call-log-repository";
 import { createRouteHandlersWithErrorEnvelope } from "@/server/services/route-error-response";
 import type { SessionService } from "@/server/services/session-service";
 import { parseAiCallLogListQuery } from "@/server/validators/ai-call-log/list-query";
 
 export type AiCallLogRouteHandlerOptions = {
-  repository?: AiCallLogRepository;
+  repository?: AiCallLogRepository &
+    Partial<Pick<PostgresAiCallLogRepository, "summarizeAiCallLogs">>;
   sessionService?: Pick<SessionService, "getCurrentSession">;
+};
+
+type AiCallLogSummaryResponseDto = Omit<
+  AiCallLogSummaryListDto,
+  "dailySummaries"
+> & {
+  dailySummaries: AiCallLogCostSummaryDto[];
 };
 
 type AdminLogActor = {
@@ -80,7 +93,7 @@ export function createAiCallLogRouteHandlers(
 
         void actorOrError.publicId;
 
-        const query = parseAiCallLogListQuery(request);
+        const query = parseAiCallLogFactQuery(request);
         const listResult = await repository.listAiCallLogs(query);
 
         return createJsonResponse(
@@ -107,25 +120,62 @@ export function createAiCallLogRouteHandlers(
 
         void actorOrError.publicId;
 
-        const query = parseAiCallLogListQuery(request);
-        const listResult = await repository.listAiCallLogs(query);
-        const dailySummaries = summarizeAiCallLogRecords(listResult.aiCallLogs);
+        const query = parseAiCallLogFactQuery(request);
+        const summaryResult = repository.summarizeAiCallLogs
+          ? await repository.summarizeAiCallLogs(query)
+          : await summarizePaginatedFallback(repository, query);
 
         return createJsonResponse(
-          createPaginatedResponse<AiCallLogSummaryListDto>(
+          createPaginatedResponse<AiCallLogSummaryResponseDto>(
             {
-              dailySummaries,
+              dailySummaries: summaryResult.dailySummaries,
               governance: createBlockedAiCallLogGovernanceHandoff(),
             },
-            createSummaryPagination(
-              listResult.pagination,
-              dailySummaries.length,
-            ),
+            summaryResult.pagination,
           ),
         );
       },
     },
   });
+}
+
+function parseAiCallLogFactQuery(request: Request): AiCallLogFactQuery {
+  const query = parseAiCallLogListQuery(request);
+  const searchParams = new URL(request.url).searchParams;
+
+  return {
+    ...query,
+    bucketType: searchParams.get("bucketType") === "month" ? "month" : "day",
+    fromStartedAt: readIsoTimestamp(searchParams.get("fromStartedAt")),
+    toStartedAt: readIsoTimestamp(searchParams.get("toStartedAt")),
+  };
+}
+
+function readIsoTimestamp(value: string | null): string | null {
+  if (value === null || !Number.isFinite(Date.parse(value))) {
+    return null;
+  }
+
+  return new Date(value).toISOString();
+}
+
+async function summarizePaginatedFallback(
+  repository: AiCallLogRepository,
+  query: AiCallLogFactQuery,
+): Promise<{
+  dailySummaries: AiCallLogCostSummaryDto[];
+  pagination: ApiPagination;
+}> {
+  const listResult = await repository.listAiCallLogs(query);
+  const dailySummaries = summarizeAiCallLogRecords(listResult.aiCallLogs);
+
+  return {
+    dailySummaries,
+    pagination: createSummaryPagination(
+      listResult.pagination,
+      dailySummaries.length,
+    ),
+  };
 }
 
 function createJsonResponse<TResponse>(

@@ -9,7 +9,6 @@ import type {
   AdminAiAuditLogListQuery,
   AdminAiFunctionType,
   AuditLogSummaryDto,
-  AiCallLogCostSummaryDto,
   AiCallLogListDto,
   AiCallLogSummaryDto,
   AiCallLogSummaryListDto,
@@ -60,6 +59,10 @@ export type AdminAiAuditLogRuntimePage<TData> = TData & {
 
 export type AppendAiCallLogInput = {
   userPublicId: string | null;
+  organizationPublicId?: string | null;
+  profession?: AiCallLogSummaryDto["profession"];
+  level?: number | null;
+  estimatedCostCny?: string | null;
   answerRecordPublicId: string | null;
   mockExamPublicId: string | null;
   questionPublicId: string | null;
@@ -143,6 +146,9 @@ export type AdminAiAuditLogRuntimeRepositories = {
 export type AdminAiCallLogRuntimeListQuery = AdminAiAuditLogListQuery & {
   organizationPublicId?: string | null;
   userPublicId?: string | null;
+  fromStartedAt?: string | null;
+  toStartedAt?: string | null;
+  bucketType?: "day" | "month";
 };
 
 type ModelConfigDatabaseRow = {
@@ -197,6 +203,9 @@ type PromptTemplateDatabaseRow = {
 type AiCallLogDatabaseRow = {
   public_id: string;
   user_public_id: string | null;
+  organization_public_id: string | null;
+  profession: AiCallLogSummaryDto["profession"];
+  level: number | null;
   answer_record_public_id: string | null;
   mock_exam_public_id: string | null;
   question_public_id: string | null;
@@ -210,9 +219,22 @@ type AiCallLogDatabaseRow = {
   prompt_token_count: number | null;
   completion_token_count: number | null;
   total_token_count: number | null;
+  estimated_cost_cny: string | null;
   latency_ms: number | null;
   started_at: Date | string;
   completed_at: Date | string | null;
+};
+
+type AiCallLogSummaryDatabaseRow = {
+  bucket: string;
+  ai_func_type: string;
+  provider_display_name: string;
+  model_alias: string;
+  call_count: number;
+  success_count: number;
+  failed_count: number;
+  total_token_count: number;
+  estimated_cost_cny: string;
 };
 
 type CountDatabaseRow = {
@@ -839,6 +861,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             insert into ai_call_log (
               public_id,
               user_public_id,
+              organization_public_id,
+              profession,
+              level,
               answer_record_public_id,
               mock_exam_public_id,
               question_public_id,
@@ -856,6 +881,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               prompt_token_count,
               completion_token_count,
               total_token_count,
+              estimated_cost_cny,
               latency_ms,
               started_at,
               completed_at,
@@ -864,6 +890,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             select
               ${publicId},
               ${input.userPublicId},
+              ${input.organizationPublicId ?? null},
+              ${input.profession ?? null}::profession,
+              ${input.level ?? null},
               ${input.answerRecordPublicId},
               ${input.mockExamPublicId},
               ${input.questionPublicId},
@@ -881,6 +910,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               ${input.promptTokenCount},
               ${input.completionTokenCount},
               ${input.totalTokenCount},
+              ${input.estimatedCostCny ?? null}::numeric,
               ${input.latencyMs},
               ${input.startedAt.toISOString()},
               ${input.completedAt?.toISOString() ?? null},
@@ -951,23 +981,6 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
     },
 
     async listAiCallLogs(query) {
-      if (
-        query.organizationPublicId !== undefined &&
-        query.organizationPublicId !== null
-      ) {
-        return {
-          aiCallLogs: [],
-          pagination: createPagination(query, 0),
-        };
-      }
-
-      if (query.profession !== "all" || query.level !== null) {
-        return {
-          aiCallLogs: [],
-          pagination: createPagination(query, 0),
-        };
-      }
-
       const database = getDatabase();
       const keywordCondition =
         query.keyword === null
@@ -975,6 +988,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           : sql`(
               public_id ilike ${`%${query.keyword}%`}
               or user_public_id ilike ${`%${query.keyword}%`}
+              or organization_public_id ilike ${`%${query.keyword}%`}
               or answer_record_public_id ilike ${`%${query.keyword}%`}
               or mock_exam_public_id ilike ${`%${query.keyword}%`}
               or question_public_id ilike ${`%${query.keyword}%`}
@@ -992,6 +1006,25 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         query.userPublicId === undefined || query.userPublicId === null
           ? sql`true`
           : sql`user_public_id = ${query.userPublicId}`;
+      const organizationPublicIdCondition =
+        query.organizationPublicId === undefined ||
+        query.organizationPublicId === null
+          ? sql`true`
+          : sql`organization_public_id = ${query.organizationPublicId}`;
+      const professionCondition =
+        query.profession === "all"
+          ? sql`true`
+          : sql`profession = ${query.profession}::profession`;
+      const levelCondition =
+        query.level === null ? sql`true` : sql`level = ${query.level}`;
+      const fromStartedAtCondition =
+        query.fromStartedAt === undefined || query.fromStartedAt === null
+          ? sql`true`
+          : sql`started_at >= ${query.fromStartedAt}::timestamptz`;
+      const toStartedAtCondition =
+        query.toStartedAt === undefined || query.toStartedAt === null
+          ? sql`true`
+          : sql`started_at <= ${query.toStartedAt}::timestamptz`;
       const orderColumn =
         query.sortBy === "completedAt" ? sql`completed_at` : sql`started_at`;
       const orderBy =
@@ -1006,6 +1039,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             select
               public_id,
               user_public_id,
+              organization_public_id,
+              profession,
+              level,
               answer_record_public_id,
               mock_exam_public_id,
               question_public_id,
@@ -1019,6 +1055,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               prompt_token_count,
               completion_token_count,
               total_token_count,
+              estimated_cost_cny,
               latency_ms,
               started_at,
               completed_at
@@ -1027,6 +1064,11 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
               and ${userPublicIdCondition}
+              and ${organizationPublicIdCondition}
+              and ${professionCondition}
+              and ${levelCondition}
+              and ${fromStartedAtCondition}
+              and ${toStartedAtCondition}
             order by ${orderBy}
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
@@ -1041,6 +1083,11 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
               and ${userPublicIdCondition}
+              and ${organizationPublicIdCondition}
+              and ${professionCondition}
+              and ${levelCondition}
+              and ${fromStartedAtCondition}
+              and ${toStartedAtCondition}
           `,
         );
 
@@ -1061,20 +1108,140 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
     },
 
     async summarizeAiCallLogs(query) {
-      const listResult = await this.listAiCallLogs({
-        ...query,
-        page: 1,
-        pageSize: 100,
-      });
-      const summaries = summarizeAiCallLogDtos(listResult.aiCallLogs);
+      const database = getDatabase();
+      const keywordCondition =
+        query.keyword === null
+          ? sql`true`
+          : sql`(
+              public_id ilike ${`%${query.keyword}%`}
+              or user_public_id ilike ${`%${query.keyword}%`}
+              or organization_public_id ilike ${`%${query.keyword}%`}
+              or answer_record_public_id ilike ${`%${query.keyword}%`}
+              or mock_exam_public_id ilike ${`%${query.keyword}%`}
+              or question_public_id ilike ${`%${query.keyword}%`}
+              or prompt_template_key ilike ${`%${query.keyword}%`}
+            )`;
+      const aiFuncTypeCondition =
+        query.aiFuncType === "all"
+          ? sql`true`
+          : sql`ai_func_type = ${toDatabaseAiFuncType(query.aiFuncType)}::ai_func_type`;
+      const callStatusCondition =
+        query.callStatus === "all"
+          ? sql`true`
+          : sql`call_status = ${query.callStatus}::ai_call_status`;
+      const userPublicIdCondition =
+        query.userPublicId === undefined || query.userPublicId === null
+          ? sql`true`
+          : sql`user_public_id = ${query.userPublicId}`;
+      const organizationPublicIdCondition =
+        query.organizationPublicId === undefined ||
+        query.organizationPublicId === null
+          ? sql`true`
+          : sql`organization_public_id = ${query.organizationPublicId}`;
+      const professionCondition =
+        query.profession === "all"
+          ? sql`true`
+          : sql`profession = ${query.profession}::profession`;
+      const levelCondition =
+        query.level === null ? sql`true` : sql`level = ${query.level}`;
+      const fromStartedAtCondition =
+        query.fromStartedAt === undefined || query.fromStartedAt === null
+          ? sql`true`
+          : sql`started_at >= ${query.fromStartedAt}::timestamptz`;
+      const toStartedAtCondition =
+        query.toStartedAt === undefined || query.toStartedAt === null
+          ? sql`true`
+          : sql`started_at <= ${query.toStartedAt}::timestamptz`;
+      const bucketType = query.bucketType === "month" ? "month" : "day";
+      const bucketExpression =
+        bucketType === "month"
+          ? sql`date_trunc('month', started_at)`
+          : sql`date_trunc('day', started_at)`;
 
-      return {
-        dailySummaries: summaries.slice(
-          (query.page - 1) * query.pageSize,
-          query.page * query.pageSize,
-        ),
-        pagination: createPagination(query, summaries.length),
-      };
+      try {
+        const rows = await executeSql<AiCallLogSummaryDatabaseRow>(
+          database,
+          sql`
+            select
+              to_char(${bucketExpression}, 'YYYY-MM-DD') as bucket,
+              ai_func_type,
+              model_config_snapshot ->> 'providerDisplayName' as provider_display_name,
+              model_config_snapshot ->> 'modelName' as model_alias,
+              count(*)::int as call_count,
+              count(*) filter (where call_status = 'success')::int as success_count,
+              count(*) filter (where call_status = 'failed')::int as failed_count,
+              coalesce(sum(total_token_count), 0)::int as total_token_count,
+              coalesce(sum(estimated_cost_cny), 0)::text as estimated_cost_cny
+            from ai_call_log
+            where ${keywordCondition}
+              and ${aiFuncTypeCondition}
+              and ${callStatusCondition}
+              and ${userPublicIdCondition}
+              and ${organizationPublicIdCondition}
+              and ${professionCondition}
+              and ${levelCondition}
+              and ${fromStartedAtCondition}
+              and ${toStartedAtCondition}
+            group by
+              ${bucketExpression},
+              ai_func_type,
+              model_config_snapshot ->> 'providerDisplayName',
+              model_config_snapshot ->> 'modelName'
+            order by ${bucketExpression} desc
+            limit ${query.pageSize}
+            offset ${(query.page - 1) * query.pageSize}
+          `,
+        );
+        const [totalRow] = await executeSql<CountDatabaseRow>(
+          database,
+          sql`
+            select count(*)::int as value
+            from (
+              select 1
+              from ai_call_log
+              where ${keywordCondition}
+                and ${aiFuncTypeCondition}
+                and ${callStatusCondition}
+                and ${userPublicIdCondition}
+                and ${organizationPublicIdCondition}
+                and ${professionCondition}
+                and ${levelCondition}
+                and ${fromStartedAtCondition}
+                and ${toStartedAtCondition}
+              group by
+                ${bucketExpression},
+                ai_func_type,
+                model_config_snapshot ->> 'providerDisplayName',
+                model_config_snapshot ->> 'modelName'
+            ) as grouped_ai_call_log
+          `,
+        );
+
+        return {
+          dailySummaries: rows.map((row) => ({
+            bucket: row.bucket,
+            bucketType,
+            aiFuncType: toAdminAiFuncType(row.ai_func_type),
+            providerDisplayName: row.provider_display_name,
+            modelAlias: row.model_alias,
+            callCount: row.call_count,
+            successCount: row.success_count,
+            failedCount: row.failed_count,
+            totalTokenCount: row.total_token_count,
+            estimatedCostCny: row.estimated_cost_cny,
+          })),
+          pagination: createPagination(query, totalRow?.value ?? 0),
+        };
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+
+        return {
+          dailySummaries: [],
+          pagination: createPagination(query, 0),
+        };
+      }
     },
   };
 }
@@ -1283,9 +1450,9 @@ function mapAppendInputToSummary(
   return {
     publicId,
     userPublicId: input.userPublicId,
-    organizationPublicId: null,
-    profession: null,
-    level: null,
+    organizationPublicId: input.organizationPublicId ?? null,
+    profession: input.profession ?? null,
+    level: input.level ?? null,
     aiFuncType: input.aiFuncType,
     callStatus: input.callStatus,
     providerDisplayName: input.modelConfigSnapshot.providerDisplayName,
@@ -1298,7 +1465,7 @@ function mapAppendInputToSummary(
     promptTokenCount: input.promptTokenCount,
     completionTokenCount: input.completionTokenCount,
     totalTokenCount: input.totalTokenCount,
-    estimatedCostCny: "0.00",
+    estimatedCostCny: input.estimatedCostCny ?? null,
     latencyMs: input.latencyMs,
     startedAt: input.startedAt.toISOString(),
     completedAt: input.completedAt?.toISOString() ?? null,
@@ -1311,9 +1478,9 @@ function mapAiCallLogRow(row: AiCallLogDatabaseRow): AiCallLogSummaryDto {
   return {
     publicId: row.public_id,
     userPublicId: row.user_public_id,
-    organizationPublicId: null,
-    profession: null,
-    level: null,
+    organizationPublicId: row.organization_public_id,
+    profession: row.profession,
+    level: row.level,
     aiFuncType: toAdminAiFuncType(row.ai_func_type),
     callStatus: row.call_status,
     providerDisplayName: modelConfigSnapshot.providerDisplayName,
@@ -1326,50 +1493,12 @@ function mapAiCallLogRow(row: AiCallLogDatabaseRow): AiCallLogSummaryDto {
     promptTokenCount: row.prompt_token_count,
     completionTokenCount: row.completion_token_count,
     totalTokenCount: row.total_token_count,
-    estimatedCostCny: "0.00",
+    estimatedCostCny: row.estimated_cost_cny,
     latencyMs: row.latency_ms,
     startedAt: toIsoString(row.started_at),
     completedAt:
       row.completed_at === null ? null : toIsoString(row.completed_at),
   };
-}
-
-function summarizeAiCallLogDtos(
-  aiCallLogs: AiCallLogSummaryDto[],
-): AiCallLogCostSummaryDto[] {
-  const summaryByKey = new Map<string, AiCallLogCostSummaryDto>();
-
-  for (const aiCallLog of aiCallLogs) {
-    const bucket = aiCallLog.startedAt.slice(0, 10);
-    const key = [
-      bucket,
-      aiCallLog.aiFuncType,
-      aiCallLog.providerDisplayName,
-      aiCallLog.modelAlias,
-    ].join("|");
-    const summary =
-      summaryByKey.get(key) ??
-      ({
-        bucket,
-        bucketType: "day",
-        aiFuncType: aiCallLog.aiFuncType,
-        providerDisplayName: aiCallLog.providerDisplayName,
-        modelAlias: aiCallLog.modelAlias,
-        callCount: 0,
-        successCount: 0,
-        failedCount: 0,
-        totalTokenCount: 0,
-        estimatedCostCny: "0.00",
-      } satisfies AiCallLogCostSummaryDto);
-
-    summary.callCount += 1;
-    summary.successCount += aiCallLog.callStatus === "success" ? 1 : 0;
-    summary.failedCount += aiCallLog.callStatus === "failed" ? 1 : 0;
-    summary.totalTokenCount += aiCallLog.totalTokenCount ?? 0;
-    summaryByKey.set(key, summary);
-  }
-
-  return [...summaryByKey.values()];
 }
 
 function toAdminAiFuncType(value: string): AdminAiFunctionType {

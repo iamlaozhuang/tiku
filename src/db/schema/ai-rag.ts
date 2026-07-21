@@ -7,6 +7,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -345,6 +346,9 @@ export const aiCallLog = pgTable(
     id: idColumn(),
     public_id: text("public_id").notNull(),
     user_public_id: text("user_public_id"),
+    organization_public_id: text("organization_public_id"),
+    profession: professionEnum("profession"),
+    level: integer("level"),
     answer_record_public_id: text("answer_record_public_id"),
     mock_exam_public_id: text("mock_exam_public_id"),
     question_public_id: text("question_public_id"),
@@ -366,6 +370,10 @@ export const aiCallLog = pgTable(
     prompt_token_count: integer("prompt_token_count"),
     completion_token_count: integer("completion_token_count"),
     total_token_count: integer("total_token_count"),
+    estimated_cost_cny: numeric("estimated_cost_cny", {
+      precision: 18,
+      scale: 6,
+    }),
     latency_ms: integer("latency_ms"),
     started_at: timestampColumn("started_at"),
     completed_at: nullableTimestampColumn("completed_at"),
@@ -374,6 +382,10 @@ export const aiCallLog = pgTable(
   (table) => [
     uniqueIndex("udx_ai_call_log_public_id").on(table.public_id),
     index("idx_ai_call_log_user_public_id").on(table.user_public_id),
+    index("idx_ai_call_log_organization_public_id").on(
+      table.organization_public_id,
+    ),
+    index("idx_ai_call_log_profession_level").on(table.profession, table.level),
     index("idx_ai_call_log_answer_record_public_id").on(
       table.answer_record_public_id,
     ),

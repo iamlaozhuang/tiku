@@ -134,6 +134,11 @@ export type AdminAiAuditLogListQuery = {
   callStatus: AiCallStatus | "all";
   profession: Profession | "all";
   level: number | null;
+  organizationPublicId?: string | null;
+  userPublicId?: string | null;
+  fromStartedAt?: string | null;
+  toStartedAt?: string | null;
+  bucketType?: "day" | "month";
 };
 
 export type ModelConfigSummaryDto = {
@@ -303,6 +308,11 @@ export function createAdminAiAuditLogListQuery(
     sortBy: "updatedAt",
     sortOrder: "desc",
     level: null,
+    organizationPublicId: null,
+    userPublicId: null,
+    fromStartedAt: null,
+    toStartedAt: null,
+    bucketType: "day",
     ...queryOverrides,
     actionType:
       typeof actionType === "string" ? normalizeFilterText(actionType) : "all",
