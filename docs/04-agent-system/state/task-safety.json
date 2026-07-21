@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-content-editor-status-preservation-2026-07-21",
-  "objective": "Close F-0056 by preserving the current question or material status during ordinary editor saves and allowing a disabled question to become available only through the existing explicit publishDraft entry. Do not add lifecycle commands, change authorization, or alter repository, schema, migration, Provider or mechanism behavior.",
+  "taskId": "p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21",
+  "objective": "Close F-0055 without product code by revalidating that current question and material editors submit expectedUpdatedAt, repositories atomically require the matching millisecond revision and is_locked=false, zero-row writes map to recoverable conflict responses, and question child replacement occurs only after the guarded parent update. Do not alter product behavior, schema, database, authorization, dependencies or the safety kernel.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/question-material-management/AdminQuestionEditorPage.tsx",
-    "src/features/admin/question-material-management/AdminMaterialEditorPage.tsx",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "src/server/services/question-service.test.ts",
+    "src/server/services/material-service.test.ts",
     "tests/unit/admin-question-editor-route.test.ts",
     "tests/unit/admin-material-editor-route.test.ts"
   ],
@@ -17,39 +18,40 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/db/**",
+    "src/** except the five direct validation test files listed in allowedFiles",
     "drizzle/**",
-    "src/server/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "new enable, publish, role, entitlement, authorization, quota or default capability",
+    "schema, migration or persistent database execution",
+    "role, entitlement, authorization, quota or default capability",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/question-material-management/AdminQuestionEditorPage.tsx",
-    "src/features/admin/question-material-management/AdminMaterialEditorPage.tsx"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "contingencyFiles": [
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "src/server/services/question-service.test.ts",
+    "src/server/services/material-service.test.ts",
     "tests/unit/admin-question-editor-route.test.ts",
     "tests/unit/admin-material-editor-route.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCallers": "The two dedicated editors construct PATCH payloads. Both currently hard-code status=available; question has an existing explicit publishDraft flag, while material has no publish intent.",
-    "routeService": "Existing question and material PATCH routes validate and persist the caller-supplied status. This task changes only the trusted editor payload and does not alter route, service or repository contracts.",
-    "repository": "Current repositories already enforce expectedUpdatedAt and is_locked=false atomically, covering F-0055. No repository change is needed for F-0056.",
-    "schema": "Existing available/disabled status values are sufficient. No schema or migration source is needed.",
-    "tests": "Direct editor tests cover ordinary disabled question/material saves preserving disabled and the explicit AI-adopted question publish path still sending available.",
-    "requirements": "Question and material disablement are explicit lifecycle states; ordinary editing must not imply re-enable. Existing publishDraft is the narrow explicit question publishing intent.",
-    "nonClaims": "No new enable command, material publish flow, F-0053 binding eligibility, F-0077 recommendation command, schema, database, permission, Provider, dependency or mechanism change."
+    "uiApiCallers": "Current dedicated question and material editor regressions prove PATCH bodies carry the loaded updatedAt as expectedUpdatedAt and retain recoverable conflict state.",
+    "routeService": "Current validators require expectedUpdatedAt and services map a null repository update to stable 409203 conflict responses while retaining the existing locked-object response.",
+    "repository": "Current question and material updates use one SQL WHERE predicate containing public_id, millisecond-precision updated_at equality and is_locked=false. Question child replacement begins only after the guarded parent UPDATE returns a row and remains in the same transaction.",
+    "schema": "Existing updated_at and is_locked columns are sufficient. No schema, migration or database execution is required.",
+    "tests": "The P0 aggregate snapshot regression checks both guarded repositories, null-update conflict mapping, timestamp precision and monotonic revision advancement; service and editor regressions cover stable responses and submitted versions.",
+    "requirements": "SC-ATOMICITY-IDEMPOTENCY and the content lifecycle require stale edits and publish-lock races to fail closed without partial child replacement.",
+    "nonClaims": "This task records independent static closure for F-0055 only. It does not close F-0053 binding eligibility, execute a real database race, or modify product behavior."
   },
   "validationCommands": [
     {
-      "name": "f0056-content-editor-status-focused",
+      "name": "f0055-content-write-concurrency-coverage",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -57,35 +59,43 @@
         "exec",
         "vitest",
         "run",
+        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+        "src/server/services/question-service.test.ts",
+        "src/server/services/material-service.test.ts",
         "tests/unit/admin-question-editor-route.test.ts",
         "tests/unit/admin-material-editor-route.test.ts"
       ]
     },
     {
-      "name": "f0056-content-editor-status-lint",
+      "name": "f0055-state-format",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "prettier",
+        "--check",
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/task-queue.yaml",
+        "docs/04-agent-system/state/task-safety.json"
+      ]
+    },
+    {
+      "name": "f0055-test-maintenance-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/question-material-management/AdminQuestionEditorPage.tsx",
-        "src/features/admin/question-material-management/AdminMaterialEditorPage.tsx",
-        "tests/unit/admin-question-editor-route.test.ts",
-        "tests/unit/admin-material-editor-route.test.ts"
+        "src/server/services/material-service.test.ts"
       ]
     },
     {
-      "name": "f0056-content-editor-status-typecheck",
+      "name": "f0055-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "f0056-content-editor-status-build",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
@@ -96,7 +106,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_existing_content_editor_lifecycle_preservation",
+    "category": "low_risk_static_product_finding_closure",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,

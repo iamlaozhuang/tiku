@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
+currentPhase: p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -821,22 +821,22 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
-  title: Content editor status preservation
-  phase: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
+  id: p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21
+  title: Content write concurrency static closure
+  phase: p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21
   status: in_progress
   priority: p1
-  taskKind: product_remediation
-  productClosureContribution: F-0056
-  branch: fix/content-editor-status-preservation
+  taskKind: product_finding_static_closure
+  productClosureContribution: F-0055
+  branch: fix/content-write-concurrency-closure
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0056
+    - F-0055
   candidateRootCauseCluster: P1-RC-05
-  objective: preserve disabled question and material status during ordinary editor saves while retaining the existing explicit question publish-draft intent
-  executionStage: candidate_validated_adversarially_reviewed_ready_for_automatic_closeout
+  objective: independently close F-0055 from current editor version tokens, atomic repository CAS and lock predicates, stable conflict mapping and guarded question child replacement without product code changes
+  executionStage: static_closure_validated_adversarially_reviewed_ready_for_automatic_closeout
   riskBoundary:
-    category: low_risk_existing_content_editor_lifecycle_preservation
+    category: low_risk_static_product_finding_closure
     approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
@@ -844,52 +844,53 @@ currentTask:
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: dedicated_question_and_material_editors_to_existing_PATCH_routes_services_repositories_and_status_columns
-    coreFiles: 5
-    contingencyFiles: 2
+    chain: dedicated_editors_to_PATCH_validators_services_repositories_to_existing_updated_at_and_is_locked_columns
+    coreFiles: 3
+    contingencyFiles: 5
     sameTaskAuthoritativeCallChainExpansion: 0
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: question_and_material_explicit_disable_lifecycle_and_existing_publishDraft_entry
-    confirmedResidualRootCause: both_ordinary_editor_PATCH_builders_hard_code_available_instead_of_preserving_the_loaded_resource_status
+    requirements: SC_ATOMICITY_IDEMPOTENCY_content_lifecycle_and_conflict_recovery
+    confirmedResidualRootCause: original_missing_version_and_lock_predicates_are_covered_on_current_master
   expectedAcceptance:
-    - ordinary_disabled_question_save_preserves_disabled
-    - ordinary_disabled_material_save_preserves_disabled
-    - explicit_question_publishDraft_still_sends_available
-    - available_resources_remain_available_on_ordinary_save
-    - no_new_enable_publish_permission_repository_schema_database_dependency_Provider_or_mechanism_change
+    - editor_PATCH_bodies_submit_loaded_expectedUpdatedAt
+    - question_and_material_UPDATE_require_matching_millisecond_revision_and_is_locked_false
+    - zero_row_updates_return_stable_recoverable_conflicts
+    - question_children_are_replaced_only_after_the_guarded_parent_update_in_the_same_transaction
+    - no_product_schema_database_permission_dependency_Provider_or_mechanism_change
   closeoutProjection:
-    current: low_risk_conditions_satisfied_candidate_validated_and_ready_for_single_kernel_commit
+    current: low_risk_static_closure_validated_and_ready_for_single_kernel_commit
     triggers: unchanged_final_index_tree_and_stable_base_origin
     successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   verificationEvidence:
     approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    tddRed: expected_2_status_preservation_failures_plus_1_preexisting_stale_managed_image_helper_regression
-    focusedAndAffectedRegression: pass_31_of_31_across_2_files
-    lint: pass_all_changed_product_and_test_files
+    tddRed: not_applicable_static_coverage_revalidation_on_current_master
+    focusedAndAffectedRegression: pass_55_of_55_across_5_files
+    testMaintenance: corrected_one_preexisting_material_query_fixture_to_include_the_existing_publicIds_empty_normalization_without_weakening_assertions
+    lint: pass_changed_test_file
     typecheck: pass_tsc_noEmit
-    build: pass_next_build_100_static_pages
+    staticRepositoryProof: pass_public_id_expectedUpdatedAt_millisecond_CAS_and_is_locked_false_in_both_updates_with_question_children_after_guarded_parent_row
     formatAndDiff: pass_prettier_and_git_diff_check
-    e2e: not_required_no_new_route_or_browser_interaction_contract
-    mainThreadAdversarialReview: pass_disabled_and_available_status_preservation_explicit_question_publish_only_no_material_publish_server_permission_schema_dependency_or_mechanism_change
+    e2e: not_required_static_level_1_closure_no_product_behavior_change_or_real_database_execution
+    mainThreadAdversarialReview: pass_stale_editor_publish_lock_and_zero_row_paths_fail_closed_no_partial_question_child_replacement_and_no_F0053_or_runtime_claim
   metrics:
     mandatoryFreshApprovals: 0_covered_by_low_risk_standing_approval
     preventableScopeMissApprovals: 0
-    testOnlyExpansions: 1_existing_allowed_regression_updated_to_current_managed_upload_path_without_assertion_weakening
+    testOnlyExpansions: 1_existing_allowed_material_service_fixture_updated_for_current_normalized_query_shape
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: 5m_JIT_root_cause_TDD_payload_fix_and_adversarial_review
-    mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
+    productValueTime: 4m_independent_finding_revalidation_and_adversarial_static_closure
+    mechanismOverhead: 3m_contract_state_validation_kernel_gate_correction_and_closeout_preparation
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
-    findingId: F-0170
-    productClosureContribution: F-0170
-    commit: f8945a68f128daf2d96ef5c2fce11cbd9e49e4a2
-    candidateTree: f380d5bdff4ae3013f423fc5a3f855170f41a890
+    taskId: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
+    findingId: F-0056
+    productClosureContribution: F-0056
+    commit: 926969fb8fd99070a620cde437bf7b73790a757d
+    candidateTree: e0dcbbb8a568a2b9862fbff010b133e7edde605d
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -903,9 +904,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: f8945a68f128daf2d96ef5c2fce11cbd9e49e4a2
-  lastKnownOriginMasterSha: f8945a68f128daf2d96ef5c2fce11cbd9e49e4a2
-  lastKnownRemoteMasterSha: f8945a68f128daf2d96ef5c2fce11cbd9e49e4a2
+  lastKnownMasterSha: 926969fb8fd99070a620cde437bf7b73790a757d
+  lastKnownOriginMasterSha: 926969fb8fd99070a620cde437bf7b73790a757d
+  lastKnownRemoteMasterSha: 926969fb8fd99070a620cde437bf7b73790a757d
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

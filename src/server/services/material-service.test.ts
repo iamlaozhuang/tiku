@@ -235,6 +235,7 @@ describe("material service", () => {
       {
         page: 1,
         pageSize: 100,
+        publicIds: [],
         sortBy: "createdAt",
         sortOrder: "desc",
         profession: "logistics",
