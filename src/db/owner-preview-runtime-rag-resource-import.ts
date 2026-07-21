@@ -88,6 +88,7 @@ type LocalResourceCatalogEntry = {
   resourceStatus: "rag_ready";
   profession: OwnerPreviewRuntimeRagProfession;
   level: number | null;
+  levelList: number[] | null;
   originalFileName: string;
   objectKey: string;
   contentType: "text/markdown";
@@ -114,6 +115,7 @@ type LocalResourceVectorChunkSnapshot = {
   resourceTitle: string;
   profession: OwnerPreviewRuntimeRagProfession;
   level: number | null;
+  levelList: number[] | null;
   headingPath: string[];
   chunkIndex: number;
   text: string;
@@ -437,6 +439,7 @@ async function executeRuntimeRagImport(input: {
     const title = createRuntimeResourceTitle(material, index + 1);
     const chunkingResult = createRagChunks({
       level: material.level,
+      levelList: material.levels.length > 0 ? material.levels : null,
       markdownContent,
       markdownContentHash,
       profession: material.profession,
@@ -469,7 +472,8 @@ async function executeRuntimeRagImport(input: {
         chunkIndex: chunk.chunkIndex,
         chunkPublicId: chunk.chunkPublicId,
         headingPath: [...chunk.headingPath],
-        level: chunk.level,
+        level: chunk.level ?? null,
+        levelList: chunk.levelList === null ? null : [...chunk.levelList],
         profession: chunk.profession,
         resourcePublicId: chunk.resourcePublicId,
         resourceTitle: chunk.resourceTitle,
@@ -486,6 +490,7 @@ async function executeRuntimeRagImport(input: {
       indexingErrorMessage: null,
       isVectorStale: false,
       level: material.level,
+      levelList: material.levels.length > 0 ? [...material.levels] : null,
       markdownContent,
       markdownContentHash,
       objectKey,
@@ -544,7 +549,40 @@ function readLocalResourceCatalog(storageRoot: string): LocalResourceCatalog {
   }
 
   return {
-    resources: parsedValue.resources.filter(isLocalResourceCatalogEntry),
+    resources: parsedValue.resources
+      .filter(isLocalResourceCatalogEntry)
+      .map(normalizeLocalResourceLevelCoverage),
+  };
+}
+
+function normalizeLocalResourceLevelCoverage(
+  resource: LocalResourceCatalogEntry,
+): LocalResourceCatalogEntry {
+  const rawLevelList = (resource as { levelList?: unknown }).levelList;
+  const isValidLevelList =
+    Array.isArray(rawLevelList) &&
+    rawLevelList.every(
+      (level) =>
+        typeof level === "number" &&
+        Number.isInteger(level) &&
+        level >= 1 &&
+        level <= 5,
+    );
+  const levelList = isValidLevelList
+    ? [...new Set(rawLevelList as number[])].sort()
+    : typeof resource.level === "number"
+      ? [resource.level]
+      : null;
+
+  return {
+    ...resource,
+    level: levelList?.length === 1 ? levelList[0] : null,
+    levelList,
+    activeChunkSnapshot: resource.activeChunkSnapshot.map((chunk) => ({
+      ...chunk,
+      level: levelList?.length === 1 ? levelList[0] : null,
+      levelList: levelList === null ? null : [...levelList],
+    })),
   };
 }
 
@@ -789,7 +827,7 @@ function createRuntimeResourcePublicId(
 ): string {
   const seed = [
     material.profession,
-    String(material.level ?? "all"),
+    material.levels.length > 0 ? material.levels.join("-") : "unknown",
     material.subject ?? "mixed",
     material.hashHint ?? markdownContentHash,
     markdownContentHash,
@@ -825,7 +863,13 @@ function createRuntimeCoverage(
   resources: readonly LocalResourceCatalogEntry[],
 ): Record<string, number> {
   return resources.reduce<Record<string, number>>((coverage, resource) => {
-    const key = `${resource.profession}|${resource.level ?? "all"}|rag_ready`;
+    const levelKey =
+      resource.levelList === null
+        ? "unknown"
+        : resource.levelList.length === 0
+          ? "general"
+          : resource.levelList.join("-");
+    const key = `${resource.profession}|${levelKey}|rag_ready`;
 
     return {
       ...coverage,

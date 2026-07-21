@@ -113,6 +113,7 @@ export type ResourceDto = {
   fileSizeByte: number | null;
   profession: Profession;
   level: number | null;
+  levelList: number[] | null;
   markdownContentHash: string | null;
   conversionErrorMessage: string | null;
   indexingErrorMessage: string | null;

@@ -9,7 +9,7 @@ describe("RAG chunking service", () => {
       resourceTitle: "Published Resource",
       resourceStatus: "published",
       profession: "marketing",
-      level: null,
+      levelList: [],
       markdownContent: "# Published\n\nContent ready for initial indexing.",
       markdownContentHash: "published_markdown_hash",
     });
@@ -19,7 +19,7 @@ describe("RAG chunking service", () => {
       resourceTitle: "Ready Resource",
       resourceStatus: "rag_ready",
       profession: "marketing",
-      level: 4,
+      levelList: [4, 5],
       markdownContent: "# Ready\n\nContent ready for rebuild.",
       markdownContentHash: "ready_markdown_hash",
     });

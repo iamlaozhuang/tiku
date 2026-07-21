@@ -336,7 +336,7 @@ describe("phase 9 RAG resource knowledge runtime", () => {
           resourceTitle: "通用资料",
           resourceStatus: "rag_ready",
           profession: "monopoly",
-          level: null,
+          levelList: [],
           headingPath: ["证件管理", "通用要求"],
           chunkIndex: 2,
           text: "许可证办理 申请材料 应当 完整",

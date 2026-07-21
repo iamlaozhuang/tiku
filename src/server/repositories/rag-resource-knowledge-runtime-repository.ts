@@ -8,8 +8,8 @@ import {
   eq,
   ilike,
   inArray,
-  isNull,
   or,
+  sql,
   type SQL,
 } from "drizzle-orm";
 
@@ -55,7 +55,8 @@ export type ResourceIndexingSource = {
   title: string;
   resourceStatus: ResourceStatus;
   profession: AdminResourceOpsListDto["resources"][number]["profession"];
-  level: number | null;
+  level?: number | null;
+  levelList?: number[] | null;
   markdownContent: string | null;
   markdownContentHash: string | null;
   originalFileName: string | null;
@@ -85,7 +86,8 @@ export type CreateResourceFromUploadInput = {
   contentHash: string;
   fileSizeByte: number;
   profession: AdminResourceOpsListDto["resources"][number]["profession"];
-  level: number | null;
+  level?: number | null;
+  levelList?: number[] | null;
   markdownContent: string | null;
   markdownContentHash: string | null;
   conversionErrorMessage: string | null;
@@ -125,7 +127,7 @@ export type PersistedResourceRetrievalChunk = {
   resourceTitle: string;
   resourceStatus: ResourceStatus;
   profession: AdminResourceOpsListDto["resources"][number]["profession"];
-  level: number | null;
+  levelList: number[] | null;
   headingPath: string[];
   chunkIndex: number;
   text: string;
@@ -246,6 +248,7 @@ type ResourceOpsRowForMapping = {
   resource_status: AdminResourceOpsListDto["resources"][number]["resourceStatus"];
   profession: AdminResourceOpsListDto["resources"][number]["profession"];
   level: number | null;
+  level_list: number[] | null;
   original_file_name: string | null;
   object_storage_path: string | null;
   markdown_content_hash: string | null;
@@ -290,6 +293,7 @@ function createPostgresRagResourceRuntimeRepository(
           resource_status: resource.resource_status,
           profession: resource.profession,
           level: resource.level,
+          level_list: resource.level_list,
           original_file_name: resource.original_file_name,
           object_storage_path: resource.object_storage_path,
           markdown_content_hash: resource.markdown_content_hash,
@@ -644,7 +648,7 @@ function createPostgresRagResourceRuntimeRepository(
           resource_type: resource.resource_type,
           resource_status: resource.resource_status,
           profession: resource.profession,
-          level: resource.level,
+          level_list: resource.level_list,
           markdown_content: resource.markdown_content,
           markdown_content_hash: resource.markdown_content_hash,
           original_file_name: resource.original_file_name,
@@ -663,7 +667,7 @@ function createPostgresRagResourceRuntimeRepository(
             title: row.title,
             resourceStatus: row.resource_status,
             profession: row.profession,
-            level: row.level,
+            levelList: row.level_list,
             markdownContent: row.markdown_content,
             markdownContentHash: row.markdown_content_hash,
             originalFileName: row.original_file_name,
@@ -703,6 +707,9 @@ async function createResourceFromUpload(
   database: RuntimeDatabase,
   input: CreateResourceFromUploadInput,
 ): Promise<AdminResourceOpsListDto["resources"][number] | null> {
+  const levelList =
+    input.levelList ?? (typeof input.level === "number" ? [input.level] : null);
+
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
     const knowledgeBaseRow = await findKnowledgeBaseByProfession(
@@ -763,7 +770,8 @@ async function createResourceFromUpload(
         content_hash: input.contentHash,
         file_size_byte: input.fileSizeByte,
         profession: input.profession,
-        level: input.level,
+        level: levelList?.length === 1 ? levelList[0] : null,
+        level_list: levelList,
         markdown_content: input.markdownContent,
         markdown_content_hash: input.markdownContentHash,
         conversion_error_message: input.conversionErrorMessage,
@@ -1272,11 +1280,14 @@ async function retrieveResourceChunks(
     );
   }
 
-  if (input.level !== null) {
-    conditions.push(
-      or(isNull(resource.level), eq(resource.level, input.level))!,
-    );
-  }
+  conditions.push(
+    input.level === null
+      ? sql`cardinality(${resource.level_list}) = 0`
+      : or(
+          sql`cardinality(${resource.level_list}) = 0`,
+          sql`${resource.level_list} @> ARRAY[${input.level}]::integer[]`,
+        )!,
+  );
 
   if (scopedResourceIds !== null) {
     conditions.push(inArray(resource.id, scopedResourceIds));
@@ -1290,7 +1301,7 @@ async function retrieveResourceChunks(
       resource_title: resource.title,
       resource_status: resource.resource_status,
       profession: resource.profession,
-      level: resource.level,
+      level_list: resource.level_list,
       heading_path: resourceChunk.heading_path,
       chunk_index: resourceChunk.chunk_index,
       content: resourceChunk.content,
@@ -1326,7 +1337,7 @@ async function retrieveResourceChunks(
       resourceTitle: row.resource_title,
       resourceStatus: row.resource_status,
       profession: row.profession,
-      level: row.level,
+      levelList: row.level_list,
       headingPath: Array.isArray(row.heading_path)
         ? row.heading_path.filter(
             (path): path is string => typeof path === "string",
@@ -1752,9 +1763,11 @@ function createResourceConditions(
   }
 
   if (queryInput.resourceLevel === "general") {
-    conditions.push(isNull(resource.level));
+    conditions.push(sql`cardinality(${resource.level_list}) = 0`);
   } else if (queryInput.resourceLevel !== null) {
-    conditions.push(eq(resource.level, queryInput.resourceLevel));
+    conditions.push(
+      sql`${resource.level_list} @> ARRAY[${queryInput.resourceLevel}]::integer[]`,
+    );
   }
 
   return conditions;
@@ -1879,6 +1892,7 @@ function mapResourceOpsRow(
     resourceStatus: row.resource_status,
     profession: row.profession,
     level: row.level,
+    levelList: row.level_list === null ? null : [...row.level_list],
     knowledgeNodePublicIds,
     originalFileName: row.original_file_name,
     downloadAvailable: row.object_storage_path !== null,
@@ -2068,6 +2082,7 @@ function createResourceOpsReturningSelection() {
     resource_status: resource.resource_status,
     profession: resource.profession,
     level: resource.level,
+    level_list: resource.level_list,
     original_file_name: resource.original_file_name,
     object_storage_path: resource.object_storage_path,
     markdown_content_hash: resource.markdown_content_hash,

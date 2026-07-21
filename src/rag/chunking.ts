@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
-import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
+import type {
+  Profession,
+  ResourceLevelList,
+  ResourceStatus,
+} from "@/server/models/ai-rag";
 
 export type RagChunkingConfig = {
   targetChunkSize: number;
@@ -19,7 +23,9 @@ export type RagChunkingInput = {
   resourceTitle: string;
   resourceStatus: ResourceStatus;
   profession: Profession;
-  level: number | null;
+  /** Legacy singleton input; active resource consumers provide levelList. */
+  level?: number | null;
+  levelList?: ResourceLevelList;
   markdownContent: string | null;
   markdownContentHash: string | null;
 };
@@ -29,7 +35,8 @@ export type RagChunk = {
   resourcePublicId: string;
   resourceTitle: string;
   profession: Profession;
-  level: number | null;
+  level?: number | null;
+  levelList: ResourceLevelList;
   headingPath: string[];
   chunkIndex: number;
   text: string;
@@ -304,6 +311,14 @@ function createRagChunk(
     resourceTitle: input.resourceTitle,
     profession: input.profession,
     level: input.level,
+    levelList:
+      input.levelList !== undefined
+        ? input.levelList === null
+          ? null
+          : [...input.levelList]
+        : typeof input.level === "number"
+          ? [input.level]
+          : null,
     headingPath: [...piece.headingPath],
     chunkIndex,
     text: piece.text,

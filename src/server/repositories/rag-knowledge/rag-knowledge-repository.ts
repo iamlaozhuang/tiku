@@ -22,7 +22,14 @@ export function sanitizeRagKnowledgeChunkRecord(
     headingPath: [...chunk.headingPath],
     isStale: chunk.isStale,
     keywordScore: chunk.keywordScore,
-    level: chunk.level,
+    levelList:
+      chunk.levelList === undefined
+        ? typeof chunk.level === "number"
+          ? [chunk.level]
+          : null
+        : chunk.levelList === null
+          ? null
+          : [...chunk.levelList],
     profession: chunk.profession,
     resourcePublicId: chunk.resourcePublicId,
     resourceStatus: chunk.resourceStatus,

@@ -28,6 +28,9 @@ import type {
 import {
   canRequestResourceIndexRebuild,
   canTransitionResourceStatus,
+  isResourceLevelEligible,
+  normalizeResourceLevelList,
+  type ResourceLevelList,
   type ResourceStatus,
   type ResourceType,
 } from "../models/ai-rag";
@@ -100,6 +103,7 @@ type LocalResourceCatalogEntry = {
   resourceStatus: ResourceStatus;
   profession: Profession;
   level: number | null;
+  levelList: ResourceLevelList;
   subject: Subject | null;
   originalFileName: string;
   objectKey: string;
@@ -129,6 +133,7 @@ type LocalResourceVectorChunkSnapshot = {
   resourceTitle: string;
   profession: Profession;
   level: number | null;
+  levelList: ResourceLevelList;
   headingPath: string[];
   chunkIndex: number;
   text: string;
@@ -403,6 +408,10 @@ function normalizeLocalResourceCatalogEntry(
   }
 
   const entry = value as Partial<LocalResourceCatalogEntry>;
+  const levelList = normalizeStoredResourceLevelList(
+    entry.levelList,
+    entry.level,
+  );
 
   const isBaseEntry =
     typeof entry.publicId === "string" &&
@@ -438,6 +447,8 @@ function normalizeLocalResourceCatalogEntry(
 
   return {
     ...entry,
+    level: levelList?.length === 1 ? levelList[0] : null,
+    levelList,
     subject: isSubject(entry.subject) ? entry.subject : null,
     knowledgeNodePublicIds: normalizeStringArray(entry.knowledgeNodePublicIds),
     knowledgeNodeAncestorPublicIds: normalizeStringArray(
@@ -448,32 +459,84 @@ function normalizeLocalResourceCatalogEntry(
         ? entry.activeMarkdownContentHash
         : null,
     activeChunkSnapshot: Array.isArray(entry.activeChunkSnapshot)
-      ? entry.activeChunkSnapshot.filter(isLocalResourceVectorChunkSnapshot)
+      ? entry.activeChunkSnapshot
+          .map(normalizeLocalResourceVectorChunkSnapshot)
+          .filter(
+            (chunk): chunk is LocalResourceVectorChunkSnapshot =>
+              chunk !== null,
+          )
       : [],
   } as LocalResourceCatalogEntry;
 }
 
-function isLocalResourceVectorChunkSnapshot(
+function normalizeLocalResourceVectorChunkSnapshot(
   value: unknown,
-): value is LocalResourceVectorChunkSnapshot {
+): LocalResourceVectorChunkSnapshot | null {
   if (typeof value !== "object" || value === null) {
-    return false;
+    return null;
   }
 
   const chunk = value as Partial<LocalResourceVectorChunkSnapshot>;
 
-  return (
-    typeof chunk.chunkPublicId === "string" &&
-    typeof chunk.resourcePublicId === "string" &&
-    typeof chunk.resourceTitle === "string" &&
-    isProfession(chunk.profession) &&
-    (typeof chunk.level === "number" || chunk.level === null) &&
-    Array.isArray(chunk.headingPath) &&
-    chunk.headingPath.every((heading) => typeof heading === "string") &&
-    typeof chunk.chunkIndex === "number" &&
-    typeof chunk.text === "string" &&
-    typeof chunk.textHash === "string"
+  if (
+    !(
+      typeof chunk.chunkPublicId === "string" &&
+      typeof chunk.resourcePublicId === "string" &&
+      typeof chunk.resourceTitle === "string" &&
+      isProfession(chunk.profession) &&
+      (typeof chunk.level === "number" || chunk.level === null) &&
+      Array.isArray(chunk.headingPath) &&
+      chunk.headingPath.every((heading) => typeof heading === "string") &&
+      typeof chunk.chunkIndex === "number" &&
+      typeof chunk.text === "string" &&
+      typeof chunk.textHash === "string"
+    )
+  ) {
+    return null;
+  }
+
+  const levelList = normalizeStoredResourceLevelList(
+    chunk.levelList,
+    chunk.level,
   );
+
+  return {
+    ...(chunk as LocalResourceVectorChunkSnapshot),
+    level: levelList?.length === 1 ? levelList[0] : null,
+    levelList,
+  };
+}
+
+function normalizeStoredResourceLevelList(
+  levelList: unknown,
+  legacyLevel: unknown,
+): ResourceLevelList {
+  if (Array.isArray(levelList)) {
+    if (
+      !levelList.every(
+        (level) =>
+          typeof level === "number" &&
+          Number.isInteger(level) &&
+          level >= 1 &&
+          level <= 5,
+      )
+    ) {
+      return null;
+    }
+
+    try {
+      return normalizeResourceLevelList(levelList as number[]);
+    } catch {
+      return null;
+    }
+  }
+
+  return typeof legacyLevel === "number" &&
+    Number.isInteger(legacyLevel) &&
+    legacyLevel >= 1 &&
+    legacyLevel <= 5
+    ? [legacyLevel]
+    : null;
 }
 
 function isProfession(value: unknown): value is Profession {
@@ -532,14 +595,57 @@ function normalizeLocalResourceTitle(value: FormDataEntryValue | null) {
     : null;
 }
 
-function parseLocalResourceLevel(value: FormDataEntryValue | null) {
-  if (typeof value !== "string" || value.trim().length === 0) {
+function parseLocalResourceLevelList(formData: FormData): number[] | null {
+  const coverageMode = formData.get("coverageMode");
+  const rawLevelList = formData.getAll("levelList");
+  const legacyLevel = formData.get("level");
+  const hasLegacyLevel =
+    typeof legacyLevel === "string" && legacyLevel.trim().length > 0;
+
+  if (
+    coverageMode === "profession_general" &&
+    rawLevelList.length === 0 &&
+    !hasLegacyLevel
+  ) {
+    return [];
+  }
+
+  const specifiedLevelList = rawLevelList.flatMap((value) => {
+    if (typeof value !== "string" || !/^\d+$/u.test(value.trim())) {
+      return [];
+    }
+
+    const level = Number(value);
+    return Number.isInteger(level) && level >= 1 && level <= 5 ? [level] : [];
+  });
+
+  if (
+    coverageMode === "specified_levels" &&
+    !hasLegacyLevel &&
+    specifiedLevelList.length === rawLevelList.length &&
+    specifiedLevelList.length > 0
+  ) {
+    return normalizeResourceLevelList(specifiedLevelList);
+  }
+
+  if (
+    coverageMode === null &&
+    typeof legacyLevel === "string" &&
+    /^\d+$/u.test(legacyLevel.trim())
+  ) {
+    const level = Number(legacyLevel);
+    return Number.isInteger(level) && level >= 1 && level <= 5 ? [level] : null;
+  }
+
+  return null;
+}
+
+function toLegacySingletonLevel(levelList: ResourceLevelList) {
+  if (levelList === null || levelList.length !== 1) {
     return null;
   }
 
-  const level = Number(value);
-
-  return Number.isInteger(level) && level > 0 ? level : null;
+  return levelList[0];
 }
 
 function parseLocalResourceKnowledgeNodePublicIds(formData: FormData) {
@@ -577,6 +683,7 @@ function mapLocalResourceEntry(
     resourceStatus: entry.resourceStatus,
     profession: entry.profession,
     level: entry.level,
+    levelList: entry.levelList === null ? null : [...entry.levelList],
     knowledgeNodePublicIds: [...entry.knowledgeNodePublicIds],
     originalFileName: entry.originalFileName,
     downloadAvailable: true,
@@ -631,8 +738,8 @@ function matchesLocalResourceQuery(
       resourceSummary.resourceType === query.resourceType) &&
     (query.resourceLevel === null ||
       (query.resourceLevel === "general"
-        ? resourceSummary.level === null
-        : resourceSummary.level === query.resourceLevel))
+        ? resourceSummary.levelList?.length === 0
+        : resourceSummary.levelList?.includes(query.resourceLevel) === true))
   );
 }
 
@@ -727,7 +834,8 @@ function createLocalVectorChunkSnapshot(
     resourcePublicId: chunk.resourcePublicId,
     resourceTitle: chunk.resourceTitle,
     profession: chunk.profession,
-    level: chunk.level,
+    level: chunk.level ?? toLegacySingletonLevel(chunk.levelList),
+    levelList: chunk.levelList === null ? null : [...chunk.levelList],
     headingPath: [...chunk.headingPath],
     chunkIndex: chunk.chunkIndex,
     text: chunk.text,
@@ -767,6 +875,12 @@ async function rebuildResourceVector(input: {
     resourceStatus: resourceForIndexing.resourceStatus,
     profession: resourceForIndexing.profession,
     level: resourceForIndexing.level,
+    levelList:
+      resourceForIndexing.levelList !== undefined
+        ? resourceForIndexing.levelList
+        : typeof resourceForIndexing.level === "number"
+          ? [resourceForIndexing.level]
+          : null,
     markdownContent: resourceForIndexing.markdownContent,
     markdownContentHash: resourceForIndexing.markdownContentHash,
   });
@@ -969,11 +1083,13 @@ async function uploadLocalResource(input: {
   const professionValue = formData.get("profession");
   const resourceTypeValue = formData.get("resourceType");
   const title = normalizeLocalResourceTitle(formData.get("title"));
+  const levelList = parseLocalResourceLevelList(formData);
 
   if (
     !isUploadFile(fileValue) ||
     !isProfession(professionValue) ||
-    !isResourceType(resourceTypeValue)
+    !isResourceType(resourceTypeValue) ||
+    levelList === null
   ) {
     return validationFailedResponse;
   }
@@ -1006,7 +1122,8 @@ async function uploadLocalResource(input: {
     resourceType: storedResource.resourceType,
     resourceStatus: parsedResource === null ? "conversion_failed" : "draft",
     profession: storedResource.profession,
-    level: parseLocalResourceLevel(formData.get("level")),
+    level: toLegacySingletonLevel(levelList),
+    levelList,
     subject: null,
     originalFileName: storedResource.fileName,
     objectKey: storedResource.objectKey,
@@ -1064,6 +1181,7 @@ async function uploadLocalResource(input: {
         fileSizeByte: entry.fileSizeByte,
         profession: entry.profession,
         level: entry.level,
+        levelList: entry.levelList,
         markdownContent: entry.markdownContent,
         markdownContentHash: entry.markdownContentHash,
         conversionErrorMessage: entry.indexingErrorMessage,
@@ -1253,6 +1371,7 @@ async function rebuildLocalResourceVector(input: {
     resourceStatus: resource.resourceStatus,
     profession: resource.profession,
     level: resource.level,
+    levelList: resource.levelList,
     markdownContent: resource.markdownContent,
     markdownContentHash: resource.markdownContentHash,
   });
@@ -1462,7 +1581,7 @@ export async function buildLocalResourceRagRetrievalResult({
         (resource.markdownContent !== null &&
           resource.markdownContentHash !== null)) &&
       resource.profession === profession &&
-      (level === null || resource.level === null || resource.level === level) &&
+      isResourceLevelEligible(resource.levelList, level) &&
       matchesLocalResourceSubjectScope(resource, subject) &&
       matchesLocalResourceKnowledgeNodeScope(
         resource,
@@ -1535,6 +1654,7 @@ function createLocalRetrievalChunks(resource: LocalResourceCatalogEntry) {
     resourceStatus: resource.resourceStatus,
     profession: resource.profession,
     level: resource.level,
+    levelList: resource.levelList,
     markdownContent: resource.markdownContent,
     markdownContentHash: resource.markdownContentHash,
   });
@@ -1542,6 +1662,7 @@ function createLocalRetrievalChunks(resource: LocalResourceCatalogEntry) {
   return chunkingResult.status === "chunked"
     ? chunkingResult.chunks.map((chunk) => ({
         ...chunk,
+        level: chunk.level ?? toLegacySingletonLevel(chunk.levelList),
         resourceStatus: resource.resourceStatus,
         isStale,
       }))

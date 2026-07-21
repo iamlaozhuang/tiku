@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: null
+  currentTaskId: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
   currentCandidateClusterId: P1-RC-03
   candidateClusterOrder:
     - P1-RC-01
@@ -235,6 +235,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
     - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
     - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+    - p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -300,7 +301,44 @@ p1RemediationSerialProgram:
     p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20: closed
     p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: closed
     p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20: closed
+    p1-remediation-rc-03-resource-multi-level-scope-2026-07-20: in_progress
 activeTasks:
+  - id: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
+    title: Resource multi-level scope
+    phase: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0088
+    branch: fix/resource-multi-level-scope
+    dependsOn:
+      - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+    objective: close F-0088 by carrying explicit multi-level resource coverage through schema, upload, indexing, and retrieval without treating legacy unknown coverage as profession-general
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    planPath: docs/superpowers/plans/2026-07-20-resource-multi-level-scope.md
+    candidateRootCauseCluster: P1-RC-03
+    findingIds:
+      - F-0088
+    highRiskApproval:
+      category: schema_migration_source
+      status: start_approved_candidate_closeout_pending
+      approvalId: fresh-schema-start-f0088-resource-level-scope-2026-07-20
+    executionStage: candidate_frozen_pending_candidate_bound_approval
+    verificationEvidence:
+      approvalId: fresh-schema-start-f0088-resource-level-scope-2026-07-20
+      tddRed: pass_expected_4_failures_of_4
+      focused: pass_50_of_50
+      affectedRegression: pass_26_of_26
+      lint: pass_zero_warnings_after_one_retry
+      typecheck: pass
+      changedFileFormatDiff: pass
+      fullProfile: pending_candidate_bound_approval
+      mainThreadAdversarialReview: pass
+      entitlementExpansion: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
   - id: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
     title: Explicit learner authorization context selection
     phase: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20

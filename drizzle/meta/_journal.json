@@ -239,6 +239,13 @@
       "when": 1784394253909,
       "tag": "20260718100413_p1_rc_02_redeem_code_nullable_deadline",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1784593913157,
+      "tag": "20260720173000_p1_rc_03_resource_multi_level_scope",
+      "breakpoints": true
     }
   ]
 }

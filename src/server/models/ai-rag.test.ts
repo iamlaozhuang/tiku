@@ -11,10 +11,13 @@ import {
   createFailureMessageDigest,
   createKnowledgeNodeSnapshot,
   createModelConfigSnapshot,
+  getResourceLevelRank,
+  isResourceLevelEligible,
   isResourceRagEligible,
   knStatusValues,
   resourceStatusValues,
   resourceTypeValues,
+  normalizeResourceLevelList,
   type AiScoringAttemptRow,
   type AiCallLogRow,
   type KnowledgeBaseRow,
@@ -43,6 +46,25 @@ const modelConfigSnapshot = createModelConfigSnapshot({
 });
 
 describe("AI/RAG domain models", () => {
+  it("normalizes resource level coverage and fails closed for unknown coverage", () => {
+    expect(normalizeResourceLevelList([5, 3, 3, 4])).toEqual([3, 4, 5]);
+    expect(normalizeResourceLevelList([])).toEqual([]);
+    expect(normalizeResourceLevelList(null)).toBeNull();
+    expect(() => normalizeResourceLevelList([0, 3])).toThrow(
+      "resource level_list must contain levels between 1 and 5",
+    );
+    expect(isResourceLevelEligible(null, 3)).toBe(false);
+    expect(isResourceLevelEligible([], 3)).toBe(true);
+    expect(isResourceLevelEligible([3, 4], 3)).toBe(true);
+    expect(isResourceLevelEligible([4, 5], 3)).toBe(false);
+    expect(isResourceLevelEligible([3, 3], 3)).toBe(false);
+    expect(isResourceLevelEligible([4, 3], 3)).toBe(false);
+    expect(isResourceLevelEligible([3, 6], 3)).toBe(false);
+    expect(getResourceLevelRank([3], 3)).toBe(0);
+    expect(getResourceLevelRank([3, 4], 3)).toBe(1);
+    expect(getResourceLevelRank([], 3)).toBe(2);
+  });
+
   it("exports AI function types from the schema boundary", () => {
     expect(aiFuncTypeValues).toEqual([
       "scoring",
@@ -342,6 +364,7 @@ describe("AI/RAG domain models", () => {
       file_size_byte: 1024,
       profession: "marketing",
       level: 3,
+      level_list: [3, 4],
       markdown_content: "# Marketing Basics",
       markdown_content_hash: "markdown_hash",
       conversion_error_message: null,

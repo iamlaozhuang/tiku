@@ -1,7 +1,15 @@
 import { createHash } from "node:crypto";
 
-import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
-import { isResourceRagEligible } from "@/server/models/ai-rag";
+import type {
+  Profession,
+  ResourceLevelList,
+  ResourceStatus,
+} from "@/server/models/ai-rag";
+import {
+  getResourceLevelRank,
+  isResourceLevelEligible,
+  isResourceRagEligible,
+} from "@/server/models/ai-rag";
 
 export type EvidenceStatus = "sufficient" | "weak" | "none";
 export type RagRetrievalMode = "keyword_only" | "fusion_sort" | "hybrid_rerank";
@@ -13,7 +21,9 @@ export type RagRetrievalCandidate = {
   resourceTitle: string;
   resourceStatus: ResourceStatus;
   profession: Profession;
-  level: number | null;
+  /** Legacy singleton fixture; active resource consumers must provide levelList. */
+  level?: number | null;
+  levelList?: ResourceLevelList;
   headingPath: string[];
   chunkIndex: number;
   text: string;
@@ -101,7 +111,10 @@ export function createRagRetrievalResult(
         qualityRank: calculateQualityRank(
           calculateCandidateScore(candidate, input.query, retrievalMode),
         ),
-        levelRank: calculateLevelRank(candidate.level, input.level),
+        levelRank: getResourceLevelRank(
+          resolveCandidateLevelList(candidate),
+          input.level,
+        ),
       })),
   ).sort(compareRankedCandidates);
 
@@ -170,35 +183,22 @@ function canUseCandidate(
   return (
     isResourceRagEligible(candidate.resourceStatus) &&
     candidate.profession === input.profession &&
-    isLevelEligible(candidate.level, input.level) &&
+    isResourceLevelEligible(
+      resolveCandidateLevelList(candidate),
+      input.level,
+    ) &&
     authorizedResourcePublicIds.has(candidate.resourcePublicId)
   );
 }
 
-function isLevelEligible(
-  candidateLevel: number | null,
-  requestedLevel: number | null,
-): boolean {
-  return (
-    requestedLevel === null ||
-    candidateLevel === requestedLevel ||
-    candidateLevel === null
-  );
-}
-
-function calculateLevelRank(
-  candidateLevel: number | null,
-  requestedLevel: number | null,
-): number {
-  if (requestedLevel !== null && candidateLevel === requestedLevel) {
-    return 0;
+function resolveCandidateLevelList(
+  candidate: RagRetrievalCandidate,
+): ResourceLevelList {
+  if (candidate.levelList !== undefined) {
+    return candidate.levelList;
   }
 
-  if (candidateLevel === null) {
-    return 1;
-  }
-
-  return 2;
+  return typeof candidate.level === "number" ? [candidate.level] : null;
 }
 
 function calculateFusionScore(candidate: RagRetrievalCandidate): number {
@@ -274,8 +274,8 @@ function compareRankedCandidates(
   rightCandidate: RankedRetrievalCandidate,
 ): number {
   return (
-    leftCandidate.qualityRank - rightCandidate.qualityRank ||
     leftCandidate.levelRank - rightCandidate.levelRank ||
+    leftCandidate.qualityRank - rightCandidate.qualityRank ||
     rightCandidate.score - leftCandidate.score ||
     leftCandidate.resourcePublicId.localeCompare(
       rightCandidate.resourcePublicId,

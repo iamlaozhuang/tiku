@@ -54,8 +54,17 @@ export type NewPromptTemplateRow = InferInsertModel<typeof promptTemplate>;
 export type KnowledgeBaseRow = InferSelectModel<typeof knowledgeBase>;
 export type NewKnowledgeBaseRow = InferInsertModel<typeof knowledgeBase>;
 
-export type ResourceRow = InferSelectModel<typeof resource>;
-export type NewResourceRow = InferInsertModel<typeof resource>;
+type ResourceSelectRow = InferSelectModel<typeof resource>;
+type ResourceInsertRow = InferInsertModel<typeof resource>;
+
+export type ResourceLevelList = number[] | null;
+
+export type ResourceRow = Omit<ResourceSelectRow, "level_list"> & {
+  level_list: ResourceLevelList;
+};
+export type NewResourceRow = Omit<ResourceInsertRow, "level_list"> & {
+  level_list?: ResourceLevelList;
+};
 
 type KnowledgeNodeSelectRow = InferSelectModel<typeof knowledgeNode>;
 type KnowledgeNodeInsertRow = InferInsertModel<typeof knowledgeNode>;
@@ -115,6 +124,77 @@ export type RedactedContentSnapshot = {
 };
 
 export type RedactedJsonObject = Record<string, unknown>;
+
+export function normalizeResourceLevelList(
+  levelList: readonly number[] | null,
+): ResourceLevelList {
+  if (levelList === null) {
+    return null;
+  }
+
+  const normalizedLevelList = [...new Set(levelList)].sort(
+    (leftLevel, rightLevel) => leftLevel - rightLevel,
+  );
+
+  if (
+    normalizedLevelList.some(
+      (level) => !Number.isInteger(level) || level < 1 || level > 5,
+    )
+  ) {
+    throw new Error("resource level_list must contain levels between 1 and 5");
+  }
+
+  return normalizedLevelList;
+}
+
+export function isResourceLevelEligible(
+  levelList: ResourceLevelList,
+  requestedLevel: number | null,
+): boolean {
+  if (levelList === null) {
+    return false;
+  }
+
+  if (
+    levelList.some(
+      (level, index) =>
+        !Number.isInteger(level) ||
+        level < 1 ||
+        level > 5 ||
+        (index > 0 && levelList[index - 1] >= level),
+    )
+  ) {
+    return false;
+  }
+
+  if (levelList.length === 0) {
+    return true;
+  }
+
+  return requestedLevel !== null && levelList.includes(requestedLevel);
+}
+
+export function getResourceLevelRank(
+  levelList: ResourceLevelList,
+  requestedLevel: number | null,
+): number {
+  if (
+    levelList === null ||
+    !isResourceLevelEligible(levelList, requestedLevel)
+  ) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  if (
+    requestedLevel !== null &&
+    levelList.length === 1 &&
+    levelList[0] === requestedLevel
+  ) {
+    return 0;
+  }
+
+  return levelList.length === 0 ? 2 : 1;
+}
 
 export type AiCallLogRedactedSnapshotsInput = {
   prompt: unknown;

@@ -13,7 +13,7 @@ const baseInput = {
   resourceTitle: "Marketing Basics",
   resourceStatus: "published",
   profession: "marketing",
-  level: 3,
+  levelList: [3, 4],
   markdownContentHash: "markdown_hash",
 } satisfies Omit<RagChunkingInput, "markdownContent">;
 
@@ -57,7 +57,7 @@ describe("RAG chunking", () => {
       resourcePublicId: "resource_public_id",
       resourceTitle: "Marketing Basics",
       profession: "marketing",
-      level: 3,
+      levelList: [3, 4],
       headingPath: ["Marketing Basics"],
       chunkIndex: 1,
     });

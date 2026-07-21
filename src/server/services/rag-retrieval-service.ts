@@ -8,7 +8,11 @@ import {
 } from "@/rag/retrieval";
 import type { RagCitationSourceDto } from "@/server/contracts/ai-rag-contract";
 import type { EvidenceStatus } from "@/rag/retrieval";
-import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
+import type {
+  Profession,
+  ResourceLevelList,
+  ResourceStatus,
+} from "@/server/models/ai-rag";
 
 export type RagRetrievalServiceInput = {
   query: string;
@@ -31,7 +35,9 @@ export type RagRetrievalChunkInput = {
   resourceTitle: string;
   resourceStatus: ResourceStatus;
   profession: Profession;
-  level: number | null;
+  /** Legacy singleton fixture; active resource consumers must provide levelList. */
+  level?: number | null;
+  levelList?: ResourceLevelList;
   headingPath: string[];
   chunkIndex: number;
   text: string;
@@ -113,7 +119,7 @@ export function buildRagRetrievalContextFromPersistedChunks(
     level: input.level,
     authorizedResourcePublicIds: input.authorizedResourcePublicIds,
     retrievalMode,
-    candidates: input.chunks,
+    candidates: input.chunks.map(resolveRetrievalChunkCoverage),
   });
 
   return {
@@ -147,9 +153,23 @@ function createKeywordOnlyRetrievalCandidate(
   const tokenScore = calculateTokenOverlapScore(query, chunk.text);
 
   return {
-    ...chunk,
+    ...resolveRetrievalChunkCoverage(chunk),
     keywordScore: tokenScore,
     semanticScore: null,
+  };
+}
+
+function resolveRetrievalChunkCoverage<T extends RagRetrievalChunkInput>(
+  chunk: T,
+): T & { levelList: ResourceLevelList } {
+  return {
+    ...chunk,
+    levelList:
+      chunk.levelList !== undefined
+        ? chunk.levelList
+        : typeof chunk.level === "number"
+          ? [chunk.level]
+          : null,
   };
 }
 

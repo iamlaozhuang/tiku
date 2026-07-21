@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
 
 import type { EvidenceStatus } from "@/rag/retrieval";
-import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
+import type {
+  Profession,
+  ResourceLevelList,
+  ResourceStatus,
+} from "@/server/models/ai-rag";
 import {
   buildResourceChunks,
   type RagChunkingServiceResult,
@@ -38,7 +42,8 @@ export type LocalRagMockEmbeddingPipelineInput = {
   resourceTitle: string;
   resourceStatus: ResourceStatus;
   profession: Profession;
-  level: number | null;
+  level?: number | null;
+  levelList?: ResourceLevelList;
 };
 
 export type LocalRagMockEmbeddingPipelineResult =
@@ -142,6 +147,7 @@ function buildChunksFromParsedDocument(
     resourceStatus: input.resourceStatus,
     profession: input.profession,
     level: input.level,
+    levelList: input.levelList,
     markdownContent: input.parsedDocument.markdownContent,
     markdownContentHash: input.parsedDocument.markdownContentHash,
   });

@@ -57,7 +57,7 @@ function createSyntheticRuntimePackage() {
         fixtureRelativePath: "materials/monopoly.md",
         fixtureSha256: "a".repeat(64),
         kind: "material",
-        level: 3,
+        levels: [3, 4, 5],
         pageCount: 1,
         profession: "monopoly",
         sourceRelativePath: "redacted-source-a.md",
@@ -165,6 +165,7 @@ describe("owner preview runtime RAG resource import", () => {
         activeChunkSnapshot: unknown[];
         chunkCount: number;
         level: number | null;
+        levelList: number[] | null;
         profession: string;
         resourceStatus: string;
         title: string;
@@ -179,6 +180,10 @@ describe("owner preview runtime RAG resource import", () => {
       catalog.resources.map((resource) => resource.profession).sort(),
     ).toEqual(["marketing", "monopoly"]);
     expect(catalog.resources.every((resource) => resource.title)).toBe(true);
+    expect(
+      catalog.resources.find((resource) => resource.profession === "monopoly")
+        ?.levelList,
+    ).toEqual([3, 4, 5]);
     expect(
       catalog.resources.every(
         (resource) =>

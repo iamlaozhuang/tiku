@@ -68,6 +68,7 @@ type ResourceStatusFilter = "all" | ResourceStatus;
 type ResourceTypeFilter = "all" | ResourceType;
 type ProfessionFilter = "all" | Profession;
 type LevelFilter = "all" | "general" | "1" | "2" | "3" | "4" | "5";
+type ResourceCoverageMode = "profession_general" | "specified_levels";
 type ResourceSortField = "uploadedAt" | "updatedAt" | "publishedAt";
 type ResourceSortOrder = "asc" | "desc";
 
@@ -151,9 +152,10 @@ type EnableState =
     };
 
 type UploadState = {
+  coverageMode: ResourceCoverageMode;
   file: File | null;
   knowledgeNodePublicIdsText: string;
-  level: string;
+  levelList: number[];
   profession: Profession;
   resourceType: ResourceType;
   status: "idle" | "submitting";
@@ -400,12 +402,18 @@ function createTestId(value: string) {
   return value.replace(/[^a-zA-Z0-9-]/g, "-");
 }
 
-function formatLevel(value: number | null) {
-  return value === null ? "专业通用资料" : `${value}级`;
+function formatLevelList(levelList: number[] | null | undefined) {
+  if (levelList === null || levelList === undefined) {
+    return "等级待确认";
+  }
+
+  return levelList.length === 0
+    ? "专业通用资料"
+    : levelList.map((level) => `${level}级`).join("、");
 }
 
 function formatResourceScope(resource: AdminResourceOpsSummaryDto) {
-  return `${professionLabels[resource.profession]} ${formatLevel(resource.level)}`;
+  return `${professionLabels[resource.profession]} ${formatLevelList(resource.levelList)}`;
 }
 
 function parseKnowledgeNodePublicIdsText(value: string) {
@@ -548,7 +556,10 @@ async function postLocalResourceUpload(
 
   formData.set("title", uploadState.title);
   formData.set("profession", uploadState.profession);
-  formData.set("level", uploadState.level);
+  formData.set("coverageMode", uploadState.coverageMode);
+  uploadState.levelList.forEach((level) => {
+    formData.append("levelList", String(level));
+  });
   formData.set("resourceType", uploadState.resourceType);
   formData.set("fileName", uploadState.file.name);
   formData.set("file", uploadState.file);
@@ -834,9 +845,10 @@ export function AdminResourceKnowledgeManagement() {
       status: "idle",
     });
   const [uploadState, setUploadState] = useState<UploadState>({
+    coverageMode: "specified_levels",
     file: null,
     knowledgeNodePublicIdsText: "",
-    level: "3",
+    levelList: [3],
     profession: "marketing",
     resourceType: "knowledge_doc",
     status: "idle",
@@ -1061,9 +1073,17 @@ export function AdminResourceKnowledgeManagement() {
   async function handleUploadResource() {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null || uploadState.file === null) {
+    if (
+      sessionToken === null ||
+      uploadState.file === null ||
+      (uploadState.coverageMode === "specified_levels" &&
+        uploadState.levelList.length === 0)
+    ) {
       setToastMessage({
-        message: "请选择资料文件",
+        message:
+          uploadState.file === null
+            ? "请选择资料文件"
+            : "请至少选择一个适用等级",
         tone: "error",
       });
       return;
@@ -1817,24 +1837,72 @@ function ResourceUploadPanel({
             onChange({ ...uploadState, profession: value as Profession })
           }
         />
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">等级</span>
-          <select
-            aria-label="等级"
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-            value={uploadState.level}
-            onChange={(event) =>
-              onChange({ ...uploadState, level: event.target.value })
-            }
-          >
-            <option value="">专业通用资料</option>
-            <option value="1">1级</option>
-            <option value="2">2级</option>
-            <option value="3">3级</option>
-            <option value="4">4级</option>
-            <option value="5">5级</option>
-          </select>
-        </label>
+        <fieldset className="flex flex-col gap-2 text-sm font-medium">
+          <legend className="text-text-secondary">适用等级</legend>
+          <label className="flex items-center gap-2 font-normal">
+            <input
+              checked={uploadState.coverageMode === "profession_general"}
+              name="coverageMode"
+              type="radio"
+              value="profession_general"
+              onChange={() =>
+                onChange({
+                  ...uploadState,
+                  coverageMode: "profession_general",
+                  levelList: [],
+                })
+              }
+            />
+            专业通用资料
+          </label>
+          <label className="flex items-center gap-2 font-normal">
+            <input
+              checked={uploadState.coverageMode === "specified_levels"}
+              name="coverageMode"
+              type="radio"
+              value="specified_levels"
+              onChange={() =>
+                onChange({
+                  ...uploadState,
+                  coverageMode: "specified_levels",
+                  levelList:
+                    uploadState.levelList.length > 0
+                      ? uploadState.levelList
+                      : [3],
+                })
+              }
+            />
+            指定等级
+          </label>
+          {uploadState.coverageMode === "specified_levels" ? (
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, 5].map((level) => (
+                <label
+                  className="flex items-center gap-1 font-normal"
+                  key={level}
+                >
+                  <input
+                    checked={uploadState.levelList.includes(level)}
+                    name="levelList"
+                    type="checkbox"
+                    value={level}
+                    onChange={(event) =>
+                      onChange({
+                        ...uploadState,
+                        levelList: event.target.checked
+                          ? [...uploadState.levelList, level].sort()
+                          : uploadState.levelList.filter(
+                              (selectedLevel) => selectedLevel !== level,
+                            ),
+                      })
+                    }
+                  />
+                  {level}级
+                </label>
+              ))}
+            </div>
+          ) : null}
+        </fieldset>
         <FilterSelect
           label="资料类型"
           options={[

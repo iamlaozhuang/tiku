@@ -69,4 +69,16 @@ describe("admin resource knowledge UI layout", () => {
     expect(source).toContain("检索索引重建请求已受理");
     expect(source).not.toContain("检索索引重建完成，已生成");
   });
+
+  it("requires explicit general coverage or one or more selected levels", () => {
+    const source = readSourceFile(adminResourceKnowledgeSourcePath);
+
+    expect(source).toContain("type ResourceCoverageMode");
+    expect(source).toContain('"profession_general"');
+    expect(source).toContain('"specified_levels"');
+    expect(source).toContain('name="levelList"');
+    expect(source).toContain("等级待确认");
+    expect(source).toContain("专业通用资料");
+    expect(source).not.toContain('<option value="">专业通用资料</option>');
+  });
 });

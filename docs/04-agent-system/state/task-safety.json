@@ -1,35 +1,57 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20",
-  "objective": "Close F-0141 by making the exact authorizationPublicId an explicit learner context across home, profile, and AI training; default only a sole candidate, never reveal advanced entry or usable generation by silently switching to another authorization, and preserve existing server-side authorization checks without expanding entitlement, changing schema/dependencies, calling external services, or modifying the safety kernel.",
+  "taskId": "p1-remediation-rc-03-resource-multi-level-scope-2026-07-20",
+  "objective": "Close F-0088 by representing resource level coverage as an explicit levelList across schema, migration source, upload, catalog, indexing, and retrieval: null means legacy unclassified and is never retrieval-eligible, an empty list means explicitly profession-general, and a non-empty distinct list means the exact covered levels; preserve scalar authorized request level, existing resource lifecycle and API envelope, and do not execute a migration, access real data, add dependencies, call providers, or modify the safety kernel.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/superpowers/plans/2026-07-20-explicit-learner-authorization-context-selection.md",
-    "src/features/student/home/StudentHomePage.tsx",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-    "src/features/student/profile/StudentProfileRedeemPage.tsx",
-    "tests/unit/student-home-ui.test.ts",
-    "tests/unit/student-personal-ai-generation-ui.test.ts",
-    "tests/unit/student-profile-redeem-ui.test.ts",
-    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
+    "docs/superpowers/plans/2026-07-20-resource-multi-level-scope.md",
+    "drizzle/20260720173000_p1_rc_03_resource_multi_level_scope.sql",
+    "drizzle/meta/20260720173000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/db/schema/ai-rag.ts",
+    "src/db/schema/ai-rag.test.ts",
+    "src/db/owner-preview-runtime-rag-resource-import.ts",
+    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+    "src/rag/chunking.ts",
+    "src/rag/chunking.test.ts",
+    "src/rag/retrieval.ts",
+    "src/rag/retrieval.test.ts",
+    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+    "src/server/contracts/ai-rag-contract.ts",
+    "src/server/mappers/ai-rag-mapper.ts",
+    "src/server/mappers/ai-rag-mapper.test.ts",
+    "src/server/models/ai-rag.ts",
+    "src/server/models/ai-rag.test.ts",
+    "src/server/repositories/knowledge-recommendation-runtime-repository.ts",
+    "src/server/repositories/rag-knowledge/in-memory-rag-knowledge-repository.ts",
+    "src/server/repositories/rag-knowledge/rag-knowledge-repository.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "src/server/services/local-rag-mock-embedding-pipeline.ts",
+    "src/server/services/rag-chunking-service.ts",
+    "src/server/services/rag-chunking-service.test.ts",
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/server/services/rag-retrieval-service.ts",
+    "src/server/services/rag-retrieval-service.test.ts",
+    "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
+    "tests/unit/owner-preview-runtime-rag-resource-import.test.ts",
+    "tests/unit/p1-resource-multi-level-scope.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+    "tests/unit/rag-knowledge/rag-layering-retrieval-governance.test.ts"
   ],
   "blockedFiles": [
     "package.json",
     "pnpm-lock.yaml",
-    "src/db/**",
-    "drizzle/**",
-    "migrations/**",
     ".github/workflows/**",
     ".env*",
-    "scripts/agent-system/**"
+    "scripts/agent-system/**",
+    "src/db/dev-seed.ts"
   ],
   "validationCommands": [
     {
-      "name": "explicit-learner-authorization-context-selection-focused",
+      "name": "resource-multi-level-scope-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -37,13 +59,17 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/student-home-ui.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-profile-redeem-ui.test.ts"
+        "src/db/schema/ai-rag.test.ts",
+        "tests/unit/p1-resource-multi-level-scope.test.ts",
+        "src/rag/retrieval.test.ts",
+        "src/rag/chunking.test.ts",
+        "src/server/mappers/ai-rag-mapper.test.ts",
+        "src/server/services/rag-chunking-service.test.ts",
+        "src/server/services/rag-retrieval-service.test.ts"
       ]
     },
     {
-      "name": "explicit-learner-authorization-context-selection-regression",
+      "name": "resource-multi-level-scope-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -51,41 +77,55 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/student-personal-ai-generation-ui.test.ts"
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+        "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
+        "tests/unit/owner-preview-runtime-rag-resource-import.test.ts",
+        "tests/unit/rag-knowledge/rag-layering-retrieval-governance.test.ts"
       ]
     },
     {
-      "name": "explicit-learner-authorization-context-selection-system-ops-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-        "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
-      ]
-    },
-    {
-      "name": "explicit-learner-authorization-context-selection-lint",
+      "name": "resource-multi-level-scope-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/student/home/StudentHomePage.tsx",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-        "src/features/student/profile/StudentProfileRedeemPage.tsx",
-        "tests/unit/student-home-ui.test.ts",
-        "tests/unit/student-personal-ai-generation-ui.test.ts",
-        "tests/unit/student-profile-redeem-ui.test.ts"
+        "src/db/schema/ai-rag.ts",
+        "src/db/schema/ai-rag.test.ts",
+        "src/db/owner-preview-runtime-rag-resource-import.ts",
+        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+        "src/rag/chunking.ts",
+        "src/rag/chunking.test.ts",
+        "src/rag/retrieval.ts",
+        "src/rag/retrieval.test.ts",
+        "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+        "src/server/contracts/ai-rag-contract.ts",
+        "src/server/mappers/ai-rag-mapper.ts",
+        "src/server/mappers/ai-rag-mapper.test.ts",
+        "src/server/models/ai-rag.ts",
+        "src/server/models/ai-rag.test.ts",
+        "src/server/repositories/knowledge-recommendation-runtime-repository.ts",
+        "src/server/repositories/rag-knowledge/in-memory-rag-knowledge-repository.ts",
+        "src/server/repositories/rag-knowledge/rag-knowledge-repository.ts",
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "src/server/services/local-rag-mock-embedding-pipeline.ts",
+        "src/server/services/rag-chunking-service.ts",
+        "src/server/services/rag-chunking-service.test.ts",
+        "src/server/services/rag-resource-knowledge-runtime.ts",
+        "src/server/services/rag-retrieval-service.ts",
+        "src/server/services/rag-retrieval-service.test.ts",
+        "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
+        "tests/unit/owner-preview-runtime-rag-resource-import.test.ts",
+        "tests/unit/p1-resource-multi-level-scope.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/rag-knowledge/rag-layering-retrieval-governance.test.ts"
       ]
     },
     {
-      "name": "explicit-learner-authorization-context-selection-typecheck",
+      "name": "resource-multi-level-scope-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -93,13 +133,13 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": "fresh-schema-start-f0088-resource-level-scope-2026-07-20",
+    "permission": "fresh-schema-start-f0088-resource-level-scope-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },
   "push": {
     "target": "origin/master",
-    "requiresFreshApproval": false
+    "requiresFreshApproval": true
   }
 }

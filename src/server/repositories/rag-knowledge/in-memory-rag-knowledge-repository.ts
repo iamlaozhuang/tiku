@@ -18,6 +18,10 @@ export function createInMemoryRagKnowledgeRepository(
       return chunks.map((chunk) => ({
         ...chunk,
         headingPath: [...chunk.headingPath],
+        levelList:
+          chunk.levelList === undefined || chunk.levelList === null
+            ? chunk.levelList
+            : [...chunk.levelList],
       }));
     },
   };

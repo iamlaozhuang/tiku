@@ -11,7 +11,7 @@ const baseCandidate = {
   resourceTitle: "Marketing Handbook",
   resourceStatus: "rag_ready",
   profession: "marketing",
-  level: 3,
+  levelList: [3],
   headingPath: ["Marketing", "Customer analysis"],
   chunkIndex: 1,
   text: "Authorized evidence text for AI context only.",
@@ -21,6 +21,41 @@ const baseCandidate = {
 } satisfies Omit<RagRetrievalCandidate, "chunkPublicId">;
 
 describe("RAG evidence retrieval", () => {
+  it("ranks exact then multi-level then explicit general and rejects unknown or mismatched coverage", () => {
+    const candidates = [
+      { id: "unknown", levelList: null, score: 1 },
+      { id: "mismatch", levelList: [4, 5], score: 0.99 },
+      { id: "general", levelList: [], score: 0.98 },
+      { id: "multi", levelList: [3, 4, 5], score: 0.7 },
+      { id: "exact", levelList: [3], score: 0.6 },
+    ].map(({ id, levelList, score }, chunkIndex) => ({
+      ...baseCandidate,
+      chunkPublicId: `${id}_chunk_public_id`,
+      resourcePublicId: `${id}_resource_public_id`,
+      levelList,
+      chunkIndex,
+      keywordScore: score,
+      semanticScore: score,
+    })) as unknown as RagRetrievalCandidate[];
+
+    const result = createRagRetrievalResult({
+      query: "multi level safety",
+      profession: "marketing",
+      level: 3,
+      authorizedResourcePublicIds: candidates.map(
+        (candidate) => candidate.resourcePublicId,
+      ),
+      candidates,
+      maxCitationCount: 5,
+    });
+
+    expect(result.citations.map((citation) => citation.chunkPublicId)).toEqual([
+      "exact_chunk_public_id",
+      "multi_chunk_public_id",
+      "general_chunk_public_id",
+    ]);
+  });
+
   it("filters resource status, profession, level, and authorization before top three selection", () => {
     const result = createRagRetrievalResult({
       query: "customer demand research",
@@ -59,7 +94,7 @@ describe("RAG evidence retrieval", () => {
           ...baseCandidate,
           chunkPublicId: "level_mismatch_chunk_public_id",
           resourcePublicId: "authorized_exact_resource_public_id",
-          level: 4,
+          levelList: [4],
           keywordScore: 0.97,
           semanticScore: 0.97,
         },
@@ -67,7 +102,7 @@ describe("RAG evidence retrieval", () => {
           ...baseCandidate,
           chunkPublicId: "authorized_general_chunk_public_id",
           resourcePublicId: "authorized_general_resource_public_id",
-          level: null,
+          levelList: [],
           chunkIndex: 2,
           keywordScore: 0.82,
           semanticScore: 0.8,
@@ -104,7 +139,7 @@ describe("RAG evidence retrieval", () => {
     expect(result.citations.map((citation) => citation.chunkPublicId)).toEqual([
       "authorized_exact_chunk_public_id",
       "authorized_second_chunk_public_id",
-      "authorized_general_chunk_public_id",
+      "authorized_fourth_chunk_public_id",
     ]);
     expect(
       result.citations.some(

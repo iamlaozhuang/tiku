@@ -185,6 +185,97 @@ function createRepositories(input: {
 }
 
 describe("phase 11 resource knowledge_base publish index loop", () => {
+  it("requires an explicit upload coverage mode and preserves explicit general coverage", async () => {
+    const storageRoot = await mkdtemp(
+      join(tmpdir(), "tiku-resource-level-coverage-"),
+    );
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      localResourceStorageRoot: storageRoot,
+      repositories: createRepositories({
+        auditLogEntries: [],
+        publishCalls: [],
+      }),
+      sessionService: createAdminSessionService(),
+    });
+
+    function createUploadFormData(
+      coverageMode?: "profession_general" | "specified_levels",
+    ) {
+      const formData = new FormData();
+      formData.set("title", "显式范围资料");
+      formData.set("profession", "marketing");
+      formData.set("resourceType", "knowledge_doc");
+      formData.set("fileName", "explicit-scope.md");
+      formData.set(
+        "file",
+        new File(["# 显式范围\n\n受控内容"], "explicit-scope.md", {
+          type: "text/markdown",
+        }),
+      );
+      if (coverageMode !== undefined) {
+        formData.set("coverageMode", coverageMode);
+      }
+      return formData;
+    }
+
+    const missingCoverageResponse = await handlers.resources.collection.POST(
+      new Request("http://localhost/api/v1/resources", {
+        body: createUploadFormData(),
+        headers: { authorization: "Bearer admin-session-token" },
+        method: "POST",
+      }),
+    );
+    await expect(missingCoverageResponse.json()).resolves.toMatchObject({
+      code: 422621,
+      data: null,
+    });
+
+    const invalidSpecifiedFormData = createUploadFormData("specified_levels");
+    invalidSpecifiedFormData.append("levelList", "6");
+    const invalidSpecifiedResponse = await handlers.resources.collection.POST(
+      new Request("http://localhost/api/v1/resources", {
+        body: invalidSpecifiedFormData,
+        headers: { authorization: "Bearer admin-session-token" },
+        method: "POST",
+      }),
+    );
+    await expect(invalidSpecifiedResponse.json()).resolves.toMatchObject({
+      code: 422621,
+      data: null,
+    });
+
+    const ambiguousGeneralFormData = createUploadFormData("profession_general");
+    ambiguousGeneralFormData.set("level", "3");
+    const ambiguousGeneralResponse = await handlers.resources.collection.POST(
+      new Request("http://localhost/api/v1/resources", {
+        body: ambiguousGeneralFormData,
+        headers: { authorization: "Bearer admin-session-token" },
+        method: "POST",
+      }),
+    );
+    await expect(ambiguousGeneralResponse.json()).resolves.toMatchObject({
+      code: 422621,
+      data: null,
+    });
+
+    const generalCoverageResponse = await handlers.resources.collection.POST(
+      new Request("http://localhost/api/v1/resources", {
+        body: createUploadFormData("profession_general"),
+        headers: { authorization: "Bearer admin-session-token" },
+        method: "POST",
+      }),
+    );
+    await expect(generalCoverageResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resource: {
+          level: null,
+          levelList: [],
+        },
+      },
+    });
+  });
+
   it("passes resource type and general-level filters into the paginated repository query", async () => {
     const listQueries: unknown[] = [];
     const localResourceStorageRoot = await mkdtemp(
@@ -384,7 +475,10 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
 
     formData.set("title", "本地资源验证讲义");
     formData.set("profession", "marketing");
-    formData.set("level", "3");
+    formData.set("coverageMode", "specified_levels");
+    formData.append("levelList", "3");
+    formData.append("levelList", "4");
+    formData.append("levelList", "5");
     formData.set("resourceType", "knowledge_doc");
     formData.set("fileName", "local-resource.md");
     formData.set(
@@ -414,7 +508,8 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
           title: "本地资源验证讲义",
           resourceStatus: "draft",
           profession: "marketing",
-          level: 3,
+          level: null,
+          levelList: [3, 4, 5],
           markdownPreviewAvailable: true,
           downloadAvailable: true,
         },

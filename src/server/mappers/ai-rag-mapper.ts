@@ -67,6 +67,7 @@ export function mapResourceToApi(
     fileSizeByte: resource.file_size_byte,
     profession: resource.profession,
     level: resource.level,
+    levelList: resource.level_list === null ? null : [...resource.level_list],
     markdownContentHash: resource.markdown_content_hash,
     conversionErrorMessage: resource.conversion_error_message,
     indexingErrorMessage: resource.indexing_error_message,

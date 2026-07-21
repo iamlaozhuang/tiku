@@ -411,7 +411,10 @@ async function completeKnowledgeRecommendationTask(
           eq(resourceIndexGeneration.generation_status, "ready"),
           eq(resource.resource_status, "rag_ready"),
           eq(resource.profession, questionRow.profession),
-          or(isNull(resource.level), eq(resource.level, questionRow.level)),
+          or(
+            sql`cardinality(${resource.level_list}) = 0`,
+            sql`${resource.level_list} @> ARRAY[${questionRow.level}]::integer[]`,
+          ),
         ),
       );
     const citationByChunkPublicId = new Map(
