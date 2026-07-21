@@ -110,7 +110,7 @@ export type AdminAiAuditLogRuntimeRepositories = {
   ): Promise<AdminAiAuditLogRuntimePage<ModelConfigListDto>>;
   createModelConfig?(
     input: NormalizedModelConfigInput,
-  ): Promise<ModelConfigSummaryDto>;
+  ): Promise<ModelConfigSummaryDto | null>;
   updateModelConfig?(
     publicId: string,
     input: NormalizedModelConfigInput,
@@ -248,6 +248,8 @@ type CountDatabaseRow = {
 type DrizzleSqlExecutor = {
   execute<TRow extends Record<string, unknown>>(query: SQL): Promise<TRow[]>;
 };
+
+class ModelConfigReorderConflictError extends Error {}
 
 function createLazyDatabaseGetter(
   createDatabase: () => AdminAiAuditLogRuntimeDatabase,
@@ -549,162 +551,279 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
     async createModelConfig(input) {
       const database = getDatabase();
       const publicId = `model-config-${randomUUID()}`;
-      const rows = await executeSql<ModelConfigDatabaseRow>(
-        database,
-        sql`
-          insert into model_config (
-            public_id,
-            model_provider_id,
-            ai_func_type,
-            model_name,
-            model_alias,
-            display_name,
-            config_version,
-            status,
-            is_enabled,
-            timeout_second,
-            max_retry_count,
-            fallback_priority,
-            snapshot_policy,
-            pricing_version,
-            input_token_price_cny_per_million,
-            output_token_price_cny_per_million,
-            fallback_model_config_id,
-            created_at,
-            updated_at
-          )
-          select
-            ${publicId},
-            mp.id,
-            ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
-            ${input.modelName},
-            ${input.modelAlias},
-            ${input.displayName},
-            ${input.configVersion},
-            ${input.status},
-            ${input.isEnabled},
-            ${input.timeoutSecond},
-            ${input.maxRetryCount},
-            ${input.fallbackPriority},
-            ${input.snapshotPolicy},
-            ${input.pricingVersion},
-            ${input.inputTokenPriceCnyPerMillion}::numeric,
-            ${input.outputTokenPriceCnyPerMillion}::numeric,
-            fallback.id,
-            now(),
-            now()
-          from model_provider mp
-          left join model_config fallback
-            on fallback.public_id = ${input.fallbackModelConfigPublicId}
-          where mp.public_id = ${input.modelProviderPublicId}
-          returning
-            public_id,
-            (select public_id from model_provider where id = model_provider_id) as provider_public_id,
-            (select display_name from model_provider where id = model_provider_id) as provider_display_name,
-            (select provider_key from model_provider where id = model_provider_id) as provider_key,
-            (select api_key_last_four from model_provider where id = model_provider_id) as api_key_last_four,
-            (select secret_status from model_provider where id = model_provider_id) as secret_status,
-            model_name,
-            model_alias,
-            display_name,
-            ai_func_type,
-            config_version,
-            is_enabled,
-            status,
-            fallback_priority,
-            snapshot_policy,
-            pricing_version,
-            input_token_price_cny_per_million,
-            output_token_price_cny_per_million,
-            timeout_second,
-            max_retry_count,
-            (select public_id from model_config where id = fallback_model_config_id) as fallback_model_config_public_id,
-            updated_at
-        `,
-      );
 
-      if (rows[0] === undefined) {
-        throw new Error("model_provider public id is required.");
-      }
+      return database.transaction(async (transaction) => {
+        await acquireModelConfigFallbackGraphLock(transaction);
+        const rows = await executeSql<ModelConfigDatabaseRow>(
+          transaction,
+          sql`
+            insert into model_config (
+              public_id,
+              model_provider_id,
+              ai_func_type,
+              model_name,
+              model_alias,
+              display_name,
+              config_version,
+              status,
+              is_enabled,
+              timeout_second,
+              max_retry_count,
+              fallback_priority,
+              snapshot_policy,
+              pricing_version,
+              input_token_price_cny_per_million,
+              output_token_price_cny_per_million,
+              fallback_model_config_id,
+              created_at,
+              updated_at
+            )
+            select
+              ${publicId},
+              mp.id,
+              ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
+              ${input.modelName},
+              ${input.modelAlias},
+              ${input.displayName},
+              ${input.configVersion},
+              ${input.status},
+              ${input.isEnabled},
+              ${input.timeoutSecond},
+              ${input.maxRetryCount},
+              ${input.fallbackPriority},
+              ${input.snapshotPolicy},
+              ${input.pricingVersion},
+              ${input.inputTokenPriceCnyPerMillion}::numeric,
+              ${input.outputTokenPriceCnyPerMillion}::numeric,
+              fallback.id,
+              now(),
+              now()
+            from model_provider mp
+            left join model_config fallback
+              on fallback.public_id = ${input.fallbackModelConfigPublicId}
+              and fallback.ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type
+            where mp.public_id = ${input.modelProviderPublicId}
+              and (
+                ${input.fallbackModelConfigPublicId}::text is null
+                or fallback.id is not null
+              )
+              and not exists (
+                select 1
+                from model_config existing
+                where existing.ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type
+                  and existing.fallback_priority = ${input.fallbackPriority}
+              )
+            returning
+              public_id,
+              (select public_id from model_provider where id = model_provider_id) as provider_public_id,
+              (select display_name from model_provider where id = model_provider_id) as provider_display_name,
+              (select provider_key from model_provider where id = model_provider_id) as provider_key,
+              (select api_key_last_four from model_provider where id = model_provider_id) as api_key_last_four,
+              (select secret_status from model_provider where id = model_provider_id) as secret_status,
+              model_name,
+              model_alias,
+              display_name,
+              ai_func_type,
+              config_version,
+              is_enabled,
+              status,
+              fallback_priority,
+              snapshot_policy,
+              pricing_version,
+              input_token_price_cny_per_million,
+              output_token_price_cny_per_million,
+              timeout_second,
+              max_retry_count,
+              (select public_id from model_config where id = fallback_model_config_id) as fallback_model_config_public_id,
+              updated_at
+          `,
+        );
 
-      return mapModelConfigRow(rows[0]);
+        return rows[0] === undefined ? null : mapModelConfigRow(rows[0]);
+      });
     },
 
     async updateModelConfig(publicId, input) {
       const database = getDatabase();
-      const rows = await executeSql<ModelConfigDatabaseRow>(
-        database,
-        sql`
-          update model_config
-          set
-            model_provider_id = mp.id,
-            ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
-            model_name = ${input.modelName},
-            model_alias = ${input.modelAlias},
-            display_name = ${input.displayName},
-            config_version = ${input.configVersion},
-            status = ${input.status},
-            is_enabled = ${input.isEnabled},
-            timeout_second = ${input.timeoutSecond},
-            max_retry_count = ${input.maxRetryCount},
-            fallback_priority = ${input.fallbackPriority},
-            snapshot_policy = ${input.snapshotPolicy},
-            pricing_version = ${input.pricingVersion},
-            input_token_price_cny_per_million = ${input.inputTokenPriceCnyPerMillion}::numeric,
-            output_token_price_cny_per_million = ${input.outputTokenPriceCnyPerMillion}::numeric,
-            fallback_model_config_id = fallback.id,
-            updated_at = now()
-          from model_provider mp
-          left join model_config fallback
-            on fallback.public_id = ${input.fallbackModelConfigPublicId}
-          where model_config.public_id = ${publicId}
-            and mp.public_id = ${input.modelProviderPublicId}
-          returning
-            model_config.public_id,
-            mp.public_id as provider_public_id,
-            mp.display_name as provider_display_name,
-            mp.provider_key,
-            mp.api_key_last_four,
-            mp.secret_status,
-            model_config.model_name,
-            model_config.model_alias,
-            model_config.display_name,
-            model_config.ai_func_type,
-            model_config.config_version,
-            model_config.is_enabled,
-            model_config.status,
-            model_config.fallback_priority,
-            model_config.snapshot_policy,
-            model_config.pricing_version,
-            model_config.input_token_price_cny_per_million,
-            model_config.output_token_price_cny_per_million,
-            model_config.timeout_second,
-            model_config.max_retry_count,
-            fallback.public_id as fallback_model_config_public_id,
-            model_config.updated_at
-        `,
-      );
 
-      return rows[0] === undefined ? null : mapModelConfigRow(rows[0]);
+      return database.transaction(async (transaction) => {
+        await acquireModelConfigFallbackGraphLock(transaction);
+        const rows = await executeSql<ModelConfigDatabaseRow>(
+          transaction,
+          sql`
+            with recursive fallback_chain as (
+              select candidate.id, candidate.fallback_model_config_id
+              from model_config candidate
+              where candidate.public_id = ${input.fallbackModelConfigPublicId}
+              union
+              select candidate.id, candidate.fallback_model_config_id
+              from model_config candidate
+              inner join fallback_chain
+                on candidate.id = fallback_chain.fallback_model_config_id
+            )
+            update model_config
+            set
+              model_provider_id = mp.id,
+              ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
+              model_name = ${input.modelName},
+              model_alias = ${input.modelAlias},
+              display_name = ${input.displayName},
+              config_version = ${input.configVersion},
+              status = ${input.status},
+              is_enabled = ${input.isEnabled},
+              timeout_second = ${input.timeoutSecond},
+              max_retry_count = ${input.maxRetryCount},
+              fallback_priority = ${input.fallbackPriority},
+              snapshot_policy = ${input.snapshotPolicy},
+              pricing_version = ${input.pricingVersion},
+              input_token_price_cny_per_million = ${input.inputTokenPriceCnyPerMillion}::numeric,
+              output_token_price_cny_per_million = ${input.outputTokenPriceCnyPerMillion}::numeric,
+              fallback_model_config_id = fallback.id,
+              updated_at = now()
+            from model_provider mp
+            left join model_config fallback
+              on fallback.public_id = ${input.fallbackModelConfigPublicId}
+              and fallback.ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type
+              and fallback.public_id <> ${publicId}
+            where model_config.public_id = ${publicId}
+              and mp.public_id = ${input.modelProviderPublicId}
+              and (
+                ${input.fallbackModelConfigPublicId}::text is null
+                or fallback.id is not null
+              )
+              and not exists (
+                select 1
+                from fallback_chain
+                where fallback_chain.id = model_config.id
+              )
+              and not exists (
+                select 1
+                from model_config incoming_fallback
+                where incoming_fallback.fallback_model_config_id = model_config.id
+                  and incoming_fallback.ai_func_type <> ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type
+              )
+              and not exists (
+                select 1
+                from model_config existing
+                where existing.ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type
+                  and existing.fallback_priority = ${input.fallbackPriority}
+                  and existing.public_id <> ${publicId}
+              )
+            returning
+              model_config.public_id,
+              mp.public_id as provider_public_id,
+              mp.display_name as provider_display_name,
+              mp.provider_key,
+              mp.api_key_last_four,
+              mp.secret_status,
+              model_config.model_name,
+              model_config.model_alias,
+              model_config.display_name,
+              model_config.ai_func_type,
+              model_config.config_version,
+              model_config.is_enabled,
+              model_config.status,
+              model_config.fallback_priority,
+              model_config.snapshot_policy,
+              model_config.pricing_version,
+              model_config.input_token_price_cny_per_million,
+              model_config.output_token_price_cny_per_million,
+              model_config.timeout_second,
+              model_config.max_retry_count,
+              fallback.public_id as fallback_model_config_public_id,
+              model_config.updated_at
+          `,
+        );
+
+        return rows[0] === undefined ? null : mapModelConfigRow(rows[0]);
+      });
     },
 
     async reorderModelConfigFallback(input) {
       const database = getDatabase();
+      const publicIds = input.items.map((item) => item.publicId);
+      const fallbackPriorities = input.items.map(
+        (item) => item.fallbackPriority,
+      );
 
-      for (const item of input.items) {
-        await executeSql(
-          database,
-          sql`
-            update model_config
-            set
-              fallback_priority = ${item.fallbackPriority},
-              updated_at = now()
-            where public_id = ${item.publicId}
-          `,
-        );
+      if (
+        new Set(publicIds).size !== input.items.length ||
+        new Set(fallbackPriorities).size !== input.items.length
+      ) {
+        return false;
       }
 
-      return true;
+      try {
+        return await database.transaction(async (transaction) => {
+          await acquireModelConfigFallbackGraphLock(transaction);
+          const lockedRows = await executeSql<{
+            public_id: string;
+            ai_func_type: string;
+          }>(
+            transaction,
+            sql`
+              select candidate.public_id, candidate.ai_func_type
+              from model_config candidate
+              where candidate.ai_func_type in (
+                select distinct ai_func_type
+                from model_config
+                where public_id in (${sql.join(
+                  publicIds.map((publicId) => sql`${publicId}`),
+                  sql`, `,
+                )})
+              )
+              for update of candidate
+            `,
+          );
+          const lockedAiFuncTypes = new Set(
+            lockedRows.map((row) => row.ai_func_type),
+          );
+          const lockedPublicIds = new Set(
+            lockedRows.map((row) => row.public_id),
+          );
+
+          if (
+            lockedRows.length !== input.items.length ||
+            lockedAiFuncTypes.size !== 1 ||
+            publicIds.some((publicId) => !lockedPublicIds.has(publicId))
+          ) {
+            return false;
+          }
+
+          const updatedRows = await executeSql<{ public_id: string }>(
+            transaction,
+            sql`
+              update model_config
+              set
+                fallback_priority = requested.fallback_priority,
+                updated_at = now()
+              from (
+                values ${sql.join(
+                  input.items.map(
+                    (item) =>
+                      sql`(${item.publicId}::text, ${item.fallbackPriority}::int)`,
+                  ),
+                  sql`, `,
+                )}
+              ) as requested(public_id, fallback_priority)
+              where model_config.public_id = requested.public_id
+              returning model_config.public_id
+            `,
+          );
+
+          if (updatedRows.length !== input.items.length) {
+            throw new ModelConfigReorderConflictError();
+          }
+
+          return true;
+        });
+      } catch (error) {
+        if (error instanceof ModelConfigReorderConflictError) {
+          return false;
+        }
+
+        throw error;
+      }
     },
 
     async listPromptTemplates(query) {
@@ -1274,10 +1393,19 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
 }
 
 async function executeSql<TRow extends Record<string, unknown>>(
-  database: AdminAiAuditLogRuntimeDatabase,
+  database: unknown,
   query: SQL,
 ): Promise<TRow[]> {
   return (database as unknown as DrizzleSqlExecutor).execute<TRow>(query);
+}
+
+async function acquireModelConfigFallbackGraphLock(
+  database: unknown,
+): Promise<void> {
+  await executeSql(
+    database,
+    sql`select pg_advisory_xact_lock(hashtext('model_config_fallback_graph'))`,
+  );
 }
 
 async function updateModelConfigEnabled(

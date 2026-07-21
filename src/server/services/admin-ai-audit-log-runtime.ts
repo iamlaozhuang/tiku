@@ -975,6 +975,19 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
 
         const modelConfig = await repositories.createModelConfig(input);
 
+        if (modelConfig === null) {
+          await appendMutationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "model_config.create",
+            targetResourceType: "model_config",
+            targetPublicId: null,
+            resultStatus: "failed",
+          });
+
+          return createJsonResponse(validationFailedResponse);
+        }
+
         await appendMutationAuditLog({
           request,
           actor: actorOrError,

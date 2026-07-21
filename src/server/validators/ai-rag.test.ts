@@ -139,4 +139,23 @@ describe("AI/RAG model config and prompt template validators", () => {
       }),
     ).toBeNull();
   });
+
+  it("rejects duplicate model configs and duplicate priorities before reorder mutation", () => {
+    expect(
+      normalizeModelConfigFallbackOrderInput({
+        items: [
+          { publicId: "model-config-public-001", fallbackPriority: 10 },
+          { publicId: "model-config-public-001", fallbackPriority: 20 },
+        ],
+      }),
+    ).toBeNull();
+    expect(
+      normalizeModelConfigFallbackOrderInput({
+        items: [
+          { publicId: "model-config-public-001", fallbackPriority: 10 },
+          { publicId: "model-config-public-002", fallbackPriority: 10 },
+        ],
+      }),
+    ).toBeNull();
+  });
 });

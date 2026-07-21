@@ -388,7 +388,16 @@ export function normalizeModelConfigFallbackOrderInput(
       } => item !== null,
     );
 
-  return items.length === input.items.length ? { items } : null;
+  const publicIds = new Set(items.map((item) => item.publicId));
+  const fallbackPriorities = new Set(
+    items.map((item) => item.fallbackPriority),
+  );
+
+  return items.length === input.items.length &&
+    publicIds.size === items.length &&
+    fallbackPriorities.size === items.length
+    ? { items }
+    : null;
 }
 
 export function normalizeModelConfigListQuery(

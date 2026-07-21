@@ -1,44 +1,23 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-paper-metadata-truth-2026-07-21",
-  "objective": "Close F-0095 by adding the missing optional paper metadata to schema and every create/read/update/copy path, exposing draft metadata editing, deriving source file names only from paper_asset, removing fabricated publish-validation text, and preserving truthful null round-trips. Keep publication rules, attachment permissions and learner visibility unchanged.",
+  "taskId": "p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21",
+  "objective": "Close F-0105 by rejecting self-referential, cross-ai-function and cyclic model_config fallback references at the authoritative database mutation boundary, rejecting duplicate reorder identifiers and priorities before mutation, and applying each homogeneous fallback-priority reorder atomically only when every requested model_config exists. Preserve the existing one-hop runtime fallback policy, model permissions, Provider configuration, pricing semantics and schema.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/paper.ts",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260722013000_p1_rc_04_paper_metadata_truth.sql",
-    "drizzle/meta/20260722013000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
-    "src/server/validators/paper-draft.ts",
-    "src/server/validators/paper-draft.test.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/mappers/paper-draft-mapper.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
-    "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
-    "tests/unit/p1-paper-metadata-truth.test.ts",
-    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-    "src/lib/admin-ai-generation-formal-draft-payload.ts",
-    "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
-    "src/app/api/v1/papers/route.ts",
-    "src/server/services/paper-draft-service.test.ts",
-    "src/server/services/paper-draft-route.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "tests/unit/admin-paper-ui.test.ts",
-    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-    "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-    "src/features/admin/content-detail/AdminContentDetail.test.tsx",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
+    "src/server/validators/ai-rag.ts",
+    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+    "src/server/services/admin-ai-audit-log-runtime.ts",
+    "src/server/validators/ai-rag.test.ts",
+    "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+    "tests/unit/phase-12-model-config-server-runtime.test.ts",
+    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+    "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
+    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -46,82 +25,46 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
+    "src/db/**",
+    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "migration execution or persistent database writes",
+    "persistent database writes or migration execution",
     "permission or entitlement changes",
-    "Provider, external service, secret/env, deployment, PR or force-push",
-    "student paper attachment exposure",
-    "publish validation semantic changes"
+    "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/paper.ts",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260722013000_p1_rc_04_paper_metadata_truth.sql",
-    "drizzle/meta/20260722013000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
-    "src/server/validators/paper-draft.ts",
-    "src/server/validators/paper-draft.test.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/mappers/paper-draft-mapper.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
-    "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
-    "tests/unit/p1-paper-metadata-truth.test.ts"
+    "src/server/validators/ai-rag.ts",
+    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+    "src/server/validators/ai-rag.test.ts",
+    "tests/unit/p1-model-config-fallback-aggregate.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-    "src/lib/admin-ai-generation-formal-draft-payload.ts",
-    "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
-    "src/app/api/v1/papers/route.ts",
-    "src/server/services/paper-draft-service.test.ts",
-    "src/server/services/paper-draft-route.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "tests/unit/admin-paper-ui.test.ts",
-    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-    "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-    "src/features/admin/content-detail/AdminContentDetail.test.tsx",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
+    "src/server/services/admin-ai-audit-log-runtime.ts",
+    "tests/unit/phase-12-model-config-server-runtime.test.ts",
+    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+    "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
+    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "The paper list has only create, compose, publish, archive, copy and asset actions; it never issues PATCH /api/v1/papers/{publicId} even though that draft-only route exists.",
-    "routeService": "GET /api/v1/papers still uses the admin-flow read model while POST/PATCH/detail use the paper lifecycle service, so field truth must be reconciled across both paths or the GET route unified.",
-    "repository": "paper-draft create/update/copy and mapper persist only paper_type/year/source/duration/score; admin-flow maps paper.source to sourceFileName and fabricates a published validation summary.",
-    "schema": "paper lacks month, source_region, source_organization, question_basis and generation_method; existing source is the legacy storage column for sourceDescription.",
-    "tests": "Focused RED will bind complete nullable metadata round-trip, draft edit revision semantics, copied metadata, real paper_asset file projection and absence of fabricated validation facts.",
-    "nonClaims": "No migration execution, real database write, attachment permission expansion, learner file exposure, publish-rule change, dependency, Provider, external service, mechanism or historical evidence change."
-  },
-  "sameTaskAuthoritativeCallChainExpansion": {
-    "policyId": "P1_EXECUTION_POLICY_CAPSULE_V1_1",
-    "additionalProductSourceFileCount": 2,
-    "files": [
-      {
-        "path": "src/lib/admin-ai-generation-formal-draft-payload.ts",
-        "evidence": "Direct caller builds the reviewed paper payload consumed by the already-frozen formal-draft adapter and must propagate the same metadata contract."
-      },
-      {
-        "path": "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
-        "evidence": "Direct paper draft presentation caller consumes PaperDraftDto and must read the renamed truthful sourceDescription plus explicit nullable metadata."
-      }
-    ],
-    "boundary": "Contract propagation only; no new capability, root cause, risk category, schema surface, dependency, permission, Provider or external effect."
+    "uiApi": "The admin UI creates model_config records through POST /api/v1/model-configs; reorder-fallback is a direct API command and has no separate client-side authority.",
+    "routeService": "The App Router delegates create, update and reorder to admin-ai-audit-log-runtime, which validates shape but currently cannot prove referenced model_config identity or transaction outcomes.",
+    "repository": "create and update resolve fallback by public_id without same ai_func_type, self or cycle predicates; reorder performs independent UPDATE statements, ignores affected rows and always returns success.",
+    "schema": "model_config has the self foreign key and ai_func_type/fallback_priority index but no cross-row constraint; this task keeps schema unchanged and enforces the invariant in conditional SQL plus one database transaction.",
+    "tests": "Focused RED binds duplicate rejection, same-function/non-self/non-cycle SQL predicates, one locked homogeneous set, exact affected-row verification and rollback-safe all-or-nothing behavior.",
+    "nonClaims": "No schema or migration source, migration execution, persistent database write, permission change, real Provider call, pricing semantic change, dependency, mechanism, deployment or external side effect."
   },
   "validationCommands": [
     {
-      "name": "f0095-paper-metadata-focused",
+      "name": "f0105-model-config-fallback-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -129,66 +72,52 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-paper-metadata-truth.test.ts",
-        "src/db/schema/paper.test.ts",
-        "src/server/validators/paper-draft.test.ts",
-        "src/server/services/paper-draft-service.test.ts",
-        "src/server/services/paper-draft-route.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-        "tests/unit/admin-paper-ui.test.ts",
-        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/p1-paper-asset-upload-saga.test.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-        "src/features/admin/content-detail/AdminContentDetail.test.tsx"
+        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+        "src/server/validators/ai-rag.test.ts",
+        "tests/unit/phase-12-model-config-server-runtime.test.ts"
       ]
     },
     {
-      "name": "f0095-paper-metadata-lint",
+      "name": "f0105-model-config-fallback-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+        "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
+        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+      ]
+    },
+    {
+      "name": "f0105-model-config-fallback-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/models/paper.ts",
-        "src/db/schema/paper.ts",
-        "src/db/schema/paper.test.ts",
-        "src/server/contracts/paper-draft-contract.ts",
-        "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
-        "src/server/contracts/admin-content-knowledge-ops-contract.ts",
-        "src/server/validators/paper-draft.ts",
-        "src/server/validators/paper-draft.test.ts",
-        "src/server/repositories/paper-draft-repository.ts",
-        "src/server/mappers/paper-draft-mapper.ts",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
-        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-        "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
-        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-        "src/features/admin/content-detail/AdminContentDetail.test.tsx",
-        "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
-        "src/lib/admin-ai-generation-formal-draft-payload.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/server/services/paper-draft-service.test.ts",
-        "src/server/services/paper-draft-route.test.ts",
-        "tests/unit/p1-paper-metadata-truth.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-        "tests/unit/admin-paper-ui.test.ts"
+        "src/server/validators/ai-rag.ts",
+        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+        "src/server/services/admin-ai-audit-log-runtime.ts",
+        "src/server/validators/ai-rag.test.ts",
+        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+        "tests/unit/phase-12-model-config-server-runtime.test.ts"
       ]
     },
     {
-      "name": "f0095-paper-metadata-typecheck",
+      "name": "f0105-model-config-fallback-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0095-paper-metadata-build",
+      "name": "f0105-model-config-fallback-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -196,50 +125,27 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "fresh-schema-start-f0095-paper-metadata-truth-2026-07-21",
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "schema_migration_source_and_database_application_logic_plus_low_risk_ui",
-    "schemaOrMigrationChange": true,
+    "category": "bounded_database_application_transaction_and_validation_logic",
+    "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementChange": false,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
-  "highRiskApproval": {
-    "approvalId": "fresh-schema-start-f0095-paper-metadata-truth-2026-07-21",
-    "taskId": "p1-remediation-rc-04-paper-metadata-truth-2026-07-21",
-    "findingIds": ["F-0095"],
-    "riskCategory": "schema/migration source + database application logic + low-risk UI",
-    "baseSha": "71275bf66a5b34638e6042173fc16c93a58e9441",
-    "conditionalCloseout": true,
-    "status": "approved_by_user_2026_07_21",
-    "requestedOperations": [
-      "schema and migration source edits without execution",
-      "offline Drizzle generation",
-      "product and test implementation",
-      "focused, regression, lint, typecheck, format, diff and build validation",
-      "one reviewable commit",
-      "ff-only merge to master",
-      "one ordinary push to canonical origin/master",
-      "sync verification and short branch cleanup"
-    ]
-  },
-  "pendingApprovalFingerprint": {
-    "taskId": "p1-remediation-rc-04-paper-metadata-truth-2026-07-21",
-    "rootCause": "paper_extended_metadata_missing_and_admin_list_projects_false_source_file_and_validation_facts",
-    "riskCategory": "schema_migration_source_database_application_logic_low_risk_ui",
-    "exactScope": "core_and_contingency_files_above",
-    "requestedOperations": "implementation_validation_commit_ff_only_canonical_push_sync_cleanup",
-    "baseSha": "71275bf66a5b34638e6042173fc16c93a58e9441"
-  },
+  "applicableStandingApprovals": [
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "fresh-schema-start-f0095-paper-metadata-truth-2026-07-21"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }
