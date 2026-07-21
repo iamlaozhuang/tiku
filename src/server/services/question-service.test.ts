@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { createQuestionService } from "./question-service";
-import type {
-  QuestionAccessRow,
-  QuestionRepository,
+import {
+  QuestionBindingEligibilityError,
+  type QuestionAccessRow,
+  type QuestionRepository,
 } from "../repositories/question-repository";
 
 const createdAt = new Date("2026-05-19T04:00:00.000Z");
@@ -146,7 +147,80 @@ function createRepository(
   };
 }
 
+function createValidQuestionInput() {
+  return {
+    questionType: "single_choice",
+    profession: "logistics",
+    level: 4,
+    subject: "theory",
+    stemRichText: "<p>题干</p>",
+    analysisRichText: "<p>解析</p>",
+    standardAnswerRichText: "<p>A</p>",
+    multiChoiceRule: "all_correct_only",
+    scoringMethod: "auto_match",
+    materialPublicId: "material_public_123",
+    questionOptions: [
+      {
+        label: "A",
+        contentRichText: "<p>正确</p>",
+        isCorrect: true,
+        sortOrder: 1,
+      },
+      {
+        label: "B",
+        contentRichText: "<p>错误</p>",
+        isCorrect: false,
+        sortOrder: 2,
+      },
+    ],
+    scoringPoints: [],
+    fillBlankAnswers: [],
+    knowledgeNodePublicIds: ["knowledge_node_public_storage"],
+    tagPublicIds: ["tag_public_storage"],
+  } as const;
+}
+
 describe("question service", () => {
+  it("maps create binding eligibility failures to the stable invalid-input response", async () => {
+    const service = createQuestionService(
+      createRepository({
+        async createQuestion() {
+          throw new QuestionBindingEligibilityError("material");
+        },
+      }),
+    );
+
+    await expect(
+      service.createQuestion(createValidQuestionInput()),
+    ).resolves.toEqual({
+      code: 422202,
+      message: "Invalid question input.",
+      data: null,
+    });
+  });
+
+  it("maps update binding eligibility failures to the stable invalid-input response", async () => {
+    const service = createQuestionService(
+      createRepository({
+        async updateQuestion() {
+          throw new QuestionBindingEligibilityError("knowledge_node");
+        },
+      }),
+    );
+
+    await expect(
+      service.updateQuestion("question_public_123", {
+        ...createValidQuestionInput(),
+        expectedUpdatedAt: createdAt.toISOString(),
+        status: "available",
+      }),
+    ).resolves.toEqual({
+      code: 422202,
+      message: "Invalid question input.",
+      data: null,
+    });
+  });
+
   it("fails closed before writing when a referenced content_image does not exist", async () => {
     let wrote = false;
     const service = createQuestionService(

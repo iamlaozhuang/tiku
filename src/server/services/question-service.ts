@@ -12,9 +12,11 @@ import {
   mapQuestionResultToApi,
   mapQuestionToApi,
 } from "../mappers/question-mapper";
-import type {
-  ContentMutationContext,
-  QuestionRepository,
+import {
+  QuestionBindingEligibilityError,
+  type ContentMutationContext,
+  type QuestionAccessRow,
+  type QuestionRepository,
 } from "../repositories/question-repository";
 import type { QuestionStatus } from "../models/paper";
 import {
@@ -145,11 +147,19 @@ export function createQuestionService(
         return createInvalidQuestionInputResponse();
       }
 
-      const question = await questionRepository.createQuestion(
-        questionInput.value,
-        options.mutationContext,
-        createOptions,
-      );
+      let question: QuestionAccessRow;
+      try {
+        question = await questionRepository.createQuestion(
+          questionInput.value,
+          options.mutationContext,
+          createOptions,
+        );
+      } catch (error) {
+        if (error instanceof QuestionBindingEligibilityError) {
+          return createInvalidQuestionInputResponse();
+        }
+        throw error;
+      }
 
       return createSuccessResponse(mapQuestionResultToApi(question));
     },
@@ -202,13 +212,21 @@ export function createQuestionService(
         );
       }
 
-      const updatedQuestion = await questionRepository.updateQuestion(
-        {
-          publicId,
-          ...questionInput.value,
-        },
-        options.mutationContext,
-      );
+      let updatedQuestion: QuestionAccessRow | null;
+      try {
+        updatedQuestion = await questionRepository.updateQuestion(
+          {
+            publicId,
+            ...questionInput.value,
+          },
+          options.mutationContext,
+        );
+      } catch (error) {
+        if (error instanceof QuestionBindingEligibilityError) {
+          return createInvalidQuestionInputResponse();
+        }
+        throw error;
+      }
 
       if (updatedQuestion === null) {
         return createErrorResponse(

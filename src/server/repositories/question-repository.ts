@@ -128,6 +128,74 @@ export type QuestionCreateOptions = {
   initialStatus?: QuestionStatus;
 };
 
+type QuestionBindingResource = "knowledge_node" | "material" | "tag";
+
+export class QuestionBindingEligibilityError extends Error {
+  constructor(resource: QuestionBindingResource) {
+    super(`${resource} binding is missing or ineligible.`);
+    this.name = "QuestionBindingEligibilityError";
+  }
+}
+
+type QuestionMaterialBindingRow = {
+  id: number;
+  public_id: string;
+  status: "available" | "disabled";
+};
+
+type QuestionKnowledgeNodeBindingRow = {
+  id: number;
+  public_id: string;
+  kn_status: "active" | "disabled";
+  is_recommendable: boolean;
+};
+
+export function requireEligibleQuestionMaterialId({
+  preservedPublicId = null,
+  requestedPublicId,
+  row,
+}: {
+  preservedPublicId?: string | null;
+  requestedPublicId: string;
+  row: QuestionMaterialBindingRow | undefined;
+}): number {
+  if (
+    row === undefined ||
+    row.public_id !== requestedPublicId ||
+    (row.status !== "available" && row.public_id !== preservedPublicId)
+  ) {
+    throw new QuestionBindingEligibilityError("material");
+  }
+
+  return row.id;
+}
+
+export function requireEligibleQuestionKnowledgeNodeIds({
+  preservedPublicIds = [],
+  requestedPublicIds,
+  rows,
+}: {
+  preservedPublicIds?: readonly string[];
+  requestedPublicIds: readonly string[];
+  rows: readonly QuestionKnowledgeNodeBindingRow[];
+}): number[] {
+  const preservedPublicIdSet = new Set(preservedPublicIds);
+  const rowByPublicId = new Map(rows.map((row) => [row.public_id, row]));
+
+  return requestedPublicIds.map((publicId) => {
+    const row = rowByPublicId.get(publicId);
+    if (
+      row === undefined ||
+      ((row.kn_status !== "active" || !row.is_recommendable) &&
+        !preservedPublicIdSet.has(publicId))
+    ) {
+      throw new QuestionBindingEligibilityError("knowledge_node");
+    }
+
+    return row.id;
+  });
+}
+
 export type QuestionRepository = {
   listQuestions(
     query: NormalizedQuestionListInput,
@@ -210,13 +278,19 @@ export function createPostgresQuestionRepository(
     async createQuestion(input, context, options) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const materialId = await resolveMaterialId(
-        database,
-        input.materialPublicId,
-      );
 
       return database.transaction(async (transaction) => {
-        const [questionRow] = await transaction
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const materialId = await resolveMaterialId(
+          scopedDatabase,
+          input.materialPublicId,
+        );
+        const childBindingIds = await resolveQuestionChildBindingIds(
+          scopedDatabase,
+          input.knowledgeNodePublicIds,
+          input.tagPublicIds,
+        );
+        const [questionRow] = await scopedDatabase
           .insert(question)
           .values({
             analysis_rich_text: input.analysisRichText,
@@ -242,16 +316,15 @@ export function createPostgresQuestionRepository(
         }
 
         await replaceQuestionChildren(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           questionRow.id,
           input.questionOptions,
           input.scoringPoints,
-          input.knowledgeNodePublicIds,
-          input.tagPublicIds,
+          childBindingIds,
         );
 
         const createdQuestion = await findQuestionByPublicId(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           questionRow.public_id,
         );
 
@@ -259,17 +332,14 @@ export function createPostgresQuestionRepository(
           throw new Error("Created question could not be loaded.");
         }
 
-        await enqueueKnowledgeRecommendationTask(
-          transaction as RuntimeDatabase,
-          {
-            questionId: createdQuestion.id,
-            questionUpdatedAt: createdQuestion.updated_at,
-            requestedByUserPublicId: null,
-          },
-        );
+        await enqueueKnowledgeRecommendationTask(scopedDatabase, {
+          questionId: createdQuestion.id,
+          questionUpdatedAt: createdQuestion.updated_at,
+          requestedByUserPublicId: null,
+        });
 
         await appendContentMutationAuditLog(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           context,
           createdQuestion.public_id,
         );
@@ -285,13 +355,28 @@ export function createPostgresQuestionRepository(
     async updateQuestion(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const materialId = await resolveMaterialId(
-        database,
-        input.materialPublicId,
-      );
 
       return database.transaction(async (transaction) => {
-        const [updatedRow] = await transaction
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const existingQuestion = await findQuestionByPublicId(
+          scopedDatabase,
+          input.publicId,
+        );
+        if (existingQuestion === null) {
+          return null;
+        }
+        const materialId = await resolveMaterialId(
+          scopedDatabase,
+          input.materialPublicId,
+          existingQuestion.material_public_id,
+        );
+        const childBindingIds = await resolveQuestionChildBindingIds(
+          scopedDatabase,
+          input.knowledgeNodePublicIds,
+          input.tagPublicIds,
+          existingQuestion.knowledge_node_public_ids,
+        );
+        const [updatedRow] = await scopedDatabase
           .update(question)
           .set({
             analysis_rich_text: input.analysisRichText,
@@ -326,7 +411,7 @@ export function createPostgresQuestionRepository(
         }
 
         const updatedQuestion = await findQuestionByPublicId(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           input.publicId,
         );
 
@@ -335,16 +420,15 @@ export function createPostgresQuestionRepository(
         }
 
         await replaceQuestionChildren(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           updatedQuestion.id,
           input.questionOptions,
           input.scoringPoints,
-          input.knowledgeNodePublicIds,
-          input.tagPublicIds,
+          childBindingIds,
         );
 
         const reloadedQuestion = await findQuestionByPublicId(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           input.publicId,
         );
 
@@ -352,17 +436,14 @@ export function createPostgresQuestionRepository(
           throw new Error("Updated question children could not be loaded.");
         }
 
-        await enqueueKnowledgeRecommendationTask(
-          transaction as RuntimeDatabase,
-          {
-            questionId: reloadedQuestion.id,
-            questionUpdatedAt: reloadedQuestion.updated_at,
-            requestedByUserPublicId: null,
-          },
-        );
+        await enqueueKnowledgeRecommendationTask(scopedDatabase, {
+          questionId: reloadedQuestion.id,
+          questionUpdatedAt: reloadedQuestion.updated_at,
+          requestedByUserPublicId: null,
+        });
 
         await appendContentMutationAuditLog(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           context,
           reloadedQuestion.public_id,
         );
@@ -416,21 +497,35 @@ export function createPostgresQuestionRepository(
     async copyQuestion(publicId, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const sourceQuestion = await findQuestionByPublicId(database, publicId);
-
-      if (sourceQuestion === null) {
-        return null;
-      }
 
       return database.transaction(async (transaction) => {
-        const [questionRow] = await transaction
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const sourceQuestion = await findQuestionByPublicId(
+          scopedDatabase,
+          publicId,
+        );
+        if (sourceQuestion === null) {
+          return null;
+        }
+        const materialId = await resolveMaterialId(
+          scopedDatabase,
+          sourceQuestion.material_public_id,
+          sourceQuestion.material_public_id,
+        );
+        const childBindingIds = await resolveQuestionChildBindingIds(
+          scopedDatabase,
+          sourceQuestion.knowledge_node_public_ids,
+          sourceQuestion.tag_public_ids,
+          sourceQuestion.knowledge_node_public_ids,
+        );
+        const [questionRow] = await scopedDatabase
           .insert(question)
           .values({
             analysis_rich_text: sourceQuestion.analysis_rich_text,
             created_by_admin_id: actorAdminId,
             is_locked: false,
             level: sourceQuestion.level,
-            material_id: sourceQuestion.material_id,
+            material_id: materialId,
             multi_choice_rule: sourceQuestion.multi_choice_rule,
             profession: sourceQuestion.profession,
             public_id: `question-${randomUUID()}`,
@@ -450,7 +545,7 @@ export function createPostgresQuestionRepository(
         }
 
         await replaceQuestionChildren(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           questionRow.id,
           sourceQuestion.question_options.map((questionOptionRow) => ({
             label: questionOptionRow.label,
@@ -463,12 +558,11 @@ export function createPostgresQuestionRepository(
             score: scoringPointRow.score,
             sortOrder: scoringPointRow.sort_order,
           })),
-          sourceQuestion.knowledge_node_public_ids,
-          sourceQuestion.tag_public_ids,
+          childBindingIds,
         );
 
         const copiedQuestion = await findQuestionByPublicId(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           questionRow.public_id,
         );
 
@@ -476,17 +570,14 @@ export function createPostgresQuestionRepository(
           throw new Error("Copied question could not be loaded.");
         }
 
-        await enqueueKnowledgeRecommendationTask(
-          transaction as RuntimeDatabase,
-          {
-            questionId: copiedQuestion.id,
-            questionUpdatedAt: copiedQuestion.updated_at,
-            requestedByUserPublicId: null,
-          },
-        );
+        await enqueueKnowledgeRecommendationTask(scopedDatabase, {
+          questionId: copiedQuestion.id,
+          questionUpdatedAt: copiedQuestion.updated_at,
+          requestedByUserPublicId: null,
+        });
 
         await appendContentMutationAuditLog(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           context,
           copiedQuestion.public_id,
         );
@@ -816,13 +907,17 @@ async function hydrateQuestions(
   }));
 }
 
+type QuestionChildBindingIds = {
+  knowledgeNodeIds: number[];
+  tagIds: number[];
+};
+
 async function replaceQuestionChildren(
   database: RuntimeDatabase,
   questionId: number,
   questionOptions: NormalizedCreateQuestionInput["questionOptions"],
   scoringPoints: NormalizedCreateQuestionInput["scoringPoints"],
-  knowledgeNodePublicIds: NormalizedCreateQuestionInput["knowledgeNodePublicIds"],
-  tagPublicIds: NormalizedCreateQuestionInput["tagPublicIds"],
+  childBindingIds: QuestionChildBindingIds,
 ): Promise<void> {
   await database
     .delete(questionOption)
@@ -860,24 +955,18 @@ async function replaceQuestionChildren(
     );
   }
 
-  const knowledgeNodeIds = await resolveKnowledgeNodeIds(
-    database,
-    knowledgeNodePublicIds,
-  );
-  const tagIds = await resolveTagIds(database, tagPublicIds);
-
-  if (knowledgeNodeIds.length > 0) {
+  if (childBindingIds.knowledgeNodeIds.length > 0) {
     await database.insert(questionKnowledgeNode).values(
-      knowledgeNodeIds.map((knowledgeNodeId) => ({
+      childBindingIds.knowledgeNodeIds.map((knowledgeNodeId) => ({
         knowledge_node_id: knowledgeNodeId,
         question_id: questionId,
       })),
     );
   }
 
-  if (tagIds.length > 0) {
+  if (childBindingIds.tagIds.length > 0) {
     await database.insert(questionTag).values(
-      tagIds.map((tagId) => ({
+      childBindingIds.tagIds.map((tagId) => ({
         question_id: questionId,
         tag_id: tagId,
       })),
@@ -885,21 +974,47 @@ async function replaceQuestionChildren(
   }
 }
 
+async function resolveQuestionChildBindingIds(
+  database: RuntimeDatabase,
+  knowledgeNodePublicIds: string[],
+  tagPublicIds: string[],
+  preservedKnowledgeNodePublicIds: readonly string[] = [],
+): Promise<QuestionChildBindingIds> {
+  const knowledgeNodeIds = await resolveKnowledgeNodeIds(
+    database,
+    knowledgeNodePublicIds,
+    preservedKnowledgeNodePublicIds,
+  );
+  const tagIds = await resolveTagIds(database, tagPublicIds);
+
+  return { knowledgeNodeIds, tagIds };
+}
+
 async function resolveMaterialId(
   database: RuntimeDatabase,
   publicId: string | null,
+  preservedPublicId: string | null = null,
 ): Promise<number | null> {
   if (publicId === null) {
     return null;
   }
 
   const [row] = await database
-    .select({ id: material.id })
+    .select({
+      id: material.id,
+      public_id: material.public_id,
+      status: material.status,
+    })
     .from(material)
     .where(eq(material.public_id, publicId))
-    .limit(1);
+    .limit(1)
+    .for("share");
 
-  return row?.id ?? null;
+  return requireEligibleQuestionMaterialId({
+    preservedPublicId,
+    requestedPublicId: publicId,
+    row,
+  });
 }
 
 async function resolveActorAdminId(
@@ -926,6 +1041,7 @@ async function resolveActorAdminId(
 async function resolveKnowledgeNodeIds(
   database: RuntimeDatabase,
   publicIds: string[],
+  preservedPublicIds: readonly string[] = [],
 ): Promise<number[]> {
   if (publicIds.length === 0) {
     return [];
@@ -933,19 +1049,21 @@ async function resolveKnowledgeNodeIds(
 
   const uniquePublicIds = Array.from(new Set(publicIds));
   const rows = await database
-    .select({ id: knowledgeNode.id, public_id: knowledgeNode.public_id })
+    .select({
+      id: knowledgeNode.id,
+      public_id: knowledgeNode.public_id,
+      kn_status: knowledgeNode.kn_status,
+      is_recommendable: knowledgeNode.is_recommendable,
+    })
     .from(knowledgeNode)
-    .where(inArray(knowledgeNode.public_id, uniquePublicIds));
+    .where(inArray(knowledgeNode.public_id, uniquePublicIds))
+    .for("share");
 
-  assertAllBindingPublicIdsResolved(
-    "knowledge_node",
-    uniquePublicIds,
-    rows.map((row) => row.public_id),
-  );
-
-  return uniquePublicIds.flatMap((publicId) =>
-    rows.filter((row) => row.public_id === publicId).map((row) => row.id),
-  );
+  return requireEligibleQuestionKnowledgeNodeIds({
+    preservedPublicIds,
+    requestedPublicIds: uniquePublicIds,
+    rows,
+  });
 }
 
 async function resolveTagIds(
@@ -960,7 +1078,8 @@ async function resolveTagIds(
   const rows = await database
     .select({ id: tag.id, public_id: tag.public_id })
     .from(tag)
-    .where(inArray(tag.public_id, uniquePublicIds));
+    .where(inArray(tag.public_id, uniquePublicIds))
+    .for("share");
 
   assertAllBindingPublicIdsResolved(
     "tag",
@@ -982,5 +1101,5 @@ function assertAllBindingPublicIdsResolved(
     return;
   }
 
-  throw new Error(`${resourceName} binding public ids could not be resolved.`);
+  throw new QuestionBindingEligibilityError(resourceName);
 }

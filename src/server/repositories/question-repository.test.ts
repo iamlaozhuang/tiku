@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  QuestionBindingEligibilityError,
   createQuestionKnowledgeNodePublicIdCondition,
   createQuestionKnowledgeNodePublicIdsCondition,
   createQuestionMaterialPublicIdCondition,
   createQuestionTagPublicIdCondition,
+  requireEligibleQuestionKnowledgeNodeIds,
+  requireEligibleQuestionMaterialId,
 } from "./question-repository";
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
@@ -77,5 +80,100 @@ describe("question repository filters", () => {
     expect(createQuestionKnowledgeNodePublicIdCondition(null)).toBeNull();
     expect(createQuestionMaterialPublicIdCondition(null)).toBeNull();
     expect(createQuestionTagPublicIdCondition(null)).toBeNull();
+  });
+});
+
+describe("question binding eligibility", () => {
+  it("rejects a missing or newly disabled material but preserves the same existing binding", () => {
+    expect(() =>
+      requireEligibleQuestionMaterialId({
+        requestedPublicId: "material-missing",
+        row: undefined,
+      }),
+    ).toThrow(QuestionBindingEligibilityError);
+    expect(() =>
+      requireEligibleQuestionMaterialId({
+        requestedPublicId: "material-disabled",
+        row: {
+          id: 12,
+          public_id: "material-disabled",
+          status: "disabled",
+        },
+      }),
+    ).toThrow(QuestionBindingEligibilityError);
+    expect(
+      requireEligibleQuestionMaterialId({
+        preservedPublicId: "material-disabled",
+        requestedPublicId: "material-disabled",
+        row: {
+          id: 12,
+          public_id: "material-disabled",
+          status: "disabled",
+        },
+      }),
+    ).toBe(12);
+    expect(
+      requireEligibleQuestionMaterialId({
+        requestedPublicId: "material-available",
+        row: {
+          id: 13,
+          public_id: "material-available",
+          status: "available",
+        },
+      }),
+    ).toBe(13);
+  });
+
+  it("requires every new knowledge_node to be active and recommendable while preserving existing disabled bindings", () => {
+    const rows = [
+      {
+        id: 22,
+        public_id: "knowledge-node-disabled",
+        kn_status: "disabled" as const,
+        is_recommendable: false,
+      },
+      {
+        id: 21,
+        public_id: "knowledge-node-active",
+        kn_status: "active" as const,
+        is_recommendable: true,
+      },
+    ];
+
+    expect(
+      requireEligibleQuestionKnowledgeNodeIds({
+        preservedPublicIds: ["knowledge-node-disabled"],
+        requestedPublicIds: [
+          "knowledge-node-active",
+          "knowledge-node-disabled",
+        ],
+        rows,
+      }),
+    ).toEqual([21, 22]);
+    expect(() =>
+      requireEligibleQuestionKnowledgeNodeIds({
+        requestedPublicIds: ["knowledge-node-disabled"],
+        rows,
+      }),
+    ).toThrow(QuestionBindingEligibilityError);
+    expect(() =>
+      requireEligibleQuestionKnowledgeNodeIds({
+        requestedPublicIds: ["knowledge-node-not-recommendable"],
+        rows: [
+          {
+            id: 23,
+            public_id: "knowledge-node-not-recommendable",
+            kn_status: "active",
+            is_recommendable: false,
+          },
+        ],
+      }),
+    ).toThrow(QuestionBindingEligibilityError);
+    expect(() =>
+      requireEligibleQuestionKnowledgeNodeIds({
+        requestedPublicIds: ["knowledge-node-missing"],
+        rows,
+      }),
+    ).toThrow(QuestionBindingEligibilityError);
   });
 });

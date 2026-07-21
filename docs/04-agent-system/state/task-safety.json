@@ -1,16 +1,19 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21",
-  "objective": "Close F-0055 without product code by revalidating that current question and material editors submit expectedUpdatedAt, repositories atomically require the matching millisecond revision and is_locked=false, zero-row writes map to recoverable conflict responses, and question child replacement occurs only after the guarded parent update. Do not alter product behavior, schema, database, authorization, dependencies or the safety kernel.",
+  "taskId": "p1-remediation-rc-05-question-binding-eligibility-2026-07-21",
+  "objective": "Close F-0053 by making question create and update resolve material, knowledge_node and tag bindings inside the repository transaction; reject missing bindings, require available material and active recommendable knowledge_node for new bindings, preserve already-bound disabled references during unrelated edits and copies, lock checked binding rows through the write, and return a stable fail-closed input error without partial mutation. Do not change schema, execute a database, expand authorization, or address recommendation review semantics from F-0077.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "src/server/repositories/question-repository.ts",
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/services/question-service.ts",
     "src/server/services/question-service.test.ts",
-    "src/server/services/material-service.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts",
-    "tests/unit/admin-material-editor-route.test.ts"
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "tests/unit/admin-question-editor-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -18,40 +21,44 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/** except the five direct validation test files listed in allowedFiles",
+    "src/db/**",
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
     "schema, migration or persistent database execution",
-    "role, entitlement, authorization, quota or default capability",
+    "new role, entitlement, authorization scope, quota or default capability",
+    "recommendation review command, F-0077, paper composition or learner snapshot behavior",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/repositories/question-repository.ts",
+    "src/server/services/question-service.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "src/server/repositories/question-repository.test.ts",
     "src/server/services/question-service.test.ts",
-    "src/server/services/material-service.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts",
-    "tests/unit/admin-material-editor-route.test.ts"
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "tests/unit/admin-question-editor-route.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCallers": "Current dedicated question and material editor regressions prove PATCH bodies carry the loaded updatedAt as expectedUpdatedAt and retain recoverable conflict state.",
-    "routeService": "Current validators require expectedUpdatedAt and services map a null repository update to stable 409203 conflict responses while retaining the existing locked-object response.",
-    "repository": "Current question and material updates use one SQL WHERE predicate containing public_id, millisecond-precision updated_at equality and is_locked=false. Question child replacement begins only after the guarded parent UPDATE returns a row and remains in the same transaction.",
-    "schema": "Existing updated_at and is_locked columns are sufficient. No schema, migration or database execution is required.",
-    "tests": "The P0 aggregate snapshot regression checks both guarded repositories, null-update conflict mapping, timestamp precision and monotonic revision advancement; service and editor regressions cover stable responses and submitted versions.",
-    "requirements": "SC-ATOMICITY-IDEMPOTENCY and the content lifecycle require stale edits and publish-lock races to fail closed without partial child replacement.",
-    "nonClaims": "This task records independent static closure for F-0055 only. It does not close F-0053 binding eligibility, execute a real database race, or modify product behavior."
+    "uiApiCallers": "Question editors and AI formal adoption submit public material, knowledge_node and tag identifiers through the existing question create/update contract; UI option filtering is not an authorization or integrity boundary.",
+    "routeService": "The question route delegates to question-service. The service currently validates shape and content images but does not map binding eligibility failures to a stable business response.",
+    "repository": "question-repository currently resolves material before the transaction and silently maps a missing material to null; knowledge_node and tag bindings resolve after child rows are deleted, while knowledge_node checks existence only. The minimal fix is transaction-local shared row locks, explicit eligibility checks and pre-resolved child IDs before mutation.",
+    "schema": "Existing material.status, knowledge_node.kn_status and knowledge_node.is_recommendable fields are sufficient. No schema or migration source is needed.",
+    "tests": "Repository focused tests will characterize missing/new-disabled/preserved-disabled bindings and stable ordered IDs; service tests will prove create/update map binding failures to 422 without success; affected P0, phase-9, formal-adoption and editor regressions remain green.",
+    "requirements": "US-02-01 permits explicit bindings; disabled material must not enter new content flows, while existing published/snapshotted references remain valid. Knowledge-node selection is limited to active recommendable nodes, while already-bound questions survive later node disablement.",
+    "nonClaims": "No profession-match expansion, recommendation review state machine, real database concurrency execution, schema, permission, Provider, dependency or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0055-content-write-concurrency-coverage",
+      "name": "f0053-question-binding-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -59,54 +66,50 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+        "src/server/repositories/question-repository.test.ts",
         "src/server/services/question-service.test.ts",
-        "src/server/services/material-service.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts",
-        "tests/unit/admin-material-editor-route.test.ts"
+        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "tests/unit/admin-question-editor-route.test.ts"
       ]
     },
     {
-      "name": "f0055-state-format",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "prettier",
-        "--check",
-        "docs/04-agent-system/state/project-state.yaml",
-        "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
-      ]
-    },
-    {
-      "name": "f0055-test-maintenance-lint",
+      "name": "f0053-question-binding-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/services/material-service.test.ts"
+        "src/server/repositories/question-repository.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/services/question-service.ts",
+        "src/server/services/question-service.test.ts"
       ]
     },
     {
-      "name": "f0055-typecheck",
+      "name": "f0053-question-binding-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "f0053-question-binding-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_static_product_finding_closure",
+    "category": "bounded_database_application_binding_integrity",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,
@@ -115,13 +118,13 @@
     "dependencyOrMechanismChange": false
   },
   "applicableStandingApprovals": [
-    "standing-test-only-allowlist-expansion-2026-07-21",
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }
