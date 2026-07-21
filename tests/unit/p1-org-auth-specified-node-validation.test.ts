@@ -25,20 +25,25 @@ function readBetween(source: string, startMarker: string, endMarker: string) {
 
 describe("F-0112 org_auth specified-node validation", () => {
   it("locks and requires an active purchaser inside the creation transaction", () => {
+    const repositorySource = readRepositorySource();
     const createCommand = readBetween(
-      readRepositorySource(),
+      repositorySource,
       "async createOrgAuth(input)",
       "async cancelOrgAuth(publicId, operator)",
     );
-
-    expect(createCommand).toContain("lockActiveOrganizationByPublicId");
-    expect(createCommand.indexOf("database.transaction")).toBeLessThan(
-      createCommand.indexOf("lockActiveOrganizationByPublicId"),
+    const createAtom = readBetween(
+      repositorySource,
+      "async function createOrgAuthAtom",
+      "async function appendTransactionalOrgAuthAuditLog",
     );
-    expect(
-      createCommand.indexOf("lockActiveOrganizationByPublicId"),
-    ).toBeLessThan(
-      createCommand.indexOf("resolveLockedOrganizationIdsForCreate"),
+
+    expect(createCommand).toContain("createOrgAuthAtom");
+    expect(createCommand.indexOf("database.transaction")).toBeLessThan(
+      createCommand.indexOf("createOrgAuthAtom"),
+    );
+    expect(createAtom).toContain("lockActiveOrganizationByPublicId");
+    expect(createAtom.indexOf("lockActiveOrganizationByPublicId")).toBeLessThan(
+      createAtom.indexOf("resolveLockedOrganizationIdsForCreate"),
     );
   });
 
@@ -73,12 +78,12 @@ describe("F-0112 org_auth specified-node validation", () => {
   });
 
   it("fails validation before overlap, quota, authorization or binding writes", () => {
-    const createCommand = readBetween(
+    const createAtom = readBetween(
       readRepositorySource(),
-      "async createOrgAuth(input)",
-      "async cancelOrgAuth(publicId, operator)",
+      "async function createOrgAuthAtom",
+      "async function appendTransactionalOrgAuthAuditLog",
     );
-    const validationIndex = createCommand.indexOf(
+    const validationIndex = createAtom.indexOf(
       "resolveLockedOrganizationIdsForCreate",
     );
 
@@ -91,7 +96,7 @@ describe("F-0112 org_auth specified-node validation", () => {
       ".insert(orgAuthOrganization)",
       ".insert(employeeOrgAuth)",
     ]) {
-      expect(createCommand.indexOf(mutationMarker)).toBeGreaterThan(
+      expect(createAtom.indexOf(mutationMarker)).toBeGreaterThan(
         validationIndex,
       );
     }

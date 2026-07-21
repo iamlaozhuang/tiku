@@ -69,6 +69,10 @@ function createRepositories(input: {
   mutationInputs: unknown[];
   hasOverlap?: boolean;
   createResult?: OrgAuthDto | null;
+  createPackageResult?: {
+    data: { orgAuths: OrgAuthDto[]; packagePublicId: string };
+    successAuditPersisted: true;
+  } | null;
   cancelResult?: OrgAuthDto | null;
 }): AdminOrganizationOrgAuthRuntimeRepositories {
   return {
@@ -122,6 +126,22 @@ function createRepositories(input: {
       return input.createResult === undefined
         ? createOrgAuth()
         : input.createResult;
+    },
+    async createOrgAuthPackage(packageInput) {
+      input.mutationInputs.push({
+        action: "createOrgAuthPackage",
+        packageInput,
+      });
+
+      return input.createPackageResult === undefined
+        ? {
+            data: {
+              orgAuths: [createOrgAuth()],
+              packagePublicId: "org-auth-package-public-001",
+            },
+            successAuditPersisted: true as const,
+          }
+        : input.createPackageResult;
     },
     async cancelOrgAuth(publicId, operator) {
       input.mutationInputs.push({
@@ -184,6 +204,7 @@ describe("phase 11 system ops org auth management loop", () => {
     await expect(response.json()).resolves.toMatchObject({
       code: 0,
       data: {
+        packagePublicId: "org-auth-package-public-001",
         orgAuth: {
           publicId: "org-auth-public-001",
           purchaserOrganizationPublicId: "organization-public-001",
@@ -193,18 +214,9 @@ describe("phase 11 system ops org auth management loop", () => {
     });
     expect(mutationInputs).toEqual([
       expect.objectContaining({ action: "hasOverlappingOrgAuth" }),
-      expect.objectContaining({ action: "createOrgAuth" }),
+      expect.objectContaining({ action: "createOrgAuthPackage" }),
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "org_auth.create",
-        targetResourceType: "org_auth",
-        targetPublicId: "org-auth-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted org_auth create metadata",
-        requestIp: "203.0.113.30",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
     expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
       "admin-session-token",
     );
@@ -225,17 +237,17 @@ describe("phase 11 system ops org auth management loop", () => {
         level: 4,
       }),
     ];
-    let createIndex = 0;
     const packageRepositories = createRepositories({
       auditInputs,
       mutationInputs,
+      createPackageResult: {
+        data: {
+          orgAuths: createdAtoms,
+          packagePublicId: "org-auth-package-public-multi-001",
+        },
+        successAuditPersisted: true,
+      },
     });
-
-    packageRepositories.createOrgAuth = async (orgAuthInput) => {
-      mutationInputs.push({ action: "createOrgAuth", orgAuthInput });
-
-      return createdAtoms[createIndex++] ?? null;
-    };
 
     const response = await createAdminOrganizationOrgAuthRuntimeRouteHandlers({
       repositories: packageRepositories,
@@ -264,6 +276,7 @@ describe("phase 11 system ops org auth management loop", () => {
     await expect(response.json()).resolves.toMatchObject({
       code: 0,
       data: {
+        packagePublicId: "org-auth-package-public-multi-001",
         orgAuth: {
           publicId: "org-auth-public-monopoly-3",
         },
@@ -288,16 +301,62 @@ describe("phase 11 system ops org auth management loop", () => {
           typeof entry === "object" &&
           entry !== null &&
           "action" in entry &&
-          entry.action === "createOrgAuth",
+          entry.action === "createOrgAuthPackage",
       ),
-    ).toHaveLength(2);
-    expect(auditInputs).toContainEqual(
-      expect.objectContaining({
-        actionType: "org_auth.create",
-        resultStatus: "success",
-        metadataSummary: "redacted org_auth create metadata",
+    ).toHaveLength(1);
+    expect(mutationInputs).not.toContainEqual(
+      expect.objectContaining({ action: "createOrgAuth" }),
+    );
+    expect(auditInputs).toEqual([]);
+  });
+
+  it("fails closed without an external success audit when the package command rolls back", async () => {
+    const auditInputs: unknown[] = [];
+    const mutationInputs: unknown[] = [];
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories: createRepositories({
+        auditInputs,
+        mutationInputs,
+        createPackageResult: null,
+      }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+
+    const response = await handlers.orgAuths.collection.POST(
+      new Request("http://localhost/api/v1/org-auths", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          name: "2026 原子失败授权包",
+          purchaserOrganizationPublicId: "organization-public-001",
+          authScopeType: "specified_nodes",
+          edition: "advanced",
+          accountQuota: 100,
+          startsAt: "2026-05-24T00:00:00.000Z",
+          expiresAt: "2027-05-24T00:00:00.000Z",
+          organizationPublicIds: ["organization-public-001"],
+          scopeSelections: [
+            { profession: "monopoly", level: 3 },
+            { profession: "marketing", level: 4 },
+          ],
+        }),
       }),
     );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409006,
+      message: "Org auth quota is exceeded or organization does not exist.",
+      data: null,
+    });
+    expect(mutationInputs).toContainEqual(
+      expect.objectContaining({ action: "createOrgAuthPackage" }),
+    );
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        resultStatus: "failed",
+        metadataSummary: "redacted org_auth quota or organization metadata",
+      }),
+    ]);
   });
 
   it("rejects overlapping org_auth scopes before creating records", async () => {

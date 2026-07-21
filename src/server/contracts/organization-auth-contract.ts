@@ -103,6 +103,7 @@ export type OrgAuthDetailDto = OrgAuthDto & {
 export type OrgAuthResultDto = {
   orgAuth: OrgAuthDto;
   orgAuths: OrgAuthDto[];
+  packagePublicId?: string;
 };
 
 export type OrgAuthManualUpgradeResultDto = {

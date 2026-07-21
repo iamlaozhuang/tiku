@@ -200,8 +200,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
-  currentCandidateClusterId: P1-RC-03
+  currentTaskId: p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
+  currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -236,6 +236,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
     - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
     - p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
+    - p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -258,6 +259,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20
     - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
     - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
+    - p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -301,12 +303,105 @@ p1RemediationSerialProgram:
     p1-remediation-rc-03-organization-portal-authorization-read-model-2026-07-20: closed
     p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: closed
     p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20: closed
-    p1-remediation-rc-03-resource-multi-level-scope-2026-07-20: in_progress
+    p1-remediation-rc-03-resource-multi-level-scope-2026-07-20: closed
+    p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20: in_progress
 activeTasks:
+  - id: p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
+    title: Organization authorization package atomicity
+    phase: p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0007
+    branch: fix/org-auth-package-atomicity
+    dependsOn:
+      - p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
+    objective: close F-0007 by delegating every normalized multi-scope org_auth package to one transaction that revalidates all existing atomic rules and persists one redacted package-level success audit before commit
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    planPath: docs/superpowers/plans/2026-07-20-org-auth-package-atomicity.md
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0007
+    highRiskApproval:
+      category: permission_database_application_layer
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: verified_candidate_ready_for_closeout
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      tddRed: pass_expected_4_failures_of_7
+      focused: pass_7_of_7
+      affectedRegression: pass_27_of_27_after_approved_helper_aware_static_assertion_update
+      lint: pass_zero_warnings
+      typecheck: pass
+      build: pass_96_static_pages
+      changedFileFormatDiff: pass
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullProfile: pass_focused_regression_lint_typecheck_build_and_p0_baselines
+      mainThreadAdversarialReview: pass_no_partial_commit_no_entitlement_expansion_and_transactional_redacted_success_audit
+      entitlementExpansion: false
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
+      approvalRequests: 1_allowlist_expansion_for_two_affected_static_regression_tests
+      approvalIdMismatch: 0
+      postApprovalCandidateTreeChanges: 0
+      repeatedBlockerReports: 2_automatic_goal_continuations
+      validationRetryCount: 1_missing_direct_yaml_module_in_auxiliary_parse_command_no_candidate_change
+      fullRuns: 1
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
+      findingId: F-0088
+      commit: 43b6322f3fd15143faf4ea598b2cfa03b6b1a3e9
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    rc04ResidualDisposition:
+      F-0007: separate_current_task
+      F-0010: separate_redeem_code_plaintext_view_copy_audit
+      F-0017: separate_redeem_code_generation_transaction_and_retry
+      F-0018: bundle_with_F-0020_learner_report_and_mistake_query_pagination
+      F-0019: separate_student_home_pagination
+      F-0020: bundle_with_F-0018_learner_report_and_mistake_query_pagination
+      F-0021: separate_admin_log_query_and_total
+      F-0022: separate_organization_training_list_projection
+      F-0030: separate_password_reset_transaction
+      F-0031: separate_multi_domain_audit_atomicity_requires_domain_partition
+      F-0034: separate_contact_config_persistence_high_risk
+      F-0038: separate_ai_call_fact_schema_high_risk
+      F-0046: separate_admin_organization_picker
+      F-0049: separate_admin_account_create_transaction
+      F-0052: separate_managed_rich_media_high_risk
+      F-0054: separate_content_reference_picker
+      F-0070: separate_knowledge_node_reference_count
+      F-0071: separate_knowledge_tree_complete_snapshot
+      F-0078: separate_recommendation_status_contract
+      F-0083: separate_resource_single_source_not_covered_by_F0088
+      F-0095: separate_paper_metadata_schema_high_risk
+      F-0105: separate_model_fallback_aggregate
+      F-0106: separate_phone_search_and_disclosure_controls
+      F-0107: separate_user_effective_authorization_read_model
+      F-0110: separate_org_auth_reference_picker
+      F-0118: separate_organization_roster_not_covered_by_F0119
+      F-0128: separate_analytics_database_pagination
+      F-0144: separate_training_self_answer_recovery
+      F-0153: separate_ai_paper_candidate_pagination
+      F-0170: separate_ai_task_result_history_join
+    nextRiskForecast:
+      - findingIds: [F-0007]
+        risk: permission_database_application_layer
+        approval: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      - findingIds: [F-0010]
+        risk: permission_sensitive_disclosure_audit
+        approval: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      - findingIds: [F-0017]
+        risk: database_application_layer_with_schema_need_to_be_decided_jit
+        approval: standing_if_no_schema_otherwise_one_canonical_fresh_id_for_start_and_candidate
   - id: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
     title: Resource multi-level scope
     phase: p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0088
@@ -323,7 +418,7 @@ activeTasks:
       category: schema_migration_source
       status: start_approved_candidate_closeout_pending
       approvalId: fresh-schema-start-f0088-resource-level-scope-2026-07-20
-    executionStage: candidate_frozen_pending_candidate_bound_approval
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     verificationEvidence:
       approvalId: fresh-schema-start-f0088-resource-level-scope-2026-07-20
       tddRed: pass_expected_4_failures_of_4
@@ -332,13 +427,17 @@ activeTasks:
       lint: pass_zero_warnings_after_one_retry
       typecheck: pass
       changedFileFormatDiff: pass
-      fullProfile: pending_candidate_bound_approval
+      fullProfile: pass_build_p0_global_p0_serial_format_and_diff
       mainThreadAdversarialReview: pass
       entitlementExpansion: false
       migrationExecution: false
       persistentDatabaseExecution: false
       realExternalCall: false
       extraFiles: false
+    closeout:
+      commit: 43b6322f3fd15143faf4ea598b2cfa03b6b1a3e9
+      status: committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: fresh-schema-start-f0088-resource-level-scope-2026-07-20
   - id: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
     title: Explicit learner authorization context selection
     phase: p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20

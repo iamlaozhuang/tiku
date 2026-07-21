@@ -129,6 +129,9 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     input: NormalizedDisableOrganizationInput & { publicId: string },
   ): Promise<OrganizationDto | null>;
   hasOverlappingOrgAuth?(input: NormalizedCreateOrgAuthInput): Promise<boolean>;
+  createOrgAuthPackage?(
+    input: OrgAuthPackageCreateCommandInput,
+  ): Promise<LifecycleCommandResult<OrgAuthPackageCreateResult> | null>;
   createOrgAuth?(
     input: NormalizedCreateOrgAuthInput,
   ): Promise<OrgAuthDto | null>;
@@ -205,6 +208,16 @@ export type OrgAuthClosureCommandOperator = {
 export type LifecycleCommandResult<TData> = {
   data: TData;
   successAuditPersisted: true;
+};
+
+export type OrgAuthPackageCreateCommandInput = {
+  operator: OrgAuthClosureCommandOperator;
+  orgAuthInputs: NormalizedCreateOrgAuthInput[];
+};
+
+export type OrgAuthPackageCreateResult = {
+  orgAuths: OrgAuthDto[];
+  packagePublicId: string;
 };
 
 export type OrgAuthManualUpgradeCommandInput =
@@ -306,10 +319,17 @@ type OrganizationTreeRow = {
 };
 
 const ORGANIZATION_TREE_CONFLICT = "ORGANIZATION_TREE_CONFLICT";
+const ORG_AUTH_PACKAGE_CREATE_REJECTED = "ORG_AUTH_PACKAGE_CREATE_REJECTED";
 
 class OrganizationTreeConflictError extends Error {
   constructor() {
     super(ORGANIZATION_TREE_CONFLICT);
+  }
+}
+
+class OrgAuthPackageCreateRejectedError extends Error {
+  constructor() {
+    super(ORG_AUTH_PACKAGE_CREATE_REJECTED);
   }
 }
 
@@ -1215,134 +1235,64 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         organizationIds,
       );
     },
+    async createOrgAuthPackage(input) {
+      const database = getDatabase();
+      const packagePublicId = `org-auth-package-${randomUUID()}`;
+
+      try {
+        return await database.transaction(async (transaction) => {
+          const transactionalDatabase =
+            transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+          await lockOrganizationScopeMutation(transactionalDatabase);
+
+          if (input.orgAuthInputs.length === 0) {
+            throw new OrgAuthPackageCreateRejectedError();
+          }
+
+          const orgAuths: OrgAuthDto[] = [];
+
+          for (const orgAuthInput of input.orgAuthInputs) {
+            const createdOrgAuth = await createOrgAuthAtom(
+              transactionalDatabase,
+              orgAuthInput,
+            );
+
+            if (createdOrgAuth === null) {
+              throw new OrgAuthPackageCreateRejectedError();
+            }
+
+            orgAuths.push(createdOrgAuth);
+          }
+
+          await appendTransactionalOrgAuthAuditLog(transactionalDatabase, {
+            actionType: "org_auth.create",
+            metadataSummary: `redacted org_auth package create metadata; scope_count=${orgAuths.length}`,
+            operator: input.operator,
+            targetPublicId: packagePublicId,
+          });
+
+          return {
+            data: { orgAuths, packagePublicId },
+            successAuditPersisted: true as const,
+          };
+        });
+      } catch (error) {
+        if (error instanceof OrgAuthPackageCreateRejectedError) {
+          return null;
+        }
+
+        throw error;
+      }
+    },
     async createOrgAuth(input) {
       const database = getDatabase();
 
       return database.transaction(async (transaction) => {
         const transactionalDatabase =
           transaction as AdminOrganizationOrgAuthRuntimeDatabase;
-
         await lockOrganizationScopeMutation(transactionalDatabase);
 
-        const purchaserOrganization = await lockActiveOrganizationByPublicId(
-          transactionalDatabase,
-          input.purchaserOrganizationPublicId,
-        );
-
-        if (purchaserOrganization === null) {
-          return null;
-        }
-
-        const organizationIds = await resolveLockedOrganizationIdsForCreate(
-          transactionalDatabase,
-          input,
-          purchaserOrganization.id,
-        );
-
-        if (organizationIds === null || organizationIds.length === 0) {
-          return null;
-        }
-
-        await lockOrgAuthQuotaScope(transactionalDatabase, {
-          level: input.level,
-          organizationIds,
-          profession: input.profession,
-        });
-
-        if (
-          await hasOverlappingOrgAuthWithOrganizationIds(
-            transactionalDatabase,
-            input,
-            organizationIds,
-          )
-        ) {
-          return null;
-        }
-
-        const usedQuota = await countActiveEmployeesByOrganizationIds(
-          transactionalDatabase,
-          organizationIds,
-        );
-
-        if (usedQuota > input.accountQuota) {
-          return null;
-        }
-
-        const now = new Date();
-        const [orgAuthRow] = await transactionalDatabase
-          .insert(orgAuth)
-          .values({
-            public_id: `org-auth-${randomUUID()}`,
-            name: input.name,
-            purchaser_organization_id: purchaserOrganization.id,
-            auth_scope_type: input.authScopeType,
-            edition: input.edition,
-            profession: input.profession,
-            level: input.level,
-            account_quota: input.accountQuota,
-            used_quota: usedQuota,
-            starts_at: input.startsAt,
-            expires_at: input.expiresAt,
-            status: "active",
-            cancelled_at: null,
-            created_at: now,
-            updated_at: now,
-          })
-          .returning({
-            id: orgAuth.id,
-            public_id: orgAuth.public_id,
-            name: orgAuth.name,
-            auth_scope_type: orgAuth.auth_scope_type,
-            edition: orgAuth.edition,
-            profession: orgAuth.profession,
-            level: orgAuth.level,
-            account_quota: orgAuth.account_quota,
-            used_quota: orgAuth.used_quota,
-            starts_at: orgAuth.starts_at,
-            expires_at: orgAuth.expires_at,
-            status: orgAuth.status,
-            cancelled_at: orgAuth.cancelled_at,
-            created_at: orgAuth.created_at,
-            updated_at: orgAuth.updated_at,
-          });
-
-        if (orgAuthRow === undefined) {
-          return null;
-        }
-
-        if (input.authScopeType === "specified_nodes") {
-          await transactionalDatabase.insert(orgAuthOrganization).values(
-            organizationIds.map((organizationId) => ({
-              org_auth_id: orgAuthRow.id,
-              organization_id: organizationId,
-            })),
-          );
-        }
-
-        const employeeIds = await listActiveEmployeeIdsByOrganizationIds(
-          transactionalDatabase,
-          organizationIds,
-        );
-
-        if (employeeIds.length > 0) {
-          await transactionalDatabase.insert(employeeOrgAuth).values(
-            employeeIds.map((employeeId) => ({
-              employee_id: employeeId,
-              org_auth_id: orgAuthRow.id,
-            })),
-          );
-        }
-
-        const organizationPublicIds = await listOrganizationPublicIdsByIds(
-          transactionalDatabase,
-          organizationIds,
-        );
-
-        return mapOrgAuthMutationRowToDto({
-          ...orgAuthRow,
-          purchaser_organization_public_id: purchaserOrganization.public_id,
-          organization_public_ids: organizationPublicIds,
-        });
+        return createOrgAuthAtom(transactionalDatabase, input);
       });
     },
     // Compatibility boundary: async cancelOrgAuth(publicId) adapters may omit
@@ -3960,6 +3910,131 @@ async function mapOrgAuthMutationRowWithRelatedData(
     ...getOrgAuthEditionEvaluation(row, editionEvaluationsByOrgAuthId),
     purchaser_organization_public_id: purchaserOrganization?.public_id ?? "",
     organization_public_ids: organizationPublicIdsByOrgAuthId.get(row.id) ?? [],
+  });
+}
+
+async function createOrgAuthAtom(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: NormalizedCreateOrgAuthInput,
+): Promise<OrgAuthDto | null> {
+  const purchaserOrganization = await lockActiveOrganizationByPublicId(
+    database,
+    input.purchaserOrganizationPublicId,
+  );
+
+  if (purchaserOrganization === null) {
+    return null;
+  }
+
+  const organizationIds = await resolveLockedOrganizationIdsForCreate(
+    database,
+    input,
+    purchaserOrganization.id,
+  );
+
+  if (organizationIds === null || organizationIds.length === 0) {
+    return null;
+  }
+
+  await lockOrgAuthQuotaScope(database, {
+    level: input.level,
+    organizationIds,
+    profession: input.profession,
+  });
+
+  if (
+    await hasOverlappingOrgAuthWithOrganizationIds(
+      database,
+      input,
+      organizationIds,
+    )
+  ) {
+    return null;
+  }
+
+  const usedQuota = await countActiveEmployeesByOrganizationIds(
+    database,
+    organizationIds,
+  );
+
+  if (usedQuota > input.accountQuota) {
+    return null;
+  }
+
+  const now = new Date();
+  const [orgAuthRow] = await database
+    .insert(orgAuth)
+    .values({
+      public_id: `org-auth-${randomUUID()}`,
+      name: input.name,
+      purchaser_organization_id: purchaserOrganization.id,
+      auth_scope_type: input.authScopeType,
+      edition: input.edition,
+      profession: input.profession,
+      level: input.level,
+      account_quota: input.accountQuota,
+      used_quota: usedQuota,
+      starts_at: input.startsAt,
+      expires_at: input.expiresAt,
+      status: "active",
+      cancelled_at: null,
+      created_at: now,
+      updated_at: now,
+    })
+    .returning({
+      id: orgAuth.id,
+      public_id: orgAuth.public_id,
+      name: orgAuth.name,
+      auth_scope_type: orgAuth.auth_scope_type,
+      edition: orgAuth.edition,
+      profession: orgAuth.profession,
+      level: orgAuth.level,
+      account_quota: orgAuth.account_quota,
+      used_quota: orgAuth.used_quota,
+      starts_at: orgAuth.starts_at,
+      expires_at: orgAuth.expires_at,
+      status: orgAuth.status,
+      cancelled_at: orgAuth.cancelled_at,
+      created_at: orgAuth.created_at,
+      updated_at: orgAuth.updated_at,
+    });
+
+  if (orgAuthRow === undefined) {
+    return null;
+  }
+
+  if (input.authScopeType === "specified_nodes") {
+    await database.insert(orgAuthOrganization).values(
+      organizationIds.map((organizationId) => ({
+        org_auth_id: orgAuthRow.id,
+        organization_id: organizationId,
+      })),
+    );
+  }
+
+  const employeeIds = await listActiveEmployeeIdsByOrganizationIds(
+    database,
+    organizationIds,
+  );
+
+  if (employeeIds.length > 0) {
+    await database.insert(employeeOrgAuth).values(
+      employeeIds.map((employeeId) => ({
+        employee_id: employeeId,
+        org_auth_id: orgAuthRow.id,
+      })),
+    );
+  }
+
+  const organizationPublicIds = await listOrganizationPublicIdsByIds(
+    database,
+    organizationIds,
+  );
+
+  return mapOrgAuthMutationRowToDto({
+    ...orgAuthRow,
+    purchaser_organization_public_id: purchaserOrganization.public_id,
+    organization_public_ids: organizationPublicIds,
   });
 }
 

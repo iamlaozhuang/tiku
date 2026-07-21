@@ -23,39 +23,58 @@ function extractCreateOrgAuthSource(repositorySource: string): string {
   return repositorySource.slice(start, end);
 }
 
+function extractCreateOrgAuthAtomSource(repositorySource: string): string {
+  const start = repositorySource.indexOf("async function createOrgAuthAtom");
+  const end = repositorySource.indexOf(
+    "async function appendTransactionalOrgAuthAuditLog",
+    start,
+  );
+
+  expect(start).toBeGreaterThanOrEqual(0);
+  expect(end).toBeGreaterThan(start);
+
+  return repositorySource.slice(start, end);
+}
+
 describe("phase 20 RA-01-11 org_auth quota atomicity", () => {
   it("keeps org_auth quota counting and record creation inside one repository transaction", () => {
-    const createOrgAuthSource = extractCreateOrgAuthSource(
-      readRepositorySource(),
-    );
+    const repositorySource = readRepositorySource();
+    const createOrgAuthSource = extractCreateOrgAuthSource(repositorySource);
+    const createOrgAuthAtomSource =
+      extractCreateOrgAuthAtomSource(repositorySource);
     const transactionIndex = createOrgAuthSource.indexOf(
       "database.transaction",
     );
-    const usedQuotaIndex = createOrgAuthSource.indexOf(
+    const atomCallIndex = createOrgAuthSource.indexOf("createOrgAuthAtom");
+    const usedQuotaIndex = createOrgAuthAtomSource.indexOf(
       "countActiveEmployeesByOrganizationIds",
     );
-    const orgAuthInsertIndex = createOrgAuthSource.indexOf(".insert(orgAuth)");
-    const scopeInsertIndex = createOrgAuthSource.indexOf(
+    const orgAuthInsertIndex =
+      createOrgAuthAtomSource.indexOf(".insert(orgAuth)");
+    const scopeInsertIndex = createOrgAuthAtomSource.indexOf(
       ".insert(orgAuthOrganization)",
     );
 
     expect(transactionIndex).toBeGreaterThanOrEqual(0);
-    expect(usedQuotaIndex).toBeGreaterThan(transactionIndex);
+    expect(atomCallIndex).toBeGreaterThan(transactionIndex);
+    expect(usedQuotaIndex).toBeGreaterThanOrEqual(0);
     expect(orgAuthInsertIndex).toBeGreaterThan(usedQuotaIndex);
     expect(scopeInsertIndex).toBeGreaterThan(orgAuthInsertIndex);
   });
 
   it("serializes overlapping org_auth scope checks before quota counting and insertion", () => {
     const repositorySource = readRepositorySource();
-    const createOrgAuthSource = extractCreateOrgAuthSource(repositorySource);
-    const lockIndex = createOrgAuthSource.indexOf("lockOrgAuthQuotaScope");
-    const overlapIndex = createOrgAuthSource.indexOf(
+    const createOrgAuthAtomSource =
+      extractCreateOrgAuthAtomSource(repositorySource);
+    const lockIndex = createOrgAuthAtomSource.indexOf("lockOrgAuthQuotaScope");
+    const overlapIndex = createOrgAuthAtomSource.indexOf(
       "hasOverlappingOrgAuthWithOrganizationIds",
     );
-    const usedQuotaIndex = createOrgAuthSource.indexOf(
+    const usedQuotaIndex = createOrgAuthAtomSource.indexOf(
       "countActiveEmployeesByOrganizationIds",
     );
-    const orgAuthInsertIndex = createOrgAuthSource.indexOf(".insert(orgAuth)");
+    const orgAuthInsertIndex =
+      createOrgAuthAtomSource.indexOf(".insert(orgAuth)");
 
     expect(lockIndex).toBeGreaterThanOrEqual(0);
     expect(repositorySource).toContain("pg_advisory_xact_lock");
