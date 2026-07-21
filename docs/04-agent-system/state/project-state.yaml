@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
+  currentTaskId: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -747,47 +747,53 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
-  title: Resource database audit atomicity
-  phase: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
+  id: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
+  title: Paper asset delete audit atomicity
+  phase: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
   status: closed
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0031_resource_database_non_upload_partition
-  branch: fix/resource-database-audit-atomicity
+  productClosureContribution: F-0031_paper_asset_delete_database_partition
+  branch: fix/paper-asset-delete-audit-atomicity
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0031
   candidateRootCauseCluster: P1-RC-04
-  objective: close only database-backed resource update publish rebuild-request disable and enable mutations by sharing each existing repository transaction with its redacted success audit while preserving local adapter behavior
+  objective: close only database-backed paper_asset delete by sharing one repository transaction with its redacted success audit while preserving external failed-command audit and excluding multipart create
   highRiskApproval:
     category: bounded_database_application_transaction_logic
     status: satisfied_by_bounded_medium_risk_standing_approval
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
-    reason: five_database_backed_resource_commands_and_their_redacted_success_audits_share_repository_transactions_with_local_adapter_success_audit_preserved
-    resumeAction: closeout_then_preflight_cross_resource_upload_local_catalog_and_paper_asset_partition
+    reason: paper_asset_delete_and_its_redacted_success_audit_share_one_repository_transaction_and_audit_failure_propagates
+    resumeAction: closeout_then_request_schema_start_approval_for_remaining_cross_resource_saga
   findingDisposition:
-    F-0031: in_progress_resource_database_partition_closed_cross_resource_upload_local_catalog_and_paper_asset_pending
+    F-0031: in_progress_paper_asset_delete_partition_closed_multipart_create_and_resource_cross_resource_paths_pending
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
-    preflightIncludedTestFiles: 5
+    preflightIncludedTestFiles: 6
     inTaskTestOnlyExpansionCount: 0
-    tddRed: expected_8_failures_missing_transactional_audit_context_and_source_aware_external_audit
-    focused: passed_32_of_32
-    affectedRegression: passed_27_of_27_after_explicit_general_level_list_fixture_alignment
+    includedCommand: paper_asset_delete_database_mutation
+    excludedCommands:
+      - paper_asset_multipart_create
+      - paper_asset_local_file_mutation
+      - resource_cross_resource_mutations
+    tddRed: expected_5_failures_missing_required_context_transactional_audit_and_failed_only_external_audit
+    focused: passed_14_of_14
+    affectedRegression: passed_17_of_17
     lint: passed_exact_affected_files
     typecheck: passed
     build: passed_97_static_pages
     p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
     p0SerialBaseline: pass_closed_program
-    mainThreadAdversarialReview: passed_required_context_same_transaction_failure_propagation_replay_audit_redaction_no_duplicate_database_success_audit_and_local_fallback_preservation
+    mainThreadAdversarialReview: passed_required_context_same_transaction_audit_failure_propagation_redaction_failed_external_audit_and_multipart_create_boundary
     schemaMigrationSourceChange: false
     migrationExecution: false
     persistentDatabaseExecution: false
     permissionOrEntitlementChange: false
+    localFileMutation: false
     realExternalCall: false
     extraFiles: false
   closeout:
@@ -795,18 +801,18 @@ currentTask:
     status: ready_for_commit_ff_only_merge_push_sync_and_cleanup
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21
-    findingId: F-0031_knowledge_node_database_partition
-    commit: 2fcb73b104f90d9a12c2aaca72ef28c4d1818d7d
+    taskId: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
+    findingId: F-0031_resource_database_non_upload_partition
+    commit: 1e8b5f647599edd606eb612f6002485dfdc46dc9
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1
   status: active
   ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy
 repositoryCheckpoint:
-  lastKnownMasterSha: 2fcb73b104f90d9a12c2aaca72ef28c4d1818d7d
-  lastKnownOriginMasterSha: 2fcb73b104f90d9a12c2aaca72ef28c4d1818d7d
-  lastKnownRemoteMasterSha: 2fcb73b104f90d9a12c2aaca72ef28c4d1818d7d
+  lastKnownMasterSha: 1e8b5f647599edd606eb612f6002485dfdc46dc9
+  lastKnownOriginMasterSha: 1e8b5f647599edd606eb612f6002485dfdc46dc9
+  lastKnownRemoteMasterSha: 1e8b5f647599edd606eb612f6002485dfdc46dc9
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

@@ -251,7 +251,9 @@ function createPaperRepository(
   };
 }
 
-function createPaperAssetRepository(): PaperAssetRepository {
+function createPaperAssetRepository(
+  deleteMutationContexts: unknown[] = [],
+): PaperAssetRepository {
   return {
     async listPaperAssets(query) {
       return {
@@ -277,7 +279,8 @@ function createPaperAssetRepository(): PaperAssetRepository {
     async findPaperAssetByPublicId(publicId) {
       return createPaperAsset({ public_id: publicId });
     },
-    async deletePaperAsset() {
+    async deletePaperAsset(_publicId, context) {
+      deleteMutationContexts.push(context);
       return true;
     },
   };
@@ -286,10 +289,13 @@ function createPaperAssetRepository(): PaperAssetRepository {
 function createRepositories(
   auditLogEntries: unknown[] = [],
   mutationContexts: unknown[] = [],
+  paperAssetDeleteMutationContexts: unknown[] = [],
 ): PaperCompositionLifecycleRuntimeRepositories {
   return {
     paperRepository: createPaperRepository(mutationContexts),
-    paperAssetRepository: createPaperAssetRepository(),
+    paperAssetRepository: createPaperAssetRepository(
+      paperAssetDeleteMutationContexts,
+    ),
     auditLogRepository: {
       async appendAuditLog(input) {
         auditLogEntries.push(input);
@@ -649,8 +655,13 @@ describe("phase 9 paper composition lifecycle runtime", () => {
 
   it("manages paper_asset metadata without exposing object keys or secrets", async () => {
     const auditLogEntries: unknown[] = [];
+    const paperAssetDeleteMutationContexts: unknown[] = [];
     const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
-      repositories: createRepositories(auditLogEntries),
+      repositories: createRepositories(
+        auditLogEntries,
+        [],
+        paperAssetDeleteMutationContexts,
+      ),
       sessionService: createSessionService("content_admin"),
     });
     const headers = { authorization: "Bearer admin-session-token" };
@@ -730,11 +741,16 @@ describe("phase 9 paper composition lifecycle runtime", () => {
         targetResourceType: "paper_asset",
         resultStatus: "success",
       }),
+    ]);
+    expect(paperAssetDeleteMutationContexts).toEqual([
       expect.objectContaining({
-        actionType: "paper_asset.delete",
-        targetResourceType: "paper_asset",
-        targetPublicId: "paper-asset-public-001",
-        resultStatus: "success",
+        actorPublicId: "admin-public-001",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "paper_asset.delete",
+          metadataSummary: "redacted paper_asset mutation metadata",
+          requestIp: null,
+        }),
       }),
     ]);
   });

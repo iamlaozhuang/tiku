@@ -183,6 +183,17 @@ describe("paper asset service", () => {
           return publicId !== "missing_asset";
         },
       }),
+      {
+        deleteMutationContext: {
+          actorPublicId: "admin_public_123",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper_asset.delete",
+            metadataSummary: "redacted paper_asset mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
     );
 
     await expect(service.createPaperAsset({ fileName: "" })).resolves.toEqual({

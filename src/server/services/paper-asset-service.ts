@@ -13,7 +13,10 @@ import {
   mapPaperAssetResultToApi,
   mapPaperAssetToApi,
 } from "../mappers/paper-asset-mapper";
-import type { PaperAssetRepository } from "../repositories/paper-asset-repository";
+import type {
+  PaperAssetDeleteMutationContext,
+  PaperAssetRepository,
+} from "../repositories/paper-asset-repository";
 import type { ContentMutationContext } from "../repositories/question-repository";
 import {
   normalizeCreatePaperAssetInput,
@@ -37,6 +40,7 @@ export type PaperAssetService = {
 
 export type PaperAssetServiceOptions = {
   mutationContext?: ContentMutationContext;
+  deleteMutationContext?: PaperAssetDeleteMutationContext;
 };
 
 const INVALID_PAPER_ASSET_INPUT_CODE = 422205;
@@ -114,7 +118,14 @@ export function createPaperAssetService(
     },
 
     async deletePaperAsset(publicId) {
-      const deleted = await paperAssetRepository.deletePaperAsset(publicId);
+      if (options.deleteMutationContext === undefined) {
+        throw new Error("Paper asset delete requires mutation audit context.");
+      }
+
+      const deleted = await paperAssetRepository.deletePaperAsset(
+        publicId,
+        options.deleteMutationContext,
+      );
 
       if (!deleted) {
         return createPaperAssetNotFoundResponse();

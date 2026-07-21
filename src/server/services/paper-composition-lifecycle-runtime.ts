@@ -10,6 +10,7 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import {
   createPostgresPaperAssetRepository,
+  type PaperAssetDeleteMutationContext,
   type PaperAssetRepository,
 } from "../repositories/paper-asset-repository";
 import {
@@ -372,9 +373,35 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
     });
   }
 
-  function createPaperAssetServiceForActor(actor: ContentAdminActor) {
+  function createPaperAssetDeleteMutationContext(
+    request: Request,
+    actor: ContentAdminActor,
+  ): PaperAssetDeleteMutationContext {
+    return {
+      actorPublicId: actor.publicId,
+      auditLog: {
+        actorRole: actor.roles[0],
+        actionType: "paper_asset.delete",
+        metadataSummary: "redacted paper_asset mutation metadata",
+        requestIp: readRequestIp(request),
+      },
+    };
+  }
+
+  function createPaperAssetServiceForActor(
+    actor: ContentAdminActor,
+    request?: Request,
+  ) {
     return createPaperAssetService(repositories.paperAssetRepository, {
       mutationContext: { actorPublicId: actor.publicId },
+      ...(request === undefined
+        ? {}
+        : {
+            deleteMutationContext: createPaperAssetDeleteMutationContext(
+              request,
+              actor,
+            ),
+          }),
     });
   }
 
@@ -852,18 +879,23 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperAssetServiceForActor(actorOrError);
+          const service = createPaperAssetServiceForActor(
+            actorOrError,
+            request,
+          );
           const response = await service.deletePaperAsset(publicId);
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper_asset.delete",
-            "paper_asset",
-            publicId,
-            response,
-            "paperAsset",
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper_asset.delete",
+              "paper_asset",
+              publicId,
+              response,
+              "paperAsset",
+            );
+          }
 
           return createJsonResponse(response);
         },

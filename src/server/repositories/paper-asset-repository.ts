@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { and, asc, count, desc, eq, type SQL } from "drizzle-orm";
 
-import { admin, paper, paperAsset } from "@/db/schema";
+import { admin, auditLog, paper, paperAsset } from "@/db/schema";
 import type { PaperAttachmentUsage } from "../models/paper";
 import type {
   NormalizedCreatePaperAssetInput,
@@ -33,6 +33,16 @@ export type PaperAssetListResult = {
   total: number;
 };
 
+export type PaperAssetDeleteMutationContext = {
+  actorPublicId: string;
+  auditLog: {
+    actorRole: string;
+    actionType: "paper_asset.delete";
+    metadataSummary: string;
+    requestIp: string | null;
+  };
+};
+
 export type PaperAssetRepository = {
   listPaperAssets(
     query: NormalizedPaperAssetListInput,
@@ -44,7 +54,10 @@ export type PaperAssetRepository = {
   findPaperAssetByPublicId(
     publicId: string,
   ): Promise<PaperAssetAccessRow | null>;
-  deletePaperAsset(publicId: string): Promise<boolean>;
+  deletePaperAsset(
+    publicId: string,
+    context: PaperAssetDeleteMutationContext,
+  ): Promise<boolean>;
 };
 
 export function createPostgresPaperAssetRepository(
@@ -125,16 +138,46 @@ export function createPostgresPaperAssetRepository(
       return findPaperAssetByPublicId(getDatabase(), publicId);
     },
 
-    async deletePaperAsset(publicId) {
+    async deletePaperAsset(publicId, context) {
       const database = getDatabase();
-      const [row] = await database
-        .delete(paperAsset)
-        .where(eq(paperAsset.public_id, publicId))
-        .returning({ public_id: paperAsset.public_id });
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const [row] = await scopedDatabase
+          .delete(paperAsset)
+          .where(eq(paperAsset.public_id, publicId))
+          .returning({ public_id: paperAsset.public_id });
 
-      return row !== undefined;
+        if (row === undefined) {
+          return false;
+        }
+
+        await appendPaperAssetDeleteAuditLog(
+          scopedDatabase,
+          context,
+          row.public_id,
+        );
+        return true;
+      });
     },
   };
+}
+
+async function appendPaperAssetDeleteAuditLog(
+  database: RuntimeDatabase,
+  context: PaperAssetDeleteMutationContext,
+  targetPublicId: string,
+): Promise<void> {
+  await database.insert(auditLog).values({
+    public_id: `audit-log-${randomUUID()}`,
+    actor_public_id: context.actorPublicId,
+    actor_role: context.auditLog.actorRole,
+    action_type: "paper_asset.delete",
+    target_resource_type: "paper_asset",
+    target_public_id: targetPublicId,
+    result_status: "success",
+    metadata_summary: context.auditLog.metadataSummary,
+    request_ip: context.auditLog.requestIp,
+  });
 }
 
 function createPaperAssetConditions(

@@ -1,18 +1,20 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21",
-  "objective": "Close only the database-backed resource update_markdown, publish_markdown, rebuild_vector request, disable, and enable partition of F-0031 by committing each successful mutation and its redacted audit_log row in one existing repository transaction while preserving local adapter success auditing; exclude upload, local file/catalog mutations, and paper_asset.",
+  "taskId": "p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21",
+  "objective": "Close only the database-backed paper_asset delete partition of F-0031 by committing the delete and its redacted success audit_log row in one repository transaction while preserving external failed-command auditing; exclude multipart create, local file mutation, resource upload, schema, and migration work.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts"
+    "src/server/repositories/paper-asset-repository.ts",
+    "src/server/services/paper-asset-service.ts",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-paper-database-audit-atomicity.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+    "src/server/services/paper-asset-service.test.ts",
+    "src/server/services/paper-asset-route.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -23,13 +25,12 @@
     "src/db/schema/**",
     "scripts/**",
     "src/server/services/local-paper-asset-storage.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/server/services/paper-asset-service.ts",
-    "src/server/repositories/paper-asset-repository.ts"
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts"
   ],
   "validationCommands": [
     {
-      "name": "resource-database-audit-atomicity-focused",
+      "name": "paper-asset-delete-audit-atomicity-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -37,14 +38,13 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts"
+        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "src/server/services/paper-asset-service.test.ts"
       ]
     },
     {
-      "name": "resource-database-audit-atomicity-regression",
+      "name": "paper-asset-delete-audit-atomicity-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -52,33 +52,34 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts"
+        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
+        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+        "src/server/services/paper-asset-route.test.ts"
       ]
     },
     {
-      "name": "resource-database-audit-atomicity-lint",
+      "name": "paper-asset-delete-audit-atomicity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts"
+        "src/server/repositories/paper-asset-repository.ts",
+        "src/server/services/paper-asset-service.ts",
+        "src/server/services/paper-composition-lifecycle-runtime.ts",
+        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts"
       ]
     },
     {
-      "name": "resource-database-audit-atomicity-typecheck",
+      "name": "paper-asset-delete-audit-atomicity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "resource-database-audit-atomicity-build",
+      "name": "paper-asset-delete-audit-atomicity-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
