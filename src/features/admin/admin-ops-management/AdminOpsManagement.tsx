@@ -73,6 +73,7 @@ type AdminOpsLoadState =
   | "error";
 
 type AdminAccountLoadState = "loading" | "ready" | "error";
+type OrganizationPickerLoadState = "loading" | "ready" | "empty" | "error";
 
 type AdminOpsData = {
   adminAccounts: AdminAccountListDto["adminAccounts"];
@@ -151,6 +152,7 @@ type AdminOpsLoadResult =
 const DEFAULT_SORT_ORDER = "desc";
 const ADMIN_ACCOUNT_ORGANIZATION_OPTIONS_QUERY =
   "page=1&pageSize=100&sortBy=updatedAt&sortOrder=desc";
+const ADMIN_ACCOUNT_ORGANIZATION_PICKER_PAGE_SIZE = 20;
 
 const userStatusOptions = [
   ["all", "全部状态"],
@@ -365,22 +367,16 @@ function canDiscloseUserPhone(currentAdminRoles: AdminRole[]): boolean {
 function normalizeAdminAccountCreationForm(
   formState: AdminAccountCreationFormState,
   allowedRoles: AdminAccountCreationRole[],
-  organizations: OrganizationListDto["organizations"],
 ): AdminAccountCreationFormState {
   const adminRole = allowedRoles.includes(formState.adminRole)
     ? formState.adminRole
     : (allowedRoles[0] ?? formState.adminRole);
-  const organizationPublicId =
-    isOrganizationAdminAccountCreationRole(adminRole) &&
-    formState.organizationPublicId.length === 0
-      ? (organizations[0]?.publicId ?? "")
-      : formState.organizationPublicId;
 
   return {
     ...formState,
     adminRole,
     organizationPublicId: isOrganizationAdminAccountCreationRole(adminRole)
-      ? organizationPublicId
+      ? formState.organizationPublicId
       : "",
   };
 }
@@ -671,9 +667,8 @@ export function AdminOpsManagement() {
       normalizeAdminAccountCreationForm(
         adminAccountForm,
         allowedAdminAccountCreationRoles,
-        data.organizations,
       ),
-    [adminAccountForm, allowedAdminAccountCreationRoles, data.organizations],
+    [adminAccountForm, allowedAdminAccountCreationRoles],
   );
   const usersPagination =
     data.usersPagination ??
@@ -1255,7 +1250,7 @@ export function AdminOpsManagement() {
       adminRole: allowedAdminAccountCreationRoles[0] ?? "ops_admin",
       initialSecret: "",
       name: "",
-      organizationPublicId: data.organizations[0]?.publicId ?? "",
+      organizationPublicId: "",
       phone: "",
     });
     await refreshAdminAccountList(sessionToken);
@@ -1639,7 +1634,6 @@ export function AdminOpsManagement() {
               allowedRoles={allowedAdminAccountCreationRoles}
               formState={normalizedAdminAccountForm}
               isSubmitting={isCreatingAdminAccount}
-              organizations={data.organizations}
               onChange={setAdminAccountForm}
               onSubmit={() => void handleCreateAdminAccount()}
             />
@@ -2161,14 +2155,12 @@ function AdminAccountCreationPanel({
   allowedRoles,
   formState,
   isSubmitting,
-  organizations,
   onChange,
   onSubmit,
 }: {
   allowedRoles: AdminAccountCreationRole[];
   formState: AdminAccountCreationFormState;
   isSubmitting: boolean;
-  organizations: OrganizationListDto["organizations"];
   onChange: (value: AdminAccountCreationFormState) => void;
   onSubmit: () => void;
 }) {
@@ -2212,9 +2204,7 @@ function AdminAccountCreationPanel({
                 organizationPublicId: isOrganizationAdminAccountCreationRole(
                   adminRole,
                 )
-                  ? formState.organizationPublicId ||
-                    organizations[0]?.publicId ||
-                    ""
+                  ? formState.organizationPublicId
                   : "",
               });
             }}
@@ -2227,29 +2217,12 @@ function AdminAccountCreationPanel({
           </select>
         </label>
         {isOrganizationAdmin ? (
-          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">绑定组织</span>
-            <select
-              className="border-input bg-background text-foreground h-9 rounded-md border px-3 text-sm"
-              value={formState.organizationPublicId}
-              onChange={(event) =>
-                onChange({
-                  ...formState,
-                  organizationPublicId: event.currentTarget.value,
-                })
-              }
-            >
-              <option value="">请选择组织</option>
-              {organizations.map((organization) => (
-                <option
-                  key={organization.publicId}
-                  value={organization.publicId}
-                >
-                  {organization.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <AdminAccountOrganizationPicker
+            value={formState.organizationPublicId}
+            onChange={(organizationPublicId) =>
+              onChange({ ...formState, organizationPublicId })
+            }
+          />
         ) : null}
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">手机号</span>
@@ -2291,6 +2264,189 @@ function AdminAccountCreationPanel({
         </Button>
       </div>
     </section>
+  );
+}
+
+function AdminAccountOrganizationPicker({
+  onChange,
+  value,
+}: {
+  onChange: (value: string) => void;
+  value: string;
+}) {
+  const [keyword, setKeyword] = useState("");
+  const [loadState, setLoadState] =
+    useState<OrganizationPickerLoadState>("loading");
+  const [organizations, setOrganizations] = useState<
+    OrganizationListDto["organizations"]
+  >([]);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<ApiPagination>({
+    page: 1,
+    pageSize: ADMIN_ACCOUNT_ORGANIZATION_PICKER_PAGE_SIZE,
+    sortBy: "updatedAt",
+    sortOrder: "desc",
+    total: 0,
+  });
+  const [retryRevision, setRetryRevision] = useState(0);
+  const [selectedOrganization, setSelectedOrganization] = useState<
+    OrganizationListDto["organizations"][number] | null
+  >(null);
+  const requestSequenceRef = useRef(0);
+
+  useEffect(() => {
+    const sessionToken = getStoredSessionToken();
+    const requestSequence = requestSequenceRef.current + 1;
+    requestSequenceRef.current = requestSequence;
+
+    const searchParams = new URLSearchParams({
+      page: `${page}`,
+      pageSize: `${ADMIN_ACCOUNT_ORGANIZATION_PICKER_PAGE_SIZE}`,
+      sortBy: "updatedAt",
+      sortOrder: "desc",
+      status: "active",
+    });
+    const normalizedKeyword = keyword.trim();
+
+    if (normalizedKeyword.length > 0) {
+      searchParams.set("keyword", normalizedKeyword);
+    }
+
+    const loadTimer = window.setTimeout(
+      () => {
+        if (sessionToken === null) {
+          setLoadState("error");
+          return;
+        }
+
+        void fetchAdminApi<OrganizationListDto>(
+          `/api/v1/organizations?${searchParams.toString()}`,
+          sessionToken,
+        )
+          .then((response) => {
+            if (requestSequenceRef.current !== requestSequence) {
+              return;
+            }
+
+            if (response.code !== 0 || response.data === null) {
+              setOrganizations([]);
+              setLoadState("error");
+              return;
+            }
+
+            const nextOrganizations = response.data.organizations.filter(
+              (organization) => organization.status === "active",
+            );
+            setOrganizations(nextOrganizations);
+            setPagination(
+              response.pagination ?? {
+                page,
+                pageSize: ADMIN_ACCOUNT_ORGANIZATION_PICKER_PAGE_SIZE,
+                sortBy: "updatedAt",
+                sortOrder: "desc",
+                total: nextOrganizations.length,
+              },
+            );
+            setLoadState(nextOrganizations.length === 0 ? "empty" : "ready");
+          })
+          .catch(() => {
+            if (requestSequenceRef.current === requestSequence) {
+              setOrganizations([]);
+              setLoadState("error");
+            }
+          });
+      },
+      normalizedKeyword.length === 0 ? 0 : 150,
+    );
+
+    return () => window.clearTimeout(loadTimer);
+  }, [keyword, page, retryRevision]);
+
+  const visibleOrganizations =
+    selectedOrganization !== null &&
+    !organizations.some(
+      (organization) => organization.publicId === selectedOrganization.publicId,
+    )
+      ? [selectedOrganization, ...organizations]
+      : organizations;
+  return (
+    <div className="border-border flex min-w-0 flex-col gap-2 rounded-md border p-3 lg:col-span-2">
+      <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">搜索可绑定组织</span>
+        <Input
+          aria-label="搜索可绑定组织"
+          autoComplete="off"
+          placeholder="输入组织名称"
+          value={keyword}
+          onChange={(event) => {
+            setLoadState("loading");
+            setKeyword(event.currentTarget.value);
+            setPage(1);
+          }}
+        />
+      </label>
+      <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">绑定组织</span>
+        <select
+          aria-label="后台账号绑定组织"
+          className="border-input bg-background text-foreground h-9 rounded-md border px-3 text-sm"
+          value={value}
+          onChange={(event) => {
+            const organizationPublicId = event.currentTarget.value;
+            setSelectedOrganization(
+              organizations.find(
+                (organization) =>
+                  organization.publicId === organizationPublicId,
+              ) ?? null,
+            );
+            onChange(organizationPublicId);
+          }}
+        >
+          <option value="">请选择组织</option>
+          {visibleOrganizations.map((organization) => (
+            <option key={organization.publicId} value={organization.publicId}>
+              {organization.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      {loadState === "loading" ? (
+        <p className="text-text-muted text-xs" role="status">
+          正在加载可绑定组织
+        </p>
+      ) : null}
+      {loadState === "empty" ? (
+        <p className="text-text-muted text-xs">没有匹配的可绑定组织</p>
+      ) : null}
+      {loadState === "error" ? (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-destructive text-xs">可绑定组织加载失败</p>
+          <Button
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setLoadState("loading");
+              setRetryRevision((revision) => revision + 1);
+            }}
+          >
+            重试加载组织
+          </Button>
+        </div>
+      ) : null}
+      {loadState === "ready" ? (
+        <AdminPagination
+          itemLabel="个可绑定组织"
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          onPageChange={(nextPage) => {
+            setLoadState("loading");
+            setPage(nextPage);
+          }}
+        />
+      ) : null}
+    </div>
   );
 }
 

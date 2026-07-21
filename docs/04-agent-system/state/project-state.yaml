@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
+  currentTaskId: p1-remediation-rc-04-admin-organization-picker-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -517,6 +517,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
     - p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21
     - p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
+    - p1-remediation-rc-04-admin-organization-picker-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -553,6 +554,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
     - p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
     - p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21
+    - p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -611,7 +613,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21: closed
     p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21: closed
     p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21: closed
-    p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21: in_progress
+    p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21: closed
+    p1-remediation-rc-04-admin-organization-picker-2026-07-21: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -776,125 +779,80 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
-  title: AI call log versioned pricing and exact cost derivation
-  phase: p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
+  id: p1-remediation-rc-04-admin-organization-picker-2026-07-21
+  title: Admin account active organization search picker
+  phase: p1-remediation-rc-04-admin-organization-picker-2026-07-21
   status: in_progress
   priority: p1
-  taskKind: product_remediation_partition
-  productClosureContribution: F-0038_complete_static_closure
-  branch: fix/ai-call-log-versioned-pricing
+  taskKind: product_remediation
+  productClosureContribution: F-0046_complete_static_closure
+  branch: fix/admin-organization-picker
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0038
+    - F-0046
   candidateRootCauseCluster: P1-RC-04
-  objective: persist a nullable versioned token-price tuple, snapshot it with each selected model configuration, and centrally calculate exact successful and failed AI-call cost without inventing missing facts or choosing real Provider prices
-  executionStage: verified_ready_for_conditional_closeout
-  freshApproval:
-    approvalId: fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21
-    status: approved
-    risk: schema_migration_source_pricing_semantics_and_database_application_logic
-    baseSha: 38d047c08ea5a041bdfa88e89bf93de2f2af4334
-    conditionalCloseout: true
-    canonicalPush: https://github.com/iamlaozhuang/tiku.git#refs/heads/master
-  partitionBoundary:
-    included:
-      - nullable_versioned_model_config_input_and_output_token_price_tuple
-      - immutable_pricing_snapshot_for_execution_provenance
-      - fixed_point_cost_derivation_for_success_and_failure
-      - complete_zero_token_facts_yield_zero
-      - incomplete_pricing_or_token_facts_yield_null
-    excluded:
-      - migration_or_persistent_database_execution
-      - real_provider_price_selection_or_cost_calibration
-      - real_provider_call_or_external_side_effect
-      - dependency_permission_secret_deployment_or_mechanism_change
+  objective: replace the backend-admin creator fixed first-100 organization snapshot with an explicit server-searched paginated active-organization picker that is complete, race-safe and fail-closed
+  executionStage: verified_ready_for_low_risk_closeout
+  riskBoundary:
+    category: low_risk_product_UI_query_consumption
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    schemaOrMigrationChange: false
+    persistentDatabaseExecution: false
+    authorizationOrEntitlementChange: false
+    realExternalCall: false
   preRedImpactScan:
-    chain: UI_API_to_admin_runtime_to_model_runtime_to_repository_to_schema_migration_to_direct_tests
-    coreFiles: 19
-    contingencyFiles: 18
+    chain: AdminOpsManagement_to_GET_organizations_existing_query_runtime_repository_schema_plus_direct_UI_and_server_regressions
+    coreFiles: 5
+    contingencyFiles: 3
     directCallerCalleeMocksFixturesReviewed: true
-    sameTaskDirectSourceAllowanceUsed: 2_of_2
-    sameTaskDirectSourceEvidence: organization-training-route preserves the approved tuple in direct snapshots; admin-ai-audit-log-ops-service explicitly keeps direct local fallback DTOs unpriced
+    existingServerCapabilities: keyword_status_page_pageSize_sort_and_pagination
+    existingCreationRecheck: organization_status_active_fail_closed
+  expectedAcceptance:
+    - active_filter_is_always_sent
+    - organization_after_first_100_is_reachable_by_server_search_or_pagination
+    - rapid_search_stale_response_cannot_replace_latest_results
+    - loading_empty_and_error_states_are_explicit
+    - organization_selection_is_explicit_and_creation_rechecks_active_status
   tddRed:
-    command: corepack.cmd pnpm@10.15.1 exec vitest run tests/unit/p1-ai-call-log-versioned-pricing.test.ts
-    result: failed_as_expected_6_of_6
-    failureBoundary: missing_schema_tuple_validation_snapshot_fixed_point_calculator_and_central_repository_derivation
+    command: corepack.cmd pnpm@10.15.1 exec vitest run tests/unit/p1-admin-organization-picker.test.ts
+    result: failed_as_expected_3_of_3
+    failureBoundary: fixed_unfiltered_first_100_snapshot_without_search_pagination_race_protection_or_explicit_states
   verificationEvidence:
-    focused: passed_132_of_132_across_8_suites
-    affectedRegression: passed_52_of_52_across_14_suites
-    pricingCharacterization: passed_7_of_7
-    lint: pass_all_changed_typescript_and_tsx
+    focused: passed_16_of_16_across_2_suites
+    affectedRegression: passed_36_of_36_across_2_suites
+    lint: pass
     typecheck: pass
-    build: passed_98_pages
-    offlineDrizzleGeneration: pass_single_migration_snapshot_and_journal
-    format: pass_targeted_prettier_generated_snapshot_kept_generator_owned
-    diffCheck: pass_final_frozen_tree
+    format: pass_targeted_prettier
+    diffCheck: pass
   adversarialReview:
-    nullableTupleAllOrNoneInValidatorAndDatabase: pass
-    fixedPointNoFloatingPointMoney: pass
-    zeroTokenWithCompleteFactsIsZero: pass
-    missingPriceVersionRateOrTokenIsNull: pass
-    explicitCallerCostCannotOverrideCentralDerivation: pass
-    pricingChangePreservesHistoricalSnapshot: pass
-    successAndFailureShareCentralAppendBoundary: pass
-    noRealProviderPriceCalibrationCallOrCredential: pass
-    noMigrationExecutionOrPersistentDatabaseWrite: pass
-    noDependencyPermissionSecretDeploymentOrMechanismChange: pass
-    exactAllowedFilesAndTwoDirectSourceAllowance: pass
-    F0038OriginalDimensionsFiltersFullSetAggregationAndVersionedCostCovered: pass
-  conditionalCloseoutProjection:
-    currentStatus: validated_uncommitted_frozen_candidate
-    triggerConditions:
-      - scope_remains_inside_approved_envelope
-      - offline_schema_generation_only
-      - focused_regression_lint_typecheck_build_format_and_diff_green
-      - main_thread_adversarial_review_green
-      - base_and_remote_remain_fast_forward
-    projectedSuccess: single_commit_ff_only_merged_canonical_push_synced_and_cleaned
-    actualPushSyncEvidence: pending_terminal_closeout
+    serverSearchAndPaginationReachOrganizationsBeyondFirst100: pass
+    activeFilterSentAndInactiveRowsRejectedClientSide: pass
+    repositoryCreationActiveRecheckPreserved: pass
+    staleRapidSearchResponseCannotReplaceLatest: pass
+    explicitSelectionRequiredWithoutSilentFirstResultDefault: pass
+    loadingEmptyErrorAndRetryStatesPresent: pass
+    noRolePermissionEntitlementSchemaDatabaseDependencyProviderOrMechanismChange: pass
+    exactAllowedFilesAndValidationCoverage: pass
   metrics:
-    mandatoryFreshApprovals: 1
+    mandatoryFreshApprovals: 0
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    validationRetryCount: 4
-    pushRetryCount: 1
-    pushRetryReason: task_contract_target_corrected_from_canonical_URL_to_kernel_required_origin_master_without_product_or_approval_scope_change
-    fullProfileRuns: 3_including_one_validation_command_retry
-    approvalWaitTurns: 3
-    productValueTime: 15m_after_approval_TDD_implementation_and_product_validation
-    mechanismOverhead: 9m_after_approval_contract_state_generation_review_one_push_contract_retry_one_validation_command_retry_plus_3_approval_wait_turns_and_closeout_pending
+    approvalWaitTurns: 0
+    productValueTime: 12m_TDD_implementation_focused_regression_and_review
+    mechanismOverhead: 7m_JIT_contract_state_updates_and_kernel_preparation
     guardSmokeChanges: 0
-    approvalIdMismatch: 0
-  testOnlyAllowlistExpansion:
-    authorization: standing-test-only-allowlist-expansion-2026-07-21
-    addedFiles:
-      - tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts
-    reason: typecheck exposed one direct existing ModelConfigSummaryDto regression fixture omitted from the pre_RED list; assertion strength and product scope are unchanged
-  approvalFingerprint: fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21_38d047c08ea5a041bdfa88e89bf93de2f2af4334
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21
+    taskId: p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
     findingId: F-0038
-    productClosureContribution: organization_attribution_only_not_closed
-    commit: 38d047c08ea5a041bdfa88e89bf93de2f2af4334
+    productClosureContribution: F-0038_complete_static_closure
+    commit: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
+    tree: 1ed9ce8c965018a1ab3c18709d876117f38097b4
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    approvalId: fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
     worktreeCleanup: pass
-    verification:
-      focused: passed_28_of_28
-      affectedRegression: passed_11_of_11
-      lint: pass
-      typecheck: pass
-      build: passed_98_pages
-      minimalSafetyKernelCommit: pass
-    adversarialReview:
-      noAuthorizationDecisionOrEntitlementChange: pass
-      noOrganizationMembershipDerivation: pass
-      personalUserNullAttributionPreserved: pass
-      F0038RemainsOpenOnlyForVersionedPricingResidual: pass
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active
@@ -904,9 +862,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 38d047c08ea5a041bdfa88e89bf93de2f2af4334
-  lastKnownOriginMasterSha: 38d047c08ea5a041bdfa88e89bf93de2f2af4334
-  lastKnownRemoteMasterSha: 38d047c08ea5a041bdfa88e89bf93de2f2af4334
+  lastKnownMasterSha: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
+  lastKnownOriginMasterSha: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
+  lastKnownRemoteMasterSha: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

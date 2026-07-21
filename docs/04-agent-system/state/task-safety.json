@@ -1,47 +1,16 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21",
-  "objective": "Close the remaining F-0038 pricing partition by persisting a nullable, versioned input/output token price tuple on model_config, copying that tuple into immutable model-config snapshots, and centrally calculating exact estimated CNY cost for successful and failed AI calls. Complete pricing plus zero tokens yields zero; incomplete pricing or token facts yields null. Do not choose real Provider prices, calibrate cost, execute a migration or database write, call a real Provider, or change authorization.",
+  "taskId": "p1-remediation-rc-04-admin-organization-picker-2026-07-21",
+  "objective": "Close F-0046 by replacing the backend-admin creator's fixed first-100 organization snapshot with an explicit, server-searched and paginated active-organization picker. The picker must expose loading, empty and error states, ignore stale rapid-search responses, require an explicit organization selection, and preserve the repository's fail-closed active-organization recheck without changing roles, permissions, schema or API semantics.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260721233000_p1_rc_04_ai_call_log_versioned_pricing.sql",
-    "drizzle/meta/20260721233000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/models/ai-rag.ts",
-    "src/server/models/ai-rag.test.ts",
-    "src/server/contracts/admin-ai-audit-log-ops-contract.ts",
-    "src/server/validators/ai-rag.ts",
-    "src/server/validators/ai-rag.test.ts",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/services/model-config-runtime.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "src/server/services/admin-ai-audit-log-ops-service.ts",
-    "src/features/admin/model-config-management/AdminModelConfigManagement.tsx",
-    "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx",
-    "src/server/services/organization-training-route.ts",
-    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
-    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-    "tests/unit/admin-model-config-management-ui.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
-    "tests/unit/phase-12-model-config-server-runtime.test.ts",
-    "tests/unit/phase-12-model-config-local-mock-runtime.test.ts",
-    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-    "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts",
-    "src/server/services/model-config-connection-test-executor.test.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-    "tests/unit/p0-rc-06-schema-migration-source.test.ts",
-    "tests/unit/p0-rc-08-schema-migration-source.test.ts"
+    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
+    "tests/unit/p1-admin-organization-picker.test.ts",
+    "tests/unit/admin-ops-summary-first-ui.test.ts",
+    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -53,67 +22,34 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "drizzle/*.sql except drizzle/20260721233000_p1_rc_04_ai_call_log_versioned_pricing.sql",
-    "drizzle/meta/* except drizzle/meta/20260721233000_snapshot.json and drizzle/meta/_journal.json",
-    "all schema files except src/db/schema/ai-rag.ts and its direct test",
+    "src/server/**",
+    "src/db/**",
+    "drizzle/**",
     "authorization or permission business semantics",
-    "real Provider calls, credentials, prices, calibration, external services or deployment"
+    "real database writes, Provider calls, external services, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260721233000_p1_rc_04_ai_call_log_versioned_pricing.sql",
-    "drizzle/meta/20260721233000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/models/ai-rag.ts",
-    "src/server/models/ai-rag.test.ts",
-    "src/server/contracts/admin-ai-audit-log-ops-contract.ts",
-    "src/server/validators/ai-rag.ts",
-    "src/server/validators/ai-rag.test.ts",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/services/model-config-runtime.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "src/server/services/admin-ai-audit-log-ops-service.ts",
-    "src/features/admin/model-config-management/AdminModelConfigManagement.tsx",
-    "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx",
-    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
+    "tests/unit/p1-admin-organization-picker.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/organization-training-route.ts",
-    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-    "tests/unit/admin-model-config-management-ui.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
-    "tests/unit/phase-12-model-config-server-runtime.test.ts",
-    "tests/unit/phase-12-model-config-local-mock-runtime.test.ts",
-    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-    "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts",
-    "src/server/services/model-config-connection-test-executor.test.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-    "tests/unit/p0-rc-06-schema-migration-source.test.ts",
-    "tests/unit/p0-rc-08-schema-migration-source.test.ts"
+    "tests/unit/admin-ops-summary-first-ui.test.ts",
+    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminResourceKnowledgeOpsBaseline saves the ModelConfigManagement form through POST /api/v1/admin/model-configs; direct UI tests cover field transport and local-estimate wording.",
-    "handlerService": "admin-ai-audit-log-runtime normalizes create/update input and builds connection-test snapshots from persisted ModelConfigSummaryDto values.",
-    "runtime": "model-config-runtime builds immutable execution snapshots from persisted model configuration; local mock snapshots remain unpriced rather than inventing Provider prices.",
-    "repositorySchema": "admin-ai-audit-log-runtime-repository is the central append boundary and persists model_config; ai-rag.ts is the authoritative schema source.",
-    "costInvariant": "The central append boundary derives estimatedCostCny using fixed-point arithmetic from a complete snapshot pricing tuple and complete token counts for both success and failure; explicit missing facts remain null.",
-    "sameTaskDirectChainAllowance": "src/server/services/organization-training-route.ts directly maps ModelConfigSummaryDto to ModelConfigSnapshot; src/server/services/admin-ai-audit-log-ops-service.ts directly produces local ModelConfigSummaryDto fallbacks that must explicitly remain unpriced. These are the two permitted direct source-file propagation additions under P1_EXECUTION_POLICY_CAPSULE_V1_1.",
-    "nonClaims": "No real Provider price is selected, no cost calibration is claimed, and no migration or persistent database write is executed."
+    "uiApi": "AdminOpsManagement creates organization-bound admin accounts and already calls GET /api/v1/organizations; the fixed page=1/pageSize=100 snapshot is the confirmed F-0046 failure boundary.",
+    "handlerService": "admin-organization-org-auth-runtime already parses page, pageSize, keyword and status and returns a paginated envelope; no server contract change is required.",
+    "repositorySchema": "admin-organization-org-auth-runtime-repository already filters and paginates the organization query, while admin-flow-runtime-repository rechecks organization.status=active during account creation.",
+    "tests": "A new focused UI test covers the 101st organization through search, status=active filtering, pagination, stale rapid-search responses, explicit selection, and empty/error states; existing admin UI and server regression suites remain unchanged.",
+    "nonClaims": "No role, permission, entitlement, schema, migration, database execution, API capability, dependency, Provider, external service or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "ai-call-log-versioned-pricing-focused",
+      "name": "admin-organization-picker-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -121,18 +57,12 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/models/ai-rag.test.ts",
-        "src/server/validators/ai-rag.test.ts",
-        "tests/unit/admin-model-config-management-ui.test.ts",
-        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-        "src/server/services/organization-training-route.test.ts"
+        "tests/unit/p1-admin-organization-picker.test.ts",
+        "tests/unit/admin-ops-summary-first-ui.test.ts"
       ]
     },
     {
-      "name": "ai-call-log-versioned-pricing-regression",
+      "name": "admin-organization-picker-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -140,49 +70,24 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-        "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
-        "tests/unit/phase-12-model-config-server-runtime.test.ts",
-        "tests/unit/phase-12-model-config-local-mock-runtime.test.ts",
-        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-        "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts",
-        "src/server/services/model-config-connection-test-executor.test.ts",
-        "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-        "tests/unit/p0-rc-06-schema-migration-source.test.ts",
-        "tests/unit/p0-rc-08-schema-migration-source.test.ts"
+        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
       ]
     },
     {
-      "name": "ai-call-log-versioned-pricing-lint",
+      "name": "admin-organization-picker-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/models/ai-rag.ts",
-        "src/server/models/ai-rag.test.ts",
-        "src/server/contracts/admin-ai-audit-log-ops-contract.ts",
-        "src/server/validators/ai-rag.ts",
-        "src/server/validators/ai-rag.test.ts",
-        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-        "src/server/services/model-config-runtime.ts",
-        "src/server/services/admin-ai-audit-log-runtime.ts",
-        "src/server/services/admin-ai-audit-log-ops-service.ts",
-        "src/features/admin/model-config-management/AdminModelConfigManagement.tsx",
-        "src/app/**/AdminAiAuditLogOpsBaseline.tsx",
-        "src/server/services/organization-training-route.ts",
-        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+        "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
+        "tests/unit/p1-admin-organization-picker.test.ts"
       ]
     },
     {
-      "name": "ai-call-log-versioned-pricing-typecheck",
+      "name": "admin-organization-picker-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -190,40 +95,24 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "standingApprovals": ["standing-test-only-allowlist-expansion-2026-07-21"],
+  "standingApprovals": [
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
   "riskClassification": {
-    "category": "schema_migration_source_pricing_semantics_and_database_application_logic",
-    "conditionalCloseout": true,
-    "noMigrationExecutionOrPersistentDatabaseWrite": true,
-    "noRealProviderPriceOrCostCalibration": true,
-    "noRealProviderCallDependencyAuthorizationOrMechanismChange": true
-  },
-  "approvalFingerprint": {
-    "approvalId": "fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21",
-    "taskId": "p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21",
-    "rootCause": "ai_call_cost_has_no_versioned_price_snapshot_or_central_exact_derivation",
-    "riskCategory": "schema/migration source + pricing semantics + database application logic",
-    "baseSha": "38d047c08ea5a041bdfa88e89bf93de2f2af4334",
-    "requestedOperations": [
-      "source implementation",
-      "offline Drizzle generation",
-      "validation",
-      "single commit",
-      "ff-only master merge",
-      "canonical origin/master push",
-      "sync",
-      "cleanup"
-    ]
+    "category": "low_risk_product_ui_query_consumption",
+    "noAuthorizationOrEntitlementChange": true,
+    "noSchemaMigrationDatabaseExecutionDependencyProviderOrMechanismChange": true
   },
   "push": {
     "target": "origin/master",
     "requiresFreshApproval": true,
-    "approvalId": "fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21",
-    "conditionalCloseout": true
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "conditionalCloseout": false
   }
 }
