@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20",
-  "objective": "Close F-0010 by removing plaintext redeem_code values from ordinary list and detail responses, exposing plaintext only through eligible ops_admin or super_admin no-store server actions, and recording redacted view and copy audit metadata before the sensitive response or client clipboard action; preserve the confirmed eligible-role distribution capability without adding roles, permissions, exports, schema, migration, real database execution, dependency, Provider, external call, safety-kernel, or secret/env work.",
+  "taskId": "p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20",
+  "objective": "Close F-0017 without schema changes by requiring a client request public ID, deriving an actor-scoped stable generation group, serializing same-request attempts, reusing a matching persisted batch, rejecting mismatched replays, and committing redeem_code rows plus redacted create/view audit rows in one database transaction; do not execute a real database, add entitlement, expose plaintext outside the existing distribution exception, or change dependencies, Provider, external services, safety mechanisms, or secret/env.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/superpowers/plans/2026-07-20-redeem-code-sensitive-access-audit.md",
-    "src/app/api/v1/redeem-codes/[publicId]/reveal-plaintext/route.ts",
-    "src/app/api/v1/redeem-codes/copy-plaintext/route.ts",
+    "docs/superpowers/plans/2026-07-20-redeem-code-batch-idempotency.md",
     "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-    "src/server/contracts/admin-user-org-auth-ops-contract.ts",
     "src/server/repositories/admin-redeem-code-runtime-repository.ts",
     "src/server/services/admin-redeem-code-runtime.ts",
     "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/p1-redeem-code-batch-idempotency.test.ts",
     "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-    "tests/unit/phase-8-admin-redeem-code-runtime.test.ts"
+    "tests/unit/phase-8-admin-redeem-code-runtime.test.ts",
+    "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts",
+    "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -28,7 +28,7 @@
   ],
   "validationCommands": [
     {
-      "name": "redeem-code-sensitive-access-focused",
+      "name": "redeem-code-batch-idempotency-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -36,12 +36,13 @@
         "exec",
         "vitest",
         "run",
+        "tests/unit/p1-redeem-code-batch-idempotency.test.ts",
         "tests/unit/phase-8-admin-redeem-code-runtime.test.ts",
         "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts"
       ]
     },
     {
-      "name": "redeem-code-sensitive-access-regression",
+      "name": "redeem-code-batch-idempotency-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -49,33 +50,32 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/admin-ops-summary-first-ui.test.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
-        "tests/unit/phone-visibility-enforcement.test.ts"
+        "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts",
+        "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts",
+        "tests/unit/admin-user-org-auth-ops-baseline.test.ts"
       ]
     },
     {
-      "name": "redeem-code-sensitive-access-lint",
+      "name": "redeem-code-batch-idempotency-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/app/api/v1/redeem-codes/[publicId]/reveal-plaintext/route.ts",
-        "src/app/api/v1/redeem-codes/copy-plaintext/route.ts",
         "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-        "src/server/contracts/admin-user-org-auth-ops-contract.ts",
         "src/server/repositories/admin-redeem-code-runtime-repository.ts",
         "src/server/services/admin-redeem-code-runtime.ts",
         "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/p1-redeem-code-batch-idempotency.test.ts",
         "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-        "tests/unit/phase-8-admin-redeem-code-runtime.test.ts"
+        "tests/unit/phase-8-admin-redeem-code-runtime.test.ts",
+        "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts",
+        "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts"
       ]
     },
     {
-      "name": "redeem-code-sensitive-access-typecheck",
+      "name": "redeem-code-batch-idempotency-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -83,7 +83,7 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "deployment": null,
     "secretEnv": null

@@ -5,6 +5,7 @@ import type { SQL } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
+import { auditLog, redeemCode } from "@/db/schema";
 import {
   createPostgresAdminRedeemCodeRuntimeRepositories,
   RedeemCodeGenerationConflictError,
@@ -97,10 +98,26 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       generation_group_id: string;
       redeem_deadline_at: Date | null;
     }> = [];
+    const auditInputs: Record<string, unknown>[] = [];
     let transactionCount = 0;
 
     const transactionDatabase = {
-      insert() {
+      async execute() {
+        return undefined;
+      },
+      insert(table: unknown) {
+        if (table === auditLog) {
+          return {
+            async values(row: Record<string, unknown>) {
+              auditInputs.push(row);
+            },
+          };
+        }
+
+        if (table !== redeemCode) {
+          throw new Error("Unexpected insert table.");
+        }
+
         return {
           values(row: (typeof insertedRows)[number]) {
             insertedRows.push(row);
@@ -128,6 +145,21 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
           },
         };
       },
+      select() {
+        return {
+          from() {
+            return {
+              where() {
+                return {
+                  async orderBy() {
+                    return [];
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
     };
     const database = {
       async transaction<T>(callback: (tx: typeof transactionDatabase) => T) {
@@ -148,7 +180,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       createRedeemCodePublicId: () => generatedPublicIds.shift()!,
     } as never);
 
-    const result = await repositories.createRedeemCodeBatch({
+    const result = await repositories.createRedeemCodeBatchAtomically({
       count: 1,
       redeemCodeType: "personal_standard_activation",
       profession: "monopoly",
@@ -156,6 +188,9 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       durationDay: 365,
       redeemDeadlineAt: null,
       actorPublicId: "admin-public-001",
+      actorRole: "ops_admin",
+      requestIp: "127.0.0.1",
+      requestPublicId: "redeem-code-generation-request-public-001",
     });
 
     expect(transactionCount).toBe(1);
@@ -201,6 +236,18 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         },
       ],
     });
+    expect(auditInputs).toHaveLength(2);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        action_type: "redeem_code.batch_create",
+        target_public_id: "redeem-code-batch-fixed",
+      }),
+      expect.objectContaining({
+        action_type: "redeem_code.plaintext_view",
+        target_public_id: "redeem-code-batch-fixed",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain("BBBBBBB2");
   });
 
   it("returns a standard conflict envelope when redeem_code generation retries are exhausted", async () => {
@@ -208,7 +255,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
     const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
       now: () => new Date("2026-05-31T17:00:00.000Z"),
       repositories: {
-        async createRedeemCodeBatch() {
+        async createRedeemCodeBatchAtomically() {
           throw new RedeemCodeGenerationConflictError();
         },
         async listRedeemCodes() {
@@ -260,6 +307,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
           level: 3,
           durationDay: 365,
           redeemDeadlineDate: "2026-06-24",
+          requestPublicId: "redeem-code-generation-request-public-001",
         }),
       }),
     );

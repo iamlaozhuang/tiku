@@ -76,8 +76,33 @@ function createAdminRepositories(auditInputs: unknown[] = []) {
   const listQueries: unknown[] = [];
 
   const repositories: AdminRedeemCodeRuntimeRepositories = {
-    async createRedeemCodeBatch(input) {
+    async createRedeemCodeBatchAtomically(input) {
       createInputs.push(input);
+      const deadlineSummary =
+        serializeDeadline(input.redeemDeadlineAt) ?? "long_term";
+
+      auditInputs.push(
+        {
+          actorPublicId: input.actorPublicId,
+          actorRole: input.actorRole,
+          actionType: "redeem_code.batch_create",
+          targetResourceType: "redeem_code",
+          targetPublicId: "redeem-code-batch-public-001",
+          resultStatus: "success",
+          metadataSummary: `redacted redeem_code batch metadata; count=${input.count} type=${input.redeemCodeType} profession=${input.profession} level=${input.level} deadline=${deadlineSummary}`,
+          requestIp: input.requestIp,
+        },
+        {
+          actorPublicId: input.actorPublicId,
+          actorRole: input.actorRole,
+          actionType: "redeem_code.plaintext_view",
+          targetResourceType: "redeem_code",
+          targetPublicId: "redeem-code-batch-public-001",
+          resultStatus: "success",
+          metadataSummary: `redacted redeem_code plaintext view metadata; source=generation count=${input.count}`,
+          requestIp: input.requestIp,
+        },
+      );
 
       return {
         generation: {
@@ -276,6 +301,7 @@ describe("phase 11 redeem_code batch management loop", () => {
             profession: "monopoly",
             level: 3,
             durationDay: 365,
+            requestPublicId: "redeem-code-generation-request-public-001",
             ...deadlineInput,
           }),
         }),
@@ -295,6 +321,10 @@ describe("phase 11 redeem_code batch management loop", () => {
       expect(auditInputs).toEqual([
         expect.objectContaining({
           metadataSummary: expect.stringContaining("deadline=long_term"),
+        }),
+        expect.objectContaining({
+          actionType: "redeem_code.plaintext_view",
+          metadataSummary: expect.stringContaining("source=generation"),
         }),
       ]);
     },
@@ -320,6 +350,7 @@ describe("phase 11 redeem_code batch management loop", () => {
             level: 3,
             durationDay: 365,
             redeemDeadlineDate,
+            requestPublicId: "redeem-code-generation-request-public-001",
           }),
         }),
       );
@@ -349,6 +380,7 @@ describe("phase 11 redeem_code batch management loop", () => {
           redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
+          requestPublicId: "redeem-code-generation-request-public-001",
           ...durationInput,
         }),
       }),
@@ -379,6 +411,7 @@ describe("phase 11 redeem_code batch management loop", () => {
           level: 3,
           durationDay: 365,
           redeemDeadlineDate: "2026-06-24",
+          requestPublicId: "redeem-code-generation-request-public-001",
         }),
       }),
     );
@@ -393,6 +426,9 @@ describe("phase 11 redeem_code batch management loop", () => {
         durationDay: 365,
         redeemDeadlineAt: new Date("2026-06-24T15:59:59.999Z"),
         actorPublicId: "admin-public-001",
+        actorRole: "ops_admin",
+        requestIp: null,
+        requestPublicId: "redeem-code-generation-request-public-001",
       },
     ]);
     expect(payload).toMatchObject({
@@ -434,6 +470,17 @@ describe("phase 11 redeem_code batch management loop", () => {
           "redacted redeem_code batch metadata; count=3 type=personal_standard_activation profession=monopoly level=3 deadline=2026-06-24T15:59:59.999Z",
         requestIp: null,
       },
+      {
+        actorPublicId: "admin-public-001",
+        actorRole: "ops_admin",
+        actionType: "redeem_code.plaintext_view",
+        targetResourceType: "redeem_code",
+        targetPublicId: "redeem-code-batch-public-001",
+        resultStatus: "success",
+        metadataSummary:
+          "redacted redeem_code plaintext view metadata; source=generation count=3",
+        requestIp: null,
+      },
     ]);
     expect(JSON.stringify(auditInputs)).not.toContain(generatedCodePlaceholder);
   });
@@ -451,6 +498,7 @@ describe("phase 11 redeem_code batch management loop", () => {
         body: JSON.stringify({
           count: 101,
           redeemDeadlineDate: "2026-06-24",
+          requestPublicId: "redeem-code-generation-request-public-001",
         }),
       }),
     );
@@ -478,6 +526,7 @@ describe("phase 11 redeem_code batch management loop", () => {
           count: 1,
           durationDay: 365,
           redeemDeadlineDate: "2026-06-24",
+          requestPublicId: "redeem-code-generation-request-public-001",
         }),
       }),
     );

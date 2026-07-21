@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import {
   createAdminRedeemCodeRuntimeRouteHandlers,
@@ -77,9 +77,9 @@ function createRepositories(input?: {
   includePlainTextTarget?: boolean;
 }): AdminRedeemCodeRuntimeRepositories {
   const repositories = {
-    async createRedeemCodeBatch(
+    async createRedeemCodeBatchAtomically(
       input: Parameters<
-        AdminRedeemCodeRuntimeRepositories["createRedeemCodeBatch"]
+        AdminRedeemCodeRuntimeRepositories["createRedeemCodeBatchAtomically"]
       >[0],
     ) {
       const redeemDeadlineAt = input.redeemDeadlineAt?.toISOString() ?? null;
@@ -598,8 +598,54 @@ describe("phase 8 admin redeem code runtime", () => {
 
   it("records a redacted batch view before returning the generation distribution window", async () => {
     const auditInputs: Record<string, unknown>[] = [];
+    const repositories = createRepositories({ auditInputs });
+    const createBatch = vi.spyOn(
+      repositories,
+      "createRedeemCodeBatchAtomically",
+    );
     const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
-      repositories: createRepositories({ auditInputs }),
+      repositories,
+      sessionService: createSessionService("super_admin"),
+      now: () => now,
+    });
+    const response = await handlers.redeemCodes.POST(
+      new Request("http://localhost/api/v1/redeem-codes", {
+        body: JSON.stringify({
+          count: 1,
+          redeemCodeType: "personal_standard_activation",
+          profession: "monopoly",
+          level: 3,
+          durationDay: 365,
+          requestPublicId: "redeem-code-generation-request-public-001",
+        }),
+        headers: {
+          authorization: "Bearer admin-session-token",
+          "x-forwarded-for": "127.0.0.1",
+        },
+        method: "POST",
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({ code: 0 });
+    expect(createBatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorPublicId: "admin-public-001",
+        actorRole: "super_admin",
+        requestIp: "127.0.0.1",
+        requestPublicId: "redeem-code-generation-request-public-001",
+      }),
+    );
+    expect(auditInputs).toEqual([]);
+  });
+
+  it("rejects generation without a client request public ID", async () => {
+    const repositories = createRepositories();
+    const createBatch = vi.spyOn(
+      repositories,
+      "createRedeemCodeBatchAtomically",
+    );
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories,
       sessionService: createSessionService("super_admin"),
       now: () => now,
     });
@@ -617,21 +663,11 @@ describe("phase 8 admin redeem code runtime", () => {
       }),
     );
 
-    await expect(response.json()).resolves.toMatchObject({ code: 0 });
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "redeem_code.batch_create",
-        targetPublicId: "redeem-code-batch-public-001",
-      }),
-      expect.objectContaining({
-        actionType: "redeem_code.plaintext_view",
-        targetPublicId: "redeem-code-batch-public-001",
-        metadataSummary:
-          "redacted redeem_code plaintext view metadata; source=generation count=1",
-      }),
-    ]);
-    expect(JSON.stringify(auditInputs)).not.toContain("ABCDEFG2");
-    expect(JSON.stringify(auditInputs)).not.toContain("code_hash");
+    await expect(response.json()).resolves.toMatchObject({
+      code: 422601,
+      data: null,
+    });
+    expect(createBatch).not.toHaveBeenCalled();
   });
 
   it("rejects detail access for admin roles that cannot read redeem_code operations", async () => {
@@ -704,6 +740,7 @@ describe("phase 8 admin redeem code runtime", () => {
             profession: "monopoly",
             level: 3,
             durationDay: 365,
+            requestPublicId: "redeem-code-generation-request-public-001",
             ...deadlineInput,
           }),
           method: "POST",
@@ -771,6 +808,7 @@ describe("phase 8 admin redeem code runtime", () => {
           level: 3,
           durationDay: 365,
           redeemDeadlineDate: "2026-05-23",
+          requestPublicId: "redeem-code-generation-request-public-001",
         }),
         method: "POST",
         headers: { authorization: "Bearer admin-session-token" },

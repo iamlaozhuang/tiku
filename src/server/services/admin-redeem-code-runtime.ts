@@ -24,6 +24,7 @@ import {
   type AdminRedeemCodeRuntimeRepositories,
   type AdminRedeemCodeRuntimeRepositoryOptions,
   RedeemCodeGenerationConflictError,
+  RedeemCodeGenerationIdempotencyConflictError,
 } from "../repositories/admin-redeem-code-runtime-repository";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
@@ -55,6 +56,7 @@ type RedeemCodeBatchRequest = {
   level: number;
   durationDay: number;
   redeemDeadlineAt: Date | null;
+  requestPublicId: string;
 };
 
 type RedeemCodeBatchRequestResult =
@@ -324,6 +326,20 @@ function normalizeRedeemCodeBatchRequest(
   const redeemCodeType = readRedeemCodeType(source.redeemCodeType);
   const profession = readProfession(source.profession);
   const level = readOptionalInteger(source.level);
+  const requestPublicId =
+    typeof source.requestPublicId === "string"
+      ? source.requestPublicId.trim()
+      : null;
+
+  if (requestPublicId === null || !PUBLIC_ID_PATTERN.test(requestPublicId)) {
+    return {
+      success: false,
+      response: createErrorResponse(
+        ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+        "Redeem code generation requestPublicId is invalid.",
+      ),
+    };
+  }
 
   if (count < 1 || count > REDEEM_CODE_BATCH_CREATE_LIMIT) {
     return {
@@ -397,6 +413,7 @@ function normalizeRedeemCodeBatchRequest(
       level,
       durationDay,
       redeemDeadlineAt,
+      requestPublicId,
     },
   };
 }
@@ -810,25 +827,33 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
           return createJsonResponse(batchRequest.response);
         }
 
-        const auditLogRepository = repositories.auditLogRepository;
+        const createRedeemCodeBatchAtomically =
+          repositories.createRedeemCodeBatchAtomically;
 
-        if (auditLogRepository === undefined) {
-          throw new Error("Redeem code audit repository is required.");
+        if (typeof createRedeemCodeBatchAtomically !== "function") {
+          throw new Error(
+            "Atomic redeem code generation repository is required.",
+          );
         }
 
         let createdRedeemCodeBatch: Awaited<
           ReturnType<
-            AdminRedeemCodeRuntimeRepositories["createRedeemCodeBatch"]
+            AdminRedeemCodeRuntimeRepositories["createRedeemCodeBatchAtomically"]
           >
         >;
 
         try {
-          createdRedeemCodeBatch = await repositories.createRedeemCodeBatch({
+          createdRedeemCodeBatch = await createRedeemCodeBatchAtomically({
             ...batchRequest.value,
             actorPublicId: actor.publicId,
+            actorRole: readRedeemCodeAuditRole(actor),
+            requestIp: readRequestIp(request),
           });
         } catch (error) {
-          if (error instanceof RedeemCodeGenerationConflictError) {
+          if (
+            error instanceof RedeemCodeGenerationConflictError ||
+            error instanceof RedeemCodeGenerationIdempotencyConflictError
+          ) {
             return createJsonResponse(
               createErrorResponse(
                 ADMIN_AUTH_OPERATION_ERROR_CODES.concurrentConflict,
@@ -839,28 +864,6 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
 
           throw error;
         }
-
-        const deadlineSummary =
-          createdRedeemCodeBatch.generation.redeemDeadlineAt ?? "long_term";
-
-        await auditLogRepository.appendAuditLog({
-          actorPublicId: actor.publicId,
-          actorRole: readRedeemCodeAuditRole(actor),
-          actionType: "redeem_code.batch_create",
-          targetResourceType: "redeem_code",
-          targetPublicId: createdRedeemCodeBatch.generation.generationGroupId,
-          resultStatus: "success",
-          metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodeBatch.generation.count} type=${createdRedeemCodeBatch.generation.redeemCodeType} profession=${createdRedeemCodeBatch.generation.profession} level=${createdRedeemCodeBatch.generation.level} deadline=${deadlineSummary}`,
-          requestIp: readRequestIp(request),
-        });
-        await appendRedeemCodePlainTextAuditLog({
-          request,
-          actor,
-          actionType: "redeem_code.plaintext_view",
-          targetPublicId: createdRedeemCodeBatch.generation.generationGroupId,
-          resultStatus: "success",
-          metadataSummary: `redacted redeem_code plaintext view metadata; source=generation count=${createdRedeemCodeBatch.generation.count}`,
-        });
 
         return createJsonResponse(
           createSuccessResponse(createdRedeemCodeBatch),

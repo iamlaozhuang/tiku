@@ -284,6 +284,7 @@ type EmployeeConfirmationState =
 type RedeemCodeConfirmationState = {
   kind: "generateRedeemCode";
   input: CreateRedeemCodeInput;
+  requestPublicId: string;
 } | null;
 
 type OrganizationMutationInput = {
@@ -6974,10 +6975,11 @@ export function AdminRedeemCodePage() {
     const createResponse = await postAdminApi<RedeemCodeGenerationDto>(
       "/api/v1/redeem-codes",
       sessionToken,
-      confirmationState.input,
+      {
+        ...confirmationState.input,
+        requestPublicId: confirmationState.requestPublicId,
+      },
     );
-
-    setConfirmationState(null);
 
     if (createResponse.code !== 0 || createResponse.data === null) {
       setToastMessage({
@@ -6986,6 +6988,8 @@ export function AdminRedeemCodePage() {
       });
       return;
     }
+
+    setConfirmationState(null);
 
     const generatedRedeemCodes = createResponse.data.redeemCodes;
 
@@ -7152,7 +7156,11 @@ export function AdminRedeemCodePage() {
             id="redeem-code-generate-panel"
             onFormChange={setRedeemCodeGenerationFormState}
             onGenerateRedeemCode={(input) =>
-              setConfirmationState({ kind: "generateRedeemCode", input })
+              setConfirmationState({
+                kind: "generateRedeemCode",
+                input,
+                requestPublicId: `redeem-code-generation-request-${crypto.randomUUID()}`,
+              })
             }
           />
           {generatedRedeemCodeSummary === null ? null : (

@@ -170,7 +170,10 @@ function createJsonResponse(payload: unknown, status = 200) {
   };
 }
 
-function mockAdminFetch(options: { copyFails?: boolean } = {}) {
+function mockAdminFetch(
+  options: { copyFails?: boolean; generationFailsOnce?: boolean } = {},
+) {
+  let generationAttemptCount = 0;
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
       const path = String(url);
@@ -380,6 +383,19 @@ function mockAdminFetch(options: { copyFails?: boolean } = {}) {
       }
 
       if (path === "/api/v1/redeem-codes" && init?.method === "POST") {
+        generationAttemptCount += 1;
+
+        if (
+          options.generationFailsOnce === true &&
+          generationAttemptCount === 1
+        ) {
+          return createJsonResponse({
+            code: 503607,
+            message: "temporary generation failure",
+            data: null,
+          });
+        }
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -1057,6 +1073,59 @@ describe("AdminRedeemCodePage", () => {
       await screen.findByText("Redeem code plaintext access is unavailable."),
     ).toBeVisible();
     expect(clipboardWriteText).not.toHaveBeenCalled();
+  });
+
+  it("reuses one request public ID when a failed generation confirmation is retried", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch({ generationFailsOnce: true });
+
+    render(createElement(AdminRedeemCodePage));
+
+    await screen.findByRole("heading", { name: "卡密管理" });
+    fireEvent.click(screen.getByRole("button", { name: "生成卡密" }));
+    const drawer = screen.getByRole("dialog", { name: "生成卡密" });
+    fireEvent.change(
+      within(drawer).getByTestId("redeem-code-generation-type-select"),
+      { target: { value: "personal_standard_activation" } },
+    );
+    fireEvent.change(
+      within(drawer).getByTestId("redeem-code-generation-profession-select"),
+      { target: { value: "monopoly" } },
+    );
+    fireEvent.change(
+      within(drawer).getByTestId("redeem-code-generation-level-input"),
+      { target: { value: "3" } },
+    );
+    fireEvent.click(within(drawer).getByTestId("redeem-code-generate-button"));
+    fireEvent.click(
+      screen.getByTestId("redeem-code-generation-confirm-action"),
+    );
+
+    expect(
+      await screen.findByText("temporary generation failure"),
+    ).toBeVisible();
+    const retryDialog = screen.getByRole("alertdialog");
+    fireEvent.click(
+      within(retryDialog).getByTestId("redeem-code-generation-confirm-action"),
+    );
+
+    await screen.findByText("卡密已生成，请在受控分发窗口核对并复制");
+    const generationBodies = fetchMock.mock.calls
+      .filter(
+        ([url, init]) =>
+          String(url) === "/api/v1/redeem-codes" && init?.method === "POST",
+      )
+      .map(
+        ([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>,
+      );
+
+    expect(generationBodies).toHaveLength(2);
+    expect(generationBodies[0]?.requestPublicId).toMatch(
+      /^redeem-code-generation-request-/u,
+    );
+    expect(generationBodies[1]?.requestPublicId).toBe(
+      generationBodies[0]?.requestPublicId,
+    );
   });
 
   it("submits null for long-term redemption and uses the same label across admin surfaces", async () => {

@@ -13,6 +13,7 @@ import {
   isNull,
   lt,
   or,
+  sql,
   type SQL,
 } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -35,9 +36,16 @@ import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminRedeemCodeRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
+type PersistedRedeemCodeGenerationItem = RedeemCodeGenerationItemDto & {
+  durationDay: number;
+};
+
 export type AdminRedeemCodeRuntimeRepositoryOptions = {
   createDatabase?: () => AdminRedeemCodeRuntimeDatabase;
-  createGenerationGroupId?: () => string;
+  createGenerationGroupId?: (input: {
+    actorPublicId: string;
+    requestPublicId: string;
+  }) => string;
   createRedeemCodePlainText?: () => string;
   createRedeemCodePublicId?: () => string;
   now?: () => Date;
@@ -48,7 +56,7 @@ export type AdminRedeemCodePage<TData> = TData & {
 };
 
 export type AdminRedeemCodeRuntimeRepositories = {
-  createRedeemCodeBatch(
+  createRedeemCodeBatchAtomically(
     input: CreateRedeemCodeBatchInput,
   ): Promise<RedeemCodeGenerationDto>;
   listRedeemCodes(
@@ -79,6 +87,9 @@ export type CreateRedeemCodeBatchInput = {
   durationDay: number;
   redeemDeadlineAt: Date | null;
   actorPublicId: string;
+  actorRole: string;
+  requestIp: string | null;
+  requestPublicId: string;
 };
 
 export type AppendRedeemCodeAuditLogInput = {
@@ -98,11 +109,19 @@ const { auditLog, redeemCode, user } = databaseSchema;
 const LOCAL_REDEEM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const LOCAL_REDEEM_CODE_LENGTH = 8;
 const LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS = 5;
+const REDEEM_CODE_GENERATION_LOCK_NAMESPACE = 200114;
 
 export class RedeemCodeGenerationConflictError extends Error {
   constructor() {
     super("Redeem code generation conflicted with another operation.");
     this.name = "RedeemCodeGenerationConflictError";
+  }
+}
+
+export class RedeemCodeGenerationIdempotencyConflictError extends Error {
+  constructor() {
+    super("Redeem code generation request conflicts with its prior payload.");
+    this.name = "RedeemCodeGenerationIdempotencyConflictError";
   }
 }
 
@@ -146,49 +165,87 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
   );
   const clock = options.now ?? (() => new Date());
   const createGenerationGroupId =
-    options.createGenerationGroupId ??
-    (() => `redeem-code-batch-${randomUUID()}`);
+    options.createGenerationGroupId ?? createDefaultGenerationGroupId;
   const createRedeemCodePlainText =
     options.createRedeemCodePlainText ?? createLocalRedeemCodePlainText;
   const createRedeemCodePublicId =
     options.createRedeemCodePublicId ?? (() => `redeem-code-${randomUUID()}`);
 
   return {
-    async createRedeemCodeBatch(input) {
+    async createRedeemCodeBatchAtomically(input) {
       const database = getDatabase();
-      const generationGroupId = createGenerationGroupId();
+      const generationGroupId = createGenerationGroupId({
+        actorPublicId: input.actorPublicId,
+        requestPublicId: input.requestPublicId,
+      });
 
       return database.transaction(async (transactionDatabase) => {
-        const redeemCodes: RedeemCodeGenerationItemDto[] = [];
+        const generationDatabase =
+          transactionDatabase as AdminRedeemCodeRuntimeDatabase;
 
-        for (let codeIndex = 0; codeIndex < input.count; codeIndex += 1) {
-          redeemCodes.push(
-            await createRedeemCodeWithRetry(
-              transactionDatabase as AdminRedeemCodeRuntimeDatabase,
-              {
-                ...input,
-                generationGroupId,
-              },
-              {
-                createRedeemCodePlainText,
-                createRedeemCodePublicId,
-              },
-            ),
+        await lockRedeemCodeGenerationRequest(
+          generationDatabase,
+          generationGroupId,
+        );
+        const existingRedeemCodes = await listRedeemCodeGenerationItems(
+          generationDatabase,
+          generationGroupId,
+        );
+
+        if (existingRedeemCodes.length > 0) {
+          assertRedeemCodeGenerationMatches(input, existingRedeemCodes);
+          await appendRedeemCodeAuditLog(generationDatabase, {
+            actorPublicId: input.actorPublicId,
+            actorRole: input.actorRole,
+            actionType: "redeem_code.plaintext_view",
+            targetResourceType: "redeem_code",
+            targetPublicId: generationGroupId,
+            resultStatus: "success",
+            metadataSummary: `redacted redeem_code plaintext view metadata; source=generation_replay count=${existingRedeemCodes.length}`,
+            requestIp: input.requestIp,
+          });
+
+          return createRedeemCodeGenerationResult(
+            input,
+            generationGroupId,
+            existingRedeemCodes,
           );
         }
 
-        return {
-          generation: {
-            generationGroupId,
-            count: redeemCodes.length,
-            redeemCodeType: input.redeemCodeType,
-            profession: input.profession,
-            level: input.level,
-            durationDay: input.durationDay,
-            redeemDeadlineAt: serializeRedeemDeadlineAt(input.redeemDeadlineAt),
-          },
-          redeemCodes,
-        };
+        const createdRedeemCodes = await createRedeemCodeItems(
+          generationDatabase,
+          { ...input, generationGroupId },
+          { createRedeemCodePlainText, createRedeemCodePublicId },
+        );
+        const deadlineSummary =
+          serializeRedeemDeadlineAt(input.redeemDeadlineAt) ?? "long_term";
+
+        await appendRedeemCodeAuditLog(generationDatabase, {
+          actorPublicId: input.actorPublicId,
+          actorRole: input.actorRole,
+          actionType: "redeem_code.batch_create",
+          targetResourceType: "redeem_code",
+          targetPublicId: generationGroupId,
+          resultStatus: "success",
+          metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodes.length} type=${input.redeemCodeType} profession=${input.profession} level=${input.level} deadline=${deadlineSummary}`,
+          requestIp: input.requestIp,
+        });
+        await appendRedeemCodeAuditLog(generationDatabase, {
+          actorPublicId: input.actorPublicId,
+          actorRole: input.actorRole,
+          actionType: "redeem_code.plaintext_view",
+          targetResourceType: "redeem_code",
+          targetPublicId: generationGroupId,
+          resultStatus: "success",
+          metadataSummary: `redacted redeem_code plaintext view metadata; source=generation count=${createdRedeemCodes.length}`,
+          requestIp: input.requestIp,
+        });
+
+        return createRedeemCodeGenerationResult(
+          input,
+          generationGroupId,
+          createdRedeemCodes,
+        );
       });
     },
     async listRedeemCodes(query) {
@@ -333,22 +390,162 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
     },
     auditLogRepository: {
       async appendAuditLog(input) {
-        await getDatabase()
-          .insert(auditLog)
-          .values({
-            public_id: `audit-log-${randomUUID()}`,
-            actor_public_id: input.actorPublicId,
-            actor_role: input.actorRole,
-            action_type: input.actionType,
-            target_resource_type: input.targetResourceType,
-            target_public_id: input.targetPublicId,
-            result_status: input.resultStatus,
-            metadata_summary: input.metadataSummary,
-            request_ip: input.requestIp,
-          });
+        await appendRedeemCodeAuditLog(getDatabase(), input);
       },
     },
   };
+}
+
+function createDefaultGenerationGroupId(input: {
+  actorPublicId: string;
+  requestPublicId: string;
+}): string {
+  const requestScopeHash = createHash("sha256")
+    .update(`${input.actorPublicId}\u0000${input.requestPublicId}`)
+    .digest("hex");
+
+  return `redeem-code-batch-${requestScopeHash}`;
+}
+
+async function lockRedeemCodeGenerationRequest(
+  database: AdminRedeemCodeRuntimeDatabase,
+  generationGroupId: string,
+): Promise<void> {
+  await database.execute(
+    sql`select pg_advisory_xact_lock(${REDEEM_CODE_GENERATION_LOCK_NAMESPACE}, hashtext(${generationGroupId})) as redeem_code_generation_lock`,
+  );
+}
+
+async function listRedeemCodeGenerationItems(
+  database: AdminRedeemCodeRuntimeDatabase,
+  generationGroupId: string,
+): Promise<PersistedRedeemCodeGenerationItem[]> {
+  const rows = await database
+    .select({
+      public_id: redeemCode.public_id,
+      code_display: redeemCode.code_display,
+      redeem_code_type: redeemCode.redeem_code_type,
+      profession: redeemCode.profession,
+      level: redeemCode.level,
+      duration_day: redeemCode.duration_day,
+      redeem_deadline_at: redeemCode.redeem_deadline_at,
+      status: redeemCode.status,
+      created_at: redeemCode.created_at,
+    })
+    .from(redeemCode)
+    .where(eq(redeemCode.generation_group_id, generationGroupId))
+    .orderBy(asc(redeemCode.id));
+
+  return rows.map((row) => ({
+    publicId: row.public_id,
+    codePlainText: row.code_display,
+    codeDisplay: row.code_display,
+    redeemCodeType: row.redeem_code_type,
+    profession: row.profession,
+    level: row.level,
+    durationDay: row.duration_day,
+    status: row.status,
+    redeemDeadlineAt: serializeRedeemDeadlineAt(row.redeem_deadline_at),
+    createdAt: row.created_at.toISOString(),
+  }));
+}
+
+function assertRedeemCodeGenerationMatches(
+  input: CreateRedeemCodeBatchInput,
+  redeemCodes: PersistedRedeemCodeGenerationItem[],
+): void {
+  const expectedDeadline = serializeRedeemDeadlineAt(input.redeemDeadlineAt);
+  const hasMatchingPayload =
+    redeemCodes.length === input.count &&
+    redeemCodes.every(
+      (redeemCodeItem) =>
+        redeemCodeItem.redeemCodeType === input.redeemCodeType &&
+        redeemCodeItem.profession === input.profession &&
+        redeemCodeItem.level === input.level &&
+        redeemCodeItem.durationDay === input.durationDay &&
+        redeemCodeItem.redeemDeadlineAt === expectedDeadline,
+    );
+
+  if (!hasMatchingPayload) {
+    throw new RedeemCodeGenerationIdempotencyConflictError();
+  }
+}
+
+function createRedeemCodeGenerationResult(
+  input: CreateRedeemCodeBatchInput,
+  generationGroupId: string,
+  redeemCodes: RedeemCodeGenerationItemDto[],
+): RedeemCodeGenerationDto {
+  return {
+    generation: {
+      generationGroupId,
+      count: redeemCodes.length,
+      redeemCodeType: input.redeemCodeType,
+      profession: input.profession,
+      level: input.level,
+      durationDay: input.durationDay,
+      redeemDeadlineAt: serializeRedeemDeadlineAt(input.redeemDeadlineAt),
+    },
+    redeemCodes: redeemCodes.map(toRedeemCodeGenerationItemDto),
+  };
+}
+
+function toRedeemCodeGenerationItemDto(
+  input: RedeemCodeGenerationItemDto,
+): RedeemCodeGenerationItemDto {
+  return {
+    publicId: input.publicId,
+    codePlainText: input.codePlainText,
+    codeDisplay: input.codeDisplay,
+    redeemCodeType: input.redeemCodeType,
+    profession: input.profession,
+    level: input.level,
+    status: input.status,
+    redeemDeadlineAt: input.redeemDeadlineAt,
+    createdAt: input.createdAt,
+  };
+}
+
+async function createRedeemCodeItems(
+  database: AdminRedeemCodeRuntimeDatabase,
+  input: CreateRedeemCodeBatchInput & { generationGroupId: string },
+  helpers: {
+    createRedeemCodePlainText: () => string;
+    createRedeemCodePublicId: () => string;
+  },
+  createdRedeemCodes: RedeemCodeGenerationItemDto[] = [],
+): Promise<RedeemCodeGenerationItemDto[]> {
+  if (createdRedeemCodes.length >= input.count) {
+    return createdRedeemCodes;
+  }
+
+  const createdRedeemCode = await createRedeemCodeWithRetry(
+    database,
+    input,
+    helpers,
+  );
+
+  return createRedeemCodeItems(database, input, helpers, [
+    ...createdRedeemCodes,
+    createdRedeemCode,
+  ]);
+}
+
+async function appendRedeemCodeAuditLog(
+  database: AdminRedeemCodeRuntimeDatabase,
+  input: AppendRedeemCodeAuditLogInput,
+): Promise<void> {
+  await database.insert(auditLog).values({
+    public_id: `audit-log-${randomUUID()}`,
+    actor_public_id: input.actorPublicId,
+    actor_role: input.actorRole,
+    action_type: input.actionType,
+    target_resource_type: input.targetResourceType,
+    target_public_id: input.targetPublicId,
+    result_status: input.resultStatus,
+    metadata_summary: input.metadataSummary,
+    request_ip: input.requestIp,
+  });
 }
 
 async function createRedeemCodeWithRetry(
