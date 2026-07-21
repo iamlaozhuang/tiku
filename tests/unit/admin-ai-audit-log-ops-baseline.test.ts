@@ -929,8 +929,8 @@ describe("admin ai and audit log ops baseline", () => {
               aiCallLogs: [
                 {
                   publicId: "runtime-ai-call-log-split-001",
-                  userPublicId: null,
-                  organizationPublicId: null,
+                  userPublicId: "user-public-001",
+                  organizationPublicId: "organization-public-001",
                   profession: "monopoly",
                   level: 3,
                   aiFuncType: "ai_scoring",
@@ -1018,6 +1018,21 @@ describe("admin ai and audit log ops baseline", () => {
         name: /查看AI 评分.*Local Mock.*调用详情/u,
       }),
     ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /查看AI 评分.*Local Mock.*调用详情/u,
+      }),
+    );
+    const detailPanel = screen
+      .getByRole("heading", { name: "AI 调用日志详情" })
+      .closest("section");
+    expect(detailPanel).not.toBeNull();
+    expect(detailPanel).toHaveTextContent("user-public-001");
+    expect(detailPanel).toHaveTextContent("organization-public-001");
+    expect(detailPanel).toHaveTextContent("monopoly");
+    expect(detailPanel).toHaveTextContent("3");
+    expect(detailPanel).toHaveTextContent("0.01 元");
+    expect(detailPanel).toHaveTextContent("100 ms");
     expect(document.body).not.toHaveTextContent("Cost Calibration");
     expect(screen.getByText("失败调用")).toBeInTheDocument();
     expect(screen.queryByText("审计日志只读")).toBeNull();
@@ -1044,6 +1059,86 @@ describe("admin ai and audit log ops baseline", () => {
     expect(fetchedPaths).not.toContainEqual(
       expect.stringMatching(/^\/api\/v1\/prompt-templates\b/u),
     );
+  });
+
+  it("sends every canonical AI call filter to both list and summary and resets them", async () => {
+    localStorage.setItem("tiku.localSessionToken", "ai-filter-session");
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const requestPath = String(input);
+
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: requestPath.startsWith("/api/v1/ai-call-logs/summary")
+          ? { dailySummaries: [] }
+          : { aiCallLogs: [] },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          sortBy: "startedAt",
+          sortOrder: "desc",
+          total: 0,
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminAiCallLogOpsPage, { runtimeEnabled: true }));
+    await screen.findByRole("heading", { level: 1, name: "AI 调用日志" });
+
+    fireEvent.change(screen.getByLabelText("AI 功能类型"), {
+      target: { value: "ai_scoring" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用用户"), {
+      target: { value: "user-public-001" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用企业"), {
+      target: { value: "organization-public-001" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用专业"), {
+      target: { value: "marketing" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用等级"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用状态"), {
+      target: { value: "failed" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用开始日期"), {
+      target: { value: "2026-07-01" },
+    });
+    fireEvent.change(screen.getByLabelText("AI 调用结束日期"), {
+      target: { value: "2026-07-11" },
+    });
+
+    await waitFor(() => {
+      const recentPaths = fetchMock.mock.calls
+        .slice(-2)
+        .map(([input]) => String(input));
+
+      expect(recentPaths).toHaveLength(2);
+      for (const path of recentPaths) {
+        expect(path).toContain("aiFuncType=ai_scoring");
+        expect(path).toContain("userPublicId=user-public-001");
+        expect(path).toContain("organizationPublicId=organization-public-001");
+        expect(path).toContain("profession=marketing");
+        expect(path).toContain("level=4");
+        expect(path).toContain("callStatus=failed");
+        expect(path).toContain("fromStartedAt=2026-07-01T00%3A00%3A00.000Z");
+        expect(path).toContain("toStartedAt=2026-07-11T23%3A59%3A59.999Z");
+      }
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "重置筛选" }));
+    expect(screen.getByLabelText("AI 功能类型")).toHaveValue("all");
+    expect(screen.getByLabelText("AI 调用用户")).toHaveValue("");
+    expect(screen.getByLabelText("AI 调用企业")).toHaveValue("");
+    expect(screen.getByLabelText("AI 调用专业")).toHaveValue("all");
+    expect(screen.getByLabelText("AI 调用等级")).toHaveValue(null);
+    expect(screen.getByLabelText("AI 调用状态")).toHaveValue("all");
+    expect(screen.getByLabelText("AI 调用开始日期")).toHaveValue("");
+    expect(screen.getByLabelText("AI 调用结束日期")).toHaveValue("");
+    expect(document.body).not.toHaveTextContent("ai-filter-session");
   });
 
   it("renders ai and audit operation states with redacted runtime metadata", () => {

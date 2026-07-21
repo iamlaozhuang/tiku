@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
+  currentTaskId: p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -255,6 +255,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-contact-config-persistence-2026-07-21
     - p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
     - p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
+    - p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -295,6 +296,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-f0031-static-closure-2026-07-21
     - p1-remediation-rc-04-contact-config-persistence-2026-07-21
     - p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
+    - p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -361,66 +363,67 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
     p1-remediation-rc-04-contact-config-persistence-2026-07-21: closed
     p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21: closed
-    p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21: in_progress
+    p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21: closed
+    p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
-    title: AI call log known dimension propagation
-    phase: p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
+  - id: p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
+    title: AI call log operations filters and redacted attribution detail
+    phase: p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation_partition
-    productClosureContribution: F-0038_known_dimension_propagation_only_not_closed
-    branch: fix/ai-call-log-known-dimension-propagation
-    objective: propagate already-authoritative profession and level facts plus explicitly supplied optional organization facts through existing AI scoring, explanation, and learning-suggestion append paths without deriving authorization context or pricing semantics
+    productClosureContribution: F-0038_operations_ui_only_not_closed
+    branch: fix/ai-call-log-operations-filters
+    objective: expose the canonical AI call log function, user, organization, profession, level, status, and time filters in the operations UI and show persisted attribution and cost facts in the redacted detail without changing backend or pricing semantics
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-04
     findingIds:
       - F-0038
     executionStage: verified_ready_for_standing_closeout
     standingApproval:
-      category: bounded_provider_adapter_pure_logic_and_database_input_propagation
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      category: low_risk_existing_read_only_operations_ui_contract
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       status: applicable
       testOnlyApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      baseSha: 78954e4fd7a9699ac0a614716965130a86764d45
+      baseSha: f6d6dc515ac2c8a5e3e42e2565599cea94d23d87
     partitionBoundary:
       included:
-        - scoring_context_profession_and_level_propagation
-        - mistake_snapshot_profession_and_level_propagation
-        - learning_suggestion_profession_level_and_explicit_optional_organization_propagation
+        - canonical_function_user_organization_profession_level_status_and_time_filters
+        - redacted_user_organization_profession_level_cost_latency_and_timestamp_detail
       excluded:
-        - authorization_or_session_context_derivation
+        - backend_contract_or_repository_change
+        - authorization_or_session_context_change
         - pricing_source_semantics
-        - admin_ui_completion
         - schema_migration_or_persistent_database_execution
         - real_provider_or_external_call
         - full_F0038_closure
     preRedImpactScan:
-      coreProductFiles: 4
-      contingencyTestFiles: 9
+      coreProductFiles: 1
+      contingencyTestFiles: 2
       directCallerCalleeMocksFixturesReviewed: true
       schemaMigrationRisk: none
-      permissionAuthorizationRisk: no_semantic_change
-      providerRisk: local_pure_logic_only
+      permissionAuthorizationRisk: none_read_only_existing_contract
+      providerRisk: none
     tddRed:
-      command: corepack.cmd pnpm@10.15.1 exec vitest run tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts
-      result: failed_as_expected_4_of_18_across_four_authoritative_boundaries
-      failureBoundary: omitted_known_dimension_facts_at_existing_append_boundaries
+      command: corepack.cmd pnpm@10.15.1 exec vitest run tests/unit/admin-ai-audit-log-ops-baseline.test.ts src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+      result: failed_as_expected_2_of_14
+      failureBoundary: missing_reachable_filter_controls_query_parameters_and_attribution_detail
     verificationEvidence:
-      focused: passed_26_of_26
-      affectedRegression: passed_15_of_15
+      focused: passed_21_of_21
+      affectedRegression: included_in_focused_split_and_co_located_suites
       lint: pass
       typecheck: pass
       build: passed_98_static_pages
       format: pass_applied_before_freeze
       diffCheck: pass
     adversarialReview:
-      noAuthorizationContextInvention: pass
-      noPricingOrCostFabrication: pass
-      noRealProviderExternalCall: pass
-      noSchemaDependencyPermissionOrExtraFiles: pass
-      testsPreserveNegativeAndRedactionAssertions: pass
-      F0038RemainsOpenForUiOrganizationAndCostResiduals: pass
+      queryMatchesExistingBackendContract: pass
+      listAndSummaryReceiveSameCompleteFilterSet: pass
+      noAuthorizationPricingProviderOrRawPayloadChange: pass
+      detailUsesOnlyPersistedRedactedDtoFacts: pass
+      noSchemaDependencyOrExtraFiles: pass
+      testsPreserveRedactionAssertions: pass
+      F0038RemainsOpenForOrganizationAndCostProducerResiduals: pass
     conditionalCloseoutProjection:
       currentStatus: validated_uncommitted_candidate
       triggerConditions:
@@ -435,48 +438,48 @@ activeTasks:
       candidateReapprovals: 0
       validationRetryCount: 0
       approvalWaitTurns: 0
-      productValueTime: 4m_TDD_and_minimal_dimension_propagation
-      mechanismOverhead: 3m_scope_state_validation_and_review
+      productValueTime: 5m_TDD_UI_filter_and_redacted_detail_implementation
+      mechanismOverhead: 3m_contract_state_validation_and_review
       guardSmokeChanges: 0
       approvalIdMismatch: 0
     testOnlyAllowlistExpansion:
       authorization: standing-test-only-allowlist-expansion-2026-07-21
       addedFiles: []
       reason: preflight_included_direct_tests_no_runtime_expansion_yet
-    approvalFingerprint: none_standing_bounded_medium_risk_closeout_applies
+    approvalFingerprint: none_standing_low_risk_closeout_applies
     previousTaskCloseout:
-      taskId: p1-remediation-rc-04-ai-call-log-fact-query-foundation-2026-07-21
+      taskId: p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21
       findingId: F-0038
-      productClosureContribution: foundation_only_not_closed
-      commit: 78954e4fd7a9699ac0a614716965130a86764d45
+      productClosureContribution: known_dimension_propagation_only_not_closed
+      commit: f6d6dc515ac2c8a5e3e42e2565599cea94d23d87
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: fresh-schema-start-f0038-ai-call-log-fact-query-foundation-2026-07-21
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
       worktreeCleanup: pass
       verification:
-        tddRed: failed_as_expected_5_of_5
-        focused: passed_41_of_41
-        affectedRegression: passed_45_of_45
+        tddRed: failed_as_expected_4_of_18
+        focused: passed_26_of_26
+        affectedRegression: passed_15_of_15
         lint: pass
         typecheck: pass
-        drizzleCheck: pass_source_only_no_database_execution
         build: passed_98_static_pages
         minimalSafetyKernelCommit: pass
       adversarialReview:
-        durableFactsAndNullableHistoricalTruth: pass
-        authoritativeDatabaseFilteringCountingAndAggregation: pass
-        producerPricingUiExcludedAndFindingRemainsOpen: pass
-        noDatabaseExecutionPermissionProviderDependencyOrExtraFiles: pass
+        noAuthorizationContextInvention: pass
+        noPricingOrCostFabrication: pass
+        noRealProviderExternalCall: pass
+        noSchemaDependencyPermissionOrExtraFiles: pass
+        findingRemainsOpenForUiOrganizationAndCostResiduals: pass
       metrics:
-        mandatoryFreshApprovals: 1
+        mandatoryFreshApprovals: 0
         preventableScopeMissApprovals: 0
         candidateReapprovals: 0
-        approvalWaitTurns: 3
-        validationRetryCount: 1
-        productValueTime: 11m_root_cause_TDD_schema_query_and_route_implementation
-        mechanismOverhead: 6m_contract_materialization_scope_checks_validation_profile_correction_and_external_approval_wait
+        approvalWaitTurns: 0
+        validationRetryCount: 0
+        productValueTime: 4m_TDD_and_minimal_dimension_propagation
+        mechanismOverhead: 3m_scope_state_validation_review_and_closeout
         guardSmokeChanges: 0
   - id: p1-remediation-rc-04-f0031-static-closure-2026-07-21
     title: F-0031 production boundary static closure

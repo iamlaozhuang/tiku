@@ -64,10 +64,19 @@ type AdminAuditLogQueryState = {
   toDate: string;
 };
 type AdminAiCallLogQueryState = {
+  aiFuncType: "all" | AiCallLogListDto["aiCallLogs"][number]["aiFuncType"];
   callStatus: "all" | "success" | "failed";
+  fromDate: string;
   keyword: string;
+  level: string;
+  organizationPublicId: string;
   page: number;
   pageSize: AdminAiAuditLogPageSize;
+  profession:
+    | "all"
+    | NonNullable<AiCallLogListDto["aiCallLogs"][number]["profession"]>;
+  toDate: string;
+  userPublicId: string;
 };
 
 type AdminAiAuditRuntimeData = {
@@ -152,10 +161,17 @@ const defaultAdminAuditLogQuery: AdminAuditLogQueryState = {
 };
 
 const defaultAdminAiCallLogQuery: AdminAiCallLogQueryState = {
+  aiFuncType: "all",
   callStatus: "all",
+  fromDate: "",
   keyword: "",
+  level: "",
+  organizationPublicId: "",
   page: 1,
   pageSize: 20,
+  profession: "all",
+  toDate: "",
+  userPublicId: "",
 };
 
 const auditActionFilterOptions = [
@@ -1465,6 +1481,34 @@ function createAiCallLogRuntimeQuery(query: AdminAiCallLogQueryState): string {
     searchParams.set("callStatus", query.callStatus);
   }
 
+  if (query.aiFuncType !== "all") {
+    searchParams.set("aiFuncType", query.aiFuncType);
+  }
+
+  if (query.userPublicId.trim().length > 0) {
+    searchParams.set("userPublicId", query.userPublicId.trim());
+  }
+
+  if (query.organizationPublicId.trim().length > 0) {
+    searchParams.set("organizationPublicId", query.organizationPublicId.trim());
+  }
+
+  if (query.profession !== "all") {
+    searchParams.set("profession", query.profession);
+  }
+
+  if (query.level.length > 0) {
+    searchParams.set("level", query.level);
+  }
+
+  if (query.fromDate.length > 0) {
+    searchParams.set("fromStartedAt", `${query.fromDate}T00:00:00.000Z`);
+  }
+
+  if (query.toDate.length > 0) {
+    searchParams.set("toStartedAt", `${query.toDate}T23:59:59.999Z`);
+  }
+
   return searchParams.toString();
 }
 
@@ -1536,8 +1580,32 @@ function filterAiCallLogsForSplitPage(
   const keyword = query.keyword.trim().toLowerCase();
 
   return aiCallLogs.filter((aiCallLog) => {
+    const matchesFunction =
+      query.aiFuncType === "all" || aiCallLog.aiFuncType === query.aiFuncType;
     const matchesStatus =
       query.callStatus === "all" || aiCallLog.callStatus === query.callStatus;
+    const matchesUser =
+      query.userPublicId.trim().length === 0 ||
+      aiCallLog.userPublicId === query.userPublicId.trim();
+    const matchesOrganization =
+      query.organizationPublicId.trim().length === 0 ||
+      aiCallLog.organizationPublicId === query.organizationPublicId.trim();
+    const matchesProfession =
+      query.profession === "all" || aiCallLog.profession === query.profession;
+    const matchesLevel =
+      query.level.length === 0 || aiCallLog.level === Number(query.level);
+    const startedTimestamp = Date.parse(aiCallLog.startedAt);
+    const fromTimestamp =
+      query.fromDate.length === 0
+        ? null
+        : Date.parse(`${query.fromDate}T00:00:00.000Z`);
+    const toTimestamp =
+      query.toDate.length === 0
+        ? null
+        : Date.parse(`${query.toDate}T23:59:59.999Z`);
+    const matchesDateRange =
+      (fromTimestamp === null || startedTimestamp >= fromTimestamp) &&
+      (toTimestamp === null || startedTimestamp <= toTimestamp);
     const matchesKeyword =
       keyword.length === 0 ||
       [
@@ -1545,6 +1613,10 @@ function filterAiCallLogsForSplitPage(
         aiCallLog.callStatus,
         aiCallLog.providerDisplayName,
         aiCallLog.modelAlias,
+        aiCallLog.userPublicId ?? "",
+        aiCallLog.organizationPublicId ?? "",
+        aiCallLog.profession ?? "",
+        aiCallLog.level ?? "",
         aiCallLog.promptSummary ?? "",
         aiCallLog.outputSummary ?? "",
       ]
@@ -1552,7 +1624,16 @@ function filterAiCallLogsForSplitPage(
         .toLowerCase()
         .includes(keyword);
 
-    return matchesStatus && matchesKeyword;
+    return (
+      matchesFunction &&
+      matchesStatus &&
+      matchesUser &&
+      matchesOrganization &&
+      matchesProfession &&
+      matchesLevel &&
+      matchesDateRange &&
+      matchesKeyword
+    );
   });
 }
 
@@ -1842,7 +1923,14 @@ function AdminAiCallLogToolbar({
         <Button
           disabled={
             query.keyword.trim().length === 0 &&
+            query.aiFuncType === "all" &&
+            query.userPublicId.trim().length === 0 &&
+            query.organizationPublicId.trim().length === 0 &&
+            query.profession === "all" &&
+            query.level.length === 0 &&
             query.callStatus === "all" &&
+            query.fromDate.length === 0 &&
+            query.toDate.length === 0 &&
             query.pageSize === 20
           }
           size="lg"
@@ -1868,6 +1956,96 @@ function AdminAiCallLogToolbar({
           }
         />
       </label>
+      <label className={`${adminListFilterLabelClassName} min-w-40`}>
+        <span>功能类型</span>
+        <select
+          aria-label="AI 功能类型"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.aiFuncType}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              aiFuncType: event.target
+                .value as AdminAiCallLogQueryState["aiFuncType"],
+              page: 1,
+            })
+          }
+        >
+          <option value="all">全部功能</option>
+          <option value="ai_scoring">AI 评分</option>
+          <option value="ai_explanation">AI 讲解</option>
+          <option value="ai_hint">AI 提示</option>
+          <option value="kn_recommendation">知识点推荐</option>
+          <option value="learning_suggestion">学习建议</option>
+        </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-48`}>
+        <span>用户</span>
+        <input
+          aria-label="AI 调用用户"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          placeholder="用户公开标识"
+          value={query.userPublicId}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              page: 1,
+              userPublicId: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-48`}>
+        <span>企业</span>
+        <input
+          aria-label="AI 调用企业"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          placeholder="企业公开标识"
+          value={query.organizationPublicId}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              organizationPublicId: event.target.value,
+              page: 1,
+            })
+          }
+        />
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-36`}>
+        <span>专业</span>
+        <select
+          aria-label="AI 调用专业"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.profession}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              page: 1,
+              profession: event.target
+                .value as AdminAiCallLogQueryState["profession"],
+            })
+          }
+        >
+          <option value="all">全部专业</option>
+          <option value="monopoly">专卖</option>
+          <option value="marketing">营销</option>
+          <option value="logistics">物流</option>
+        </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-28`}>
+        <span>等级</span>
+        <input
+          aria-label="AI 调用等级"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          max={5}
+          min={1}
+          type="number"
+          value={query.level}
+          onChange={(event) =>
+            onChange({ ...query, level: event.target.value, page: 1 })
+          }
+        />
+      </label>
       <label className={`${adminListFilterLabelClassName} min-w-36`}>
         <span>调用状态</span>
         <select
@@ -1887,6 +2065,32 @@ function AdminAiCallLogToolbar({
           <option value="success">成功</option>
           <option value="failed">失败</option>
         </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-40`}>
+        <span>开始日期</span>
+        <input
+          aria-label="AI 调用开始日期"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          max={query.toDate || undefined}
+          type="date"
+          value={query.fromDate}
+          onChange={(event) =>
+            onChange({ ...query, fromDate: event.target.value, page: 1 })
+          }
+        />
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-40`}>
+        <span>结束日期</span>
+        <input
+          aria-label="AI 调用结束日期"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          min={query.fromDate || undefined}
+          type="date"
+          value={query.toDate}
+          onChange={(event) =>
+            onChange({ ...query, page: 1, toDate: event.target.value })
+          }
+        />
       </label>
       <label className={`${adminListFilterLabelClassName} min-w-28`}>
         <span>每页条数</span>
@@ -2501,6 +2705,24 @@ function AdminAiCallLogDetailPanel({
             value={formatAdminOpsDisplayValue(aiCallLog.callStatus)}
           />
           <AdminOpsReadonlyDetail
+            label="用户"
+            value={aiCallLog.userPublicId ?? "未记录"}
+          />
+          <AdminOpsReadonlyDetail
+            label="企业"
+            value={aiCallLog.organizationPublicId ?? "未记录"}
+          />
+          <AdminOpsReadonlyDetail
+            label="专业"
+            value={aiCallLog.profession ?? "未记录"}
+          />
+          <AdminOpsReadonlyDetail
+            label="等级"
+            value={
+              aiCallLog.level === null ? "未记录" : String(aiCallLog.level)
+            }
+          />
+          <AdminOpsReadonlyDetail
             label="输入摘要"
             value={aiCallLog.promptSummary ?? "输入摘要不可用"}
           />
@@ -2511,6 +2733,34 @@ function AdminAiCallLogDetailPanel({
           <AdminOpsReadonlyDetail
             label="用量"
             value={String(aiCallLog.totalTokenCount ?? 0)}
+          />
+          <AdminOpsReadonlyDetail
+            label="预估成本"
+            value={
+              aiCallLog.estimatedCostCny === null
+                ? "未记录"
+                : `${aiCallLog.estimatedCostCny} 元`
+            }
+          />
+          <AdminOpsReadonlyDetail
+            label="耗时"
+            value={
+              aiCallLog.latencyMs === null
+                ? "未记录"
+                : `${aiCallLog.latencyMs} ms`
+            }
+          />
+          <AdminOpsReadonlyDetail
+            label="开始时间"
+            value={formatAuditLogTimestamp(aiCallLog.startedAt)}
+          />
+          <AdminOpsReadonlyDetail
+            label="完成时间"
+            value={
+              aiCallLog.completedAt === null
+                ? "未完成"
+                : formatAuditLogTimestamp(aiCallLog.completedAt)
+            }
           />
           <div className="flex flex-wrap gap-1">
             <AdminOpsStatusBadge label="已脱敏" />

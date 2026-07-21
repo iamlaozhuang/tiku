@@ -1,25 +1,14 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-ai-call-log-known-dimension-propagation-2026-07-21",
-  "objective": "Advance F-0038 without claiming closure by propagating already-authoritative profession and level facts, plus any explicitly supplied organization fact, through the existing AI scoring, explanation, and learning-suggestion append paths. Do not derive new authorization context, pricing, or entitlement semantics and do not call a real Provider.",
+  "taskId": "p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21",
+  "objective": "Advance F-0038 without claiming full closure by exposing the already-supported AI call log function, user, organization, profession, level, status, and time-range filters in the operations UI and by showing the persisted attribution and cost facts in the redacted detail view. Do not change backend contracts, authorization, pricing, schema, Provider behavior, or raw payload visibility.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/student-flow-runtime.ts",
-    "src/server/services/student-mistake-book-runtime.ts",
-    "src/server/services/ai-mock-provider-runtime.ts",
-    "src/server/services/exam-report-service.ts",
-    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-    "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
+    "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx",
+    "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx",
+    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -29,59 +18,32 @@
     "docs/05-execution-logs/**",
     "src/db/**",
     "drizzle/**",
+    "src/server/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "src/server/services/*authorization*",
-    "src/server/services/*auth*",
-    "src/features/**",
-    "src/app/**",
     "e2e/**"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/student-flow-runtime.ts",
-    "src/server/services/student-mistake-book-runtime.ts",
-    "src/server/services/ai-mock-provider-runtime.ts",
-    "src/server/services/exam-report-service.ts",
-    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts"
+    "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx",
+    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-    "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
+    "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx"
   ],
   "authoritativeChainEvidence": {
-    "aiScoring": "MockExamAiScoringRuntimeContext already contains authoritative profession and level, but student-flow-runtime omits both from appendAiCallLog.",
-    "aiExplanation": "MistakeBookAiExplanationRuntimeContext carries a question snapshot already parsed for RAG profession and level, but student-mistake-book-runtime omits them from appendAiCallLog.",
-    "learningSuggestion": "ExamReportRow already contains authoritative profession and level; exam-report-service omits them from LearningSuggestionMockContext, and ai-mock-provider-runtime omits optional dimension fields from appendAiCallLog.",
-    "organizationBoundary": "Current learner service contexts expose no authoritative organizationPublicId. This task propagates an explicitly supplied optional value only and does not expand session or authorization context.",
-    "costBoundary": "No approved pricing SSOT exists. estimatedCostCny remains null and cost-source semantics stay outside this task.",
-    "providerBoundary": "Only deterministic context-to-log input propagation changes. Tests inject local fake runners/providers; no real Provider, credential, configuration, or external call is permitted.",
-    "directTests": [
-      "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-      "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-      "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-      "src/server/services/exam-report-service.test.ts",
-      "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-      "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-      "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-      "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-      "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
-    ]
+    "ui": "The split AI call log page exposes only keyword, status, and page size even though its canonical API contract already accepts function, user, organization, profession, level, and time filters.",
+    "api": "The canonical list and summary routes already normalize and forward the complete filter set; no backend change is required.",
+    "detail": "AiCallLogSummaryDto already contains userPublicId, organizationPublicId, profession, level, estimatedCostCny, latencyMs, and timestamps, but the reachable detail panel omits them.",
+    "residual": "Organization capture and versioned pricing remain separate producer-side roots; this UI partition does not claim full F-0038 closure."
   },
   "validationCommands": [
     {
-      "name": "ai-call-log-dimension-propagation-focused",
+      "name": "ai-call-log-operations-filters-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -89,55 +51,24 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-        "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-        "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-        "src/server/services/exam-report-service.test.ts"
+        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+        "AdminAiAuditLogOpsBaseline.test.tsx"
       ]
     },
     {
-      "name": "ai-call-log-dimension-propagation-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
-      ]
-    },
-    {
-      "name": "ai-call-log-dimension-propagation-lint",
+      "name": "ai-call-log-operations-filters-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/services/student-flow-runtime.ts",
-        "src/server/services/student-mistake-book-runtime.ts",
-        "src/server/services/ai-mock-provider-runtime.ts",
-        "src/server/services/exam-report-service.ts",
-        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-        "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-        "tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/phase-12-model-config-local-mock-runtime.test.ts"
+        "src/app/**/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx",
+        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts"
       ]
     },
     {
-      "name": "ai-call-log-dimension-propagation-typecheck",
+      "name": "ai-call-log-operations-filters-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -151,20 +82,20 @@
     "secretEnv": null
   },
   "standingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "bounded_provider_adapter_pure_logic_and_database_input_propagation",
+    "category": "low_risk_existing_read_only_operations_ui_contract",
     "eligibleForStandingCloseout": true,
     "noEntitlementExpansion": true,
-    "noSchemaMigrationOrDatabaseExecution": true,
-    "noRealProviderExternalCallOrCredential": true,
+    "noSchemaMigrationDatabaseProviderOrPricingChange": true,
+    "noRawPayloadVisibility": true,
     "noDependencyConfigurationOrMechanismChange": true
   },
   "push": {
     "target": "origin/master",
     "requiresFreshApproval": false,
-    "standingApprovalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "standingApprovalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }
