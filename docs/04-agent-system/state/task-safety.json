@@ -1,22 +1,13 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-learner-history-pagination-2026-07-20",
-  "objective": "Close F-0018 and F-0020 by making current effective authorization and user-removal part of the database-visible set before stable pagination/counting, returning rows and total from one repeatable-read snapshot, and making report search/status server-side query inputs that reset to page one and ignore stale responses; preserve historical report snapshots and stopped-question visibility, do not expand entitlement, change schema/migrations/dependencies/Provider/safety mechanisms/secret-env, call external services, or execute a real database.",
+  "taskId": "p1-remediation-rc-04-student-home-pagination-2026-07-20",
+  "objective": "Close F-0019 by making the learner home paper entry consume the existing server pagination contract with a fixed page size of 20, previous/next navigation, page-one reset on scope changes, authoritative totals, stale empty-page fallback after concurrent content changes, and no loss of authorization-context behavior; do not change backend semantics, authorization, schema/migrations, dependencies, Provider/external services, safety mechanisms, deployment, or secret/env.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/superpowers/plans/2026-07-20-learner-history-pagination.md",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "src/server/repositories/mistake-book-repository.test.ts",
-    "src/server/repositories/mistake-book-repository.ts",
-    "src/server/repositories/student-flow-runtime-repository.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "src/server/services/exam-report-service.ts",
-    "src/server/services/mistake-book-service.test.ts",
-    "src/server/services/mistake-book-service.ts",
-    "tests/unit/p1-learner-history-pagination.test.ts",
-    "tests/unit/student-mock-exam-report-ui.test.ts"
+    "src/features/student/home/StudentHomePage.tsx",
+    "tests/unit/student-home-ui.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -29,7 +20,7 @@
   ],
   "validationCommands": [
     {
-      "name": "learner-history-pagination-focused",
+      "name": "student-home-pagination-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -37,17 +28,11 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-learner-history-pagination.test.ts",
-        "src/server/repositories/mistake-book-repository.test.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "src/server/services/exam-report-route.test.ts",
-        "src/server/services/mistake-book-service.test.ts",
-        "src/server/services/mistake-book-route.test.ts",
-        "tests/unit/student-mock-exam-report-ui.test.ts"
+        "tests/unit/student-home-ui.test.ts"
       ]
     },
     {
-      "name": "learner-history-pagination-regression",
+      "name": "student-home-pagination-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -55,36 +40,26 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-        "tests/unit/student-mistake-book-ui.test.ts",
-        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-        "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts",
-        "src/server/validators/exam-report.test.ts",
-        "src/server/validators/mistake-book.test.ts"
+        "src/server/validators/student-paper.test.ts",
+        "src/server/mappers/student-paper-mapper.test.ts",
+        "src/server/services/student-paper-service.test.ts",
+        "src/server/services/student-paper-route.test.ts"
       ]
     },
     {
-      "name": "learner-history-pagination-lint",
+      "name": "student-home-pagination-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-        "src/server/repositories/mistake-book-repository.test.ts",
-        "src/server/repositories/mistake-book-repository.ts",
-        "src/server/repositories/student-flow-runtime-repository.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "src/server/services/exam-report-service.ts",
-        "src/server/services/mistake-book-service.test.ts",
-        "src/server/services/mistake-book-service.ts",
-        "tests/unit/p1-learner-history-pagination.test.ts",
-        "tests/unit/student-mock-exam-report-ui.test.ts"
+        "src/features/student/home/StudentHomePage.tsx",
+        "tests/unit/student-home-ui.test.ts"
       ]
     },
     {
-      "name": "learner-history-pagination-typecheck",
+      "name": "student-home-pagination-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -92,8 +67,8 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": null,
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },

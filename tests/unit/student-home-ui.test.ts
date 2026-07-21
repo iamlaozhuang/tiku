@@ -767,4 +767,212 @@ describe("StudentHomePage", () => {
 
     expect(screen.getByTestId("auth-expiry-reminder")).toBeInTheDocument();
   });
+
+  it.each([
+    { total: 21, expectedPages: 2 },
+    { total: 40, expectedPages: 2 },
+    { total: 41, expectedPages: 3 },
+  ])(
+    "makes every paper page reachable when total is $total",
+    async ({ total, expectedPages }) => {
+      const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+        const requestUrl = String(url);
+
+        if (requestUrl === "/api/v1/student-papers/scopes") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: [studentHomeFixture.scopes[1]],
+            }),
+          };
+        }
+
+        if (requestUrl === "/api/v1/authorizations") {
+          throw new Error("authorization contexts unavailable");
+        }
+
+        const requestPage = Number(
+          new URL(requestUrl, "http://tiku.local").searchParams.get("page"),
+        );
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: [
+              {
+                ...studentHomeFixture.papers[1],
+                publicId: `paper-page-${requestPage}`,
+                name: `第 ${requestPage} 页试卷`,
+              },
+            ],
+            pagination: {
+              page: requestPage,
+              pageSize: 20,
+              total,
+              sortBy: "publishedAt",
+              sortOrder: "desc",
+            },
+          }),
+        };
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(createElement(StudentHomePage));
+
+      expect(await screen.findByText("第 1 页试卷")).toBeInTheDocument();
+
+      for (let page = 2; page <= expectedPages; page += 1) {
+        fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+        expect(
+          await screen.findByText(`第 ${page} 页试卷`),
+        ).toBeInTheDocument();
+      }
+
+      expect(
+        screen.getByText(`第 ${expectedPages} / ${expectedPages} 页`),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "下一页" })).toBeDisabled();
+    },
+  );
+
+  it("resets paper pagination to page one when the authorization scope changes", async () => {
+    const requestedUrls: string[] = [];
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const requestUrl = String(url);
+
+      if (requestUrl === "/api/v1/student-papers/scopes") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: [studentHomeFixture.scopes[1], studentHomeFixture.scopes[0]],
+          }),
+        };
+      }
+
+      if (requestUrl === "/api/v1/authorizations") {
+        throw new Error("authorization contexts unavailable");
+      }
+
+      requestedUrls.push(requestUrl);
+      const request = new URL(requestUrl, "http://tiku.local");
+      const requestPage = Number(request.searchParams.get("page"));
+      const profession = request.searchParams.get("profession");
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: [
+            {
+              ...studentHomeFixture.papers[0],
+              publicId: `paper-${profession}-${requestPage}`,
+              name: `${profession} 第 ${requestPage} 页`,
+              profession,
+            },
+          ],
+          pagination: {
+            page: requestPage,
+            pageSize: 20,
+            total: 21,
+            sortBy: "publishedAt",
+            sortOrder: "desc",
+          },
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentHomePage));
+
+    expect(await screen.findByText("marketing 第 1 页")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    expect(await screen.findByText("marketing 第 2 页")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "专卖 3级" }));
+
+    expect(await screen.findByText("monopoly 第 1 页")).toBeInTheDocument();
+    expect(requestedUrls.at(-1)).toContain("profession=monopoly");
+    expect(requestedUrls.at(-1)).toContain("page=1");
+  });
+
+  it("falls back to the last valid paper page after concurrent removal", async () => {
+    const requestedPages: number[] = [];
+    let collectionShrank = false;
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const requestUrl = String(url);
+
+      if (requestUrl === "/api/v1/student-papers/scopes") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: [studentHomeFixture.scopes[1]],
+          }),
+        };
+      }
+
+      if (requestUrl === "/api/v1/authorizations") {
+        throw new Error("authorization contexts unavailable");
+      }
+
+      const requestPage = Number(
+        new URL(requestUrl, "http://tiku.local").searchParams.get("page"),
+      );
+      requestedPages.push(requestPage);
+      const isStaleThirdPage = requestPage === 3;
+
+      if (isStaleThirdPage) {
+        collectionShrank = true;
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: isStaleThirdPage
+            ? []
+            : [
+                {
+                  ...studentHomeFixture.papers[1],
+                  publicId: `paper-page-${requestPage}`,
+                  name: `第 ${requestPage} 页试卷`,
+                },
+              ],
+          pagination: {
+            page: requestPage,
+            pageSize: 20,
+            total: collectionShrank ? 40 : 41,
+            sortBy: "publishedAt",
+            sortOrder: "desc",
+          },
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentHomePage));
+
+    expect(await screen.findByText("第 1 页试卷")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    expect(await screen.findByText("第 2 页试卷")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+
+    expect(await screen.findByText("第 2 页试卷")).toBeInTheDocument();
+    expect(requestedPages).toEqual([1, 2, 3, 2]);
+    expect(screen.getByText("第 2 / 2 页")).toBeInTheDocument();
+  });
 });

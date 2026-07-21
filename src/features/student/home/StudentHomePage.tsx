@@ -25,6 +25,10 @@ import type {
   EffectiveAuthorizationListDto,
 } from "@/server/contracts/effective-authorization-contract";
 import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
+import type {
   StudentPaperListDto,
   StudentPaperScopeDto,
   StudentPaperScopesDto,
@@ -55,6 +59,12 @@ type SubjectGroup = {
 type StudentPaperScopePayload = StudentPaperScopesDto | StudentPaperScopeDto[];
 type StudentPaperListPayload = StudentPaperListDto | StudentPaperSummaryDto[];
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
+
+type StudentPaperPageResult = {
+  payload: ApiResponse<StudentPaperListPayload | null>;
+  papers: StudentPaperSummaryDto[];
+  pagination: ApiPagination;
+};
 
 type AuthExpiryReminder = {
   scope: StudentPaperScopeDto;
@@ -418,11 +428,14 @@ function selectSubjectGroups(
   }));
 }
 
-function createStudentPaperListPath(scope: StudentHomeScopeSelection): string {
+function createStudentPaperListPath(
+  scope: StudentHomeScopeSelection,
+  page = 1,
+): string {
   const searchParams = new URLSearchParams({
     profession: scope.profession,
     level: String(scope.level),
-    page: "1",
+    page: String(page),
     pageSize: String(studentPaperPageSize),
   });
 
@@ -439,6 +452,47 @@ function readStudentPapers(
   payload: StudentPaperListPayload,
 ): StudentPaperSummaryDto[] {
   return Array.isArray(payload) ? payload : payload.papers;
+}
+
+async function fetchStudentPaperPage(
+  scope: StudentHomeScopeSelection,
+  requestedPage: number,
+  allowEmptyPageFallback = true,
+): Promise<StudentPaperPageResult> {
+  const payload = await fetchStudentApi<StudentPaperListPayload>(
+    createStudentPaperListPath(scope, requestedPage),
+  );
+  const papers =
+    payload.code === 0 && payload.data !== null
+      ? readStudentPapers(payload.data)
+      : [];
+  const pagination = payload.pagination ?? {
+    page: requestedPage,
+    pageSize: studentPaperPageSize,
+    total: papers.length,
+    sortBy: "publishedAt",
+    sortOrder: "desc",
+  };
+  const lastPage = Math.max(
+    1,
+    Math.ceil(pagination.total / pagination.pageSize),
+  );
+
+  if (
+    allowEmptyPageFallback &&
+    payload.code === 0 &&
+    payload.data !== null &&
+    papers.length === 0 &&
+    requestedPage > 1
+  ) {
+    return fetchStudentPaperPage(
+      scope,
+      Math.min(requestedPage - 1, lastPage),
+      false,
+    );
+  }
+
+  return { payload, papers, pagination };
 }
 
 function readAuthorizationContexts(
@@ -854,6 +908,14 @@ export function StudentHomePage({
   const [runtimePapers, setRuntimePapers] = useState<StudentPaperSummaryDto[]>(
     [],
   );
+  const [runtimePaperPagination, setRuntimePaperPagination] =
+    useState<ApiPagination>({
+      page: 1,
+      pageSize: studentPaperPageSize,
+      total: 0,
+      sortBy: "publishedAt",
+      sortOrder: "desc",
+    });
   const [runtimeAuthorizationContexts, setRuntimeAuthorizationContexts] =
     useState<EffectiveAuthorizationContextDto[]>([]);
   const [authExpiryReminderDismissals, setAuthExpiryReminderDismissals] =
@@ -932,6 +994,10 @@ export function StudentHomePage({
     (paperCount, group) => paperCount + group.papers.length,
     0,
   );
+  const totalPaperPages = Math.max(
+    1,
+    Math.ceil(runtimePaperPagination.total / runtimePaperPagination.pageSize),
+  );
   const authExpiryReminder = selectAuthExpiryReminder(
     displayScopes,
     authExpiryReminderDismissals,
@@ -994,9 +1060,8 @@ export function StudentHomePage({
           return;
         }
 
-        const paperPayload = await fetchStudentApi<StudentPaperListPayload>(
-          createStudentPaperListPath(nextScope),
-        );
+        const paperPage = await fetchStudentPaperPage(nextScope, 1);
+        const paperPayload = paperPage.payload;
 
         if (!isActive) {
           return;
@@ -1012,7 +1077,8 @@ export function StudentHomePage({
           return;
         }
 
-        setRuntimePapers(readStudentPapers(paperPayload.data));
+        setRuntimePapers(paperPage.papers);
+        setRuntimePaperPagination(paperPage.pagination);
         setRuntimeState("ready");
       } catch {
         if (isActive) {
@@ -1056,9 +1122,8 @@ export function StudentHomePage({
     setRuntimeState("loading");
 
     try {
-      const paperPayload = await fetchStudentApi<StudentPaperListPayload>(
-        createStudentPaperListPath(scope),
-      );
+      const paperPage = await fetchStudentPaperPage(scope, 1);
+      const paperPayload = paperPage.payload;
 
       if (isStudentUnauthorizedResponse(paperPayload)) {
         setRuntimeState("unauthorized");
@@ -1070,7 +1135,37 @@ export function StudentHomePage({
         return;
       }
 
-      setRuntimePapers(readStudentPapers(paperPayload.data));
+      setRuntimePapers(paperPage.papers);
+      setRuntimePaperPagination(paperPage.pagination);
+      setRuntimeState("ready");
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
+  async function handleSelectPaperPage(nextPage: number) {
+    if (!isRuntimeMode || selectedScope === null) {
+      return;
+    }
+
+    setRuntimeState("loading");
+
+    try {
+      const paperPage = await fetchStudentPaperPage(selectedScope, nextPage);
+      const paperPayload = paperPage.payload;
+
+      if (isStudentUnauthorizedResponse(paperPayload)) {
+        setRuntimeState("unauthorized");
+        return;
+      }
+
+      if (paperPayload.code !== 0 || paperPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      setRuntimePapers(paperPage.papers);
+      setRuntimePaperPagination(paperPage.pagination);
       setRuntimeState("ready");
     } catch {
       setRuntimeState("error");
@@ -1276,6 +1371,39 @@ export function StudentHomePage({
           ))}
         </div>
       )}
+
+      {isRuntimeMode &&
+      (runtimePaperPagination.total > studentPaperPageSize ||
+        runtimePaperPagination.page > 1) ? (
+        <div className="border-border bg-surface flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
+          <button
+            type="button"
+            disabled={runtimePaperPagination.page <= 1}
+            onClick={() =>
+              void handleSelectPaperPage(runtimePaperPagination.page - 1)
+            }
+            className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border px-3 font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            上一页
+          </button>
+          <div className="text-text-secondary text-center">
+            <span>
+              第 {runtimePaperPagination.page} / {totalPaperPages} 页
+            </span>
+            <span className="ml-2">共 {runtimePaperPagination.total} 套</span>
+          </div>
+          <button
+            type="button"
+            disabled={runtimePaperPagination.page >= totalPaperPages}
+            onClick={() =>
+              void handleSelectPaperPage(runtimePaperPagination.page + 1)
+            }
+            className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border px-3 font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            下一页
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }
