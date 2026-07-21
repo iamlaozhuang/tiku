@@ -197,4 +197,124 @@ describe("AI generation knowledge node options route", () => {
     });
     expect(listSpy).not.toHaveBeenCalled();
   });
+
+  it("collects every verified page before publishing the AI option universe", async () => {
+    const knowledgeNodes = Array.from({ length: 101 }, (_, itemIndex) => ({
+      publicId: `knowledge-node-public-${itemIndex + 1}`,
+      parentKnowledgeNodePublicId: null,
+      profession: "marketing" as const,
+      levelList: [3],
+      name: `知识点 ${itemIndex + 1}`,
+      pathName: `营销/知识点 ${itemIndex + 1}`,
+      sortOrder: itemIndex + 1,
+      knStatus: "active" as const,
+      questionCount: 0,
+      isRecommendable: true,
+      updatedAt,
+    }));
+    const repository: ContentKnowledgeNodeRuntimeRepository = {
+      async listKnowledgeNodes(query) {
+        const startIndex = (query.page - 1) * query.pageSize;
+
+        return {
+          knowledgeNodes: knowledgeNodes.slice(
+            startIndex,
+            startIndex + query.pageSize,
+          ),
+          pagination: {
+            page: query.page,
+            pageSize: query.pageSize,
+            sortBy: query.sortBy,
+            sortOrder: query.sortOrder,
+            total: knowledgeNodes.length,
+          },
+        };
+      },
+    };
+    const listSpy = vi.spyOn(repository, "listKnowledgeNodes");
+    const handlers = createAiGenerationKnowledgeNodeOptionsRouteHandlers({
+      knowledgeNodeRepository: repository,
+      sessionService: createSessionService({
+        userType: "personal",
+        adminRoles: [],
+      }),
+    });
+
+    const response = await handlers.collection.GET(
+      new Request(
+        "http://localhost/api/v1/ai-generation/knowledge-nodes?profession=marketing&level=3",
+        { headers: { authorization: "Bearer ai-options-session-token" } },
+      ),
+    );
+    const payload = await response.json();
+
+    expect(payload.code).toBe(0);
+    expect(payload.data.knowledgeNodes).toHaveLength(101);
+    expect(payload.pagination.total).toBe(101);
+    expect(listSpy).toHaveBeenCalledTimes(2);
+    expect(listSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2, pageSize: 100 }),
+    );
+  });
+
+  it("returns a standard error envelope instead of a partial AI option universe when pagination drifts", async () => {
+    const firstPageKnowledgeNodes = Array.from(
+      { length: 100 },
+      (_, itemIndex) => ({
+        publicId: `knowledge-node-public-${itemIndex + 1}`,
+        parentKnowledgeNodePublicId: null,
+        profession: "marketing" as const,
+        levelList: [3],
+        name: `知识点 ${itemIndex + 1}`,
+        pathName: `营销/知识点 ${itemIndex + 1}`,
+        sortOrder: itemIndex + 1,
+        knStatus: "active" as const,
+        questionCount: 0,
+        isRecommendable: true,
+        updatedAt,
+      }),
+    );
+    const repository: ContentKnowledgeNodeRuntimeRepository = {
+      async listKnowledgeNodes(query) {
+        return {
+          knowledgeNodes:
+            query.page === 1
+              ? firstPageKnowledgeNodes
+              : [
+                  {
+                    ...firstPageKnowledgeNodes[0],
+                    publicId: "knowledge-node-public-101",
+                  },
+                ],
+          pagination: {
+            page: query.page,
+            pageSize: query.pageSize,
+            sortBy: query.sortBy,
+            sortOrder: query.sortOrder,
+            total: query.page === 1 ? 101 : 102,
+          },
+        };
+      },
+    };
+    const handlers = createAiGenerationKnowledgeNodeOptionsRouteHandlers({
+      knowledgeNodeRepository: repository,
+      sessionService: createSessionService({
+        userType: "personal",
+        adminRoles: [],
+      }),
+    });
+
+    const response = await handlers.collection.GET(
+      new Request(
+        "http://localhost/api/v1/ai-generation/knowledge-nodes?profession=marketing&level=3",
+        { headers: { authorization: "Bearer ai-options-session-token" } },
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 503621,
+      message: "Knowledge-node options are temporarily unavailable.",
+      data: null,
+    });
+  });
 });

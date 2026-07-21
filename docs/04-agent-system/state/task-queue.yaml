@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
+  currentTaskId: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -263,6 +263,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-managed-rich-text-image-2026-07-21
     - p1-remediation-rc-04-question-reference-picker-2026-07-21
     - p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
+    - p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -311,6 +312,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21
     - p1-remediation-rc-04-managed-rich-text-image-2026-07-21
     - p1-remediation-rc-04-question-reference-picker-2026-07-21
+    - p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -385,49 +387,50 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21: closed
     p1-remediation-rc-04-managed-rich-text-image-2026-07-21: closed
     p1-remediation-rc-04-question-reference-picker-2026-07-21: closed
-    p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21: in_progress
+    p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21: closed
+    p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
-    title: Truthful knowledge node question reference counts
-    phase: p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
+  - id: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
+    title: Verified complete knowledge tree snapshots
+    phase: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0070_complete_static_and_isolated_repository_closure
-    branch: fix/knowledge-node-reference-count
-    objective: replace literal zero knowledge_node question counts with one truthful batched question_knowledge_node aggregate on every production projection
+    productClosureContribution: F-0071_complete_static_and_isolated_read_snapshot_closure
+    branch: fix/knowledge-tree-complete-snapshot
+    objective: verify every page before publishing a complete knowledge_node tree or AI option universe and keep partial management snapshots read-only with explicit retry
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-04
     findingIds:
-      - F-0070
-    executionStage: candidate_precommit_validation_in_progress
+      - F-0071
+    executionStage: candidate_precommit_validation_ready
     riskBoundary:
-      category: bounded_medium_risk_database_application_read_projection
+      category: bounded_medium_risk_database_application_read_pagination_and_low_risk_ui_fail_closed
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementChange: false
       realExternalCall: false
     preRedImpactScan:
-      chain: admin_knowledge_node_UI_to_two_runtime_routes_to_two_repository_projections_to_question_knowledge_node_binding_authority
-      coreFiles: 7
-      contingencyFiles: 3
+      chain: admin_and_student_callers_to_management_and_AI_routes_to_paginated_knowledge_node_repository_and_direct_tests
+      coreFiles: 9
+      contingencyFiles: 4
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedResidualRootCause: both_production_repositories_satisfy_the_DTO_with_a_literal_zero_instead_of_reading_the_binding_authority
-      atomicReason: both_reachable_repository_paths_must_share_one_batched_aggregate_or_the_same_UI_can_still_receive_false_zero_counts
+      confirmedResidualRootCause: callers treat a page prefix as a complete set because pagination integrity is never verified and later-page failures share the normal termination path
+      atomicReason: management writes and AI recommendation selection must consume the same fail_closed completeness invariant or users still observe inconsistent candidate universes
     expectedAcceptance:
-      - zero_binding_nodes_report_zero
-      - multiple_durable_question_bindings_report_the_exact_count
-      - one_batched_aggregate_serves_each_returned_page_without_N_plus_one_queries
-      - disabled_question_bindings_remain_counted_for_lifecycle_impact
-      - list_update_and_disable_DTOs_never_replace_a_real_count_with_literal_zero
-      - schema_write_authorization_and_UI_contracts_remain_unchanged
+      - every_business_error_missing_pagination_empty_short_page_total_drift_and_duplicate_public_id_fails_closed
+      - a_verified_multi_page_tree_enters_ready_only_when_loaded_count_equals_stable_total
+      - a_partial_management_prefix_remains_visible_read_only_and_exposes_retry
+      - create_edit_move_and_disable_are_unavailable_until_the_snapshot_is_complete
+      - AI_option_routes_collect_all_pages_or_return_a_standard_error_envelope
+      - schema_write_authorization_and_existing_option_filters_remain_unchanged
     implementationEvidence:
-      red: focused_suite_failed_because_the_authoritative_question_knowledge_node_aggregate_module_did_not_exist
-      green: 4_files_41_tests_passed_with_one_grouped_count_query_and_zero_multi_failure_regressions
-      review: passed_no_blocker_after_proving_all_bindings_count_disabled_questions_remain_visible_list_update_disable_are_truthful_and_aggregate_failure_propagates_fail_closed
+      red: 3_expected_behavior_failures_plus_missing_complete_collection_module_across_UI_route_and_pure_integrity_tests
+      green: 7_files_131_tests_passed_lint_typecheck_and_99_page_production_build
+      review: passed_after_hiding_partial_aggregate_metrics_rejecting_empty_public_ids_and_proving_every_mutation_entry_is_double_gated_by_complete_snapshot_state
     conditionalCloseoutProjection:
-      current: candidate_precommit_validation_in_progress
+      current: candidate_precommit_validation_ready
       triggers: focused_regression_lint_typecheck_format_diff_and_kernel_commit_all_green_with_no_scope_or_base_drift
       successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup_under_bounded_medium_risk_standing_approval
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
@@ -436,17 +439,17 @@ activeTasks:
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: pending_terminal_measurement
-      mechanismOverhead: pending_terminal_measurement
+      productValueTime: 7m_RED_to_build_GREEN
+      mechanismOverhead: 4m_scope_contract_state_and_adversarial_review_before_freeze
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-04-question-reference-picker-2026-07-21
-      findingId: F-0054
-      productClosureContribution: F-0054_complete_static_and_isolated_ui_closure
-      commit: 6b98ffe667001d8f486bcd90d1dda513b492173b
-      tree: 5b447887529a3925d5441769644c25abaebd5523
+      taskId: p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
+      findingId: F-0070
+      productClosureContribution: F-0070_complete_static_and_isolated_repository_closure
+      commit: 5d502574e2b1fbb50400b5bfec0a145ac9e62293
+      tree: bf8a00dfcf5b5acfdc65d799a0c3f034813311bb
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

@@ -105,10 +105,10 @@ const knowledgeNodePayload = {
   },
   pagination: {
     page: 1,
-    pageSize: 20,
+    pageSize: 100,
     total: 2,
-    sortBy: "updatedAt",
-    sortOrder: "desc",
+    sortBy: "sortOrder",
+    sortOrder: "asc",
   },
 };
 
@@ -898,6 +898,99 @@ describe("admin content and knowledge ops baseline", () => {
     expect(
       screen.getByRole("region", { name: "知识点树工作区" }),
     ).toBeInTheDocument();
+  });
+
+  it("keeps a verified prefix read-only when a later tree page fails and recovers only after retry", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const firstPageKnowledgeNodes = Array.from(
+      { length: 100 },
+      (_, itemIndex) => ({
+        ...knowledgeNodePayload.data.knowledgeNodes[0],
+        name: `分页知识点 ${itemIndex + 1}`,
+        pathName: `营销/分页知识点 ${itemIndex + 1}`,
+        publicId: `knowledge-node-page-${itemIndex + 1}`,
+        sortOrder: itemIndex + 1,
+      }),
+    );
+    let firstPageRequestCount = 0;
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (path.includes("/api/v1/knowledge-nodes?page=1&")) {
+        firstPageRequestCount += 1;
+
+        if (firstPageRequestCount === 1) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { knowledgeNodes: firstPageKnowledgeNodes },
+            pagination: {
+              page: 1,
+              pageSize: 100,
+              total: 101,
+              sortBy: "sortOrder",
+              sortOrder: "asc",
+            },
+          });
+        }
+
+        return createJsonResponse({
+          ...knowledgeNodePayload,
+          pagination: {
+            ...knowledgeNodePayload.pagination,
+            pageSize: 100,
+            sortBy: "sortOrder",
+            sortOrder: "asc",
+          },
+        });
+      }
+
+      if (path.includes("/api/v1/knowledge-nodes?page=2&")) {
+        return createJsonResponse({
+          code: 503621,
+          message: "unavailable",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    expect(
+      await screen.findByRole("alert", { name: "知识点树数据不完整" }),
+    ).toHaveTextContent("已加载 100 个节点");
+    expect(
+      screen.getByTestId("knowledge-node-row-knowledge-node-page-1"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("knowledge-node-lifecycle-context-band"),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "新增节点" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "编辑节点" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "移动节点" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "停用节点" })).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "重新加载完整知识点树" }),
+    );
+
+    expect(await screen.findByText("营销/市场调研")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("alert", { name: "知识点树数据不完整" }),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "新增节点" })).toBeEnabled();
+    expect(firstPageRequestCount).toBe(2);
   });
 
   it("creates, edits, and disables knowledge_node rows through publicId-safe runtime actions", async () => {

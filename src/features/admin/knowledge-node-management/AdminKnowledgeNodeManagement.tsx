@@ -6,6 +6,7 @@ import { GitBranch, Move, Pencil, Plus, Search, ShieldOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AdminToast } from "@/components/admin/AdminToast/AdminToast";
+import { loadCompletePaginatedCollection } from "@/lib/complete-paginated-collection";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -30,6 +31,7 @@ import {
 type KnowledgeNodeLoadState =
   | "loading"
   | "ready"
+  | "partial"
   | "empty"
   | "unauthorized"
   | "error";
@@ -107,11 +109,13 @@ function useKnowledgeNodeData() {
   const [knowledgeNodes, setKnowledgeNodes] = useState<
     AdminKnowledgeNodeOpsSummaryDto[]
   >([]);
+  const [reloadVersion, setReloadVersion] = useState(0);
 
   useEffect(() => {
     let isActive = true;
 
     async function loadKnowledgeNodes() {
+      let latestVerifiedKnowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[] = [];
       const sessionToken = getStoredSessionToken();
 
       if (sessionToken === null) {
@@ -139,54 +143,45 @@ function useKnowledgeNodeData() {
           return;
         }
 
-        const knowledgeNodeResponse = await fetchAdminApi<KnowledgeNodeListDto>(
-          "/api/v1/knowledge-nodes?page=1&pageSize=100&sortBy=sortOrder&sortOrder=asc",
-          sessionToken,
-        );
+        const loadedKnowledgeNodes =
+          await loadCompletePaginatedCollection<AdminKnowledgeNodeOpsSummaryDto>(
+            {
+              expectedPageSize: 100,
+              getItemKey: (knowledgeNode) => knowledgeNode.publicId,
+              loadPage: async (page) => {
+                const response = await fetchAdminApi<KnowledgeNodeListDto>(
+                  `/api/v1/knowledge-nodes?page=${page}&pageSize=100&sortBy=sortOrder&sortOrder=asc`,
+                  sessionToken,
+                );
 
-        if (!isActive) {
-          return;
-        }
+                if (response.code !== 0 || response.data === null) {
+                  throw new Error("Knowledge-node page is unavailable.");
+                }
 
-        if (
-          knowledgeNodeResponse.code !== 0 ||
-          knowledgeNodeResponse.data === null
-        ) {
-          setLoadState("error");
-          return;
-        }
+                return {
+                  items: response.data.knowledgeNodes,
+                  pagination: response.pagination ?? null,
+                };
+              },
+              onProgress: (verifiedKnowledgeNodes) => {
+                latestVerifiedKnowledgeNodes = verifiedKnowledgeNodes;
 
-        const loadedKnowledgeNodes = [
-          ...knowledgeNodeResponse.data.knowledgeNodes,
-        ];
-        const total =
-          knowledgeNodeResponse.pagination?.total ??
-          loadedKnowledgeNodes.length;
-        let nextPage = 2;
-
-        while (loadedKnowledgeNodes.length < total) {
-          const nextResponse = await fetchAdminApi<KnowledgeNodeListDto>(
-            `/api/v1/knowledge-nodes?page=${nextPage}&pageSize=100&sortBy=sortOrder&sortOrder=asc`,
-            sessionToken,
+                if (isActive) {
+                  setKnowledgeNodes(verifiedKnowledgeNodes);
+                }
+              },
+            },
           );
 
-          if (
-            nextResponse.code !== 0 ||
-            nextResponse.data === null ||
-            nextResponse.data.knowledgeNodes.length === 0
-          ) {
-            break;
-          }
-
-          loadedKnowledgeNodes.push(...nextResponse.data.knowledgeNodes);
-          nextPage += 1;
+        if (isActive) {
+          setKnowledgeNodes(loadedKnowledgeNodes);
+          setLoadState(loadedKnowledgeNodes.length === 0 ? "empty" : "ready");
         }
-
-        setKnowledgeNodes(loadedKnowledgeNodes);
-        setLoadState(loadedKnowledgeNodes.length === 0 ? "empty" : "ready");
       } catch {
         if (isActive) {
-          setLoadState("error");
+          setLoadState(
+            latestVerifiedKnowledgeNodes.length === 0 ? "error" : "partial",
+          );
         }
       }
     }
@@ -196,9 +191,17 @@ function useKnowledgeNodeData() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [reloadVersion]);
 
-  return { knowledgeNodes, loadState, setKnowledgeNodes };
+  return {
+    knowledgeNodes,
+    loadState,
+    retry() {
+      setLoadState("loading");
+      setReloadVersion((currentVersion) => currentVersion + 1);
+    },
+    setKnowledgeNodes,
+  };
 }
 
 export function AdminKnowledgeNodeManagement() {
@@ -210,8 +213,10 @@ export function AdminKnowledgeNodeManagement() {
     status: "idle",
   });
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
-  const { knowledgeNodes, loadState, setKnowledgeNodes } =
+  const { knowledgeNodes, loadState, retry, setKnowledgeNodes } =
     useKnowledgeNodeData();
+  const isKnowledgeSnapshotComplete =
+    loadState === "ready" || loadState === "empty";
   const filteredKnowledgeNodes = useMemo(
     () =>
       knowledgeNodes.filter((knowledgeNode) => {
@@ -263,10 +268,11 @@ export function AdminKnowledgeNodeManagement() {
 
   async function handleConfirmAction() {
     if (
-      action.status !== "create" &&
-      action.status !== "edit" &&
-      action.status !== "disable" &&
-      action.status !== "move"
+      !isKnowledgeSnapshotComplete ||
+      (action.status !== "create" &&
+        action.status !== "edit" &&
+        action.status !== "disable" &&
+        action.status !== "move")
     ) {
       return;
     }
@@ -379,6 +385,7 @@ export function AdminKnowledgeNodeManagement() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
+            disabled={!isKnowledgeSnapshotComplete}
             onClick={() => {
               setToastMessage(null);
               setAction({
@@ -392,7 +399,9 @@ export function AdminKnowledgeNodeManagement() {
             新增节点
           </Button>
           <Button
-            disabled={activeKnowledgeNode === null}
+            disabled={
+              !isKnowledgeSnapshotComplete || activeKnowledgeNode === null
+            }
             variant="outline"
             onClick={() => {
               setToastMessage(null);
@@ -409,7 +418,9 @@ export function AdminKnowledgeNodeManagement() {
           </Button>
           <Button
             disabled={
-              activeKnowledgeNode === null || moveParentCandidate === null
+              !isKnowledgeSnapshotComplete ||
+              activeKnowledgeNode === null ||
+              moveParentCandidate === null
             }
             variant="outline"
             onClick={() => {
@@ -431,6 +442,7 @@ export function AdminKnowledgeNodeManagement() {
           </Button>
           <Button
             disabled={
+              !isKnowledgeSnapshotComplete ||
               activeKnowledgeNode === null ||
               activeKnowledgeNode.knStatus === "disabled"
             }
@@ -446,7 +458,28 @@ export function AdminKnowledgeNodeManagement() {
         </div>
       </header>
 
-      <KnowledgeNodeLifecycleContextBand knowledgeNodes={knowledgeNodes} />
+      {loadState === "partial" ? (
+        <section
+          aria-label="知识点树数据不完整"
+          className="border-destructive/30 bg-destructive/5 rounded-md border p-4"
+          role="alert"
+        >
+          <h2 className="text-text-primary font-semibold">
+            知识点树数据不完整
+          </h2>
+          <p className="text-text-secondary mt-2 text-sm">
+            已加载 {knowledgeNodes.length}{" "}
+            个节点。当前内容仅供查看，新增、编辑、移动和停用已暂停。
+          </p>
+          <Button className="mt-3" variant="outline" onClick={retry}>
+            重新加载完整知识点树
+          </Button>
+        </section>
+      ) : null}
+
+      {isKnowledgeSnapshotComplete ? (
+        <KnowledgeNodeLifecycleContextBand knowledgeNodes={knowledgeNodes} />
+      ) : null}
 
       <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
@@ -499,7 +532,8 @@ export function AdminKnowledgeNodeManagement() {
             <div>
               <h2 className="text-text-primary font-semibold">知识点树</h2>
               <p className="text-text-muted mt-1 text-xs">
-                共 {displayedKnowledgeNodes.length} 个节点
+                {loadState === "partial" ? "已加载" : "共"}{" "}
+                {displayedKnowledgeNodes.length} 个节点
               </p>
             </div>
           </div>

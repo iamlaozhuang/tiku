@@ -4,6 +4,7 @@ import {
   createErrorResponse,
   createPaginatedResponse,
 } from "../contracts/api-response";
+import { loadCompletePaginatedCollection } from "../../lib/complete-paginated-collection";
 import {
   createAdminContentKnowledgeListQuery,
   type AdminContentKnowledgeListQuery,
@@ -28,6 +29,10 @@ const aiGenerationKnowledgeNodeSessionRequiredResponse = createErrorResponse(
 const aiGenerationKnowledgeNodePermissionDeniedResponse = createErrorResponse(
   403001,
   "AI generation knowledge-node options permission denied.",
+);
+const aiGenerationKnowledgeNodeUnavailableResponse = createErrorResponse(
+  503621,
+  "Knowledge-node options are temporarily unavailable.",
 );
 
 function createJsonResponse<TPayload>(payload: TPayload): Response {
@@ -122,33 +127,55 @@ export function createAiGenerationKnowledgeNodeOptionsRouteHandlers(
         }
 
         const level = readRequestedLevel(request);
-        const result = await knowledgeNodeRepository.listKnowledgeNodes(
-          createAdminContentKnowledgeListQuery({
-            page: 1,
-            pageSize: 100,
-            profession: readRequestedProfession(request),
-            sortBy: "sortOrder",
-            sortOrder: "asc",
-            status: "active",
-          }),
-        );
-        const knowledgeNodes = result.knowledgeNodes.filter((knowledgeNode) =>
-          isKnowledgeNodeSelectableForAi(knowledgeNode, level),
-        );
+        const profession = readRequestedProfession(request);
 
-        return createJsonResponse(
-          createPaginatedResponse<AdminKnowledgeNodeOpsListDto>(
-            { knowledgeNodes },
-            {
-              ...result.pagination,
-              page: 1,
-              pageSize: 100,
-              sortBy: "sortOrder",
-              sortOrder: "asc",
-              total: knowledgeNodes.length,
-            },
-          ),
-        );
+        try {
+          const allKnowledgeNodes =
+            await loadCompletePaginatedCollection<AdminKnowledgeNodeOpsSummaryDto>(
+              {
+                expectedPageSize: 100,
+                getItemKey: (knowledgeNode) => knowledgeNode.publicId,
+                loadPage: async (page) => {
+                  const result =
+                    await knowledgeNodeRepository.listKnowledgeNodes(
+                      createAdminContentKnowledgeListQuery({
+                        page,
+                        pageSize: 100,
+                        profession,
+                        sortBy: "sortOrder",
+                        sortOrder: "asc",
+                        status: "active",
+                      }),
+                    );
+
+                  return {
+                    items: result.knowledgeNodes,
+                    pagination: result.pagination,
+                  };
+                },
+              },
+            );
+          const knowledgeNodes = allKnowledgeNodes.filter((knowledgeNode) =>
+            isKnowledgeNodeSelectableForAi(knowledgeNode, level),
+          );
+
+          return createJsonResponse(
+            createPaginatedResponse<AdminKnowledgeNodeOpsListDto>(
+              { knowledgeNodes },
+              {
+                page: 1,
+                pageSize: 100,
+                sortBy: "sortOrder",
+                sortOrder: "asc",
+                total: knowledgeNodes.length,
+              },
+            ),
+          );
+        } catch {
+          return createJsonResponse(
+            aiGenerationKnowledgeNodeUnavailableResponse,
+          );
+        }
       },
     },
   };

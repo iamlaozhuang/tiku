@@ -1,18 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21",
-  "objective": "Close F-0070 by replacing hard-coded knowledge_node questionCount values with one batched aggregate over question_knowledge_node for every returned list, update and disable projection. Count all durable bindings, including disabled questions, because lifecycle impact must preserve and disclose existing references. Preserve schemas, write semantics, authorization and UI contracts.",
+  "taskId": "p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21",
+  "objective": "Close F-0071 by treating the full knowledge_node tree and AI recommendation option universe as verified paginated collections. Any business error, missing or drifting pagination, unexpected empty page, duplicate publicId, or incomplete total must fail closed; the management UI must retain any verified prefix read-only, expose retry, and prohibit create/edit/move/disable until a complete snapshot is loaded. Preserve schemas, write semantics and authorization.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/knowledge-node-reference-count.ts",
-    "src/server/repositories/knowledge-node-reference-count.test.ts",
-    "src/server/repositories/content-knowledge-node-runtime-repository.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+    "src/lib/complete-paginated-collection.ts",
+    "src/lib/complete-paginated-collection.test.ts",
+    "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+    "src/server/services/ai-generation-knowledge-node-options-route.ts",
     "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/phase-9-content-question-material-runtime.test.ts"
+    "tests/unit/ai-generation-knowledge-node-options-route.test.ts",
+    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -35,27 +38,30 @@
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/knowledge-node-reference-count.ts",
-    "src/server/repositories/knowledge-node-reference-count.test.ts",
-    "src/server/repositories/content-knowledge-node-runtime-repository.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts"
+    "src/lib/complete-paginated-collection.ts",
+    "src/lib/complete-paginated-collection.test.ts",
+    "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+    "src/server/services/ai-generation-knowledge-node-options-route.ts",
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+    "tests/unit/ai-generation-knowledge-node-options-route.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/phase-9-content-question-material-runtime.test.ts"
+    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "ui": "AdminKnowledgeNodeManagement already renders and aggregates questionCount; no UI contract change is required once the repository projection is truthful.",
-    "routesServices": "Both content-question-material and rag-resource-knowledge runtimes forward their repository DTOs without recomputing questionCount.",
-    "repositories": "The two production knowledge_node list repositories and the RAG update/disable return path currently map questionCount to the literal zero.",
-    "schema": "question_knowledge_node is the durable binding authority and already has a knowledge_node_id index; a grouped count over the returned node IDs requires no schema change.",
-    "tests": "A focused aggregate test covers zero, multiple bindings and one batched query; repository regression proves both production paths consume the aggregate and mutation audit behavior remains atomic.",
-    "nonClaims": "No schema/migration, real database execution, question status filtering, authorization, dependency, Provider, external service, UI, mechanism or write-semantic change."
+    "ui": "AdminKnowledgeNodeManagement currently paginates the complete tree but converts later-page failures into ready; its create/edit/move/disable controls consume that alleged complete snapshot. Admin and student AI generation consume the AI options route.",
+    "routesServices": "The knowledge-node management route exposes ordinary paginated pages. The AI generation options route currently reads exactly page 1 with pageSize 100 and relabels the filtered prefix as the full total.",
+    "repositories": "ContentKnowledgeNodeRuntimeRepository is the shared paginated authority; no repository write or schema change is required.",
+    "schema": "knowledge_node remains unchanged; this task verifies completeness of existing read pagination only.",
+    "tests": "Focused pure collection tests cover page errors, missing/invalid pagination, total drift, short/empty pages, duplicates and success. UI tests prove partial read-only state and retry recovery; route tests prove all pages are collected or a standard error envelope is returned.",
+    "nonClaims": "No schema/migration, persistent database execution, write semantic, authorization, dependency, Provider, external service, resource upload picker, question reference picker, mechanism or historical evidence change."
   },
   "validationCommands": [
     {
-      "name": "knowledge-node-reference-count-focused",
+      "name": "knowledge-tree-complete-snapshot-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -63,29 +69,33 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/knowledge-node-reference-count.test.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "src/lib/complete-paginated-collection.test.ts",
         "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/phase-9-content-question-material-runtime.test.ts"
+        "tests/unit/ai-generation-knowledge-node-options-route.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "tests/unit/student-personal-ai-generation-ui.test.ts"
       ]
     },
     {
-      "name": "knowledge-node-reference-count-lint",
+      "name": "knowledge-tree-complete-snapshot-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/knowledge-node-reference-count.ts",
-        "src/server/repositories/knowledge-node-reference-count.test.ts",
-        "src/server/repositories/content-knowledge-node-runtime-repository.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+        "src/lib/complete-paginated-collection.ts",
+        "src/lib/complete-paginated-collection.test.ts",
+        "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+        "src/server/services/ai-generation-knowledge-node-options-route.ts",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+        "tests/unit/ai-generation-knowledge-node-options-route.test.ts"
       ]
     },
     {
-      "name": "knowledge-node-reference-count-typecheck",
+      "name": "knowledge-tree-complete-snapshot-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -103,7 +113,7 @@
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "bounded_medium_risk_database_application_read_projection",
+    "category": "bounded_medium_risk_database_application_read_pagination_and_low_risk_ui_fail_closed",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementChange": false,
