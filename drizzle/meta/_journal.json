@@ -288,6 +288,13 @@
       "when": 1784680200000,
       "tag": "20260722003000_p1_rc_04_managed_rich_text_image",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1784683800000,
+      "tag": "20260722013000_p1_rc_04_paper_metadata_truth",
+      "breakpoints": true
     }
   ]
 }

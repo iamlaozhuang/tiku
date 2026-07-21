@@ -1,4 +1,5 @@
 import {
+  paperGenerationMethodValues,
   paperStatusValues,
   paperTypeValues,
   professionValues,
@@ -33,7 +34,12 @@ type NormalizedPaperMetadataInput = {
   subject: (typeof subjectValues)[number];
   paperType: (typeof paperTypeValues)[number] | null;
   year: number | null;
-  source: string | null;
+  month: number | null;
+  sourceDescription: string | null;
+  sourceRegion: string | null;
+  sourceOrganization: string | null;
+  questionBasis: string | null;
+  generationMethod: (typeof paperGenerationMethodValues)[number] | null;
   durationMinute: number | null;
   totalScore: string | null;
 };
@@ -280,6 +286,50 @@ function normalizePaperType(
   return isPaperType(value) ? value : undefined;
 }
 
+function normalizePaperGenerationMethod(
+  value: unknown,
+): (typeof paperGenerationMethodValues)[number] | null | undefined {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return typeof value === "string" &&
+    paperGenerationMethodValues.includes(
+      value as (typeof paperGenerationMethodValues)[number],
+    )
+    ? (value as (typeof paperGenerationMethodValues)[number])
+    : undefined;
+}
+
+function normalizeMonth(value: unknown): number | null | undefined {
+  const month = normalizeOptionalPositiveInteger(value);
+
+  if (month === undefined || month === null) {
+    return month;
+  }
+
+  return month <= 12 ? month : undefined;
+}
+
+function normalizeSourceDescription(
+  input: Record<string, unknown>,
+): string | null | undefined {
+  const hasSourceDescription = input.sourceDescription !== undefined;
+  const hasLegacySource = input.source !== undefined;
+  const sourceDescription = normalizeOptionalText(input.sourceDescription);
+  const legacySource = normalizeOptionalText(input.source);
+
+  if (sourceDescription === undefined || legacySource === undefined) {
+    return undefined;
+  }
+
+  if (hasSourceDescription && hasLegacySource) {
+    return sourceDescription === legacySource ? sourceDescription : undefined;
+  }
+
+  return hasSourceDescription ? sourceDescription : legacySource;
+}
+
 function normalizeDurationMinute(value: unknown): number | null | undefined {
   const durationMinute = normalizeOptionalPositiveInteger(value);
 
@@ -306,7 +356,14 @@ function normalizePaperMetadata(
   const level = normalizePositiveInteger(input.level);
   const paperType = normalizePaperType(input.paperType);
   const year = normalizeOptionalPositiveInteger(input.year);
-  const source = normalizeOptionalText(input.source);
+  const month = normalizeMonth(input.month);
+  const sourceDescription = normalizeSourceDescription(input);
+  const sourceRegion = normalizeOptionalText(input.sourceRegion);
+  const sourceOrganization = normalizeOptionalText(input.sourceOrganization);
+  const questionBasis = normalizeOptionalText(input.questionBasis);
+  const generationMethod = normalizePaperGenerationMethod(
+    input.generationMethod,
+  );
   const durationMinute = normalizeDurationMinute(input.durationMinute);
   const totalScore = normalizeOptionalScore(input.totalScore);
 
@@ -317,7 +374,12 @@ function normalizePaperMetadata(
     !isSubject(input.subject) ||
     paperType === undefined ||
     year === undefined ||
-    source === undefined ||
+    month === undefined ||
+    sourceDescription === undefined ||
+    sourceRegion === undefined ||
+    sourceOrganization === undefined ||
+    questionBasis === undefined ||
+    generationMethod === undefined ||
     durationMinute === undefined ||
     totalScore === undefined
   ) {
@@ -336,7 +398,12 @@ function normalizePaperMetadata(
       subject: input.subject,
       paperType,
       year,
-      source,
+      month,
+      sourceDescription,
+      sourceRegion,
+      sourceOrganization,
+      questionBasis,
+      generationMethod,
       durationMinute,
       totalScore,
     },

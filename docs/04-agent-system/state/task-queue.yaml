@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
+  currentTaskId: p1-remediation-rc-04-paper-metadata-truth-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -266,6 +266,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
     - p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
     - p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
+    - p1-remediation-rc-04-paper-metadata-truth-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -317,6 +318,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
     - p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
     - p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
+    - p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -394,67 +396,71 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21: closed
     p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21: closed
     p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21: closed
-    p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21: in_progress
+    p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21: closed
+    p1-remediation-rc-04-paper-metadata-truth-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
-    title: F-0083 production resource authority static closure
-    phase: p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
+  - id: p1-remediation-rc-04-paper-metadata-truth-2026-07-21
+    title: Paper metadata round-trip and truthful list projection
+    phase: p1-remediation-rc-04-paper-metadata-truth-2026-07-21
     status: in_progress
     priority: p1
-    taskKind: product_static_closure
-    productClosureContribution: F-0083_covered_by_later_single_resource_authority_work
-    branch: fix/f0083-single-source-static-closure
-    objective: close F-0083 without product code by proving later F-0031 work made PostgreSQL the only production resource authority and confined the local catalog to explicit tests
+    taskKind: product_remediation
+    productClosureContribution: F-0095_complete_metadata_edit_and_truthful_projection_closure
+    branch: fix/paper-metadata-truth
+    objective: add missing optional paper metadata through schema create read update copy and UI edit while deriving attachment and validation facts truthfully
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-04
     findingIds:
-      - F-0083
-    executionStage: candidate_precommit_validation_ready
+      - F-0095
+    executionStage: candidate_frozen_ready_for_conditional_closeout
     riskBoundary:
-      category: low_risk_no_product_code_change_static_closure
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-      schemaOrMigrationChange: false
+      category: schema_migration_source_and_database_application_logic_plus_low_risk_UI
+      approvalId: fresh-schema-start-f0095-paper-metadata-truth-2026-07-21
+      schemaOrMigrationChange: true
       persistentDatabaseExecution: false
       authorizationOrEntitlementChange: false
       realExternalCall: false
+      conditionalCloseout: true
     preRedImpactScan:
-      chain: production_resource_API_routes_to_default_runtime_to_PostgreSQL_repository_to_resource_and_knowledge_relations_to_RAG_retrieval
-      coreFiles: 3
-      contingencyFiles: 5
+      chain: admin_paper_UI_to_list_create_detail_PATCH_copy_and_AI_adoption_to_paper_contract_validator_repository_schema_and_paper_asset_projection
+      coreFiles: 19
+      contingencyFiles: 17
+      sameTaskAuthoritativeCallChainExpansion: 2_direct_product_callers_under_P1_EXECUTION_POLICY_CAPSULE_V1_1
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedResidualRootCause: no_residual_product_root_cause_after_F0031_database_resource_partitions_upload_saga_and_production_boundary_static_closure
-      atomicReason: record_independent_F0083_acceptance_without_repeating_product_code_already_covered_by_later_tasks
+      confirmedResidualRootCause: paper_schema_and_write_contract_stop_at_the_early_minimum_field_set_while_the_independent_admin_list_mapper_invents_attachment_and_validation_facts
+      atomicReason: schema_round_trip_edit_entry_copy_and_truthful_list_projection_are_one_metadata_invariant_and_partial_delivery_would_preserve_user_visible_false_facts
     expectedAcceptance:
-      - production_resource_routes_never_enable_the_local_adapter
-      - upload_list_detail_markdown_enable_disable_publish_and_rebuild_share_the_PostgreSQL_resource_repository
-      - knowledge_node_relations_and_RAG_retrieval_use_the_same_database_resource_identity
-      - local_catalog_remains_explicit_test_only_and_cannot_become_a_second_production_authority
-      - no_product_test_schema_database_permission_Provider_external_or_mechanism_change
+      - month_region_organization_source_description_question_basis_and_generation_method_round_trip_nullably
+      - draft_metadata_is_editable_with_expected_revision_and_published_or_archived_papers_remain_locked
+      - copy_preserves_all_extended_metadata_while_creating_a_new_draft
+      - source_file_name_comes_only_from_a_real_paper_asset_and_no_publish_validation_fact_is_fabricated
+      - AI_adopted_paper_drafts_are_marked_with_AI_generation_method
+      - no_migration_execution_permission_attachment_visibility_publish_rule_Provider_dependency_or_mechanism_change
     implementationEvidence:
-      red: not_applicable_no_product_change_static_coverage_revalidation
-      green: 5_affected_regression_files_43_tests_passed_plus_6_of_6_default_production_route_construction_and_zero_production_local_adapter_references
-      review: passed_after_proving_database_identity_spans_upload_all_admin_actions_knowledge_relations_and_RAG_retrieval_while_local_catalog_requires_explicit_test_injection
+      red: 6_expected_failures_proved_missing_schema_round_trip_truthful_asset_projection_edit_PATCH_and_legacy_alias_conflict
+      green: 14_files_125_tests_lint_typecheck_and_99_route_build_passed
+      review: adversarial_pass_no_false_file_or_validation_fact_no_metadata_loss_no_published_edit_no_migration_execution_and_no_scope_or_risk_drift
     conditionalCloseoutProjection:
-      current: candidate_precommit_validation_ready
-      triggers: five_affected_regression_files_format_diff_and_kernel_commit_all_green_with_no_scope_or_base_drift
-      successProjection: one_state_only_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup_under_low_risk_standing_approval
+      current: frozen_candidate_green_and_reviewed_under_matching_conditional_approval
+      triggers: approval_ID_task_risk_scope_and_base_match_then_TDD_implementation_offline_generation_validation_and_adversarial_review_all_green_without_drift
+      successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup_under_conditional_closeout_approval
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     metrics:
-      mandatoryFreshApprovals: 0
+      mandatoryFreshApprovals: 1_approved
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: 3m_static_authority_revalidation
-      mechanismOverhead: 3m_scope_contract_state_and_candidate_freeze
+      approvalWaitTurns: 1_current_request
+      productValueTime: 16m_analysis_TDD_implementation_and_product_verification_after_approval
+      mechanismOverhead: 6m_scope_contract_approval_wait_coordination_and_closeout_preparation
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
-      findingId: F-0078
-      productClosureContribution: F-0078_complete_static_and_isolated_failure_recovery_closure
-      commit: b1c871e4be8362a0b3528665fc1db7d1a815d62b
-      tree: 7ca17ab4ca1c6255785e87e98ea287a209cc7fd9
+      taskId: p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
+      findingId: F-0083
+      productClosureContribution: F-0083_covered_by_later_single_resource_authority_work
+      commit: 71275bf66a5b34638e6042173fc16c93a58e9441
+      tree: 83233ffad6fcc0031458ca279850406d19e61664
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

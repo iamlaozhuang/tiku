@@ -252,7 +252,11 @@ function isPaperDraftPayload(
     isSubjectValue(value.subject) &&
     (value.paperType === null || isPaperTypeValue(value.paperType)) &&
     isOptionalNumber(value.year) &&
-    isOptionalString(value.source) &&
+    isOptionalNumber(value.month) &&
+    isOptionalString(value.sourceDescription) &&
+    isOptionalString(value.sourceRegion) &&
+    isOptionalString(value.sourceOrganization) &&
+    isOptionalString(value.questionBasis) &&
     isOptionalNumber(value.durationMinute) &&
     isOptionalString(value.totalScore) &&
     isOptionalPaperSectionDraftPayloadArray(value.paperSections)
@@ -291,7 +295,12 @@ function sanitizePaperDraftPayload(
     subject: payload.subject,
     paperType: payload.paperType,
     year: payload.year,
-    source: payload.source,
+    month: payload.month ?? null,
+    sourceDescription: payload.sourceDescription ?? null,
+    sourceRegion: payload.sourceRegion ?? null,
+    sourceOrganization: payload.sourceOrganization ?? null,
+    questionBasis: payload.questionBasis ?? null,
+    generationMethod: "ai",
     durationMinute: payload.durationMinute,
     totalScore: payload.totalScore,
   };

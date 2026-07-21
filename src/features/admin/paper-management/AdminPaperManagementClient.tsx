@@ -12,6 +12,7 @@ import {
   FileCheck,
   FilePlus2,
   Layers3,
+  Pencil,
   Search,
   Upload,
 } from "lucide-react";
@@ -42,6 +43,7 @@ import type {
 } from "@/server/contracts/paper-draft-contract";
 import type {
   PaperStatus,
+  PaperGenerationMethod,
   PaperType,
   Profession,
   Subject,
@@ -67,11 +69,16 @@ type AdminCommonSortOrder = "asc" | "desc";
 type PaperLoadState = "loading" | "ready" | "unauthorized" | "error";
 type PaperFormValues = {
   durationMinute: string;
+  generationMethod: PaperGenerationMethod;
   level: string;
+  month: string;
   name: string;
   paperType: PaperType;
   profession: Profession;
-  source: string;
+  questionBasis: string;
+  sourceDescription: string;
+  sourceOrganization: string;
+  sourceRegion: string;
   subject: Subject;
   totalScore: string;
   year: string;
@@ -84,6 +91,14 @@ type PaperAssetFormValues = {
 type ActivePaperForm =
   | {
       kind: "paper";
+      mode: "create";
+      values: PaperFormValues;
+    }
+  | {
+      kind: "paper";
+      mode: "edit";
+      publicId: string;
+      revision: number;
       values: PaperFormValues;
     }
   | {
@@ -496,7 +511,20 @@ function createPaperInput(values: PaperFormValues) {
     subject: values.subject,
     paperType: values.paperType,
     year: values.year.trim().length === 0 ? null : Number(values.year),
-    source: values.source.trim().length === 0 ? null : values.source,
+    month: values.month.trim().length === 0 ? null : Number(values.month),
+    sourceDescription:
+      values.sourceDescription.trim().length === 0
+        ? null
+        : values.sourceDescription,
+    sourceRegion:
+      values.sourceRegion.trim().length === 0 ? null : values.sourceRegion,
+    sourceOrganization:
+      values.sourceOrganization.trim().length === 0
+        ? null
+        : values.sourceOrganization,
+    questionBasis:
+      values.questionBasis.trim().length === 0 ? null : values.questionBasis,
+    generationMethod: values.generationMethod,
     durationMinute:
       values.durationMinute.trim().length === 0
         ? null
@@ -707,15 +735,24 @@ export function AdminPaperManagement({
     setActionError(null);
 
     try {
+      const activePaperForm = activeForm?.kind === "paper" ? activeForm : null;
+      const isEditing = activePaperForm?.mode === "edit";
       const commandKey = "create";
       const response = await mutateAdminApi<{ paper: PaperDraftDto }>(
-        "/api/v1/papers",
+        isEditing
+          ? `/api/v1/papers/${activePaperForm.publicId}`
+          : "/api/v1/papers",
         sessionToken,
-        "POST",
-        {
-          ...createPaperInput(values),
-          commandPublicId: getOrCreatePaperCommandPublicId(commandKey),
-        },
+        isEditing ? "PATCH" : "POST",
+        isEditing
+          ? {
+              ...createPaperInput(values),
+              expectedRevision: activePaperForm.revision,
+            }
+          : {
+              ...createPaperInput(values),
+              commandPublicId: getOrCreatePaperCommandPublicId(commandKey),
+            },
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -724,13 +761,69 @@ export function AdminPaperManagement({
       }
 
       const savedPaper = mapPaperDraftToSummary(response.data.paper);
-      paperCommandPublicIdsRef.current.delete(commandKey);
+      if (!isEditing) paperCommandPublicIdsRef.current.delete(commandKey);
       setPapers((currentPapers) => upsertByPublicId(currentPapers, savedPaper));
-      setActionMessage("草稿已保存，正在进入组卷工作台。");
+      setActionMessage(
+        isEditing ? "试卷元数据已更新。" : "草稿已保存，正在进入组卷工作台。",
+      );
       setActiveForm(null);
-      router.push(`/content/papers/${savedPaper.publicId}/compose`);
+      if (!isEditing)
+        router.push(`/content/papers/${savedPaper.publicId}/compose`);
     } catch {
       setActionError("试卷保存失败，请刷新后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleEditPaper(paperSummary: AdminPaperOpsSummaryDto) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+    setActionMessage(null);
+
+    try {
+      const response = await fetchAdminApi<{ paper: PaperDraftDto }>(
+        `/api/v1/papers/${paperSummary.publicId}`,
+        sessionToken,
+      );
+      const paperDraft = response.data?.paper;
+
+      if (response.code !== 0 || paperDraft === undefined) {
+        setActionError("试卷元数据加载失败，请刷新后重试。");
+        return;
+      }
+
+      setActiveForm({
+        kind: "paper",
+        mode: "edit",
+        publicId: paperDraft.publicId,
+        revision: paperDraft.revision,
+        values: {
+          durationMinute: paperDraft.durationMinute?.toString() ?? "",
+          generationMethod: paperDraft.generationMethod ?? "manual",
+          level: String(paperDraft.level),
+          month: paperDraft.month?.toString() ?? "",
+          name: paperDraft.name,
+          paperType: paperDraft.paperType ?? "mock_paper",
+          profession: paperDraft.profession,
+          questionBasis: paperDraft.questionBasis ?? "",
+          sourceDescription: paperDraft.sourceDescription ?? "",
+          sourceOrganization: paperDraft.sourceOrganization ?? "",
+          sourceRegion: paperDraft.sourceRegion ?? "",
+          subject: paperDraft.subject,
+          totalScore: paperDraft.totalScore ?? "",
+          year: paperDraft.year?.toString() ?? "",
+        },
+      });
+    } catch {
+      setActionError("试卷元数据加载失败，请刷新后重试。");
     } finally {
       setIsSubmitting(false);
     }
@@ -943,6 +1036,7 @@ export function AdminPaperManagement({
             setActionMessage(null);
             setActiveForm({
               kind: "paper",
+              mode: "create",
               values: {
                 name: "新建本地组卷",
                 profession: "marketing",
@@ -950,7 +1044,12 @@ export function AdminPaperManagement({
                 subject: "theory",
                 paperType: "mock_paper",
                 year: "2026",
-                source: "",
+                month: "",
+                sourceDescription: "",
+                sourceRegion: "",
+                sourceOrganization: "",
+                questionBasis: "",
+                generationMethod: "manual",
                 durationMinute: "90",
                 totalScore: "5.0",
               },
@@ -1083,6 +1182,7 @@ export function AdminPaperManagement({
           });
         }}
         onCopy={(paper) => void handleCopyPaper(paper.publicId, paper.name)}
+        onEdit={(paper) => void handleEditPaper(paper)}
         onPublish={(paper) =>
           setPendingPaperAction({
             kind: "publish",
@@ -1327,6 +1427,19 @@ function PaperWriteForm({
           />
         </label>
         <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">月份</span>
+          <Input
+            aria-label="月份"
+            max={12}
+            min={1}
+            type="number"
+            value={formValues.month}
+            onChange={(event) =>
+              setFormValues({ ...formValues, month: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
           <span className="text-text-secondary">考试时长</span>
           <Input
             aria-label="考试时长"
@@ -1356,12 +1469,68 @@ function PaperWriteForm({
           <span className="text-text-secondary">来源说明</span>
           <Input
             aria-label="来源说明"
-            value={formValues.source}
+            value={formValues.sourceDescription}
             onChange={(event) =>
-              setFormValues({ ...formValues, source: event.target.value })
+              setFormValues({
+                ...formValues,
+                sourceDescription: event.target.value,
+              })
             }
           />
         </label>
+      </div>
+      <div className="grid gap-3 md:grid-cols-4">
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">来源地区</span>
+          <Input
+            aria-label="来源地区"
+            value={formValues.sourceRegion}
+            onChange={(event) =>
+              setFormValues({ ...formValues, sourceRegion: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">来源机构</span>
+          <Input
+            aria-label="来源机构"
+            value={formValues.sourceOrganization}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                sourceOrganization: event.target.value,
+              })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">出题依据</span>
+          <Input
+            aria-label="出题依据"
+            value={formValues.questionBasis}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                questionBasis: event.target.value,
+              })
+            }
+          />
+        </label>
+        <FilterSelect
+          label="生成方式"
+          options={[
+            ["manual", "人工"],
+            ["ai", "AI"],
+            ["mixed", "混合"],
+          ]}
+          value={formValues.generationMethod}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              generationMethod: value as PaperGenerationMethod,
+            })
+          }
+        />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting} type="submit">
@@ -1637,6 +1806,7 @@ function PaperList({
   onArchive,
   onBindAsset,
   onCopy,
+  onEdit,
   onPublish,
 }: {
   emptyTitle: string;
@@ -1645,6 +1815,7 @@ function PaperList({
   onArchive: (paper: AdminPaperOpsSummaryDto) => void;
   onBindAsset: (publicId: string) => void;
   onCopy: (paper: AdminPaperOpsSummaryDto) => void;
+  onEdit: (paper: AdminPaperOpsSummaryDto) => void;
   onPublish: (paper: AdminPaperOpsSummaryDto) => void;
 }) {
   return (
@@ -1718,6 +1889,17 @@ function PaperList({
                   <Eye aria-hidden="true" className="size-3.5" />
                   查看试卷
                 </Link>
+                <Button
+                  aria-label={`编辑元数据 ${paper.name}`}
+                  disabled={!isDraft}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => onEdit(paper)}
+                >
+                  <Pencil aria-hidden="true" data-icon="inline-start" />
+                  编辑元数据
+                </Button>
                 <Link
                   aria-label={`组卷 ${paper.name}`}
                   aria-disabled={!isDraft}

@@ -65,6 +65,7 @@ export const multiChoiceRuleValues = [
 ] as const;
 export const scoringMethodValues = ["auto_match", "ai_scoring"] as const;
 export const paperTypeValues = ["past_paper", "mock_paper"] as const;
+export const paperGenerationMethodValues = ["manual", "ai", "mixed"] as const;
 export const paperAttachmentUsageValues = [
   "paper_source",
   "answer_analysis",
@@ -101,6 +102,10 @@ export const multiChoiceRuleEnum = pgEnum(
 );
 export const scoringMethodEnum = pgEnum("scoring_method", scoringMethodValues);
 export const paperTypeEnum = pgEnum("paper_type", paperTypeValues);
+export const paperGenerationMethodEnum = pgEnum(
+  "paper_generation_method",
+  paperGenerationMethodValues,
+);
 export const paperAttachmentUsageEnum = pgEnum(
   "paper_attachment_usage",
   paperAttachmentUsageValues,
@@ -304,7 +309,12 @@ export const paper = pgTable(
     paper_status: paperStatusEnum("paper_status").default("draft").notNull(),
     paper_type: paperTypeEnum("paper_type"),
     year: integer("year"),
+    month: integer("month"),
     source: text("source"),
+    source_region: text("source_region"),
+    source_organization: text("source_organization"),
+    question_basis: text("question_basis"),
+    generation_method: paperGenerationMethodEnum("generation_method"),
     duration_minute: integer("duration_minute"),
     total_score: scoreColumn("total_score"),
     revision: integer("revision").default(1).notNull(),

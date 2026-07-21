@@ -43,6 +43,12 @@ const paperTypeLabels = {
   past_paper: "真题",
 } as const;
 
+const paperGenerationMethodLabels = {
+  ai: "AI 生成",
+  manual: "人工组卷",
+  mixed: "人机混合",
+} as const;
+
 const questionTypeLabels: Record<
   PaperQuestionDto["questionSnapshot"]["questionType"],
   string
@@ -108,6 +114,25 @@ function PaperMetadata({ paper }: { paper: PaperDraftDto }) {
     {
       label: "年份",
       value: paper.year === null ? "未设置" : String(paper.year),
+    },
+    {
+      label: "月份",
+      value: paper.month === null ? "未设置" : `${paper.month} 月`,
+    },
+    {
+      label: "来源地区",
+      value: paper.sourceRegion ?? "未设置",
+    },
+    {
+      label: "来源机构",
+      value: paper.sourceOrganization ?? "未设置",
+    },
+    {
+      label: "生成方式",
+      value:
+        paper.generationMethod === null
+          ? "未设置"
+          : paperGenerationMethodLabels[paper.generationMethod],
     },
     {
       label: "考试时长",
@@ -524,7 +549,10 @@ export function AdminPaperDetailPage({ publicId }: { publicId: string }) {
           来源与材料题组
         </h2>
         <p className="text-text-secondary mt-2 text-sm">
-          来源：{paper.source ?? "未填写"}
+          来源说明：{paper.sourceDescription ?? "未填写"}
+        </p>
+        <p className="text-text-secondary mt-2 text-sm">
+          出题依据：{paper.questionBasis ?? "未填写"}
         </p>
         {paper.questionGroups.length === 0 ? (
           <p className="text-text-secondary mt-2 text-sm">暂无材料题组。</p>

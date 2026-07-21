@@ -1,4 +1,5 @@
 import type {
+  PaperGenerationMethod,
   FillBlankAnswer,
   MultiChoiceRule,
   PaperStatus,
@@ -87,7 +88,12 @@ export type PaperDraftDto = {
   paperStatus: PaperStatus;
   paperType: PaperType | null;
   year: number | null;
-  source: string | null;
+  month: number | null;
+  sourceDescription: string | null;
+  sourceRegion: string | null;
+  sourceOrganization: string | null;
+  questionBasis: string | null;
+  generationMethod: PaperGenerationMethod | null;
   durationMinute: number | null;
   totalScore: string | null;
   revision: number;

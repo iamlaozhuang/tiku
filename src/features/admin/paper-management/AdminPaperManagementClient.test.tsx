@@ -3,6 +3,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -113,6 +114,114 @@ afterEach(() => {
 });
 
 describe("AdminPaperManagement", () => {
+  it("loads complete draft metadata and saves edits through PATCH with revision", async () => {
+    const paper = createPaper({
+      publicId: "paper-public-edit-metadata",
+      name: "区域营销真题",
+      revision: 4,
+    });
+    const mutationRequests: Array<{ method: string; body: unknown }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof Request
+              ? input.url
+              : input.toString();
+
+        if (url.includes("/api/v1/sessions")) {
+          return createJsonResponse(createAdminSessionResponse());
+        }
+        if (url.includes("/api/v1/papers?")) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { papers: [paper] },
+          });
+        }
+        if (
+          url.endsWith(`/api/v1/papers/${paper.publicId}`) &&
+          (init?.method ?? "GET") === "GET"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              paper: {
+                ...paper,
+                month: 6,
+                sourceDescription: "公开资料整理",
+                sourceRegion: "华东",
+                sourceOrganization: "区域技能鉴定中心",
+                questionBasis: "2026 营销职业标准",
+                generationMethod: "manual",
+                durationMinute: 120,
+                archivedAt: null,
+                publishedAt: null,
+                paperSections: [],
+                questionGroups: [],
+                createdAt: "2026-07-21T08:00:00.000Z",
+              },
+            },
+          });
+        }
+        if (
+          url.endsWith(`/api/v1/papers/${paper.publicId}`) &&
+          init?.method === "PATCH"
+        ) {
+          const body = JSON.parse(String(init.body)) as unknown;
+          mutationRequests.push({ method: init.method, body });
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { paper: { ...(body as object), ...paper, revision: 5 } },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "unexpected",
+          data: null,
+        });
+      }),
+    );
+
+    render(<AdminPaperManagement />);
+    const row = within(
+      await screen.findByTestId(`paper-row-${paper.publicId}`),
+    );
+    fireEvent.click(
+      row.getByRole("button", { name: `编辑元数据 ${paper.name}` }),
+    );
+
+    expect(await screen.findByLabelText("月份")).toHaveValue(6);
+    expect(screen.getByLabelText("来源地区")).toHaveValue("华东");
+    expect(screen.getByLabelText("来源机构")).toHaveValue("区域技能鉴定中心");
+    expect(screen.getByLabelText("出题依据")).toHaveValue("2026 营销职业标准");
+    expect(screen.getByLabelText("生成方式")).toHaveValue("manual");
+
+    fireEvent.change(screen.getByLabelText("来源地区"), {
+      target: { value: "华南" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
+
+    await waitFor(() => expect(mutationRequests).toHaveLength(1));
+    expect(mutationRequests[0]).toEqual({
+      method: "PATCH",
+      body: expect.objectContaining({
+        expectedRevision: 4,
+        month: 6,
+        sourceDescription: "公开资料整理",
+        sourceRegion: "华南",
+        sourceOrganization: "区域技能鉴定中心",
+        questionBasis: "2026 营销职业标准",
+        generationMethod: "manual",
+      }),
+    });
+  });
+
   it("names paper actions with business names and keeps opaque identifiers out of operator copy", async () => {
     const paper = createPaper({
       publicId: "paper_internal_marker_001",

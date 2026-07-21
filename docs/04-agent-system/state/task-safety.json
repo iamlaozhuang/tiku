@@ -1,16 +1,44 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21",
-  "objective": "Close F-0083 without product code changes by proving the later F-0031 partitions already made PostgreSQL the only production resource authority across upload, list, detail, markdown update, enable/disable, publish, rebuild, knowledge binding and RAG retrieval, while the local catalog remains reachable only through an explicitly injected test adapter.",
+  "taskId": "p1-remediation-rc-04-paper-metadata-truth-2026-07-21",
+  "objective": "Close F-0095 by adding the missing optional paper metadata to schema and every create/read/update/copy path, exposing draft metadata editing, deriving source file names only from paper_asset, removing fabricated publish-validation text, and preserving truthful null round-trips. Keep publication rules, attachment permissions and learner visibility unchanged.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
-    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts"
+    "src/server/models/paper.ts",
+    "src/db/schema/paper.ts",
+    "src/db/schema/paper.test.ts",
+    "drizzle/20260722013000_p1_rc_04_paper_metadata_truth.sql",
+    "drizzle/meta/20260722013000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/contracts/paper-draft-contract.ts",
+    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+    "src/server/validators/paper-draft.ts",
+    "src/server/validators/paper-draft.test.ts",
+    "src/server/repositories/paper-draft-repository.ts",
+    "src/server/mappers/paper-draft-mapper.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+    "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+    "tests/unit/p1-paper-metadata-truth.test.ts",
+    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+    "src/lib/admin-ai-generation-formal-draft-payload.ts",
+    "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+    "src/app/api/v1/papers/route.ts",
+    "src/server/services/paper-draft-service.test.ts",
+    "src/server/services/paper-draft-route.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/admin-paper-ui.test.ts",
+    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+    "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
+    "src/features/admin/content-detail/AdminContentDetail.test.tsx",
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+    "tests/unit/p1-paper-asset-upload-saga.test.ts",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -18,38 +46,82 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/**",
-    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "product source or product test edits",
-    "schema, migration, database execution, permission, Provider, external service, secret/env, deployment, PR or force-push"
+    "migration execution or persistent database writes",
+    "permission or entitlement changes",
+    "Provider, external service, secret/env, deployment, PR or force-push",
+    "student paper attachment exposure",
+    "publish validation semantic changes"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/models/paper.ts",
+    "src/db/schema/paper.ts",
+    "src/db/schema/paper.test.ts",
+    "drizzle/20260722013000_p1_rc_04_paper_metadata_truth.sql",
+    "drizzle/meta/20260722013000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/contracts/paper-draft-contract.ts",
+    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+    "src/server/validators/paper-draft.ts",
+    "src/server/validators/paper-draft.test.ts",
+    "src/server/repositories/paper-draft-repository.ts",
+    "src/server/mappers/paper-draft-mapper.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+    "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+    "tests/unit/p1-paper-metadata-truth.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
-    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts"
+    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+    "src/lib/admin-ai-generation-formal-draft-payload.ts",
+    "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+    "src/app/api/v1/papers/route.ts",
+    "src/server/services/paper-draft-service.test.ts",
+    "src/server/services/paper-draft-route.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/admin-paper-ui.test.ts",
+    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+    "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
+    "src/features/admin/content-detail/AdminContentDetail.test.tsx",
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+    "tests/unit/p1-paper-asset-upload-saga.test.ts",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "productionApiCallers": "All src/app/api/v1/resources routes construct createRagResourceKnowledgeRuntimeRouteHandlers() without local adapter options.",
-    "routeRuntime": "The default handler keeps allowLocalResourceAdapter false and dispatches every production collection/detail/mutation action to the PostgreSQL resource repository.",
-    "repository": "The PostgreSQL repository projects resource knowledge_node relations and implements durable upload, detail, markdown mutation, enable/disable, publish and index generation on the same resource rows.",
-    "ragConsumer": "Production retrieval defaults to the PostgreSQL repository retrieveResourceChunks path; the local catalog consumer requires explicit local adapter injection.",
-    "coveredBy": "F-0031 database resource audit partitions, durable resource upload saga and production-boundary static closure completed after the original F-0083 baseline.",
-    "findingLedger": "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml#F-0083"
+    "uiApi": "The paper list has only create, compose, publish, archive, copy and asset actions; it never issues PATCH /api/v1/papers/{publicId} even though that draft-only route exists.",
+    "routeService": "GET /api/v1/papers still uses the admin-flow read model while POST/PATCH/detail use the paper lifecycle service, so field truth must be reconciled across both paths or the GET route unified.",
+    "repository": "paper-draft create/update/copy and mapper persist only paper_type/year/source/duration/score; admin-flow maps paper.source to sourceFileName and fabricates a published validation summary.",
+    "schema": "paper lacks month, source_region, source_organization, question_basis and generation_method; existing source is the legacy storage column for sourceDescription.",
+    "tests": "Focused RED will bind complete nullable metadata round-trip, draft edit revision semantics, copied metadata, real paper_asset file projection and absence of fabricated validation facts.",
+    "nonClaims": "No migration execution, real database write, attachment permission expansion, learner file exposure, publish-rule change, dependency, Provider, external service, mechanism or historical evidence change."
+  },
+  "sameTaskAuthoritativeCallChainExpansion": {
+    "policyId": "P1_EXECUTION_POLICY_CAPSULE_V1_1",
+    "additionalProductSourceFileCount": 2,
+    "files": [
+      {
+        "path": "src/lib/admin-ai-generation-formal-draft-payload.ts",
+        "evidence": "Direct caller builds the reviewed paper payload consumed by the already-frozen formal-draft adapter and must propagate the same metadata contract."
+      },
+      {
+        "path": "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+        "evidence": "Direct paper draft presentation caller consumes PaperDraftDto and must read the renamed truthful sourceDescription plus explicit nullable metadata."
+      }
+    ],
+    "boundary": "Contract propagation only; no new capability, root cause, risk category, schema surface, dependency, permission, Provider or external effect."
   },
   "validationCommands": [
     {
-      "name": "f0083-single-source-regression",
+      "name": "f0095-paper-metadata-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -57,76 +129,117 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts"
+        "tests/unit/p1-paper-metadata-truth.test.ts",
+        "src/db/schema/paper.test.ts",
+        "src/server/validators/paper-draft.test.ts",
+        "src/server/services/paper-draft-service.test.ts",
+        "src/server/services/paper-draft-route.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "tests/unit/admin-paper-ui.test.ts",
+        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+        "tests/unit/p1-paper-asset-upload-saga.test.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
+        "src/features/admin/content-detail/AdminContentDetail.test.tsx"
       ]
     },
     {
-      "name": "f0083-state-format",
+      "name": "f0095-paper-metadata-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "prettier",
-        "--check",
-        "docs/04-agent-system/state/project-state.yaml",
-        "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "eslint",
+        "src/server/models/paper.ts",
+        "src/db/schema/paper.ts",
+        "src/db/schema/paper.test.ts",
+        "src/server/contracts/paper-draft-contract.ts",
+        "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
+        "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+        "src/server/validators/paper-draft.ts",
+        "src/server/validators/paper-draft.test.ts",
+        "src/server/repositories/paper-draft-repository.ts",
+        "src/server/mappers/paper-draft-mapper.ts",
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+        "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
+        "src/features/admin/content-detail/AdminContentDetail.test.tsx",
+        "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+        "src/lib/admin-ai-generation-formal-draft-payload.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/services/paper-draft-service.test.ts",
+        "src/server/services/paper-draft-route.test.ts",
+        "tests/unit/p1-paper-metadata-truth.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "tests/unit/admin-paper-ui.test.ts"
       ]
+    },
+    {
+      "name": "f0095-paper-metadata-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "f0095-paper-metadata-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "fresh-schema-start-f0095-paper-metadata-truth-2026-07-21",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "applicableStandingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
-  "riskBoundary": {
-    "category": "low_risk_no_product_code_change_static_closure",
-    "schemaOrMigrationChange": false,
+  "riskClassification": {
+    "category": "schema_migration_source_and_database_application_logic_plus_low_risk_ui",
+    "schemaOrMigrationChange": true,
+    "migrationExecution": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementChange": false,
     "realExternalCall": false,
-    "productSourceChange": false,
-    "productTestChange": false
+    "dependencyOrMechanismChange": false
   },
-  "findingDisposition": {
-    "F-0083": "covered_by_f0031_database_resource_partitions_upload_saga_and_production_boundary_static_closure"
-  },
-  "verificationEvidence": {
-    "productionRouteScan": "passed_6_of_6_resource_routes_construct_default_runtime_without_local_adapter_options",
-    "productionLocalAdapterScan": "passed_zero_useLocalResourceAdapter_or_localResourceStorageRoot_references_in_production_resource_routes",
-    "affectedRegression": "passed_43_of_43_across_5_files",
-    "mainThreadAdversarialReview": "passed_database_authority_covers_upload_admin_actions_knowledge_relations_and_RAG_retrieval_local_catalog_is_explicit_test_only_no_product_diff"
-  },
-  "conditionalCloseoutProjection": {
-    "currentState": "verified_uncommitted_state_only_candidate",
-    "triggerConditions": [
-      "exact_three_state_file_diff",
-      "five_affected_regression_files_green",
-      "main_thread_adversarial_review_green",
-      "minimal_safety_kernel_commit_path_green",
-      "base_and_canonical_remote_unchanged"
-    ],
-    "projectedOutcome": [
-      "one_reviewable_state_only_commit",
-      "ff_only_merge_to_master",
-      "one_ordinary_push_to_canonical_origin_master",
-      "sync_verification_and_short_branch_cleanup"
+  "highRiskApproval": {
+    "approvalId": "fresh-schema-start-f0095-paper-metadata-truth-2026-07-21",
+    "taskId": "p1-remediation-rc-04-paper-metadata-truth-2026-07-21",
+    "findingIds": ["F-0095"],
+    "riskCategory": "schema/migration source + database application logic + low-risk UI",
+    "baseSha": "71275bf66a5b34638e6042173fc16c93a58e9441",
+    "conditionalCloseout": true,
+    "status": "approved_by_user_2026_07_21",
+    "requestedOperations": [
+      "schema and migration source edits without execution",
+      "offline Drizzle generation",
+      "product and test implementation",
+      "focused, regression, lint, typecheck, format, diff and build validation",
+      "one reviewable commit",
+      "ff-only merge to master",
+      "one ordinary push to canonical origin/master",
+      "sync verification and short branch cleanup"
     ]
+  },
+  "pendingApprovalFingerprint": {
+    "taskId": "p1-remediation-rc-04-paper-metadata-truth-2026-07-21",
+    "rootCause": "paper_extended_metadata_missing_and_admin_list_projects_false_source_file_and_validation_facts",
+    "riskCategory": "schema_migration_source_database_application_logic_low_risk_ui",
+    "exactScope": "core_and_contingency_files_above",
+    "requestedOperations": "implementation_validation_commit_ff_only_canonical_push_sync_cleanup",
+    "baseSha": "71275bf66a5b34638e6042173fc16c93a58e9441"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "fresh-schema-start-f0095-paper-metadata-truth-2026-07-21"
   }
 }

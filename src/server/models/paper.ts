@@ -8,6 +8,7 @@ import {
   paper,
   paperAsset,
   paperAttachmentUsageValues,
+  paperGenerationMethodValues,
   paperQuestion,
   paperScoringPoint,
   paperSection,
@@ -28,6 +29,7 @@ export {
   materialStatusValues,
   multiChoiceRuleValues,
   paperAttachmentUsageValues,
+  paperGenerationMethodValues,
   paperStatusValues,
   paperTypeValues,
   professionValues,
@@ -44,6 +46,8 @@ export type QuestionType = (typeof questionTypeValues)[number];
 export type QuestionStatus = (typeof questionStatusValues)[number];
 export type MaterialStatus = (typeof materialStatusValues)[number];
 export type PaperType = (typeof paperTypeValues)[number];
+export type PaperGenerationMethod =
+  (typeof paperGenerationMethodValues)[number];
 export type PaperStatus = (typeof paperStatusValues)[number];
 export type MultiChoiceRule = (typeof multiChoiceRuleValues)[number];
 export type ScoringMethod = (typeof scoringMethodValues)[number];

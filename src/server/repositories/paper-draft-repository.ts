@@ -24,6 +24,7 @@ import type {
 import type {
   FillBlankAnswer,
   MultiChoiceRule,
+  PaperGenerationMethod,
   PaperStatus,
   PaperType,
   Profession,
@@ -104,7 +105,12 @@ export type PaperDraftAccessRow = {
   paper_status: PaperStatus;
   paper_type: PaperType | null;
   year: number | null;
+  month: number | null;
   source: string | null;
+  source_region: string | null;
+  source_organization: string | null;
+  question_basis: string | null;
+  generation_method: PaperGenerationMethod | null;
   duration_minute: number | null;
   total_score: string | null;
   revision: number;
@@ -485,12 +491,17 @@ export function createPostgresPaperDraftRepository(
           .values({
             created_by_admin_id: actorAdminId,
             duration_minute: input.durationMinute,
+            generation_method: input.generationMethod,
             level: input.level,
+            month: input.month,
             name: input.name,
             paper_type: input.paperType,
             profession: input.profession,
             public_id: `paper-${randomUUID()}`,
-            source: input.source,
+            question_basis: input.questionBasis,
+            source: input.sourceDescription,
+            source_organization: input.sourceOrganization,
+            source_region: input.sourceRegion,
             subject: input.subject,
             total_score: input.totalScore,
             updated_by_admin_id: actorAdminId,
@@ -540,11 +551,16 @@ export function createPostgresPaperDraftRepository(
           .update(paper)
           .set({
             duration_minute: input.durationMinute,
+            generation_method: input.generationMethod,
             level: input.level,
+            month: input.month,
             name: input.name,
             paper_type: input.paperType,
             profession: input.profession,
-            source: input.source,
+            question_basis: input.questionBasis,
+            source: input.sourceDescription,
+            source_organization: input.sourceOrganization,
+            source_region: input.sourceRegion,
             subject: input.subject,
             total_score: input.totalScore,
             revision: sql`${paper.revision} + 1`,
@@ -1199,13 +1215,18 @@ export function createPostgresPaperDraftRepository(
           .values({
             created_by_admin_id: actorAdminId,
             duration_minute: sourcePaper.duration_minute,
+            generation_method: sourcePaper.generation_method,
             level: sourcePaper.level,
+            month: sourcePaper.month,
             name: `${sourcePaper.name}（副本）`,
             paper_status: "draft",
             paper_type: sourcePaper.paper_type,
             profession: sourcePaper.profession,
             public_id: `paper-${randomUUID()}`,
+            question_basis: sourcePaper.question_basis,
             source: sourcePaper.source,
+            source_organization: sourcePaper.source_organization,
+            source_region: sourcePaper.source_region,
             subject: sourcePaper.subject,
             total_score: sourcePaper.total_score,
             updated_by_admin_id: actorAdminId,

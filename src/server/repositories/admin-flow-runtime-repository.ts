@@ -231,6 +231,7 @@ const {
   orgAuth,
   organization,
   paper,
+  paperAsset,
   paperQuestion,
   personalAuth,
   practice,
@@ -1769,7 +1770,6 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
           year: paper.year,
           total_score: paper.total_score,
           revision: paper.revision,
-          source: paper.source,
           updated_at: paper.updated_at,
         })
         .from(paper)
@@ -1790,6 +1790,10 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
       const questionTypeDistributions =
         await listPaperQuestionTypeDistributions(database, paperIds);
       const mockExamCounts = await listMockExamCounts(database, paperIds);
+      const sourceFileNames = await listPaperSourceFileNames(
+        database,
+        paperIds,
+      );
 
       return {
         papers: rows.map((row) => ({
@@ -1806,9 +1810,8 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
           questionCount: questionCounts.get(row.id) ?? 0,
           questionTypeDistribution: questionTypeDistributions.get(row.id) ?? [],
           mockExamCount: mockExamCounts.get(row.id) ?? 0,
-          sourceFileName: row.source,
-          publishValidationSummary:
-            row.paper_status === "published" ? "published seed paper" : null,
+          sourceFileName: sourceFileNames.get(row.id) ?? null,
+          publishValidationSummary: null,
           updatedAt: row.updated_at.toISOString(),
         })),
         pagination: createPagination(queryInput, totalRow?.value ?? 0),
@@ -2249,6 +2252,38 @@ async function listMockExamCounts(
     .groupBy(mockExam.paper_id);
 
   return new Map(rows.map((row) => [row.paper_id, row.value]));
+}
+
+async function listPaperSourceFileNames(
+  database: AdminFlowRuntimeDatabase,
+  paperIds: number[],
+): Promise<Map<number, string>> {
+  if (paperIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await database
+    .select({
+      paper_id: paperAsset.paper_id,
+      file_name: paperAsset.file_name,
+    })
+    .from(paperAsset)
+    .where(
+      and(
+        inArray(paperAsset.paper_id, paperIds),
+        eq(paperAsset.paper_attachment_usage, "paper_source"),
+      ),
+    )
+    .orderBy(desc(paperAsset.created_at), desc(paperAsset.id));
+  const sourceFileNames = new Map<number, string>();
+
+  for (const row of rows) {
+    if (!sourceFileNames.has(row.paper_id)) {
+      sourceFileNames.set(row.paper_id, row.file_name);
+    }
+  }
+
+  return sourceFileNames;
 }
 
 function summarizeText(value: string): string {
