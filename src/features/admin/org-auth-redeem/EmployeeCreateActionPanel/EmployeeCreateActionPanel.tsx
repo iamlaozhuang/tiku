@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  AdminOrganizationReferencePicker,
+  type AdminOrganizationReference,
+} from "@/features/admin/AdminOrganizationReferencePicker/AdminOrganizationReferencePicker";
 import type { EmployeeImportPreflightDto } from "@/server/contracts/employee-import-command-contract";
 
 type EmployeeCreateActionPanelProps = {
@@ -9,7 +13,7 @@ type EmployeeCreateActionPanelProps = {
   message: string | null;
   name: string;
   organizationPublicId: string;
-  organizations: { name: string; publicId: string }[];
+  organizations?: AdminOrganizationReference[];
   phone: string;
   preview: EmployeeImportPreflightDto | null;
   onConfirm: () => void;
@@ -64,24 +68,15 @@ export function EmployeeCreateActionPanel(
 
   return (
     <div className="space-y-4">
-      <label className="block space-y-1 text-sm">
-        <span>目标组织</span>
-        <select
-          aria-label="员工创建目标组织"
-          className="border-border bg-background h-9 w-full rounded-md border px-3"
-          value={props.organizationPublicId}
-          onChange={(event) =>
-            edit(() => props.onOrganizationChange(event.target.value))
-          }
-        >
-          <option value="">请选择目标组织</option>
-          {props.organizations.map((organization) => (
-            <option key={organization.publicId} value={organization.publicId}>
-              {organization.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <AdminOrganizationReferencePicker
+        initialOrganizations={props.organizations}
+        searchLabel="搜索员工创建目标组织"
+        selectLabel="员工创建目标组织"
+        value={props.organizationPublicId}
+        onChange={(organizationPublicId) =>
+          edit(() => props.onOrganizationChange(organizationPublicId))
+        }
+      />
       <label className="block space-y-1 text-sm">
         <span>手机号</span>
         <input

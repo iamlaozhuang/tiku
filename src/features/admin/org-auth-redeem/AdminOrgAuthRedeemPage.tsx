@@ -39,6 +39,7 @@ import type {
   AdminEmployeeListDto,
   AdminOrgAuthListDto,
   EmployeeListDto,
+  EmployeeTransferPreviewDto,
   EmployeeTransferResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
@@ -95,6 +96,10 @@ import { EmployeeCreateActionPanel } from "./EmployeeCreateActionPanel/EmployeeC
 import { EmployeeImportPreflightPanel } from "./EmployeeImportPreflightPanel/EmployeeImportPreflightPanel";
 import { useEmployeeImportCommand } from "./useEmployeeImportCommand";
 import type { EmployeeImportSourceFormat } from "@/server/contracts/employee-import-command-contract";
+import {
+  AdminOrganizationReferencePicker,
+  type AdminOrganizationReference,
+} from "@/features/admin/AdminOrganizationReferencePicker/AdminOrganizationReferencePicker";
 
 type LoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
 
@@ -257,17 +262,6 @@ type OrganizationConfirmationState =
       publicId: string;
     }
   | null;
-
-type EmployeeTransferReviewRow = {
-  activeScopeCount: number;
-  availableQuota: number;
-  currentOrganizationName: string;
-  employeeName: string;
-  employeePublicId: string;
-  reason: "quota_available" | "quota_insufficient" | "target_no_active_auth";
-  targetOrganizationName: string;
-  targetOrganizationPublicId: string;
-};
 
 type EmployeeConfirmationState =
   | {
@@ -706,117 +700,11 @@ function toStartOfDayIso(dateValue: string): string {
   return `${dateValue}T00:00:00.000Z`;
 }
 
-function findFirstOrganizationPublicId(
-  organizations: AdminOrgAuthData["organizations"],
-): string {
-  return organizations[0]?.publicId ?? "";
-}
-
-function createOrganizationDepthMap(
-  organizations: AdminOrgAuthData["organizations"],
-): Map<string, number> {
-  const organizationByPublicId = new Map(
-    organizations.map((organization) => [organization.publicId, organization]),
-  );
-
-  function readOrganizationDepth(
-    publicId: string,
-    visited: Set<string>,
-  ): number {
-    const organization = organizationByPublicId.get(publicId);
-
-    if (
-      organization === undefined ||
-      organization.parentOrganizationPublicId === null ||
-      visited.has(publicId)
-    ) {
-      return 0;
-    }
-
-    return (
-      readOrganizationDepth(
-        organization.parentOrganizationPublicId,
-        new Set([...visited, publicId]),
-      ) + 1
-    );
-  }
-
-  return new Map(
-    organizations.map((organization) => [
-      organization.publicId,
-      readOrganizationDepth(organization.publicId, new Set()),
-    ]),
-  );
-}
-
-function isOrganizationInCoverage(
-  organization: AdminOrgAuthData["organizations"][number],
-  purchaserOrganizationPublicId: string,
-  organizationByPublicId: Map<
-    string,
-    AdminOrgAuthData["organizations"][number]
-  >,
-): boolean {
-  if (organization.publicId === purchaserOrganizationPublicId) {
-    return true;
-  }
-
-  const visitedPublicIds = new Set<string>();
-  let parentOrganizationPublicId = organization.parentOrganizationPublicId;
-
-  while (parentOrganizationPublicId !== null) {
-    if (parentOrganizationPublicId === purchaserOrganizationPublicId) {
-      return true;
-    }
-
-    if (visitedPublicIds.has(parentOrganizationPublicId)) {
-      return false;
-    }
-
-    visitedPublicIds.add(parentOrganizationPublicId);
-    parentOrganizationPublicId =
-      organizationByPublicId.get(parentOrganizationPublicId)
-        ?.parentOrganizationPublicId ?? null;
-  }
-
-  return false;
-}
-
-function selectOrgAuthCoverageOrganizations(
-  formState: OrgAuthFormState,
-  organizations: AdminOrgAuthData["organizations"],
-  purchaserOrganizationPublicId: string,
-): AdminOrgAuthData["organizations"] {
-  if (purchaserOrganizationPublicId.length === 0) {
-    return [];
-  }
-
-  if (formState.authScopeType === "specified_nodes") {
-    return organizations.filter((organization) =>
-      formState.organizationPublicIds.includes(organization.publicId),
-    );
-  }
-
-  const organizationByPublicId = new Map(
-    organizations.map((organization) => [organization.publicId, organization]),
-  );
-
-  return organizations.filter((organization) =>
-    isOrganizationInCoverage(
-      organization,
-      purchaserOrganizationPublicId,
-      organizationByPublicId,
-    ),
-  );
-}
-
-function buildOrgAuthInput(
-  formState: OrgAuthFormState,
-  organizations: AdminOrgAuthData["organizations"],
-): { input: CreateOrgAuthInput | null; message: string | null } {
-  const purchaserOrganizationPublicId =
-    formState.purchaserOrganizationPublicId ||
-    findFirstOrganizationPublicId(organizations);
+function buildOrgAuthInput(formState: OrgAuthFormState): {
+  input: CreateOrgAuthInput | null;
+  message: string | null;
+} {
+  const purchaserOrganizationPublicId = formState.purchaserOrganizationPublicId;
   const name = formState.name.trim();
   const accountQuota = Number(formState.accountQuota);
   const edition = formState.edition;
@@ -1582,9 +1470,11 @@ function OrgAuthOverlapClosureGuidance() {
 
 function OrgAuthAtomicScopePreview({
   coverageOrganizations,
+  isServerExpandedCoverage,
   formState,
 }: {
-  coverageOrganizations: AdminOrgAuthData["organizations"];
+  coverageOrganizations: AdminOrganizationReference[];
+  isServerExpandedCoverage: boolean;
   formState: OrgAuthFormState;
 }) {
   const editionLabel =
@@ -1620,8 +1510,9 @@ function OrgAuthAtomicScopePreview({
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-          {coverageRows.length} 个企业节点 / {atomicScopeRows.length}{" "}
-          个原子专业等级
+          {coverageRows.length} 个已选节点
+          {isServerExpandedCoverage ? "（后端展开下级）" : ""} /{" "}
+          {atomicScopeRows.length} 个原子专业等级
         </span>
       </div>
 
@@ -2742,71 +2633,21 @@ function AdminTaskDrawer({
   );
 }
 
-function buildEmployeeTransferReviewRows(input: {
-  employees: AdminOrgAuthData["employees"];
-  organizations: AdminOrgAuthData["organizations"];
-  orgAuths: AdminOrgAuthData["orgAuths"];
-}): EmployeeTransferReviewRow[] {
-  const activeOrganizations = input.organizations.filter(
-    (organization) => organization.status === "active",
-  );
-
-  return input.employees.flatMap((employee) => {
-    const currentOrganization = input.organizations.find(
-      (organization) => organization.publicId === employee.organizationPublicId,
-    );
-    const targetOrganizations = activeOrganizations.filter(
-      (organization) => organization.publicId !== employee.organizationPublicId,
-    );
-
-    return targetOrganizations.map((targetOrganization) => {
-      const targetActiveOrgAuths = input.orgAuths.filter(
-        (orgAuth) =>
-          orgAuth.status === "active" &&
-          orgAuth.organizationPublicIds.includes(targetOrganization.publicId),
-      );
-      const availableQuota = targetActiveOrgAuths.reduce(
-        (totalAvailableQuota, orgAuth) =>
-          totalAvailableQuota +
-          Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0),
-        0,
-      );
-      const reason =
-        targetActiveOrgAuths.length === 0
-          ? "target_no_active_auth"
-          : availableQuota > 0
-            ? "quota_available"
-            : "quota_insufficient";
-
-      return {
-        activeScopeCount: targetActiveOrgAuths.length,
-        availableQuota,
-        currentOrganizationName:
-          currentOrganization?.name ?? employee.organizationPublicId,
-        employeeName: employee.name,
-        employeePublicId: employee.publicId,
-        reason,
-        targetOrganizationName: targetOrganization.name,
-        targetOrganizationPublicId: targetOrganization.publicId,
-      };
-    });
-  });
-}
-
-const employeeTransferReviewReasonLabels: Record<
-  EmployeeTransferReviewRow["reason"],
+const employeeTransferPreviewStatusLabels: Record<
+  EmployeeTransferPreviewDto["status"],
   string
 > = {
-  quota_available: "可进入事务复核",
+  available: "当前快照允许进入事务复核",
   quota_insufficient: "目标授权额度不足",
-  target_no_active_auth: "目标组织暂无有效授权",
+  same_organization: "目标组织与当前组织相同",
+  target_no_active_authorization: "目标组织暂无当前有效授权",
+  target_organization_not_found: "目标组织不可用",
 };
 
 function EmployeeTransferActionPanel({
   employee,
   onTransferEmployee,
   organizations,
-  orgAuths,
 }: {
   employee: AdminEmployeeListData["employees"][number];
   onTransferEmployee: (input: {
@@ -2814,19 +2655,67 @@ function EmployeeTransferActionPanel({
     targetOrganizationPublicId: string;
   }) => void;
   organizations: AdminOrgAuthData["organizations"];
-  orgAuths: AdminOrgAuthData["orgAuths"];
 }) {
   const [targetOrganizationPublicId, setTargetOrganizationPublicId] =
     useState("");
-  const reviewRows = buildEmployeeTransferReviewRows({
-    employees: [employee],
-    organizations,
-    orgAuths,
-  });
-  const selectedReview = reviewRows.find(
-    (reviewRow) =>
-      reviewRow.targetOrganizationPublicId === targetOrganizationPublicId,
+  const [targetOrganization, setTargetOrganization] =
+    useState<AdminOrganizationReference | null>(null);
+  const [preview, setPreview] = useState<EmployeeTransferPreviewDto | null>(
+    null,
   );
+  const [previewState, setPreviewState] = useState<
+    "error" | "idle" | "loading" | "ready"
+  >("idle");
+  const previewRequestSequenceRef = useRef(0);
+
+  useEffect(() => {
+    const requestSequence = previewRequestSequenceRef.current + 1;
+    previewRequestSequenceRef.current = requestSequence;
+
+    if (targetOrganizationPublicId.length === 0) {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+    if (sessionToken === null) {
+      void Promise.resolve().then(() => {
+        if (previewRequestSequenceRef.current === requestSequence) {
+          setPreview(null);
+          setPreviewState("error");
+        }
+      });
+      return;
+    }
+
+    const searchParams = new URLSearchParams({
+      targetOrganizationPublicId,
+    });
+
+    void fetchAdminApi<EmployeeTransferPreviewDto>(
+      `/api/v1/employees/${encodeURIComponent(employee.publicId)}/transfer?${searchParams.toString()}`,
+      sessionToken,
+    )
+      .then((response) => {
+        if (previewRequestSequenceRef.current !== requestSequence) {
+          return;
+        }
+
+        if (response.code !== 0 || response.data === null) {
+          setPreview(null);
+          setPreviewState("error");
+          return;
+        }
+
+        setPreview(response.data);
+        setPreviewState("ready");
+      })
+      .catch(() => {
+        if (previewRequestSequenceRef.current === requestSequence) {
+          setPreview(null);
+          setPreviewState("error");
+        }
+      });
+  }, [employee.publicId, targetOrganizationPublicId]);
 
   return (
     <section
@@ -2844,59 +2733,68 @@ function EmployeeTransferActionPanel({
           目标授权额度不足时阻断；成功后撤销员工已有活跃会话，保留已提交作答时企业归属快照，并阻断原组织未提交企业训练。
         </p>
       </div>
-      <label className="flex flex-col gap-2 text-sm font-medium">
-        <span className="text-text-secondary">目标企业</span>
-        <select
-          aria-label="目标企业"
-          className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-          value={targetOrganizationPublicId}
-          onChange={(event) =>
-            setTargetOrganizationPublicId(event.target.value)
-          }
-        >
-          <option value="">请选择目标企业</option>
-          {reviewRows.map((reviewRow) => (
-            <option
-              key={reviewRow.targetOrganizationPublicId}
-              value={reviewRow.targetOrganizationPublicId}
-            >
-              {reviewRow.targetOrganizationName}
-            </option>
-          ))}
-        </select>
-      </label>
-      {selectedReview === undefined ? (
+      <AdminOrganizationReferencePicker
+        excludedPublicIds={[employee.organizationPublicId]}
+        initialOrganizations={organizations}
+        searchLabel="搜索员工转移目标组织"
+        selectLabel="目标企业"
+        value={targetOrganizationPublicId}
+        onChange={(organizationPublicId, organization) => {
+          setTargetOrganizationPublicId(organizationPublicId);
+          setTargetOrganization(organization);
+          setPreview(null);
+          setPreviewState(
+            organizationPublicId.length === 0 ? "idle" : "loading",
+          );
+        }}
+      />
+      {previewState === "idle" ? (
         <p className="text-text-muted text-sm">选择目标企业后查看影响。</p>
-      ) : (
+      ) : null}
+      {previewState === "loading" ? (
+        <p className="text-text-muted text-sm" role="status">
+          正在读取当前授权与额度快照
+        </p>
+      ) : null}
+      {previewState === "error" ? (
+        <p className="text-destructive text-sm">
+          转移预检失败，请重新选择或稍后重试。
+        </p>
+      ) : null}
+      {preview === null ? null : (
         <div className="border-border bg-background space-y-2 rounded-md border p-3">
           <p className="text-text-primary text-sm font-medium">
-            {selectedReview.currentOrganizationName} 到{" "}
-            {selectedReview.targetOrganizationName}
+            {employee.organizationPublicId} 到{" "}
+            {preview.targetOrganizationName ??
+              targetOrganization?.name ??
+              preview.targetOrganizationPublicId}
           </p>
           <p className="text-text-secondary text-sm">
-            目标有效授权范围 {selectedReview.activeScopeCount}；可用额度{" "}
-            {selectedReview.availableQuota}
+            目标当前有效授权范围 {preview.activeAuthorizationCount}；可用额度{" "}
+            {preview.quotaRequired
+              ? (preview.availableSeatCount ?? "不可用")
+              : "当前员工状态不占用额度"}
           </p>
           <p className="text-text-muted text-xs">
-            {employeeTransferReviewReasonLabels[selectedReview.reason]}
+            {employeeTransferPreviewStatusLabels[preview.status]}
+            。这是只读快照，提交时服务端会在事务中重新校验。
           </p>
         </div>
       )}
       <button
         className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
         data-testid={
-          selectedReview === undefined
+          preview === null
             ? "employee-transfer-submit"
-            : `employee-transfer-${selectedReview.employeePublicId}-${selectedReview.targetOrganizationPublicId}`
+            : `employee-transfer-${preview.employeePublicId}-${preview.targetOrganizationPublicId}`
         }
-        disabled={selectedReview?.reason !== "quota_available"}
+        disabled={preview?.status !== "available"}
         type="button"
         onClick={() => {
-          if (selectedReview !== undefined) {
+          if (preview?.status === "available") {
             onTransferEmployee({
-              employeePublicId: selectedReview.employeePublicId,
-              targetOrganizationPublicId:
-                selectedReview.targetOrganizationPublicId,
+              employeePublicId: preview.employeePublicId,
+              targetOrganizationPublicId: preview.targetOrganizationPublicId,
             });
           }
         }}
@@ -4044,21 +3942,45 @@ function OrgAuthActionPanel({
   disabled: boolean;
   formState: OrgAuthFormState;
   id?: string;
+  organizations: AdminOrgAuthData["organizations"];
   onCreateOrgAuth: () => void;
   onFormChange: (formState: OrgAuthFormState) => void;
-  organizations: AdminOrgAuthData["organizations"];
 }) {
-  const selectedPurchaserPublicId =
-    formState.purchaserOrganizationPublicId ||
-    findFirstOrganizationPublicId(organizations);
-  const organizationDepthByPublicId = createOrganizationDepthMap(organizations);
-  const formValidation = buildOrgAuthInput(formState, organizations);
-  const coverageOrganizations = selectOrgAuthCoverageOrganizations(
-    formState,
-    organizations,
-    selectedPurchaserPublicId,
+  const [knownOrganizations, setKnownOrganizations] = useState<
+    AdminOrganizationReference[]
+  >([]);
+  const formValidation = buildOrgAuthInput(formState);
+  const selectedPurchaser = knownOrganizations.find(
+    (organization) =>
+      organization.publicId === formState.purchaserOrganizationPublicId,
   );
+  const coverageOrganizations =
+    formState.authScopeType === "specified_nodes"
+      ? formState.organizationPublicIds.flatMap((publicId) => {
+          const organization = knownOrganizations.find(
+            (candidate) => candidate.publicId === publicId,
+          );
+          return organization === undefined ? [] : [organization];
+        })
+      : selectedPurchaser === undefined
+        ? []
+        : [selectedPurchaser];
   const isCreateDisabled = disabled || formValidation.input === null;
+
+  function rememberOrganization(
+    organization: AdminOrganizationReference | null,
+  ) {
+    if (organization === null) {
+      return;
+    }
+
+    setKnownOrganizations((currentOrganizations) => [
+      ...currentOrganizations.filter(
+        (candidate) => candidate.publicId !== organization.publicId,
+      ),
+      organization,
+    ]);
+  }
 
   function updateFormState(nextFields: Partial<OrgAuthFormState>) {
     onFormChange({
@@ -4067,16 +3989,12 @@ function OrgAuthActionPanel({
     });
   }
 
-  function toggleOrganizationPublicId(organizationPublicId: string) {
+  function removeOrganizationPublicId(organizationPublicId: string) {
     updateFormState({
-      organizationPublicIds: formState.organizationPublicIds.includes(
-        organizationPublicId,
-      )
-        ? formState.organizationPublicIds.filter(
-            (selectedOrganizationPublicId) =>
-              selectedOrganizationPublicId !== organizationPublicId,
-          )
-        : [...formState.organizationPublicIds, organizationPublicId],
+      organizationPublicIds: formState.organizationPublicIds.filter(
+        (selectedOrganizationPublicId) =>
+          selectedOrganizationPublicId !== organizationPublicId,
+      ),
     });
   }
 
@@ -4150,27 +4068,21 @@ function OrgAuthActionPanel({
             />
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
-            <span className="text-text-secondary">购买主体</span>
-            <select
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              value={selectedPurchaserPublicId}
-              onChange={(event) =>
+          <div className="lg:col-span-2">
+            <AdminOrganizationReferencePicker
+              disabled={disabled}
+              initialOrganizations={organizations}
+              searchLabel="搜索企业授权购买主体"
+              selectLabel="购买主体"
+              value={formState.purchaserOrganizationPublicId}
+              onChange={(organizationPublicId, organization) => {
+                rememberOrganization(organization);
                 updateFormState({
-                  purchaserOrganizationPublicId: event.target.value,
-                })
-              }
-            >
-              {organizations.map((organization) => (
-                <option
-                  key={organization.publicId}
-                  value={organization.publicId}
-                >
-                  {organization.name}
-                </option>
-              ))}
-            </select>
-          </label>
+                  purchaserOrganizationPublicId: organizationPublicId,
+                });
+              }}
+            />
+          </div>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
             <span className="text-text-secondary">授权范围类型</span>
@@ -4291,49 +4203,76 @@ function OrgAuthActionPanel({
               选择“本企业及下级”时，后端按购买主体自动展开下级；选择“指定企业列表”时，只覆盖勾选的企业节点。
             </p>
           </div>
-          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-            {organizations.map((organization) => {
-              const organizationDepth =
-                organizationDepthByPublicId.get(organization.publicId) ?? 0;
-              const isChecked =
-                formState.authScopeType === "specified_nodes"
-                  ? formState.organizationPublicIds.includes(
-                      organization.publicId,
+          {formState.authScopeType === "specified_nodes" ? (
+            <div className="mt-3 space-y-3">
+              <AdminOrganizationReferencePicker
+                disabled={disabled}
+                excludedPublicIds={formState.organizationPublicIds}
+                initialOrganizations={organizations}
+                searchLabel="搜索授权覆盖企业"
+                selectLabel="添加授权覆盖企业"
+                value=""
+                onChange={(organizationPublicId, organization) => {
+                  if (
+                    organizationPublicId.length === 0 ||
+                    formState.organizationPublicIds.includes(
+                      organizationPublicId,
                     )
-                  : organization.publicId === selectedPurchaserPublicId;
-
-              return (
-                <label
-                  key={organization.publicId}
-                  className={`border-border bg-surface flex items-start gap-2 rounded-md border py-2 pr-3 text-sm ${getOrganizationDepthPaddingClassName(organizationDepth)}`}
-                >
-                  <input
-                    aria-label={organization.name}
-                    checked={isChecked}
-                    className="mt-1"
-                    disabled={formState.authScopeType !== "specified_nodes"}
-                    type="checkbox"
-                    onChange={() =>
-                      toggleOrganizationPublicId(organization.publicId)
-                    }
-                  />
-                  <span className="min-w-0">
-                    <span className="text-text-primary block font-medium">
-                      {organization.name}
+                  ) {
+                    return;
+                  }
+                  rememberOrganization(organization);
+                  updateFormState({
+                    organizationPublicIds: [
+                      ...formState.organizationPublicIds,
+                      organizationPublicId,
+                    ],
+                  });
+                }}
+              />
+              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {coverageOrganizations.map((organization) => (
+                  <div
+                    key={organization.publicId}
+                    className="border-border bg-surface flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+                  >
+                    <span>
+                      <span className="text-text-primary block font-medium">
+                        {organization.name}
+                      </span>
+                      <span className="text-text-muted block text-xs">
+                        {orgTierLabels[organization.orgTier]}
+                      </span>
                     </span>
-                    <span className="text-text-muted block text-xs">
-                      {orgTierLabels[organization.orgTier]}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
+                    <button
+                      aria-label={`移除覆盖企业 ${organization.name}`}
+                      className="border-border bg-background rounded-md border px-2 py-1 text-xs"
+                      type="button"
+                      onClick={() =>
+                        removeOrganizationPublicId(organization.publicId)
+                      }
+                    >
+                      移除
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-text-muted mt-3 text-sm">
+              {selectedPurchaser === undefined
+                ? "请先选择购买主体。"
+                : `${selectedPurchaser.name} 及其下级由服务端在提交时完整展开。`}
+            </p>
+          )}
         </div>
 
         <OrgAuthAtomicScopePreview
           coverageOrganizations={coverageOrganizations}
           formState={formState}
+          isServerExpandedCoverage={
+            formState.authScopeType === "current_and_descendants"
+          }
         />
 
         <OrgAuthOverlapClosureGuidance />
@@ -6426,15 +6365,12 @@ export function AdminOrgAuthPage() {
             title="新增企业授权"
           >
             <OrgAuthActionPanel
-              disabled={data.organizations.length === 0}
+              disabled={false}
               formState={orgAuthFormState}
               id="org-auth-create-panel"
               organizations={data.organizations}
               onCreateOrgAuth={() => {
-                const orgAuthDraft = buildOrgAuthInput(
-                  orgAuthFormState,
-                  data.organizations,
-                );
+                const orgAuthDraft = buildOrgAuthInput(orgAuthFormState);
 
                 if (orgAuthDraft.input === null) {
                   setToastMessage({
@@ -6680,7 +6616,6 @@ export function AdminOrgAuthPage() {
             <EmployeeTransferActionPanel
               employee={selectedTransferEmployee}
               organizations={data.organizations}
-              orgAuths={data.orgAuths}
               onTransferEmployee={(input) => {
                 setLastEmployeeTransferResult(null);
                 setLastEmployeeUnbindResult(null);

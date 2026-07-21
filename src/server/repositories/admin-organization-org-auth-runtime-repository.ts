@@ -26,6 +26,7 @@ import type {
   AdminAuthOperationListQuery,
   EmployeeListQuery,
   EmployeeTransferResultDto,
+  EmployeeTransferPreviewDto,
   EmployeeUnbindResultDto,
   EmployeeListDto,
   OrganizationListDto,
@@ -69,6 +70,7 @@ import {
   lockEmployeeIdentity,
   releaseEmployeeOrgAuthQuota,
   reserveEmployeeOrgAuthQuota,
+  previewEmployeeOrgAuthQuota,
 } from "./employee-org-auth-quota-repository";
 import {
   createOrgAuthCoversOrganizationCondition,
@@ -155,6 +157,9 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   transferEmployee?(
     input: EmployeeTransferInput,
   ): Promise<EmployeeTransferRepositoryResult | null>;
+  previewEmployeeTransfer?(
+    input: EmployeeTransferInput,
+  ): Promise<EmployeeTransferPreviewDto | null>;
   unbindEmployee?(
     input: EmployeeUnbindInput,
   ): Promise<EmployeeUnbindResultDto | null>;
@@ -2075,6 +2080,91 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
 
         throw error;
       }
+    },
+    async previewEmployeeTransfer(input) {
+      const database = getDatabase();
+      const [employeeRow] = await database
+        .select({
+          employee_id: employee.id,
+          employee_public_id: employee.public_id,
+          organization_id: employee.organization_id,
+          organization_public_id: organization.public_id,
+          user_status: user.status,
+        })
+        .from(employee)
+        .innerJoin(user, eq(user.id, employee.user_id))
+        .innerJoin(organization, eq(organization.id, employee.organization_id))
+        .where(
+          and(
+            eq(employee.public_id, input.employeePublicId),
+            eq(user.user_type, "employee"),
+          ),
+        )
+        .limit(1);
+
+      if (employeeRow === undefined) {
+        return null;
+      }
+
+      const [targetOrganizationRow] = await database
+        .select({
+          id: organization.id,
+          name: organization.name,
+          public_id: organization.public_id,
+          status: organization.status,
+        })
+        .from(organization)
+        .where(eq(organization.public_id, input.targetOrganizationPublicId))
+        .limit(1);
+      const commonResult = {
+        activeAuthorizationCount: 0,
+        availableSeatCount: null,
+        employeePublicId: employeeRow.employee_public_id,
+        previousOrganizationPublicId: employeeRow.organization_public_id,
+        quotaRequired: employeeRow.user_status === "active",
+        revalidationRequired: true as const,
+        targetOrganizationName: targetOrganizationRow?.name ?? null,
+        targetOrganizationPublicId: input.targetOrganizationPublicId,
+      };
+
+      if (
+        targetOrganizationRow === undefined ||
+        targetOrganizationRow.status !== "active"
+      ) {
+        return {
+          ...commonResult,
+          status: "target_organization_not_found" as const,
+        };
+      }
+
+      if (targetOrganizationRow.id === employeeRow.organization_id) {
+        return {
+          ...commonResult,
+          status: "same_organization" as const,
+        };
+      }
+
+      if (employeeRow.user_status !== "active") {
+        return {
+          ...commonResult,
+          status: "available" as const,
+        };
+      }
+
+      const quotaPreview = await previewEmployeeOrgAuthQuota(database, {
+        employeeId: employeeRow.employee_id,
+        organizationId: targetOrganizationRow.id,
+      });
+
+      return {
+        ...commonResult,
+        activeAuthorizationCount: quotaPreview.activeAuthorizationCount,
+        availableSeatCount: quotaPreview.availableSeatCount,
+        status:
+          quotaPreview.status === "no_active_authorization"
+            ? ("target_no_active_authorization" as const)
+            : quotaPreview.status,
+      };
     },
     async unbindEmployee(input) {
       const database = getDatabase();

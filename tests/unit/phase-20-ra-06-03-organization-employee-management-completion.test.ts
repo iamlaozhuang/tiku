@@ -554,7 +554,7 @@ function mockOrganizationPageFetch() {
         );
       }
 
-      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/organizations?")) {
         return createJsonResponse(organizationListPayload);
       }
 
@@ -675,6 +675,24 @@ function mockOrganizationPageFetch() {
         });
       }
 
+      if (path.startsWith("/api/v1/employees/employee-public-001/transfer?")) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            activeAuthorizationCount: 1,
+            availableSeatCount: 99,
+            employeePublicId: "employee-public-001",
+            previousOrganizationPublicId: "org-city-001",
+            quotaRequired: true,
+            revalidationRequired: true,
+            status: "available",
+            targetOrganizationName: "Target Test Tobacco",
+            targetOrganizationPublicId: "org-target-001",
+          },
+        });
+      }
+
       if (path === "/api/v1/employees/employee-public-001/transfer") {
         const body = JSON.parse(String(init?.body));
 
@@ -744,7 +762,7 @@ function mockEmptyOrganizationPageFetch() {
         );
       }
 
-      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/organizations?")) {
         return createJsonResponse(emptyOrganizationListPayload);
       }
 
@@ -1050,7 +1068,9 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
 
-    const orgAuthRow = screen.getByTestId("admin-org-auth-org-auth-public-001");
+    const orgAuthRow = await screen.findByTestId(
+      "admin-org-auth-org-auth-public-001",
+    );
     fireEvent.click(
       within(orgAuthRow).getByRole("button", {
         name: /^查看企业授权 /u,
@@ -1129,7 +1149,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     });
 
     fireEvent.click(
-      screen.getByTestId(
+      await screen.findByTestId(
         "employee-transfer-employee-public-001-org-target-001",
       ),
     );

@@ -31,6 +31,50 @@ export type EmployeeOrgAuthQuotaReservationResult =
   | "quota_insufficient"
   | "reserved";
 
+export type EmployeeOrgAuthQuotaPreviewResult = {
+  activeAuthorizationCount: number;
+  availableSeatCount: number | null;
+  status: "available" | "no_active_authorization" | "quota_insufficient";
+};
+
+type EmployeeOrgAuthQuotaPreviewRow = {
+  accountQuota: number;
+  existingReservation: boolean;
+  reservationCount: number;
+  startsAt: Date;
+};
+
+export function evaluateEmployeeOrgAuthQuotaPreview(
+  rows: EmployeeOrgAuthQuotaPreviewRow[],
+  now: Date,
+): EmployeeOrgAuthQuotaPreviewResult {
+  const activeAuthorizationCount = rows.filter(
+    (row) => row.startsAt <= now,
+  ).length;
+
+  if (activeAuthorizationCount === 0) {
+    return {
+      activeAuthorizationCount: 0,
+      availableSeatCount: null,
+      status: "no_active_authorization",
+    };
+  }
+
+  const availableSeatCounts = rows.map(
+    (row) =>
+      row.accountQuota -
+      row.reservationCount +
+      (row.existingReservation ? 1 : 0),
+  );
+  const availableSeatCount = Math.min(...availableSeatCounts);
+
+  return {
+    activeAuthorizationCount,
+    availableSeatCount: Math.max(availableSeatCount, 0),
+    status: availableSeatCount > 0 ? "available" : "quota_insufficient",
+  };
+}
+
 export type EmployeeAccountStatusWithQuotaResult =
   | "not_found"
   | "quota_insufficient"
@@ -114,6 +158,58 @@ async function refreshOrgAuthUsedQuota(
       })
       .where(eq(orgAuth.id, orgAuthId));
   }
+}
+
+export async function previewEmployeeOrgAuthQuota(
+  database: EmployeeOrgAuthQuotaDatabase,
+  input: {
+    employeeId: number;
+    organizationId: number;
+  },
+): Promise<EmployeeOrgAuthQuotaPreviewResult> {
+  const now = new Date();
+  const orgAuthRows = await listCoveringOrgAuthQuotaRows(
+    database,
+    input.organizationId,
+    now,
+  );
+
+  if (orgAuthRows.length === 0) {
+    return evaluateEmployeeOrgAuthQuotaPreview([], now);
+  }
+
+  const existingReservations = await database
+    .select({ org_auth_id: employeeOrgAuth.org_auth_id })
+    .from(employeeOrgAuth)
+    .where(
+      and(
+        eq(employeeOrgAuth.employee_id, input.employeeId),
+        inArray(
+          employeeOrgAuth.org_auth_id,
+          orgAuthRows.map((row) => row.id),
+        ),
+      ),
+    );
+  const existingOrgAuthIds = new Set(
+    existingReservations.map((row) => row.org_auth_id),
+  );
+  const previewRows: EmployeeOrgAuthQuotaPreviewRow[] = [];
+
+  for (const orgAuthRow of orgAuthRows) {
+    const [reservationCount] = await database
+      .select({ value: count() })
+      .from(employeeOrgAuth)
+      .where(eq(employeeOrgAuth.org_auth_id, orgAuthRow.id));
+
+    previewRows.push({
+      accountQuota: orgAuthRow.account_quota,
+      existingReservation: existingOrgAuthIds.has(orgAuthRow.id),
+      reservationCount: reservationCount?.value ?? 0,
+      startsAt: orgAuthRow.starts_at,
+    });
+  }
+
+  return evaluateEmployeeOrgAuthQuotaPreview(previewRows, now);
 }
 
 export async function reserveEmployeeOrgAuthQuota(

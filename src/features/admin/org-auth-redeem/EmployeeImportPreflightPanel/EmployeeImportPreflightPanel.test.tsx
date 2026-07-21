@@ -46,7 +46,18 @@ describe("EmployeeImportPreflightPanel", () => {
         isBusy={false}
         message={null}
         organizationPublicId="organization-public-1"
-        organizations={[{ name: "Org One", publicId: "organization-public-1" }]}
+        organizations={[
+          {
+            authSummary: null,
+            employeeCount: 0,
+            name: "Org One",
+            orgTier: "city",
+            parentOrganizationPublicId: null,
+            publicId: "organization-public-1",
+            revision: 1,
+            status: "active",
+          },
+        ]}
         preview={preview}
         sourceFormat="csv"
         onConfirm={vi.fn()}

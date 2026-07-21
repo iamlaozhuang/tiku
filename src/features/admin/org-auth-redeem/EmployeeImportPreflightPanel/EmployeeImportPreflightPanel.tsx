@@ -1,11 +1,13 @@
 "use client";
 
+import {
+  AdminOrganizationReferencePicker,
+  type AdminOrganizationReference,
+} from "@/features/admin/AdminOrganizationReferencePicker/AdminOrganizationReferencePicker";
 import type {
   EmployeeImportPreflightDto,
   EmployeeImportSourceFormat,
 } from "@/server/contracts/employee-import-command-contract";
-
-type OrganizationOption = { name: string; publicId: string };
 
 type EmployeeImportPreflightPanelProps = {
   canConfirm: boolean;
@@ -13,7 +15,7 @@ type EmployeeImportPreflightPanelProps = {
   isBusy: boolean;
   message: string | null;
   organizationPublicId: string;
-  organizations: OrganizationOption[];
+  organizations?: AdminOrganizationReference[];
   preview: EmployeeImportPreflightDto | null;
   sourceFormat: EmployeeImportSourceFormat;
   onConfirm: () => void;
@@ -85,25 +87,16 @@ export function EmployeeImportPreflightPanel({
   return (
     <div className="space-y-4">
       <div className="grid gap-3 md:grid-cols-2">
-        <label className="space-y-1 text-sm">
-          <span>目标组织</span>
-          <select
-            aria-label="员工导入目标组织"
-            className="border-border bg-background h-9 w-full rounded-md border px-3"
-            data-testid="employee-import-organization-select"
-            value={organizationPublicId}
-            onChange={(event) =>
-              handleEdit(() => onOrganizationChange(event.target.value))
-            }
-          >
-            <option value="">请选择目标组织</option>
-            {organizations.map((organization) => (
-              <option key={organization.publicId} value={organization.publicId}>
-                {organization.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <AdminOrganizationReferencePicker
+          initialOrganizations={organizations}
+          searchLabel="搜索员工导入目标组织"
+          selectLabel="员工导入目标组织"
+          selectTestId="employee-import-organization-select"
+          value={organizationPublicId}
+          onChange={(nextOrganizationPublicId) =>
+            handleEdit(() => onOrganizationChange(nextOrganizationPublicId))
+          }
+        />
         <label className="space-y-1 text-sm">
           <span>源格式</span>
           <select

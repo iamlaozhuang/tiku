@@ -364,6 +364,23 @@ export type EmployeeTransferResultDto = {
   status: "transferred";
 };
 
+export type EmployeeTransferPreviewDto = {
+  activeAuthorizationCount: number;
+  availableSeatCount: number | null;
+  employeePublicId: string;
+  previousOrganizationPublicId: string;
+  quotaRequired: boolean;
+  revalidationRequired: true;
+  status:
+    | "available"
+    | "quota_insufficient"
+    | "same_organization"
+    | "target_no_active_authorization"
+    | "target_organization_not_found";
+  targetOrganizationName: string | null;
+  targetOrganizationPublicId: string;
+};
+
 export type AuthorizationSummaryDto = {
   publicId: string;
   purchaserName: string;

@@ -431,7 +431,7 @@ function mockSystemOpsFetch() {
         );
       }
 
-      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/organizations?")) {
         return createJsonResponse(organizationPayload);
       }
 
@@ -441,6 +441,24 @@ function mockSystemOpsFetch() {
 
       if (path.startsWith("/api/v1/employees?")) {
         return createJsonResponse(employeePayload);
+      }
+
+      if (path.startsWith("/api/v1/employees/employee-public-001/transfer?")) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            activeAuthorizationCount: 1,
+            availableSeatCount: 0,
+            employeePublicId: "employee-public-001",
+            previousOrganizationPublicId: "organization-public-001",
+            quotaRequired: true,
+            revalidationRequired: true,
+            status: "quota_insufficient",
+            targetOrganizationName: "宁波烟草",
+            targetOrganizationPublicId: "organization-public-002",
+          },
+        });
       }
 
       if (path === "/api/v1/employees/employee-public-001/unbind") {
@@ -558,7 +576,7 @@ function mockSystemOpsFetchWithOrganizationTree(
         );
       }
 
-      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/organizations?")) {
         return createJsonResponse(organizationTreePayload);
       }
 
@@ -1339,6 +1357,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
       target: { value: "standard" },
     });
+    fireEvent.change(screen.getByLabelText("购买主体"), {
+      target: { value: "organization-public-001" },
+    });
 
     await screen.findByRole("heading", { name: "企业管理" });
 
@@ -1408,6 +1429,10 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
     await screen.findByTestId("org-auth-create-form");
 
+    fireEvent.change(screen.getByLabelText("购买主体"), {
+      target: { value: "organization-public-001" },
+    });
+
     const atomicScopePreview = screen.getByTestId(
       "org-auth-atomic-scope-preview",
     );
@@ -1467,7 +1492,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByLabelText("授权范围类型"), {
       target: { value: "specified_nodes" },
     });
-    fireEvent.click(screen.getByLabelText("西湖区烟草公司"));
+    fireEvent.change(screen.getByLabelText("添加授权覆盖企业"), {
+      target: { value: "org-district-001" },
+    });
     fireEvent.click(screen.getByTestId("org-auth-profession-monopoly"));
     fireEvent.click(screen.getByTestId("org-auth-profession-logistics"));
     fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
@@ -1534,6 +1561,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
       target: { value: "standard" },
     });
+    fireEvent.change(screen.getByLabelText("购买主体"), {
+      target: { value: "org-city-001" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
     fireEvent.click(screen.getByRole("button", { name: "确认创建" }));
@@ -1569,7 +1599,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByLabelText("授权范围类型"), {
       target: { value: "specified_nodes" },
     });
-    fireEvent.click(screen.getByLabelText("西湖区烟草公司"));
+    fireEvent.change(screen.getByLabelText("添加授权覆盖企业"), {
+      target: { value: "org-district-001" },
+    });
     fireEvent.change(screen.getByLabelText("账号额度"), {
       target: { value: "50" },
     });
@@ -2266,8 +2298,10 @@ describe("admin user organization authorization ops baseline", () => {
     expect(transferBoundary).toHaveTextContent("撤销员工已有活跃会话");
     expect(transferBoundary).toHaveTextContent("作答时企业归属快照");
     expect(transferBoundary).toHaveTextContent("原组织未提交企业训练");
-    expect(transferBoundary).toHaveTextContent("宁波烟草");
-    expect(transferBoundary).toHaveTextContent("目标授权额度不足");
+    await waitFor(() => {
+      expect(transferBoundary).toHaveTextContent("宁波烟草");
+      expect(transferBoundary).toHaveTextContent("目标授权额度不足");
+    });
     expect(transferBoundary).not.toHaveTextContent("approval_required");
     fireEvent.keyDown(document, { key: "Escape" });
 

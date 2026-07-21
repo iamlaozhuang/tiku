@@ -17,7 +17,18 @@ describe("EmployeeCreateActionPanel", () => {
         message={null}
         name="Employee One"
         organizationPublicId="organization-public-1"
-        organizations={[{ name: "Org One", publicId: "organization-public-1" }]}
+        organizations={[
+          {
+            authSummary: null,
+            employeeCount: 0,
+            name: "Org One",
+            orgTier: "city",
+            parentOrganizationPublicId: null,
+            publicId: "organization-public-1",
+            revision: 1,
+            status: "active",
+          },
+        ]}
         phone="13900000001"
         preview={null}
         onConfirm={vi.fn()}

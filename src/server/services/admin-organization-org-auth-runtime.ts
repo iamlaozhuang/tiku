@@ -15,6 +15,7 @@ import {
   type AdminAuthOperationSortField,
   type EmployeeListQuery,
   type EmployeeSummaryDto,
+  type EmployeeTransferPreviewDto,
   type EmployeeTransferResultDto,
   type EmployeeUnbindResultDto,
   type OrganizationTreeQuery,
@@ -696,6 +697,18 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     }
 
     return actor;
+  }
+
+  async function requireEmployeeTransferPreviewReader(
+    request: Request,
+  ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    return canManageEmployee(actor) ? actor : adminPermissionDeniedResponse;
   }
 
   async function createOrgAuthClosureResponse(input: {
@@ -1835,6 +1848,56 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
         },
       },
       transfer: {
+        async GET(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError =
+            await requireEmployeeTransferPreviewReader(request);
+
+          if ("code" in actorOrError) {
+            return createNoStoreJsonResponse({
+              httpStatus: actorOrError.code === 401001 ? 401 : 403,
+              response: actorOrError,
+            });
+          }
+
+          if (repositories.previewEmployeeTransfer === undefined) {
+            return createNoStoreJsonResponse({
+              httpStatus: 503,
+              response: employeeMutationUnavailableResponse,
+            });
+          }
+
+          const normalizedInput = normalizeEmployeeTransferInput({
+            targetOrganizationPublicId: new URL(request.url).searchParams.get(
+              "targetOrganizationPublicId",
+            ),
+          });
+
+          if (normalizedInput === null) {
+            return createNoStoreJsonResponse({
+              httpStatus: 400,
+              response: employeeInputInvalidResponse,
+            });
+          }
+
+          const result = await repositories.previewEmployeeTransfer({
+            employeePublicId: publicId,
+            targetOrganizationPublicId:
+              normalizedInput.targetOrganizationPublicId,
+          });
+
+          if (result === null) {
+            return createNoStoreJsonResponse({
+              httpStatus: 404,
+              response: employeeNotFoundResponse,
+            });
+          }
+
+          return createNoStoreJsonResponse({
+            httpStatus: 200,
+            response: createSuccessResponse<EmployeeTransferPreviewDto>(result),
+          });
+        },
         async POST(request: Request, context: RouteContext): Promise<Response> {
           const { publicId } = await context.params;
           const actorOrError = await requireEmployeeManager(

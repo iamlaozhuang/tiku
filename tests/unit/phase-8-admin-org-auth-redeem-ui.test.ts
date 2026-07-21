@@ -131,6 +131,17 @@ const employeePayload = {
   },
 };
 
+const referenceTargetOrganization = {
+  authSummary: null,
+  employeeCount: 0,
+  name: "第 101 个合法组织",
+  orgTier: "city",
+  parentOrganizationPublicId: null,
+  publicId: "organization-public-101",
+  revision: 1,
+  status: "active",
+};
+
 const redeemCodePayload = {
   code: 0,
   message: "ok",
@@ -290,8 +301,26 @@ function mockAdminFetch(
         });
       }
 
-      if (path === "/api/v1/organizations?page=1&pageSize=20") {
-        return createJsonResponse(organizationPayload);
+      if (path.startsWith("/api/v1/organizations?")) {
+        const requestUrl = new URL(path, "http://localhost");
+        const isReferenceSearch =
+          requestUrl.searchParams.get("status") === "active";
+        const organizations =
+          isReferenceSearch &&
+          requestUrl.searchParams.get("keyword") ===
+            referenceTargetOrganization.name
+            ? [referenceTargetOrganization]
+            : organizationPayload.data.organizations;
+
+        return createJsonResponse({
+          ...organizationPayload,
+          data: { organizations },
+          pagination: {
+            ...organizationPayload.pagination,
+            page: Number(requestUrl.searchParams.get("page") ?? "1"),
+            total: isReferenceSearch ? 101 : 1,
+          },
+        });
       }
 
       if (path.startsWith("/api/v1/org-auths?")) {
@@ -328,6 +357,24 @@ function mockAdminFetch(
             total: 65,
             sortBy: requestUrl.searchParams.get("sortBy") ?? "registeredAt",
             sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
+          },
+        });
+      }
+
+      if (path.startsWith("/api/v1/employees/employee-public-001/transfer?")) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            activeAuthorizationCount: 1,
+            availableSeatCount: 5,
+            employeePublicId: "employee-public-001",
+            previousOrganizationPublicId: "organization-public-001",
+            quotaRequired: true,
+            revalidationRequired: true,
+            status: "available",
+            targetOrganizationName: referenceTargetOrganization.name,
+            targetOrganizationPublicId: referenceTargetOrganization.publicId,
           },
         });
       }
@@ -452,6 +499,82 @@ afterEach(() => {
 });
 
 describe("AdminOrgAuthPage", () => {
+  it("uses searchable references for authorization, employee onboarding, and transfer preflight", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch();
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业管理" });
+    fireEvent.click(screen.getByTestId("ops-organization-view-org-auth"));
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
+    const orgAuthDrawer = screen.getByRole("dialog", {
+      name: "新增企业授权",
+    });
+    fireEvent.change(
+      within(orgAuthDrawer).getByLabelText("搜索企业授权购买主体"),
+      { target: { value: referenceTargetOrganization.name } },
+    );
+    const purchaserSelect = within(orgAuthDrawer).getByLabelText("购买主体");
+    await within(purchaserSelect).findByRole("option", {
+      name: referenceTargetOrganization.name,
+    });
+    fireEvent.change(purchaserSelect, {
+      target: { value: referenceTargetOrganization.publicId },
+    });
+    fireEvent.click(
+      within(orgAuthDrawer).getByRole("button", { name: "关闭新增企业授权" }),
+    );
+
+    fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
+    fireEvent.click(screen.getByRole("button", { name: "批量导入员工" }));
+    const importDrawer = screen.getByRole("dialog", {
+      name: "批量导入员工",
+    });
+    fireEvent.change(
+      within(importDrawer).getByLabelText("搜索员工导入目标组织"),
+      { target: { value: referenceTargetOrganization.name } },
+    );
+    const importSelect =
+      within(importDrawer).getByLabelText("员工导入目标组织");
+    await within(importSelect).findByRole("option", {
+      name: referenceTargetOrganization.name,
+    });
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    fireEvent.click(
+      within(screen.getByRole("table", { name: "员工账号列表" })).getByRole(
+        "button",
+        { name: "转移员工 张三" },
+      ),
+    );
+    const transferDrawer = screen.getByRole("dialog", { name: "转移员工" });
+    fireEvent.change(
+      within(transferDrawer).getByLabelText("搜索员工转移目标组织"),
+      { target: { value: referenceTargetOrganization.name } },
+    );
+    const transferSelect = within(transferDrawer).getByLabelText("目标企业");
+    await within(transferSelect).findByRole("option", {
+      name: referenceTargetOrganization.name,
+    });
+    fireEvent.change(transferSelect, {
+      target: { value: referenceTargetOrganization.publicId },
+    });
+
+    expect(
+      await within(transferDrawer).findByText(/当前快照允许进入事务复核/u),
+    ).toBeInTheDocument();
+    expect(
+      within(transferDrawer).getByRole("button", { name: "继续转移" }),
+    ).toBeEnabled();
+    expect(
+      fetchMock.mock.calls.some(([request]) =>
+        String(request).includes(
+          `targetOrganizationPublicId=${referenceTargetOrganization.publicId}`,
+        ),
+      ),
+    ).toBe(true);
+  });
+
   it("uses a list-first employee workflow with reusable filters, pagination, and on-demand actions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockAdminFetch();
