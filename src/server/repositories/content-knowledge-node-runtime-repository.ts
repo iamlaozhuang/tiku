@@ -20,6 +20,7 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import { listKnowledgeNodeQuestionCounts } from "./knowledge-node-reference-count";
 
 export type ContentKnowledgeNodePage<TData> = TData & {
   pagination: ApiPagination;
@@ -72,6 +73,10 @@ export function createPostgresContentKnowledgeNodeRuntimeRepository(
           .map((row) => row.parent_knowledge_node_id)
           .filter((id): id is number => id !== null),
       );
+      const questionCounts = await listKnowledgeNodeQuestionCounts(
+        database,
+        rows.map((row) => row.id),
+      );
 
       return {
         knowledgeNodes: rows.map((row) => ({
@@ -88,7 +93,7 @@ export function createPostgresContentKnowledgeNodeRuntimeRepository(
           pathName: row.path_name,
           sortOrder: row.sort_order,
           knStatus: row.kn_status,
-          questionCount: 0,
+          questionCount: questionCounts.get(row.id) ?? 0,
           isRecommendable: row.is_recommendable,
           updatedAt: row.updated_at.toISOString(),
         })),

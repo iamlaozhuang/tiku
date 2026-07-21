@@ -51,6 +51,7 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import { listKnowledgeNodeQuestionCounts } from "./knowledge-node-reference-count";
 
 export type ResourceIndexingSource = {
   publicId: string;
@@ -1935,10 +1936,18 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           .map((row) => row.parent_knowledge_node_id)
           .filter((id): id is number => id !== null),
       );
+      const questionCounts = await listKnowledgeNodeQuestionCounts(
+        database,
+        rows.map((row) => row.id),
+      );
 
       return {
         knowledgeNodes: rows.map((row) =>
-          mapKnowledgeNodeRow(row, parentPublicIds),
+          mapKnowledgeNodeRow(
+            row,
+            parentPublicIds,
+            questionCounts.get(row.id) ?? 0,
+          ),
         ),
         pagination: createPagination(queryInput, totalRow?.value ?? 0),
       };
@@ -2026,6 +2035,7 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           new Map(
             parentNode === null ? [] : [[parentNode.id, parentNode.public_id]],
           ),
+          0,
         );
       });
     },
@@ -2133,11 +2143,16 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           mutationContext,
           row.public_id,
         );
+        const questionCounts = await listKnowledgeNodeQuestionCounts(
+          scopedDatabase,
+          [row.id],
+        );
         return mapKnowledgeNodeRow(
           row,
           new Map(
             parentNode === null ? [] : [[parentNode.id, parentNode.public_id]],
           ),
+          questionCounts.get(row.id) ?? 0,
         );
       });
     },
@@ -2171,7 +2186,15 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           mutationContext,
           row.public_id,
         );
-        return mapKnowledgeNodeRow(row, parentPublicIds);
+        const questionCounts = await listKnowledgeNodeQuestionCounts(
+          scopedDatabase,
+          [row.id],
+        );
+        return mapKnowledgeNodeRow(
+          row,
+          parentPublicIds,
+          questionCounts.get(row.id) ?? 0,
+        );
       });
     },
   };
@@ -2405,6 +2428,7 @@ function createIndexingErrorSummary(message: string | null): string | null {
 function mapKnowledgeNodeRow(
   row: KnowledgeNodeRowForMapping,
   parentPublicIds: ReadonlyMap<number, string>,
+  questionCount: number,
 ): AdminKnowledgeNodeOpsListDto["knowledgeNodes"][number] {
   return {
     publicId: row.public_id,
@@ -2420,7 +2444,7 @@ function mapKnowledgeNodeRow(
     pathName: row.path_name,
     sortOrder: row.sort_order,
     knStatus: row.kn_status,
-    questionCount: 0,
+    questionCount,
     isRecommendable: row.is_recommendable,
     updatedAt: row.updated_at.toISOString(),
   };

@@ -1,23 +1,18 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-question-reference-picker-2026-07-21",
-  "objective": "Close F-0054 by replacing the question editor's fixed first-100 material and knowledge_node catalogs with debounced server-side search, real pagination, latest-intent response handling, and exact hydration of every current binding. Preserve existing content-admin authority and mutation contracts; do not change schema, dependencies, authorization semantics, or unrelated list filters.",
+  "taskId": "p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21",
+  "objective": "Close F-0070 by replacing hard-coded knowledge_node questionCount values with one batched aggregate over question_knowledge_node for every returned list, update and disable projection. Count all durable bindings, including disabled questions, because lifecycle impact must preserve and disclose existing references. Preserve schemas, write semantics, authorization and UI contracts.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
-    "src/server/validators/material.ts",
-    "src/server/validators/material.test.ts",
-    "src/server/repositories/material-repository.ts",
-    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+    "src/server/repositories/knowledge-node-reference-count.ts",
+    "src/server/repositories/knowledge-node-reference-count.test.ts",
     "src/server/repositories/content-knowledge-node-runtime-repository.ts",
-    "src/server/services/content-question-material-runtime.ts",
-    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
     "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "src/lib/admin-list-query.test.ts",
-    "tests/unit/admin-question-material-ui.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts"
+    "tests/unit/phase-9-content-question-material-runtime.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -32,6 +27,7 @@
     ".github/workflows/**",
     ".env*",
     "role, permission, authorization or entitlement changes",
+    "database schema or migration changes",
     "persistent database execution or real data access",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
@@ -39,32 +35,27 @@
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
-    "src/server/validators/material.ts",
-    "src/server/repositories/material-repository.ts",
-    "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+    "src/server/repositories/knowledge-node-reference-count.ts",
+    "src/server/repositories/knowledge-node-reference-count.test.ts",
     "src/server/repositories/content-knowledge-node-runtime-repository.ts",
-    "src/server/services/content-question-material-runtime.ts"
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts"
   ],
   "contingencyFiles": [
-    "src/server/validators/material.test.ts",
-    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
     "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "src/lib/admin-list-query.test.ts",
-    "tests/unit/admin-question-material-ui.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts"
+    "tests/unit/phase-9-content-question-material-runtime.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiCaller": "AdminQuestionEditorForm currently receives a page-1/pageSize-100 material and knowledge_node snapshot and filters it in memory, making the 101st legal reference unreachable and mislabeling valid cross-page bindings as unavailable.",
-    "routeHandler": "The existing materials and knowledge-nodes collection routes already support keyword and pagination. They need a bounded repeated publicId filter so the editor can hydrate current bindings without inventing another endpoint.",
-    "serviceRepository": "content-question-material-runtime parses list queries and the material and knowledge_node repositories own filtering and count semantics; exact public IDs must flow through this same authoritative query path.",
-    "schema": "Existing public_id indexes and tables are sufficient; no schema or migration change is required.",
-    "tests": "Direct validator, runtime, contract and editor tests cover the 101st item, exact cross-page hydration, debounced search, pagination, stale response suppression, loading/error/empty states and disabled-selection behavior.",
-    "nonClaims": "No schema, dependency, permission, Provider, external service, real database execution, mechanism or unrelated content-list filter change."
+    "ui": "AdminKnowledgeNodeManagement already renders and aggregates questionCount; no UI contract change is required once the repository projection is truthful.",
+    "routesServices": "Both content-question-material and rag-resource-knowledge runtimes forward their repository DTOs without recomputing questionCount.",
+    "repositories": "The two production knowledge_node list repositories and the RAG update/disable return path currently map questionCount to the literal zero.",
+    "schema": "question_knowledge_node is the durable binding authority and already has a knowledge_node_id index; a grouped count over the returned node IDs requires no schema change.",
+    "tests": "A focused aggregate test covers zero, multiple bindings and one batched query; repository regression proves both production paths consume the aggregate and mutation audit behavior remains atomic.",
+    "nonClaims": "No schema/migration, real database execution, question status filtering, authorization, dependency, Provider, external service, UI, mechanism or write-semantic change."
   },
   "validationCommands": [
     {
-      "name": "question-reference-picker-focused",
+      "name": "knowledge-node-reference-count-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -72,37 +63,29 @@
         "exec",
         "vitest",
         "run",
-        "src/server/validators/material.test.ts",
-        "tests/unit/phase-9-content-question-material-runtime.test.ts",
+        "src/server/repositories/knowledge-node-reference-count.test.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
         "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "src/lib/admin-list-query.test.ts",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts"
+        "tests/unit/phase-9-content-question-material-runtime.test.ts"
       ]
     },
     {
-      "name": "question-reference-picker-lint",
+      "name": "knowledge-node-reference-count-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
-        "src/server/validators/material.ts",
-        "src/server/validators/material.test.ts",
-        "src/server/repositories/material-repository.ts",
-        "src/server/contracts/admin-content-knowledge-ops-contract.ts",
+        "src/server/repositories/knowledge-node-reference-count.ts",
+        "src/server/repositories/knowledge-node-reference-count.test.ts",
         "src/server/repositories/content-knowledge-node-runtime-repository.ts",
-        "src/server/services/content-question-material-runtime.ts",
-        "tests/unit/phase-9-content-question-material-runtime.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts"
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
       ]
     },
     {
-      "name": "question-reference-picker-typecheck",
+      "name": "knowledge-node-reference-count-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -110,17 +93,17 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "low_risk_read_only_query_and_editor_selection_logic",
+    "category": "bounded_medium_risk_database_application_read_projection",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementChange": false,
@@ -130,6 +113,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }
