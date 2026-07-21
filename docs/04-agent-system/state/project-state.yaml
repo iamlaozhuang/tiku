@@ -750,7 +750,7 @@ currentTask:
   id: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
   title: User password reset atomicity
   phase: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
-  status: in_progress
+  status: closed
   priority: p1
   taskKind: product_remediation
   productClosureContribution: F-0030
@@ -768,9 +768,9 @@ currentTask:
     status: satisfied_by_bounded_medium_risk_standing_approval
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
-    status: verified_candidate_ready_for_commit
-    reason: frozen_product_candidate_passed_single_full_profile_p0_baselines_format_diff_and_adversarial_review
-    resumeAction: commit_ff_only_merge_canonical_push_sync_and_cleanup_under_standing_approval
+    status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    reason: product_commit_02ff16fd5_is_on_clean_synced_master_and_product_branch_is_deleted
+    resumeAction: send_READY_FOR_P1_EXECUTION_POLICY_CAPSULE_V1_and_park
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -804,6 +804,11 @@ currentTask:
     repeatedBlockerReports: 0
     validationRetryCount: 0
     fullRuns: 1
+  closeout:
+    commit: 02ff16fd5c96b980846687edcbebc7e837dc6211
+    candidateTree: 270e88c8a71cec80dee633cc5d355b1dd57a44bb
+    status: committed_ff_only_merged_pushed_synced_and_cleaned
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   previousTaskCloseout:
     taskId: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
     findingId: F-0022
@@ -826,7 +831,7 @@ currentTask:
     F-0020: closed_with_F-0018_by_learner_history_pagination
     F-0021: separate_admin_log_query_and_total
     F-0022: separate_organization_training_list_projection
-    F-0030: separate_password_reset_transaction
+    F-0030: closed_by_user_password_reset_atomic_transaction
     F-0031: separate_multi_domain_audit_atomicity_requires_domain_partition
     F-0034: separate_contact_config_persistence_high_risk
     F-0038: separate_ai_call_fact_schema_high_risk

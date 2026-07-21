@@ -1,24 +1,11 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21",
-  "objective": "Close F-0030 by replacing the route-level password-update, session-revocation, and success-audit sequence with one repository-owned transaction that locks the target identity and atomically updates the credential, revokes every active session, and appends a redacted audit_log row. Preserve server-generated one-time password distribution, no-store responses, existing super_admin/ops_admin authorization, not-found behavior, and failure auditing. Do not change schema/migrations, dependencies, entitlement or authorization scope, Provider/external services, safety mechanisms, deployment, secret/env, or execute a persistent database write.",
+  "taskId": "p1-remediation-rc-04-user-password-reset-atomicity-state-closeout-2026-07-21",
+  "objective": "Record the already committed, ff-only merged, canonically pushed, synced, and cleaned F-0030 product task as closed in project-state and task-queue. This is a docs/state-only closeout checkpoint before the registered P1 execution policy capsule handoff; do not modify product source, tests, safety mechanisms, approval semantics, dependencies, schema/migrations, permissions, Provider/external services, deployment, or secret/env.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-flow-runtime-repository.test.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/auth/local-session-runtime.test.ts",
-    "src/server/services/admin-flow-runtime.test.ts",
-    "src/server/services/admin-flow-runtime.ts",
-    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
-    "tests/unit/phase-11-auth-session-account-hardening.test.ts",
-    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-    "tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts",
-    "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
-    "tests/unit/phase-21-admin-permission-boundary-review.test.ts",
-    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
-    "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "blockedFiles": [
     "package.json",
@@ -26,73 +13,30 @@
     ".github/workflows/**",
     ".env*",
     "drizzle/**",
-    "src/db/**",
+    "src/**",
+    "tests/**",
     "scripts/agent-system/**"
   ],
   "validationCommands": [
     {
-      "name": "user-password-reset-atomicity-focused",
-      "kind": "test",
+      "name": "user-password-reset-atomicity-state-closeout-format",
+      "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "vitest",
-        "run",
-        "src/server/repositories/admin-flow-runtime-repository.test.ts",
-        "tests/unit/phase-11-auth-session-account-hardening.test.ts",
-        "tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts"
+        "prettier",
+        "--check",
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/task-queue.yaml",
+        "docs/04-agent-system/state/task-safety.json"
       ]
-    },
-    {
-      "name": "user-password-reset-atomicity-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "src/server/services/admin-flow-runtime.test.ts",
-        "src/server/auth/local-session-runtime.test.ts",
-        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
-        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-        "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
-        "tests/unit/phase-21-admin-permission-boundary-review.test.ts",
-        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
-        "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts"
-      ]
-    },
-    {
-      "name": "user-password-reset-atomicity-lint",
-      "kind": "lint",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "eslint",
-        "src/server/repositories/admin-flow-runtime-repository.test.ts",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/server/services/admin-flow-runtime.ts",
-        "tests/unit/phase-11-auth-session-account-hardening.test.ts",
-        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-        "tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts",
-        "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
-        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
-        "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts"
-      ]
-    },
-    {
-      "name": "user-password-reset-atomicity-typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": null,
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
