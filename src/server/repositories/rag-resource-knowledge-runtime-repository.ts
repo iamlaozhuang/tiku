@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm";
 
 import {
+  auditLog,
   knowledgeBase,
   knowledgeNode,
   knowledgeNodeResource,
@@ -207,14 +208,30 @@ export type RagKnowledgeNodeRuntimeRepository = {
   ): Promise<ResourceKnowledgePage<AdminKnowledgeNodeOpsListDto>>;
   createKnowledgeNode(
     input: KnowledgeNodeMutationInput,
+    mutationContext: KnowledgeNodeMutationContext,
   ): Promise<AdminKnowledgeNodeOpsListDto["knowledgeNodes"][number] | null>;
   updateKnowledgeNode(
     publicId: string,
     input: KnowledgeNodeUpdateInput,
+    mutationContext: KnowledgeNodeMutationContext,
   ): Promise<AdminKnowledgeNodeOpsListDto["knowledgeNodes"][number] | null>;
   disableKnowledgeNode(
     publicId: string,
+    mutationContext: KnowledgeNodeMutationContext,
   ): Promise<AdminKnowledgeNodeOpsListDto["knowledgeNodes"][number] | null>;
+};
+
+export type KnowledgeNodeMutationContext = {
+  actorPublicId: string;
+  auditLog: {
+    actorRole: string;
+    actionType:
+      | "knowledge_node.create"
+      | "knowledge_node.update"
+      | "knowledge_node.disable";
+    metadataSummary: string;
+    requestIp: string | null;
+  };
 };
 
 export type ResourceKnowledgePage<TData> = TData & {
@@ -1521,7 +1538,7 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
         pagination: createPagination(queryInput, totalRow?.value ?? 0),
       };
     },
-    async createKnowledgeNode(input) {
+    async createKnowledgeNode(input, mutationContext) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
@@ -1590,19 +1607,24 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           })
           .returning(createKnowledgeNodeReturningSelection());
 
-        return row === undefined
-          ? null
-          : mapKnowledgeNodeRow(
-              row,
-              new Map(
-                parentNode === null
-                  ? []
-                  : [[parentNode.id, parentNode.public_id]],
-              ),
-            );
+        if (row === undefined) {
+          return null;
+        }
+
+        await appendKnowledgeNodeMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
+        return mapKnowledgeNodeRow(
+          row,
+          new Map(
+            parentNode === null ? [] : [[parentNode.id, parentNode.public_id]],
+          ),
+        );
       });
     },
-    async updateKnowledgeNode(publicId, input) {
+    async updateKnowledgeNode(publicId, input, mutationContext) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
@@ -1697,43 +1719,75 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           )
           .returning(createKnowledgeNodeReturningSelection());
 
-        return row === undefined
-          ? null
-          : mapKnowledgeNodeRow(
-              row,
-              new Map(
-                parentNode === null
-                  ? []
-                  : [[parentNode.id, parentNode.public_id]],
-              ),
-            );
+        if (row === undefined) {
+          return null;
+        }
+
+        await appendKnowledgeNodeMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
+        return mapKnowledgeNodeRow(
+          row,
+          new Map(
+            parentNode === null ? [] : [[parentNode.id, parentNode.public_id]],
+          ),
+        );
       });
     },
-    async disableKnowledgeNode(publicId) {
+    async disableKnowledgeNode(publicId, mutationContext) {
       const database = getDatabase();
-      const [row] = await database
-        .update(knowledgeNode)
-        .set({
-          kn_status: "disabled",
-          is_recommendable: false,
-          disabled_at: new Date(),
-          updated_at: new Date(),
-        })
-        .where(eq(knowledgeNode.public_id, publicId))
-        .returning(createKnowledgeNodeReturningSelection());
-      const parentPublicIds = await listParentKnowledgeNodePublicIds(
-        database,
-        row?.parent_knowledge_node_id === null ||
-          row?.parent_knowledge_node_id === undefined
-          ? []
-          : [row.parent_knowledge_node_id],
-      );
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const [row] = await scopedDatabase
+          .update(knowledgeNode)
+          .set({
+            kn_status: "disabled",
+            is_recommendable: false,
+            disabled_at: new Date(),
+            updated_at: new Date(),
+          })
+          .where(eq(knowledgeNode.public_id, publicId))
+          .returning(createKnowledgeNodeReturningSelection());
 
-      return row === undefined
-        ? null
-        : mapKnowledgeNodeRow(row, parentPublicIds);
+        if (row === undefined) {
+          return null;
+        }
+
+        const parentPublicIds = await listParentKnowledgeNodePublicIds(
+          scopedDatabase,
+          row.parent_knowledge_node_id === null
+            ? []
+            : [row.parent_knowledge_node_id],
+        );
+        await appendKnowledgeNodeMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
+        return mapKnowledgeNodeRow(row, parentPublicIds);
+      });
     },
   };
+}
+
+async function appendKnowledgeNodeMutationAuditLog(
+  database: RuntimeDatabase,
+  mutationContext: KnowledgeNodeMutationContext,
+  targetPublicId: string,
+): Promise<void> {
+  await database.insert(auditLog).values({
+    public_id: `audit-log-${randomUUID()}`,
+    actor_public_id: mutationContext.actorPublicId,
+    actor_role: mutationContext.auditLog.actorRole,
+    action_type: mutationContext.auditLog.actionType,
+    target_resource_type: "knowledge_node",
+    target_public_id: targetPublicId,
+    result_status: "success",
+    metadata_summary: mutationContext.auditLog.metadataSummary,
+    request_ip: mutationContext.auditLog.requestIp,
+  });
 }
 
 function createResourceConditions(

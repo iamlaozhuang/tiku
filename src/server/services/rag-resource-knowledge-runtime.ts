@@ -42,6 +42,7 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import {
   createPostgresRagResourceKnowledgeRuntimeRepositories,
+  type KnowledgeNodeMutationContext,
   type RagKnowledgeNodeRuntimeRepository,
   type RagResourceKnowledgeRuntimeRepositories,
   type RagResourceRuntimeRepository,
@@ -780,6 +781,23 @@ async function appendAuditLog(
     requestIp: readRequestIp(request),
     ...input,
   });
+}
+
+function createKnowledgeNodeMutationContext(
+  request: Request,
+  actor: ContentAdminActor,
+  actionType: KnowledgeNodeMutationContext["auditLog"]["actionType"],
+  metadataSummary: string,
+): KnowledgeNodeMutationContext {
+  return {
+    actorPublicId: actor.publicId,
+    auditLog: {
+      actorRole: actor.roles[0],
+      actionType,
+      metadataSummary,
+      requestIp: readRequestIp(request),
+    },
+  };
 }
 
 function createResourceVectorResult(
@@ -2031,24 +2049,32 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           const knowledgeNode =
             await repositories.knowledgeNodeRepository.createKnowledgeNode(
               mutationInput,
+              createKnowledgeNodeMutationContext(
+                request,
+                actorOrError,
+                "knowledge_node.create",
+                "redacted knowledge_node create metadata",
+              ),
             );
           const response =
             knowledgeNode === null
               ? knowledgeNodeNotFoundResponse
               : createSuccessResponse(mapKnowledgeNodeResult(knowledgeNode));
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "knowledge_node.create",
-              targetResourceType: "knowledge_node",
-              targetPublicId: knowledgeNode?.publicId ?? null,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted knowledge_node create metadata",
-            },
-          );
+          if (response.code !== 0) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "knowledge_node.create",
+                targetResourceType: "knowledge_node",
+                targetPublicId: null,
+                resultStatus: "failed",
+                metadataSummary: "redacted knowledge_node create metadata",
+              },
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -2081,24 +2107,32 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             await repositories.knowledgeNodeRepository.updateKnowledgeNode(
               publicId,
               mutationInput,
+              createKnowledgeNodeMutationContext(
+                request,
+                actorOrError,
+                "knowledge_node.update",
+                "redacted knowledge_node update metadata",
+              ),
             );
           const response =
             knowledgeNode === null
               ? knowledgeNodeNotFoundResponse
               : createSuccessResponse(mapKnowledgeNodeResult(knowledgeNode));
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "knowledge_node.update",
-              targetResourceType: "knowledge_node",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted knowledge_node update metadata",
-            },
-          );
+          if (response.code !== 0) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "knowledge_node.update",
+                targetResourceType: "knowledge_node",
+                targetPublicId: publicId,
+                resultStatus: "failed",
+                metadataSummary: "redacted knowledge_node update metadata",
+              },
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -2119,24 +2153,32 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           const knowledgeNode =
             await repositories.knowledgeNodeRepository.disableKnowledgeNode(
               publicId,
+              createKnowledgeNodeMutationContext(
+                request,
+                actorOrError,
+                "knowledge_node.disable",
+                "redacted knowledge_node disable metadata",
+              ),
             );
           const response =
             knowledgeNode === null
               ? knowledgeNodeNotFoundResponse
               : createSuccessResponse(mapKnowledgeNodeResult(knowledgeNode));
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "knowledge_node.disable",
-              targetResourceType: "knowledge_node",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted knowledge_node disable metadata",
-            },
-          );
+          if (response.code !== 0) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "knowledge_node.disable",
+                targetResourceType: "knowledge_node",
+                targetPublicId: publicId,
+                resultStatus: "failed",
+                metadataSummary: "redacted knowledge_node disable metadata",
+              },
+            );
+          }
 
           return createJsonResponse(response);
         },

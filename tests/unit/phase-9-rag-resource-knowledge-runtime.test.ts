@@ -47,6 +47,7 @@ function createAdminSessionService(
 
 function createRuntimeRepositories(input: {
   auditLogEntries: unknown[];
+  knowledgeNodeMutationContexts?: unknown[];
 }): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   return {
     resourceRepository: {
@@ -127,7 +128,8 @@ function createRuntimeRepositories(input: {
           },
         };
       },
-      async createKnowledgeNode(createInput) {
+      async createKnowledgeNode(createInput, mutationContext) {
+        input.knowledgeNodeMutationContexts?.push(mutationContext);
         return {
           publicId: "knowledge-node-public-permit",
           parentKnowledgeNodePublicId: createInput.parentKnowledgeNodePublicId,
@@ -145,7 +147,8 @@ function createRuntimeRepositories(input: {
       async updateKnowledgeNode() {
         throw new Error("not used");
       },
-      async disableKnowledgeNode(publicId) {
+      async disableKnowledgeNode(publicId, mutationContext) {
+        input.knowledgeNodeMutationContexts?.push(mutationContext);
         return {
           publicId,
           parentKnowledgeNodePublicId: null,
@@ -375,8 +378,12 @@ describe("phase 9 RAG resource knowledge runtime", () => {
 
   it("creates and disables knowledge nodes through public ids and audit logs", async () => {
     const auditLogEntries: unknown[] = [];
+    const knowledgeNodeMutationContexts: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
-      repositories: createRuntimeRepositories({ auditLogEntries }),
+      repositories: createRuntimeRepositories({
+        auditLogEntries,
+        knowledgeNodeMutationContexts,
+      }),
       sessionService: createAdminSessionService("content_admin"),
     });
 
@@ -428,19 +435,28 @@ describe("phase 9 RAG resource knowledge runtime", () => {
         },
       },
     });
-    expect(auditLogEntries).toEqual([
+    expect(knowledgeNodeMutationContexts).toEqual([
       expect.objectContaining({
-        actionType: "knowledge_node.create",
-        targetResourceType: "knowledge_node",
-        targetPublicId: "knowledge-node-public-permit",
+        actorPublicId: "admin-public-001",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "knowledge_node.create",
+          metadataSummary: "redacted knowledge_node create metadata",
+          requestIp: null,
+        }),
       }),
       expect.objectContaining({
-        actionType: "knowledge_node.disable",
-        targetResourceType: "knowledge_node",
-        targetPublicId: "knowledge-node-public-permit",
+        actorPublicId: "admin-public-001",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "knowledge_node.disable",
+          metadataSummary: "redacted knowledge_node disable metadata",
+          requestIp: null,
+        }),
       }),
     ]);
-    expect(JSON.stringify(auditLogEntries)).not.toContain(
+    expect(auditLogEntries).toEqual([]);
+    expect(JSON.stringify(knowledgeNodeMutationContexts)).not.toContain(
       "admin-session-token",
     );
   });

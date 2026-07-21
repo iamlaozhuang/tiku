@@ -50,6 +50,7 @@ function createAdminSessionService(): Pick<
 
 function createRuntimeRepositories(input: {
   auditLogEntries: unknown[];
+  mutationAuditContexts: unknown[];
   updateInputs: unknown[];
 }): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   return {
@@ -94,8 +95,9 @@ function createRuntimeRepositories(input: {
       async createKnowledgeNode() {
         throw new Error("create is not used in this test");
       },
-      async updateKnowledgeNode(publicId, updateInput) {
+      async updateKnowledgeNode(publicId, updateInput, mutationContext) {
         input.updateInputs.push({ publicId, updateInput });
+        input.mutationAuditContexts.push(mutationContext);
 
         if (
           updateInput.parentKnowledgeNodePublicId ===
@@ -146,10 +148,12 @@ function createRuntimeRepositories(input: {
 describe("phase 11 knowledge_node tree management loop", () => {
   it("moves and sorts knowledge_node rows through PATCH with redacted audit evidence", async () => {
     const auditLogEntries: unknown[] = [];
+    const mutationAuditContexts: unknown[] = [];
     const updateInputs: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
       repositories: createRuntimeRepositories({
         auditLogEntries,
+        mutationAuditContexts,
         updateInputs,
       }),
       sessionService: createAdminSessionService(),
@@ -200,20 +204,23 @@ describe("phase 11 knowledge_node tree management loop", () => {
         },
       },
     ]);
-    expect(auditLogEntries).toEqual([
+    expect(mutationAuditContexts).toEqual([
       expect.objectContaining({
-        actionType: "knowledge_node.update",
-        targetResourceType: "knowledge_node",
-        targetPublicId: "knowledge-node-public-child",
-        resultStatus: "success",
-        metadataSummary: "redacted knowledge_node update metadata",
+        actorPublicId: "admin-public-001",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "knowledge_node.update",
+          metadataSummary: "redacted knowledge_node update metadata",
+          requestIp: null,
+        }),
       }),
     ]);
+    expect(auditLogEntries).toEqual([]);
     expect(JSON.stringify(payload)).not.toContain('"id"');
-    expect(JSON.stringify(auditLogEntries)).not.toContain(
+    expect(JSON.stringify(mutationAuditContexts)).not.toContain(
       "admin-session-token",
     );
-    expect(JSON.stringify(auditLogEntries)).not.toContain("市场调研");
+    expect(JSON.stringify(mutationAuditContexts)).not.toContain("市场调研");
   });
 
   it("keeps knowledge_node runtime disable-only and exposes no hard-delete route", () => {

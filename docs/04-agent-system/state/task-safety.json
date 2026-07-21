@@ -1,22 +1,18 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21",
-  "objective": "Close only the admin-account creation database partition of F-0031 by committing the credential, admin, role/organization binding, and redacted audit_log row in one repository transaction; preserve all existing role and organization authorization semantics and do not claim resource, knowledge, or paper_asset partitions closed.",
+  "taskId": "p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21",
+  "objective": "Close only the knowledge_node database partition of F-0031 by committing each create, update, or disable mutation and its redacted success audit_log row in one repository transaction; keep resource and paper_asset mutations out of scope.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/services/admin-flow-runtime.ts",
-    "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
-    "src/server/repositories/admin-flow-runtime-repository.test.ts",
-    "src/server/services/admin-flow-runtime.test.ts",
-    "tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts",
-    "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts",
-    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts",
-    "tests/unit/p0-rc-01-admin-account-migration-source.test.ts"
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -25,11 +21,14 @@
     ".env*",
     "drizzle/**",
     "src/db/schema/**",
-    "scripts/**"
+    "scripts/**",
+    "src/server/services/paper-asset-service.ts",
+    "src/server/repositories/paper-asset-repository.ts",
+    "src/server/services/local-paper-asset-storage.ts"
   ],
   "validationCommands": [
     {
-      "name": "admin-account-creation-audit-atomicity-focused",
+      "name": "knowledge-node-audit-atomicity-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -37,14 +36,14 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
-        "src/server/repositories/admin-flow-runtime-repository.test.ts",
-        "src/server/services/admin-flow-runtime.test.ts",
-        "tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts"
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
       ]
     },
     {
-      "name": "admin-account-creation-audit-atomicity-regression",
+      "name": "knowledge-node-audit-atomicity-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -52,36 +51,33 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-        "tests/unit/phase-11-system-ops-organization-management-loop.test.ts",
-        "tests/unit/p0-rc-01-admin-account-migration-source.test.ts"
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
       ]
     },
     {
-      "name": "admin-account-creation-audit-atomicity-lint",
+      "name": "knowledge-node-audit-atomicity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/server/services/admin-flow-runtime.ts",
-        "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
-        "src/server/services/admin-flow-runtime.test.ts",
-        "tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts"
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "src/server/services/rag-resource-knowledge-runtime.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts"
       ]
     },
     {
-      "name": "admin-account-creation-audit-atomicity-typecheck",
+      "name": "knowledge-node-audit-atomicity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "admin-account-creation-audit-atomicity-build",
+      "name": "knowledge-node-audit-atomicity-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -90,7 +86,7 @@
   "approvalSources": {
     "dependency": null,
     "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
