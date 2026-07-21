@@ -79,6 +79,12 @@ function createRepositories(input: {
   auditLogEntries: unknown[];
   aiCallLogEntries: unknown[];
   reviewInputs: unknown[];
+  requestTaskStatus?:
+    | "failed"
+    | "pending"
+    | "running"
+    | "succeeded"
+    | "superseded";
 }): ContentQuestionMaterialRuntimeRepositories {
   return {
     questionRepository: {
@@ -181,24 +187,44 @@ function createRepositories(input: {
           questionPublicId: "question-public-001",
           questionUpdatedAt: createdAt.toISOString(),
           currentQuestionUpdatedAt: createdAt.toISOString(),
-          taskStatus: "succeeded",
-          evidenceStatus: "sufficient",
-          modelConfigPublicId: "model-config-public-kn-001",
-          promptTemplatePublicId: "prompt-template-public-kn-001",
-          failureCode: null,
-          candidates: [
-            {
-              candidatePublicId: "kn-recommendation-candidate-public-001",
-              knowledgeNodePublicId: "knowledge-node-public-authorization",
-              name: "authorization",
-              pathName: "monopoly / authorization",
-              rank: 1,
-              confidenceBasisPoint: 9_000,
-              reasonSummary: "citation-backed recommendation",
-              citationCount: 2,
-              reviewStatus: "pending",
-            },
-          ],
+          taskStatus: input.requestTaskStatus ?? "succeeded",
+          evidenceStatus:
+            input.requestTaskStatus === "failed" ||
+            input.requestTaskStatus === "superseded"
+              ? null
+              : "sufficient",
+          modelConfigPublicId:
+            input.requestTaskStatus === "failed" ||
+            input.requestTaskStatus === "superseded"
+              ? null
+              : "model-config-public-kn-001",
+          promptTemplatePublicId:
+            input.requestTaskStatus === "failed" ||
+            input.requestTaskStatus === "superseded"
+              ? null
+              : "prompt-template-public-kn-001",
+          failureCode:
+            input.requestTaskStatus === "failed"
+              ? "recommendation_runner_failed"
+              : null,
+          candidates:
+            input.requestTaskStatus === "failed" ||
+            input.requestTaskStatus === "superseded"
+              ? []
+              : [
+                  {
+                    candidatePublicId: "kn-recommendation-candidate-public-001",
+                    knowledgeNodePublicId:
+                      "knowledge-node-public-authorization",
+                    name: "authorization",
+                    pathName: "monopoly / authorization",
+                    rank: 1,
+                    confidenceBasisPoint: 9_000,
+                    reasonSummary: "citation-backed recommendation",
+                    citationCount: 2,
+                    reviewStatus: "pending",
+                  },
+                ],
         };
       },
       async completeKnowledgeRecommendationTask() {
@@ -238,6 +264,49 @@ function createRepositories(input: {
 }
 
 describe("phase 11 AI knowledge recommendation review loop", () => {
+  it.each([
+    [
+      "failed" as const,
+      503621,
+      "Knowledge recommendation failed. Retry is available.",
+    ],
+    ["superseded" as const, 409621, "Knowledge recommendation state changed."],
+  ])(
+    "projects a %s durable task as an error envelope and failed audit",
+    async (requestTaskStatus, expectedCode, expectedMessage) => {
+      const auditLogEntries: unknown[] = [];
+      const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
+        repositories: createRepositories({
+          auditLogEntries,
+          aiCallLogEntries: [],
+          reviewInputs: [],
+          requestTaskStatus,
+        }),
+        sessionService: createSessionService(),
+      });
+
+      const response = await handlers.questions.recommendKnowledgeNodes.POST(
+        new Request(
+          "http://localhost/api/v1/questions/question-public-001/recommend-knowledge-nodes",
+          {
+            method: "POST",
+            headers: { authorization: "Bearer admin-session-token" },
+          },
+        ),
+        { params: Promise.resolve({ publicId: "question-public-001" }) },
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: expectedCode,
+        message: expectedMessage,
+        data: null,
+      });
+      expect(auditLogEntries).toEqual([
+        expect.objectContaining({ resultStatus: "failed" }),
+      ]);
+    },
+  );
+
   it("returns durable review metadata and persists confirm without fabricated call logs", async () => {
     const auditLogEntries: unknown[] = [];
     const aiCallLogEntries: unknown[] = [];

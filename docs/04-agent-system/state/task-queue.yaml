@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
+  currentTaskId: p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -264,6 +264,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-question-reference-picker-2026-07-21
     - p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
     - p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
+    - p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -313,6 +314,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-managed-rich-text-image-2026-07-21
     - p1-remediation-rc-04-question-reference-picker-2026-07-21
     - p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
+    - p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -388,47 +390,48 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-managed-rich-text-image-2026-07-21: closed
     p1-remediation-rc-04-question-reference-picker-2026-07-21: closed
     p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21: closed
-    p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21: in_progress
+    p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21: closed
+    p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
-    title: Verified complete knowledge tree snapshots
-    phase: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
+  - id: p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
+    title: Recoverable knowledge recommendation failure states
+    phase: p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0071_complete_static_and_isolated_read_snapshot_closure
-    branch: fix/knowledge-tree-complete-snapshot
-    objective: verify every page before publishing a complete knowledge_node tree or AI option universe and keep partial management snapshots read-only with explicit retry
+    productClosureContribution: F-0078_complete_static_and_isolated_failure_recovery_closure
+    branch: fix/knowledge-recommendation-failure-recovery
+    objective: restart failed durable recommendation tasks and make route audit envelope and UI request states agree on accepted successful_empty failed network and retry outcomes
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-04
     findingIds:
-      - F-0071
+      - F-0078
     executionStage: candidate_precommit_validation_ready
     riskBoundary:
-      category: bounded_medium_risk_database_application_read_pagination_and_low_risk_ui_fail_closed
+      category: bounded_medium_risk_database_application_task_retry_and_low_risk_ui_fail_closed
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementChange: false
       realExternalCall: false
     preRedImpactScan:
-      chain: admin_and_student_callers_to_management_and_AI_routes_to_paginated_knowledge_node_repository_and_direct_tests
+      chain: admin_question_UI_to_recommendation_POST_route_to_durable_task_repository_and_existing_runner_completion_contract
       coreFiles: 9
-      contingencyFiles: 4
+      contingencyFiles: 3
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedResidualRootCause: callers treat a page prefix as a complete set because pagination integrity is never verified and later-page failures share the normal termination path
-      atomicReason: management writes and AI recommendation selection must consume the same fail_closed completeness invariant or users still observe inconsistent candidate universes
+      confirmedResidualRootCause: P0 introduced durable task statuses but the retry route audit envelope and client request state still collapse failed network non_JSON and accepted outcomes
+      atomicReason: failed_row_restart_route_failure_projection_and_UI_request_state_are_one_command_lifecycle_and_must_change_together_to_be_recoverable
     expectedAcceptance:
-      - every_business_error_missing_pagination_empty_short_page_total_drift_and_duplicate_public_id_fails_closed
-      - a_verified_multi_page_tree_enters_ready_only_when_loaded_count_equals_stable_total
-      - a_partial_management_prefix_remains_visible_read_only_and_exposes_retry
-      - create_edit_move_and_disable_are_unavailable_until_the_snapshot_is_complete
-      - AI_option_routes_collect_all_pages_or_return_a_standard_error_envelope
-      - schema_write_authorization_and_existing_option_filters_remain_unchanged
+      - failed_same_revision_task_restarts_atomically_without_duplicate_task_rows
+      - failed_or_superseded_task_results_never_use_a_success_envelope_or_success_audit
+      - pending_running_successful_empty_and_recommended_results_remain_distinct
+      - network_non_JSON_and_business_failures_render_recoverable_error_without_unhandled_promises
+      - duplicate_in_flight_clicks_issue_one_request_and_stale_generations_cannot_overwrite_newer_state
+      - schema_eligibility_review_authorization_and_Provider_boundaries_remain_unchanged
     implementationEvidence:
-      red: 3_expected_behavior_failures_plus_missing_complete_collection_module_across_UI_route_and_pure_integrity_tests
-      green: 7_files_131_tests_passed_lint_typecheck_and_99_page_production_build
-      review: passed_after_hiding_partial_aggregate_metrics_rejecting_empty_public_ids_and_proving_every_mutation_entry_is_double_gated_by_complete_snapshot_state
+      red: 5_expected_failures_and_1_unhandled_rejection_proved_failed_rows_were_not_restarted_failed_tasks_used_success_envelopes_and_UI_network_duplicate_request_paths_were_unhandled
+      green: 6_files_73_tests_passed_exact_lint_typecheck_and_99_page_production_build
+      review: passed_after_proving_only_failed_same_revision_rows_restart_under_lock_pending_and_succeeded_rows_remain_idempotent_failed_and_superseded_results_fail_closed_successful_empty_stays_distinct_and_UI_retries_do_not_overwrite_prior_verified_results
     conditionalCloseoutProjection:
       current: candidate_precommit_validation_ready
       triggers: focused_regression_lint_typecheck_format_diff_and_kernel_commit_all_green_with_no_scope_or_base_drift
@@ -439,15 +442,15 @@ activeTasks:
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: 7m_RED_to_build_GREEN
-      mechanismOverhead: 4m_scope_contract_state_and_adversarial_review_before_freeze
+      productValueTime: 8m_RED_to_build_GREEN
+      mechanismOverhead: 4m_scope_contract_state_adversarial_review_and_candidate_freeze
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-04-knowledge-node-reference-count-2026-07-21
-      findingId: F-0070
-      productClosureContribution: F-0070_complete_static_and_isolated_repository_closure
-      commit: 5d502574e2b1fbb50400b5bfec0a145ac9e62293
-      tree: bf8a00dfcf5b5acfdc65d799a0c3f034813311bb
+      taskId: p1-remediation-rc-04-knowledge-tree-complete-snapshot-2026-07-21
+      findingId: F-0071
+      productClosureContribution: F-0071_complete_static_and_isolated_read_snapshot_closure
+      commit: 5fa4bc1cf64a683109a4d195d97995dd65588e2a
+      tree: f829e44583afd73f6883c6e478b5dc815b632124
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       masterOriginSync: pass

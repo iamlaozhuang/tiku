@@ -3097,6 +3097,170 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 
+  it("distinguishes network, non-JSON, failed-task, and successful-empty recommendation outcomes with retry", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const baseFetch = mockWritableContentFetch();
+    let recommendationAttempt = 0;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (
+          path ===
+            "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes" &&
+          init?.method === "POST"
+        ) {
+          recommendationAttempt += 1;
+
+          if (recommendationAttempt === 1) {
+            throw new TypeError("simulated network failure");
+          }
+          if (recommendationAttempt === 2) {
+            return new Response("upstream html", { status: 502 });
+          }
+
+          const isFailed = recommendationAttempt === 3;
+
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              recommendation: {
+                questionPublicId: "question-marketing-001",
+                recommendationStatus: isFailed
+                  ? "recommendation_failed"
+                  : "recommended",
+                reviewState: {
+                  questionUpdatedAt: "2026-05-19T06:20:00.000Z",
+                  currentQuestionUpdatedAt: "2026-05-19T06:20:00.000Z",
+                  taskPublicId: "kn-recommendation-task-public-recovery",
+                  taskStatus: isFailed ? "failed" : "succeeded",
+                  staleCheck: "question_updated_at_mismatch",
+                  bindingMode: "durable_question_binding",
+                },
+                recommendations: [],
+                evidenceStatus: isFailed ? null : "none",
+                modelConfig: null,
+                failureReason: isFailed ? "recommendation_runner_failed" : null,
+              },
+            },
+          });
+        }
+
+        return baseFetch(url, init);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    const recommendButton = screen.getByRole("button", {
+      name: `为题目 ${marketingQuestionReadableName} 推荐知识点`,
+    });
+
+    for (const expectedAttempt of [1, 2, 3]) {
+      fireEvent.click(recommendButton);
+      expect(
+        await screen.findByText("知识点推荐未完成，请重试。"),
+      ).toBeInTheDocument();
+      expect(recommendButton).toBeEnabled();
+      expect(recommendButton).toHaveTextContent("重试知识点推荐");
+      expect(recommendationAttempt).toBe(expectedAttempt);
+    }
+
+    fireEvent.click(recommendButton);
+
+    expect(
+      await screen.findByText(
+        `题目“${marketingQuestionReadableName}”的知识点推荐已完成，暂无候选`,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-panel-question-marketing-001",
+      ),
+    ).toHaveTextContent("推荐已完成，暂无候选");
+    expect(recommendationAttempt).toBe(4);
+  });
+
+  it("issues one recommendation request while the same question is in flight", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const baseFetch = mockWritableContentFetch();
+    let resolveRecommendation:
+      | ((response: ReturnType<typeof createJsonResponse>) => void)
+      | undefined;
+    const recommendationResponse = new Promise<
+      ReturnType<typeof createJsonResponse>
+    >((resolve) => {
+      resolveRecommendation = resolve;
+    });
+    let recommendationRequestCount = 0;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (
+          path ===
+            "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes" &&
+          init?.method === "POST"
+        ) {
+          recommendationRequestCount += 1;
+          return recommendationResponse;
+        }
+
+        return baseFetch(url, init);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    const recommendButton = screen.getByRole("button", {
+      name: `为题目 ${marketingQuestionReadableName} 推荐知识点`,
+    });
+
+    fireEvent.click(recommendButton);
+    fireEvent.click(recommendButton);
+
+    expect(recommendationRequestCount).toBe(1);
+    expect(recommendButton).toBeDisabled();
+    expect(recommendButton).toHaveTextContent("知识点推荐处理中");
+
+    resolveRecommendation?.(
+      createJsonResponse({
+        code: 0,
+        message: "ok",
+        data: {
+          recommendation: {
+            questionPublicId: "question-marketing-001",
+            recommendationStatus: "pending",
+            reviewState: {
+              questionUpdatedAt: "2026-05-19T06:20:00.000Z",
+              currentQuestionUpdatedAt: "2026-05-19T06:20:00.000Z",
+              taskPublicId: "kn-recommendation-task-public-pending",
+              taskStatus: "pending",
+              staleCheck: "question_updated_at_mismatch",
+              bindingMode: "durable_question_binding",
+            },
+            recommendations: [],
+            evidenceStatus: null,
+            modelConfig: null,
+            failureReason: null,
+          },
+        },
+      }),
+    );
+
+    expect(
+      await screen.findByText(
+        `题目“${marketingQuestionReadableName}”的知识点推荐任务已创建`,
+      ),
+    ).toBeInTheDocument();
+    expect(recommendButton).toBeEnabled();
+  });
+
   it("creates, edits, disables, and copies materials through the protected runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockWritableContentFetch();

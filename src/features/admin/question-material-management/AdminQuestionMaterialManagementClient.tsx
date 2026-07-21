@@ -109,6 +109,7 @@ type QuestionTypeFilter = "all" | QuestionType;
 export type QuestionFormMode = "create" | "edit";
 export type MaterialFormMode = "create" | "edit";
 type RecommendationReviewStatus = "accepted" | "discarded";
+type RecommendationRequestState = "idle" | "loading" | "error";
 type AdminCommonSortOrder = "asc" | "desc";
 export type BindingOptionsLoadState = "idle" | "loading" | "ready" | "error";
 type QuestionKnowledgeRecommendationDto =
@@ -1281,6 +1282,12 @@ export function AdminQuestionMaterialManagement({
     recommendationsByQuestionPublicId,
     setRecommendationsByQuestionPublicId,
   ] = useState<Record<string, KnowledgeRecommendationReviewState>>({});
+  const [
+    recommendationRequestStateByQuestionPublicId,
+    setRecommendationRequestStateByQuestionPublicId,
+  ] = useState<Record<string, RecommendationRequestState>>({});
+  const recommendationRequestsInFlightRef = useRef(new Set<string>());
+  const recommendationRequestGenerationRef = useRef(new Map<string, number>());
   const contentQueryString = useMemo(() => {
     const searchParams = createAdminListSearchParams({
       page: query.page,
@@ -1831,33 +1838,99 @@ export function AdminQuestionMaterialManagement({
       return;
     }
 
-    setActionError(null);
-    const response =
-      await mutateAdminApi<QuestionKnowledgeRecommendationResultDto>(
-        `/api/v1/questions/${question.publicId}/recommend-knowledge-nodes`,
-        sessionToken,
-        "POST",
-      );
-
-    if (response.code !== 0 || response.data === null) {
-      setActionError("知识点推荐生成失败，请刷新后重试。");
+    if (recommendationRequestsInFlightRef.current.has(question.publicId)) {
       return;
     }
 
-    const recommendationResult = response.data;
-
-    setRecommendationsByQuestionPublicId((currentRecommendations) => ({
-      ...currentRecommendations,
-      [question.publicId]: {
-        recommendation: recommendationResult.recommendation,
-      },
-    }));
-    setActionMessage(
-      recommendationResult.recommendation.recommendationStatus === "pending" ||
-        recommendationResult.recommendation.recommendationStatus === "running"
-        ? `题目“${createQuestionReadableName(question)}”的知识点推荐任务已创建`
-        : `题目“${createQuestionReadableName(question)}”的知识点推荐已加载`,
+    recommendationRequestsInFlightRef.current.add(question.publicId);
+    const requestGeneration =
+      (recommendationRequestGenerationRef.current.get(question.publicId) ?? 0) +
+      1;
+    recommendationRequestGenerationRef.current.set(
+      question.publicId,
+      requestGeneration,
     );
+    setRecommendationRequestStateByQuestionPublicId((currentState) => ({
+      ...currentState,
+      [question.publicId]: "loading",
+    }));
+    setActionError(null);
+    setActionMessage(null);
+
+    try {
+      const response =
+        await mutateAdminApi<QuestionKnowledgeRecommendationResultDto>(
+          `/api/v1/questions/${question.publicId}/recommend-knowledge-nodes`,
+          sessionToken,
+          "POST",
+        );
+
+      if (
+        recommendationRequestGenerationRef.current.get(question.publicId) !==
+        requestGeneration
+      ) {
+        return;
+      }
+
+      if (response.code !== 0 || response.data === null) {
+        setRecommendationRequestStateByQuestionPublicId((currentState) => ({
+          ...currentState,
+          [question.publicId]: "error",
+        }));
+        setActionError("知识点推荐未完成，请重试。");
+        return;
+      }
+
+      const recommendation = response.data.recommendation;
+      if (
+        recommendation.recommendationStatus === "recommendation_failed" ||
+        recommendation.recommendationStatus === "superseded" ||
+        recommendation.reviewState.taskStatus === "failed" ||
+        recommendation.reviewState.taskStatus === "superseded"
+      ) {
+        setRecommendationRequestStateByQuestionPublicId((currentState) => ({
+          ...currentState,
+          [question.publicId]: "error",
+        }));
+        setActionError("知识点推荐未完成，请重试。");
+        return;
+      }
+
+      setRecommendationsByQuestionPublicId((currentRecommendations) => ({
+        ...currentRecommendations,
+        [question.publicId]: { recommendation },
+      }));
+      setRecommendationRequestStateByQuestionPublicId((currentState) => ({
+        ...currentState,
+        [question.publicId]: "idle",
+      }));
+      setActionMessage(
+        recommendation.recommendationStatus === "pending" ||
+          recommendation.recommendationStatus === "running"
+          ? `题目“${createQuestionReadableName(question)}”的知识点推荐任务已创建`
+          : recommendation.recommendations.length === 0
+            ? `题目“${createQuestionReadableName(question)}”的知识点推荐已完成，暂无候选`
+            : `题目“${createQuestionReadableName(question)}”的知识点推荐已加载`,
+      );
+    } catch {
+      if (
+        recommendationRequestGenerationRef.current.get(question.publicId) ===
+        requestGeneration
+      ) {
+        setRecommendationRequestStateByQuestionPublicId((currentState) => ({
+          ...currentState,
+          [question.publicId]: "error",
+        }));
+        setActionError("知识点推荐未完成，请重试。");
+      }
+    } finally {
+      if (
+        recommendationRequestGenerationRef.current.get(question.publicId) ===
+        requestGeneration
+      ) {
+        recommendationRequestsInFlightRef.current.delete(question.publicId);
+      }
+    }
   }
 
   async function handleReviewKnowledgeRecommendation(
@@ -2256,6 +2329,9 @@ export function AdminQuestionMaterialManagement({
               }
               recommendationByQuestionPublicId={
                 recommendationsByQuestionPublicId
+              }
+              recommendationRequestStateByQuestionPublicId={
+                recommendationRequestStateByQuestionPublicId
               }
               rows={displayedQuestions}
               selectedPublicId={selectedQuestionPublicId}
@@ -4208,6 +4284,7 @@ function QuestionList({
   editorRoutesEnabled,
   emptyTitle,
   recommendationByQuestionPublicId,
+  recommendationRequestStateByQuestionPublicId,
   rows,
   selectedPublicId,
   onCopy,
@@ -4222,6 +4299,10 @@ function QuestionList({
   recommendationByQuestionPublicId: Record<
     string,
     KnowledgeRecommendationReviewState
+  >;
+  recommendationRequestStateByQuestionPublicId: Record<
+    string,
+    RecommendationRequestState
   >;
   rows: QuestionDto[];
   selectedPublicId: string | null;
@@ -4247,6 +4328,9 @@ function QuestionList({
         {rows.map((question) => {
           const isSelected = question.publicId === selectedPublicId;
           const readableName = createQuestionReadableName(question);
+          const recommendationRequestState =
+            recommendationRequestStateByQuestionPublicId[question.publicId] ??
+            "idle";
 
           return (
             <article
@@ -4339,13 +4423,18 @@ function QuestionList({
                 )}
                 <Button
                   aria-label={`为题目 ${readableName} 推荐知识点`}
+                  disabled={recommendationRequestState === "loading"}
                   size="sm"
                   type="button"
                   variant="outline"
                   onClick={() => onRecommend(question)}
                 >
                   <Sparkles aria-hidden="true" data-icon="inline-start" />
-                  推荐知识点
+                  {recommendationRequestState === "loading"
+                    ? "知识点推荐处理中"
+                    : recommendationRequestState === "error"
+                      ? "重试知识点推荐"
+                      : "推荐知识点"}
                 </Button>
               </div>
               <KnowledgeRecommendationReviewPanel
@@ -4514,6 +4603,7 @@ function KnowledgeRecommendationReviewPanel({
         recommendation.confirmationStatus === "confirmed" ||
         recommendation.confirmationStatus === "ignored",
     );
+  const taskStatus = reviewState.recommendation.reviewState.taskStatus;
 
   return (
     <section
@@ -4529,12 +4619,15 @@ function KnowledgeRecommendationReviewPanel({
           <p className="text-text-secondary text-xs leading-5">
             {isStale
               ? "已过期：题目在推荐后发生更新"
-              : reviewState.recommendation.reviewState.taskStatus ===
-                    "pending" ||
-                  reviewState.recommendation.reviewState.taskStatus ===
-                    "running"
+              : taskStatus === "pending" || taskStatus === "running"
                 ? "推荐任务处理中"
-                : "当前推荐待确认"}
+                : taskStatus === "failed"
+                  ? "推荐任务失败，可重新发起"
+                  : taskStatus === "superseded"
+                    ? "推荐任务已失效，请重新发起"
+                    : reviewState.recommendation.recommendations.length === 0
+                      ? "推荐已完成，暂无候选"
+                      : "当前推荐待确认"}
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
@@ -4576,7 +4669,11 @@ function KnowledgeRecommendationReviewPanel({
 
       {reviewState.recommendation.recommendations.length === 0 ? (
         <p className="text-text-secondary mt-3 text-sm">
-          本次没有可审查的推荐结果。
+          {taskStatus === "failed" || taskStatus === "superseded"
+            ? "推荐未完成，请重新发起。"
+            : taskStatus === "pending" || taskStatus === "running"
+              ? "推荐任务正在处理，暂无可审查结果。"
+              : "推荐已完成，暂无候选。"}
         </p>
       ) : (
         <div className="mt-3 grid gap-2">

@@ -29,6 +29,12 @@ export type KnowledgeRecommendationTaskStatus =
   | "failed"
   | "superseded";
 
+export function shouldRestartKnowledgeRecommendationTask(
+  taskStatus: KnowledgeRecommendationTaskStatus,
+): boolean {
+  return taskStatus === "failed";
+}
+
 export type KnowledgeRecommendationCandidateView = {
   candidatePublicId: string;
   knowledgeNodePublicId: string;
@@ -181,6 +187,43 @@ export async function enqueueKnowledgeRecommendationTask(
         inArray(knRecommendationTask.task_status, ["pending", "running"]),
       ),
     );
+
+  const existingTaskQuery = database
+    .select({
+      id: knRecommendationTask.id,
+      task_status: knRecommendationTask.task_status,
+    })
+    .from(knRecommendationTask)
+    .where(
+      and(
+        eq(knRecommendationTask.question_id, input.questionId),
+        eq(knRecommendationTask.question_revision_at, input.questionUpdatedAt),
+      ),
+    )
+    .limit(1);
+  const [existingTask] = await existingTaskQuery.for("update");
+
+  if (existingTask !== undefined) {
+    if (shouldRestartKnowledgeRecommendationTask(existingTask.task_status)) {
+      await database
+        .update(knRecommendationTask)
+        .set({
+          request_public_id: `kn-recommendation-request-${randomUUID()}`,
+          task_status: "pending",
+          evidence_status: null,
+          model_config_id: null,
+          prompt_template_id: null,
+          requested_by_user_public_id: input.requestedByUserPublicId,
+          failure_code: null,
+          started_at: null,
+          completed_at: null,
+          updated_at: new Date(),
+        })
+        .where(eq(knRecommendationTask.id, existingTask.id));
+    }
+
+    return existingTask.id;
+  }
 
   await database
     .insert(knRecommendationTask)

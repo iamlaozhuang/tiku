@@ -804,6 +804,9 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
                   },
                 );
 
+          const taskFailed =
+            task?.taskStatus === "failed" || task?.taskStatus === "superseded";
+
           await appendAuditLog(
             repositories.auditLogRepository,
             request,
@@ -812,7 +815,7 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
               actionType: "question.recommend_knowledge_nodes",
               targetResourceType: "question",
               targetPublicId: question.public_id,
-              resultStatus: task === null ? "failed" : "success",
+              resultStatus: task === null || taskFailed ? "failed" : "success",
               metadataSummary:
                 "redacted knowledge recommendation operation metadata",
             },
@@ -824,9 +827,19 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
                   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
                   "Knowledge recommendation state changed.",
                 )
-              : createSuccessResponse(
-                  mapKnowledgeRecommendationTaskToApi(task),
-                ),
+              : task.taskStatus === "failed"
+                ? createErrorResponse(
+                    503621,
+                    "Knowledge recommendation failed. Retry is available.",
+                  )
+                : task.taskStatus === "superseded"
+                  ? createErrorResponse(
+                      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+                      "Knowledge recommendation state changed.",
+                    )
+                  : createSuccessResponse(
+                      mapKnowledgeRecommendationTaskToApi(task),
+                    ),
           );
         },
       },
