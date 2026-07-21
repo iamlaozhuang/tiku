@@ -260,6 +260,13 @@
       "when": 1784658600000,
       "tag": "20260721183000_p1_rc_04_paper_asset_upload_saga",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1784665800000,
+      "tag": "20260721203000_p1_rc_04_contact_config_persistence",
+      "breakpoints": true
     }
   ]
 }

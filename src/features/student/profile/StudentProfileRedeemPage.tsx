@@ -23,7 +23,10 @@ import type {
   RedeemCodeRedemptionDto,
 } from "@/server/contracts/authorization-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/lib/local-purchase-guidance-contact-config";
+import type {
+  PurchaseGuidanceContactConfigDto,
+  PurchaseGuidanceContactConfigResultDto,
+} from "@/server/contracts/contact-config-contract";
 import type {
   AuthorizationListItemDto,
   EffectiveAuthorizationDto,
@@ -863,10 +866,35 @@ function ProfileAuthorizationDetails({
 }
 
 function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
-  const contactConfig = LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG;
-  const enabledChannels = contactConfig.channels.filter(
-    (channel) => channel.isEnabled,
-  );
+  const [contactConfig, setContactConfig] =
+    useState<PurchaseGuidanceContactConfigDto | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadPurchaseGuidance() {
+      try {
+        const response = await fetchApi<PurchaseGuidanceContactConfigResultDto>(
+          "/api/v1/contact-configs/purchase-guidance",
+        );
+
+        if (isActive && response.code === 0 && response.data !== null) {
+          setContactConfig(response.data.contactConfig);
+        }
+      } catch {
+        // Keep the learner surface fail-closed without exposing stale contacts.
+      }
+    }
+
+    void loadPurchaseGuidance();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const enabledChannels =
+    contactConfig?.channels.filter((channel) => channel.isEnabled) ?? [];
 
   return (
     <section
@@ -880,10 +908,10 @@ function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
         <div className="min-w-0 space-y-3">
           <div className="space-y-1">
             <h2 className="text-text-primary text-sm font-semibold">
-              {contactConfig.title}
+              {contactConfig?.title ?? "购买支持"}
             </h2>
             <p className="text-text-secondary text-sm leading-6">
-              {contactConfig.summary}
+              {contactConfig?.summary ?? "购买联系方式暂不可用，请稍后再试。"}
             </p>
           </div>
           <div className="space-y-2">
@@ -924,9 +952,11 @@ function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
               ))
             )}
           </div>
-          <p className="text-text-muted text-xs leading-5">
-            {contactConfig.safetyNotice}
-          </p>
+          {contactConfig === null ? null : (
+            <p className="text-text-muted text-xs leading-5">
+              {contactConfig.safetyNotice}
+            </p>
+          )}
         </div>
       </div>
     </section>

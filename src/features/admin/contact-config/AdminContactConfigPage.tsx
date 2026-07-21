@@ -109,6 +109,7 @@ function toFormState(
 
 function toUpdateContactConfigInput(
   formState: ContactConfigFormState,
+  expectedRevision: number,
 ): UpdateContactConfigInputDto {
   return {
     channels: formState.channels.map((channel) => ({
@@ -124,6 +125,7 @@ function toUpdateContactConfigInput(
       usage: channel.usage.trim(),
       value: channel.value.trim(),
     })),
+    expectedRevision,
     safetyNotice: formState.safetyNotice.trim(),
     summary: formState.summary.trim(),
     title: formState.title.trim(),
@@ -132,10 +134,13 @@ function toUpdateContactConfigInput(
 
 async function putContactConfig(
   formState: ContactConfigFormState,
+  expectedRevision: number,
   sessionToken: string,
 ): Promise<ApiResponse<PurchaseGuidanceContactConfigResultDto | null>> {
   const response = await fetch("/api/v1/contact-configs", {
-    body: JSON.stringify(toUpdateContactConfigInput(formState)),
+    body: JSON.stringify(
+      toUpdateContactConfigInput(formState, expectedRevision),
+    ),
     headers: {
       authorization: `Bearer ${sessionToken}`,
       "content-type": "application/json",
@@ -180,6 +185,7 @@ function buildContactConfigPreview(
       value: channel.value,
     })),
     publicId: "contact-config-preview",
+    revision: 0,
     safetyNotice: formState.safetyNotice,
     summary: formState.summary,
     title: formState.title,
@@ -345,7 +351,7 @@ export function AdminContactConfigPage() {
   async function handleSubmitContactConfig() {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null) {
+    if (sessionToken === null || contactConfig === null) {
       setLoadState("unauthorized");
       return;
     }
@@ -354,7 +360,11 @@ export function AdminContactConfigPage() {
     setToastMessage(null);
 
     try {
-      const response = await putContactConfig(formState, sessionToken);
+      const response = await putContactConfig(
+        formState,
+        contactConfig.revision,
+        sessionToken,
+      );
 
       if (response.code !== 0 || response.data === null) {
         setToastMessage({

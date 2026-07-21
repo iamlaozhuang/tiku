@@ -93,15 +93,40 @@ afterEach(() => {
 });
 
 describe("phase 11 contact_config purchase guidance loop", () => {
-  it("returns standard-envelope local purchase guidance without secret or private fields", () => {
-    const response = createContactConfigService().getPurchaseGuidance();
+  it("returns standard-envelope durable purchase guidance without secret or private fields", async () => {
+    const contactConfig = {
+      publicId: "contact-config-purchase-guidance",
+      revision: 1,
+      title: "购买支持",
+      summary: "请联系 Tiku 运营支持获取购买方式与开通流程。",
+      channels: [
+        {
+          channelType: "phone" as const,
+          isEnabled: true,
+          label: "Tiku 运营支持",
+          qrImageUrl: null,
+          value: "400-000-2026",
+          serviceHours: "工作日 09:00-18:00",
+          usage: "购买咨询",
+          href: "tel:4000002026",
+        },
+      ],
+      safetyNotice: "请勿提供密码、验证码或卡密明文。",
+      updatedAt: "2026-05-24T00:00:00.000Z",
+    };
+    const response = await createContactConfigService({
+      createQrImage: vi.fn(),
+      getActiveContactConfig: vi.fn(async () => contactConfig),
+      getQrImage: vi.fn(),
+      updateContactConfig: vi.fn(),
+    }).getPurchaseGuidance();
 
     expect(response).toMatchObject({
       code: 0,
       message: "ok",
       data: {
         contactConfig: {
-          publicId: "contact-config-local-purchase-guidance",
+          publicId: "contact-config-purchase-guidance",
           title: "购买支持",
           channels: [
             expect.objectContaining({
@@ -139,6 +164,35 @@ describe("phase 11 contact_config purchase guidance loop", () => {
           });
         }
 
+        if (path === "/api/v1/contact-configs/purchase-guidance") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              contactConfig: {
+                publicId: "contact-config-purchase-guidance",
+                revision: 1,
+                title: "购买支持",
+                summary: "请联系 Tiku 运营支持获取购买方式与开通流程。",
+                channels: [
+                  {
+                    channelType: "phone",
+                    isEnabled: true,
+                    label: "Tiku 运营支持",
+                    qrImageUrl: null,
+                    value: "400-000-2026",
+                    serviceHours: "工作日 09:00-18:00",
+                    usage: "购买咨询",
+                    href: "tel:4000002026",
+                  },
+                ],
+                safetyNotice: "请勿提供密码、验证码或卡密明文。",
+                updatedAt: "2026-05-24T00:00:00.000Z",
+              },
+            },
+          });
+        }
+
         return createJsonResponse({
           code: 404001,
           message: "missing",
@@ -152,6 +206,7 @@ describe("phase 11 contact_config purchase guidance loop", () => {
     const guidance = await screen.findByTestId(
       "student-purchase-guidance-contact-config",
     );
+    await screen.findByText("Tiku 运营支持");
 
     expect(guidance).toHaveTextContent("购买支持");
     expect(guidance).toHaveTextContent("Tiku 运营支持");

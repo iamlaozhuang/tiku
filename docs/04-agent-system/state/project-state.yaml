@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-f0031-static-closure-2026-07-21
+  currentTaskId: p1-remediation-rc-04-contact-config-persistence-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -511,6 +511,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
     - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
     - p1-remediation-rc-04-f0031-static-closure-2026-07-21
+    - p1-remediation-rc-04-contact-config-persistence-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -541,6 +542,7 @@ p1RemediationSerialProgram:
     - p1-execution-policy-capsule-v1-1-2026-07-21
     - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
     - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+    - p1-remediation-rc-04-f0031-static-closure-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -593,7 +595,8 @@ p1RemediationSerialProgram:
     p1-execution-policy-capsule-v1-1-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
-    p1-remediation-rc-04-f0031-static-closure-2026-07-21: in_progress
+    p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
+    p1-remediation-rc-04-contact-config-persistence-2026-07-21: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -758,66 +761,64 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-f0031-static-closure-2026-07-21
-  title: F-0031 production boundary static closure
-  phase: p1-remediation-rc-04-f0031-static-closure-2026-07-21
+  id: p1-remediation-rc-04-contact-config-persistence-2026-07-21
+  title: Contact config durable authoritative read model
+  phase: p1-remediation-rc-04-contact-config-persistence-2026-07-21
   status: in_progress
   priority: p1
-  taskKind: product_static_closure
-  productClosureContribution: F-0031_complete_static_closure
-  branch: fix/f0031-static-closure
+  taskKind: product_remediation
+  productClosureContribution: F-0034
+  branch: fix/contact-config-persistence
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0031
+    - F-0034
   candidateRootCauseCluster: P1-RC-04
-  objective: close F-0031 statically after proving all production mutation partitions are covered and the explicit local resource adapter is not reachable from production API construction
-  executionStage: verified_ready_for_single_commit_ff_only_push_sync_cleanup
-  riskBoundary:
-    category: low_risk_no_product_code_change
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    schemaOrMigrationChange: false
-    persistentDatabaseExecution: false
-    entitlementExpansion: false
-    realExternalCall: false
-  closureBoundary:
-    productionApiConstruction: all_resource_routes_construct_handlers_without_local_adapter_options
-    defaultRuntime: database_repository_and_durable_resource_upload_saga
-    localAdapter: explicit_test_only_option_not_a_production_authority_path
-    requiredEvidence: current_source_plus_existing_partition_and_local_adapter_regressions
-  findingDisposition:
-    F-0031: closed_all_production_partitions_covered_explicit_local_adapter_not_production_reachable
-  verificationEvidence:
-    productionRouteScan: passed_6_of_6_resource_routes_construct_default_runtime_without_local_adapter_options
-    productionSourceScan: passed_no_useLocalResourceAdapter_reference_outside_runtime_definition
-    affectedRegression: passed_85_of_85_across_11_files
-    mainThreadAdversarialReview: passed_no_production_local_adapter_injection_no_product_diff_no_schema_database_permission_provider_external_or_mechanism_change
+  objective: persist the unique contact_config and QR media, atomically enforce revision and redacted audit updates, and make admin plus learner purchase guidance consume the same durable read model
+  executionStage: candidate_frozen_conditional_closeout_authorized
+  highRiskApproval:
+    category: schema_migration_source_and_database_application_logic
+    approvalId: fresh-schema-start-f0034-contact-config-persistence-2026-07-21
+    status: approved_task_bound_conditional_closeout
+    conditionalCloseout: true
+    baseSha: 82ff0adebaed5f8220082f5a1602ca01000acbdb
+  partitionBoundary:
+    included:
+      - singleton_durable_contact_config_and_revision
+      - durable_qr_image_bytes_and_metadata
+      - transactional_update_and_redacted_audit
+      - operations_admin_and_learner_shared_read_model
+      - optimistic_concurrency_fail_closed
+    excluded:
+      - migration_execution
+      - persistent_database_execution
+      - permission_or_entitlement_change
+      - provider_or_external_service_calls
+      - dependency_or_configuration_change
+  approvalFingerprint: p1-remediation-rc-04-contact-config-persistence-2026-07-21|in_memory_contact_config_and_hardcoded_learner_consumer_diverge_without_durable_audited_revisioned_source|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|82ff0adebaed5f8220082f5a1602ca01000acbdb
   conditionalCloseoutProjection:
-    currentState: verified_uncommitted_state_only_candidate
+    currentStatus: validated_uncommitted_candidate
     triggerConditions:
-      - exact_three_file_diff
-      - minimal_safety_kernel_commit_path_green
-      - base_and_canonical_remote_unchanged
-    projectedOutcome:
-      - one_reviewable_commit
-      - ff_only_merge_to_master
-      - one_ordinary_push_to_canonical_origin_master
-      - sync_verification_and_short_branch_cleanup
+      - final_staged_scope_matches_task_safety
+      - minimal_safety_kernel_commit_profile_green
+      - ff_only_master_and_canonical_push_remain_fast_forward
+    projectedSuccess: committed_ff_only_merged_pushed_synced_and_cleaned
+    actualPushSyncEvidence: pending_terminal_closeout
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
-    findingId: F-0031_paper_asset_durable_file_lifecycle_partition
-    commit: 2bff15ab46958a62b6fbc461440769170064d1e8
+    taskId: p1-remediation-rc-04-f0031-static-closure-2026-07-21
+    findingId: F-0031
+    commit: 82ff0adebaed5f8220082f5a1602ca01000acbdb
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
     worktreeCleanup: pass
     metrics:
-      mandatoryFreshApprovals: 1
+      mandatoryFreshApprovals: 0
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
-      approvalWaitTurns: 2
-      productValueTime: terminal_clock_not_reconstructable_product_analysis_tdd_and_implementation_completed
-      mechanismOverhead: terminal_clock_not_reconstructable_includes_two_approval_wait_turns_and_one_validation_selection_correction
+      approvalWaitTurns: 0
+      productValueTime: 4m_static_authority_and_reachability_analysis
+      mechanismOverhead: 3m_scope_contract_validation_and_closeout
       guardSmokeChanges: 0
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
@@ -828,9 +829,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 2bff15ab46958a62b6fbc461440769170064d1e8
-  lastKnownOriginMasterSha: 2bff15ab46958a62b6fbc461440769170064d1e8
-  lastKnownRemoteMasterSha: 2bff15ab46958a62b6fbc461440769170064d1e8
+  lastKnownMasterSha: 82ff0adebaed5f8220082f5a1602ca01000acbdb
+  lastKnownOriginMasterSha: 82ff0adebaed5f8220082f5a1602ca01000acbdb
+  lastKnownRemoteMasterSha: 82ff0adebaed5f8220082f5a1602ca01000acbdb
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

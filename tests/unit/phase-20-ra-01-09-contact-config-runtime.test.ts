@@ -11,6 +11,7 @@ import {
 
 const baseContactConfig = {
   publicId: "contact-config-local-purchase-guidance",
+  revision: 1,
   title: "Purchase support",
   summary: "Contact Tiku operations for purchase guidance.",
   channels: [
@@ -31,6 +32,7 @@ const baseContactConfig = {
 
 const updatedContactConfig = {
   ...baseContactConfig,
+  revision: 2,
   title: "Updated purchase support",
   summary: "Use the verified operations channel for local purchases.",
   channels: [
@@ -84,13 +86,30 @@ function createSessionService(
 }
 
 function createRepositories(): ContactConfigRuntimeRepositories {
+  let qrImageRecord:
+    | {
+        bytes: Uint8Array;
+        contentType: "image/jpeg" | "image/png" | "image/webp";
+        publicId: string;
+      }
+    | undefined;
+
   return {
-    auditLogRepository: {
-      appendAuditLog: vi.fn(async () => undefined),
-    },
     contactConfigRepository: {
+      createQrImage: vi.fn(async (input) => {
+        qrImageRecord = {
+          bytes: input.bytes,
+          contentType: input.contentType,
+          publicId: input.publicId,
+        };
+        return qrImageRecord;
+      }),
       getActiveContactConfig: vi.fn(async () => baseContactConfig),
-      updateContactConfig: vi.fn(async () => updatedContactConfig),
+      getQrImage: vi.fn(async () => qrImageRecord ?? null),
+      updateContactConfig: vi.fn(async () => ({
+        status: "updated" as const,
+        contactConfig: updatedContactConfig,
+      })),
     },
   };
 }
@@ -160,6 +179,7 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
 
     const putResponse = await handlers.contactConfigs.PUT(
       createRequest("PUT", {
+        expectedRevision: 1,
         title: "Updated purchase support",
         summary: "Use the verified operations channel for local purchases.",
         channels: updatedContactConfig.channels,
@@ -186,34 +206,32 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
     });
     expect(
       repositories.contactConfigRepository.updateContactConfig,
-    ).toHaveBeenCalledWith({
-      channels: [
-        expect.objectContaining({
-          channelType: "wechat_work",
-          isEnabled: true,
-          qrImageUrl: "/api/v1/contact-configs/qr-images/contact-config-qr-001",
-        }),
-      ],
-      safetyNotice: updatedContactConfig.safetyNotice,
-      summary: "Use the verified operations channel for local purchases.",
-      title: "Updated purchase support",
-    });
-    expect(
-      repositories.auditLogRepository?.appendAuditLog,
     ).toHaveBeenCalledWith(
       expect.objectContaining({
-        actionType: "contact_config.update",
-        actorPublicId: "admin-public-001",
-        actorRole: "ops_admin",
-        metadataSummary: expect.stringContaining("redacted contact_config"),
-        targetPublicId: "contact-config-local-purchase-guidance",
-        targetResourceType: "contact_config",
+        actor: expect.objectContaining({
+          publicId: "admin-public-001",
+          role: "ops_admin",
+        }),
+        contactConfig: {
+          channels: [
+            expect.objectContaining({
+              channelType: "wechat_work",
+              isEnabled: true,
+              qrImageUrl:
+                "/api/v1/contact-configs/qr-images/contact-config-qr-001",
+            }),
+          ],
+          expectedRevision: 1,
+          safetyNotice: updatedContactConfig.safetyNotice,
+          summary: "Use the verified operations channel for local purchases.",
+          title: "Updated purchase support",
+        },
       }),
     );
     expect(JSON.stringify(putPayload)).not.toContain("admin-session-marker");
     expect(
       JSON.stringify(
-        vi.mocked(repositories.auditLogRepository!.appendAuditLog).mock
+        vi.mocked(repositories.contactConfigRepository.updateContactConfig).mock
           .calls[0],
       ),
     ).not.toContain("admin-session-marker");
@@ -228,6 +246,7 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
 
     const response = await handlers.contactConfigs.PUT(
       createRequest("PUT", {
+        expectedRevision: 1,
         title: "Blocked",
         summary: "Blocked",
         channels: updatedContactConfig.channels,
@@ -243,9 +262,6 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
     });
     expect(
       repositories.contactConfigRepository.updateContactConfig,
-    ).not.toHaveBeenCalled();
-    expect(
-      repositories.auditLogRepository?.appendAuditLog,
     ).not.toHaveBeenCalled();
   });
 
@@ -274,6 +290,14 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
       },
     });
     expect(JSON.stringify(uploadPayload)).not.toContain("admin-session-marker");
+    expect(
+      repositories.contactConfigRepository.createQrImage,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: expect.objectContaining({ role: "ops_admin" }),
+        contentType: "image/png",
+      }),
+    );
 
     const qrImagePublicId = String(uploadPayload.data.qrImage.publicId);
     const qrImageResponse = await handlers.contactConfigQrImages.GET(
@@ -326,6 +350,7 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
 
     const putResponse = await handlers.contactConfigs.PUT(
       createCookieBackedRequest("PUT", {
+        expectedRevision: 1,
         title: "Updated purchase support",
         summary: "Use the verified operations channel for local purchases.",
         channels: updatedContactConfig.channels,
@@ -344,6 +369,58 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
     });
     expect(sessionService.getCurrentSession).toHaveBeenCalledWith({
       authorization: "Bearer admin-session-marker",
+    });
+  });
+
+  it("serves the same repository-backed purchase guidance without admin auth", async () => {
+    const repositories = createRepositories();
+    const sessionService = createSessionService(["content_admin"]);
+    const handlers = createContactConfigRuntimeRouteHandlers({
+      repositories,
+      sessionService,
+    });
+
+    const response = await handlers.purchaseGuidance.GET();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      code: 0,
+      data: {
+        contactConfig: {
+          publicId: baseContactConfig.publicId,
+          revision: 1,
+        },
+      },
+    });
+    expect(sessionService.getCurrentSession).not.toHaveBeenCalled();
+  });
+
+  it("fails stale revisions closed without returning a successful update", async () => {
+    const repositories = createRepositories();
+    repositories.contactConfigRepository.updateContactConfig = vi.fn(
+      async () => ({ status: "conflict" as const }),
+    );
+    const handlers = createContactConfigRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService(["ops_admin"]),
+    });
+
+    const response = await handlers.contactConfigs.PUT(
+      createRequest("PUT", {
+        channels: updatedContactConfig.channels,
+        expectedRevision: 1,
+        safetyNotice: updatedContactConfig.safetyNotice,
+        summary: updatedContactConfig.summary,
+        title: updatedContactConfig.title,
+      }),
+    );
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      code: 409034,
+      message:
+        "Contact config was changed by another administrator. Reload and retry.",
+      data: null,
     });
   });
 });

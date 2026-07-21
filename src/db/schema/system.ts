@@ -1,11 +1,15 @@
 import {
   bigint,
   index,
+  integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+
+import type { ContactConfigChannelDto } from "@/server/contracts/contact-config-contract";
 
 const idColumn = () =>
   bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey();
@@ -40,5 +44,45 @@ export const auditLog = pgTable(
       table.target_public_id,
     ),
     index("idx_audit_log_created_at").on(table.created_at),
+  ],
+);
+
+export const contactConfig = pgTable(
+  "contact_config",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    singleton_key: text("singleton_key").default("purchase_guidance").notNull(),
+    title: text("title").notNull(),
+    summary: text("summary").notNull(),
+    channels: jsonb("channels").$type<ContactConfigChannelDto[]>().notNull(),
+    safety_notice: text("safety_notice").notNull(),
+    revision: integer("revision").default(1).notNull(),
+    updated_by_admin_public_id: text("updated_by_admin_public_id").notNull(),
+    created_at: createdAtColumn(),
+    updated_at: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("udx_contact_config_public_id").on(table.public_id),
+    uniqueIndex("udx_contact_config_singleton_key").on(table.singleton_key),
+  ],
+);
+
+export const contactConfigQrImage = pgTable(
+  "contact_config_qr_image",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    content_type: text("content_type").notNull(),
+    bytes_base64: text("bytes_base64").notNull(),
+    byte_size: integer("byte_size").notNull(),
+    created_by_admin_public_id: text("created_by_admin_public_id").notNull(),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_contact_config_qr_image_public_id").on(table.public_id),
+    index("idx_contact_config_qr_image_created_at").on(table.created_at),
   ],
 );

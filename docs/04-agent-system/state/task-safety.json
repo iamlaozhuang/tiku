@@ -1,22 +1,32 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-f0031-static-closure-2026-07-21",
-  "objective": "Close F-0031 without product code changes by proving every production mutation partition is covered and the explicit local resource adapter is reachable only through injected test options, never through production API construction.",
+  "taskId": "p1-remediation-rc-04-contact-config-persistence-2026-07-21",
+  "objective": "Close F-0034 by replacing the process-local contact_config and hardcoded learner consumer with one durable revisioned contact_config and durable QR media read model, atomic redacted update audit, optimistic concurrency, and shared operations-admin/learner consumption.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
-    "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-    "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
-    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
+    "src/db/schema/system.ts",
+    "src/db/schema/system.test.ts",
+    "drizzle/20260721203000_p1_rc_04_contact_config_persistence.sql",
+    "drizzle/meta/20260721203000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/contracts/contact-config-contract.ts",
+    "src/server/repositories/contact-config-repository.ts",
+    "src/server/services/contact-config-service.ts",
+    "src/app/api/v1/contact-configs/route.ts",
+    "src/app/api/v1/contact-configs/qr-images/route.ts",
+    "src/app/api/v1/contact-configs/qr-images/[publicId]/route.ts",
+    "src/app/api/v1/contact-configs/purchase-guidance/route.ts",
+    "src/features/admin/contact-config/AdminContactConfigPage.tsx",
+    "src/features/student/profile/StudentProfileRedeemPage.tsx",
+    "src/lib/local-purchase-guidance-contact-config.ts",
+    "tests/unit/p1-contact-config-persistence.test.ts",
+    "tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts",
+    "tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts",
+    "tests/unit/student-profile-redeem-ui.test.ts",
+    "tests/unit/admin-ops-summary-first-ui.test.ts",
+    "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -24,41 +34,59 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/**",
-    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
-    ".env*"
+    ".env*",
+    "seed/**",
+    "e2e/**"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/db/schema/system.ts",
+    "src/db/schema/system.test.ts",
+    "drizzle/20260721203000_p1_rc_04_contact_config_persistence.sql",
+    "drizzle/meta/20260721203000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/contracts/contact-config-contract.ts",
+    "src/server/repositories/contact-config-repository.ts",
+    "src/server/services/contact-config-service.ts",
+    "src/app/api/v1/contact-configs/purchase-guidance/route.ts",
+    "src/features/admin/contact-config/AdminContactConfigPage.tsx",
+    "src/features/student/profile/StudentProfileRedeemPage.tsx",
+    "src/lib/local-purchase-guidance-contact-config.ts",
+    "tests/unit/p1-contact-config-persistence.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
-    "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-    "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
-    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
+    "src/app/api/v1/contact-configs/route.ts",
+    "src/app/api/v1/contact-configs/qr-images/route.ts",
+    "src/app/api/v1/contact-configs/qr-images/[publicId]/route.ts",
+    "tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts",
+    "tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts",
+    "tests/unit/student-profile-redeem-ui.test.ts",
+    "tests/unit/admin-ops-summary-first-ui.test.ts",
+    "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "productionApiCallers": "src/app/api/v1/resources/** construct createRagResourceKnowledgeRuntimeRouteHandlers() without options",
-    "defaultRuntime": "src/server/services/rag-resource-knowledge-runtime.ts defaults allowLocalResourceAdapter to false and uses the database repository",
-    "explicitLocalAdapter": "localResourceStorageRoot/useLocalResourceAdapter are supplied only by isolated tests",
-    "closedPartitions": "admin account, question/material, paper, knowledge_node, database resource, resource upload, paper_asset delete/create/upload",
-    "findingLedger": "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml#F-0031"
+    "adminCaller": "src/features/admin/contact-config/AdminContactConfigPage.tsx",
+    "learnerCaller": "src/features/student/profile/StudentProfileRedeemPage.tsx currently reads a compiled constant",
+    "apiHandlers": "src/app/api/v1/contact-configs/**",
+    "service": "src/server/services/contact-config-service.ts currently defaults to module-level memory stores and optional audit",
+    "repository": "new dedicated PostgreSQL contact_config repository required",
+    "schema": "src/db/schema/system.ts currently contains audit_log but no contact_config or QR media table",
+    "directTests": [
+      "tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts",
+      "tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts",
+      "tests/unit/student-profile-redeem-ui.test.ts",
+      "tests/unit/admin-ops-summary-first-ui.test.ts",
+      "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
+    ]
   },
   "validationCommands": [
     {
-      "name": "f0031-production-partition-regression",
+      "name": "contact-config-persistence-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -66,75 +94,107 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
-        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-        "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
-        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
-        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-        "tests/unit/p1-paper-asset-upload-saga.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
+        "tests/unit/p1-contact-config-persistence.test.ts",
+        "src/db/schema/system.test.ts",
+        "tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts"
       ]
     },
     {
-      "name": "f0031-state-format",
+      "name": "contact-config-persistence-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts",
+        "tests/unit/student-profile-redeem-ui.test.ts",
+        "tests/unit/admin-ops-summary-first-ui.test.ts",
+        "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
+      ]
+    },
+    {
+      "name": "contact-config-persistence-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "prettier",
-        "--check",
-        "docs/04-agent-system/state/project-state.yaml",
-        "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "eslint",
+        "src/db/schema/system.ts",
+        "src/db/schema/system.test.ts",
+        "src/server/contracts/contact-config-contract.ts",
+        "src/server/repositories/contact-config-repository.ts",
+        "src/server/services/contact-config-service.ts",
+        "src/app/api/v1/contact-configs/route.ts",
+        "src/app/api/v1/contact-configs/qr-images/route.ts",
+        "src/app/api/v1/contact-configs/qr-images/[publicId]/route.ts",
+        "src/app/api/v1/contact-configs/purchase-guidance/route.ts",
+        "src/features/admin/contact-config/AdminContactConfigPage.tsx",
+        "src/features/student/profile/StudentProfileRedeemPage.tsx",
+        "tests/unit/p1-contact-config-persistence.test.ts",
+        "tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts",
+        "tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts",
+        "tests/unit/student-profile-redeem-ui.test.ts",
+        "tests/unit/admin-ops-summary-first-ui.test.ts",
+        "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
       ]
+    },
+    {
+      "name": "contact-config-persistence-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "contact-config-persistence-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "fresh-schema-start-f0034-contact-config-persistence-2026-07-21",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "applicableStandingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
-  "riskBoundary": {
-    "category": "low_risk_no_product_code_change",
-    "schemaOrMigrationChange": false,
-    "persistentDatabaseExecution": false,
-    "entitlementExpansion": false,
-    "realExternalCall": false,
-    "productSourceChange": false
-  },
-  "findingDisposition": {
-    "F-0031": "closed_all_production_partitions_covered_explicit_local_adapter_not_production_reachable"
-  },
-  "verificationEvidence": {
-    "productionRouteScan": "passed_6_of_6_resource_routes_construct_default_runtime_without_local_adapter_options",
-    "productionSourceScan": "passed_no_useLocalResourceAdapter_reference_outside_runtime_definition",
-    "affectedRegression": "passed_85_of_85_across_11_files",
-    "mainThreadAdversarialReview": "passed_no_production_local_adapter_injection_no_product_diff_no_schema_database_permission_provider_external_or_mechanism_change"
-  },
-  "conditionalCloseoutProjection": {
-    "currentState": "verified_uncommitted_state_only_candidate",
-    "triggerConditions": [
-      "exact_three_file_diff",
-      "minimal_safety_kernel_commit_path_green",
-      "base_and_canonical_remote_unchanged"
-    ],
-    "projectedOutcome": [
+  "approvalEnvelope": {
+    "approvalId": "fresh-schema-start-f0034-contact-config-persistence-2026-07-21",
+    "status": "approved_task_bound_conditional_closeout",
+    "taskId": "p1-remediation-rc-04-contact-config-persistence-2026-07-21",
+    "rootCause": "in_memory_contact_config_and_hardcoded_learner_consumer_diverge_without_durable_audited_revisioned_source",
+    "riskCategory": "schema_migration_source_and_database_application_logic",
+    "baseSha": "82ff0adebaed5f8220082f5a1602ca01000acbdb",
+    "conditionalCloseout": true,
+    "requestedOperations": [
+      "schema_and_migration_source_implementation_without_execution",
+      "offline_drizzle_generation",
+      "product_and_test_implementation",
+      "validation_and_main_thread_adversarial_review",
       "one_reviewable_commit",
       "ff_only_merge_to_master",
       "one_ordinary_push_to_canonical_origin_master",
-      "sync_verification_and_short_branch_cleanup"
-    ]
+      "sync_verification",
+      "short_branch_cleanup"
+    ],
+    "explicitlyForbidden": [
+      "migration_execution",
+      "persistent_database_write_or_real_data_access",
+      "dependency_or_lockfile_change",
+      "permission_or_entitlement_change",
+      "provider_or_external_service_call",
+      "secret_or_env_change",
+      "deployment",
+      "pull_request",
+      "force_push",
+      "noncanonical_remote",
+      "subagent"
+    ],
+    "canonicalPushTarget": "https://github.com/iamlaozhuang/tiku.git#refs/heads/master",
+    "approvalFingerprint": "p1-remediation-rc-04-contact-config-persistence-2026-07-21|in_memory_contact_config_and_hardcoded_learner_consumer_diverge_without_durable_audited_revisioned_source|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|82ff0adebaed5f8220082f5a1602ca01000acbdb"
   },
   "push": {
     "target": "origin/master",

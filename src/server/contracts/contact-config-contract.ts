@@ -13,6 +13,7 @@ export type ContactConfigChannelDto = {
 
 export type PurchaseGuidanceContactConfigDto = {
   publicId: string;
+  revision: number;
   title: string;
   summary: string;
   channels: ContactConfigChannelDto[];
@@ -25,6 +26,7 @@ export type PurchaseGuidanceContactConfigResultDto = {
 };
 
 export type UpdateContactConfigInputDto = {
+  expectedRevision: number;
   title: string;
   summary: string;
   channels: ContactConfigChannelDto[];

@@ -1,49 +1,36 @@
+import { randomUUID } from "node:crypto";
+
+import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
+import { ADMIN_AUTH_OPERATION_ERROR_CODES } from "../contracts/admin-user-org-auth-ops-contract";
 import {
-  createSuccessResponse,
   createErrorResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
-import { randomUUID } from "crypto";
-import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "../../lib/local-purchase-guidance-contact-config";
 import {
-  type ContactConfigQrImageUploadResultDto,
   type ContactConfigChannelDto,
-  type PurchaseGuidanceContactConfigDto,
+  type ContactConfigQrImageUploadResultDto,
   type PurchaseGuidanceContactConfigResultDto,
   type UpdateContactConfigInputDto,
 } from "../contracts/contact-config-contract";
-import { ADMIN_AUTH_OPERATION_ERROR_CODES } from "../contracts/admin-user-org-auth-ops-contract";
-import { createLocalSessionRuntime } from "../auth/local-session-runtime";
-import { getRequestAuthorization } from "../auth/session-cookie";
-import type { SessionService } from "./session-service";
+import {
+  createPostgresContactConfigRepository,
+  type ContactConfigAdminRole,
+  type ContactConfigRuntimeRepository,
+} from "../repositories/contact-config-repository";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
+import type { SessionService } from "./session-service";
+
+export type { ContactConfigRuntimeRepository } from "../repositories/contact-config-repository";
 
 export type ContactConfigService = {
-  getPurchaseGuidance(): ApiResponse<PurchaseGuidanceContactConfigResultDto>;
-};
-
-export type ContactConfigRuntimeRepository = {
-  getActiveContactConfig(): Promise<PurchaseGuidanceContactConfigDto>;
-  updateContactConfig(
-    input: UpdateContactConfigInputDto,
-  ): Promise<PurchaseGuidanceContactConfigDto>;
-};
-
-export type ContactConfigAuditLogRepository = {
-  appendAuditLog(input: {
-    actorPublicId: string;
-    actorRole: ContactConfigAdminRole;
-    actionType: "contact_config.update" | "contact_config.qr_image_upload";
-    targetResourceType: "contact_config";
-    targetPublicId: string;
-    resultStatus: "success";
-    metadataSummary: string;
-    requestIp: string | null;
-  }): Promise<void>;
+  getPurchaseGuidance(): Promise<
+    ApiResponse<PurchaseGuidanceContactConfigResultDto>
+  >;
 };
 
 export type ContactConfigRuntimeRepositories = {
-  auditLogRepository?: ContactConfigAuditLogRepository;
   contactConfigRepository: ContactConfigRuntimeRepository;
 };
 
@@ -52,8 +39,6 @@ export type ContactConfigRuntimeOptions = {
   sessionService?: Pick<SessionService, "getCurrentSession">;
   now?: () => Date;
 };
-
-type ContactConfigAdminRole = "super_admin" | "ops_admin" | "content_admin";
 
 type ContactConfigAdminActor = {
   publicId: string;
@@ -99,6 +84,10 @@ const contactConfigQrImageInvalidResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
   "Contact QR image input is invalid.",
 );
+const contactConfigConflictResponse = createErrorResponse(
+  409034,
+  "Contact config was changed by another administrator. Reload and retry.",
+);
 
 const allowedQrImageContentTypes = new Set([
   "image/jpeg",
@@ -107,32 +96,23 @@ const allowedQrImageContentTypes = new Set([
 ]);
 const maxQrImageByteSize = 2 * 1024 * 1024;
 
-type LocalQrImageRecord = {
-  bytes: Uint8Array;
-  contentType: "image/jpeg" | "image/png" | "image/webp";
-  publicId: string;
-};
-
-let localContactConfigStore: PurchaseGuidanceContactConfigDto = {
-  ...LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG,
-  channels: LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG.channels.map((channel) => ({
-    ...channel,
-  })),
-};
-const localQrImageStore = new Map<string, LocalQrImageRecord>();
-
-export function createContactConfigService(): ContactConfigService {
+export function createContactConfigService(
+  repository: ContactConfigRuntimeRepository = createPostgresContactConfigRepository(),
+): ContactConfigService {
   return {
-    getPurchaseGuidance() {
+    async getPurchaseGuidance() {
       return createSuccessResponse<PurchaseGuidanceContactConfigResultDto>({
-        contactConfig: localContactConfigStore,
+        contactConfig: await repository.getActiveContactConfig(),
       });
     },
   };
 }
 
-function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
-  return Response.json(response);
+function createJsonResponse<TData>(
+  response: ApiResponse<TData>,
+  status = 200,
+): Response {
+  return Response.json(response, { status });
 }
 
 function isContactConfigAdminRole(
@@ -195,11 +175,9 @@ function normalizeText(value: unknown, maxLength: number): string | null {
 
   const normalizedValue = value.trim();
 
-  if (normalizedValue.length === 0 || normalizedValue.length > maxLength) {
-    return null;
-  }
-
-  return normalizedValue;
+  return normalizedValue.length === 0 || normalizedValue.length > maxLength
+    ? null
+    : normalizedValue;
 }
 
 function normalizeHref(value: unknown): string | null {
@@ -216,10 +194,6 @@ function normalizeHref(value: unknown): string | null {
   return normalizedValue.length === 0 ? null : normalizedValue;
 }
 
-function normalizeOptionalBoolean(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
-
 function normalizeQrImageUrl(value: unknown): string | null {
   if (value === null || value === undefined) {
     return null;
@@ -231,10 +205,6 @@ function normalizeQrImageUrl(value: unknown): string | null {
 
   const normalizedValue = value.trim();
 
-  if (normalizedValue.length === 0) {
-    return null;
-  }
-
   return normalizedValue.startsWith("/api/v1/contact-configs/qr-images/")
     ? normalizedValue
     : null;
@@ -245,9 +215,7 @@ function normalizeChannel(value: unknown): ContactConfigChannelDto | null {
     return null;
   }
 
-  const channelType = value.channelType;
-
-  if (channelType !== "phone" && channelType !== "wechat_work") {
+  if (value.channelType !== "phone" && value.channelType !== "wechat_work") {
     return null;
   }
 
@@ -256,7 +224,6 @@ function normalizeChannel(value: unknown): ContactConfigChannelDto | null {
   const serviceHours = normalizeText(value.serviceHours, 80);
   const usage = normalizeText(value.usage, 120);
   const href = normalizeHref(value.href);
-  const isEnabled = normalizeOptionalBoolean(value.isEnabled, true);
   const qrImageUrl = normalizeQrImageUrl(value.qrImageUrl);
 
   if (
@@ -264,6 +231,7 @@ function normalizeChannel(value: unknown): ContactConfigChannelDto | null {
     channelValue === null ||
     serviceHours === null ||
     usage === null ||
+    typeof value.isEnabled !== "boolean" ||
     (value.qrImageUrl !== null &&
       value.qrImageUrl !== undefined &&
       qrImageUrl === null)
@@ -272,14 +240,14 @@ function normalizeChannel(value: unknown): ContactConfigChannelDto | null {
   }
 
   return {
-    channelType,
-    isEnabled,
+    channelType: value.channelType,
+    href,
+    isEnabled: value.isEnabled,
     label,
     qrImageUrl,
-    value: channelValue,
     serviceHours,
     usage,
-    href,
+    value: channelValue,
   };
 }
 
@@ -287,38 +255,34 @@ function normalizeContactConfigInput(
   input: unknown,
 ): NormalizedContactConfigInputResult {
   if (!isRecord(input)) {
-    return {
-      success: false,
-      response: contactConfigInputInvalidResponse,
-    };
+    return { success: false, response: contactConfigInputInvalidResponse };
   }
 
   const title = normalizeText(input.title, 80);
   const summary = normalizeText(input.summary, 240);
   const safetyNotice = normalizeText(input.safetyNotice, 240);
-  const channels =
-    Array.isArray(input.channels) && input.channels.length >= 1
-      ? input.channels.map(normalizeChannel)
-      : [];
+  const channels = Array.isArray(input.channels)
+    ? input.channels.map(normalizeChannel)
+    : [];
 
   if (
     title === null ||
     summary === null ||
     safetyNotice === null ||
+    !Number.isSafeInteger(input.expectedRevision) ||
+    Number(input.expectedRevision) < 1 ||
     channels.length === 0 ||
     channels.length > 5 ||
     channels.some((channel) => channel === null)
   ) {
-    return {
-      success: false,
-      response: contactConfigInputInvalidResponse,
-    };
+    return { success: false, response: contactConfigInputInvalidResponse };
   }
 
   return {
     success: true,
     value: {
       channels: channels as ContactConfigChannelDto[],
+      expectedRevision: Number(input.expectedRevision),
       safetyNotice,
       summary,
       title,
@@ -334,30 +298,19 @@ async function normalizeQrImageUpload(
   try {
     formData = await request.formData();
   } catch {
-    return {
-      success: false,
-      response: contactConfigQrImageInvalidResponse,
-    };
+    return { success: false, response: contactConfigQrImageInvalidResponse };
   }
 
   const file = formData.get("file");
 
-  if (file === null || typeof file === "string") {
-    return {
-      success: false,
-      response: contactConfigQrImageInvalidResponse,
-    };
-  }
-
   if (
+    file === null ||
+    typeof file === "string" ||
     !allowedQrImageContentTypes.has(file.type) ||
     file.size <= 0 ||
     file.size > maxQrImageByteSize
   ) {
-    return {
-      success: false,
-      response: contactConfigQrImageInvalidResponse,
-    };
+    return { success: false, response: contactConfigQrImageInvalidResponse };
   }
 
   return {
@@ -369,43 +322,22 @@ async function normalizeQrImageUpload(
   };
 }
 
-function createQrImagePublicId(): string {
-  return `contact-config-qr-${randomUUID()}`;
-}
-
 function createQrImageUrl(publicId: string): string {
   return `/api/v1/contact-configs/qr-images/${encodeURIComponent(publicId)}`;
 }
 
-export function createLocalContactConfigRepository(
-  options: Pick<ContactConfigRuntimeOptions, "now"> = {},
-): ContactConfigRuntimeRepository {
-  return {
-    async getActiveContactConfig() {
-      return localContactConfigStore;
-    },
-    async updateContactConfig(input) {
-      const updatedAt = (options.now ?? (() => new Date()))().toISOString();
-
-      localContactConfigStore = {
-        ...localContactConfigStore,
-        ...input,
-        channels: input.channels.map((channel) => ({ ...channel })),
-        updatedAt,
-      };
-
-      return localContactConfigStore;
-    },
-  };
+function getRequestIp(request: Request): string | null {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 }
 
 export function createContactConfigRuntimeRouteHandlers(
   options: ContactConfigRuntimeOptions = {},
 ) {
   const repositories = options.repositories ?? {
-    contactConfigRepository: createLocalContactConfigRepository(options),
+    contactConfigRepository: createPostgresContactConfigRepository(),
   };
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const now = options.now ?? (() => new Date());
 
   async function requireManager(
     request: Request,
@@ -422,6 +354,15 @@ export function createContactConfigRuntimeRouteHandlers(
   }
 
   return createRouteHandlersWithErrorEnvelope({
+    purchaseGuidance: {
+      async GET(): Promise<Response> {
+        return createJsonResponse(
+          await createContactConfigService(
+            repositories.contactConfigRepository,
+          ).getPurchaseGuidance(),
+        );
+      },
+    },
     contactConfigs: {
       async GET(request: Request): Promise<Response> {
         const actorOrError = await requireManager(request);
@@ -452,25 +393,24 @@ export function createContactConfigRuntimeRouteHandlers(
           return createJsonResponse(normalizedInput.response);
         }
 
-        const contactConfig =
-          await repositories.contactConfigRepository.updateContactConfig(
-            normalizedInput.value,
-          );
+        const result =
+          await repositories.contactConfigRepository.updateContactConfig({
+            actor: {
+              publicId: actorOrError.publicId,
+              requestIp: getRequestIp(request),
+              role: actorOrError.roles[0],
+            },
+            contactConfig: normalizedInput.value,
+            now: now(),
+          });
 
-        await repositories.auditLogRepository?.appendAuditLog({
-          actorPublicId: actorOrError.publicId,
-          actorRole: actorOrError.roles[0],
-          actionType: "contact_config.update",
-          targetResourceType: "contact_config",
-          targetPublicId: contactConfig.publicId,
-          resultStatus: "success",
-          metadataSummary: `redacted contact_config update metadata; channelCount=${contactConfig.channels.length}`,
-          requestIp: null,
-        });
+        if (result.status === "conflict") {
+          return createJsonResponse(contactConfigConflictResponse, 409);
+        }
 
         return createJsonResponse(
           createSuccessResponse<PurchaseGuidanceContactConfigResultDto>({
-            contactConfig,
+            contactConfig: result.contactConfig,
           }),
         );
       },
@@ -489,32 +429,27 @@ export function createContactConfigRuntimeRouteHandlers(
           return createJsonResponse(normalizedUpload.response);
         }
 
-        const publicId = createQrImagePublicId();
-        const qrImageRecord: LocalQrImageRecord = {
-          publicId,
-          ...normalizedUpload.value,
-        };
-
-        localQrImageStore.set(publicId, qrImageRecord);
-
-        await repositories.auditLogRepository?.appendAuditLog({
-          actorPublicId: actorOrError.publicId,
-          actorRole: actorOrError.roles[0],
-          actionType: "contact_config.qr_image_upload",
-          targetResourceType: "contact_config",
-          targetPublicId: publicId,
-          resultStatus: "success",
-          metadataSummary: `redacted contact_config qr image upload metadata; contentType=${qrImageRecord.contentType}; byteSize=${qrImageRecord.bytes.byteLength}`,
-          requestIp: null,
-        });
+        const publicId = `contact-config-qr-${randomUUID()}`;
+        const record = await repositories.contactConfigRepository.createQrImage(
+          {
+            actor: {
+              publicId: actorOrError.publicId,
+              requestIp: getRequestIp(request),
+              role: actorOrError.roles[0],
+            },
+            now: now(),
+            publicId,
+            ...normalizedUpload.value,
+          },
+        );
 
         return createJsonResponse(
           createSuccessResponse<ContactConfigQrImageUploadResultDto>({
             qrImage: {
-              byteSize: qrImageRecord.bytes.byteLength,
-              contentType: qrImageRecord.contentType,
-              publicId,
-              qrImageUrl: createQrImageUrl(publicId),
+              byteSize: record.bytes.byteLength,
+              contentType: record.contentType,
+              publicId: record.publicId,
+              qrImageUrl: createQrImageUrl(record.publicId),
             },
           }),
         );
@@ -524,23 +459,25 @@ export function createContactConfigRuntimeRouteHandlers(
         context: { params: Promise<{ publicId: string }> },
       ): Promise<Response> {
         const { publicId } = await context.params;
-        const qrImageRecord = localQrImageStore.get(publicId);
+        const record =
+          await repositories.contactConfigRepository.getQrImage(publicId);
 
-        if (qrImageRecord === undefined) {
+        if (record === null) {
           return createJsonResponse(
             createErrorResponse(404001, "Contact QR image not found."),
+            404,
           );
         }
 
-        const responseBody = qrImageRecord.bytes.buffer.slice(
-          qrImageRecord.bytes.byteOffset,
-          qrImageRecord.bytes.byteOffset + qrImageRecord.bytes.byteLength,
+        const responseBody = record.bytes.buffer.slice(
+          record.bytes.byteOffset,
+          record.bytes.byteOffset + record.bytes.byteLength,
         ) as ArrayBuffer;
 
         return new Response(responseBody, {
           headers: {
             "cache-control": "no-store",
-            "content-type": qrImageRecord.contentType,
+            "content-type": record.contentType,
           },
         });
       },
