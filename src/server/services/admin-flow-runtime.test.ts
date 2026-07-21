@@ -261,7 +261,7 @@ describe("createAdminFlowRuntimeRouteHandlers", () => {
 
     const response = await handlers.users.collection.GET(
       new Request(
-        "http://localhost/api/v1/users?page=3&pageSize=50&sortBy=registeredAt&sortOrder=asc&status=disabled&userType=employee&keyword=%20target%20",
+        "http://localhost/api/v1/users?page=3&pageSize=50&sortBy=registeredAt&sortOrder=asc&status=disabled&userType=employee&userCategory=disabled&authFilter=expired&keyword=%20target%20",
         {
           headers: {
             cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
@@ -279,8 +279,8 @@ describe("createAdminFlowRuntimeRouteHandlers", () => {
       keyword: "target",
       status: "disabled",
       userType: "employee",
-      userCategory: "all",
-      authFilter: "all",
+      userCategory: "disabled",
+      authFilter: "expired",
     });
   });
 

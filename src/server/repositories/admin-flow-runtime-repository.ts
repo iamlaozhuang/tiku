@@ -41,12 +41,20 @@ import type {
   AdminAccountListQuery,
   AdminAccountMutationConflictReason,
   AdminAuthOperationListQuery,
+  AdminUserCategory,
   AdminUserDetailDto,
   AdminUserListDto,
   UserPhoneDisclosureReasonCode,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import { classifyAdminIdentityKeyword } from "../contracts/admin-user-org-auth-ops-contract";
-import { adminRoleValues, type AdminRole } from "../models/auth";
+import {
+  adminRoleValues,
+  type AdminRole,
+  type AuthorizationEdition,
+  type AuthStatus,
+  type UserStatus,
+  type UserType,
+} from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { setEmployeeAccountStatusWithQuota } from "./employee-org-auth-quota-repository";
 import { findAccountPhoneIdentityConflictUnderLock } from "./account-phone-identity-lock";
@@ -243,6 +251,7 @@ const {
   adminOrganization,
   adminRoleAssignment,
   auditLog,
+  authUpgrade,
   authAccount,
   authSession,
   authUser,
@@ -293,7 +302,11 @@ function createPagination(
 
 type AdminUserListItem = AdminUserListDto["users"][number];
 type AdminUserAuthStatus = AdminUserListItem["authStatus"];
+type AdminUserAuthEditionLabel = NonNullable<
+  AdminUserListItem["authEditionLabel"]
+>;
 type AdminUserListRow = {
+  auth_edition_label: NonNullable<AdminUserListItem["authEditionLabel"]>;
   auth_status: AdminUserAuthStatus;
   created_at: Date;
   name: string;
@@ -302,8 +315,122 @@ type AdminUserListRow = {
   phone: string;
   public_id: string;
   status: AdminUserListItem["status"];
+  user_category: AdminUserCategory;
   user_type: AdminUserListItem["userType"];
 };
+
+type AdminUserEffectiveAuthorizationSource = {
+  edition: AuthorizationEdition;
+  expiresAt: Date;
+  startsAt: Date;
+  status: AuthStatus;
+  upgrade?: {
+    expiresAt: Date;
+    revokedAt: Date | null;
+    startsAt: Date;
+    status: "active" | "expired" | "revoked";
+    targetEdition: AuthorizationEdition;
+  } | null;
+};
+
+export type AdminUserEffectiveAuthorizationSummaryInput = {
+  accountStatus: UserStatus;
+  now: Date;
+  sources: AdminUserEffectiveAuthorizationSource[];
+  userType: UserType;
+};
+
+export type AdminUserEffectiveAuthorizationSummary = Pick<
+  AdminUserListItem,
+  "authEditionLabel" | "authStatus" | "userCategory"
+>;
+
+function isDateWithinInclusiveWindow(
+  now: Date,
+  startsAt: Date,
+  expiresAt: Date,
+): boolean {
+  return (
+    startsAt.getTime() <= now.getTime() && now.getTime() <= expiresAt.getTime()
+  );
+}
+
+function resolveEffectiveSourceEdition(
+  source: AdminUserEffectiveAuthorizationSource,
+  now: Date,
+): AuthorizationEdition {
+  if (source.edition === "advanced") {
+    return "advanced";
+  }
+
+  const upgrade = source.upgrade;
+
+  return upgrade !== undefined &&
+    upgrade !== null &&
+    upgrade.status === "active" &&
+    upgrade.revokedAt === null &&
+    isDateWithinInclusiveWindow(now, upgrade.startsAt, upgrade.expiresAt)
+    ? upgrade.targetEdition
+    : source.edition;
+}
+
+function resolveEffectiveAuthorizationSourceStatus(
+  source: AdminUserEffectiveAuthorizationSource,
+  now: Date,
+): AuthStatus {
+  if (source.status === "cancelled") {
+    return "cancelled";
+  }
+
+  return source.status === "active" &&
+    isDateWithinInclusiveWindow(now, source.startsAt, source.expiresAt)
+    ? "active"
+    : "expired";
+}
+
+export function resolveAdminUserEffectiveAuthorizationSummary(
+  input: AdminUserEffectiveAuthorizationSummaryInput,
+): AdminUserEffectiveAuthorizationSummary {
+  const activeSources = input.sources.filter(
+    (source) =>
+      resolveEffectiveAuthorizationSourceStatus(source, input.now) === "active",
+  );
+  const hasAdvancedSource = activeSources.some(
+    (source) => resolveEffectiveSourceEdition(source, input.now) === "advanced",
+  );
+  const hasStandardSource = activeSources.length > 0;
+  const authEditionLabel = hasAdvancedSource
+    ? "advanced"
+    : hasStandardSource
+      ? "standard"
+      : input.sources.length > 0
+        ? "expired"
+        : "none";
+  const authStatus =
+    activeSources.length > 0
+      ? "active"
+      : input.sources.some(
+            (source) =>
+              resolveEffectiveAuthorizationSourceStatus(source, input.now) ===
+              "expired",
+          )
+        ? "expired"
+        : input.sources.some((source) => source.status === "cancelled")
+          ? "cancelled"
+          : null;
+  const userCategory =
+    input.accountStatus === "disabled"
+      ? "disabled"
+      : input.userType === "employee"
+        ? "employee"
+        : hasAdvancedSource
+          ? "personal_advanced"
+          : hasStandardSource
+            ? "personal_standard"
+            : "no_auth_personal";
+
+  return { authEditionLabel, authStatus, userCategory };
+}
 
 const adminUserAuthStatusPriority = {
   active: 3,
@@ -342,6 +469,11 @@ function mergeAdminUserListRows(rows: AdminUserListRow[]): AdminUserListRow[] {
 
     rowsByPublicId.set(row.public_id, {
       ...existingRow,
+      auth_edition_label:
+        existingRow.auth_edition_label === "advanced" ||
+        row.auth_edition_label !== "advanced"
+          ? existingRow.auth_edition_label
+          : row.auth_edition_label,
       auth_status: selectAdminUserAuthStatus(
         existingRow.auth_status,
         row.auth_status,
@@ -349,6 +481,10 @@ function mergeAdminUserListRows(rows: AdminUserListRow[]): AdminUserListRow[] {
       organization_name: existingRow.organization_name ?? row.organization_name,
       organization_public_id:
         existingRow.organization_public_id ?? row.organization_public_id,
+      user_category:
+        existingRow.user_category === "disabled"
+          ? existingRow.user_category
+          : row.user_category,
     });
   }
 
@@ -365,6 +501,197 @@ function sortAdminRoles(adminRoles: readonly AdminRole[]): AdminRole[] {
       (roleOrder.get(leftRole) ?? Number.MAX_SAFE_INTEGER) -
       (roleOrder.get(rightRole) ?? Number.MAX_SAFE_INTEGER),
   );
+}
+
+function createAdminUserEffectiveAuthorizationReadModel(
+  database: AdminFlowRuntimeDatabase,
+  now: Date,
+) {
+  const organizationAuthorizationCoversEmployee =
+    createOrgAuthCoversOrganizationCondition({
+      authScopeType: orgAuth.auth_scope_type,
+      orgAuthId: orgAuth.id,
+      organizationId: employee.organization_id,
+      purchaserOrganizationId: orgAuth.purchaser_organization_id,
+    });
+  const hasActivePersonalAuthorization = sql<boolean>`exists (
+    select 1
+    from ${personalAuth}
+    where ${personalAuth.user_id} = ${user.id}
+      and ${personalAuth.status} = 'active'
+      and ${personalAuth.starts_at} <= ${now}
+      and ${personalAuth.expires_at} >= ${now}
+  )`;
+  const hasActiveAdvancedPersonalAuthorization = sql<boolean>`exists (
+    select 1
+    from ${personalAuth}
+    where ${personalAuth.user_id} = ${user.id}
+      and ${personalAuth.status} = 'active'
+      and ${personalAuth.starts_at} <= ${now}
+      and ${personalAuth.expires_at} >= ${now}
+      and (
+        ${personalAuth.edition} = 'advanced'
+        or exists (
+          select 1
+          from ${authUpgrade}
+          where ${authUpgrade.personal_auth_id} = ${personalAuth.id}
+            and ${authUpgrade.status} = 'active'
+            and ${authUpgrade.revoked_at} is null
+            and ${authUpgrade.starts_at} <= ${now}
+            and ${authUpgrade.expires_at} >= ${now}
+            and ${authUpgrade.target_edition} = 'advanced'
+        )
+      )
+  )`;
+  const hasActiveOrganizationAuthorization = sql<boolean>`exists (
+    select 1
+    from ${employeeOrgAuth}
+    inner join ${orgAuth}
+      on ${orgAuth.id} = ${employeeOrgAuth.org_auth_id}
+    where ${employeeOrgAuth.employee_id} = ${employee.id}
+      and ${organizationAuthorizationCoversEmployee}
+      and ${orgAuth.status} = 'active'
+      and ${orgAuth.starts_at} <= ${now}
+      and ${orgAuth.expires_at} >= ${now}
+  )`;
+  const hasActiveAdvancedOrganizationAuthorization = sql<boolean>`exists (
+    select 1
+    from ${employeeOrgAuth}
+    inner join ${orgAuth}
+      on ${orgAuth.id} = ${employeeOrgAuth.org_auth_id}
+    where ${employeeOrgAuth.employee_id} = ${employee.id}
+      and ${organizationAuthorizationCoversEmployee}
+      and ${orgAuth.status} = 'active'
+      and ${orgAuth.starts_at} <= ${now}
+      and ${orgAuth.expires_at} >= ${now}
+      and (
+        ${orgAuth.edition} = 'advanced'
+        or exists (
+          select 1
+          from ${authUpgrade}
+          where ${authUpgrade.org_auth_id} = ${orgAuth.id}
+            and ${authUpgrade.status} = 'active'
+            and ${authUpgrade.revoked_at} is null
+            and ${authUpgrade.starts_at} <= ${now}
+            and ${authUpgrade.expires_at} >= ${now}
+            and ${authUpgrade.target_edition} = 'advanced'
+        )
+      )
+  )`;
+  const hasActiveAuthorization = sql<boolean>`(
+    ${hasActivePersonalAuthorization}
+    or (
+      ${user.user_type} = 'employee'
+      and ${hasActiveOrganizationAuthorization}
+    )
+  )`;
+  const hasActiveAdvancedAuthorization = sql<boolean>`(
+    ${hasActiveAdvancedPersonalAuthorization}
+    or (
+      ${user.user_type} = 'employee'
+      and ${hasActiveAdvancedOrganizationAuthorization}
+    )
+  )`;
+  const hasAnyAuthorization = sql<boolean>`(
+    exists (
+      select 1 from ${personalAuth}
+      where ${personalAuth.user_id} = ${user.id}
+    )
+    or (
+      ${user.user_type} = 'employee'
+      and exists (
+        select 1
+        from ${employeeOrgAuth}
+        inner join ${orgAuth}
+          on ${orgAuth.id} = ${employeeOrgAuth.org_auth_id}
+        where ${employeeOrgAuth.employee_id} = ${employee.id}
+          and ${organizationAuthorizationCoversEmployee}
+      )
+    )
+  )`;
+  const hasCancelledAuthorization = sql<boolean>`(
+    exists (
+      select 1 from ${personalAuth}
+      where ${personalAuth.user_id} = ${user.id}
+        and ${personalAuth.status} = 'cancelled'
+    )
+    or (
+      ${user.user_type} = 'employee'
+      and exists (
+        select 1
+        from ${employeeOrgAuth}
+        inner join ${orgAuth}
+          on ${orgAuth.id} = ${employeeOrgAuth.org_auth_id}
+        where ${employeeOrgAuth.employee_id} = ${employee.id}
+          and ${organizationAuthorizationCoversEmployee}
+          and ${orgAuth.status} = 'cancelled'
+      )
+    )
+  )`;
+  const hasExpiredAuthorization = sql<boolean>`(
+    exists (
+      select 1 from ${personalAuth}
+      where ${personalAuth.user_id} = ${user.id}
+        and (
+          ${personalAuth.status} = 'expired'
+          or (
+            ${personalAuth.status} = 'active'
+            and (
+              ${personalAuth.starts_at} > ${now}
+              or ${personalAuth.expires_at} < ${now}
+            )
+          )
+        )
+    )
+    or (
+      ${user.user_type} = 'employee'
+      and exists (
+        select 1
+        from ${employeeOrgAuth}
+        inner join ${orgAuth}
+          on ${orgAuth.id} = ${employeeOrgAuth.org_auth_id}
+        where ${employeeOrgAuth.employee_id} = ${employee.id}
+          and ${organizationAuthorizationCoversEmployee}
+          and (
+            ${orgAuth.status} = 'expired'
+            or (
+              ${orgAuth.status} = 'active'
+              and (
+                ${orgAuth.starts_at} > ${now}
+                or ${orgAuth.expires_at} < ${now}
+              )
+            )
+          )
+      )
+    )
+  )`;
+
+  return database
+    .select({
+      auth_edition_label: sql<AdminUserAuthEditionLabel>`case
+        when ${hasActiveAdvancedAuthorization} then 'advanced'
+        when ${hasActiveAuthorization} then 'standard'
+        when ${hasAnyAuthorization} then 'expired'
+        else 'none'
+      end`.as("auth_edition_label"),
+      auth_status: sql<AdminUserAuthStatus>`case
+        when ${hasActiveAuthorization} then 'active'
+        when ${hasExpiredAuthorization} then 'expired'
+        when ${hasCancelledAuthorization} then 'cancelled'
+        else null
+      end`.as("auth_status"),
+      user_category: sql<AdminUserCategory>`case
+        when ${user.status} = 'disabled' then 'disabled'
+        when ${user.user_type} = 'employee' then 'employee'
+        when ${hasActiveAdvancedAuthorization} then 'personal_advanced'
+        when ${hasActiveAuthorization} then 'personal_standard'
+        else 'no_auth_personal'
+      end`.as("user_category"),
+      user_id: user.id,
+    })
+    .from(user)
+    .leftJoin(employee, eq(employee.user_id, user.id))
+    .as("admin_user_effective_authorization");
 }
 
 function createAdminRoleVisibilityCondition(
@@ -601,27 +928,17 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     },
     async listUsers(query) {
       const database = getDatabase();
-      const conditions = createUserConditions(query);
+      const effectiveAuthorization =
+        createAdminUserEffectiveAuthorizationReadModel(database, new Date());
+      const conditions = createUserConditions(query, effectiveAuthorization);
       const sortColumn =
         query.sortBy === "registeredAt" || query.sortBy === "createdAt"
           ? user.created_at
           : user.updated_at;
-      const personalAuthStatusByUser = database
-        .select({
-          auth_status: sql<AdminUserAuthStatus>`case
-            when bool_or(${personalAuth.status} = 'active') then 'active'
-            when bool_or(${personalAuth.status} = 'expired') then 'expired'
-            when bool_or(${personalAuth.status} = 'cancelled') then 'cancelled'
-            else null
-          end`.as("auth_status"),
-          user_id: personalAuth.user_id,
-        })
-        .from(personalAuth)
-        .groupBy(personalAuth.user_id)
-        .as("personal_auth_status_by_user");
       const rows = await database
         .select({
-          auth_status: personalAuthStatusByUser.auth_status,
+          auth_edition_label: effectiveAuthorization.auth_edition_label,
+          auth_status: effectiveAuthorization.auth_status,
           created_at: user.created_at,
           name: user.name,
           organization_name: organization.name,
@@ -629,14 +946,15 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           phone: user.phone,
           public_id: user.public_id,
           status: user.status,
+          user_category: effectiveAuthorization.user_category,
           user_type: user.user_type,
         })
         .from(user)
         .leftJoin(employee, eq(employee.user_id, user.id))
         .leftJoin(organization, eq(organization.id, employee.organization_id))
         .leftJoin(
-          personalAuthStatusByUser,
-          eq(personalAuthStatusByUser.user_id, user.id),
+          effectiveAuthorization,
+          eq(effectiveAuthorization.user_id, user.id),
         )
         .where(and(...conditions))
         .orderBy(
@@ -648,6 +966,10 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       const [totalRow] = await database
         .select({ value: count() })
         .from(user)
+        .leftJoin(
+          effectiveAuthorization,
+          eq(effectiveAuthorization.user_id, user.id),
+        )
         .where(and(...conditions));
 
       return {
@@ -666,6 +988,8 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
               : null,
             organizationName: isCurrentEmployee ? row.organization_name : null,
             authStatus: row.auth_status,
+            authEditionLabel: row.auth_edition_label,
+            userCategory: row.user_category,
           };
         }),
         pagination: createPagination(query, totalRow?.value ?? 0),
@@ -673,6 +997,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     },
     async getUserDetail(publicId) {
       const database = getDatabase();
+      const now = new Date();
       const [userDetailRow] = await database
         .select({
           created_at: user.created_at,
@@ -703,6 +1028,21 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
 
       const personalAuthRows = await database
         .select({
+          edition: personalAuth.edition,
+          effective_edition: sql<AuthorizationEdition>`case
+            when ${personalAuth.edition} = 'advanced' then 'advanced'
+            when exists (
+              select 1
+              from ${authUpgrade}
+              where ${authUpgrade.personal_auth_id} = ${personalAuth.id}
+                and ${authUpgrade.status} = 'active'
+                and ${authUpgrade.revoked_at} is null
+                and ${authUpgrade.starts_at} <= ${now}
+                and ${authUpgrade.expires_at} >= ${now}
+                and ${authUpgrade.target_edition} = 'advanced'
+            ) then 'advanced'
+            else 'standard'
+          end`.as("effective_edition"),
           expires_at: personalAuth.expires_at,
           level: personalAuth.level,
           profession: personalAuth.profession,
@@ -722,6 +1062,21 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
               .select({
                 account_quota: orgAuth.account_quota,
                 auth_scope_type: orgAuth.auth_scope_type,
+                edition: orgAuth.edition,
+                effective_edition: sql<AuthorizationEdition>`case
+                  when ${orgAuth.edition} = 'advanced' then 'advanced'
+                  when exists (
+                    select 1
+                    from ${authUpgrade}
+                    where ${authUpgrade.org_auth_id} = ${orgAuth.id}
+                      and ${authUpgrade.status} = 'active'
+                      and ${authUpgrade.revoked_at} is null
+                      and ${authUpgrade.starts_at} <= ${now}
+                      and ${authUpgrade.expires_at} >= ${now}
+                      and ${authUpgrade.target_edition} = 'advanced'
+                  ) then 'advanced'
+                  else 'standard'
+                end`.as("effective_edition"),
                 expires_at: orgAuth.expires_at,
                 internal_org_auth_id: orgAuth.id,
                 internal_purchaser_organization_id:
@@ -824,7 +1179,17 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           usedQuota: null,
           startsAt: formatNullableDate(authorizationRow.starts_at),
           expiresAt: formatNullableDate(authorizationRow.expires_at),
-          status: authorizationRow.status,
+          status: resolveEffectiveAuthorizationSourceStatus(
+            {
+              edition: authorizationRow.effective_edition,
+              expiresAt: authorizationRow.expires_at,
+              startsAt: authorizationRow.starts_at,
+              status: authorizationRow.status,
+            },
+            now,
+          ),
+          edition: authorizationRow.edition,
+          effectiveEdition: authorizationRow.effective_edition,
           organizationPublicIds: [],
         })),
         ...organizationAuthRows.map((authorizationRow) => ({
@@ -841,13 +1206,43 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           usedQuota: authorizationRow.used_quota,
           startsAt: formatNullableDate(authorizationRow.starts_at),
           expiresAt: formatNullableDate(authorizationRow.expires_at),
-          status: authorizationRow.status,
+          status: resolveEffectiveAuthorizationSourceStatus(
+            {
+              edition: authorizationRow.effective_edition,
+              expiresAt: authorizationRow.expires_at,
+              startsAt: authorizationRow.starts_at,
+              status: authorizationRow.status,
+            },
+            now,
+          ),
+          edition: authorizationRow.edition,
+          effectiveEdition: authorizationRow.effective_edition,
           organizationPublicIds:
             scopeOrganizationPublicIdsByAuth.get(
               authorizationRow.internal_org_auth_id,
             ) ?? [],
         })),
       ];
+      const effectiveAuthorizationSummary =
+        resolveAdminUserEffectiveAuthorizationSummary({
+          accountStatus: userDetailRow.status,
+          now,
+          sources: [
+            ...personalAuthRows.map((authorizationRow) => ({
+              edition: authorizationRow.effective_edition,
+              expiresAt: authorizationRow.expires_at,
+              startsAt: authorizationRow.starts_at,
+              status: authorizationRow.status,
+            })),
+            ...organizationAuthRows.map((authorizationRow) => ({
+              edition: authorizationRow.effective_edition,
+              expiresAt: authorizationRow.expires_at,
+              startsAt: authorizationRow.starts_at,
+              status: authorizationRow.status,
+            })),
+          ],
+          userType: userDetailRow.user_type,
+        });
 
       return {
         user: {
@@ -863,7 +1258,9 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           organizationName: isCurrentEmployee
             ? userDetailRow.organization_name
             : null,
-          authStatus: authorizations[0]?.status ?? null,
+          authStatus: effectiveAuthorizationSummary.authStatus,
+          authEditionLabel: effectiveAuthorizationSummary.authEditionLabel,
+          userCategory: effectiveAuthorizationSummary.userCategory,
         },
         enterpriseBinding:
           !isCurrentEmployee ||
@@ -2132,7 +2529,12 @@ function isUndefinedTableError(error: unknown): boolean {
   return isUndefinedTableError((error as { cause?: unknown }).cause);
 }
 
-function createUserConditions(query: AdminAuthOperationListQuery): SQL[] {
+function createUserConditions(
+  query: AdminAuthOperationListQuery,
+  effectiveAuthorization: ReturnType<
+    typeof createAdminUserEffectiveAuthorizationReadModel
+  >,
+): SQL[] {
   const conditions: SQL[] = [];
 
   if (query.keyword !== null) {
@@ -2150,6 +2552,20 @@ function createUserConditions(query: AdminAuthOperationListQuery): SQL[] {
 
   if (query.status === "active" || query.status === "disabled") {
     conditions.push(eq(user.status, query.status));
+  }
+
+  const userCategory = query.userCategory ?? "all";
+
+  if (userCategory === "backend_admin") {
+    conditions.push(sql<boolean>`false`);
+  } else if (userCategory !== "all") {
+    conditions.push(eq(effectiveAuthorization.user_category, userCategory));
+  }
+
+  const authFilter = query.authFilter ?? "all";
+
+  if (authFilter !== "all") {
+    conditions.push(eq(effectiveAuthorization.auth_edition_label, authFilter));
   }
 
   return conditions;

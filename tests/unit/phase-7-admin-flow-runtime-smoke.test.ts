@@ -209,6 +209,7 @@ describe("phase 7 admin flow runtime smoke", () => {
   it("keeps the runtime user list unique by publicId when a user has multiple personal_auth rows", async () => {
     const duplicatedUserRows = [
       {
+        auth_edition_label: "expired",
         auth_status: "expired",
         created_at: now,
         name: "Dev Student",
@@ -217,9 +218,11 @@ describe("phase 7 admin flow runtime smoke", () => {
         phone: "13900000002",
         public_id: "user-dev-student",
         status: "active",
+        user_category: "no_auth_personal",
         user_type: "personal",
       },
       {
+        auth_edition_label: "advanced",
         auth_status: "active",
         created_at: now,
         name: "Dev Student",
@@ -228,11 +231,20 @@ describe("phase 7 admin flow runtime smoke", () => {
         phone: "13900000002",
         public_id: "user-dev-student",
         status: "active",
+        user_category: "personal_advanced",
         user_type: "personal",
       },
     ];
     let selectCallCount = 0;
     const mainListBuilder = {
+      as() {
+        return {
+          auth_edition_label: personalAuth.edition,
+          auth_status: personalAuth.status,
+          user_category: personalAuth.status,
+          user_id: personalAuth.user_id,
+        };
+      },
       from() {
         return mainListBuilder;
       },
@@ -266,6 +278,9 @@ describe("phase 7 admin flow runtime smoke", () => {
       from() {
         return countBuilder;
       },
+      leftJoin() {
+        return countBuilder;
+      },
       async where() {
         return [{ value: 1 }];
       },
@@ -297,8 +312,10 @@ describe("phase 7 admin flow runtime smoke", () => {
       },
       users: [
         {
+          authEditionLabel: "advanced",
           authStatus: "active",
           publicId: "user-dev-student",
+          userCategory: "personal_advanced",
         },
       ],
     });

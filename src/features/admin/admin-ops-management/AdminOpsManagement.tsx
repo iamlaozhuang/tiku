@@ -53,6 +53,8 @@ import type {
   OrganizationAdminAccountCreationRole,
   OrganizationListDto,
   AdminUserDetailDto,
+  AdminUserAuthFilter,
+  AdminUserCategory,
   AdminUserListDto,
   AdminUserPasswordResetResultDto,
   UserPhoneDisclosureReasonCode,
@@ -167,6 +169,23 @@ const userTypeOptions = [
   ["employee", "企业员工"],
 ] satisfies [UserType | "all", string][];
 
+const userCategoryOptions = [
+  ["all", "全部分类"],
+  ["no_auth_personal", "无有效授权个人"],
+  ["personal_standard", "标准版个人"],
+  ["personal_advanced", "高级版个人"],
+  ["employee", "企业员工"],
+  ["disabled", "已停用账号"],
+] satisfies [AdminUserCategory | "all", string][];
+
+const userAuthFilterOptions = [
+  ["all", "全部授权"],
+  ["none", "无授权记录"],
+  ["standard", "标准版"],
+  ["advanced", "高级版"],
+  ["expired", "已失效"],
+] satisfies [AdminUserAuthFilter, string][];
+
 const userStatusLabels = {
   active: "正常",
   disabled: "已停用",
@@ -182,6 +201,26 @@ const authStatusLabels = {
   cancelled: "已取消",
   expired: "已过期",
 } satisfies Record<AuthStatus, string>;
+
+const userCategoryLabels = {
+  backend_admin: "后台账号",
+  disabled: "已停用账号",
+  employee: "企业员工",
+  no_auth_personal: "无有效授权个人",
+  personal_advanced: "高级版个人",
+  personal_standard: "标准版个人",
+} satisfies Record<AdminUserCategory, string>;
+
+const userAuthEditionLabels = {
+  admin_not_applicable: "不适用",
+  advanced: "高级版",
+  expired: "已失效",
+  none: "无授权记录",
+  standard: "标准版",
+} satisfies Record<
+  NonNullable<AdminUserListDto["users"][number]["authEditionLabel"]>,
+  string
+>;
 
 const adminRoleLabels = {
   content_admin: "内容管理员",
@@ -234,13 +273,17 @@ const adminOpsLoadCache = new Map<string, Promise<AdminOpsLoadResult>>();
 const adminAccountPasswordRequestField = "pass" + "word";
 
 function createListSearchParams({
+  authFilter,
   keyword,
   query,
+  userCategory,
   userStatus,
   userType,
 }: {
+  authFilter: AdminUserAuthFilter;
   keyword: string;
   query: AdminListQuery;
+  userCategory: AdminUserCategory | "all";
   userStatus: string;
   userType: string;
 }) {
@@ -257,6 +300,14 @@ function createListSearchParams({
 
   if (userType !== "all") {
     searchParams.set("userType", userType);
+  }
+
+  if (userCategory !== "all") {
+    searchParams.set("userCategory", userCategory);
+  }
+
+  if (authFilter !== "all") {
+    searchParams.set("authFilter", authFilter);
   }
 
   const normalizedKeyword = keyword.trim();
@@ -560,6 +611,11 @@ export function AdminOpsManagement() {
   const [userKeyword, setUserKeyword] = useState("");
   const [userStatus, setUserStatus] = useState<UserStatus | "all">("all");
   const [userType, setUserType] = useState<UserType | "all">("all");
+  const [userCategory, setUserCategory] = useState<AdminUserCategory | "all">(
+    "all",
+  );
+  const [userAuthFilter, setUserAuthFilter] =
+    useState<AdminUserAuthFilter>("all");
   const {
     handleFilterChange,
     handlePageChange,
@@ -631,12 +687,14 @@ export function AdminOpsManagement() {
   const listQuery = useMemo(
     () =>
       createListSearchParams({
+        authFilter: userAuthFilter,
         keyword: userKeyword,
         query,
+        userCategory,
         userStatus,
         userType,
       }),
-    [query, userKeyword, userStatus, userType],
+    [query, userAuthFilter, userCategory, userKeyword, userStatus, userType],
   );
   const adminAccountListQuery = useMemo(
     () =>
@@ -695,10 +753,22 @@ export function AdminOpsManagement() {
     handleFilterChange("userType");
   }
 
+  function handleUserCategoryChange(value: AdminUserCategory | "all") {
+    setUserCategory(value);
+    handleFilterChange("userCategory");
+  }
+
+  function handleUserAuthFilterChange(value: AdminUserAuthFilter) {
+    setUserAuthFilter(value);
+    handleFilterChange("authFilter");
+  }
+
   function handleResetUserFilters() {
     setUserKeyword("");
     setUserStatus("all");
     setUserType("all");
+    setUserCategory("all");
+    setUserAuthFilter("all");
     resetUserListQuery();
   }
 
@@ -1352,7 +1422,7 @@ export function AdminOpsManagement() {
           role="tabpanel"
         >
           <AdminListToolbar
-            description="按姓名或完整手机号、账号状态和用户类型筛选；查看详情后再执行重置或启停操作。"
+            description="按姓名或完整手机号、账号状态、用户分类和有效授权版本筛选；查看详情后再执行重置或启停操作。"
             resultLabel={`共 ${usersPagination.total} 个用户`}
             title="学员与员工账号筛选"
           >
@@ -1400,6 +1470,44 @@ export function AdminOpsManagement() {
                 }
               >
                 {userTypeOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>用户分类</span>
+              <select
+                aria-label="用户分类"
+                className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+                value={userCategory}
+                onChange={(event) =>
+                  handleUserCategoryChange(
+                    event.target.value as AdminUserCategory | "all",
+                  )
+                }
+              >
+                {userCategoryOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>授权版本</span>
+              <select
+                aria-label="授权版本"
+                className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+                value={userAuthFilter}
+                onChange={(event) =>
+                  handleUserAuthFilterChange(
+                    event.target.value as AdminUserAuthFilter,
+                  )
+                }
+              >
+                {userAuthFilterOptions.map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>
@@ -1824,7 +1932,9 @@ function AdminUserListTable({
                   <td className="border-border border-b px-3 py-3 align-middle">
                     <div className="flex flex-wrap gap-2">
                       <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs">
-                        {userTypeLabels[user.userType]}
+                        {user.userCategory === undefined
+                          ? userTypeLabels[user.userType]
+                          : userCategoryLabels[user.userCategory]}
                       </span>
                       <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
                         {userStatusLabels[user.status]}
@@ -1836,9 +1946,15 @@ function AdminUserListTable({
                       {user.organizationName ?? "未绑定企业"}
                     </p>
                     <p className="text-text-muted mt-1 text-xs">
-                      {user.authStatus === null
-                        ? "无授权"
-                        : authStatusLabels[user.authStatus]}
+                      {user.authEditionLabel === undefined
+                        ? user.authStatus === null
+                          ? "无授权"
+                          : authStatusLabels[user.authStatus]
+                        : `${userAuthEditionLabels[user.authEditionLabel]}${
+                            user.authStatus === null
+                              ? ""
+                              : ` / ${authStatusLabels[user.authStatus]}`
+                          }`}
                     </p>
                   </td>
                   <td className="border-border border-b px-3 py-3 align-middle">
@@ -2702,6 +2818,9 @@ function AdminUserDetailPanel({
                     </p>
                     <p className="text-text-muted text-xs">
                       {formatProfessionLevel(authorization)} /{" "}
+                      {authorization.effectiveEdition === undefined
+                        ? null
+                        : `${userAuthEditionLabels[authorization.effectiveEdition]} / `}
                       {authStatusLabels[authorization.status]} / 购买方{" "}
                       {authorization.purchaserName ?? "个人"}
                     </p>

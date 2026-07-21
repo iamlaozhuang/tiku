@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21",
-  "objective": "Close F-0106 by classifying identity keywords so phone matching accepts only a normalized complete phone and uses equality while names remain fuzzy, requiring an enumerated business reason for every single-record reveal or copy request, and atomically enforcing a per-actor disclosure budget with the redacted audit decision on the existing audit_log boundary. Preserve masked list/detail responses, current eligible roles and no-store delivery without schema, migration, dependency or entitlement changes.",
+  "taskId": "p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21",
+  "objective": "Close F-0107 by making the production user list and detail use one effective authorization read model across personal_auth and current employee org_auth sources, including active upgrades, validity windows and disabled-account precedence; apply userCategory and authFilter before pagination/count; and expose the same explicit category and edition labels in the operations UI. Preserve existing roles, masked phone delivery, account separation and authorization entitlements without schema, migration, dependency or persistent database execution.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
@@ -10,13 +10,16 @@
     "src/server/repositories/admin-flow-runtime-repository.ts",
     "src/server/services/admin-flow-runtime.ts",
     "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-    "tests/unit/p1-phone-search-disclosure-controls.test.ts",
-    "tests/unit/phone-visibility-enforcement.test.ts",
-    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+    "tests/unit/p1-user-effective-authorization-read-model.test.ts",
     "src/server/repositories/admin-flow-runtime-repository.test.ts",
     "src/server/services/admin-flow-runtime.test.ts",
+    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+    "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
+    "tests/unit/admin-ops-summary-first-ui.test.ts",
     "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
+    "tests/unit/phone-visibility-enforcement.test.ts",
+    "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -30,8 +33,8 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "persistent database writes or migration execution",
-    "role, permission, entitlement or disclosure eligibility expansion",
+    "schema, migration or persistent database execution",
+    "role, permission, entitlement, quota or default capability expansion",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
@@ -42,27 +45,31 @@
     "src/server/repositories/admin-flow-runtime-repository.ts",
     "src/server/services/admin-flow-runtime.ts",
     "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-    "tests/unit/p1-phone-search-disclosure-controls.test.ts"
+    "tests/unit/p1-user-effective-authorization-read-model.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/phone-visibility-enforcement.test.ts",
-    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
     "src/server/repositories/admin-flow-runtime-repository.test.ts",
     "src/server/services/admin-flow-runtime.test.ts",
+    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+    "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
+    "tests/unit/admin-ops-summary-first-ui.test.ts",
     "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
+    "tests/unit/phone-visibility-enforcement.test.ts",
+    "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminOpsManagement owns the explicit user-detail reveal and copy gestures and currently sends empty POST bodies; both App Router routes delegate directly to the shared runtime handler.",
-    "routeService": "admin-flow-runtime authorizes each request and sets no-store, but currently ignores the body and appends a fixed audit after fetching the phone.",
-    "repository": "admin and user list conditions apply percent-wildcard phone matching to every keyword; getUserPhoneForDisclosure is a loose read separate from audit and has no shared disclosure budget.",
-    "schema": "Existing user, admin and audit_log tables provide exact phone identity, actor/action/time audit facts and transactional locking; this task changes no schema or migration and executes no persistent database.",
-    "tests": "Focused RED covers short numeric fragments, exact phone equality, required enumerated reasons, atomic disclosure/audit/rate decisions, no-store, redaction, copy separation and UI body propagation; direct regressions cover runtime, repository and admin operations UI.",
-    "nonClaims": "No new role or entitlement, schema/migration source or execution, real database access, dependency, Provider, external service, secret/env, deployment, PR, force-push or mechanism change."
+    "uiApi": "The production AdminOpsManagement page builds /api/v1/users query parameters and renders user category and authorization facts; the App Router route delegates directly to admin-flow-runtime.",
+    "routeService": "admin-flow-runtime authorizes ops_admin/super_admin reads but currently drops userCategory and authFilter before calling the repository.",
+    "repository": "The production list aggregates only personal_auth status, so current employees lose org_auth edition and upgrades; filters are absent before pagination/count and detail chooses authorizations[0] instead of evaluating all effective sources.",
+    "schema": "Existing personal_auth, employee, employee_org_auth, org_auth and auth_upgrade facts are sufficient for a read-only effective model. No schema/migration source or persistent database execution is required.",
+    "tests": "Focused RED will cover personal expiry plus active organization authorization, direct/upgrade advanced edition, multiple organization sources, disabled precedence, query parsing, pre-pagination filtering and explicit UI labels; direct mocks and regressions are pre-allowlisted.",
+    "requirements": "docs/01-requirements/modules/06-admin-ops.md, edition-aware authorization requirements, ADR-007, CT-REQ-046, the 2026-07-07 operations UI baseline and the local ops-users design-board row require explicit effective authorization classification while preserving service authorization.",
+    "nonClaims": "No new role, entitlement, authorization source, schema/migration, real database access, dependency, Provider, external service, secret/env, deployment, PR, force-push or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0106-phone-controls-focused",
+      "name": "f0107-effective-authorization-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -70,29 +77,31 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-phone-search-disclosure-controls.test.ts",
-        "tests/unit/phone-visibility-enforcement.test.ts",
-        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
-        "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
-      ]
-    },
-    {
-      "name": "f0106-phone-controls-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
+        "tests/unit/p1-user-effective-authorization-read-model.test.ts",
         "src/server/repositories/admin-flow-runtime-repository.test.ts",
         "src/server/services/admin-flow-runtime.test.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-        "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
+        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+        "tests/unit/phase-7-admin-flow-runtime-smoke.test.ts"
       ]
     },
     {
-      "name": "f0106-phone-controls-lint",
+      "name": "f0107-effective-authorization-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+        "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
+        "tests/unit/admin-ops-summary-first-ui.test.ts",
+        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/phone-visibility-enforcement.test.ts"
+      ]
+    },
+    {
+      "name": "f0107-effective-authorization-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -103,19 +112,17 @@
         "src/server/repositories/admin-flow-runtime-repository.ts",
         "src/server/services/admin-flow-runtime.ts",
         "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-        "tests/unit/p1-phone-search-disclosure-controls.test.ts",
-        "tests/unit/phone-visibility-enforcement.test.ts",
-        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts"
+        "tests/unit/p1-user-effective-authorization-read-model.test.ts"
       ]
     },
     {
-      "name": "f0106-phone-controls-typecheck",
+      "name": "f0107-effective-authorization-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0106-phone-controls-build",
+      "name": "f0107-effective-authorization-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -129,7 +136,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_permission_privacy_contraction_and_database_application_transaction_logic",
+    "category": "bounded_permission_effective_authorization_read_model_and_database_application_query_logic",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,

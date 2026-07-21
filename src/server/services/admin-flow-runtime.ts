@@ -33,6 +33,8 @@ import {
   type AdminAccountMutationResultDto,
   type AdminAccountPasswordResetResultDto,
   type AdminUserDetailDto,
+  type AdminUserAuthFilter,
+  type AdminUserCategory,
   type AdminUserPasswordResetResultDto,
   type AdminUserSummaryDto,
   type OrganizationAdminAccountCreationRole,
@@ -378,6 +380,8 @@ function readAdminAuthOperationListQuery(
     keyword: searchParams.get("keyword"),
     status: readAdminAuthOperationStatus(searchParams),
     userType: readAdminAuthOperationUserType(searchParams),
+    userCategory: readAdminUserCategory(searchParams),
+    authFilter: readAdminUserAuthFilter(searchParams),
   });
 }
 
@@ -444,6 +448,34 @@ function readAdminAuthOperationUserType(
   const userType = searchParams.get("userType");
 
   return userType === "personal" || userType === "employee" ? userType : "all";
+}
+
+function readAdminUserCategory(
+  searchParams: URLSearchParams,
+): AdminUserCategory | "all" {
+  const userCategory = searchParams.get("userCategory");
+
+  return userCategory === "no_auth_personal" ||
+    userCategory === "personal_standard" ||
+    userCategory === "personal_advanced" ||
+    userCategory === "employee" ||
+    userCategory === "backend_admin" ||
+    userCategory === "disabled"
+    ? userCategory
+    : "all";
+}
+
+function readAdminUserAuthFilter(
+  searchParams: URLSearchParams,
+): AdminUserAuthFilter {
+  const authFilter = searchParams.get("authFilter");
+
+  return authFilter === "none" ||
+    authFilter === "standard" ||
+    authFilter === "advanced" ||
+    authFilter === "expired"
+    ? authFilter
+    : "all";
 }
 
 function readAdminContentKnowledgeListQuery(

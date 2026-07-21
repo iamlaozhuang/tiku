@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
+  currentTaskId: p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -269,6 +269,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-metadata-truth-2026-07-21
     - p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
     - p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
+    - p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -323,6 +324,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
     - p1-remediation-rc-04-paper-metadata-truth-2026-07-21
     - p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
+    - p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -403,12 +405,89 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21: closed
     p1-remediation-rc-04-paper-metadata-truth-2026-07-21: closed
     p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21: closed
-    p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21: in_progress
+    p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21: closed
+    p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21: in_progress
 activeTasks:
+  - id: p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
+    title: User effective authorization read model
+    phase: p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0107
+    branch: fix/user-effective-authorization-read-model
+    objective: make production user list detail filters and labels use one effective personal and organization authorization read model
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0107
+    executionStage: candidate_validated_pending_external_kernel_binding
+    riskBoundary:
+      category: bounded_permission_effective_authorization_read_model_and_database_application_query_logic
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      standingCloseout: true
+    preRedImpactScan:
+      chain: AdminOpsManagement_to_users_route_to_admin_flow_runtime_to_admin_flow_repository_to_personal_auth_employee_org_auth_and_auth_upgrade
+      coreFiles: 8
+      contingencyFiles: 8
+      sameTaskAuthoritativeCallChainExpansion: 0
+      directCallerCalleeMocksFixturesReviewed: true
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      testOnlyExpansionReason: phase_7_smoke_directly_mocks_the_changed_production_user_list_repository_query_shape
+      requirements: module_06_admin_ops_plus_edition_aware_authorization_ADR_007_CT_REQ_046_and_2026_07_07_ops_users_baseline
+      confirmedResidualRootCause: production_query_drops_userCategory_and_authFilter_then_repository_aggregates_only_personal_auth_and_detail_uses_first_row_status
+    expectedAcceptance:
+      - personal_and_current_employee_organization_sources_share_one_validity_and_upgrade_aware_effective_classification
+      - userCategory_and_authFilter_apply_before_pagination_and_count
+      - expired_personal_auth_cannot_hide_active_org_auth_and_multiple_sources_resolve_deterministically
+      - disabled_account_status_remains_explicit_without_granting_effective_access
+      - list_detail_and_UI_show_the_same_category_edition_and_status_facts
+      - no_schema_migration_real_database_entitlement_expansion_dependency_Provider_or_mechanism_change
+    closeoutProjection:
+      current: candidate_validated_pending_external_kernel_binding
+      triggers: TDD_RED_then_focused_and_affected_regression_quality_and_main_thread_adversarial_review_GREEN
+      successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    validationEvidence:
+      red: 3_of_3_expected_failures_before_product_implementation
+      focused: 44_of_44_passed_across_5_files
+      affectedRegression: 58_of_58_passed_across_5_files
+      lint: pass
+      typecheck: pass
+      build: pass_99_static_pages
+      formatAndDiff: pass
+    adversarialReview:
+      status: pass_no_blocker
+      invariants: effective_personal_and_current_scoped_org_sources_use_inclusive_windows_and_active_upgrades_with_disabled_precedence
+      queryBoundary: userCategory_and_authFilter_are_applied_to_both_row_and_count_queries_before_pagination
+      securityBoundary: no_entitlement_role_schema_migration_dependency_real_database_provider_external_or_mechanism_change
+    metrics:
+      mandatoryFreshApprovals: 0_bounded_medium_standing_approval
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: running
+      mechanismOverhead: running_includes_JIT_contract_and_coordination
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
+      findingId: F-0106
+      productClosureContribution: F-0106
+      commit: 13b556920e9b5eda77d9e083baec2dd5773192c6
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: guardian-f0106-permission-tree-84dce9ca-2026-07-21
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
     title: Exact phone search and audited disclosure controls
     phase: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0106
@@ -418,60 +497,23 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-04
     findingIds:
       - F-0106
-    executionStage: candidate_frozen_ready_for_standing_closeout
-    riskBoundary:
-      category: bounded_permission_privacy_contraction_and_database_application_transaction_logic
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      schemaOrMigrationChange: false
-      persistentDatabaseExecution: false
-      authorizationOrEntitlementExpansion: false
-      realExternalCall: false
-      standingCloseout: true
-    preRedImpactScan:
-      chain: AdminOpsManagement_to_reveal_copy_routes_to_admin_flow_runtime_to_user_repository_and_existing_audit_log
-      coreFiles: 8
-      contingencyFiles: 6
-      sameTaskAuthoritativeCallChainExpansion: 0
-      directCallerCalleeMocksFixturesReviewed: true
-      testOnlyExpansion: standing-test-only-allowlist-expansion-2026-07-21_for_static_user_detail_boundary_delimiter
-      confirmedResidualRootCause: sensitive_phone_keywords_are_not_classified_and_disclosure_reason_rate_decision_phone_read_and_audit_are_not_one_command
-      atomicReason: a_phone_must_not_leave_the_authoritative_boundary_without_the_same_transaction_reserving_budget_and_recording_the_redacted_outcome
-    expectedAcceptance:
-      - short_numeric_fragments_never_match_phone_while_complete_normalized_phone_uses_equality_and_names_remain_fuzzy
-      - reveal_and_copy_require_an_enumerated_reason_and_optional_bounded_note_contract
-      - one_transaction_per_valid_disclosure_locks_actor_budget_reads_one_phone_and_records_a_redacted_success_failure_or_rate_limit_audit
-      - every_response_is_no_store_and_full_phone_never_enters_list_detail_audit_error_or_copy_response
-      - no_schema_migration_real_database_permission_expansion_dependency_Provider_or_mechanism_change
-    implementationEvidence:
-      red: initial_8_of_8_failures_plus_2_adversarial_followup_RED_for_no_store_error_boundary_and_effective_multi_role_audit_role
-      green: focused_24_of_24_affected_regression_69_of_69_and_targeted_DOM_clearance_1_of_1_passed_before_freeze
-      preliminaryQuality: exact_lint_typecheck_and_build_99_routes_passed_before_freeze
-      buildRetry: first_attempt_failed_only_on_transient_Google_Fonts_network_then_same_candidate_retry_passed_without_file_change
-      review: adversarial_pass_exact_phone_only_name_fuzzy_reason_allowlist_actor_budget_lock_atomic_redacted_audit_no_store_all_failures_copy_request_semantics_and_DOM_clearance
-    closeoutProjection:
-      current: frozen_candidate_ready_for_kernel_and_declared_validation
-      triggers: standing_approval_scope_match_then_all_declared_validation_and_commit_hook_green_without_diff_drift
-      successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup
-      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
-    metrics:
-      mandatoryFreshApprovals: 0_bounded_medium_standing_approval
-      preventableScopeMissApprovals: 0
-      candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: 18m_JIT_root_cause_TDD_implementation_and_adversarial_corrections_before_freeze
-      mechanismOverhead: 7m_contract_state_format_validation_coordination_and_one_transient_font_retry_before_closeout
-      guardSmokeChanges: 0
-    previousTaskCloseout:
-      taskId: p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
-      findingId: F-0105
-      productClosureContribution: F-0105_complete_fallback_aggregate_closure
-      commit: 481d7dbed4515c6cc95513ed403274375530342c
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    closeout:
+      commit: 13b556920e9b5eda77d9e083baec2dd5773192c6
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      approvalId: guardian-f0106-permission-tree-84dce9ca-2026-07-21
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
       worktreeCleanup: pass
+    metrics:
+      mandatoryFreshApprovals: 1_guardian_tree_binding_for_kernel
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 1
+      productValueTime: 18m_JIT_root_cause_TDD_implementation_and_adversarial_corrections_before_freeze
+      mechanismOverhead: 7m_contract_state_format_validation_coordination_and_one_transient_font_retry_before_closeout
+      guardSmokeChanges: 0
   - id: p1-remediation-rc-04-f0031-static-closure-2026-07-21
     title: F-0031 production boundary static closure
     phase: p1-remediation-rc-04-f0031-static-closure-2026-07-21

@@ -5,7 +5,8 @@ import {
   createPostgresAdminFlowRuntimeRepositories,
   isAdminAccountOrganizationBindingValid,
 } from "./admin-flow-runtime-repository";
-import { sql } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import {
   admin as adminTable,
   adminOrganization as adminOrganizationTable,
@@ -763,6 +764,7 @@ describe("admin flow runtime repository backend accounts", () => {
       [],
       [
         {
+          auth_edition_label: "advanced",
           auth_status: "active",
           created_at: registeredAt,
           name: "Retained Personal User",
@@ -771,6 +773,7 @@ describe("admin flow runtime repository backend accounts", () => {
           phone: "13900000008",
           public_id: "user-retained-public-001",
           status: "active",
+          user_category: "personal_advanced",
           user_type: "personal",
         },
       ],
@@ -795,10 +798,104 @@ describe("admin flow runtime repository backend accounts", () => {
         organizationName: null,
         organizationPublicId: null,
         publicId: "user-retained-public-001",
+        authEditionLabel: "advanced",
+        userCategory: "personal_advanced",
         userType: "personal",
       }),
     ]);
     expect(fixture.getSelectCount()).toBe(3);
+  });
+
+  it("applies effective category and edition filters to both rows and count", async () => {
+    const whereExpressions: SQL[] = [];
+    const effectiveAuthorization = {
+      auth_edition_label: sql<string>`auth_edition_label`,
+      auth_status: sql<string>`auth_status`,
+      user_category: sql<string>`user_category`,
+      user_id: userTable.id,
+    };
+    const derivedBuilder = {
+      as() {
+        return effectiveAuthorization;
+      },
+      from() {
+        return derivedBuilder;
+      },
+      leftJoin() {
+        return derivedBuilder;
+      },
+    };
+    const rowBuilder = {
+      from() {
+        return rowBuilder;
+      },
+      leftJoin() {
+        return rowBuilder;
+      },
+      where(expression: SQL) {
+        whereExpressions.push(expression);
+        return rowBuilder;
+      },
+      orderBy() {
+        return rowBuilder;
+      },
+      limit() {
+        return rowBuilder;
+      },
+      async offset() {
+        return [];
+      },
+    };
+    const countBuilder = {
+      from() {
+        return countBuilder;
+      },
+      leftJoin() {
+        return countBuilder;
+      },
+      async where(expression: SQL) {
+        whereExpressions.push(expression);
+        return [{ value: 0 }];
+      },
+    };
+    let selectCount = 0;
+    const database = {
+      select() {
+        selectCount += 1;
+
+        return selectCount === 1
+          ? derivedBuilder
+          : selectCount === 2
+            ? rowBuilder
+            : countBuilder;
+      },
+    };
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => database as never,
+    });
+
+    await repositories.userOrgAuthRepository.listUsers({
+      authFilter: "advanced",
+      keyword: null,
+      page: 1,
+      pageSize: 20,
+      sortBy: "registeredAt",
+      sortOrder: "desc",
+      status: "all",
+      userCategory: "employee",
+      userType: "all",
+    });
+
+    expect(whereExpressions).toHaveLength(2);
+    const dialect = new PgDialect();
+
+    for (const expression of whereExpressions) {
+      const rendered = dialect.sqlToQuery(expression);
+
+      expect(rendered.sql).toContain("user_category");
+      expect(rendered.sql).toContain("auth_edition_label");
+      expect(rendered.params).toEqual(["employee", "advanced"]);
+    }
   });
 
   it("keeps personal authorization but omits retained enterprise binding from user detail", async () => {
@@ -822,6 +919,8 @@ describe("admin flow runtime repository backend accounts", () => {
       ],
       [
         {
+          edition: "standard",
+          effective_edition: "advanced",
           expires_at: new Date("2027-07-16T20:00:00.000Z"),
           level: 3,
           profession: "monopoly",
@@ -842,9 +941,12 @@ describe("admin flow runtime repository backend accounts", () => {
     expect(result).toMatchObject({
       enterpriseBinding: null,
       user: {
+        authEditionLabel: "advanced",
+        authStatus: "active",
         organizationName: null,
         organizationPublicId: null,
         publicId: "user-retained-public-001",
+        userCategory: "personal_advanced",
         userType: "personal",
       },
       authorizations: [

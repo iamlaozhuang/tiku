@@ -223,6 +223,8 @@ function mockAdminOpsFetch() {
             organizationPublicId: "organization-public-001",
             organizationName: "杭州烟草",
             authStatus: "active",
+            authEditionLabel: "advanced",
+            userCategory: "employee",
           },
           enterpriseBinding: {
             employeePublicId: "employee-public-001",
@@ -260,6 +262,8 @@ function mockAdminOpsFetch() {
               organizationPublicId: "organization-public-001",
               organizationName: "杭州烟草",
               authStatus: "active",
+              authEditionLabel: "advanced",
+              userCategory: "employee",
             },
           ],
         }),
@@ -833,6 +837,8 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(screen.queryByText("sk-real-secret")).toBeNull();
     expect(screen.queryByText("admin-session-token")).toBeNull();
     expect(screen.queryByText("AI 评分 / 调用成功")).not.toBeInTheDocument();
+    expect(within(userRow).getByText("企业员工")).toBeInTheDocument();
+    expect(within(userRow).getByText("高级版 / 生效中")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "查看学员甲详情" }));
     expect(await screen.findByText("组织授权")).toBeInTheDocument();
@@ -856,6 +862,26 @@ describe("phase 9 admin ops runtime ui completion", () => {
         fetchMock.mock.calls.some(([input]) =>
           String(input).includes("status=active"),
         ),
+      ).toBe(true);
+    });
+
+    fireEvent.change(screen.getByLabelText("用户分类"), {
+      target: { value: "personal_advanced" },
+    });
+    fireEvent.change(screen.getByLabelText("授权版本"), {
+      target: { value: "advanced" },
+    });
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([input]) => {
+          const url = String(input);
+
+          return (
+            url.includes("userCategory=personal_advanced") &&
+            url.includes("authFilter=advanced")
+          );
+        }),
       ).toBe(true);
     });
 

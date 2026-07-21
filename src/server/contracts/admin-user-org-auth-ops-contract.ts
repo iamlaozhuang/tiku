@@ -226,6 +226,8 @@ export type AdminUserAuthorizationSummaryDto = {
   startsAt: string | null;
   expiresAt: string | null;
   status: AuthStatus;
+  edition?: AuthorizationEdition;
+  effectiveEdition?: AuthorizationEdition;
   organizationPublicIds: string[];
 };
 
