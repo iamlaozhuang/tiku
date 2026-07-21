@@ -45,6 +45,7 @@ export type AdminContentKnowledgeListQuery = {
   sortBy: AdminContentKnowledgeSortField;
   sortOrder: AdminContentKnowledgeSortOrder;
   keyword: string | null;
+  publicIds: string[];
   status: AdminContentKnowledgeStatus;
   profession: Profession | "all";
   level: number | null;
@@ -145,7 +146,7 @@ export type AdminKnowledgeNodeOpsListDto = {
 export function createAdminContentKnowledgeListQuery(
   overrides: Partial<AdminContentKnowledgeListQuery> = {},
 ): AdminContentKnowledgeListQuery {
-  const { keyword, ...queryOverrides } = overrides;
+  const { keyword, publicIds, ...queryOverrides } = overrides;
 
   return {
     page: 1,
@@ -162,6 +163,7 @@ export function createAdminContentKnowledgeListQuery(
     year: null,
     ...queryOverrides,
     keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,
+    publicIds: normalizePublicIds(publicIds),
   };
 }
 
@@ -169,4 +171,14 @@ function normalizeKeyword(value: string): string | null {
   const keyword = value.trim();
 
   return keyword.length === 0 ? null : keyword;
+}
+
+function normalizePublicIds(value: string[] | undefined): string[] {
+  return Array.from(
+    new Set(
+      (value ?? [])
+        .map((publicId) => publicId.trim())
+        .filter((publicId) => publicId.length > 0),
+    ),
+  ).slice(0, 100);
 }

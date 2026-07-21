@@ -773,6 +773,240 @@ export function useQuestionBindingOptions(enabled: boolean) {
   return { loadState, options };
 }
 
+type ReferenceOptionsLoadState = "loading" | "ready" | "error";
+
+function mergeByPublicId<TValue extends { publicId: string }>(
+  values: TValue[],
+): TValue[] {
+  return Array.from(
+    new Map(values.map((value) => [value.publicId, value])).values(),
+  );
+}
+
+function useQuestionReferenceOptions({
+  enabled,
+  materialPublicId,
+  knowledgeNodePublicIds,
+}: {
+  enabled: boolean;
+  materialPublicId: string | null;
+  knowledgeNodePublicIds: string[];
+}) {
+  const [materialKeyword, setMaterialKeyword] = useState("");
+  const [materialPage, setMaterialPage] = useState(1);
+  const [materials, setMaterials] = useState<MaterialDto[]>([]);
+  const [materialPagination, setMaterialPagination] = useState(
+    defaultContentPagination,
+  );
+  const [materialLoadState, setMaterialLoadState] =
+    useState<ReferenceOptionsLoadState>("loading");
+  const [knowledgeNodeKeyword, setKnowledgeNodeKeyword] = useState("");
+  const [knowledgeNodePage, setKnowledgeNodePage] = useState(1);
+  const [knowledgeNodes, setKnowledgeNodes] = useState<
+    AdminKnowledgeNodeOpsSummaryDto[]
+  >([]);
+  const [knowledgeNodePagination, setKnowledgeNodePagination] = useState(
+    defaultContentPagination,
+  );
+  const [knowledgeNodeLoadState, setKnowledgeNodeLoadState] =
+    useState<ReferenceOptionsLoadState>("loading");
+  const debouncedMaterialKeyword = useAdminListDebouncedValue(materialKeyword);
+  const debouncedKnowledgeNodeKeyword =
+    useAdminListDebouncedValue(knowledgeNodeKeyword);
+  const [materialLatestIntent] = useState(() => createAdminListLatestIntent());
+  const [knowledgeNodeLatestIntent] = useState(() =>
+    createAdminListLatestIntent(),
+  );
+  const knowledgeNodePublicIdFingerprint = knowledgeNodePublicIds.join("\n");
+
+  useEffect(() => {
+    if (!enabled) return;
+    const intent = materialLatestIntent.begin();
+
+    async function loadMaterials() {
+      setMaterialLoadState("loading");
+      const sessionToken = getStoredSessionToken();
+      if (sessionToken === null) {
+        setMaterialLoadState("error");
+        return;
+      }
+      const searchParams = new URLSearchParams({
+        page: String(materialPage),
+        pageSize: "20",
+        sortBy: "updatedAt",
+        sortOrder: "desc",
+        status: "available",
+      });
+      if (debouncedMaterialKeyword.trim() !== "") {
+        searchParams.set("keyword", debouncedMaterialKeyword.trim());
+      }
+      const exactParams = new URLSearchParams({ page: "1", pageSize: "20" });
+      if (materialPublicId !== null) {
+        exactParams.append("publicId", materialPublicId);
+      }
+
+      try {
+        const [searchResponse, exactResponse] = await Promise.all([
+          fetchAdminApi<MaterialDto[]>(
+            `/api/v1/materials?${searchParams.toString()}`,
+            sessionToken,
+          ),
+          materialPublicId === null
+            ? Promise.resolve(null)
+            : fetchAdminApi<MaterialDto[]>(
+                `/api/v1/materials?${exactParams.toString()}`,
+                sessionToken,
+              ),
+        ]);
+        if (!intent.isCurrent()) return;
+        if (
+          searchResponse.code !== 0 ||
+          searchResponse.data === null ||
+          searchResponse.pagination === undefined ||
+          (exactResponse !== null &&
+            (exactResponse.code !== 0 || exactResponse.data === null))
+        ) {
+          setMaterialLoadState("error");
+          return;
+        }
+        setMaterials(
+          mergeByPublicId([
+            ...searchResponse.data,
+            ...(exactResponse?.data ?? []),
+          ]),
+        );
+        setMaterialPagination(searchResponse.pagination);
+        setMaterialLoadState("ready");
+      } catch {
+        if (intent.isCurrent()) setMaterialLoadState("error");
+      }
+    }
+
+    void loadMaterials();
+    return () => intent.cancel();
+  }, [
+    debouncedMaterialKeyword,
+    enabled,
+    materialLatestIntent,
+    materialPage,
+    materialPublicId,
+  ]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const intent = knowledgeNodeLatestIntent.begin();
+
+    async function loadKnowledgeNodes() {
+      setKnowledgeNodeLoadState("loading");
+      const sessionToken = getStoredSessionToken();
+      if (sessionToken === null) {
+        setKnowledgeNodeLoadState("error");
+        return;
+      }
+      const exactKnowledgeNodePublicIds =
+        knowledgeNodePublicIdFingerprint === ""
+          ? []
+          : knowledgeNodePublicIdFingerprint.split("\n");
+      const searchParams = new URLSearchParams({
+        page: String(knowledgeNodePage),
+        pageSize: "20",
+        sortBy: "sortOrder",
+        sortOrder: "asc",
+        status: "active",
+      });
+      if (debouncedKnowledgeNodeKeyword.trim() !== "") {
+        searchParams.set("keyword", debouncedKnowledgeNodeKeyword.trim());
+      }
+      const exactPublicIdChunks = Array.from(
+        { length: Math.ceil(exactKnowledgeNodePublicIds.length / 100) },
+        (_, index) =>
+          exactKnowledgeNodePublicIds.slice(index * 100, (index + 1) * 100),
+      );
+
+      try {
+        const [searchResponse, ...exactResponses] = await Promise.all([
+          fetchAdminApi<{ knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[] }>(
+            `/api/v1/knowledge-nodes?${searchParams.toString()}`,
+            sessionToken,
+          ),
+          ...exactPublicIdChunks.map((publicIds) => {
+            const exactParams = new URLSearchParams({
+              page: "1",
+              pageSize: "100",
+            });
+            for (const publicId of publicIds) {
+              exactParams.append("publicId", publicId);
+            }
+            return fetchAdminApi<{
+              knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
+            }>(
+              `/api/v1/knowledge-nodes?${exactParams.toString()}`,
+              sessionToken,
+            );
+          }),
+        ]);
+        if (!intent.isCurrent()) return;
+        if (
+          searchResponse.code !== 0 ||
+          searchResponse.data === null ||
+          searchResponse.pagination === undefined ||
+          exactResponses.some(
+            (exactResponse) =>
+              exactResponse.code !== 0 || exactResponse.data === null,
+          )
+        ) {
+          setKnowledgeNodeLoadState("error");
+          return;
+        }
+        setKnowledgeNodes(
+          mergeByPublicId([
+            ...searchResponse.data.knowledgeNodes,
+            ...exactResponses.flatMap(
+              (exactResponse) => exactResponse.data?.knowledgeNodes ?? [],
+            ),
+          ]),
+        );
+        setKnowledgeNodePagination(searchResponse.pagination);
+        setKnowledgeNodeLoadState("ready");
+      } catch {
+        if (intent.isCurrent()) setKnowledgeNodeLoadState("error");
+      }
+    }
+
+    void loadKnowledgeNodes();
+    return () => intent.cancel();
+  }, [
+    debouncedKnowledgeNodeKeyword,
+    enabled,
+    knowledgeNodeLatestIntent,
+    knowledgeNodePage,
+    knowledgeNodePublicIdFingerprint,
+  ]);
+
+  return {
+    knowledgeNodeKeyword,
+    knowledgeNodeLoadState,
+    knowledgeNodePage,
+    knowledgeNodePagination,
+    knowledgeNodes,
+    materialKeyword,
+    materialLoadState,
+    materialPage,
+    materialPagination,
+    materials,
+    setKnowledgeNodeKeyword: (value: string) => {
+      setKnowledgeNodeKeyword(value);
+      setKnowledgeNodePage(1);
+    },
+    setKnowledgeNodePage,
+    setMaterialKeyword: (value: string) => {
+      setMaterialKeyword(value);
+      setMaterialPage(1);
+    },
+    setMaterialPage,
+  };
+}
+
 async function mutateAdminApi<TData>(
   path: string,
   sessionToken: string,
@@ -2407,6 +2641,23 @@ export function AdminQuestionEditorForm({
     formValues.knowledgeNodePublicIdsText,
   );
   const previewTagPublicIds = parsePublicIdList(formValues.tagPublicIdsText);
+  const referenceOptions = useQuestionReferenceOptions({
+    enabled: bindingOptionsLoadState === "ready",
+    materialPublicId: previewMaterialPublicId,
+    knowledgeNodePublicIds: previewKnowledgeNodePublicIds,
+  });
+  const resolvedBindingOptions = useMemo<QuestionBindingOptions>(
+    () => ({
+      materials: referenceOptions.materials,
+      knowledgeNodes: referenceOptions.knowledgeNodes,
+      tags: bindingOptions.tags,
+    }),
+    [
+      bindingOptions.tags,
+      referenceOptions.knowledgeNodes,
+      referenceOptions.materials,
+    ],
+  );
 
   useEffect(() => {
     onDirtyStateChange?.(dirtyState.status === "dirty");
@@ -2590,10 +2841,18 @@ export function AdminQuestionEditorForm({
         />
         <label className="grid gap-2 text-sm font-medium">
           <span className="text-text-secondary">关联材料</span>
+          <Input
+            aria-label="搜索材料"
+            placeholder="搜索材料名称"
+            value={referenceOptions.materialKeyword}
+            onChange={(event) =>
+              referenceOptions.setMaterialKeyword(event.target.value)
+            }
+          />
           <select
             aria-label="关联材料"
             className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-3 py-1 text-sm outline-none focus-visible:ring-3"
-            disabled={bindingOptionsLoadState !== "ready"}
+            disabled={referenceOptions.materialLoadState !== "ready"}
             value={formValues.materialPublicId}
             onChange={(event) =>
               setFormValues({
@@ -2604,17 +2863,36 @@ export function AdminQuestionEditorForm({
           >
             <option value="">不关联材料</option>
             {formValues.materialPublicId !== "" &&
-            !bindingOptions.materials.some(
+            !referenceOptions.materials.some(
               (material) => material.publicId === formValues.materialPublicId,
             ) ? (
-              <option value={formValues.materialPublicId}>绑定项不可用</option>
+              <option value={formValues.materialPublicId}>
+                {referenceOptions.materialLoadState === "error"
+                  ? "当前绑定（核对失败）"
+                  : "当前绑定（正在核对）"}
+              </option>
             ) : null}
-            {bindingOptions.materials.map((material) => (
-              <option key={material.publicId} value={material.publicId}>
+            {referenceOptions.materials.map((material) => (
+              <option
+                disabled={
+                  material.status === "disabled" &&
+                  formValues.materialPublicId !== material.publicId
+                }
+                key={material.publicId}
+                value={material.publicId}
+              >
                 {material.title}
+                {material.status === "disabled" ? "（已停用）" : ""}
               </option>
             ))}
           </select>
+          <ReferencePickerStatus
+            label="材料"
+            loadState={referenceOptions.materialLoadState}
+            page={referenceOptions.materialPage}
+            pagination={referenceOptions.materialPagination}
+            onPageChange={referenceOptions.setMaterialPage}
+          />
         </label>
       </div>
       <fieldset className="border-border grid gap-3 rounded-md border p-3">
@@ -2632,12 +2910,19 @@ export function AdminQuestionEditorForm({
         <div className="grid gap-3 md:grid-cols-2">
           <BusinessBindingSelector
             label="知识点"
-            options={bindingOptions.knowledgeNodes.map((knowledgeNode) => ({
+            options={referenceOptions.knowledgeNodes.map((knowledgeNode) => ({
+              disabled: knowledgeNode.knStatus === "disabled",
               label: knowledgeNode.pathName || knowledgeNode.name,
               publicId: knowledgeNode.publicId,
             }))}
+            keyword={referenceOptions.knowledgeNodeKeyword}
+            loadState={referenceOptions.knowledgeNodeLoadState}
+            page={referenceOptions.knowledgeNodePage}
+            pagination={referenceOptions.knowledgeNodePagination}
             searchLabel="搜索知识点"
             selectedPublicIds={previewKnowledgeNodePublicIds}
+            onKeywordChange={referenceOptions.setKnowledgeNodeKeyword}
+            onPageChange={referenceOptions.setKnowledgeNodePage}
             onChange={(knowledgeNodePublicIds) =>
               setFormValues({
                 ...formValues,
@@ -2664,7 +2949,7 @@ export function AdminQuestionEditorForm({
           />
         </div>
         <QuestionBindingPreview
-          bindingOptions={bindingOptions}
+          bindingOptions={resolvedBindingOptions}
           knowledgeNodePublicIds={previewKnowledgeNodePublicIds}
           materialPublicId={previewMaterialPublicId}
           tagPublicIds={previewTagPublicIds}
@@ -3208,32 +3493,111 @@ function QuestionBindingPreview({
 }
 
 type BusinessBindingOption = {
+  disabled?: boolean;
   label: string;
   publicId: string;
 };
 
+function ReferencePickerStatus({
+  label,
+  loadState,
+  page,
+  pagination,
+  onPageChange,
+}: {
+  label: string;
+  loadState: ReferenceOptionsLoadState;
+  page: number;
+  pagination: ApiPagination;
+  onPageChange: (page: number) => void;
+}) {
+  if (loadState === "loading") {
+    return <span className="text-text-muted text-xs">正在加载{label}</span>;
+  }
+  if (loadState === "error") {
+    return (
+      <span className="text-destructive text-xs" role="alert">
+        {label}选项暂不可用，请重试搜索。
+      </span>
+    );
+  }
+
+  const lastPage = Math.max(
+    1,
+    Math.ceil(pagination.total / pagination.pageSize),
+  );
+  return (
+    <span className="flex items-center justify-between gap-2 text-xs">
+      <span className="text-text-muted">
+        第 {page}/{lastPage} 页，共 {pagination.total} 项
+      </span>
+      <span className="flex gap-1">
+        <Button
+          disabled={page <= 1}
+          size="sm"
+          type="button"
+          variant="outline"
+          onClick={() => onPageChange(page - 1)}
+        >
+          上一页
+        </Button>
+        <Button
+          disabled={page >= lastPage}
+          size="sm"
+          type="button"
+          variant="outline"
+          onClick={() => onPageChange(page + 1)}
+        >
+          下一页
+        </Button>
+      </span>
+    </span>
+  );
+}
+
 function BusinessBindingSelector({
   label,
+  keyword: controlledKeyword,
+  loadState,
   options,
+  page,
+  pagination,
   searchLabel,
   selectedPublicIds,
+  onKeywordChange,
+  onPageChange,
   onChange,
 }: {
   label: string;
+  keyword?: string;
+  loadState?: ReferenceOptionsLoadState;
   options: BusinessBindingOption[];
+  page?: number;
+  pagination?: ApiPagination;
   searchLabel: string;
   selectedPublicIds: string[];
+  onKeywordChange?: (keyword: string) => void;
+  onPageChange?: (page: number) => void;
   onChange: (publicIds: string[]) => void;
 }) {
-  const [keyword, setKeyword] = useState("");
+  const [localKeyword, setLocalKeyword] = useState("");
+  const keyword = controlledKeyword ?? localKeyword;
+  const isRemote = onKeywordChange !== undefined;
   const normalizedKeyword = keyword.trim().toLocaleLowerCase();
-  const displayedOptions = options.filter((bindingOption) =>
-    bindingOption.label.toLocaleLowerCase().includes(normalizedKeyword),
-  );
-  const unavailableCount = selectedPublicIds.filter(
-    (publicId) =>
-      !options.some((bindingOption) => bindingOption.publicId === publicId),
-  ).length;
+  const displayedOptions = isRemote
+    ? options
+    : options.filter((bindingOption) =>
+        bindingOption.label.toLocaleLowerCase().includes(normalizedKeyword),
+      );
+  const unavailableCount =
+    loadState !== undefined && loadState !== "ready"
+      ? 0
+      : selectedPublicIds.filter(
+          (publicId) =>
+            !options.some(
+              (bindingOption) => bindingOption.publicId === publicId,
+            ),
+        ).length;
 
   return (
     <fieldset className="border-border grid gap-2 rounded-md border p-3">
@@ -3244,7 +3608,9 @@ function BusinessBindingSelector({
         aria-label={searchLabel}
         placeholder={`搜索${label}名称`}
         value={keyword}
-        onChange={(event) => setKeyword(event.target.value)}
+        onChange={(event) =>
+          (onKeywordChange ?? setLocalKeyword)(event.target.value)
+        }
       />
       {unavailableCount === 0 ? null : (
         <p className="text-destructive text-xs">
@@ -3252,7 +3618,7 @@ function BusinessBindingSelector({
         </p>
       )}
       <div className="max-h-36 space-y-2 overflow-y-auto">
-        {displayedOptions.length === 0 ? (
+        {loadState === "error" ? null : displayedOptions.length === 0 ? (
           <p className="text-text-muted text-xs">没有匹配的可用选项</p>
         ) : (
           displayedOptions.map((bindingOption) => (
@@ -3263,6 +3629,10 @@ function BusinessBindingSelector({
               <input
                 checked={selectedPublicIds.includes(bindingOption.publicId)}
                 className="mt-0.5 size-4"
+                disabled={
+                  bindingOption.disabled === true &&
+                  !selectedPublicIds.includes(bindingOption.publicId)
+                }
                 type="checkbox"
                 onChange={(event) =>
                   onChange(
@@ -3279,6 +3649,17 @@ function BusinessBindingSelector({
           ))
         )}
       </div>
+      {page !== undefined &&
+      pagination !== undefined &&
+      onPageChange !== undefined ? (
+        <ReferencePickerStatus
+          label={label}
+          loadState={loadState ?? "ready"}
+          page={page}
+          pagination={pagination}
+          onPageChange={onPageChange}
+        />
+      ) : null}
     </fieldset>
   );
 }

@@ -201,6 +201,7 @@ function readMaterialQuery(request: Request): Record<string, unknown> {
     subject: searchParams.get("subject") ?? undefined,
     status: searchParams.get("status") ?? undefined,
     keyword: searchParams.get("keyword") ?? undefined,
+    publicIds: searchParams.getAll("publicId"),
   };
 }
 
@@ -212,6 +213,7 @@ function readKnowledgeNodeQuery(
   const pageSize = Number(searchParams.get("pageSize"));
   const level = Number(searchParams.get("level"));
   const sortBy = searchParams.get("sortBy");
+  const status = searchParams.get("status");
 
   return createAdminContentKnowledgeListQuery({
     page: Number.isFinite(page) && page > 0 ? page : 1,
@@ -219,6 +221,8 @@ function readKnowledgeNodeQuery(
       ? pageSize
       : 20) as AdminContentKnowledgePageSize,
     keyword: searchParams.get("keyword"),
+    publicIds: searchParams.getAll("publicId"),
+    status: status === "active" || status === "disabled" ? status : "all",
     level: Number.isFinite(level) && level > 0 ? level : null,
     sortBy: ADMIN_CONTENT_KNOWLEDGE_SORT_FIELDS.includes(
       sortBy as AdminContentKnowledgeSortField,

@@ -111,13 +111,31 @@ function mockQuestionEditorFetch({
         return createJsonResponse(adminSessionPayload);
       }
       if (path.startsWith("/api/v1/materials?")) {
-        return createJsonResponse({ code: 0, message: "ok", data: [] });
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: [],
+          pagination: {
+            page: 1,
+            pageSize: 20,
+            total: 0,
+            sortBy: "updatedAt",
+            sortOrder: "desc",
+          },
+        });
       }
       if (path.startsWith("/api/v1/knowledge-nodes?")) {
         return createJsonResponse({
           code: 0,
           message: "ok",
           data: { knowledgeNodes: [] },
+          pagination: {
+            page: 1,
+            pageSize: 20,
+            total: 0,
+            sortBy: "sortOrder",
+            sortOrder: "asc",
+          },
         });
       }
       if (path === "/api/v1/tags") {

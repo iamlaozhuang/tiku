@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   normalizeCreateMaterialInput,
+  normalizeMaterialListInput,
   normalizeUpdateMaterialInput,
 } from "./material";
 
@@ -87,5 +88,16 @@ describe("material validator", () => {
       success: true,
       value: { expectedUpdatedAt: new Date("2026-05-19T02:00:00.000Z") },
     });
+  });
+
+  it("normalizes bounded exact public id filters for current binding hydration", () => {
+    expect(
+      normalizeMaterialListInput({
+        publicIds: [" material-public-101 ", "material-public-101", ""],
+      }),
+    ).toMatchObject({ publicIds: ["material-public-101"] });
+    expect(
+      normalizeMaterialListInput({ publicIds: "material-public-102" }),
+    ).toMatchObject({ publicIds: ["material-public-102"] });
   });
 });

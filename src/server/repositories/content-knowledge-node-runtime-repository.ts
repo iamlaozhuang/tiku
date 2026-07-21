@@ -107,6 +107,10 @@ function createKnowledgeNodeConditions(
     conditions.push(ilike(knowledgeNode.path_name, `%${queryInput.keyword}%`));
   }
 
+  if (queryInput.publicIds.length > 0) {
+    conditions.push(inArray(knowledgeNode.public_id, queryInput.publicIds));
+  }
+
   if (queryInput.status === "active" || queryInput.status === "disabled") {
     conditions.push(eq(knowledgeNode.kn_status, queryInput.status));
   }

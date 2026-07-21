@@ -333,7 +333,7 @@ describe("phase 9 content question material runtime", () => {
     });
     const response = await handlers.materials.collection.GET(
       new Request(
-        "http://localhost/api/v1/materials?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&keyword=case&profession=marketing&level=3&subject=theory&status=available",
+        "http://localhost/api/v1/materials?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&keyword=case&profession=marketing&level=3&subject=theory&status=available&publicId=material-public-101&publicId=material-public-102",
         { headers: { authorization: "Bearer admin-session-token" } },
       ),
     );
@@ -350,6 +350,41 @@ describe("phase 9 content question material runtime", () => {
         level: 3,
         subject: "theory",
         status: "available",
+        publicIds: ["material-public-101", "material-public-102"],
+      }),
+    );
+  });
+
+  it("forwards exact knowledge node public ids through the collection query", async () => {
+    const repositories = createRepositories();
+    let capturedQuery:
+      | Parameters<
+          typeof repositories.knowledgeNodeRepository.listKnowledgeNodes
+        >[0]
+      | null = null;
+    const originalList =
+      repositories.knowledgeNodeRepository.listKnowledgeNodes;
+    repositories.knowledgeNodeRepository.listKnowledgeNodes = async (query) => {
+      capturedQuery = query;
+      return originalList(query);
+    };
+    const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService("content_admin"),
+    });
+
+    const response = await handlers.knowledgeNodes.GET(
+      new Request(
+        "http://localhost/api/v1/knowledge-nodes?page=1&pageSize=20&status=active&publicId=knowledge-node-public-101&publicId=knowledge-node-public-102",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(capturedQuery).toEqual(
+      expect.objectContaining({
+        publicIds: ["knowledge-node-public-101", "knowledge-node-public-102"],
+        status: "active",
       }),
     );
   });

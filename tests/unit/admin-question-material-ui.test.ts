@@ -230,25 +230,36 @@ const knowledgeNodeOptionPayload = {
     knowledgeNodes: [
       {
         publicId: "knowledge-node-sampling",
+        knStatus: "active",
         name: "Sampling",
         pathName: "Marketing / Research / Sampling",
       },
       {
         publicId: "knowledge-node-costing",
+        knStatus: "active",
         name: "Costing",
         pathName: "Logistics / Costing",
       },
       {
         publicId: "knowledge-node-retail",
+        knStatus: "active",
         name: "Retail",
         pathName: "Marketing / Retail",
       },
       {
         publicId: "knowledge-node-price",
+        knStatus: "active",
         name: "Pricing",
         pathName: "Marketing / Pricing",
       },
     ],
+  },
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 4,
+    sortBy: "sortOrder",
+    sortOrder: "asc",
   },
 };
 
@@ -823,6 +834,118 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(questionForm.getByText("营销案例材料 A")).toBeInTheDocument();
     expect(questionForm.queryByText("knowledge-node-sampling")).toBeNull();
     expect(questionForm.queryByText("tag-research")).toBeNull();
+  });
+
+  it("searches and paginates question references on the server while hydrating current bindings exactly", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+    const defaultFetchImplementation = fetchMock.getMockImplementation();
+    fetchMock.mockImplementation(async (url, init) => {
+      const parsedUrl = new URL(String(url), "http://localhost");
+      if (
+        parsedUrl.pathname === "/api/v1/materials" &&
+        parsedUrl.searchParams.get("keyword") === "第 101 份材料"
+      ) {
+        return createJsonResponse({
+          ...materialPayload,
+          data: [
+            {
+              ...materialPayload.data[0],
+              publicId: "material-public-101",
+              title: "第 101 份材料",
+            },
+          ],
+          pagination: { ...materialPayload.pagination, total: 101 },
+        });
+      }
+      if (
+        parsedUrl.pathname === "/api/v1/knowledge-nodes" &&
+        parsedUrl.searchParams.get("keyword") === "第 101 个知识点"
+      ) {
+        return createJsonResponse({
+          ...knowledgeNodeOptionPayload,
+          data: {
+            knowledgeNodes: [
+              {
+                ...knowledgeNodeOptionPayload.data.knowledgeNodes[0],
+                publicId: "knowledge-node-public-101",
+                name: "第 101 个知识点",
+                pathName: "营销 / 第 101 个知识点",
+              },
+            ],
+          },
+          pagination: { ...knowledgeNodeOptionPayload.pagination, total: 101 },
+        });
+      }
+      return defaultFetchImplementation!(url, init);
+    });
+
+    render(createElement(AdminQuestionMaterialManagement));
+    const questionName = marketingQuestionReadableName;
+    fireEvent.click(
+      await screen.findByRole("button", { name: `编辑题目 ${questionName}` }),
+    );
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+
+    expect(await questionForm.findByLabelText("搜索材料")).toBeInTheDocument();
+    fireEvent.change(questionForm.getByLabelText("搜索材料"), {
+      target: { value: "第 101 份材料" },
+    });
+    fireEvent.change(questionForm.getByLabelText("搜索知识点"), {
+      target: { value: "第 101 个知识点" },
+    });
+
+    await waitFor(() => {
+      const urls = fetchMock.mock.calls.map(([url]) => String(url));
+      const parsedUrls = urls
+        .filter((url) => url.includes("?"))
+        .map((url) => new URL(url, "http://localhost"));
+      expect(
+        parsedUrls.some(
+          (url) =>
+            url.pathname === "/api/v1/materials" &&
+            url.searchParams.get("keyword") === "第 101 份材料" &&
+            url.searchParams.get("page") === "1" &&
+            url.searchParams.get("pageSize") === "20",
+        ),
+      ).toBe(true);
+      expect(
+        parsedUrls.some(
+          (url) =>
+            url.pathname === "/api/v1/knowledge-nodes" &&
+            url.searchParams.get("keyword") === "第 101 个知识点" &&
+            url.searchParams.get("page") === "1" &&
+            url.searchParams.get("pageSize") === "20",
+        ),
+      ).toBe(true);
+      expect(
+        parsedUrls.some(
+          (url) =>
+            url.pathname === "/api/v1/materials" &&
+            url.searchParams.get("publicId") === "material-marketing-001",
+        ),
+      ).toBe(true);
+      expect(
+        parsedUrls.some(
+          (url) =>
+            url.pathname === "/api/v1/knowledge-nodes" &&
+            url.searchParams.get("publicId") === "knowledge-node-sampling",
+        ),
+      ).toBe(true);
+    });
+    expect(
+      questionForm.getByRole("option", { name: "第 101 份材料" }),
+    ).toBeInTheDocument();
+    expect(
+      questionForm.getByRole("checkbox", { name: "营销 / 第 101 个知识点" }),
+    ).toBeInTheDocument();
+    expect(
+      within(questionForm.getByRole("group", { name: "知识点" })).getByRole(
+        "button",
+        { name: "下一页" },
+      ),
+    ).toBeEnabled();
+    expect(questionForm.queryByText("绑定项不可用")).toBeNull();
   });
 
   it("uses material titles and statuses to name repeated material actions", async () => {

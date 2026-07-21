@@ -326,6 +326,10 @@ function createMaterialConditions(
     );
   }
 
+  if (queryInput.publicIds.length > 0) {
+    conditions.push(inArray(material.public_id, queryInput.publicIds));
+  }
+
   return conditions;
 }
 

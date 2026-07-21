@@ -29,6 +29,7 @@ export type NormalizedMaterialListInput = NormalizedPagination & {
   subject: (typeof subjectValues)[number] | null;
   status: (typeof materialStatusValues)[number] | null;
   keyword: string | null;
+  publicIds: string[];
 };
 
 type ValidationResult<TValue> =
@@ -89,6 +90,21 @@ function normalizeQueryInteger(value: unknown): number | undefined {
   const parsedValue = Number(value);
 
   return Number.isFinite(parsedValue) ? parsedValue : undefined;
+}
+
+function normalizePublicIds(value: unknown): string[] {
+  const values = Array.isArray(value) ? value : [value];
+
+  return Array.from(
+    new Set(
+      values
+        .filter(
+          (candidate): candidate is string => typeof candidate === "string",
+        )
+        .map((candidate) => candidate.trim())
+        .filter((candidate) => candidate.length > 0),
+    ),
+  ).slice(0, 100);
 }
 
 function isProfession(
@@ -224,5 +240,6 @@ export function normalizeMaterialListInput(
     subject: isSubject(input.subject) ? input.subject : null,
     status: isMaterialStatus(input.status) ? input.status : null,
     keyword,
+    publicIds: normalizePublicIds(input.publicIds),
   };
 }
