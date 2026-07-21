@@ -236,7 +236,7 @@ export function AdminMaterialEditorPage({
               ? {
                   ...createMaterialInput(values),
                   expectedUpdatedAt: material?.updatedAt ?? "",
-                  status: "available",
+                  status: material?.status ?? "available",
                 }
               : createMaterialInput(values),
           ),

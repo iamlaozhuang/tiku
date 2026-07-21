@@ -1,19 +1,15 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-ai-task-result-history-join-2026-07-21",
-  "objective": "Close F-0170 by making the paginated AI task page the sole history window and loading draft results in one owner-scoped, unpaginated batch by those task public IDs. Preserve existing workspace, owner, generation-kind, role, redaction and formal-adoption boundaries without schema, migration, persistent database execution, Provider calls or entitlement expansion.",
+  "taskId": "p1-remediation-rc-05-content-editor-status-preservation-2026-07-21",
+  "objective": "Close F-0056 by preserving the current question or material status during ordinary editor saves and allowing a disabled question to become available only through the existing explicit publishDraft entry. Do not add lifecycle commands, change authorization, or alter repository, schema, migration, Provider or mechanism behavior.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
+    "src/features/admin/question-material-management/AdminQuestionEditorPage.tsx",
+    "src/features/admin/question-material-management/AdminMaterialEditorPage.tsx",
+    "tests/unit/admin-question-editor-route.test.ts",
+    "tests/unit/admin-material-editor-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -23,42 +19,37 @@
     "docs/05-execution-logs/**",
     "src/db/**",
     "drizzle/**",
+    "src/server/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "schema, migration or persistent database execution",
-    "new role, entitlement, authorization scope, quota or default capability",
-    "raw AI input, output, provider payload or unredacted generated content",
+    "new enable, publish, role, entitlement, authorization, quota or default capability",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts"
+    "src/features/admin/question-material-management/AdminQuestionEditorPage.tsx",
+    "src/features/admin/question-material-management/AdminMaterialEditorPage.tsx"
   ],
   "contingencyFiles": [
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
+    "tests/unit/admin-question-editor-route.test.ts",
+    "tests/unit/admin-material-editor-route.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCallers": "Content and organization AI history UIs consume generatedResult only from the existing admin history GET response; no UI change is needed.",
-    "routeService": "admin-ai-generation-local-contract-route currently applies the same page and offset independently to the all-status task set and the draft-result subset, then joins only those two windows.",
-    "repository": "The result repository and Postgres gateway need one owner/workspace/generation-kind scoped batch read by the current task page public IDs, without a second pagination window.",
-    "schema": "Existing ai_generation_task and admin_ai_generation_result task_public_id relationship is sufficient. No schema or migration source is needed.",
-    "tests": "Route tests cover mixed failed, pending, cancelled and succeeded tasks across a page boundary, late results, reversed completion order and empty pages. Repository tests cover exact task-ID, owner, workspace, generation-kind and draft-status scope in one batch.",
-    "requirements": "SC-BACKEND-LIST-CONTRACT and AI closed-loop traceability require task rows, associated results and total to describe one stable task result set. ADR-002 keeps database access in the repository and ADR-007 preserves existing role authorization.",
-    "nonClaims": "No F-0146 snapshot, F-0154 metadata, UI, schema, migration, real database, Provider, dependency, permission, deployment or mechanism change."
+    "uiApiCallers": "The two dedicated editors construct PATCH payloads. Both currently hard-code status=available; question has an existing explicit publishDraft flag, while material has no publish intent.",
+    "routeService": "Existing question and material PATCH routes validate and persist the caller-supplied status. This task changes only the trusted editor payload and does not alter route, service or repository contracts.",
+    "repository": "Current repositories already enforce expectedUpdatedAt and is_locked=false atomically, covering F-0055. No repository change is needed for F-0056.",
+    "schema": "Existing available/disabled status values are sufficient. No schema or migration source is needed.",
+    "tests": "Direct editor tests cover ordinary disabled question/material saves preserving disabled and the explicit AI-adopted question publish path still sending available.",
+    "requirements": "Question and material disablement are explicit lifecycle states; ordinary editing must not imply re-enable. Existing publishDraft is the narrow explicit question publishing intent.",
+    "nonClaims": "No new enable command, material publish flow, F-0053 binding eligibility, F-0077 recommendation command, schema, database, permission, Provider, dependency or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0170-ai-task-result-history-focused",
+      "name": "f0056-content-editor-status-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -66,38 +57,32 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
+        "tests/unit/admin-question-editor-route.test.ts",
+        "tests/unit/admin-material-editor-route.test.ts"
       ]
     },
     {
-      "name": "f0170-ai-task-result-history-lint",
+      "name": "f0056-content-editor-status-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
+        "src/features/admin/question-material-management/AdminQuestionEditorPage.tsx",
+        "src/features/admin/question-material-management/AdminMaterialEditorPage.tsx",
+        "tests/unit/admin-question-editor-route.test.ts",
+        "tests/unit/admin-material-editor-route.test.ts"
       ]
     },
     {
-      "name": "f0170-ai-task-result-history-typecheck",
+      "name": "f0056-content-editor-status-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0170-ai-task-result-history-build",
+      "name": "f0056-content-editor-status-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -105,13 +90,13 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": null,
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_read_logic_and_existing_ai_authorization",
+    "category": "low_risk_existing_content_editor_lifecycle_preservation",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,
@@ -120,7 +105,6 @@
     "dependencyOrMechanismChange": false
   },
   "applicableStandingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21",
     "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   ],
@@ -128,6 +112,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

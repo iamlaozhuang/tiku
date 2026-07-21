@@ -430,6 +430,33 @@ describe("AdminQuestionEditorPage", () => {
     });
   });
 
+  it("preserves a disabled question during an ordinary editor save", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockQuestionEditorFetch({
+      detailQuestion: { ...editableQuestion, status: "disabled" },
+    });
+
+    render(
+      createElement(AdminQuestionEditorPage, {
+        questionPublicId: "question-edit-001",
+      }),
+    );
+
+    const form = within(await screen.findByRole("form", { name: "题目表单" }));
+    fireEvent.click(form.getByRole("button", { name: "保存题目" }));
+
+    expect(await screen.findByText("题目已保存")).toBeInTheDocument();
+    const patchCall = fetchMock.mock.calls.find(
+      ([requestUrl, init]) =>
+        String(requestUrl) === "/api/v1/questions/question-edit-001" &&
+        init?.method === "PATCH",
+    );
+    expect(JSON.parse(String(patchCall?.[1]?.body))).toMatchObject({
+      expectedUpdatedAt: editableQuestion.updatedAt,
+      status: "disabled",
+    });
+  });
+
   it("blocks a locked deep link and copies only after the explicit action", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockQuestionEditorFetch({

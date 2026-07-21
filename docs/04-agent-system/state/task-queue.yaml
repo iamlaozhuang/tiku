@@ -200,8 +200,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
-  currentCandidateClusterId: P1-RC-04
+  currentTaskId: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
+  currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -418,61 +418,128 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21: closed
     p1-remediation-rc-04-organization-training-self-answer-recovery-2026-07-21: closed
     p1-remediation-rc-04-ai-paper-candidate-pagination-2026-07-21: closed
-    p1-remediation-rc-04-ai-task-result-history-join-2026-07-21: in_progress
+    p1-remediation-rc-04-ai-task-result-history-join-2026-07-21: closed
+    p1-remediation-rc-05-content-editor-status-preservation-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
-    title: AI task-result history authoritative join
-    phase: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
+  - id: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
+    title: Content editor status preservation
+    phase: p1-remediation-rc-05-content-editor-status-preservation-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0170
-    branch: fix/ai-task-result-history-join
-    objective: make the paginated AI task page authoritative and batch-load its draft results by exact task public IDs without a second pagination window
+    productClosureContribution: F-0056
+    branch: fix/content-editor-status-preservation
+    objective: preserve disabled question and material status during ordinary editor saves while retaining the existing explicit question publish-draft intent
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-    candidateRootCauseCluster: P1-RC-04
+    candidateRootCauseCluster: P1-RC-05
     findingIds:
-      - F-0170
+      - F-0056
     executionStage: candidate_validated_adversarially_reviewed_ready_for_automatic_closeout
     riskBoundary:
-      category: bounded_database_application_read_logic_and_existing_ai_authorization
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      category: low_risk_existing_content_editor_lifecycle_preservation
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: content_and_organization_history_GET_to_admin_AI_history_service_to_task_page_and_result_batch_repository_to_existing_task_result_relationship
-      coreFiles: 7
-      contingencyFiles: 4
+      chain: dedicated_question_and_material_editors_to_existing_PATCH_routes_services_repositories_and_status_columns
+      coreFiles: 5
+      contingencyFiles: 2
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      requirements: SC_BACKEND_LIST_CONTRACT_AI_generation_closed_loop_ADR_002_and_ADR_007
-      confirmedResidualRootCause: history_service_independently_pages_all_status_tasks_and_the_draft_result_subset_then_joins_only_the_two_misaligned_windows
+      requirements: question_and_material_explicit_disable_lifecycle_and_existing_publishDraft_entry
+      confirmedResidualRootCause: both_ordinary_editor_PATCH_builders_hard_code_available_instead_of_preserving_the_loaded_resource_status
     expectedAcceptance:
-      - task_page_is_the_only_paginated_history_window
-      - draft_results_are_loaded_once_by_exact_current_page_task_public_IDs_with_workspace_owner_generation_kind_and_draft_status_scope
-      - failed_pending_cancelled_and_reversed_completion_order_do_not_hide_later_success_results
-      - rows_result_associations_and_task_total_remain_one_stable_task_result_set
-      - existing_role_redaction_and_formal_adoption_boundaries_remain_unchanged
-      - no_F0146_snapshot_F0154_metadata_UI_schema_migration_real_DB_dependency_Provider_or_mechanism_change
+      - ordinary_disabled_question_save_preserves_disabled
+      - ordinary_disabled_material_save_preserves_disabled
+      - explicit_question_publishDraft_still_sends_available
+      - available_resources_remain_available_on_ordinary_save
+      - no_new_enable_publish_permission_repository_schema_database_dependency_Provider_or_mechanism_change
     closeoutProjection:
-      current: bounded_medium_risk_conditions_satisfied_candidate_validated_and_ready_for_single_kernel_commit
+      current: low_risk_conditions_satisfied_candidate_validated_and_ready_for_single_kernel_commit
       triggers: unchanged_final_index_tree_and_stable_base_origin
       successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     verificationEvidence:
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      tddRed: expected_2_status_preservation_failures_plus_1_preexisting_stale_managed_image_helper_regression
+      focusedAndAffectedRegression: pass_31_of_31_across_2_files
+      lint: pass_all_changed_product_and_test_files
+      typecheck: pass_tsc_noEmit
+      build: pass_next_build_100_static_pages
+      formatAndDiff: pass_prettier_and_git_diff_check
+      e2e: not_required_no_new_route_or_browser_interaction_contract
+      mainThreadAdversarialReview: pass_disabled_and_available_status_preservation_explicit_question_publish_only_no_material_publish_server_permission_schema_dependency_or_mechanism_change
+    metrics:
+      mandatoryFreshApprovals: 0_covered_by_low_risk_standing_approval
+      preventableScopeMissApprovals: 0
+      testOnlyExpansions: 1_existing_allowed_regression_updated_to_current_managed_upload_path_without_assertion_weakening
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: 5m_JIT_root_cause_TDD_payload_fix_and_adversarial_review
+      mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
+      findingId: F-0170
+      productClosureContribution: F-0170
+      commit: f8945a68f128daf2d96ef5c2fce11cbd9e49e4a2
+      candidateTree: f380d5bdff4ae3013f423fc5a3f855170f41a890
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
+    rc05ResidualDisposition:
+      F-0029: separate_formal_adoption_atomic_target_claim_and_draft_transaction
+      F-0053: separate_question_binding_eligibility_and_missing_material_fail_closed
+      F-0055: covered_by_current_master_expectedUpdatedAt_and_is_locked_atomic_update_with_conflict_regressions
+      F-0056: separate_current_task_content_editor_status_preservation
+      F-0074: separate_material_reference_read_model_snapshot_fact_source
+      F-0077: separate_recommendation_revision_and_candidate_state_command
+      F-0094: separate_paper_section_and_question_group_identity_management
+      F-0096: separate_residual_attachment_usage_download_and_published_lifecycle_after_upload_saga_coverage
+      F-0097: separate_exam_papers_alias_retirement_or_real_runtime_unification
+      F-0098: separate_student_snapshot_question_group_hierarchy
+      F-0155: separate_server_owned_reviewed_draft_revision_and_digest_binding
+      F-0156: separate_formal_adoption_review_state_machine_and_idempotent_command_semantics
+      F-0160: separate_learner_generation_input_constraint_snapshot
+      F-0166: bundle_with_F0167_server_owned_organization_AI_copy_command
+      F-0167: bundle_with_F0166_server_owned_organization_AI_copy_command
+  - id: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
+    title: AI task-result history authoritative join
+    phase: p1-remediation-rc-04-ai-task-result-history-join-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0170
+    branch: fix/ai-task-result-history-join
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0170
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    closeout:
+      commit: f8945a68f128daf2d96ef5c2fce11cbd9e49e4a2
+      candidateTree: f380d5bdff4ae3013f423fc5a3f855170f41a890
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
+    verificationEvidence:
       tddRed: expected_5_of_52_failures_before_batch_contract_and_authoritative_task_page_join
       focusedAndAffectedRegression: pass_64_of_64_across_4_files
       lint: pass_all_changed_product_and_test_files
       typecheck: pass_tsc_noEmit
       build: pass_next_build_100_static_pages
-      formatAndDiff: pass_prettier_with_git_diff_check_pending_final_index_freeze
-      e2e: not_required_no_UI_browser_or_external_side_effect_change
-      mainThreadAdversarialReview: pass_task_page_only_pagination_exact_scoped_batch_empty_page_no_query_mixed_status_offset_shift_reverse_result_order_dedup_redaction_and_no_permission_or_formal_content_expansion
+      fullProfile: passed_once_by_pre_commit_kernel
+      mainThreadAdversarialReview: passed_task_page_only_pagination_exact_scoped_batch_empty_page_mixed_status_offset_shift_reverse_result_order_dedup_redaction_and_no_permission_or_formal_content_expansion
     metrics:
       mandatoryFreshApprovals: 0_covered_by_bounded_medium_risk_standing_approval
       preventableScopeMissApprovals: 0
@@ -482,18 +549,6 @@ activeTasks:
       productValueTime: 5m_JIT_root_cause_TDD_batch_repository_service_join_and_adversarial_review
       mechanismOverhead: 3m_contract_state_requirement_reads_validation_and_closeout_preparation
       guardSmokeChanges: 0
-    previousTaskCloseout:
-      taskId: p1-remediation-rc-04-ai-paper-candidate-pagination-2026-07-21
-      findingId: F-0153
-      productClosureContribution: F-0153
-      commit: bd74e54f8d5a637c04a4bf791a7ef98c08c380f2
-      candidateTree: 8f7409c3430b6ba6b2b1b277bd462f8a32dd1f7c
-      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      masterOriginSync: pass
-      worktreeClean: true
-      shortBranchCleanup: pass
-      worktreeCleanup: pass
   - id: p1-remediation-rc-04-ai-paper-candidate-pagination-2026-07-21
     title: AI paper complete candidate and selected-source reads
     phase: p1-remediation-rc-04-ai-paper-candidate-pagination-2026-07-21

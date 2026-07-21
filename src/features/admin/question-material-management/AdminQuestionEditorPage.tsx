@@ -243,7 +243,9 @@ export function AdminQuestionEditorPage({
               ? {
                   ...createQuestionInput(values),
                   expectedUpdatedAt: question?.updatedAt ?? "",
-                  status: "available",
+                  status: publishDraft
+                    ? "available"
+                    : (question?.status ?? "available"),
                 }
               : createQuestionInput(values),
           ),

@@ -101,6 +101,24 @@ function mockMaterialEditorFetch({
             : { code: createCode, message: "conflict", data: null },
         );
       }
+      if (path === "/api/v1/content-images" && init?.method === "POST") {
+        return {
+          ok: true,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              contentImage: {
+                publicId: "content-image-uploaded-001",
+                contentType: "image/png",
+                fileSizeByte: 3,
+                createdAt: "2026-07-21T00:00:00.000Z",
+                url: "/api/v1/content-images/content-image-uploaded-001",
+              },
+            },
+          }),
+        } as Response;
+      }
       if (path === "/api/v1/materials/material-edit-001") {
         if (init?.method === "PATCH") {
           return createJsonResponse(
@@ -354,7 +372,19 @@ describe("AdminMaterialEditorPage", () => {
     fireEvent.click(form.getByRole("button", { name: "保存材料" }));
     expect(form.getByRole("alert")).toHaveTextContent("请输入有效材料正文");
 
-    fireEvent.click(form.getByRole("button", { name: "插入受管图片引用" }));
+    fireEvent.change(form.getByLabelText("选择材料图片"), {
+      target: {
+        files: [
+          new File([new Uint8Array([1, 2, 3])], "material.png", {
+            type: "image/png",
+          }),
+        ],
+      },
+    });
+    await form.findByText("图片已上传并插入。");
+    expect(
+      (form.getByLabelText("材料正文") as HTMLTextAreaElement).value,
+    ).toContain('data-content-image-public-id="content-image-uploaded-001"');
     fireEvent.click(form.getByRole("button", { name: "保存材料" }));
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
@@ -431,6 +461,33 @@ describe("AdminMaterialEditorPage", () => {
       "data-admin-form-dirty-state",
       "clean",
     );
+  });
+
+  it("preserves a disabled material during an ordinary editor save", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockMaterialEditorFetch({
+      detailMaterial: { ...editableMaterial, status: "disabled" },
+    });
+
+    render(
+      createElement(AdminMaterialEditorPage, {
+        materialPublicId: editableMaterial.publicId,
+      }),
+    );
+
+    const form = within(await screen.findByRole("form", { name: "材料表单" }));
+    fireEvent.click(form.getByRole("button", { name: "保存材料" }));
+
+    expect(await screen.findByText("材料已保存")).toBeInTheDocument();
+    const patchCall = fetchMock.mock.calls.find(
+      ([url, init]) =>
+        String(url) === "/api/v1/materials/material-edit-001" &&
+        init?.method === "PATCH",
+    );
+    expect(JSON.parse(String(patchCall?.[1]?.body))).toMatchObject({
+      expectedUpdatedAt: editableMaterial.updatedAt,
+      status: "disabled",
+    });
   });
 
   it("does not mount a form for a locked deep link and copies only after an explicit action", async () => {
