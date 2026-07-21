@@ -60,6 +60,7 @@ import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { MaterialDto } from "@/server/contracts/material-contract";
+import type { ContentImageResultDto } from "@/server/contracts/content-image-contract";
 import type {
   QuestionDto,
   QuestionKnowledgeRecommendationResultDto,
@@ -121,17 +122,6 @@ export type QuestionBindingOptions = {
   materials: Pick<MaterialDto, "publicId" | "title">[];
   tags: TagOptionDto[];
 };
-
-const managedMediaReferences = {
-  material: {
-    altText: "材料图片",
-    paperAssetPublicId: "paper-asset-local-material-image",
-  },
-  question: {
-    altText: "题目图片",
-    paperAssetPublicId: "paper-asset-local-question-image",
-  },
-} as const;
 
 function readContentListUrlQuery(): {
   materialDetailPublicId: string;
@@ -216,14 +206,61 @@ function createEditorEntryHref({
   return createAdminEditorHref({ publicId, resource, returnTo });
 }
 
-function createManagedPaperAssetImageMarkup({
+function createManagedContentImageMarkup({
   altText,
-  paperAssetPublicId,
+  publicId,
 }: {
   altText: string;
-  paperAssetPublicId: string;
+  publicId: string;
 }) {
-  return `<img src="/api/v1/paper-assets/${paperAssetPublicId}" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="${paperAssetPublicId}" alt="${altText}" />`;
+  return `<img src="/api/v1/content-images/${publicId}" data-content-image-public-id="${publicId}" alt="${altText}" />`;
+}
+
+type ContentImageCommand = { fingerprint: string; publicId: string };
+
+function getContentImageCommand(
+  file: File,
+  current: ContentImageCommand | null,
+): ContentImageCommand {
+  const fingerprint = [file.name, file.type, file.size, file.lastModified].join(
+    ":",
+  );
+  return current?.fingerprint === fingerprint
+    ? current
+    : { fingerprint, publicId: `content-image-command-${crypto.randomUUID()}` };
+}
+
+async function uploadManagedContentImage({
+  commandPublicId,
+  file,
+  profession,
+}: {
+  commandPublicId: string;
+  file: File;
+  profession: Profession;
+}): Promise<ContentImageResultDto> {
+  const sessionToken = getStoredSessionToken();
+  if (sessionToken === null) {
+    throw new Error("登录会话已失效，请重新登录。");
+  }
+  const formData = new FormData();
+  formData.set("commandPublicId", commandPublicId);
+  formData.set("profession", profession);
+  formData.set("file", file);
+  const response = await fetch("/api/v1/content-images", {
+    method: "POST",
+    headers: { authorization: `Bearer ${sessionToken}` },
+    body: formData,
+  });
+  const payload = (await response.json()) as {
+    code: number;
+    message: string;
+    data: ContentImageResultDto | null;
+  };
+  if (!response.ok || payload.code !== 0 || payload.data === null) {
+    throw new Error(payload.message || "图片上传失败。");
+  }
+  return payload.data;
 }
 
 type ContentLoadState = "loading" | "ready" | "unauthorized" | "error";
@@ -2340,6 +2377,11 @@ export function AdminQuestionEditorForm({
   const [formValues, setFormValues] = useState(values);
   const [formIssues, setFormIssues] = useState<ContentIntegrityIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageCommandRef = useRef<ContentImageCommand | null>(null);
+  const [imageUploadStatus, setImageUploadStatus] = useState<string | null>(
+    null,
+  );
   const [initialValuesFingerprint] = useState(() => JSON.stringify(values));
   const disabledReasonId = useId();
   const disabledReason = isSubmitting
@@ -2737,19 +2779,54 @@ export function AdminQuestionEditorForm({
         ) : null}
       </label>
       <div className="flex flex-wrap gap-2" aria-label="富文本辅助工具">
+        <input
+          ref={imageInputRef}
+          aria-label="选择题目图片"
+          className="sr-only"
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (file === undefined || formValues.profession === "") {
+              setImageUploadStatus("请先选择专业和有效图片。");
+              return;
+            }
+            if (file.size <= 0 || file.size > 5 * 1024 * 1024) {
+              setImageUploadStatus("图片必须大于 0 且不超过 5MB。");
+              return;
+            }
+            const command = getContentImageCommand(
+              file,
+              imageCommandRef.current,
+            );
+            imageCommandRef.current = command;
+            setImageUploadStatus("图片上传中…");
+            try {
+              const result = await uploadManagedContentImage({
+                commandPublicId: command.publicId,
+                file,
+                profession: formValues.profession,
+              });
+              setFormValues((current) => ({
+                ...current,
+                stemRichText: `${current.stemRichText}\n\n${createManagedContentImageMarkup({ altText: "题目图片", publicId: result.contentImage.publicId })}`,
+              }));
+              imageCommandRef.current = null;
+              setImageUploadStatus("图片已上传并插入。");
+            } catch (error) {
+              setImageUploadStatus(
+                error instanceof Error ? error.message : "图片上传失败。",
+              );
+            }
+          }}
+        />
         <Button
           type="button"
           variant="outline"
-          onClick={() =>
-            setFormValues({
-              ...formValues,
-              stemRichText: `${formValues.stemRichText}\n\n${createManagedPaperAssetImageMarkup(
-                managedMediaReferences.question,
-              )}`,
-            })
-          }
+          disabled={formValues.profession === ""}
+          onClick={() => imageInputRef.current?.click()}
         >
-          插入受管图片引用
+          上传并插入受管图片
         </Button>
         <Button
           type="button"
@@ -2765,9 +2842,14 @@ export function AdminQuestionEditorForm({
         </Button>
       </div>
       <p className="text-text-muted text-xs leading-5">
-        图片 helper 仅插入本地 paper_asset metadata 引用，不写入 object key、OCR
-        文本或完整文件内容。
+        仅支持不超过 5MB 的 JPG、PNG、GIF 或
+        WebP；保存内容前会核对受管图片真实存在。
       </p>
+      {imageUploadStatus === null ? null : (
+        <p className="text-text-secondary text-xs" role="status">
+          {imageUploadStatus}
+        </p>
+      )}
       {isOptionQuestion ? (
         <fieldset
           aria-describedby={
@@ -3284,6 +3366,11 @@ export function AdminMaterialEditorForm({
   const [formValues, setFormValues] = useState(values);
   const [formIssues, setFormIssues] = useState<ContentIntegrityIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageCommandRef = useRef<ContentImageCommand | null>(null);
+  const [imageUploadStatus, setImageUploadStatus] = useState<string | null>(
+    null,
+  );
   const [initialValuesFingerprint] = useState(() => JSON.stringify(values));
   const disabledReasonId = useId();
   const dirtyState = getAdminFormDirtyState(
@@ -3442,19 +3529,54 @@ export function AdminMaterialEditorForm({
         ) : null}
       </label>
       <div className="flex flex-wrap gap-2" aria-label="材料富文本辅助工具">
+        <input
+          ref={imageInputRef}
+          aria-label="选择材料图片"
+          className="sr-only"
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (file === undefined || formValues.profession === "") {
+              setImageUploadStatus("请先选择专业和有效图片。");
+              return;
+            }
+            if (file.size <= 0 || file.size > 5 * 1024 * 1024) {
+              setImageUploadStatus("图片必须大于 0 且不超过 5MB。");
+              return;
+            }
+            const command = getContentImageCommand(
+              file,
+              imageCommandRef.current,
+            );
+            imageCommandRef.current = command;
+            setImageUploadStatus("图片上传中…");
+            try {
+              const result = await uploadManagedContentImage({
+                commandPublicId: command.publicId,
+                file,
+                profession: formValues.profession,
+              });
+              setFormValues((current) => ({
+                ...current,
+                contentRichText: `${current.contentRichText}\n\n${createManagedContentImageMarkup({ altText: "材料图片", publicId: result.contentImage.publicId })}`,
+              }));
+              imageCommandRef.current = null;
+              setImageUploadStatus("图片已上传并插入。");
+            } catch (error) {
+              setImageUploadStatus(
+                error instanceof Error ? error.message : "图片上传失败。",
+              );
+            }
+          }}
+        />
         <Button
           type="button"
           variant="outline"
-          onClick={() =>
-            setFormValues({
-              ...formValues,
-              contentRichText: `${formValues.contentRichText}\n\n${createManagedPaperAssetImageMarkup(
-                managedMediaReferences.material,
-              )}`,
-            })
-          }
+          disabled={formValues.profession === ""}
+          onClick={() => imageInputRef.current?.click()}
         >
-          插入受管图片引用
+          上传并插入受管图片
         </Button>
         <Button
           type="button"
@@ -3470,9 +3592,14 @@ export function AdminMaterialEditorForm({
         </Button>
       </div>
       <p className="text-text-muted text-xs leading-5">
-        图片 helper 仅插入本地 paper_asset metadata 引用，不写入 object key、OCR
-        文本或完整文件内容。
+        仅支持不超过 5MB 的 JPG、PNG、GIF 或
+        WebP；保存内容前会核对受管图片真实存在。
       </p>
+      {imageUploadStatus === null ? null : (
+        <p className="text-text-secondary text-xs" role="status">
+          {imageUploadStatus}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         <Button
           aria-describedby={

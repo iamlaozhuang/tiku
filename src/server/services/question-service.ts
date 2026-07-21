@@ -22,6 +22,8 @@ import {
   normalizeQuestionListInput,
   normalizeUpdateQuestionInput,
 } from "../validators/question";
+import { parseManagedContentImageReferences } from "@/lib/content-integrity";
+import type { ContentImageRepository } from "../repositories/content-image-repository";
 
 export type QuestionService = {
   listQuestions(
@@ -50,6 +52,10 @@ export type QuestionCreationOptions = {
 
 export type QuestionServiceOptions = {
   mutationContext?: ContentMutationContext;
+  contentImageRepository?: Pick<
+    ContentImageRepository,
+    "findExistingContentImagePublicIds"
+  >;
 };
 
 const INVALID_QUESTION_INPUT_CODE = 422202;
@@ -70,6 +76,28 @@ function createQuestionNotFoundResponse(): ApiResponse<null> {
     QUESTION_NOT_FOUND_CODE,
     "Question does not exist.",
   );
+}
+
+async function hasExistingContentImages(
+  richTexts: string[],
+  repository: QuestionServiceOptions["contentImageRepository"],
+): Promise<boolean> {
+  const publicIds = [
+    ...new Set(
+      richTexts.flatMap(
+        (value) => parseManagedContentImageReferences(value).publicIds,
+      ),
+    ),
+  ];
+  if (publicIds.length === 0) {
+    return true;
+  }
+  if (repository === undefined) {
+    return false;
+  }
+  const existing =
+    await repository.findExistingContentImagePublicIds(publicIds);
+  return new Set(existing).size === publicIds.length;
 }
 
 export function createQuestionService(
@@ -101,6 +129,22 @@ export function createQuestionService(
         return createInvalidQuestionInputResponse();
       }
 
+      if (
+        !(await hasExistingContentImages(
+          [
+            questionInput.value.stemRichText,
+            questionInput.value.standardAnswerRichText,
+            questionInput.value.analysisRichText,
+            ...questionInput.value.questionOptions.map(
+              (option) => option.contentRichText,
+            ),
+          ],
+          options.contentImageRepository,
+        ))
+      ) {
+        return createInvalidQuestionInputResponse();
+      }
+
       const question = await questionRepository.createQuestion(
         questionInput.value,
         options.mutationContext,
@@ -125,6 +169,22 @@ export function createQuestionService(
       const questionInput = normalizeUpdateQuestionInput(input);
 
       if (!questionInput.success) {
+        return createInvalidQuestionInputResponse();
+      }
+
+      if (
+        !(await hasExistingContentImages(
+          [
+            questionInput.value.stemRichText,
+            questionInput.value.standardAnswerRichText,
+            questionInput.value.analysisRichText,
+            ...questionInput.value.questionOptions.map(
+              (option) => option.contentRichText,
+            ),
+          ],
+          options.contentImageRepository,
+        ))
+      ) {
         return createInvalidQuestionInputResponse();
       }
 

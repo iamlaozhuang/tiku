@@ -19,6 +19,8 @@ import {
   normalizeMaterialListInput,
   normalizeUpdateMaterialInput,
 } from "../validators/material";
+import { parseManagedContentImageReferences } from "@/lib/content-integrity";
+import type { ContentImageRepository } from "../repositories/content-image-repository";
 
 export type MaterialService = {
   listMaterials(
@@ -42,6 +44,10 @@ export type MaterialService = {
 
 export type MaterialServiceOptions = {
   mutationContext?: ContentMutationContext;
+  contentImageRepository?: Pick<
+    ContentImageRepository,
+    "findExistingContentImagePublicIds"
+  >;
 };
 
 const INVALID_MATERIAL_INPUT_CODE = 422201;
@@ -62,6 +68,22 @@ function createMaterialNotFoundResponse(): ApiResponse<null> {
     MATERIAL_NOT_FOUND_CODE,
     "Material does not exist.",
   );
+}
+
+async function hasExistingContentImages(
+  richText: string,
+  repository: MaterialServiceOptions["contentImageRepository"],
+): Promise<boolean> {
+  const publicIds = parseManagedContentImageReferences(richText).publicIds;
+  if (publicIds.length === 0) {
+    return true;
+  }
+  if (repository === undefined) {
+    return false;
+  }
+  const existing =
+    await repository.findExistingContentImagePublicIds(publicIds);
+  return new Set(existing).size === publicIds.length;
 }
 
 export function createMaterialService(
@@ -93,6 +115,15 @@ export function createMaterialService(
         return createInvalidMaterialInputResponse();
       }
 
+      if (
+        !(await hasExistingContentImages(
+          materialInput.value.contentRichText,
+          options.contentImageRepository,
+        ))
+      ) {
+        return createInvalidMaterialInputResponse();
+      }
+
       const material = await materialRepository.createMaterial(
         materialInput.value,
         options.mutationContext,
@@ -116,6 +147,15 @@ export function createMaterialService(
       const materialInput = normalizeUpdateMaterialInput(input);
 
       if (!materialInput.success) {
+        return createInvalidMaterialInputResponse();
+      }
+
+      if (
+        !(await hasExistingContentImages(
+          materialInput.value.contentRichText,
+          options.contentImageRepository,
+        ))
+      ) {
         return createInvalidMaterialInputResponse();
       }
 

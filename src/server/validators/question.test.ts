@@ -81,7 +81,7 @@ describe("question validator", () => {
       normalizeCreateQuestionInput(
         createObjectiveQuestionInput({
           stemRichText:
-            '<img src="/api/v1/paper-assets/paper-asset-public-1" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="paper-asset-public-1" alt="流程示意图" />',
+            '<img src="/api/v1/content-images/content-image-public-1" data-content-image-public-id="content-image-public-1" alt="流程示意图" />',
         }),
       ),
     ).toMatchObject({ success: true });

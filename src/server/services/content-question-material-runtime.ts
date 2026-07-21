@@ -33,6 +33,10 @@ import {
   type QuestionRepository,
 } from "../repositories/question-repository";
 import {
+  createPostgresContentImageRepository,
+  type ContentImageRepository,
+} from "../repositories/content-image-repository";
+import {
   createPostgresTagRepository,
   type TagRepository,
 } from "../repositories/tag-repository";
@@ -79,6 +83,10 @@ export type ContentQuestionMaterialRuntimeRepositories = {
   auditLogRepository: ContentAuditLogRepository;
   aiCallLogRepository?: ContentAiCallLogRepository;
   knowledgeRecommendationRepository?: KnowledgeRecommendationRuntimeRepository;
+  contentImageRepository?: Pick<
+    ContentImageRepository,
+    "findExistingContentImagePublicIds"
+  >;
 };
 
 export type ContentQuestionMaterialRuntimeOptions = {
@@ -246,6 +254,7 @@ function createDefaultRepositories(): ContentQuestionMaterialRuntimeRepositories
     aiCallLogRepository: adminAiAuditLogRepositories,
     knowledgeRecommendationRepository:
       createPostgresKnowledgeRecommendationRuntimeRepository(),
+    contentImageRepository: createPostgresContentImageRepository(),
   };
 }
 
@@ -458,6 +467,7 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
     actionType?: string,
   ) {
     return createQuestionService(repositories.questionRepository, {
+      contentImageRepository: repositories.contentImageRepository,
       mutationContext: {
         actorPublicId: actor.publicId,
         ...(request !== undefined && actionType !== undefined
@@ -481,6 +491,7 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
     actionType?: string,
   ) {
     return createMaterialService(repositories.materialRepository, {
+      contentImageRepository: repositories.contentImageRepository,
       mutationContext: {
         actorPublicId: actor.publicId,
         ...(request !== undefined && actionType !== undefined

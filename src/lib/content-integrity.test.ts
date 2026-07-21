@@ -6,6 +6,7 @@ import {
   hasMeaningfulRichText,
   type QuestionIntegrityInput,
 } from "./content-integrity";
+import * as contentIntegrity from "./content-integrity";
 
 function createValidQuestionIntegrityInput(
   overrides: Partial<QuestionIntegrityInput> = {},
@@ -45,9 +46,9 @@ describe("content integrity", () => {
     },
   );
 
-  it("accepts only accessible managed images whose metadata and source agree", () => {
+  it("accepts only accessible managed content_image references whose ID and source agree", () => {
     const validImage =
-      '<img src="/api/v1/paper-assets/paper-asset-public-1" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="paper-asset-public-1" alt="流程图" />';
+      '<img src="/api/v1/content-images/content-image-public-1" data-content-image-public-id="content-image-public-1" alt="流程图" />';
 
     expect(hasMeaningfulRichText(validImage)).toBe(true);
     expect(
@@ -56,19 +57,53 @@ describe("content integrity", () => {
     expect(
       hasMeaningfulRichText(
         validImage.replace(
-          "/api/v1/paper-assets/paper-asset-public-1",
-          "/api/v1/paper-assets/paper-asset-other",
+          "/api/v1/content-images/content-image-public-1",
+          "/api/v1/content-images/content-image-other",
         ),
       ),
     ).toBe(false);
     expect(
       hasMeaningfulRichText(
         validImage.replaceAll(
-          "paper-asset-public-1",
-          "../paper-asset-public-1",
+          "content-image-public-1",
+          "../content-image-public-1",
         ),
       ),
     ).toBe(false);
+  });
+
+  it("classifies every image and rejects external, legacy, malformed or mixed references", () => {
+    const parseManagedContentImageReferences = (
+      contentIntegrity as unknown as {
+        parseManagedContentImageReferences?: (value: string) => unknown;
+      }
+    ).parseManagedContentImageReferences;
+
+    expect(
+      parseManagedContentImageReferences?.(
+        '<p>正文</p><img src="/api/v1/content-images/content-image-a" data-content-image-public-id="content-image-a" alt="图 A" /><img src="/api/v1/content-images/content-image-a" data-content-image-public-id="content-image-a" alt="图 A" />',
+      ),
+    ).toEqual({ publicIds: ["content-image-a"], valid: true });
+    expect(
+      parseManagedContentImageReferences?.(
+        '<p>正文</p><img src="https://tracker.example/pixel.png" alt="外链" />',
+      ),
+    ).toEqual({ publicIds: [], valid: false });
+    expect(
+      parseManagedContentImageReferences?.(
+        '<img src="/api/v1/paper-assets/paper-asset-public-1" data-paper-asset-public-id="paper-asset-public-1" alt="旧引用" />',
+      ),
+    ).toEqual({ publicIds: [], valid: false });
+    expect(
+      parseManagedContentImageReferences?.(
+        '<img src="/api/v1/content-images/content-image-a" data-content-image-public-id="content-image-b" alt="错配" />',
+      ),
+    ).toEqual({ publicIds: [], valid: false });
+    expect(
+      parseManagedContentImageReferences?.(
+        "<table><tr><td>正常表格</td></tr></table>",
+      ),
+    ).toEqual({ publicIds: [], valid: true });
   });
 
   it("distinguishes empty table markup from table content", () => {

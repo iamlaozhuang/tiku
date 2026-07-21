@@ -88,6 +88,41 @@ function createRepository(
 }
 
 describe("material service", () => {
+  it("fails closed when a referenced content_image does not exist", async () => {
+    let wrote = false;
+    const service = createMaterialService(
+      createRepository({
+        async createMaterial(input) {
+          wrote = true;
+          return createMaterial({ content_rich_text: input.contentRichText });
+        },
+      }),
+      {
+        contentImageRepository: {
+          async findExistingContentImagePublicIds() {
+            return [];
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.createMaterial({
+        title: "受管图片材料",
+        contentRichText:
+          '<img src="/api/v1/content-images/content-image-missing" data-content-image-public-id="content-image-missing" alt="现场照片" />',
+        profession: "logistics",
+        level: 4,
+        subject: "skill",
+      }),
+    ).resolves.toEqual({
+      code: 422201,
+      message: "Invalid material input.",
+      data: null,
+    });
+    expect(wrote).toBe(false);
+  });
+
   it("returns a stable conflict when the optimistic update loses the race", async () => {
     const service = createMaterialService(
       createRepository({

@@ -61,6 +61,12 @@ glossary:
     scope: all
     notes: 绑定在试卷上的原始 PDF/Word 附件
 
+  content_image:
+    chinese: 富文本图片
+    abbr: null
+    scope: all
+    notes: 题目、材料、解析和答案富文本引用的受管图片；不得与 paper_asset 混用
+
   material:
     chinese: 材料
     abbr: mat

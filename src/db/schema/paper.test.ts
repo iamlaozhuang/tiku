@@ -28,6 +28,55 @@ function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
 }
 
 describe("paper schema question_type enum", () => {
+  it("persists managed content_image metadata and its resumable upload operation independently from paper_asset", () => {
+    const schema = paperSchema as unknown as Record<string, unknown>;
+    const contentImage = schema.contentImage;
+    const uploadOperation = schema.contentImageUploadOperation;
+
+    expect(contentImage).toBeDefined();
+    expect(uploadOperation).toBeDefined();
+    expect(schema.contentImageUploadOperationStatusValues).toEqual([
+      "pending",
+      "file_stored",
+      "completed",
+      "failed",
+    ]);
+    expect(getTableName(contentImage as never)).toBe("content_image");
+    expect(getColumnNames(contentImage as never)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "object_key",
+        "content_type",
+        "file_size_byte",
+        "file_hash",
+        "created_by_admin_id",
+        "created_at",
+      ]),
+    );
+    expect(getIndexNames(contentImage as never)).toEqual(
+      expect.arrayContaining([
+        "udx_content_image_public_id",
+        "idx_content_image_file_hash",
+      ]),
+    );
+    expect(getTableName(uploadOperation as never)).toBe(
+      "content_image_upload_operation",
+    );
+    expect(getColumnNames(uploadOperation as never)).toEqual(
+      expect.arrayContaining([
+        "content_image_id",
+        "content_image_public_id",
+        "idempotency_key_hash",
+        "request_fingerprint",
+        "operation_status",
+        "last_failure_message_digest",
+        "file_stored_at",
+        "completed_at",
+      ]),
+    );
+  });
+
   it("persists a resumable paper_asset upload operation", () => {
     const uploadOperation = (paperSchema as unknown as Record<string, unknown>)
       .paperAssetUploadOperation;

@@ -100,29 +100,48 @@ function readHtmlAttribute(attributes: string, attributeName: string) {
   return match === null ? null : decodeHtmlEntities(match[1] ?? match[2] ?? "");
 }
 
-function hasAccessibleManagedImage(value: string): boolean {
+export type ManagedContentImageReferenceResult = {
+  publicIds: string[];
+  valid: boolean;
+};
+
+export function parseManagedContentImageReferences(
+  value: string,
+): ManagedContentImageReferenceResult {
   const imagePattern = /<img\b([^>]*)>/giu;
   const publicIdPattern = /^[a-z][a-z0-9-]{2,}$/u;
+  const publicIds = new Set<string>();
+  const imageMatches = Array.from(value.matchAll(imagePattern));
 
-  return Array.from(value.matchAll(imagePattern)).some((imageMatch) => {
+  for (const imageMatch of imageMatches) {
     const attributes = imageMatch[1] ?? "";
     const altText = readHtmlAttribute(attributes, "alt");
-    const boundary = readHtmlAttribute(attributes, "data-paper-asset-boundary");
-    const paperAssetPublicId = readHtmlAttribute(
+    const contentImagePublicId = readHtmlAttribute(
       attributes,
-      "data-paper-asset-public-id",
+      "data-content-image-public-id",
     );
     const source = readHtmlAttribute(attributes, "src");
 
-    return (
-      boundary === "metadata-only" &&
-      paperAssetPublicId !== null &&
-      publicIdPattern.test(paperAssetPublicId) &&
-      source === `/api/v1/paper-assets/${paperAssetPublicId}` &&
-      altText !== null &&
-      getMeaningfulPlainText(altText).length > 0
-    );
-  });
+    if (
+      contentImagePublicId === null ||
+      !publicIdPattern.test(contentImagePublicId) ||
+      source !== `/api/v1/content-images/${contentImagePublicId}` ||
+      altText === null ||
+      getMeaningfulPlainText(altText).length === 0
+    ) {
+      return { publicIds: [], valid: false };
+    }
+
+    publicIds.add(contentImagePublicId);
+  }
+
+  return { publicIds: Array.from(publicIds), valid: true };
+}
+
+function hasAccessibleManagedImage(value: string): boolean {
+  const references = parseManagedContentImageReferences(value);
+
+  return references.valid && references.publicIds.length > 0;
 }
 
 export function hasMeaningfulRichText(value: string): boolean {
@@ -157,6 +176,12 @@ export function getMaterialIntegrityIssues(
     });
   } else if (!hasMeaningfulRichText(input.contentRichText)) {
     issues.push({ field: "contentRichText", message: "请输入有效材料正文。" });
+  }
+  if (!parseManagedContentImageReferences(input.contentRichText).valid) {
+    issues.push({
+      field: "contentRichText",
+      message: "材料正文只能引用有效的受管富文本图片。",
+    });
   }
 
   return issues;
@@ -232,13 +257,25 @@ export function getQuestionIntegrityIssues(
   } else if (input.stemRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH) {
     addIssue("stemRichText", "题干超过 10000 字符，不能保存。");
   }
+  if (!parseManagedContentImageReferences(input.stemRichText).valid) {
+    addIssue("stemRichText", "题干只能引用有效的受管富文本图片。");
+  }
   if (!hasMeaningfulRichText(input.standardAnswerRichText)) {
     addIssue("standardAnswerRichText", "请输入有效标准答案或参考答案。");
+  }
+  if (!parseManagedContentImageReferences(input.standardAnswerRichText).valid) {
+    addIssue(
+      "standardAnswerRichText",
+      "标准答案只能引用有效的受管富文本图片。",
+    );
   }
   if (!hasMeaningfulRichText(input.analysisRichText)) {
     addIssue("analysisRichText", "请输入有效老师解析。");
   } else if (input.analysisRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH) {
     addIssue("analysisRichText", "解析超过 10000 字符，不能保存。");
+  }
+  if (!parseManagedContentImageReferences(input.analysisRichText).valid) {
+    addIssue("analysisRichText", "老师解析只能引用有效的受管富文本图片。");
   }
 
   const isOptionQuestion = [
@@ -268,6 +305,15 @@ export function getQuestionIntegrityIssues(
       )
     ) {
       addIssue("questionOptions", "每个选项都必须包含有效内容。");
+    }
+    if (
+      input.questionOptions.some(
+        (questionOption) =>
+          !parseManagedContentImageReferences(questionOption.contentRichText)
+            .valid,
+      )
+    ) {
+      addIssue("questionOptions", "选项只能引用有效的受管富文本图片。");
     }
 
     const correctLabels = input.questionOptions

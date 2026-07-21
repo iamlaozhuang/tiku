@@ -147,6 +147,63 @@ function createRepository(
 }
 
 describe("question service", () => {
+  it("fails closed before writing when a referenced content_image does not exist", async () => {
+    let wrote = false;
+    const service = createQuestionService(
+      createRepository({
+        async createQuestion() {
+          wrote = true;
+          return createQuestion();
+        },
+      }),
+      {
+        contentImageRepository: {
+          async findExistingContentImagePublicIds() {
+            return [];
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.createQuestion({
+        questionType: "single_choice",
+        profession: "logistics",
+        level: 4,
+        subject: "theory",
+        stemRichText:
+          '<img src="/api/v1/content-images/content-image-missing" data-content-image-public-id="content-image-missing" alt="流程图" />',
+        analysisRichText: "<p>解析</p>",
+        standardAnswerRichText: "<p>A</p>",
+        multiChoiceRule: "all_correct_only",
+        scoringMethod: "auto_match",
+        materialPublicId: null,
+        questionOptions: [
+          {
+            label: "A",
+            contentRichText: "<p>正确</p>",
+            isCorrect: true,
+            sortOrder: 1,
+          },
+          {
+            label: "B",
+            contentRichText: "<p>错误</p>",
+            isCorrect: false,
+            sortOrder: 2,
+          },
+        ],
+        scoringPoints: [],
+        knowledgeNodePublicIds: [],
+        tagPublicIds: [],
+      }),
+    ).resolves.toEqual({
+      code: 422202,
+      message: "Invalid question input.",
+      data: null,
+    });
+    expect(wrote).toBe(false);
+  });
+
   it("returns a stable conflict when the optimistic update loses the race", async () => {
     const service = createQuestionService(
       createRepository({

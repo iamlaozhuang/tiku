@@ -68,6 +68,21 @@ function isSafeUrl(value: string | null): value is string {
   );
 }
 
+function readManagedContentImageSource(element: Element): string | null {
+  const publicId = element.getAttribute("data-content-image-public-id");
+  const source = element.getAttribute("src");
+
+  if (
+    publicId === null ||
+    !/^[a-z][a-z0-9-]{2,}$/u.test(publicId) ||
+    source !== `/api/v1/content-images/${publicId}`
+  ) {
+    return null;
+  }
+
+  return source;
+}
+
 export function getStudentRichTextPlainText(value: string): string {
   return value
     .replace(/<(script|style|iframe|object|embed|form)[\s\S]*?<\/\1>/giu, "")
@@ -158,10 +173,10 @@ function renderRichTextNode(
     case "i":
       return <em key={key}>{children}</em>;
     case "img": {
-      const src = element.getAttribute("src");
+      const src = readManagedContentImageSource(element);
       const alt = element.getAttribute("alt") ?? "";
 
-      return isSafeUrl(src) ? (
+      return src !== null && alt.trim().length > 0 ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={key}

@@ -77,6 +77,12 @@ export const paperAssetUploadOperationStatusValues = [
   "completed",
   "failed",
 ] as const;
+export const contentImageUploadOperationStatusValues = [
+  "pending",
+  "file_stored",
+  "completed",
+  "failed",
+] as const;
 
 export const subjectEnum = pgEnum("subject", subjectValues);
 export const questionTypeEnum = pgEnum("question_type", questionTypeValues);
@@ -102,6 +108,10 @@ export const paperAttachmentUsageEnum = pgEnum(
 export const paperAssetUploadOperationStatusEnum = pgEnum(
   "paper_asset_upload_operation_status",
   paperAssetUploadOperationStatusValues,
+);
+export const contentImageUploadOperationStatusEnum = pgEnum(
+  "content_image_upload_operation_status",
+  contentImageUploadOperationStatusValues,
 );
 
 export const material = pgTable(
@@ -535,6 +545,72 @@ export const paperAssetUploadOperation = pgTable(
       table.paper_asset_id,
     ),
     index("idx_paper_asset_upload_operation_status_updated_at").on(
+      table.operation_status,
+      table.updated_at,
+    ),
+  ],
+);
+
+export const contentImage = pgTable(
+  "content_image",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    profession: professionEnum("profession").notNull(),
+    object_key: text("object_key").notNull(),
+    content_type: text("content_type").notNull(),
+    file_size_byte: bigint("file_size_byte", { mode: "number" }).notNull(),
+    file_hash: text("file_hash").notNull(),
+    created_by_admin_id: adminIdColumn("created_by_admin_id"),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_content_image_public_id").on(table.public_id),
+    index("idx_content_image_file_hash").on(table.file_hash),
+  ],
+);
+
+export const contentImageUploadOperation = pgTable(
+  "content_image_upload_operation",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    actor_admin_id: adminIdColumn("actor_admin_id"),
+    content_image_id: bigint("content_image_id", { mode: "number" }).references(
+      () => contentImage.id,
+      { onDelete: "set null" },
+    ),
+    content_image_public_id: text("content_image_public_id").notNull(),
+    idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    request_fingerprint: text("request_fingerprint").notNull(),
+    profession: professionEnum("profession").notNull(),
+    object_key: text("object_key").notNull(),
+    content_type: text("content_type").notNull(),
+    file_size_byte: bigint("file_size_byte", { mode: "number" }).notNull(),
+    file_hash: text("file_hash").notNull(),
+    operation_status: contentImageUploadOperationStatusEnum("operation_status")
+      .default("pending")
+      .notNull(),
+    last_failure_message_digest: text("last_failure_message_digest"),
+    file_stored_at: nullableTimestampColumn("file_stored_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_content_image_upload_operation_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_content_image_upload_operation_idempotency_key_hash").on(
+      table.idempotency_key_hash,
+    ),
+    uniqueIndex(
+      "udx_content_image_upload_operation_content_image_public_id",
+    ).on(table.content_image_public_id),
+    uniqueIndex("udx_content_image_upload_operation_content_image_id").on(
+      table.content_image_id,
+    ),
+    index("idx_content_image_upload_operation_status_updated_at").on(
       table.operation_status,
       table.updated_at,
     ),

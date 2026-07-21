@@ -1,17 +1,46 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21",
-  "objective": "Close the remaining F-0049 race by moving the active-organization recheck under the existing shared organization-scope lock and into the same transaction as the shared account-phone identity lock, account writes and redacted success audit. Preserve stable conflict/not-found responses and failed audits without expanding roles, permissions, entitlement, schema or API capability.",
+  "taskId": "p1-remediation-rc-04-managed-rich-text-image-2026-07-21",
+  "objective": "Close F-0052 atomically by replacing fake paper_asset rich-text placeholders with durable managed content_image upload operations, validating every question/material image reference as an existing managed image, rejecting external or malformed image sources, and serving authenticated image bytes with the stored content type. Preserve existing content-admin mutation authority, question/material contracts, snapshots and non-image rich text behavior.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/admin-flow-runtime-repository.test.ts",
-    "src/server/repositories/account-phone-identity-lock.test.ts",
-    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
+    "docs/03-standards/glossary.yaml",
+    "src/db/schema/paper.ts",
+    "src/db/schema/paper.test.ts",
+    "drizzle/20260722003000_p1_rc_04_managed_rich_text_image.sql",
+    "drizzle/meta/20260722003000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/lib/content-integrity.ts",
+    "src/lib/content-integrity.test.ts",
+    "src/server/contracts/content-image-contract.ts",
+    "src/server/validators/content-image.ts",
+    "src/server/validators/content-image.test.ts",
+    "src/server/repositories/content-image-repository.ts",
+    "src/server/repositories/content-image-repository.test.ts",
+    "src/server/services/local-content-image-storage.ts",
+    "src/server/services/local-content-image-storage.test.ts",
+    "src/server/services/content-image-service.ts",
+    "src/server/services/content-image-service.test.ts",
+    "src/server/services/content-image-runtime.ts",
+    "src/server/services/content-image-runtime.test.ts",
+    "src/app/api/v1/content-images/route.ts",
+    "src/app/api/v1/content-images/[publicId]/route.ts",
+    "src/server/validators/question.ts",
+    "src/server/validators/question.test.ts",
+    "src/server/validators/material.ts",
+    "src/server/validators/material.test.ts",
+    "src/server/services/question-service.ts",
+    "src/server/services/question-service.test.ts",
+    "src/server/services/material-service.ts",
+    "src/server/services/material-service.test.ts",
+    "src/server/services/content-question-material-runtime.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
+    "tests/unit/admin-question-material-ui.test.ts",
+    "src/components/StudentRichText/StudentRichText.tsx",
+    "tests/unit/p1-managed-rich-text-image.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -23,36 +52,65 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "src/db/**",
-    "drizzle/**",
-    "role, permission, authorization or entitlement expansion",
-    "schema, migration or persistent database execution",
-    "Provider calls, external services, deployment, PR or force-push"
+    "existing paper_asset schema, behavior or attachment semantics",
+    "role, permission, authorization or entitlement expansion beyond authenticated reads and existing content-admin upload",
+    "migration execution or persistent database execution",
+    "external storage, Provider calls, external services, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/admin-flow-runtime-repository.test.ts"
+    "docs/03-standards/glossary.yaml",
+    "src/db/schema/paper.ts",
+    "src/db/schema/paper.test.ts",
+    "drizzle/20260722003000_p1_rc_04_managed_rich_text_image.sql",
+    "drizzle/meta/20260722003000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/lib/content-integrity.ts",
+    "src/lib/content-integrity.test.ts",
+    "src/server/contracts/content-image-contract.ts",
+    "src/server/validators/content-image.ts",
+    "src/server/validators/content-image.test.ts",
+    "src/server/repositories/content-image-repository.ts",
+    "src/server/repositories/content-image-repository.test.ts",
+    "src/server/services/local-content-image-storage.ts",
+    "src/server/services/local-content-image-storage.test.ts",
+    "src/server/services/content-image-service.ts",
+    "src/server/services/content-image-service.test.ts",
+    "src/server/services/content-image-runtime.ts",
+    "src/server/services/content-image-runtime.test.ts",
+    "src/app/api/v1/content-images/route.ts",
+    "src/app/api/v1/content-images/[publicId]/route.ts",
+    "src/server/validators/question.ts",
+    "src/server/validators/material.ts",
+    "src/server/services/question-service.ts",
+    "src/server/services/material-service.ts",
+    "src/server/services/content-question-material-runtime.ts",
+    "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
+    "src/components/StudentRichText/StudentRichText.tsx",
+    "tests/unit/p1-managed-rich-text-image.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/repositories/account-phone-identity-lock.test.ts",
-    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-    "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
+    "src/server/validators/question.test.ts",
+    "src/server/validators/material.test.ts",
+    "src/server/services/question-service.test.ts",
+    "src/server/services/material-service.test.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "tests/unit/admin-question-material-ui.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminOpsManagement sends an explicit organizationPublicId through the existing POST /api/v1/admin-accounts contract; F-0046 already made that selection complete and explicit.",
-    "handlerService": "admin-flow-runtime already validates creation permission, maps repository phone conflicts and organization_not_found to stable responses, and writes redacted failed audits; no service or API contract change is needed.",
-    "repository": "admin-flow-runtime-repository already locks the shared phone identity and writes account rows plus the redacted success audit atomically, but its active organization lookup remains outside that transaction.",
-    "schemaMigration": "organization status and account relations already exist; the shared organization-scope advisory lock is the authoritative concurrency boundary, so no schema or migration change is required.",
-    "tests": "Focused repository tests prove organization scope lock then active recheck then phone identity lock and writes, including fail-closed missing/inactive organization behavior; existing phone-lock, lifecycle and admin regressions cover unchanged conflict/audit semantics.",
-    "nonClaims": "No role, permission, entitlement, schema, migration, persistent database execution, dependency, Provider, external service or mechanism change."
+    "uiApi": "AdminQuestionMaterialManagementClient currently inserts two nonexistent fixed paper_asset IDs; it must upload a real image first and only then insert an immutable same-origin content_images reference.",
+    "handlerService": "A dedicated content-images runtime will keep upload authority limited to existing super_admin/content_admin roles, require any active session for byte reads, and return bytes rather than a JSON metadata envelope.",
+    "repositorySchema": "paper_asset is explicitly the original PDF/Word attachment of an existing paper and cannot safely represent pre-paper question/material images. A separate content_image plus durable upload operation is the narrowest complete persistent boundary.",
+    "contentMutation": "Question and material validators must reject every external, malformed or legacy paper_asset image even when text is present; services must verify all parsed content_image public IDs exist before repository writes.",
+    "studentRendering": "StudentRichText must render only canonical same-origin content_images byte URLs and drop external http(s), legacy paper_asset metadata URLs and malformed sources.",
+    "tests": "Focused tests cover MIME/size/path validation, idempotent upload operation and audit, active-session byte delivery, bad/missing/external references, legitimate text/table behavior, UI upload-before-insert and student rendering.",
+    "nonClaims": "No migration execution, real database write, external object storage, Provider, dependency, secret/env, deployment, PR, force-push, role creation or entitlement expansion."
   },
   "validationCommands": [
     {
-      "name": "admin-account-create-preconditions-focused",
+      "name": "managed-rich-text-image-core-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -60,12 +118,17 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/admin-flow-runtime-repository.test.ts",
-        "src/server/repositories/account-phone-identity-lock.test.ts"
+        "tests/unit/p1-managed-rich-text-image.test.ts",
+        "src/lib/content-integrity.test.ts",
+        "src/server/validators/content-image.test.ts",
+        "src/server/repositories/content-image-repository.test.ts",
+        "src/server/services/local-content-image-storage.test.ts",
+        "src/server/services/content-image-service.test.ts",
+        "src/server/services/content-image-runtime.test.ts"
       ]
     },
     {
-      "name": "admin-account-create-preconditions-regression",
+      "name": "managed-rich-text-image-content-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -73,53 +136,92 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-        "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-        "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
+        "src/db/schema/paper.test.ts",
+        "src/server/validators/question.test.ts",
+        "src/server/validators/material.test.ts",
+        "src/server/services/question-service.test.ts",
+        "src/server/services/material-service.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts",
+        "tests/unit/admin-question-material-ui.test.ts"
       ]
     },
     {
-      "name": "admin-account-create-preconditions-lint",
+      "name": "managed-rich-text-image-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/server/repositories/admin-flow-runtime-repository.test.ts"
+        "src/lib/content-integrity.ts",
+        "src/lib/content-integrity.test.ts",
+        "src/db/schema/paper.ts",
+        "src/db/schema/paper.test.ts",
+        "src/server/contracts/content-image-contract.ts",
+        "src/server/validators/content-image.ts",
+        "src/server/validators/content-image.test.ts",
+        "src/server/repositories/content-image-repository.ts",
+        "src/server/repositories/content-image-repository.test.ts",
+        "src/server/services/local-content-image-storage.ts",
+        "src/server/services/local-content-image-storage.test.ts",
+        "src/server/services/content-image-service.ts",
+        "src/server/services/content-image-service.test.ts",
+        "src/server/services/content-image-runtime.ts",
+        "src/server/services/content-image-runtime.test.ts",
+        "src/app/api/v1/content-images/route.ts",
+        "src/app/api/v1/content-images/[publicId]/route.ts",
+        "src/server/validators/question.ts",
+        "src/server/validators/material.ts",
+        "src/server/services/question-service.ts",
+        "src/server/services/material-service.ts",
+        "src/server/services/content-question-material-runtime.ts",
+        "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
+        "src/components/StudentRichText/StudentRichText.tsx",
+        "tests/unit/p1-managed-rich-text-image.test.ts"
       ]
     },
     {
-      "name": "admin-account-create-preconditions-typecheck",
+      "name": "managed-rich-text-image-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "managed-rich-text-image-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": "fresh-schema-start-f0052-managed-rich-text-image-2026-07-21",
+    "permission": "fresh-schema-start-f0052-managed-rich-text-image-2026-07-21",
     "deployment": null,
     "secretEnv": null
   },
-  "standingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
+  "standingApprovals": ["standing-test-only-allowlist-expansion-2026-07-21"],
+  "freshApproval": {
+    "approvalId": "fresh-schema-start-f0052-managed-rich-text-image-2026-07-21",
+    "taskId": "p1-remediation-rc-04-managed-rich-text-image-2026-07-21",
+    "baseSha": "045b54d08e52746a4d9dbd50970529264959e829",
+    "risk": "schema_migration_source_database_application_local_file_storage_authenticated_image_byte_delivery",
+    "conditionalCloseout": true,
+    "canonicalPushTarget": "https://github.com/iamlaozhuang/tiku.git#refs/heads/master"
+  },
   "riskClassification": {
-    "category": "bounded_medium_risk_database_application_transaction_and_permission_contraction",
-    "entitlementExpansion": false,
-    "schemaMigrationSourceChange": false,
+    "category": "high_risk_schema_migration_source_and_authenticated_private_media_delivery",
+    "migrationExecution": false,
     "persistentDatabaseExecution": false,
+    "anonymousRead": false,
+    "roleOrEntitlementExpansion": false,
     "realExternalCall": false,
-    "mechanismChange": false
+    "dependencyOrMechanismChange": false
   },
   "push": {
     "target": "origin/master",
     "requiresFreshApproval": true,
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "conditionalCloseout": false
+    "approvalId": "fresh-schema-start-f0052-managed-rich-text-image-2026-07-21",
+    "conditionalCloseout": true
   }
 }

@@ -439,6 +439,22 @@ function mockWritableContentFetch(
         return createJsonResponse(tagOptionPayload);
       }
 
+      if (path === "/api/v1/content-images" && method === "POST") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            contentImage: {
+              publicId: "content-image-uploaded-001",
+              contentType: "image/png",
+              fileSizeByte: 3,
+              createdAt: "2026-07-21T00:00:00.000Z",
+              url: "/api/v1/content-images/content-image-uploaded-001",
+            },
+          },
+        });
+      }
+
       if (path === "/api/v1/questions" && method === "POST") {
         return createJsonResponse({
           code: 0,
@@ -2450,7 +2466,7 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBe(false);
   });
 
-  it("offers bounded rich text helpers for managed paper_asset image references and table markup", async () => {
+  it("uploads a managed content_image before inserting its canonical reference", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockWritableContentFetch();
 
@@ -2460,9 +2476,19 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
 
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
-    fireEvent.click(
-      questionForm.getByRole("button", { name: "插入受管图片引用" }),
-    );
+    fireEvent.change(questionForm.getByLabelText("专业"), {
+      target: { value: "marketing" },
+    });
+    fireEvent.change(questionForm.getByLabelText("选择题目图片"), {
+      target: {
+        files: [
+          new File([new Uint8Array([1, 2, 3])], "diagram.png", {
+            type: "image/png",
+          }),
+        ],
+      },
+    });
+    await questionForm.findByText("图片已上传并插入。");
     fireEvent.click(questionForm.getByRole("button", { name: "插入表格模板" }));
 
     const stemInput = questionForm.getByLabelText(
@@ -2471,11 +2497,12 @@ describe("AdminQuestionMaterialManagement", () => {
 
     expect(stemInput.value).toContain("<img");
     expect(stemInput.value).toContain(
-      'data-paper-asset-public-id="paper-asset-local-question-image"',
+      'data-content-image-public-id="content-image-uploaded-001"',
     );
-    expect(stemInput.value).toContain("/api/v1/paper-assets/");
-    expect(stemInput.value).not.toContain("local-image-placeholder");
-    expect(stemInput.value).not.toContain("dev/paper-asset");
+    expect(stemInput.value).toContain(
+      "/api/v1/content-images/content-image-uploaded-001",
+    );
+    expect(stemInput.value).not.toContain("paper-assets");
     expect(stemInput.value).toContain("<table>");
   });
 
@@ -3116,7 +3143,7 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBe(false);
   });
 
-  it("offers bounded rich text helpers for managed material paper_asset image references and table markup", async () => {
+  it("uploads a managed material content_image before inserting its canonical reference", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockWritableContentFetch();
 
@@ -3154,9 +3181,16 @@ describe("AdminQuestionMaterialManagement", () => {
           requestInit?.method === "POST",
       ),
     ).toBe(false);
-    fireEvent.click(
-      materialForm.getByRole("button", { name: "插入受管图片引用" }),
-    );
+    fireEvent.change(materialForm.getByLabelText("选择材料图片"), {
+      target: {
+        files: [
+          new File([new Uint8Array([1, 2, 3])], "diagram.png", {
+            type: "image/png",
+          }),
+        ],
+      },
+    });
+    await materialForm.findByText("图片已上传并插入。");
 
     const contentInput = materialForm.getByLabelText(
       "材料正文",
@@ -3164,11 +3198,12 @@ describe("AdminQuestionMaterialManagement", () => {
 
     expect(contentInput.value).toContain("<img");
     expect(contentInput.value).toContain(
-      'data-paper-asset-public-id="paper-asset-local-material-image"',
+      'data-content-image-public-id="content-image-uploaded-001"',
     );
-    expect(contentInput.value).toContain("/api/v1/paper-assets/");
-    expect(contentInput.value).not.toContain("local-image-placeholder");
-    expect(contentInput.value).not.toContain("dev/paper-asset");
+    expect(contentInput.value).toContain(
+      "/api/v1/content-images/content-image-uploaded-001",
+    );
+    expect(contentInput.value).not.toContain("paper-assets");
     expect(contentInput.value).toContain("<table>");
     fireEvent.click(materialForm.getByRole("button", { name: "保存材料" }));
     await screen.findByText("材料“新建案例材料”已保存");
