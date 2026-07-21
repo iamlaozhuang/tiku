@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import {
   and,
@@ -22,6 +22,7 @@ import {
   resource,
   resourceChunk,
   resourceIndexGeneration,
+  resourceUploadOperation,
 } from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
 import type {
@@ -95,6 +96,46 @@ export type CreateResourceFromUploadInput = {
   knowledgeNodePublicIds: string[];
 };
 
+export type PrepareResourceUploadInput = {
+  operationPublicId: string;
+  resourcePublicId: string;
+  actorPublicId: string;
+  idempotencyKeyHash: string;
+  requestFingerprint: string;
+  objectStoragePath: string;
+  fileHash: string;
+  fileSizeByte: number;
+};
+
+export type ResourceUploadOperationReference = {
+  publicId: string;
+  resourcePublicId: string;
+  objectStoragePath: string;
+};
+
+export type PrepareResourceUploadResult =
+  | { status: "prepared"; operation: ResourceUploadOperationReference }
+  | {
+      status: "completed";
+      resource: AdminResourceOpsListDto["resources"][number];
+    }
+  | { status: "conflict"; reason: "request_mismatch" | "invalid_state" };
+
+export type CompleteResourceUploadInput = CreateResourceFromUploadInput & {
+  operationPublicId: string;
+  requestFingerprint: string;
+  mutationContext: ResourceMutationContext;
+};
+
+export type CompleteResourceUploadResult =
+  | {
+      status: "completed";
+      resource: AdminResourceOpsListDto["resources"][number];
+      replayed: boolean;
+    }
+  | { status: "invalid_scope" }
+  | { status: "conflict" };
+
 export type ResourceIndexGenerationRequestResult =
   | { status: "not_found" }
   | {
@@ -153,9 +194,17 @@ export type ResourcePublishMarkdownResult =
     };
 
 export type RagResourceRuntimeRepository = {
-  createResourceFromUpload?(
-    input: CreateResourceFromUploadInput,
-  ): Promise<AdminResourceOpsListDto["resources"][number] | null>;
+  prepareResourceUpload?(
+    input: PrepareResourceUploadInput,
+  ): Promise<PrepareResourceUploadResult>;
+  markResourceUploadFileStored?(operationPublicId: string): Promise<boolean>;
+  completeResourceUpload?(
+    input: CompleteResourceUploadInput,
+  ): Promise<CompleteResourceUploadResult>;
+  recordResourceUploadFailure?(input: {
+    operationPublicId: string;
+    failureMessageDigest: string;
+  }): Promise<void>;
   listResources(
     query: AdminContentKnowledgeListQuery,
   ): Promise<ResourceKnowledgePage<AdminResourceOpsListDto>>;
@@ -213,6 +262,7 @@ export type ResourceMutationContext = {
     actorRole: string;
     actionType:
       | "resource.update_markdown"
+      | "resource.upload"
       | "resource.publish_markdown"
       | "resource.rebuild_vector"
       | "resource.disable"
@@ -262,6 +312,10 @@ export type RagResourceKnowledgeRuntimeRepositories = {
   resourceRepository: RagResourceRuntimeRepository;
   knowledgeNodeRepository: RagKnowledgeNodeRuntimeRepository;
 };
+
+function createSha256Digest(value: string): string {
+  return `sha256:${createHash("sha256").update(value).digest("hex")}`;
+}
 
 type KnowledgeNodeRowForMapping = {
   id: number;
@@ -315,8 +369,17 @@ function createPostgresRagResourceRuntimeRepository(
   getDatabase: () => RuntimeDatabase,
 ): RagResourceRuntimeRepository {
   return {
-    async createResourceFromUpload(input) {
-      return createResourceFromUpload(getDatabase(), input);
+    async prepareResourceUpload(input) {
+      return prepareResourceUpload(getDatabase(), input);
+    },
+    async markResourceUploadFileStored(operationPublicId) {
+      return markResourceUploadFileStored(getDatabase(), operationPublicId);
+    },
+    async completeResourceUpload(input) {
+      return completeResourceUpload(getDatabase(), input);
+    },
+    async recordResourceUploadFailure(input) {
+      await recordResourceUploadFailure(getDatabase(), input);
     },
     async listResources(queryInput) {
       const database = getDatabase();
@@ -766,103 +829,369 @@ function createPostgresRagResourceRuntimeRepository(
   };
 }
 
-async function createResourceFromUpload(
+async function prepareResourceUpload(
   database: RuntimeDatabase,
-  input: CreateResourceFromUploadInput,
-): Promise<AdminResourceOpsListDto["resources"][number] | null> {
-  const levelList =
-    input.levelList ?? (typeof input.level === "number" ? [input.level] : null);
-
+  input: PrepareResourceUploadInput,
+): Promise<PrepareResourceUploadResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
-    const knowledgeBaseRow = await findKnowledgeBaseByProfession(
-      scopedDatabase,
-      input.profession,
-      true,
-    );
-
-    if (knowledgeBaseRow === null || !knowledgeBaseRow.isEnabled) {
-      return null;
-    }
-
-    const knowledgeNodeRows =
-      input.knowledgeNodePublicIds.length === 0
-        ? []
-        : await scopedDatabase
-            .select({
-              id: knowledgeNode.id,
-              public_id: knowledgeNode.public_id,
-              knowledge_base_id: knowledgeNode.knowledge_base_id,
-              profession: knowledgeNode.profession,
-              kn_status: knowledgeNode.kn_status,
-            })
-            .from(knowledgeNode)
-            .where(
-              inArray(knowledgeNode.public_id, input.knowledgeNodePublicIds),
-            )
-            .for("share");
-    const validation = validateResourceKnowledgeNodeScope({
-      resource: {
-        knowledgeBaseId: knowledgeBaseRow.id,
-        profession: input.profession,
-      },
-      requestedKnowledgeNodePublicIds: input.knowledgeNodePublicIds,
-      knowledgeNodes: knowledgeNodeRows.map((row) => ({
-        id: row.id,
-        publicId: row.public_id,
-        knowledgeBaseId: row.knowledge_base_id,
-        profession: row.profession,
-        knStatus: row.kn_status,
-      })),
-    });
-
-    if (validation.status === "invalid") {
-      return null;
-    }
-
-    const [resourceRow] = await scopedDatabase
-      .insert(resource)
+    const [insertedOperation] = await scopedDatabase
+      .insert(resourceUploadOperation)
       .values({
-        public_id: input.publicId,
-        knowledge_base_id: knowledgeBaseRow.id,
-        resource_type: input.resourceType,
-        resource_status: input.resourceStatus,
-        title: input.title,
-        original_file_name: input.originalFileName,
+        public_id: input.operationPublicId,
+        actor_public_id: input.actorPublicId,
+        idempotency_key_hash: input.idempotencyKeyHash,
+        request_fingerprint: input.requestFingerprint,
+        resource_public_id: input.resourcePublicId,
         object_storage_path: input.objectStoragePath,
-        content_hash: input.contentHash,
+        file_hash: input.fileHash,
         file_size_byte: input.fileSizeByte,
-        profession: input.profession,
-        level: levelList?.length === 1 ? levelList[0] : null,
-        level_list: levelList,
-        markdown_content: input.markdownContent,
-        markdown_content_hash: input.markdownContentHash,
-        conversion_error_message: input.conversionErrorMessage,
-        is_vector_stale: false,
+        operation_status: "pending",
+      })
+      .onConflictDoNothing({
+        target: resourceUploadOperation.idempotency_key_hash,
       })
       .returning({
-        ...createResourceOpsReturningSelection(),
-        id: resource.id,
+        public_id: resourceUploadOperation.public_id,
+        actor_public_id: resourceUploadOperation.actor_public_id,
+        request_fingerprint: resourceUploadOperation.request_fingerprint,
+        resource_public_id: resourceUploadOperation.resource_public_id,
+        object_storage_path: resourceUploadOperation.object_storage_path,
+        operation_status: resourceUploadOperation.operation_status,
+        resource_id: resourceUploadOperation.resource_id,
       });
+    const operationRow =
+      insertedOperation ??
+      (
+        await scopedDatabase
+          .select({
+            public_id: resourceUploadOperation.public_id,
+            actor_public_id: resourceUploadOperation.actor_public_id,
+            request_fingerprint: resourceUploadOperation.request_fingerprint,
+            resource_public_id: resourceUploadOperation.resource_public_id,
+            object_storage_path: resourceUploadOperation.object_storage_path,
+            operation_status: resourceUploadOperation.operation_status,
+            resource_id: resourceUploadOperation.resource_id,
+          })
+          .from(resourceUploadOperation)
+          .where(
+            eq(
+              resourceUploadOperation.idempotency_key_hash,
+              input.idempotencyKeyHash,
+            ),
+          )
+          .limit(1)
+          .for("update")
+      )[0];
 
-    if (resourceRow === undefined) {
-      return null;
+    if (
+      operationRow === undefined ||
+      operationRow.actor_public_id !== input.actorPublicId ||
+      operationRow.request_fingerprint !== input.requestFingerprint
+    ) {
+      return { status: "conflict", reason: "request_mismatch" };
     }
 
-    if (validation.knowledgeNodeIds.length > 0) {
-      await scopedDatabase.insert(knowledgeNodeResource).values(
-        validation.knowledgeNodeIds.map((knowledgeNodeId) => ({
-          knowledge_node_id: knowledgeNodeId,
-          resource_id: resourceRow.id,
-        })),
+    if (operationRow.operation_status === "completed") {
+      if (operationRow.resource_id === null) {
+        return { status: "conflict", reason: "invalid_state" };
+      }
+
+      const completedResource = await findResourceSummaryById(
+        scopedDatabase,
+        operationRow.resource_id,
       );
+
+      return completedResource === null
+        ? { status: "conflict", reason: "invalid_state" }
+        : { status: "completed", resource: completedResource };
+    }
+
+    if (operationRow.operation_status === "failed") {
+      await scopedDatabase
+        .update(resourceUploadOperation)
+        .set({
+          operation_status: "pending",
+          file_stored_at: null,
+          last_failure_message_digest: null,
+          updated_at: new Date(),
+        })
+        .where(eq(resourceUploadOperation.public_id, operationRow.public_id));
     }
 
     return {
-      ...mapResourceOpsRow(resourceRow),
-      knowledgeNodePublicIds: [...input.knowledgeNodePublicIds],
+      status: "prepared",
+      operation: {
+        publicId: operationRow.public_id,
+        resourcePublicId: operationRow.resource_public_id,
+        objectStoragePath: operationRow.object_storage_path,
+      },
     };
   });
+}
+
+async function markResourceUploadFileStored(
+  database: RuntimeDatabase,
+  operationPublicId: string,
+): Promise<boolean> {
+  const [operationRow] = await database
+    .update(resourceUploadOperation)
+    .set({
+      operation_status: "file_stored",
+      file_stored_at: new Date(),
+      last_failure_message_digest: null,
+      updated_at: new Date(),
+    })
+    .where(
+      and(
+        eq(resourceUploadOperation.public_id, operationPublicId),
+        inArray(resourceUploadOperation.operation_status, [
+          "pending",
+          "file_stored",
+        ]),
+      ),
+    )
+    .returning({ public_id: resourceUploadOperation.public_id });
+
+  if (operationRow !== undefined) {
+    return true;
+  }
+
+  const [completedOperation] = await database
+    .select({ operation_status: resourceUploadOperation.operation_status })
+    .from(resourceUploadOperation)
+    .where(eq(resourceUploadOperation.public_id, operationPublicId))
+    .limit(1);
+
+  return completedOperation?.operation_status === "completed";
+}
+
+async function recordResourceUploadFailure(
+  database: RuntimeDatabase,
+  input: {
+    operationPublicId: string;
+    failureMessageDigest: string;
+  },
+): Promise<void> {
+  await database
+    .update(resourceUploadOperation)
+    .set({
+      operation_status: "failed",
+      last_failure_message_digest: input.failureMessageDigest,
+      updated_at: new Date(),
+    })
+    .where(
+      and(
+        eq(resourceUploadOperation.public_id, input.operationPublicId),
+        inArray(resourceUploadOperation.operation_status, [
+          "pending",
+          "file_stored",
+          "failed",
+        ]),
+      ),
+    );
+}
+
+async function completeResourceUpload(
+  database: RuntimeDatabase,
+  input: CompleteResourceUploadInput,
+): Promise<CompleteResourceUploadResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const [operationRow] = await scopedDatabase
+      .select({
+        id: resourceUploadOperation.id,
+        actor_public_id: resourceUploadOperation.actor_public_id,
+        request_fingerprint: resourceUploadOperation.request_fingerprint,
+        resource_public_id: resourceUploadOperation.resource_public_id,
+        object_storage_path: resourceUploadOperation.object_storage_path,
+        file_hash: resourceUploadOperation.file_hash,
+        file_size_byte: resourceUploadOperation.file_size_byte,
+        operation_status: resourceUploadOperation.operation_status,
+        resource_id: resourceUploadOperation.resource_id,
+      })
+      .from(resourceUploadOperation)
+      .where(eq(resourceUploadOperation.public_id, input.operationPublicId))
+      .limit(1)
+      .for("update");
+
+    if (
+      operationRow === undefined ||
+      operationRow.actor_public_id !== input.mutationContext.actorPublicId ||
+      input.mutationContext.auditLog.actionType !== "resource.upload" ||
+      operationRow.request_fingerprint !== input.requestFingerprint ||
+      operationRow.resource_public_id !== input.publicId ||
+      operationRow.object_storage_path !== input.objectStoragePath ||
+      operationRow.file_hash !== input.contentHash ||
+      operationRow.file_size_byte !== input.fileSizeByte
+    ) {
+      return { status: "conflict" };
+    }
+
+    if (operationRow.operation_status === "completed") {
+      const completedResource =
+        operationRow.resource_id === null
+          ? null
+          : await findResourceSummaryById(
+              scopedDatabase,
+              operationRow.resource_id,
+            );
+
+      return completedResource === null
+        ? { status: "conflict" }
+        : { status: "completed", resource: completedResource, replayed: true };
+    }
+
+    if (operationRow.operation_status !== "file_stored") {
+      return { status: "conflict" };
+    }
+
+    const insertedResource = await insertResourceFromUpload(
+      scopedDatabase,
+      input,
+    );
+
+    if (insertedResource === null) {
+      await scopedDatabase
+        .update(resourceUploadOperation)
+        .set({
+          operation_status: "failed",
+          last_failure_message_digest: createSha256Digest(
+            "scope_validation_failed",
+          ),
+          updated_at: new Date(),
+        })
+        .where(eq(resourceUploadOperation.id, operationRow.id));
+      return { status: "invalid_scope" };
+    }
+
+    await appendResourceMutationAuditLog(
+      scopedDatabase,
+      {
+        ...input.mutationContext,
+        auditLog: {
+          ...input.mutationContext.auditLog,
+          metadataSummary: "redacted resource upload metadata",
+        },
+      },
+      insertedResource.resource.publicId,
+    );
+    await scopedDatabase
+      .update(resourceUploadOperation)
+      .set({
+        operation_status: "completed",
+        resource_id: insertedResource.resourceId,
+        completed_at: new Date(),
+        last_failure_message_digest: null,
+        updated_at: new Date(),
+      })
+      .where(eq(resourceUploadOperation.id, operationRow.id));
+
+    return {
+      status: "completed",
+      resource: insertedResource.resource,
+      replayed: false,
+    };
+  });
+}
+
+async function insertResourceFromUpload(
+  scopedDatabase: RuntimeDatabase,
+  input: CreateResourceFromUploadInput,
+): Promise<{
+  resourceId: number;
+  resource: AdminResourceOpsListDto["resources"][number];
+} | null> {
+  const levelList =
+    input.levelList ?? (typeof input.level === "number" ? [input.level] : null);
+  const knowledgeBaseRow = await findKnowledgeBaseByProfession(
+    scopedDatabase,
+    input.profession,
+    true,
+  );
+
+  if (knowledgeBaseRow === null || !knowledgeBaseRow.isEnabled) {
+    return null;
+  }
+
+  const knowledgeNodeRows =
+    input.knowledgeNodePublicIds.length === 0
+      ? []
+      : await scopedDatabase
+          .select({
+            id: knowledgeNode.id,
+            public_id: knowledgeNode.public_id,
+            knowledge_base_id: knowledgeNode.knowledge_base_id,
+            profession: knowledgeNode.profession,
+            kn_status: knowledgeNode.kn_status,
+          })
+          .from(knowledgeNode)
+          .where(inArray(knowledgeNode.public_id, input.knowledgeNodePublicIds))
+          .for("share");
+  const validation = validateResourceKnowledgeNodeScope({
+    resource: {
+      knowledgeBaseId: knowledgeBaseRow.id,
+      profession: input.profession,
+    },
+    requestedKnowledgeNodePublicIds: input.knowledgeNodePublicIds,
+    knowledgeNodes: knowledgeNodeRows.map((row) => ({
+      id: row.id,
+      publicId: row.public_id,
+      knowledgeBaseId: row.knowledge_base_id,
+      profession: row.profession,
+      knStatus: row.kn_status,
+    })),
+  });
+
+  if (validation.status === "invalid") {
+    return null;
+  }
+
+  const [resourceRow] = await scopedDatabase
+    .insert(resource)
+    .values({
+      public_id: input.publicId,
+      knowledge_base_id: knowledgeBaseRow.id,
+      resource_type: input.resourceType,
+      resource_status: input.resourceStatus,
+      title: input.title,
+      original_file_name: input.originalFileName,
+      object_storage_path: input.objectStoragePath,
+      content_hash: input.contentHash,
+      file_size_byte: input.fileSizeByte,
+      profession: input.profession,
+      level: levelList?.length === 1 ? levelList[0] : null,
+      level_list: levelList,
+      markdown_content: input.markdownContent,
+      markdown_content_hash: input.markdownContentHash,
+      conversion_error_message: input.conversionErrorMessage,
+      is_vector_stale: false,
+    })
+    .returning({
+      ...createResourceOpsReturningSelection(),
+      id: resource.id,
+    });
+
+  if (resourceRow === undefined) {
+    return null;
+  }
+
+  if (validation.knowledgeNodeIds.length > 0) {
+    await scopedDatabase.insert(knowledgeNodeResource).values(
+      validation.knowledgeNodeIds.map((knowledgeNodeId) => ({
+        knowledge_node_id: knowledgeNodeId,
+        resource_id: resourceRow.id,
+      })),
+    );
+  }
+
+  return {
+    resourceId: resourceRow.id,
+    resource: {
+      ...mapResourceOpsRow(resourceRow),
+      knowledgeNodePublicIds: [...input.knowledgeNodePublicIds],
+    },
+  };
 }
 
 async function requestResourceIndexRebuild(
@@ -2009,6 +2338,31 @@ async function listResourceKnowledgeNodePublicIds(
     result.set(row.resource_id, publicIds);
     return result;
   }, new Map());
+}
+
+async function findResourceSummaryById(
+  database: RuntimeDatabase,
+  resourceId: number,
+): Promise<AdminResourceOpsListDto["resources"][number] | null> {
+  const [resourceRow] = await database
+    .select({
+      id: resource.id,
+      ...createResourceOpsReturningSelection(),
+    })
+    .from(resource)
+    .where(eq(resource.id, resourceId))
+    .limit(1);
+
+  if (resourceRow === undefined) {
+    return null;
+  }
+
+  const knowledgeNodePublicIds =
+    (await listResourceKnowledgeNodePublicIds(database, [resourceRow.id])).get(
+      resourceRow.id,
+    ) ?? [];
+
+  return mapResourceOpsRow(resourceRow, knowledgeNodePublicIds);
 }
 
 function mapResourceOpsRow(

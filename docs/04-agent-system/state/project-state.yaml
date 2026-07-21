@@ -465,12 +465,12 @@ p0RemediationSerialProgram:
       shortBranchCleanup: pass
 p1RemediationSerialProgram:
   programId: p1-remediation-2026-07-16
-  status: closed
+  status: in_progress
   activityStatePolicy: wip_one_dynamic_task_materialization
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
+  currentTaskId: p1-remediation-rc-04-resource-upload-saga-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -747,72 +747,84 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
-  title: Paper asset delete audit atomicity
-  phase: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
+  id: p1-remediation-rc-04-resource-upload-saga-2026-07-21
+  title: Resource upload saga
+  phase: p1-remediation-rc-04-resource-upload-saga-2026-07-21
   status: closed
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0031_paper_asset_delete_database_partition
-  branch: fix/paper-asset-delete-audit-atomicity
+  productClosureContribution: F-0031_resource_upload_cross_resource_partition
+  branch: fix/resource-upload-saga
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0031
   candidateRootCauseCluster: P1-RC-04
-  objective: close only database-backed paper_asset delete by sharing one repository transaction with its redacted success audit while preserving external failed-command audit and excluding multipart create
+  objective: close only database-backed resource upload with a persistent idempotent operation, deterministic file storage, transactional resource audit operation completion, and resumable failure compensation
   highRiskApproval:
-    category: bounded_database_application_transaction_logic
-    status: satisfied_by_bounded_medium_risk_standing_approval
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    category: schema_migration_source_and_database_application_logic
+    status: task_bound_start_approved_candidate_tree_approval_pending
+    approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
+  allowedFilesExpansionApproval: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
   currentExecutionGate:
-    status: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
-    reason: paper_asset_delete_and_its_redacted_success_audit_share_one_repository_transaction_and_audit_failure_propagates
-    resumeAction: closeout_then_request_schema_start_approval_for_remaining_cross_resource_saga
+    status: candidate_preflight_green_waiting_same_id_formatted_snapshot_tree_binding
+    reason: kernel_safe_contract_and_mandatory_lint_staged_preapplied_with_only_snapshot_whitespace_change_and_drizzle_history_pass
+    resumeAction: freeze_tree_twice_then_request_same_id_formatted_snapshot_tree_full_commit_ff_only_canonical_push_sync_cleanup_approval
   findingDisposition:
-    F-0031: in_progress_paper_asset_delete_partition_closed_multipart_create_and_resource_cross_resource_paths_pending
+    F-0031: in_progress_database_resource_upload_partition_closed_paper_asset_create_and_local_catalog_pending
   verificationEvidence:
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
+    allowedFilesExpansionApproval: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
     testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
-    preflightIncludedTestFiles: 6
+    preflightIncludedTestFiles: 7
     inTaskTestOnlyExpansionCount: 0
-    includedCommand: paper_asset_delete_database_mutation
+    includedCommand: database_backed_resource_multipart_upload
     excludedCommands:
       - paper_asset_multipart_create
-      - paper_asset_local_file_mutation
-      - resource_cross_resource_mutations
-    tddRed: expected_5_failures_missing_required_context_transactional_audit_and_failed_only_external_audit
-    focused: passed_14_of_14
-    affectedRegression: passed_17_of_17
+      - local_resource_catalog_adapter
+      - migration_execution
+      - persistent_database_execution
+      - provider_or_external_service_calls
+    baselineFocused: passed_53_of_53
+    tddRed: expected_8_failures_missing_operation_schema_idempotency_replay_transactional_audit_failure_state_and_deterministic_write
+    adversarialRed: expected_4_failures_missing_failed_state_reset_hashed_scope_failure_client_uuid_v4_and_same_key_transport_retry
+    focused: passed_56_of_56
+    affectedRegression: passed_44_of_44
     lint: passed_exact_affected_files
     typecheck: passed
     build: passed_97_static_pages
+    drizzleHistory: pass_everything_fine
+    drizzleSnapshotFormatting: mandatory_lint_staged_preapplied_only_snapshot_whitespace_changed_and_drizzle_history_remained_valid
     p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
     p0SerialBaseline: pass_closed_program
-    mainThreadAdversarialReview: passed_required_context_same_transaction_audit_failure_propagation_redaction_failed_external_audit_and_multipart_create_boundary
-    schemaMigrationSourceChange: false
+    mainThreadAdversarialReview: passed_global_hashed_idempotency_operation_identity_binding_concurrent_replay_transactional_redacted_audit_deterministic_content_addressed_write_failure_resume_client_uuid_v4_same_key_transport_retry_and_no_legacy_upload_bypass
+    schemaMigrationSourceChange: true_approved
     migrationExecution: false
     persistentDatabaseExecution: false
     permissionOrEntitlementChange: false
-    localFileMutation: false
     realExternalCall: false
     extraFiles: false
+    approvalRequests: 5_including_same_id_formatted_snapshot_candidate_tree_rebind_request
+    approvalIdMismatch: 0
+    postApprovalCandidateTreeChanges: 2_removed_kernel_unsafe_drizzle_validation_command_and_preapplied_mandatory_snapshot_formatting_without_product_change
+    repeatedBlockerReports: 0
+    fullRuns: 1_failed_at_kernel_command_safety_plus_1_pending_after_new_tree_binding
   closeout:
     commit: finalized_by_commit_containing_this_state
-    status: ready_for_commit_ff_only_merge_push_sync_and_cleanup
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    status: ready_for_same_id_formatted_snapshot_candidate_tree_binding_then_full_commit_ff_only_merge_push_sync_and_cleanup
+    approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
-    findingId: F-0031_resource_database_non_upload_partition
-    commit: 1e8b5f647599edd606eb612f6002485dfdc46dc9
+    taskId: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
+    findingId: F-0031_paper_asset_delete_database_partition
+    commit: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1
   status: active
   ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy
 repositoryCheckpoint:
-  lastKnownMasterSha: 1e8b5f647599edd606eb612f6002485dfdc46dc9
-  lastKnownOriginMasterSha: 1e8b5f647599edd606eb612f6002485dfdc46dc9
-  lastKnownRemoteMasterSha: 1e8b5f647599edd606eb612f6002485dfdc46dc9
+  lastKnownMasterSha: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
+  lastKnownOriginMasterSha: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
+  lastKnownRemoteMasterSha: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

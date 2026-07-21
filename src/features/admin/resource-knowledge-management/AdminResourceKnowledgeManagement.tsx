@@ -569,11 +569,35 @@ async function postLocalResourceUpload(
     formData.append("knowledgeNodePublicIds", knowledgeNodePublicId);
   });
 
-  const response = await fetch("/api/v1/resources", {
-    body: formData,
-    headers: createAdminAuthHeaders(sessionToken),
-    method: "POST",
-  });
+  const idempotencyKey = globalThis.crypto.randomUUID();
+  const headers = {
+    ...createAdminAuthHeaders(sessionToken),
+    "idempotency-key": idempotencyKey,
+  };
+  let response: Response | null = null;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      response = await fetch("/api/v1/resources", {
+        body: formData,
+        headers,
+        method: "POST",
+      });
+
+      if (response.status < 500 || attempt === 1) {
+        break;
+      }
+    } catch (error) {
+      if (attempt === 1) {
+        throw error;
+      }
+    }
+  }
+
+  if (response === null) {
+    return null;
+  }
+
   const payload = (await response.json()) as ApiResponse<{
     localResource: LocalResourceUploadSummaryDto;
     resource: AdminResourceOpsSummaryDto;

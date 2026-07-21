@@ -20,6 +20,8 @@ import {
   modelProvider,
   promptTemplate,
   resource,
+  resourceUploadOperation,
+  resourceUploadOperationStatusValues,
   resourceStatusValues,
   resourceTypeValues,
 } from "./ai-rag";
@@ -62,6 +64,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       getTableName(aiScoringTask),
       getTableName(knowledgeBase),
       getTableName(resource),
+      getTableName(resourceUploadOperation),
       getTableName(knowledgeNode),
       getTableName(knowledgeNodeResource),
     ]).toEqual([
@@ -73,6 +76,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       "ai_scoring_task",
       "knowledge_base",
       "resource",
+      "resource_upload_operation",
       "knowledge_node",
       "knowledge_node_resource",
     ]);
@@ -418,6 +422,50 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "idx_resource_level_list",
         "idx_resource_resource_status",
         "idx_resource_content_hash",
+      ]),
+    );
+  });
+
+  it("persists an idempotent resource upload operation without raw request data", () => {
+    expect(resourceUploadOperationStatusValues).toEqual([
+      "pending",
+      "file_stored",
+      "completed",
+      "failed",
+    ]);
+    expect(getColumnNames(resourceUploadOperation)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "actor_public_id",
+        "idempotency_key_hash",
+        "request_fingerprint",
+        "resource_public_id",
+        "object_storage_path",
+        "file_hash",
+        "file_size_byte",
+        "operation_status",
+        "resource_id",
+        "last_failure_message_digest",
+        "file_stored_at",
+        "completed_at",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getColumnNames(resourceUploadOperation)).not.toEqual(
+      expect.arrayContaining([
+        "idempotency_key",
+        "file_content",
+        "request_body",
+      ]),
+    );
+    expect(getIndexNames(resourceUploadOperation)).toEqual(
+      expect.arrayContaining([
+        "udx_resource_upload_operation_public_id",
+        "udx_resource_upload_operation_idempotency_key_hash",
+        "udx_resource_upload_operation_resource_public_id",
+        "idx_resource_upload_operation_status_updated_at",
       ]),
     );
   });

@@ -54,7 +54,8 @@ import {
 } from "../validators/rag-resource-knowledge";
 import {
   defaultLocalUploadStorageRoot,
-  storeLocalResourceFile,
+  prepareLocalResourceFile,
+  storePreparedLocalResourceFile,
   type StoredLocalResourceMetadata,
 } from "./local-paper-asset-storage";
 import {
@@ -67,7 +68,11 @@ import {
   buildRagRetrievalContextFromPersistedChunks,
 } from "./rag-retrieval-service";
 import type { SessionService } from "./session-service";
-import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlersWithErrorEnvelope,
+  UNEXPECTED_RUNTIME_ERROR_CODE,
+  UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+} from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -94,6 +99,7 @@ export type RagResourceKnowledgeRuntimeRepositoriesWithAudit =
 
 export type RagResourceKnowledgeRuntimeOptions = {
   localResourceStorageRoot?: string;
+  useLocalResourceAdapter?: boolean;
   repositories?: RagResourceKnowledgeRuntimeRepositoriesWithAudit;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
@@ -233,6 +239,21 @@ function readResourceIndexRequestPublicId(request: Request): string {
     idempotencyKey.length <= 128
     ? idempotencyKey
     : `resource-index-request-${randomUUID()}`;
+}
+
+const uuidV4Pattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+
+function readResourceUploadIdempotencyKey(request: Request): string | null {
+  const idempotencyKey = request.headers.get("idempotency-key")?.trim();
+
+  return idempotencyKey !== undefined && uuidV4Pattern.test(idempotencyKey)
+    ? idempotencyKey.toLowerCase()
+    : null;
+}
+
+function createSha256Digest(value: string): string {
+  return `sha256:${createHash("sha256").update(value).digest("hex")}`;
 }
 
 function isContentAdminRole(role: string): role is ContentAdminRole {
@@ -657,6 +678,30 @@ function parseLocalResourceKnowledgeNodePublicIds(formData: FormData) {
       .flatMap((value) =>
         typeof value === "string" ? value.split(/[,\s]+/u) : [],
       ),
+  );
+}
+
+function createResourceUploadRequestFingerprint(input: {
+  fileHash: string;
+  fileSizeByte: number;
+  fileName: string;
+  profession: Profession;
+  resourceType: ResourceType;
+  title: string | null;
+  levelList: number[];
+  knowledgeNodePublicIds: string[];
+}): string {
+  return createSha256Digest(
+    JSON.stringify({
+      fileHash: input.fileHash,
+      fileSizeByte: input.fileSizeByte,
+      fileName: input.fileName,
+      profession: input.profession,
+      resourceType: input.resourceType,
+      title: input.title,
+      levelList: [...input.levelList].sort((left, right) => left - right),
+      knowledgeNodePublicIds: [...input.knowledgeNodePublicIds].sort(),
+    }),
   );
 }
 
@@ -1177,13 +1222,63 @@ async function enableResource(input: {
   };
 }
 
+function createResourceUploadEntry(input: {
+  publicId: string;
+  title: string | null;
+  levelList: number[];
+  storedResource: StoredLocalResourceMetadata;
+  parseResult: Awaited<ReturnType<typeof parseLocalTextDocumentAsset>>;
+  knowledgeNodePublicIds: string[];
+  uploadedAt: Date;
+}): LocalResourceCatalogEntry {
+  const parsedResource =
+    input.parseResult.status === "parsed" ? input.parseResult : null;
+  const now = input.uploadedAt.toISOString();
+
+  return {
+    publicId: input.publicId,
+    title:
+      input.title ?? input.storedResource.fileName.replace(/\.[^.]+$/u, ""),
+    resourceType: input.storedResource.resourceType,
+    resourceStatus: parsedResource === null ? "conversion_failed" : "draft",
+    profession: input.storedResource.profession,
+    level: toLegacySingletonLevel(input.levelList),
+    levelList: [...input.levelList],
+    subject: null,
+    originalFileName: input.storedResource.fileName,
+    objectKey: input.storedResource.objectKey,
+    contentType: input.storedResource.contentType,
+    fileSizeByte: input.storedResource.fileSizeByte,
+    fileHash: input.storedResource.fileHash,
+    markdownContent: parsedResource?.markdownContent ?? null,
+    markdownContentHash: parsedResource?.markdownContentHash ?? null,
+    indexingErrorMessage:
+      input.parseResult.status === "skipped"
+        ? input.parseResult.skippedReason
+        : null,
+    isVectorStale: false,
+    publishedAt: null,
+    uploadedAt: now,
+    updatedAt: now,
+    disabledFromStatus: null,
+    chunkCount: 0,
+    textHashes: [],
+    headingPaths: parsedResource?.headingPaths ?? [],
+    knowledgeNodePublicIds: [...input.knowledgeNodePublicIds],
+    knowledgeNodeAncestorPublicIds: [],
+    activeMarkdownContentHash: null,
+    activeChunkSnapshot: [],
+  };
+}
+
 async function uploadLocalResource(input: {
   allowLocalResourceAdapter: boolean;
   request: Request;
   resourceRepository: RagResourceRuntimeRepository;
   storageRoot: string;
+  mutationContext: ResourceMutationContext;
 }): Promise<
-  ApiResponse<{
+  ResourceMutationExecution<{
     resource: AdminResourceOpsSummaryDto;
     localResource: LocalResourceUploadSummary;
   } | null>
@@ -1201,11 +1296,27 @@ async function uploadLocalResource(input: {
     !isResourceType(resourceTypeValue) ||
     levelList === null
   ) {
-    return validationFailedResponse;
+    return {
+      response: validationFailedResponse,
+      successAuditLocation: "external",
+    };
+  }
+
+  const idempotencyKey = input.allowLocalResourceAdapter
+    ? null
+    : readResourceUploadIdempotencyKey(input.request);
+
+  if (!input.allowLocalResourceAdapter && idempotencyKey === null) {
+    return {
+      response: validationFailedResponse,
+      successAuditLocation: "external",
+    };
   }
 
   const uploadedAt = new Date();
-  const storedResource = await storeLocalResourceFile({
+  const knowledgeNodePublicIds =
+    parseLocalResourceKnowledgeNodePublicIds(formData);
+  const preparedFile = await prepareLocalResourceFile({
     file: fileValue,
     fileName:
       typeof formData.get("fileName") === "string"
@@ -1213,108 +1324,237 @@ async function uploadLocalResource(input: {
         : undefined,
     profession: professionValue,
     resourceType: resourceTypeValue,
-    storageRoot: input.storageRoot,
     uploadedAt,
   });
-  const parseResult = await parseLocalTextDocumentAsset({
-    fileName: storedResource.fileName,
-    objectKey: storedResource.objectKey,
-    storageRoot: input.storageRoot,
-    maxFileSizeByte: localResourceMaxFileSizeByte,
-  });
-  const now = uploadedAt.toISOString();
-  const publicId = createLocalResourcePublicId(storedResource);
-  const catalog = await readLocalResourceCatalog(input.storageRoot);
-  const parsedResource = parseResult.status === "parsed" ? parseResult : null;
-  const entry: LocalResourceCatalogEntry = {
-    publicId,
-    title: title ?? storedResource.fileName.replace(/\.[^.]+$/u, ""),
-    resourceType: storedResource.resourceType,
-    resourceStatus: parsedResource === null ? "conversion_failed" : "draft",
-    profession: storedResource.profession,
-    level: toLegacySingletonLevel(levelList),
-    levelList,
-    subject: null,
-    originalFileName: storedResource.fileName,
-    objectKey: storedResource.objectKey,
-    contentType: storedResource.contentType,
-    fileSizeByte: storedResource.fileSizeByte,
-    fileHash: storedResource.fileHash,
-    markdownContent: parsedResource?.markdownContent ?? null,
-    markdownContentHash: parsedResource?.markdownContentHash ?? null,
-    indexingErrorMessage:
-      parseResult.status === "skipped" ? parseResult.skippedReason : null,
-    isVectorStale: false,
-    publishedAt: null,
-    uploadedAt: now,
-    updatedAt: now,
-    disabledFromStatus: null,
-    chunkCount: 0,
-    textHashes: [],
-    headingPaths: parsedResource?.headingPaths ?? [],
-    knowledgeNodePublicIds: parseLocalResourceKnowledgeNodePublicIds(formData),
-    knowledgeNodeAncestorPublicIds: [],
-    activeMarkdownContentHash: null,
-    activeChunkSnapshot: [],
-  };
-  let resourceSummary = mapLocalResourceEntry(entry);
 
   if (input.allowLocalResourceAdapter) {
+    const storedResource = await storePreparedLocalResourceFile({
+      preparedFile,
+      storageRoot: input.storageRoot,
+    });
+    const parseResult = await parseLocalTextDocumentAsset({
+      fileName: storedResource.fileName,
+      objectKey: storedResource.objectKey,
+      storageRoot: input.storageRoot,
+      maxFileSizeByte: localResourceMaxFileSizeByte,
+    });
+    const entry = createResourceUploadEntry({
+      publicId: createLocalResourcePublicId(storedResource),
+      title,
+      levelList,
+      storedResource,
+      parseResult,
+      knowledgeNodePublicIds,
+      uploadedAt,
+    });
+    const catalog = await readLocalResourceCatalog(input.storageRoot);
     const nextCatalog = {
       resources: [
         entry,
         ...catalog.resources.filter(
-          (resource) => resource.publicId !== publicId,
+          (resource) => resource.publicId !== entry.publicId,
         ),
       ],
     };
 
     await writeLocalResourceCatalog(input.storageRoot, nextCatalog);
-  } else {
-    if (input.resourceRepository.createResourceFromUpload === undefined) {
-      return createErrorResponse(
-        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
-        "Durable resource storage is unavailable.",
-      );
-    }
-
-    const persistedResource =
-      await input.resourceRepository.createResourceFromUpload({
-        publicId: entry.publicId,
-        resourceType: entry.resourceType,
-        resourceStatus:
-          entry.resourceStatus === "draft" ? "draft" : "conversion_failed",
-        title: entry.title,
-        originalFileName: entry.originalFileName,
-        objectStoragePath: entry.objectKey,
-        contentHash: entry.fileHash,
-        fileSizeByte: entry.fileSizeByte,
-        profession: entry.profession,
-        level: entry.level,
-        levelList: entry.levelList,
-        markdownContent: entry.markdownContent,
-        markdownContentHash: entry.markdownContentHash,
-        conversionErrorMessage: entry.indexingErrorMessage,
-        knowledgeNodePublicIds: entry.knowledgeNodePublicIds,
-      });
-
-    if (persistedResource === null) {
-      return createErrorResponse(
-        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
-        "Resource scope validation failed.",
-      );
-    }
-
-    resourceSummary = persistedResource;
+    return {
+      response: createSuccessResponse({
+        resource: mapLocalResourceEntry(entry),
+        localResource: createLocalUploadSummary(
+          parseResult.status === "parsed" ? parseResult.evidenceSummary : null,
+          parseResult.status === "skipped" ? parseResult.skippedReason : null,
+        ),
+      }),
+      successAuditLocation: "external",
+    };
   }
 
-  return createSuccessResponse({
-    resource: resourceSummary,
-    localResource: createLocalUploadSummary(
-      parsedResource?.evidenceSummary ?? null,
-      parseResult.status === "skipped" ? parseResult.skippedReason : null,
-    ),
+  if (
+    input.resourceRepository.prepareResourceUpload === undefined ||
+    input.resourceRepository.markResourceUploadFileStored === undefined ||
+    input.resourceRepository.completeResourceUpload === undefined ||
+    input.resourceRepository.recordResourceUploadFailure === undefined
+  ) {
+    return {
+      response: createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+        "Durable resource storage is unavailable.",
+      ),
+      successAuditLocation: "external",
+    };
+  }
+
+  if (idempotencyKey === null) {
+    return {
+      response: validationFailedResponse,
+      successAuditLocation: "external",
+    };
+  }
+
+  const idempotencyKeyHash = createSha256Digest(idempotencyKey);
+  const requestFingerprint = createResourceUploadRequestFingerprint({
+    fileHash: preparedFile.fileHash,
+    fileSizeByte: preparedFile.fileSizeByte,
+    fileName: preparedFile.fileName,
+    profession: professionValue,
+    resourceType: resourceTypeValue,
+    title,
+    levelList,
+    knowledgeNodePublicIds,
   });
+  let preparation;
+
+  try {
+    preparation = await input.resourceRepository.prepareResourceUpload({
+      operationPublicId: `resource-upload-operation-${randomUUID()}`,
+      resourcePublicId: `resource-${randomUUID()}`,
+      actorPublicId: input.mutationContext.actorPublicId,
+      idempotencyKeyHash,
+      requestFingerprint,
+      objectStoragePath: preparedFile.objectKey,
+      fileHash: preparedFile.fileHash,
+      fileSizeByte: preparedFile.fileSizeByte,
+    });
+  } catch {
+    return {
+      response: createErrorResponse(
+        UNEXPECTED_RUNTIME_ERROR_CODE,
+        UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+      ),
+      successAuditLocation: "external",
+    };
+  }
+
+  if (preparation.status === "conflict") {
+    return {
+      response: createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+        "Resource upload idempotency conflict.",
+      ),
+      successAuditLocation: "external",
+    };
+  }
+
+  if (preparation.status === "completed") {
+    return {
+      response: createSuccessResponse({
+        resource: preparation.resource,
+        localResource: createLocalUploadSummary(null, null),
+      }),
+      successAuditLocation: "database",
+    };
+  }
+
+  const operation = preparation.operation;
+
+  try {
+    const persistedFile = await storePreparedLocalResourceFile({
+      preparedFile,
+      objectKey: operation.objectStoragePath,
+      storageRoot: input.storageRoot,
+    });
+    const fileStored =
+      await input.resourceRepository.markResourceUploadFileStored(
+        operation.publicId,
+      );
+
+    if (!fileStored) {
+      throw new Error("Resource upload operation state changed.");
+    }
+
+    const persistedParseResult = await parseLocalTextDocumentAsset({
+      fileName: persistedFile.fileName,
+      objectKey: persistedFile.objectKey,
+      storageRoot: input.storageRoot,
+      maxFileSizeByte: localResourceMaxFileSizeByte,
+    });
+    const persistedParsedResource =
+      persistedParseResult.status === "parsed" ? persistedParseResult : null;
+    const entry = createResourceUploadEntry({
+      publicId: operation.resourcePublicId,
+      title,
+      levelList,
+      storedResource: persistedFile,
+      parseResult: persistedParseResult,
+      knowledgeNodePublicIds,
+      uploadedAt,
+    });
+
+    const completion = await input.resourceRepository.completeResourceUpload({
+      operationPublicId: operation.publicId,
+      requestFingerprint,
+      mutationContext: input.mutationContext,
+      publicId: entry.publicId,
+      resourceType: entry.resourceType,
+      resourceStatus:
+        entry.resourceStatus === "draft" ? "draft" : "conversion_failed",
+      title: entry.title,
+      originalFileName: entry.originalFileName,
+      objectStoragePath: entry.objectKey,
+      contentHash: entry.fileHash,
+      fileSizeByte: entry.fileSizeByte,
+      profession: entry.profession,
+      level: entry.level,
+      levelList: entry.levelList,
+      markdownContent: entry.markdownContent,
+      markdownContentHash: entry.markdownContentHash,
+      conversionErrorMessage: entry.indexingErrorMessage,
+      knowledgeNodePublicIds: entry.knowledgeNodePublicIds,
+    });
+
+    if (completion.status === "invalid_scope") {
+      return {
+        response: createErrorResponse(
+          ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
+          "Resource scope validation failed.",
+        ),
+        successAuditLocation: "external",
+      };
+    }
+
+    if (completion.status === "conflict") {
+      return {
+        response: createErrorResponse(
+          ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+          "Resource upload operation conflict.",
+        ),
+        successAuditLocation: "external",
+      };
+    }
+
+    return {
+      response: createSuccessResponse({
+        resource: completion.resource,
+        localResource: createLocalUploadSummary(
+          persistedParsedResource?.evidenceSummary ?? null,
+          persistedParseResult.status === "skipped"
+            ? persistedParseResult.skippedReason
+            : null,
+        ),
+      }),
+      successAuditLocation: "database",
+    };
+  } catch (error) {
+    try {
+      await input.resourceRepository.recordResourceUploadFailure({
+        operationPublicId: operation.publicId,
+        failureMessageDigest: createSha256Digest(
+          error instanceof Error ? error.name : "unknown_upload_failure",
+        ),
+      });
+    } catch {
+      // The persisted pending/file_stored state remains safely replayable.
+    }
+
+    return {
+      response: createErrorResponse(
+        UNEXPECTED_RUNTIME_ERROR_CODE,
+        UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+      ),
+      successAuditLocation: "external",
+    };
+  }
 }
 
 async function findLocalResource(input: {
@@ -1793,6 +2033,7 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
   const repositories = options.repositories ?? createDefaultRepositories();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
   const allowLocalResourceAdapter =
+    options.useLocalResourceAdapter ??
     options.localResourceStorageRoot !== undefined;
   const localResourceStorageRoot =
     options.localResourceStorageRoot ?? defaultLocalUploadStorageRoot;
@@ -1869,27 +2110,38 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await uploadLocalResource({
+          const result = await uploadLocalResource({
             allowLocalResourceAdapter,
             request,
             resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
+            mutationContext: createResourceMutationContext(
+              request,
+              actorOrError,
+              "resource.upload",
+              "redacted resource upload metadata",
+            ),
           });
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "resource.upload",
-              targetResourceType: "resource",
-              targetPublicId: response.data?.resource.publicId ?? null,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted local resource upload metadata",
-            },
-          );
+          if (
+            result.response.code !== 0 ||
+            result.successAuditLocation === "external"
+          ) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.upload",
+                targetResourceType: "resource",
+                targetPublicId: result.response.data?.resource.publicId ?? null,
+                resultStatus: result.response.code === 0 ? "success" : "failed",
+                metadataSummary: "redacted resource upload metadata",
+              },
+            );
+          }
 
-          return createJsonResponse(response);
+          return createJsonResponse(result.response);
         },
       },
       detail: {

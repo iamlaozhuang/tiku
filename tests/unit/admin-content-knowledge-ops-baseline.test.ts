@@ -310,7 +310,14 @@ function mockKnowledgeNodeFetch(payload: unknown = knowledgeNodePayload) {
   return fetchMock;
 }
 
-function mockResourceFetch(payload: unknown = resourcePayload) {
+function mockResourceFetch(
+  payload: unknown = resourcePayload,
+  options: {
+    uploadFailures?: number;
+    uploadFailureKind?: "transport" | "response";
+  } = {},
+) {
+  let uploadAttempts = 0;
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
       const path = String(url);
@@ -345,6 +352,23 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
       }
 
       if (path === "/api/v1/resources" && init?.method === "POST") {
+        uploadAttempts += 1;
+        if (uploadAttempts <= (options.uploadFailures ?? 0)) {
+          if (options.uploadFailureKind === "transport") {
+            throw new Error("connection lost after request dispatch");
+          }
+
+          return {
+            ok: false,
+            status: 503,
+            json: async () => ({
+              code: 503001,
+              message: "temporarily unavailable",
+              data: null,
+            }),
+          };
+        }
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -1271,7 +1295,12 @@ describe("admin content and knowledge ops baseline", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources",
       expect.objectContaining({
-        headers: { authorization: "Bearer unit-test-admin-token" },
+        headers: expect.objectContaining({
+          authorization: "Bearer unit-test-admin-token",
+          "idempotency-key": expect.stringMatching(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u,
+          ),
+        }),
         method: "POST",
       }),
     );
@@ -1327,6 +1356,47 @@ describe("admin content and knowledge ops baseline", () => {
     );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("objectStoragePath");
+  });
+
+  it("retries a transient resource upload once with the identical idempotency key", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockResourceFetch(resourcePayload, {
+      uploadFailures: 1,
+      uploadFailureKind: "transport",
+    });
+
+    render(createElement(AdminResourceKnowledgeManagement));
+    await screen.findByRole("heading", { name: "资料与知识库管理" });
+    fireEvent.click(screen.getByRole("button", { name: "上传资料" }));
+    fireEvent.change(screen.getByLabelText("资料文件"), {
+      target: {
+        files: [
+          new File(["stable upload bytes"], "retry-resource.md", {
+            type: "text/markdown",
+          }),
+        ],
+      },
+    });
+    fireEvent.click(screen.getByRole("radio", { name: "专业通用资料" }));
+    fireEvent.click(screen.getByRole("button", { name: "上传资料并生成草稿" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "资料上传完成，已生成解析草稿",
+    );
+    const uploadCalls = fetchMock.mock.calls.filter(
+      ([path, init]) => path === "/api/v1/resources" && init?.method === "POST",
+    );
+    expect(uploadCalls).toHaveLength(2);
+    const firstKey = new Headers(uploadCalls[0]?.[1]?.headers).get(
+      "idempotency-key",
+    );
+    const secondKey = new Headers(uploadCalls[1]?.[1]?.headers).get(
+      "idempotency-key",
+    );
+    expect(firstKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u,
+    );
+    expect(secondKey).toBe(firstKey);
   });
 
   it("enables a disabled resource through the protected resource action", async () => {

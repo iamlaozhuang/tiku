@@ -182,6 +182,18 @@ export const resourceStatusEnum = pgEnum(
   resourceStatusValues,
 );
 
+export const resourceUploadOperationStatusValues = [
+  "pending",
+  "file_stored",
+  "completed",
+  "failed",
+] as const;
+
+export const resourceUploadOperationStatusEnum = pgEnum(
+  "resource_upload_operation_status",
+  resourceUploadOperationStatusValues,
+);
+
 export const knStatusValues = ["active", "disabled"] as const;
 
 export const knStatusEnum = pgEnum("kn_status", knStatusValues);
@@ -963,6 +975,49 @@ export const resource = pgTable(
     index("idx_resource_level_list").using("gin", table.level_list),
     index("idx_resource_resource_status").on(table.resource_status),
     index("idx_resource_content_hash").on(table.content_hash),
+  ],
+);
+
+export const resourceUploadOperation = pgTable(
+  "resource_upload_operation",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    actor_public_id: text("actor_public_id").notNull(),
+    idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    request_fingerprint: text("request_fingerprint").notNull(),
+    resource_public_id: text("resource_public_id").notNull(),
+    object_storage_path: text("object_storage_path").notNull(),
+    file_hash: text("file_hash").notNull(),
+    file_size_byte: integer("file_size_byte").notNull(),
+    operation_status: resourceUploadOperationStatusEnum("operation_status")
+      .default("pending")
+      .notNull(),
+    resource_id: bigint("resource_id", { mode: "number" }).references(
+      () => resource.id,
+      { onDelete: "restrict" },
+    ),
+    last_failure_message_digest: text("last_failure_message_digest"),
+    file_stored_at: nullableTimestampColumn("file_stored_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_resource_upload_operation_public_id").on(table.public_id),
+    uniqueIndex("udx_resource_upload_operation_idempotency_key_hash").on(
+      table.idempotency_key_hash,
+    ),
+    uniqueIndex("udx_resource_upload_operation_resource_public_id").on(
+      table.resource_public_id,
+    ),
+    uniqueIndex("udx_resource_upload_operation_resource_id").on(
+      table.resource_id,
+    ),
+    index("idx_resource_upload_operation_status_updated_at").on(
+      table.operation_status,
+      table.updated_at,
+    ),
   ],
 );
 

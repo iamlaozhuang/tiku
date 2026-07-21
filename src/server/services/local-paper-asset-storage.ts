@@ -37,6 +37,16 @@ export type StoredLocalResourceMetadata = {
   resourceType: ResourceType;
 };
 
+export type PreparedLocalResourceFile = StoredLocalResourceMetadata & {
+  bytes: Buffer;
+};
+
+export type StorePreparedLocalResourceFileInput = {
+  preparedFile: PreparedLocalResourceFile;
+  objectKey?: string;
+  storageRoot?: string;
+};
+
 export const defaultLocalUploadStorageRoot = join(
   process.cwd(),
   ".runtime",
@@ -121,6 +131,27 @@ export async function storeLocalResourceFile({
   storageRoot = defaultLocalUploadStorageRoot,
   uploadedAt = new Date(),
 }: StoreLocalResourceFileInput): Promise<StoredLocalResourceMetadata> {
+  const preparedFile = await prepareLocalResourceFile({
+    file,
+    fileName: inputFileName,
+    profession,
+    resourceType,
+    uploadedAt,
+  });
+
+  return storePreparedLocalResourceFile({ preparedFile, storageRoot });
+}
+
+export async function prepareLocalResourceFile({
+  file,
+  fileName: inputFileName,
+  profession,
+  resourceType,
+  uploadedAt = new Date(),
+}: Omit<
+  StoreLocalResourceFileInput,
+  "storageRoot"
+>): Promise<PreparedLocalResourceFile> {
   const fileName = normalizeFileName(inputFileName ?? file.name);
   const bytes = Buffer.from(await file.arrayBuffer());
   const fileHash = createHash("sha256").update(bytes).digest("hex");
@@ -132,12 +163,9 @@ export async function storeLocalResourceFile({
     formatYearMonth(uploadedAt),
     `${fileHash}.${extension}`,
   ].join("/");
-  const targetPath = resolveInsideStorageRoot(storageRoot, objectKey);
-
-  await mkdir(dirname(targetPath), { recursive: true });
-  await writeFile(targetPath, bytes);
 
   return {
+    bytes,
     fileName,
     objectKey,
     contentType: file.type || "application/octet-stream",
@@ -145,5 +173,40 @@ export async function storeLocalResourceFile({
     fileHash,
     profession,
     resourceType,
+  };
+}
+
+export async function storePreparedLocalResourceFile({
+  preparedFile,
+  objectKey = preparedFile.objectKey,
+  storageRoot = defaultLocalUploadStorageRoot,
+}: StorePreparedLocalResourceFileInput): Promise<StoredLocalResourceMetadata> {
+  const objectKeySegments = objectKey.split("/");
+  const expectedFileName = `${preparedFile.fileHash}.${normalizeExtension(preparedFile.fileName)}`;
+
+  if (
+    objectKeySegments.length !== 5 ||
+    objectKeySegments[0] !== "dev" ||
+    objectKeySegments[1] !== "resource" ||
+    objectKeySegments[2] !== preparedFile.profession ||
+    !/^\d{6}$/u.test(objectKeySegments[3] ?? "") ||
+    objectKeySegments[4] !== expectedFileName
+  ) {
+    throw new Error("Prepared resource storage identity mismatch.");
+  }
+
+  const targetPath = resolveInsideStorageRoot(storageRoot, objectKey);
+
+  await mkdir(dirname(targetPath), { recursive: true });
+  await writeFile(targetPath, preparedFile.bytes);
+
+  return {
+    fileName: preparedFile.fileName,
+    objectKey,
+    contentType: preparedFile.contentType,
+    fileSizeByte: preparedFile.fileSizeByte,
+    fileHash: preparedFile.fileHash,
+    profession: preparedFile.profession,
+    resourceType: preparedFile.resourceType,
   };
 }
