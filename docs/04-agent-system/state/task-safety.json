@@ -1,107 +1,75 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-resource-upload-saga-2026-07-21",
-  "objective": "Close only the database-backed resource upload partition of F-0031 with a persistent idempotent upload operation, deterministic file storage, transactional resource/audit/operation completion, and resumable failure compensation; exclude paper_asset create and the local catalog adapter.",
+  "taskId": "p1-execution-policy-capsule-v1-1-2026-07-21",
+  "objective": "Strengthen the repository P1 execution policy capsule to v1.1 within state-only files, without changing Minimal Safety Kernel semantics or expanding product, approval, data, dependency, provider, or remote boundaries.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260721110000_p1_rc_04_resource_upload_saga.sql",
-    "drizzle/meta/20260721110000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
-    "tests/unit/p1-resource-database-audit-atomicity.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "blockedFiles": [
+    "AGENTS.md",
+    "docs/04-agent-system/sop/**",
+    "scripts/**",
+    ".git/hooks/**",
+    "docs/05-execution-logs/**",
+    "src/**",
+    "tests/**",
+    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
-    ".env*",
-    "scripts/**",
-    "src/app/**",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts"
+    ".env*"
   ],
+  "coreFiles": [
+    "docs/04-agent-system/state/project-state.yaml",
+    "docs/04-agent-system/state/task-queue.yaml",
+    "docs/04-agent-system/state/task-safety.json"
+  ],
+  "contingencyFiles": [],
   "validationCommands": [
     {
-      "name": "resource-upload-saga-focused",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts"
-      ]
-    },
-    {
-      "name": "resource-upload-saga-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
-        "tests/unit/p1-resource-database-audit-atomicity.test.ts"
-      ]
-    },
-    {
-      "name": "resource-upload-saga-lint",
+      "name": "policy-state-format",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "eslint",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
+        "prettier",
+        "--check",
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/task-queue.yaml",
+        "docs/04-agent-system/state/task-safety.json"
       ]
     },
     {
-      "name": "resource-upload-saga-typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "resource-upload-saga-build",
+      "name": "policy-state-diff",
       "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
+      "executable": "git",
+      "arguments": ["diff", "--cached", "--check"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "fresh-schema-start-f0031-resource-upload-saga-2026-07-21",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
+  },
+  "currentAuthorization": {
+    "approvalId": "START_P1_EXECUTION_POLICY_CAPSULE_V1_1",
+    "source": "current_user_message",
+    "baseSha": "7f11dfc9d409fd0e5029589bc712c4ee09567cc0",
+    "conditionalCloseout": true,
+    "allowedOperations": [
+      "state_only_implementation",
+      "one_reviewable_commit",
+      "ff_only_merge_to_master",
+      "one_ordinary_push_to_canonical_origin_master",
+      "sync_verification",
+      "short_branch_cleanup"
+    ],
+    "canonicalPushTarget": "https://github.com/iamlaozhuang/tiku.git#refs/heads/master"
   },
   "push": {
     "target": "origin/master",

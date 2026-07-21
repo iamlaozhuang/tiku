@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-resource-upload-saga-2026-07-21
+  currentTaskId: p1-execution-policy-capsule-v1-1-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -507,6 +507,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
     - p1-remediation-rc-04-student-home-pagination-2026-07-20
+    - p1-execution-policy-capsule-v1-1-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -582,7 +583,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20: closed
     p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20: closed
     p1-remediation-rc-04-learner-history-pagination-2026-07-20: closed
-    p1-remediation-rc-04-student-home-pagination-2026-07-20: in_progress
+    p1-remediation-rc-04-student-home-pagination-2026-07-20: closed
+    p1-execution-policy-capsule-v1-1-2026-07-21: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -747,84 +749,56 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-resource-upload-saga-2026-07-21
-  title: Resource upload saga
-  phase: p1-remediation-rc-04-resource-upload-saga-2026-07-21
-  status: closed
-  priority: p1
-  taskKind: product_remediation
-  productClosureContribution: F-0031_resource_upload_cross_resource_partition
-  branch: fix/resource-upload-saga
+  id: p1-execution-policy-capsule-v1-1-2026-07-21
+  title: P1 execution policy capsule v1.1
+  phase: p1-execution-policy-capsule-v1-1-2026-07-21
+  status: in_progress
+  priority: governance
+  taskKind: docs_state_only
+  branch: codex/p1-execution-policy-capsule-v1-1
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-  findingIds:
-    - F-0031
-  candidateRootCauseCluster: P1-RC-04
-  objective: close only database-backed resource upload with a persistent idempotent operation, deterministic file storage, transactional resource audit operation completion, and resumable failure compensation
-  highRiskApproval:
-    category: schema_migration_source_and_database_application_logic
-    status: task_bound_start_approved_candidate_tree_approval_pending
-    approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
-  allowedFilesExpansionApproval: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
-  currentExecutionGate:
-    status: candidate_preflight_green_waiting_same_id_formatted_snapshot_tree_binding
-    reason: kernel_safe_contract_and_mandatory_lint_staged_preapplied_with_only_snapshot_whitespace_change_and_drizzle_history_pass
-    resumeAction: freeze_tree_twice_then_request_same_id_formatted_snapshot_tree_full_commit_ff_only_canonical_push_sync_cleanup_approval
-  findingDisposition:
-    F-0031: in_progress_database_resource_upload_partition_closed_paper_asset_create_and_local_catalog_pending
-  verificationEvidence:
-    approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
-    allowedFilesExpansionApproval: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
-    testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
-    preflightIncludedTestFiles: 7
-    inTaskTestOnlyExpansionCount: 0
-    includedCommand: database_backed_resource_multipart_upload
-    excludedCommands:
-      - paper_asset_multipart_create
-      - local_resource_catalog_adapter
-      - migration_execution
-      - persistent_database_execution
-      - provider_or_external_service_calls
-    baselineFocused: passed_53_of_53
-    tddRed: expected_8_failures_missing_operation_schema_idempotency_replay_transactional_audit_failure_state_and_deterministic_write
-    adversarialRed: expected_4_failures_missing_failed_state_reset_hashed_scope_failure_client_uuid_v4_and_same_key_transport_retry
-    focused: passed_56_of_56
-    affectedRegression: passed_44_of_44
-    lint: passed_exact_affected_files
-    typecheck: passed
-    build: passed_97_static_pages
-    drizzleHistory: pass_everything_fine
-    drizzleSnapshotFormatting: mandatory_lint_staged_preapplied_only_snapshot_whitespace_changed_and_drizzle_history_remained_valid
-    p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
-    p0SerialBaseline: pass_closed_program
-    mainThreadAdversarialReview: passed_global_hashed_idempotency_operation_identity_binding_concurrent_replay_transactional_redacted_audit_deterministic_content_addressed_write_failure_resume_client_uuid_v4_same_key_transport_retry_and_no_legacy_upload_bypass
-    schemaMigrationSourceChange: true_approved
-    migrationExecution: false
-    persistentDatabaseExecution: false
-    permissionOrEntitlementChange: false
-    realExternalCall: false
-    extraFiles: false
-    approvalRequests: 5_including_same_id_formatted_snapshot_candidate_tree_rebind_request
-    approvalIdMismatch: 0
-    postApprovalCandidateTreeChanges: 2_removed_kernel_unsafe_drizzle_validation_command_and_preapplied_mandatory_snapshot_formatting_without_product_change
-    repeatedBlockerReports: 0
-    fullRuns: 1_failed_at_kernel_command_safety_plus_1_pending_after_new_tree_binding
-  closeout:
-    commit: finalized_by_commit_containing_this_state
-    status: ready_for_same_id_formatted_snapshot_candidate_tree_binding_then_full_commit_ff_only_merge_push_sync_and_cleanup
-    approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
+  objective: strengthen the P1 execution policy capsule without changing Minimal Safety Kernel semantics or expanding product and approval boundaries
+  approval:
+    id: START_P1_EXECUTION_POLICY_CAPSULE_V1_1
+    source: current_user_message
+    conditionalCloseout: true
+    baseSha: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
+  conditionalCloseoutProjection:
+    currentState: state_only_candidate_in_progress_not_yet_committed_or_pushed
+    triggers:
+      - exact_three_file_scope
+      - fresh_validation_and_main_thread_adversarial_review_green
+      - one_reviewable_commit_and_ff_only_master_merge
+      - one_canonical_origin_master_push
+      - verified_sync_and_short_branch_cleanup
+    projectedOutcome: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    actualPushSyncEvidence: terminal_only_after_success
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
-    findingId: F-0031_paper_asset_delete_database_partition
-    commit: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
+    taskId: p1-remediation-rc-04-resource-upload-saga-2026-07-21
+    findingId: F-0031_database_resource_upload_partition
+    commit: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    masterOriginSync: pass
+    worktreeClean: true
+    shortBranchCleanup: pass
+    worktreeCleanup: pass
+    productBoundary:
+      included: database_backed_resource_upload_partition
+      remaining:
+        - paper_asset_multipart_create
+        - local_resource_catalog_adapter
 p1ExecutionPolicy:
-  policyId: P1_EXECUTION_POLICY_CAPSULE_V1
+  policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active
   ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy
+  supersedes:
+    policyId: P1_EXECUTION_POLICY_CAPSULE_V1
+    status: superseded
+    ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
-  lastKnownOriginMasterSha: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
-  lastKnownRemoteMasterSha: 1b0227cad7c48405fc32edd9de925dda5e47e2f7
+  lastKnownMasterSha: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
+  lastKnownOriginMasterSha: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
+  lastKnownRemoteMasterSha: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

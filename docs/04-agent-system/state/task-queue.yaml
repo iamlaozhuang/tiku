@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-resource-upload-saga-2026-07-21
+  currentTaskId: p1-execution-policy-capsule-v1-1-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -248,6 +248,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-resource-upload-saga-2026-07-21
+    - p1-execution-policy-capsule-v1-1-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -342,7 +343,27 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-resource-upload-saga-2026-07-21: closed
+    p1-execution-policy-capsule-v1-1-2026-07-21: in_progress
 activeTasks:
+  - id: p1-execution-policy-capsule-v1-1-2026-07-21
+    title: P1 execution policy capsule v1.1
+    phase: p1-execution-policy-capsule-v1-1-2026-07-21
+    status: in_progress
+    priority: governance
+    taskKind: docs_state_only
+    branch: codex/p1-execution-policy-capsule-v1-1
+    objective: strengthen the P1 execution policy capsule without changing Minimal Safety Kernel semantics or expanding product and approval boundaries
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    approval:
+      id: START_P1_EXECUTION_POLICY_CAPSULE_V1_1
+      source: current_user_message
+      baseSha: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
+      conditionalCloseout: true
+    conditionalCloseoutProjection:
+      currentState: state_only_candidate_in_progress_not_yet_committed_or_pushed
+      trigger: exact_scope_validation_review_commit_ff_only_push_sync_and_cleanup_all_succeed
+      projectedOutcome: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      actualPushSyncEvidence: terminal_only_after_success
   - id: p1-remediation-rc-04-resource-upload-saga-2026-07-21
     title: Resource upload saga
     phase: p1-remediation-rc-04-resource-upload-saga-2026-07-21
@@ -358,10 +379,10 @@ activeTasks:
       - F-0031
     highRiskApproval:
       category: schema_migration_source_and_database_application_logic
-      status: task_bound_start_approved_candidate_tree_approval_pending
+      status: satisfied_by_fresh_approval_and_closed
       approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
     allowedFilesExpansionApproval: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
-    executionStage: candidate_preflight_green_and_adversarially_reviewed_waiting_same_id_formatted_snapshot_tree_binding
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     partitionBoundary:
       included:
         - database_backed_resource_multipart_upload
@@ -376,7 +397,7 @@ activeTasks:
         - persistent_database_execution
         - provider_or_external_service_calls
     findingDisposition:
-      F-0031: in_progress_database_resource_upload_partition_closed_paper_asset_create_and_local_catalog_pending
+      F-0031: database_resource_upload_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
       allowedFilesExpansionApproval: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
@@ -406,11 +427,15 @@ activeTasks:
       approvalIdMismatch: 0
       postApprovalCandidateTreeChanges: 2_removed_kernel_unsafe_drizzle_validation_command_and_preapplied_mandatory_snapshot_formatting_without_product_change
       repeatedBlockerReports: 0
-      fullRuns: 1_failed_at_kernel_command_safety_plus_1_pending_after_new_tree_binding
+      fullRuns: 1_failed_at_kernel_command_safety_plus_1_successful_on_approved_tree
     closeout:
-      commit: finalized_by_commit_containing_this_state
-      status: ready_for_same_id_formatted_snapshot_candidate_tree_binding_then_full_commit_ff_only_merge_push_sync_and_cleanup
+      commit: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       approvalId: fresh-schema-start-f0031-resource-upload-saga-2026-07-21
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
     previousTaskCloseout:
       taskId: p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
       findingId: F-0031_paper_asset_delete_database_partition
@@ -442,7 +467,7 @@ activeTasks:
         - paper_asset_local_file_mutation
         - resource_cross_resource_mutations
     findingDisposition:
-      F-0031: in_progress_paper_asset_delete_partition_closed_multipart_create_and_resource_cross_resource_paths_pending
+      F-0031: paper_asset_delete_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -505,7 +530,7 @@ activeTasks:
         - local_resource_file_and_catalog_mutations
         - paper_asset_file_and_database_mutations
     findingDisposition:
-      F-0031: in_progress_resource_database_partition_closed_cross_resource_upload_local_catalog_and_paper_asset_pending
+      F-0031: resource_database_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -569,7 +594,7 @@ activeTasks:
         - resource_mutations
         - paper_asset_filesystem_mutations
     findingDisposition:
-      F-0031: in_progress_knowledge_node_partition_closed_resource_and_paper_asset_partitions_pending
+      F-0031: knowledge_node_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -631,7 +656,7 @@ activeTasks:
         - resource_mutations
         - knowledge_node_mutations
     findingDisposition:
-      F-0031: in_progress_admin_account_creation_partition_closed_resource_knowledge_and_paper_asset_partitions_pending
+      F-0031: admin_account_creation_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -693,7 +718,7 @@ activeTasks:
         - resource_mutations
         - knowledge_node_mutations
     findingDisposition:
-      F-0031: in_progress_paper_database_partition_closed_other_domain_partitions_pending
+      F-0031: paper_database_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       allowedFilesExpansionApproval: current-user-paper-draft-service-delete-context-allowlist-approval-2026-07-21
@@ -754,7 +779,7 @@ activeTasks:
         - resource_mutations
         - knowledge_node_mutations
     findingDisposition:
-      F-0031: in_progress_question_material_partition_closed_other_domain_partitions_pending
+      F-0031: question_material_partition_closed_remaining_partitions_open
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -3448,17 +3473,24 @@ activeTasks:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
 p1ExecutionPolicy:
-  schemaVersion: 1
-  policyId: P1_EXECUTION_POLICY_CAPSULE_V1
+  schemaVersion: "1.1"
+  policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active
   effectiveScope: current_active_p1_goal
   source:
     kind: durable_user_instruction
     registeredAt: "2026-07-21"
+    supersedes: P1_EXECUTION_POLICY_CAPSULE_V1
     approvalReferences:
       lowRiskCloseout: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       boundedMediumRiskCloseout: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansion: standing-test-only-allowlist-expansion-2026-07-21
+      v1_1StateOnlyImplementation: START_P1_EXECUTION_POLICY_CAPSULE_V1_1
+  supersededPolicies:
+    - policyId: P1_EXECUTION_POLICY_CAPSULE_V1
+      status: superseded
+      source: durable_user_instruction_registered_2026_07_21
+      retainedAs: historical_policy_source_not_active_authorization
   effectiveUntil: current_p1_goal_complete_cancelled_or_policy_revoked
   revocationConditions:
     - current_p1_goal_complete_or_cancelled
@@ -3471,19 +3503,85 @@ p1ExecutionPolicy:
       - each_finding_requires_independent_acceptance_evidence_and_closure
       - bundle_only_findings_with_one_confirmed_authoritative_path_invariant_failure_mechanism_fix_validation_matrix_risk_and_review_boundary
     preRedImpactScan:
-      - scan_direct_callers_mocks_fixtures_src_test_spec_and_tests_for_minutes_not_repository_wide_planning
-      - add_every_validation_command_direct_test_path_to_allowedFiles_before_RED
+      timebox: minutes_not_repository_wide_planning
+      authoritativeChain:
+        - UI_or_API_caller
+        - route_or_handler
+        - service
+        - repository
+        - schema_or_migration
+        - direct_tests_mocks_and_fixtures
+      contractFields:
+        - coreFiles
+        - contingencyFiles
+      requirements:
+        - scan_the_complete_authoritative_chain_before_first_approval_and_RED
+        - write_current_task_coreFiles_and_contingencyFiles_once_before_freeze
+        - add_every_validation_command_direct_test_path_to_allowedFiles_before_RED
+        - prepare_only_the_current_task_and_do_not_prebuild_future_task_contracts
     scopeAndFreezePreparation:
       - inventory_predictable_product_files_test_files_and_risk_categories_once
       - complete_formatter_generated_artifacts_and_test_scope_before_candidate_freeze
-      - forecast_only_the_next_one_to_three_tasks_and_do_not_prebuild_all_contracts
-    approvalTiming:
-      - combine_foreseeable_fresh_approval_categories_in_task_preflight
-      - request_delta_approval_during_implementation_only_for_a_new_independent_root_cause_or_real_scope_expansion
-      - request_one_candidate_tree_approval_only_after_format_validation_review_and_two_unchanged_read_only_tree_checks
-    duplicateSuppression:
-      - do_not_repeat_the_same_scope_candidate_approval_id_or_blocker_when_evidence_is_unchanged
-      - report_only_incremental_evidence
+      - forecast_only_the_next_one_to_three_tasks_without_materializing_their_contracts
+    sameTaskAuthoritativeCallChainAllowance:
+      maxAdditionalProductSourceFiles: 2
+      allConditionsRequired:
+        - same_task_finding_or_RC_objective_root_cause_risk_category_and_business_domain
+        - direct_caller_or_callee_evidence_from_the_frozen_authoritative_chain
+        - only_parameter_header_mutation_context_idempotency_retry_or_error_contract_propagation
+        - record_exact_paths_and_call_chain_evidence_in_task_safety_before_editing
+        - no_new_capability_permission_schema_dependency_provider_external_effect_or_independent_root_cause
+        - run_corresponding_focused_tests_lint_and_typecheck
+      freshApprovalRequiredWhen:
+        - more_than_two_product_source_files
+        - cross_domain_or_indirect_call_chain
+        - new_independent_root_cause
+        - new_or_changed_high_risk_category
+    futureHighRiskConditionalCloseout:
+      effectiveForApprovalsIssuedAfter: P1_EXECUTION_POLICY_CAPSULE_V1_1
+      retroactive: false
+      doesNotReinterpretTasksThrough: p1-remediation-rc-04-resource-upload-saga-2026-07-21
+      requiredEnvelopeFields:
+        - taskId
+        - RC_or_finding
+        - riskCategory
+        - coreFiles
+        - contingencyFiles
+        - allowedOperations
+        - explicitlyForbiddenItems
+        - canonicalPushTarget
+        - conditionalCloseout_true
+      conditionalCoverage:
+        - implementation
+        - one_reviewable_commit
+        - ff_only_merge_to_master
+        - one_canonical_origin_master_push
+        - sync_verification
+        - cleanup
+      coverageConditions:
+        - implementation_remains_inside_the_approved_envelope
+        - formatter_preapplied
+        - validation_and_main_thread_adversarial_review_green
+        - base_and_remote_unchanged
+      deltaFreshApprovalRequiredWhen:
+        - file_or_risk_outside_the_approved_envelope
+        - new_capability
+        - base_or_remote_drift
+        - semantic_change_after_validation_or_review
+    approvalDeduplication:
+      pendingApprovalFingerprintFields:
+        - taskId
+        - rootCause
+        - riskCategory
+        - exactScope
+        - requestedOperations
+        - baseSha
+      rules:
+        - only_one_active_request_per_identical_fingerprint
+        - unchanged_evidence_must_not_trigger_reapplication_rechecking_or_restatement
+        - report_only_incremental_evidence
+        - durable_wait_sends_one_request_then_parks_without_repeat_turns
+        - a_later_user_or_coordinator_message_resumes_the_same_Goal_without_creating_a_new_Goal
     testOnlyExpansion:
       approvalId: standing-test-only-allowlist-expansion-2026-07-21
       boundaries:
@@ -3494,6 +3592,29 @@ p1ExecutionPolicy:
       - reread_p1ExecutionPolicy_before_each_new_task
       - write_only_applicable_approval_ids_into_that_tasks_task_safety_contract
       - chat_summaries_and_old_task_plans_are_not_authorization_SSOT
+    metrics:
+      observationWindow: next_three_product_tasks
+      fields:
+        - mandatoryFreshApprovals
+        - preventableScopeMissApprovals
+        - candidateReapprovals
+        - approvalWaitTurns
+        - productValueTime
+        - mechanismOverhead
+        - guardSmokeChanges
+      accounting:
+        mechanismOverheadIncludes:
+          - waiting
+          - diagnosis
+          - repeated_commands
+          - coordination
+        fabricatedResultsForbidden: true
+    closeoutStateConsistency:
+      - separate_current_state_trigger_conditions_and_projected_outcome
+      - never_record_unperformed_commit_push_sync_or_cleanup_as_actual_fact
+      - successful_terminal_evidence_is_the_actual_closeout_proof
+      - next_task_start_only_verifies_closeout_facts_and_does_not_reopen_candidate_approval
+      - a_closed_task_must_not_retain_pending_approval_waiting_tree_binding_or_in_progress_disposition
     freshApprovalRequired:
       - dependency_or_package_or_lockfile_change
       - schema_or_migration_change
@@ -3502,6 +3623,7 @@ p1ExecutionPolicy:
       - real_provider_or_external_service_call_or_configuration
       - credential_or_secret_env
       - deployment_or_pull_request_or_force_push_or_noncanonical_remote
+      - approval_envelope_drift_or_the_same_task_call_chain_allowance_failure
       - capsule_or_minimal_safety_kernel_semantic_change
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20
