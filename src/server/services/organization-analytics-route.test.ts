@@ -250,6 +250,9 @@ function createRepositoryBackedDashboardSummaryRepository(
     async readEmployeeTrainingSummaryInputs() {
       return [];
     },
+    async readEmployeeTrainingSummaryPage() {
+      return { employeeTrainingSummaryInputs: [], total: 0 };
+    },
     async readFormalLearningSummary(input) {
       observedReads.push({
         readName: "formal_learning_summary",
@@ -333,6 +336,15 @@ function createRepositoryBackedEmployeeStatisticsRepository(
         },
       ];
     },
+    async readEmployeeTrainingSummaryPage(input) {
+      const employeeTrainingSummaryInputs =
+        await this.readEmployeeTrainingSummaryInputs(input);
+
+      return {
+        employeeTrainingSummaryInputs,
+        total: employeeTrainingSummaryInputs.length,
+      };
+    },
     async readFormalLearningSummary() {
       return null;
     },
@@ -413,8 +425,16 @@ function createFakeRuntimeDatabase(selectRowsByCall: readonly unknown[][]) {
     const rows = selectRowsByCall[selectCalls.length] ?? [];
     const queryBuilder = {
       from: vi.fn(() => queryBuilder),
+      groupBy: vi.fn(() => queryBuilder),
       innerJoin: vi.fn(() => queryBuilder),
-      where: vi.fn(async () => rows),
+      limit: vi.fn(() => queryBuilder),
+      offset: vi.fn(() => queryBuilder),
+      orderBy: vi.fn(() => queryBuilder),
+      then: (
+        resolve: (value: unknown[]) => unknown,
+        reject?: (reason: unknown) => unknown,
+      ) => Promise.resolve(rows).then(resolve, reject),
+      where: vi.fn(() => queryBuilder),
     };
 
     selectCalls.push({
@@ -1274,6 +1294,13 @@ describe("organization analytics employee statistics route handlers", () => {
       ],
       [
         {
+          employeeDisplayName: "Employee 001",
+          employeePublicId: "organization_analytics_employee_public_001",
+        },
+      ],
+      [{ value: 1 }],
+      [
+        {
           employeePublicId: "organization_analytics_employee_public_001",
           employeeDisplayName: "Employee 001",
           organizationPublicId: "organization_analytics_route_org_public_001",
@@ -1358,10 +1385,12 @@ describe("organization analytics employee statistics route handlers", () => {
       },
     });
     expect(sessionService.requests).toHaveLength(1);
-    expect(select).toHaveBeenCalledTimes(3);
+    expect(select).toHaveBeenCalledTimes(5);
     expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
       ["organizationId"],
       ["organizationId", "organizationPublicId", "parentOrganizationId"],
+      ["employeeDisplayName", "employeePublicId"],
+      ["value"],
       [
         "employeePublicId",
         "employeeDisplayName",

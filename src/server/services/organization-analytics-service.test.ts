@@ -273,6 +273,11 @@ function createOrganizationAnalyticsServiceRepositoryFake(
       async () =>
         createValidEmployeeStatisticsCommand().employeeTrainingSummaryInputs,
     ),
+    readEmployeeTrainingSummaryPage: vi.fn(async () => ({
+      employeeTrainingSummaryInputs:
+        createValidEmployeeStatisticsCommand().employeeTrainingSummaryInputs,
+      total: 1,
+    })),
     readFormalLearningSummary: vi.fn(
       async () => createValidCommand().formalLearningSummary,
     ),
@@ -502,13 +507,14 @@ describe("organization analytics repository-backed service", () => {
         command,
       );
 
-    expect(repository.readEmployeeTrainingSummaryInputs).toHaveBeenCalledWith({
+    expect(repository.readEmployeeTrainingSummaryPage).toHaveBeenCalledWith({
       organizationPublicId: "org_city_public_123",
       scopeOrganizationPublicIds: [
         "org_city_public_123",
         "org_district_public_456",
       ],
       dateRange: command.dateRange,
+      pagination: { page: 1, pageSize: 20 },
     });
     expect(result).toEqual(
       buildOrganizationAnalyticsEmployeeStatisticsSummary(

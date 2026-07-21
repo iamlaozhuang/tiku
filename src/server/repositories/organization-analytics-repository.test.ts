@@ -118,10 +118,15 @@ function createGateway(
       generatedArtifact: "hidden generated artifact",
     },
   ]);
+  const readEmployeeTrainingSummaryPage = vi.fn(async () => ({
+    employeeTrainingSummaryInputs: await readEmployeeTrainingSummaryInputs(),
+    total: 1,
+  }));
   const gateway: OrganizationAnalyticsRepositoryGateway = {
     findVisibleOrganizationScopeByAdminPublicId,
     readTrainingAggregateMetricsInput,
     readEmployeeTrainingSummaryInputs,
+    readEmployeeTrainingSummaryPage,
     readFormalLearningSummary,
     readKnowledgeWeakPointSummary,
     readExportReadinessRows,
@@ -133,6 +138,7 @@ function createGateway(
     findVisibleOrganizationScopeByAdminPublicId,
     readTrainingAggregateMetricsInput,
     readEmployeeTrainingSummaryInputs,
+    readEmployeeTrainingSummaryPage,
     readFormalLearningSummary,
     readKnowledgeWeakPointSummary,
     readExportReadinessRows,

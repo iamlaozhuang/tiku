@@ -6,9 +6,22 @@ import {
   organizationTrainingAnswer,
   user,
 } from "@/db/schema";
-import { and, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
+import {
+  and,
+  asc,
+  countDistinct,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  type SQL,
+} from "drizzle-orm";
 
-import type { OrganizationAnalyticsDateRangeDto } from "../contracts/organization-analytics-contract";
+import type {
+  OrganizationAnalyticsDateRangeDto,
+  OrganizationAnalyticsEmployeeStatisticsPaginationInput,
+} from "../contracts/organization-analytics-contract";
 import type {
   OrganizationAnalyticsEmployeeTrainingSummaryInput,
   OrganizationAnalyticsExportReadinessRow,
@@ -38,6 +51,16 @@ export type OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput = Omit<
   "dateRange"
 >;
 
+export type OrganizationAnalyticsEmployeeTrainingSummaryPageInput =
+  OrganizationAnalyticsScopeReadInput & {
+    pagination: OrganizationAnalyticsEmployeeStatisticsPaginationInput;
+  };
+
+export type OrganizationAnalyticsEmployeeTrainingSummaryPage = {
+  employeeTrainingSummaryInputs: readonly OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[];
+  total: number;
+};
+
 export type OrganizationAnalyticsFormalLearningSummary = {
   formalPracticeCount: number;
   formalMockExamCount: number;
@@ -66,6 +89,9 @@ export type OrganizationAnalyticsRepositoryGateway = {
   ): Promise<
     readonly OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[]
   >;
+  readEmployeeTrainingSummaryPage(
+    input: OrganizationAnalyticsEmployeeTrainingSummaryPageInput,
+  ): Promise<OrganizationAnalyticsEmployeeTrainingSummaryPage>;
   readFormalLearningSummary(
     input: OrganizationAnalyticsScopeReadInput,
   ): Promise<Omit<
@@ -92,6 +118,9 @@ export type OrganizationAnalyticsRepository = {
   ): Promise<
     readonly OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[]
   >;
+  readEmployeeTrainingSummaryPage(
+    input: OrganizationAnalyticsEmployeeTrainingSummaryPageInput,
+  ): Promise<OrganizationAnalyticsEmployeeTrainingSummaryPage>;
   readFormalLearningSummary(
     input: OrganizationAnalyticsScopeReadInput,
   ): Promise<OrganizationAnalyticsFormalLearningSummary | null>;
@@ -139,7 +168,12 @@ export type OrganizationAnalyticsTrainingAnswerSourceGatewayOptions = {
 export type OrganizationAnalyticsPostgresGatewayOptions =
   OrganizationAnalyticsTrainingAnswerSourceGatewayOptions & {
     findVisibleOrganizationScopeByAdminPublicId: OrganizationAnalyticsVisibleOrganizationScopeReader;
+    readEmployeeTrainingSummaryPage?: OrganizationAnalyticsEmployeeTrainingSummaryPageReader;
   };
+
+export type OrganizationAnalyticsEmployeeTrainingSummaryPageReader = (
+  input: OrganizationAnalyticsEmployeeTrainingSummaryPageInput,
+) => Promise<OrganizationAnalyticsEmployeeTrainingSummaryPage>;
 
 type OrganizationAnalyticsVisibleOrganizationScopeRow = {
   organizationId: number;
@@ -196,6 +230,23 @@ export function createOrganizationAnalyticsRepository(
       return employeeTrainingSummaryInputs.map(
         copyEmployeeTrainingSummaryInput,
       );
+    },
+
+    async readEmployeeTrainingSummaryPage(input) {
+      const readInput = normalizeEmployeeTrainingSummaryPageInput(input);
+
+      if (readInput === null) {
+        return { employeeTrainingSummaryInputs: [], total: 0 };
+      }
+
+      const page = await gateway.readEmployeeTrainingSummaryPage(readInput);
+
+      return {
+        employeeTrainingSummaryInputs: page.employeeTrainingSummaryInputs.map(
+          copyEmployeeTrainingSummaryInput,
+        ),
+        total: normalizeTotal(page.total),
+      };
     },
 
     async readFormalLearningSummary(input) {
@@ -268,6 +319,12 @@ export function createOrganizationAnalyticsPostgresGateway(
 
   return {
     ...trainingAnswerSourceGateway,
+
+    async readEmployeeTrainingSummaryPage(input) {
+      return options.readEmployeeTrainingSummaryPage === undefined
+        ? trainingAnswerSourceGateway.readEmployeeTrainingSummaryPage(input)
+        : options.readEmployeeTrainingSummaryPage(input);
+    },
 
     async findVisibleOrganizationScopeByAdminPublicId(adminPublicId) {
       const normalizedAdminPublicId = normalizeRequiredText(adminPublicId);
@@ -391,6 +448,129 @@ export function createOrganizationAnalyticsTrainingAnswerSourceReader(
   };
 }
 
+function createSubmittedTrainingAnswerCondition(
+  input: OrganizationAnalyticsScopeReadInput,
+): SQL | null {
+  const submittedAtRange = normalizeDateRange(input.dateRange);
+
+  if (submittedAtRange === null) {
+    return null;
+  }
+
+  return and(
+    eq(
+      organizationTrainingAnswer.organization_training_answer_status,
+      "submitted",
+    ),
+    inArray(organizationTrainingAnswer.organization_public_id, [
+      ...input.scopeOrganizationPublicIds,
+    ]),
+    isNotNull(organizationTrainingAnswer.submitted_at),
+    gte(organizationTrainingAnswer.submitted_at, submittedAtRange.startAt),
+    lte(organizationTrainingAnswer.submitted_at, submittedAtRange.endAt),
+  )!;
+}
+
+export function createOrganizationAnalyticsEmployeeTrainingSummaryPageReader(
+  database: RuntimeDatabase,
+): OrganizationAnalyticsEmployeeTrainingSummaryPageReader {
+  return async (input) => {
+    const readInput = normalizeEmployeeTrainingSummaryPageInput(input);
+
+    if (readInput === null) {
+      return { employeeTrainingSummaryInputs: [], total: 0 };
+    }
+
+    const whereCondition = createSubmittedTrainingAnswerCondition(readInput);
+
+    if (whereCondition === null) {
+      return { employeeTrainingSummaryInputs: [], total: 0 };
+    }
+
+    const offset =
+      (readInput.pagination.page - 1) * readInput.pagination.pageSize;
+    const employeePageRows = await database
+      .select({
+        employeeDisplayName: user.name,
+        employeePublicId: employee.public_id,
+      })
+      .from(organizationTrainingAnswer)
+      .innerJoin(
+        employee,
+        eq(organizationTrainingAnswer.employee_id, employee.id),
+      )
+      .innerJoin(user, eq(employee.user_id, user.id))
+      .where(whereCondition)
+      .groupBy(user.name, employee.public_id)
+      .orderBy(asc(user.name), asc(employee.public_id))
+      .limit(readInput.pagination.pageSize)
+      .offset(offset);
+    const [totalRow] = await database
+      .select({ value: countDistinct(employee.public_id) })
+      .from(organizationTrainingAnswer)
+      .innerJoin(
+        employee,
+        eq(organizationTrainingAnswer.employee_id, employee.id),
+      )
+      .innerJoin(user, eq(employee.user_id, user.id))
+      .where(whereCondition);
+    const employeePublicIds = employeePageRows.map(
+      (employeePageRow) => employeePageRow.employeePublicId,
+    );
+
+    if (employeePublicIds.length === 0) {
+      return {
+        employeeTrainingSummaryInputs: [],
+        total: normalizeTotal(totalRow?.value),
+      };
+    }
+
+    const trainingAnswerSourceRows = await database
+      .select({
+        employeePublicId: organizationTrainingAnswer.employee_public_id,
+        employeeDisplayName: user.name,
+        organizationPublicId: organizationTrainingAnswer.organization_public_id,
+        organizationTrainingVersionPublicId:
+          organizationTrainingAnswer.organization_training_version_public_id,
+        score: organizationTrainingAnswer.score,
+        totalScore: organizationTrainingAnswer.total_score,
+        submittedAt: organizationTrainingAnswer.submitted_at,
+        answerOrganizationSnapshot:
+          organizationTrainingAnswer.answer_organization_snapshot,
+      })
+      .from(organizationTrainingAnswer)
+      .innerJoin(
+        employee,
+        eq(organizationTrainingAnswer.employee_id, employee.id),
+      )
+      .innerJoin(user, eq(employee.user_id, user.id))
+      .where(
+        and(
+          whereCondition,
+          inArray(
+            organizationTrainingAnswer.employee_public_id,
+            employeePublicIds,
+          ),
+        ),
+      )
+      .orderBy(
+        asc(user.name),
+        asc(employee.public_id),
+        asc(organizationTrainingAnswer.submitted_at),
+        asc(organizationTrainingAnswer.public_id),
+      );
+
+    return {
+      employeeTrainingSummaryInputs:
+        createEmployeeTrainingSummaryInputsFromSourceRows(
+          trainingAnswerSourceRows.flatMap(copyTrainingAnswerSourceRow),
+          readInput,
+        ).sort(compareEmployeeTrainingSummaryInputs),
+      total: normalizeTotal(totalRow?.value),
+    };
+  };
+}
+
 export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
   options: OrganizationAnalyticsTrainingAnswerSourceGatewayOptions,
 ): OrganizationAnalyticsRepositoryGateway {
@@ -446,6 +626,32 @@ export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
       );
     },
 
+    async readEmployeeTrainingSummaryPage(input) {
+      const readInput = normalizeEmployeeTrainingSummaryPageInput(input);
+
+      if (readInput === null) {
+        return { employeeTrainingSummaryInputs: [], total: 0 };
+      }
+
+      const trainingAnswerSourceRows =
+        await options.readTrainingAnswerSourceRows(readInput);
+      const employeeTrainingSummaryInputs =
+        createEmployeeTrainingSummaryInputsFromSourceRows(
+          trainingAnswerSourceRows,
+          readInput,
+        ).sort(compareEmployeeTrainingSummaryInputs);
+      const offset =
+        (readInput.pagination.page - 1) * readInput.pagination.pageSize;
+
+      return {
+        employeeTrainingSummaryInputs: employeeTrainingSummaryInputs.slice(
+          offset,
+          offset + readInput.pagination.pageSize,
+        ),
+        total: employeeTrainingSummaryInputs.length,
+      };
+    },
+
     async readFormalLearningSummary() {
       return null;
     },
@@ -470,6 +676,9 @@ function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyti
     },
     async readEmployeeTrainingSummaryInputs() {
       return [];
+    },
+    async readEmployeeTrainingSummaryPage() {
+      return { employeeTrainingSummaryInputs: [], total: 0 };
     },
     async readFormalLearningSummary() {
       return null;
@@ -680,6 +889,17 @@ function selectLatestEmployeeSummarySourceSubmission(
         Date.parse(rightSubmission.submittedAt) -
         Date.parse(leftSubmission.submittedAt),
     )[0] ?? null
+  );
+}
+
+function compareEmployeeTrainingSummaryInputs(
+  leftInput: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput,
+  rightInput: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput,
+): number {
+  return (
+    leftInput.employeeDisplayName.localeCompare(
+      rightInput.employeeDisplayName,
+    ) || leftInput.employeePublicId.localeCompare(rightInput.employeePublicId)
   );
 }
 
@@ -911,6 +1131,34 @@ function normalizeScopeReadInput(
       endAt: input.dateRange.endAt,
     },
   };
+}
+
+function normalizeEmployeeTrainingSummaryPageInput(
+  input: OrganizationAnalyticsEmployeeTrainingSummaryPageInput,
+): OrganizationAnalyticsEmployeeTrainingSummaryPageInput | null {
+  const scopeInput = normalizeScopeReadInput(input);
+  const page = Math.floor(input.pagination.page);
+  const pageSize = input.pagination.pageSize;
+
+  if (
+    scopeInput === null ||
+    !Number.isSafeInteger(page) ||
+    page <= 0 ||
+    (pageSize !== 20 && pageSize !== 50 && pageSize !== 100)
+  ) {
+    return null;
+  }
+
+  return {
+    ...scopeInput,
+    pagination: { page, pageSize },
+  };
+}
+
+function normalizeTotal(value: number | string | null | undefined): number {
+  const total = Number(value ?? 0);
+
+  return Number.isSafeInteger(total) && total > 0 ? total : 0;
 }
 
 function copyTrainingAggregateMetricsInput(

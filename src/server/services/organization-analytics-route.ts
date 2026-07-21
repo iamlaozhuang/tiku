@@ -12,6 +12,7 @@ import {
   mapOrganizationAnalyticsEmployeeStatisticsRouteResponse,
 } from "../mappers/organization-analytics-mapper";
 import {
+  createOrganizationAnalyticsEmployeeTrainingSummaryPageReader,
   createOrganizationAnalyticsPostgresGateway,
   createOrganizationAnalyticsTrainingAnswerSourceReader,
   createOrganizationAnalyticsVisibleOrganizationScopeReader,
@@ -312,6 +313,11 @@ function createRuntimePostgresOrganizationAnalyticsRepository(
     },
     async readTrainingAnswerSourceRows(input) {
       return createOrganizationAnalyticsTrainingAnswerSourceReader(
+        getDatabase(),
+      )(input);
+    },
+    async readEmployeeTrainingSummaryPage(input) {
+      return createOrganizationAnalyticsEmployeeTrainingSummaryPageReader(
         getDatabase(),
       )(input);
     },

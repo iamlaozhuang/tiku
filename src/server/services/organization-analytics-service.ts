@@ -338,36 +338,62 @@ export function buildOrganizationAnalyticsEmployeeStatisticsSummary(
     return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
-  const employees = command.employeeTrainingSummaryInputs.map((employeeInput) =>
-    createOrganizationAnalyticsEmployeeTrainingSummary({
-      ...employeeInput,
-      dateRange: command.dateRange,
-    }),
-  );
-  const total = employees.length;
   const page = Math.max(command.pagination.page, 1);
   const pageSize = command.pagination.pageSize;
-  const paginatedEmployees = employees.slice(
-    (page - 1) * pageSize,
-    page * pageSize,
+  const paginatedEmployeeTrainingSummaryInputs =
+    command.employeeTrainingSummaryInputs.slice(
+      (page - 1) * pageSize,
+      page * pageSize,
+    );
+
+  return createOrganizationAnalyticsEmployeeStatisticsPageResponse({
+    dateRange: command.dateRange,
+    employeeTrainingSummaryInputs: paginatedEmployeeTrainingSummaryInputs,
+    organizationPublicId: command.organizationPublicId,
+    page,
+    pageSize,
+    scopeOrganizationPublicIds: command.scopeOrganizationPublicIds,
+    total: command.employeeTrainingSummaryInputs.length,
+    updatedAt: command.updatedAt,
+  });
+}
+
+function createOrganizationAnalyticsEmployeeStatisticsPageResponse(input: {
+  dateRange: OrganizationAnalyticsDateRangeDto;
+  employeeTrainingSummaryInputs: readonly Omit<
+    OrganizationAnalyticsEmployeeTrainingSummaryInput,
+    "dateRange"
+  >[];
+  organizationPublicId: string;
+  page: number;
+  pageSize: 20 | 50 | 100;
+  scopeOrganizationPublicIds: readonly string[];
+  total: number;
+  updatedAt: string;
+}): ApiResponse<OrganizationAnalyticsEmployeeStatisticsSummaryDto | null> {
+  const employees = input.employeeTrainingSummaryInputs.map((employeeInput) =>
+    createOrganizationAnalyticsEmployeeTrainingSummary({
+      ...employeeInput,
+      dateRange: input.dateRange,
+    }),
   );
 
   return createPaginatedResponse(
     {
-      organizationPublicId: command.organizationPublicId,
-      scopeOrganizationPublicIds: [...command.scopeOrganizationPublicIds],
-      dateRange: command.dateRange,
-      employeeCount: total,
-      employees: paginatedEmployees,
+      organizationPublicId: input.organizationPublicId,
+      scopeOrganizationPublicIds: [...input.scopeOrganizationPublicIds],
+      dateRange: input.dateRange,
+      employeeCount: input.total,
+      employees,
       redactedStatisticsBoundary:
         createOrganizationAnalyticsRedactedStatisticsBoundary(),
       redactionStatus: "summary_only",
-      updatedAt: command.updatedAt,
+      updatedAt: input.updatedAt,
     },
     {
-      page,
-      pageSize,
-      total,
+      page: input.page,
+      pageSize: input.pageSize,
+      total: input.total,
       sortBy: "employeeDisplayName",
       sortOrder: "asc",
     },
@@ -386,23 +412,23 @@ export async function buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRep
     return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
-  const employeeTrainingSummaryInputs =
-    await command.repository.readEmployeeTrainingSummaryInputs({
+  const employeeTrainingSummaryPage =
+    await command.repository.readEmployeeTrainingSummaryPage({
       organizationPublicId: command.organizationPublicId,
       scopeOrganizationPublicIds,
       dateRange: command.dateRange,
+      pagination: command.pagination,
     });
 
-  return buildOrganizationAnalyticsEmployeeStatisticsSummary({
-    adminContext: command.adminContext,
-    organizationPublicId: command.organizationPublicId,
-    scopeOrganizationPublicIds,
+  return createOrganizationAnalyticsEmployeeStatisticsPageResponse({
     dateRange: command.dateRange,
-    employeeTrainingSummaryInputs,
-    pagination: {
-      page: command.pagination.page,
-      pageSize: command.pagination.pageSize,
-    },
+    employeeTrainingSummaryInputs:
+      employeeTrainingSummaryPage.employeeTrainingSummaryInputs,
+    organizationPublicId: command.organizationPublicId,
+    page: Math.max(command.pagination.page, 1),
+    pageSize: command.pagination.pageSize,
+    scopeOrganizationPublicIds,
+    total: employeeTrainingSummaryPage.total,
     updatedAt: command.updatedAt,
   });
 }

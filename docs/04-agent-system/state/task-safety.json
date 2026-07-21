@@ -1,27 +1,19 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21",
-  "objective": "Close F-0118 by replacing the fixed five-row current-node employee preview with a read-only organization-admin roster whose scope is derived from the bound organization and valid descendant tree, whose search/count/page use one repository predicate, and whose rows expose only employee public ids, masked phones, account lock/disable state and the existing effective-authorization summary. Preserve the platform-owned mutation boundary and fail closed on out-of-scope public ids without schema, migration, persistent database execution or new entitlement semantics.",
+  "taskId": "p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21",
+  "objective": "Close F-0128 by moving employee-statistics page selection, stable employeeDisplayName plus employeePublicId ordering, distinct employee count and answer-row narrowing into the PostgreSQL repository path. Preserve the existing organization scope, date range, advanced-admin authorization and summary-only privacy contract without schema, migration, persistent database execution or UI behavior changes.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/organization-portal-overview-contract.ts",
-    "src/server/repositories/organization-scope-query.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/organization-portal-overview-repository.ts",
-    "src/server/services/organization-portal-overview-service.ts",
-    "src/server/services/organization-portal-overview-route.ts",
-    "src/app/api/v1/organization-portal-employees/route.ts",
-    "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
-    "tests/unit/p1-organization-portal-employee-roster.test.ts",
-    "src/server/services/organization-portal-overview-route.test.ts",
-    "tests/unit/organization-portal-admin-entry-surface.test.ts",
-    "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
-    "tests/unit/p1-user-effective-authorization-read-model.test.ts",
-    "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-    "tests/unit/admin-cross-role-exception-closure.test.ts",
-    "e2e/organization-portal-local-flow.spec.ts"
+    "src/server/repositories/organization-analytics-repository.ts",
+    "src/server/services/organization-analytics-service.ts",
+    "src/server/services/organization-analytics-route.ts",
+    "tests/unit/p1-organization-analytics-database-pagination.test.ts",
+    "src/server/repositories/organization-analytics-repository.test.ts",
+    "src/server/services/organization-analytics-service.test.ts",
+    "src/server/services/organization-analytics-route.test.ts",
+    "tests/unit/organization-analytics-admin-entry-surface.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -36,46 +28,37 @@
     ".github/workflows/**",
     ".env*",
     "schema, migration or persistent database execution",
-    "organization tree mutation or employee mutation",
-    "new role, permission, entitlement, quota or default capability",
-    "plaintext phone disclosure or phone-fragment search",
+    "organization analytics authorization or privacy expansion",
+    "raw employee answers, personal AI content or export",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/organization-portal-overview-contract.ts",
-    "src/server/repositories/organization-scope-query.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/organization-portal-overview-repository.ts",
-    "src/server/services/organization-portal-overview-service.ts",
-    "src/server/services/organization-portal-overview-route.ts",
-    "src/app/api/v1/organization-portal-employees/route.ts",
-    "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
-    "tests/unit/p1-organization-portal-employee-roster.test.ts"
+    "src/server/repositories/organization-analytics-repository.ts",
+    "src/server/services/organization-analytics-service.ts",
+    "src/server/services/organization-analytics-route.ts",
+    "tests/unit/p1-organization-analytics-database-pagination.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/organization-portal-overview-route.test.ts",
-    "tests/unit/organization-portal-admin-entry-surface.test.ts",
-    "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
-    "tests/unit/p1-user-effective-authorization-read-model.test.ts",
-    "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-    "tests/unit/admin-cross-role-exception-closure.test.ts",
-    "e2e/organization-portal-local-flow.spec.ts"
+    "src/server/repositories/organization-analytics-repository.test.ts",
+    "src/server/services/organization-analytics-service.test.ts",
+    "src/server/services/organization-analytics-route.test.ts",
+    "tests/unit/organization-analytics-admin-entry-surface.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminOrganizationPortalPage renders overview.employees as a complete employee roster although the overview repository returns only five current-node rows. A dedicated GET /api/v1/organization-portal-employees collection will own name search, account/auth filters, page/pageSize and employeePublicId support lookup while the overview remains summary-only.",
-    "routeService": "The existing organization-portal session resolver already restricts access to org_standard_admin and org_advanced_admin and supplies the bound organization public id. The new read-only handler reuses that resolver, normalizes 20/50/100 pagination and returns no-store responses without adding a mutation route.",
-    "repository": "The roster repository will use one bound-organization self-or-descendant predicate for rows and count, stable display-name plus employee-public-id ordering, masked phone mapping, explicit locked/disabled precedence, and the F-0107 effective-authorization read model. Optional employeePublicId lookup remains inside the same scope predicate so out-of-tree ids fail closed as an empty result.",
-    "schema": "Existing organization parent links, employee.public_id, unique employee.user_id, user.locked_until_at, employee_org_auth, org_auth and auth_upgrade facts are sufficient. No schema/migration source or persistent database execution is required.",
-    "tests": "Focused RED covers the 6th/21st/101st employees, descendant inclusion and sibling exclusion, identical row/count predicates, 20/50/100 pagination, stable ordering, URL-restored filters, public-id scoped lookup, masked phones, disabled-over-locked precedence, expired/active authorization summaries and no write controls. Direct route/UI/F-0119/F-0107/tree-scope regressions are pre-allowlisted.",
-    "requirements": "The 2026-07-02 role/auth decision package D04/D09 and 2026-07-07 organization-admin workspace baseline require an organization-scoped read-only roster/status surface while all employee and tree mutation stays platform-owned. ADR-007 and edition-aware authorization requirements keep the effective authorization source and edition semantics unchanged.",
-    "nonClaims": "No new role, entitlement or organization scope beyond the documented bound organization and valid descendants; no employee detail mutation, full phone, raw authorization rows, raw answers, schema/migration, real database access, dependency, Provider, external service, secret/env, deployment, PR, force-push or mechanism change."
+    "uiApi": "AdminOrganizationAnalyticsPage already sends page/pageSize and renders the returned pagination. No UI contract change is required.",
+    "routeService": "The employee-statistics route resolves the existing org_advanced_admin context and visible organization scope before repository access. The service currently asks for every employee summary input and slices in memory; it must consume one repository page and its distinct total instead.",
+    "repository": "The runtime repository currently loads every submitted organization_training_answer row in the visible scope/date range without order, count, limit or offset. The corrected path pages distinct employees by employeeDisplayName and employeePublicId, counts with the same predicate, then loads submissions only for the selected employee ids.",
+    "schema": "Existing organization_training_answer.employee_public_id, employee/user joins, organization_public_id, status and submitted_at support the correction. No schema or migration source is required.",
+    "tests": "Focused RED proves row/count predicate identity, stable same-name ordering, 21/51/101 employee windows, page-scoped submission loading and truthful service pagination. Existing repository/service/route/UI regressions are pre-allowlisted.",
+    "requirements": "Advanced organization analytics module and employee-answer-statistics story require summary-only scoped analytics, stable 20/50/100 pagination and no raw answers/export. ADR-007 keeps the advanced authorization source unchanged.",
+    "nonClaims": "No entitlement, scope, privacy, schema, migration, real database, UI, export, Provider, dependency, deployment or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0118-organization-portal-roster-focused",
+      "name": "f0128-organization-analytics-database-pagination-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -83,42 +66,38 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-organization-portal-employee-roster.test.ts",
-        "src/server/services/organization-portal-overview-route.test.ts",
-        "tests/unit/organization-portal-admin-entry-surface.test.ts",
-        "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
-        "tests/unit/p1-user-effective-authorization-read-model.test.ts",
-        "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-        "tests/unit/admin-cross-role-exception-closure.test.ts"
+        "tests/unit/p1-organization-analytics-database-pagination.test.ts",
+        "src/server/repositories/organization-analytics-repository.test.ts",
+        "src/server/services/organization-analytics-service.test.ts",
+        "src/server/services/organization-analytics-route.test.ts",
+        "tests/unit/organization-analytics-admin-entry-surface.test.ts"
       ]
     },
     {
-      "name": "f0118-organization-portal-roster-lint",
+      "name": "f0128-organization-analytics-database-pagination-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/contracts/organization-portal-overview-contract.ts",
-        "src/server/repositories/organization-scope-query.ts",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/server/repositories/organization-portal-overview-repository.ts",
-        "src/server/services/organization-portal-overview-service.ts",
-        "src/server/services/organization-portal-overview-route.ts",
-        "src/app/api/v1/organization-portal-employees/route.ts",
-        "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
-        "tests/unit/p1-organization-portal-employee-roster.test.ts"
+        "src/server/repositories/organization-analytics-repository.ts",
+        "src/server/services/organization-analytics-service.ts",
+        "src/server/services/organization-analytics-route.ts",
+        "tests/unit/p1-organization-analytics-database-pagination.test.ts",
+        "src/server/repositories/organization-analytics-repository.test.ts",
+        "src/server/services/organization-analytics-service.test.ts",
+        "src/server/services/organization-analytics-route.test.ts"
       ]
     },
     {
-      "name": "f0118-organization-portal-roster-typecheck",
+      "name": "f0128-organization-analytics-database-pagination-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0118-organization-portal-roster-build",
+      "name": "f0128-organization-analytics-database-pagination-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -127,29 +106,28 @@
   "approvalSources": {
     "dependency": null,
     "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "guardian-f0118-task-bound-read-only-roster-2026-07-21",
+    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "permission_existing_requirement_read_only_scope_and_database_application_query",
+    "category": "bounded_database_application_query_logic_and_existing_advanced_authorization",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
-    "existingRequirementVisibilityImplementation": true,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
   "applicableStandingApprovals": [
     "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21",
-    "current-user-delegated-p1-guardian-v1-2026-07-21"
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   ],
   "conditionalCloseout": true,
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0118-task-bound-read-only-roster-2026-07-21"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }
