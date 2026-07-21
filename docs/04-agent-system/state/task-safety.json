@@ -1,25 +1,29 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-user-password-reset-atomicity-state-closeout-2026-07-21",
-  "objective": "Record the already committed, ff-only merged, canonically pushed, synced, and cleaned F-0030 product task as closed in project-state and task-queue. This is a docs/state-only closeout checkpoint before the registered P1 execution policy capsule handoff; do not modify product source, tests, safety mechanisms, approval semantics, dependencies, schema/migrations, permissions, Provider/external services, deployment, or secret/env.",
+  "taskId": "p1-execution-policy-capsule-v1-2026-07-21",
+  "objective": "Persist the already-approved P1 execution policy capsule as one minimal recoverable SSOT in task-queue, leave only a pointer in project-state, and keep this file limited to the current docs/state-only task contract without changing Minimal Safety Kernel semantics or any standing approval boundary.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json"
   ],
   "blockedFiles": [
-    "package.json",
-    "pnpm-lock.yaml",
+    "AGENTS.md",
+    "docs/04-agent-system/sop/minimal-safety-kernel.md",
+    ".husky/**",
     ".github/workflows/**",
     ".env*",
+    "package.json",
+    "pnpm-lock.yaml",
     "drizzle/**",
     "src/**",
     "tests/**",
-    "scripts/agent-system/**"
+    "scripts/**",
+    "docs/05-execution-logs/**"
   ],
   "validationCommands": [
     {
-      "name": "user-password-reset-atomicity-state-closeout-format",
+      "name": "p1-execution-policy-capsule-format-and-parse",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [

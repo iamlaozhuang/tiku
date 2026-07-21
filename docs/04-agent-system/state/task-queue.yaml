@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-student-home-pagination-2026-07-20
+  currentTaskId: p1-execution-policy-capsule-v1-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -320,7 +320,39 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-admin-log-pagination-total-2026-07-20: closed
     p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21: closed
     p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21: closed
+    p1-execution-policy-capsule-v1-2026-07-21: closed
 activeTasks:
+  - id: p1-execution-policy-capsule-v1-2026-07-21
+    title: P1 execution policy capsule v1
+    phase: p1-execution-policy-capsule-v1-2026-07-21
+    status: closed
+    priority: governance
+    taskKind: docs_state_only
+    branch: codex/p1-execution-policy-capsule-v1
+    objective: persist the approved P1 execution policy capsule in task-queue as the only body SSOT and keep project-state as a pointer without changing kernel or approval semantics
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/task-safety.json
+    executionStage: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    verificationEvidence:
+      yamlJsonParse: pass
+      projectStatePointerOnly: true
+      exactExistingApprovalReferences: 3
+      unknownOrExpiredApprovalReferencedByCurrentContract: false
+      freshApprovalHighRiskBoundaryPreserved: true
+      independentFindingAcceptanceEvidenceAndClosurePreserved: true
+      testOnlyExpansionCannotTouchProductSourceOrWeakenAssertions: true
+      minimalSafetyKernelSemanticChange: false
+      extraFiles: false
+      mainThreadAdversarialReview: passed_no_scope_or_authority_expansion
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
+      findingId: F-0030
+      commit: 02ff16fd5c96b980846687edcbebc7e837dc6211
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   - id: p1-remediation-rc-04-student-home-pagination-2026-07-20
     title: Student home paper pagination
     phase: p1-remediation-rc-04-student-home-pagination-2026-07-20
@@ -2960,6 +2992,62 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
+p1ExecutionPolicy:
+  schemaVersion: 1
+  policyId: P1_EXECUTION_POLICY_CAPSULE_V1
+  status: active
+  effectiveScope: current_active_p1_goal
+  source:
+    kind: durable_user_instruction
+    registeredAt: "2026-07-21"
+    approvalReferences:
+      lowRiskCloseout: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      boundedMediumRiskCloseout: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      testOnlyAllowlistExpansion: standing-test-only-allowlist-expansion-2026-07-21
+  effectiveUntil: current_p1_goal_complete_cancelled_or_policy_revoked
+  revocationConditions:
+    - current_p1_goal_complete_or_cancelled
+    - user_revocation
+    - canonical_origin_change
+    - minimal_safety_kernel_semantic_change
+  rules:
+    rootCausePackaging:
+      - RC_and_root_cause_clusters_schedule_work_and_share_context_only
+      - each_finding_requires_independent_acceptance_evidence_and_closure
+      - bundle_only_findings_with_one_confirmed_authoritative_path_invariant_failure_mechanism_fix_validation_matrix_risk_and_review_boundary
+    preRedImpactScan:
+      - scan_direct_callers_mocks_fixtures_src_test_spec_and_tests_for_minutes_not_repository_wide_planning
+      - add_every_validation_command_direct_test_path_to_allowedFiles_before_RED
+    scopeAndFreezePreparation:
+      - inventory_predictable_product_files_test_files_and_risk_categories_once
+      - complete_formatter_generated_artifacts_and_test_scope_before_candidate_freeze
+      - forecast_only_the_next_one_to_three_tasks_and_do_not_prebuild_all_contracts
+    approvalTiming:
+      - combine_foreseeable_fresh_approval_categories_in_task_preflight
+      - request_delta_approval_during_implementation_only_for_a_new_independent_root_cause_or_real_scope_expansion
+      - request_one_candidate_tree_approval_only_after_format_validation_review_and_two_unchanged_read_only_tree_checks
+    duplicateSuppression:
+      - do_not_repeat_the_same_scope_candidate_approval_id_or_blocker_when_evidence_is_unchanged
+      - report_only_incremental_evidence
+    testOnlyExpansion:
+      approvalId: standing-test-only-allowlist-expansion-2026-07-21
+      boundaries:
+        - tests_fixtures_or_src_test_spec_only
+        - no_weakened_assertions_or_product_scope_expansion
+        - no_product_source_schema_dependency_configuration_or_mechanism_change
+    taskStartup:
+      - reread_p1ExecutionPolicy_before_each_new_task
+      - write_only_applicable_approval_ids_into_that_tasks_task_safety_contract
+      - chat_summaries_and_old_task_plans_are_not_authorization_SSOT
+    freshApprovalRequired:
+      - dependency_or_package_or_lockfile_change
+      - schema_or_migration_change
+      - persistent_database_write_or_real_data_access
+      - permission_or_authorization_business_semantic_expansion
+      - real_provider_or_external_service_call_or_configuration
+      - credential_or_secret_env
+      - deployment_or_pull_request_or_force_push_or_noncanonical_remote
+      - capsule_or_minimal_safety_kernel_semantic_change
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20
   source: current_user_message

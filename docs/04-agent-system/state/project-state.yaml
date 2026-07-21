@@ -465,12 +465,12 @@ p0RemediationSerialProgram:
       shortBranchCleanup: pass
 p1RemediationSerialProgram:
   programId: p1-remediation-2026-07-16
-  status: in_progress
+  status: closed
   activityStatePolicy: wip_one_dynamic_task_materialization
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-student-home-pagination-2026-07-20
+  currentTaskId: p1-execution-policy-capsule-v1-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -747,165 +747,39 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
-  title: User password reset atomicity
-  phase: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
-  status: closed
-  priority: p1
-  taskKind: product_remediation
-  productClosureContribution: F-0030
-  branch: fix/user-password-reset-atomicity
+  id: p1-execution-policy-capsule-v1-2026-07-21
+  title: P1 execution policy capsule v1
+  phase: p1-execution-policy-capsule-v1-2026-07-21
+  status: in_progress
+  priority: governance
+  taskKind: docs_state_only
+  branch: codex/p1-execution-policy-capsule-v1
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-  findingIds:
-    - F-0030
-  candidateRootCauseCluster: P1-RC-04
-  requirementAnchors:
-    - modules/01-user-auth.md
-    - modules/06-admin-ops.md
-    - ../02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
-  highRiskApproval:
-    category: bounded_permission_and_database_application_transaction_logic
-    status: satisfied_by_bounded_medium_risk_standing_approval
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+  objective: persist the approved P1 execution policy capsule in task-queue as the only body SSOT and keep project-state as a pointer without changing kernel or approval semantics
   currentExecutionGate:
-    status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    reason: product_commit_02ff16fd5_is_on_clean_synced_master_and_product_branch_is_deleted
-    resumeAction: send_READY_FOR_P1_EXECUTION_POLICY_CAPSULE_V1_and_park
+    status: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
+    reason: exact_three_file_scope_parse_format_diff_and_policy_boundary_review_passed
+    resumeAction: closeout_then_resume_the_next_P1_product_task
   verificationEvidence:
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
-    preflightIncludedTestFiles: 12
-    inTaskTestOnlyExpansionCount: 1
-    testOnlyExpansionReason: legacy_runtime_fixture_signature_alignment_and_shared_identity_lock_regression
-    testOnlyExpansionApprovalRequests: 0
-    weakenedTestAssertions: 0
-    postFreezeTestScopeChanges: 0
-    tddRed: passed_4_expected_failures_of_14
-    focused: passed_18_of_18
-    affectedRegression: passed_65_of_65
-    lint: passed_exact_affected_files_zero_warnings
-    typecheck: passed
-    build: passed_97_static_pages
-    changedFileFormatDiff: passed_pre_and_post_full
-    p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
-    p0SerialBaseline: pass_closed_program
-    fullProfile: passed_once_after_product_candidate_freeze
-    candidateTreeBeforeCloseoutEvidence: 99430873aa4448c8b3fc6b1b393a014d49d42f8d
-    mainThreadAdversarialReview: passed_shared_identity_lock_one_transaction_session_and_audit_failure_injection_no_legacy_reset_sink
-    entitlementExpansion: false
-    schemaMigrationSourceChange: false
-    migrationExecution: false
-    persistentDatabaseExecution: false
-    realExternalCall: false
+    yamlJsonParse: pass
+    projectStatePointerOnly: true
+    exactExistingApprovalReferences: 3
+    unknownOrExpiredApprovalReferencedByCurrentContract: false
+    freshApprovalHighRiskBoundaryPreserved: true
+    independentFindingAcceptanceEvidenceAndClosurePreserved: true
+    testOnlyExpansionCannotTouchProductSourceOrWeakenAssertions: true
+    minimalSafetyKernelSemanticChange: false
     extraFiles: false
-    approvalRequests: 0
-    approvalIdMismatch: 0
-    postApprovalCandidateTreeChanges: 0
-    repeatedBlockerReports: 0
-    validationRetryCount: 0
-    fullRuns: 1
-  closeout:
-    commit: 02ff16fd5c96b980846687edcbebc7e837dc6211
-    candidateTree: 270e88c8a71cec80dee633cc5d355b1dd57a44bb
-    status: committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    mainThreadAdversarialReview: passed_no_scope_or_authority_expansion
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
-    findingId: F-0022
-    commit: 1745dc735ddda78bf10c99a2ab1ec5bc3a3bf558
+    taskId: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
+    findingId: F-0030
+    commit: 02ff16fd5c96b980846687edcbebc7e837dc6211
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    candidateTree: d002e384a4072b3ebcaa82a4a2fc5fa181c39ef4
-    focused: passed_149_of_149
-    affectedRegression: passed_19_of_19
-    build: passed_97_static_pages
-    p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
-    p0SerialBaseline: pass_closed_program
-    fullRuns: 1
-    mechanismScriptChanges: 0
-  rc04ResidualDisposition:
-    F-0007: closed_by_org_auth_package_atomicity
-    F-0010: closed_by_redeem_code_sensitive_access_audit
-    F-0017: closed_by_redeem_code_batch_idempotency
-    F-0018: closed_with_F-0020_by_learner_history_pagination
-    F-0019: closed_by_student_home_pagination
-    F-0020: closed_with_F-0018_by_learner_history_pagination
-    F-0021: separate_admin_log_query_and_total
-    F-0022: separate_organization_training_list_projection
-    F-0030: closed_by_user_password_reset_atomic_transaction
-    F-0031: separate_multi_domain_audit_atomicity_requires_domain_partition
-    F-0034: separate_contact_config_persistence_high_risk
-    F-0038: separate_ai_call_fact_schema_high_risk
-    F-0046: separate_admin_organization_picker
-    F-0049: separate_admin_account_create_transaction
-    F-0052: separate_managed_rich_media_high_risk
-    F-0054: separate_content_reference_picker
-    F-0070: separate_knowledge_node_reference_count
-    F-0071: separate_knowledge_tree_complete_snapshot
-    F-0078: separate_recommendation_status_contract
-    F-0083: separate_resource_single_source_not_covered_by_F0088
-    F-0095: separate_paper_metadata_schema_high_risk
-    F-0105: separate_model_fallback_aggregate
-    F-0106: separate_phone_search_and_disclosure_controls
-    F-0107: separate_user_effective_authorization_read_model
-    F-0110: separate_org_auth_reference_picker
-    F-0118: separate_organization_roster_not_covered_by_F0119
-    F-0128: separate_analytics_database_pagination
-    F-0144: separate_training_self_answer_recovery
-    F-0153: separate_ai_paper_candidate_pagination
-    F-0170: separate_ai_task_result_history_join
-  nextRiskForecast:
-    - findingIds: [F-0022]
-      risk: bounded_database_application_query_logic
-      approval: standing-bounded-medium-risk-closeout-approval-2026-07-20
-boundedMediumRiskStandingAuthorization:
-  id: standing-bounded-medium-risk-closeout-approval-2026-07-20
-  source: current_user_message
-  scope: current_active_p1_goal_permission_authorization_contraction_database_application_logic_provider_adapter_pure_logic_and_local_isolated_validation
-  closeout: approved_only_after_exact_scope_green_validation_main_thread_adversarial_review_and_no_entitlement_expansion
-  push: approved_canonical_origin_master_only_with_one_use_tiku_push_approved
-  excludes:
-    - role_or_permission_or_scope_or_quota_or_default_capability_expansion
-    - schema_or_migration_change
-    - persistent_database_write_or_real_data_access
-    - dependency_or_lockfile_change
-    - real_provider_or_external_service_call
-    - credential_or_secret_env_or_service_configuration
-    - deployment_or_pull_request_or_force_push_or_noncanonical_remote
-    - subagent_or_independent_reviewer
-    - allowed_file_expansion_after_freeze
-  invalidatedBy:
-    - current_p1_goal_complete_or_cancelled
-    - user_revocation
-    - canonical_origin_change
-    - minimal_safety_kernel_semantic_change
-standingAuthorization:
-  id: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-  source: current_user_message
-  scope: current_active_p1_goal_low_risk_product_tasks_only
-  localCommit: approved_only_after_exact_diff_validation_and_main_thread_adversarial_review
-  fastForwardMerge: approved_master_only_for_eligible_low_risk_tasks
-  push: approved_canonical_origin_master_only_for_eligible_low_risk_tasks
-  cleanup: approved_after_verified_remote_sync_for_eligible_low_risk_tasks
-  excludedTaskIds:
-    - p1-remediation-rc-03-org-auth-closure-actions-2026-07-20
-  excludedCategories:
-    - dependency
-    - database
-    - permission
-    - authorization
-    - deployment
-    - secret_env
-    - provider
-    - payment
-    - external_service
-    - pull_request
-    - force_push
-  invalidatedBy:
-    - current_p1_goal_complete_or_cancelled
-    - user_revocation
-    - canonical_origin_change
-    - minimal_safety_kernel_semantic_change
-  deployment: blocked_requires_fresh_user_approval
+p1ExecutionPolicy:
+  policyId: P1_EXECUTION_POLICY_CAPSULE_V1
+  status: active
+  ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy
 repositoryCheckpoint:
   lastKnownMasterSha: 6632eade06c50685a7cac17b75c218594c00c289
   lastKnownOriginMasterSha: 6632eade06c50685a7cac17b75c218594c00c289
