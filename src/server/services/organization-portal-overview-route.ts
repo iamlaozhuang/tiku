@@ -2,16 +2,27 @@ import {
   createErrorResponse,
   type ApiResponse,
 } from "../contracts/api-response";
-import type { OrganizationPortalOverviewDto } from "../contracts/organization-portal-overview-contract";
+import type {
+  OrganizationPortalEmployeeRosterItemDto,
+  OrganizationPortalEmployeeRosterQuery,
+  OrganizationPortalOverviewDto,
+} from "../contracts/organization-portal-overview-contract";
 import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { AdminRole } from "../models/auth";
 import { createPostgresOrganizationPortalOverviewRepository } from "../repositories/organization-portal-overview-repository";
 import type { RuntimeDatabaseOptions } from "../repositories/runtime-database";
-import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 import {
+  createRouteHandlersWithErrorEnvelope,
+  UNEXPECTED_RUNTIME_ERROR_CODE,
+  UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+} from "./route-error-response";
+import {
+  buildOrganizationPortalEmployeeRosterFromRepository,
   buildOrganizationPortalOverviewFromRepository,
+  normalizeOrganizationPortalEmployeeRosterQuery,
+  type OrganizationPortalEmployeeRosterRepository,
   type OrganizationPortalOverviewAdminContext,
   type OrganizationPortalOverviewRepository,
 } from "./organization-portal-overview-service";
@@ -34,6 +45,17 @@ export type OrganizationPortalOverviewReader = (
   | ApiResponse<OrganizationPortalOverviewDto | null>
   | Promise<ApiResponse<OrganizationPortalOverviewDto | null>>;
 
+export type OrganizationPortalEmployeeRosterReaderInput = {
+  adminContext: OrganizationPortalOverviewAdminContext;
+  query: OrganizationPortalEmployeeRosterQuery;
+};
+
+export type OrganizationPortalEmployeeRosterReader = (
+  input: OrganizationPortalEmployeeRosterReaderInput,
+) =>
+  | ApiResponse<OrganizationPortalEmployeeRosterItemDto[] | null>
+  | Promise<ApiResponse<OrganizationPortalEmployeeRosterItemDto[] | null>>;
+
 export type OrganizationPortalOverviewAdminContextResolver = (input: {
   request: Request;
 }) =>
@@ -42,6 +64,7 @@ export type OrganizationPortalOverviewAdminContextResolver = (input: {
   | Promise<OrganizationPortalOverviewAdminContext | null>;
 
 export type OrganizationPortalOverviewRouteOptions = {
+  readEmployeeRoster?: OrganizationPortalEmployeeRosterReader;
   readOverview?: OrganizationPortalOverviewReader;
   resolveAdminContext?: OrganizationPortalOverviewAdminContextResolver;
 };
@@ -49,15 +72,25 @@ export type OrganizationPortalOverviewRouteOptions = {
 export type OrganizationPortalOverviewRuntimeRouteOptions =
   RuntimeDatabaseOptions & {
     now?: () => Date;
+    readEmployeeRoster?: OrganizationPortalEmployeeRosterReader;
     readOverview?: OrganizationPortalOverviewReader;
     readUpdatedAt?: () => string;
-    repository?: OrganizationPortalOverviewRepository;
+    repository?: OrganizationPortalOverviewRepository &
+      OrganizationPortalEmployeeRosterRepository;
     resolveAdminContext?: OrganizationPortalOverviewAdminContextResolver;
     sessionService?: Pick<SessionService, "getCurrentSession">;
   };
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
+}
+
+function createNoStoreJsonResponse<TData>(
+  response: ApiResponse<TData>,
+): Response {
+  return Response.json(response, {
+    headers: { "cache-control": "no-store" },
+  });
 }
 
 function createRuntimeNotConfiguredResponse(): ApiResponse<null> {
@@ -152,6 +185,19 @@ function createRepositoryBackedOverviewReader(
     });
 }
 
+function createRepositoryBackedEmployeeRosterReader(
+  repository: OrganizationPortalEmployeeRosterRepository,
+  readNow: () => Date,
+): OrganizationPortalEmployeeRosterReader {
+  return (input) =>
+    buildOrganizationPortalEmployeeRosterFromRepository({
+      adminContext: input.adminContext,
+      now: readNow(),
+      query: input.query,
+      repository,
+    });
+}
+
 function createSessionBackedOrganizationPortalAdminContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): OrganizationPortalOverviewAdminContextResolver {
@@ -208,11 +254,48 @@ function createSessionBackedOrganizationPortalAdminContextResolver(
 export function createOrganizationPortalOverviewRouteHandlers(
   options: OrganizationPortalOverviewRouteOptions = {},
 ) {
+  const readEmployeeRoster =
+    options.readEmployeeRoster ?? (() => createRuntimeNotConfiguredResponse());
   const readOverview =
     options.readOverview ?? (() => createRuntimeNotConfiguredResponse());
   const resolveAdminContext = options.resolveAdminContext;
 
   return createRouteHandlersWithErrorEnvelope({
+    employees: {
+      async GET(request: Request): Promise<Response> {
+        try {
+          if (resolveAdminContext === undefined) {
+            return createNoStoreJsonResponse(
+              createRuntimeNotConfiguredResponse(),
+            );
+          }
+
+          const adminContext = await resolveAdminContext({ request });
+
+          if (adminContext === null) {
+            return createNoStoreJsonResponse(
+              createAdminContextUnavailableResponse(),
+            );
+          }
+
+          return createNoStoreJsonResponse(
+            await readEmployeeRoster({
+              adminContext,
+              query: normalizeOrganizationPortalEmployeeRosterQuery(
+                new URL(request.url).searchParams,
+              ),
+            }),
+          );
+        } catch {
+          return createNoStoreJsonResponse(
+            createErrorResponse(
+              UNEXPECTED_RUNTIME_ERROR_CODE,
+              UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+            ),
+          );
+        }
+      },
+    },
     overview: {
       async GET(request: Request): Promise<Response> {
         if (resolveAdminContext === undefined) {
@@ -249,8 +332,12 @@ export function createOrganizationPortalOverviewRuntimeRouteHandlers(
   const readOverview =
     options.readOverview ??
     createRepositoryBackedOverviewReader(repository, readNow, readUpdatedAt);
+  const readEmployeeRoster =
+    options.readEmployeeRoster ??
+    createRepositoryBackedEmployeeRosterReader(repository, readNow);
 
   return createOrganizationPortalOverviewRouteHandlers({
+    readEmployeeRoster,
     readOverview,
     resolveAdminContext,
   });

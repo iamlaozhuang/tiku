@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import {
   BarChart3,
   BookOpenCheck,
@@ -16,6 +16,7 @@ import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   OrganizationPortalAuthorizationDto,
+  OrganizationPortalEmployeeRosterItemDto,
   OrganizationPortalEmployeeSummaryDto,
   OrganizationPortalOverviewDto,
 } from "@/server/contracts/organization-portal-overview-contract";
@@ -40,6 +41,16 @@ type AdminOrganizationPortalLoadState =
   | "ready"
   | "unauthorized"
   | "error";
+
+type EmployeeRosterLoadState = "loading" | "ready" | "empty" | "error";
+
+type EmployeeRosterViewQuery = {
+  accountStatus: "all" | "active" | "disabled" | "locked";
+  authFilter: "all" | "none" | "standard" | "advanced" | "expired";
+  keyword: string;
+  page: number;
+  pageSize: 20 | 50 | 100;
+};
 
 type OrganizationPortalDestination = {
   description: string;
@@ -99,11 +110,6 @@ const organizationStatusLabels = {
   disabled: "停用",
 } as const;
 
-const userStatusLabels = {
-  active: "正常",
-  disabled: "停用",
-} as const;
-
 const authorizationStatusLabels = {
   active: "生效中",
   cancelled: "已取消",
@@ -116,8 +122,97 @@ const editionLabels = {
   standard: "标准版",
 } as const;
 
+const employeeAccountStatusLabels = {
+  active: "正常",
+  disabled: "停用",
+  locked: "锁定",
+} as const;
+
+const employeeAuthEditionLabels = {
+  advanced: "高级版",
+  expired: "已失效",
+  none: "无授权",
+  standard: "标准版",
+} as const;
+
+const employeeAuthStatusLabels = {
+  active: "生效中",
+  cancelled: "已取消",
+  expired: "已过期",
+  none: "无授权",
+} as const;
+
+const employeeRosterPageSizes = [20, 50, 100] as const;
+
 function formatDate(value: string): string {
   return value.slice(0, 10);
+}
+
+function readInitialEmployeeRosterQuery(): EmployeeRosterViewQuery {
+  if (typeof window === "undefined") {
+    return {
+      accountStatus: "all",
+      authFilter: "all",
+      keyword: "",
+      page: 1,
+      pageSize: 20,
+    };
+  }
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const page = Number(searchParams.get("employeePage"));
+  const pageSize = Number(searchParams.get("employeePageSize"));
+  const accountStatus = searchParams.get("employeeAccountStatus");
+  const authFilter = searchParams.get("employeeAuthFilter");
+
+  return {
+    accountStatus:
+      accountStatus === "active" ||
+      accountStatus === "disabled" ||
+      accountStatus === "locked"
+        ? accountStatus
+        : "all",
+    authFilter:
+      authFilter === "none" ||
+      authFilter === "standard" ||
+      authFilter === "advanced" ||
+      authFilter === "expired"
+        ? authFilter
+        : "all",
+    keyword: searchParams.get("employeeKeyword")?.trim() ?? "",
+    page: Number.isSafeInteger(page) && page > 0 ? page : 1,
+    pageSize: pageSize === 50 || pageSize === 100 ? pageSize : 20,
+  };
+}
+
+function writeEmployeeRosterQueryToUrl(query: EmployeeRosterViewQuery): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const nextUrl = new URL(window.location.href);
+  nextUrl.searchParams.set("employeePage", String(query.page));
+  nextUrl.searchParams.set("employeePageSize", String(query.pageSize));
+
+  if (query.keyword.length > 0) {
+    nextUrl.searchParams.set("employeeKeyword", query.keyword);
+  } else {
+    nextUrl.searchParams.delete("employeeKeyword");
+  }
+
+  if (query.accountStatus === "all") {
+    nextUrl.searchParams.delete("employeeAccountStatus");
+  } else {
+    nextUrl.searchParams.set("employeeAccountStatus", query.accountStatus);
+  }
+
+  if (query.authFilter === "all") {
+    nextUrl.searchParams.delete("employeeAuthFilter");
+  } else {
+    nextUrl.searchParams.set("employeeAuthFilter", query.authFilter);
+  }
+
+  window.history.replaceState(window.history.state, "", nextUrl);
 }
 
 export function AdminOrganizationPortalPage() {
@@ -127,6 +222,7 @@ export function AdminOrganizationPortalPage() {
     useState<AdminWorkspaceCapabilitySummary | null>(null);
   const [overview, setOverview] =
     useState<OrganizationPortalOverviewDto | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -185,6 +281,7 @@ export function AdminOrganizationPortalPage() {
         }
 
         setCapabilitySummary(organizationAccess.capabilitySummary);
+        setSessionToken(sessionToken);
         setOverview(overviewResponse.data);
         setLoadState("ready");
       } catch {
@@ -290,7 +387,7 @@ export function AdminOrganizationPortalPage() {
       <section aria-label="组织后台摘要" className="grid gap-4 lg:grid-cols-2">
         <EmployeeOverviewCard
           employeeSummary={overviewData.employeeSummary}
-          employees={overviewData.employees}
+          sessionToken={sessionToken}
         />
         <AuthorizationOverviewCard
           authorizations={overviewData.authorizations}
@@ -327,12 +424,105 @@ export function AdminOrganizationPortalPage() {
 }
 
 function EmployeeOverviewCard({
-  employees,
   employeeSummary,
+  sessionToken,
 }: {
-  employees: OrganizationPortalOverviewDto["employees"];
   employeeSummary: OrganizationPortalEmployeeSummaryDto;
+  sessionToken: string | null;
 }) {
+  const [query, setQuery] = useState<EmployeeRosterViewQuery>(
+    readInitialEmployeeRosterQuery,
+  );
+  const [keywordDraft, setKeywordDraft] = useState(query.keyword);
+  const [loadState, setLoadState] =
+    useState<EmployeeRosterLoadState>("loading");
+  const [employees, setEmployees] = useState<
+    OrganizationPortalEmployeeRosterItemDto[]
+  >([]);
+  const [total, setTotal] = useState(0);
+  const [requestGeneration, setRequestGeneration] = useState(0);
+
+  useEffect(() => {
+    writeEmployeeRosterQueryToUrl(query);
+  }, [query]);
+
+  useEffect(() => {
+    let isActive = true;
+    const searchParams = new URLSearchParams({
+      accountStatus: query.accountStatus,
+      authFilter: query.authFilter,
+      page: String(query.page),
+      pageSize: String(query.pageSize),
+    });
+
+    if (query.keyword.length > 0) {
+      searchParams.set("keyword", query.keyword);
+    }
+
+    void fetchAdminApi<OrganizationPortalEmployeeRosterItemDto[]>(
+      `/api/v1/organization-portal-employees?${searchParams.toString()}`,
+      sessionToken,
+    )
+      .then((response) => {
+        if (!isActive) {
+          return;
+        }
+
+        if (
+          response.code !== 0 ||
+          response.data === null ||
+          response.pagination === undefined
+        ) {
+          setLoadState("error");
+          return;
+        }
+
+        setEmployees(response.data);
+        setTotal(response.pagination.total);
+        const responseTotalPages = Math.max(
+          1,
+          Math.ceil(response.pagination.total / query.pageSize),
+        );
+
+        if (query.page > responseTotalPages) {
+          setQuery((currentQuery) => ({
+            ...currentQuery,
+            page: responseTotalPages,
+          }));
+          return;
+        }
+
+        setLoadState(response.data.length === 0 ? "empty" : "ready");
+      })
+      .catch(() => {
+        if (isActive) {
+          setLoadState("error");
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [query, requestGeneration, sessionToken]);
+
+  const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
+
+  function updateRosterQuery(
+    update: (currentQuery: EmployeeRosterViewQuery) => EmployeeRosterViewQuery,
+  ) {
+    setLoadState("loading");
+    setQuery(update);
+  }
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    updateRosterQuery((currentQuery) => ({
+      ...currentQuery,
+      keyword: keywordDraft.trim(),
+      page: 1,
+    }));
+  }
+
   return (
     <article
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
@@ -343,35 +533,197 @@ function EmployeeOverviewCard({
         员工名单与状态
       </span>
       <div className="grid gap-2 sm:grid-cols-2">
-        <MetricBlock label="共" value={`${employeeSummary.total} 人`} />
-        <MetricBlock label="正常" value={String(employeeSummary.active)} />
-        <MetricBlock label="停用" value={String(employeeSummary.disabled)} />
-        <MetricBlock label="锁定" value={String(employeeSummary.locked)} />
+        <MetricBlock label="当前节点共" value={`${employeeSummary.total} 人`} />
+        <MetricBlock
+          label="当前节点正常"
+          value={String(employeeSummary.active)}
+        />
+        <MetricBlock
+          label="当前节点停用"
+          value={String(employeeSummary.disabled)}
+        />
+        <MetricBlock
+          label="当前节点锁定"
+          value={String(employeeSummary.locked)}
+        />
       </div>
-      {employees.length === 0 ? (
+      <p className="text-text-secondary text-sm leading-6">
+        名单覆盖当前组织及有效下级，员工与授权变更仍由平台运营处理。
+      </p>
+      <form
+        className="grid gap-3 md:grid-cols-[1fr_auto]"
+        onSubmit={handleSearchSubmit}
+      >
+        <label className="grid gap-1 text-sm">
+          <span className="text-text-secondary">按姓名搜索</span>
+          <input
+            className="border-border bg-surface text-text-primary rounded-md border px-3 py-2"
+            onChange={(event) => setKeywordDraft(event.target.value)}
+            placeholder="输入员工姓名"
+            type="search"
+            value={keywordDraft}
+          />
+        </label>
+        <button
+          className="bg-primary text-primary-foreground self-end rounded-md px-4 py-2 text-sm font-medium active:scale-[0.98]"
+          type="submit"
+        >
+          搜索
+        </button>
+      </form>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="grid gap-1 text-sm">
+          <span className="text-text-secondary">账号状态</span>
+          <select
+            className="border-border bg-surface text-text-primary rounded-md border px-3 py-2"
+            onChange={(event) =>
+              updateRosterQuery((currentQuery) => ({
+                ...currentQuery,
+                accountStatus: event.target
+                  .value as EmployeeRosterViewQuery["accountStatus"],
+                page: 1,
+              }))
+            }
+            value={query.accountStatus}
+          >
+            <option value="all">全部账号</option>
+            <option value="active">正常</option>
+            <option value="locked">锁定</option>
+            <option value="disabled">停用</option>
+          </select>
+        </label>
+        <label className="grid gap-1 text-sm">
+          <span className="text-text-secondary">授权状态</span>
+          <select
+            className="border-border bg-surface text-text-primary rounded-md border px-3 py-2"
+            onChange={(event) =>
+              updateRosterQuery((currentQuery) => ({
+                ...currentQuery,
+                authFilter: event.target
+                  .value as EmployeeRosterViewQuery["authFilter"],
+                page: 1,
+              }))
+            }
+            value={query.authFilter}
+          >
+            <option value="all">全部授权</option>
+            <option value="advanced">高级版</option>
+            <option value="standard">标准版</option>
+            <option value="expired">已失效</option>
+            <option value="none">无授权</option>
+          </select>
+        </label>
+        <label className="grid gap-1 text-sm">
+          <span className="text-text-secondary">每页数量</span>
+          <select
+            className="border-border bg-surface text-text-primary rounded-md border px-3 py-2"
+            onChange={(event) =>
+              updateRosterQuery((currentQuery) => ({
+                ...currentQuery,
+                page: 1,
+                pageSize: Number(
+                  event.target.value,
+                ) as EmployeeRosterViewQuery["pageSize"],
+              }))
+            }
+            value={query.pageSize}
+          >
+            {employeeRosterPageSizes.map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize} 条
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {loadState === "loading" ? (
+        <p className="text-text-secondary text-sm leading-6" role="status">
+          正在加载员工名单…
+        </p>
+      ) : loadState === "error" ? (
+        <div className="grid gap-2" role="alert">
+          <p className="text-text-secondary text-sm leading-6">
+            员工名单加载失败，请重试。
+          </p>
+          <button
+            className="border-border text-text-primary w-fit rounded-md border px-3 py-2 text-sm font-medium active:scale-[0.98]"
+            onClick={() => {
+              setLoadState("loading");
+              setRequestGeneration((generation) => generation + 1);
+            }}
+            type="button"
+          >
+            重新加载
+          </button>
+        </div>
+      ) : loadState === "empty" ? (
         <p className="text-text-secondary text-sm leading-6">
-          当前组织暂无员工记录。员工新增、导入、调动或解绑由平台运营处理。
+          当前筛选范围暂无员工记录。员工新增、导入、调动或解绑由平台运营处理。
         </p>
       ) : (
         <ul className="divide-border divide-y">
-          {employees.map((employee, index) => (
+          {employees.map((employee) => (
             <li
-              className="grid gap-1 py-3 text-sm sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-3"
-              key={`${employee.employeeDisplayName}-${employee.phoneMasked}-${index}`}
+              className="grid gap-1 py-3 text-sm sm:grid-cols-[1fr_auto_auto_auto] sm:items-center sm:gap-3"
+              data-employee-public-id={employee.employeePublicId}
+              key={employee.employeePublicId}
             >
-              <span className="text-text-primary font-medium">
-                {employee.employeeDisplayName}
+              <span className="grid gap-1">
+                <span className="text-text-primary font-medium">
+                  {employee.employeeDisplayName}
+                </span>
+                <span className="text-text-secondary text-xs">
+                  {employee.organizationDisplayName}
+                </span>
               </span>
               <span className="text-text-secondary">
                 {employee.phoneMasked}
               </span>
               <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-2 py-1 text-xs font-medium">
-                {userStatusLabels[employee.status]}
+                {employeeAccountStatusLabels[employee.accountStatus]}
+              </span>
+              <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-2 py-1 text-xs font-medium">
+                {employeeAuthEditionLabels[employee.authEditionLabel]}
+                <span className="mx-1">·</span>
+                {employeeAuthStatusLabels[employee.authStatus ?? "none"]}
               </span>
             </li>
           ))}
         </ul>
       )}
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <span className="text-text-secondary">
+          第 {query.page}/{totalPages} 页 · 共 {total} 人
+        </span>
+        <div className="flex gap-2">
+          <button
+            className="border-border text-text-primary rounded-md border px-3 py-2 font-medium active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={loadState === "loading" || query.page <= 1}
+            onClick={() =>
+              updateRosterQuery((currentQuery) => ({
+                ...currentQuery,
+                page: Math.max(1, currentQuery.page - 1),
+              }))
+            }
+            type="button"
+          >
+            上一页
+          </button>
+          <button
+            className="border-border text-text-primary rounded-md border px-3 py-2 font-medium active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={loadState === "loading" || query.page >= totalPages}
+            onClick={() =>
+              updateRosterQuery((currentQuery) => ({
+                ...currentQuery,
+                page: Math.min(totalPages, currentQuery.page + 1),
+              }))
+            }
+            type="button"
+          >
+            下一页
+          </button>
+        </div>
+      </div>
       <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-3 py-1 text-xs font-medium">
         只读查看
       </span>

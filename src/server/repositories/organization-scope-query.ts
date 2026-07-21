@@ -15,6 +15,42 @@ type DrizzleSqlExecutor = {
 
 export const MAX_ORGANIZATION_TREE_DEPTH = 4;
 
+export function createOrganizationIsSelfOrDescendantCondition(input: {
+  ancestorOrganizationId: SqlValue;
+  organizationId: SqlValue;
+}): SQL<boolean> {
+  return sql<boolean>`exists (
+    with recursive organization_ancestor as (
+      select
+        scoped_organization.id,
+        scoped_organization.parent_organization_id,
+        array[scoped_organization.id]::bigint[] as visited_organization_ids,
+        0 as ancestor_depth
+      from organization as scoped_organization
+      where scoped_organization.id = ${input.organizationId}
+      union all
+      select
+        parent_organization.id,
+        parent_organization.parent_organization_id,
+        organization_ancestor.visited_organization_ids || parent_organization.id,
+        organization_ancestor.ancestor_depth + 1
+      from organization_ancestor
+      inner join organization as parent_organization
+        on parent_organization.id = organization_ancestor.parent_organization_id
+      where organization_ancestor.ancestor_depth < ${MAX_ORGANIZATION_TREE_DEPTH - 1}
+        and not parent_organization.id = any(organization_ancestor.visited_organization_ids)
+    )
+    select 1
+    from organization_ancestor as scoped_path
+    where scoped_path.id = ${input.ancestorOrganizationId}
+      and exists (
+        select 1
+        from organization_ancestor as tree_integrity
+        where tree_integrity.parent_organization_id is null
+      )
+  )`;
+}
+
 export function createOrgAuthCoversOrganizationCondition(input: {
   authScopeType: SqlValue;
   orgAuthId: SqlValue;

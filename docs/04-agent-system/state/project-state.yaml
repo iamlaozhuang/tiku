@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
+  currentTaskId: p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -530,6 +530,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
     - p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
+    - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -579,6 +580,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
     - p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
     - p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
+    - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -650,7 +652,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21: closed
     p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21: closed
     p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21: closed
-    p1-remediation-rc-04-org-auth-reference-picker-2026-07-21: in_progress
+    p1-remediation-rc-04-org-auth-reference-picker-2026-07-21: closed
+    p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -815,80 +818,75 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
-  title: Organization authorization reference picker and transfer preflight
-  phase: p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
+  id: p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
+  title: Organization portal scoped employee roster
+  phase: p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0110
-  branch: fix/org-auth-reference-picker
+  productClosureContribution: F-0118
+  branch: fix/organization-portal-employee-roster
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0110
+    - F-0118
   candidateRootCauseCluster: P1-RC-04
-  objective: replace fixed first-page action references with searchable organization selection and repository-authoritative employee transfer preflight
-  executionStage: candidate_ready_for_staging_and_guardian_binding
+  objective: replace the fixed current-node five-row preview with a scoped paginated read-only employee roster using public ids, masked phones, account state and the existing effective-authorization summary
+  executionStage: candidate_validated_adversarially_reviewed_waiting_single_kernel_commit_closeout
   riskBoundary:
-    category: bounded_permission_reference_lookup_and_database_application_preflight_logic
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    category: permission_existing_requirement_read_only_scope_and_database_application_query
+    approvalId: guardian-f0118-task-bound-read-only-roster-2026-07-21
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
+    existingRequirementVisibilityImplementation: true
     realExternalCall: false
-    standingCloseout: true
+    conditionalCloseout: true
   preRedImpactScan:
-    chain: AdminOrganizationReferencePicker_and_AdminOrgAuthRedeemPage_to_organization_and_employee_transfer_routes_to_admin_organization_runtime_and_repository_to_organization_org_auth_employee_org_auth
-    coreFiles: 14
-    contingencyFiles: 11
+    chain: AdminOrganizationPortalPage_to_organization_portal_employee_route_to_overview_service_and_repository_to_bound_organization_descendant_scope_employee_user_and_existing_effective_authorization_read_model
+    coreFiles: 12
+    contingencyFiles: 7
     sameTaskAuthoritativeCallChainExpansion: 0
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: module_06_admin_ops_and_2026_07_02_ops_authorization_UI_UX_reference_collection_contract
-    confirmedResidualRootCause: AdminOrgAuthRedeemPage_reuses_fixed_page_1_20_overview_arrays_as_action_reference_directories_and_client_quota_preflight
+    requirements: role_auth_decision_D04_D09_org_admin_workspace_baseline_ADR_007_and_edition_aware_authorization_requirements
+    confirmedResidualRootCause: fixed_five_row_current_node_overview_preview_is_presented_as_complete_roster_and_does_not_consume_scope_pagination_public_id_lock_or_effective_authorization_contracts
   expectedAcceptance:
-    - organization_reference_picker_searches_and_pages_active_organizations_beyond_20_and_100
-    - org_auth_create_employee_create_import_and_transfer_do_not_depend_on_initial_overview_snapshot
-    - employee_transfer_preview_uses_repository_authoritative_current_scope_and_quota_facts
-    - transfer_POST_revalidates_stale_or_changed_preflight_and_fails_closed
-    - no_schema_migration_real_database_entitlement_quota_rule_dependency_Provider_or_mechanism_change
+    - bound_organization_and_valid_descendants_are_visible_while_siblings_and_out_of_tree_public_ids_fail_closed
+    - server_side_name_search_and_20_50_100_pagination_use_identical_row_and_count_predicates_with_stable_ordering
+    - roster_rows_expose_employee_public_id_masked_phone_account_lock_or_disable_state_and_existing_effective_authorization_summary
+    - URL_state_loading_empty_error_retry_and_pagination_are_explicit_and_no_employee_mutation_control_is_added
+    - no_schema_migration_persistent_DB_execution_new_entitlement_plaintext_phone_dependency_Provider_or_mechanism_change
   closeoutProjection:
-    current: validation_and_main_thread_adversarial_review_GREEN_awaiting_external_kernel_binding
-    triggers: TDD_RED_then_focused_and_affected_regression_quality_and_main_thread_adversarial_review_GREEN
+    current: task_bound_permission_envelope_satisfied_candidate_validated_and_ready_for_single_kernel_commit
+    triggers: unchanged_final_index_tree_and_stable_base_origin
     successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
-  validationEvidence:
-    red: passed_expected_missing_shared_picker_import_before_implementation
-    focused: passed_50_of_50_across_9_files
-    affectedRegression: passed_48_of_48_across_3_files
-    lint: passed_changed_product_and_test_files
-    typecheck: passed
-    build: passed_99_static_pages
-    formatAndDiff: passed
-  adversarialReview:
-    status: passed
-    organizationReferences: active_search_and_pagination_reach_21st_and_101st_targets_with_first_page_only_as_optional_seed
-    transferPreview: no_store_read_only_repository_facts_evaluate_every_covering_auth_and_released_employee_seat
-    stalePreview: POST_remains_transactional_authority_and_rejects_changed_quota
-    permissionBoundary: existing_employee_manager_roles_only_no_entitlement_or_capability_expansion
-    prohibitedChanges: no_schema_migration_persistent_DB_execution_dependency_Provider_external_service_or_mechanism_change
-    testQuality: no_skip_only_removed_negative_or_weakened_assertion
+  verificationEvidence:
+    approvalId: guardian-f0118-task-bound-read-only-roster-2026-07-21
+    tddRed: expected_5_of_5_failures_before_implementation
+    focusedAndAffectedRegression: pass_40_of_40_across_7_files
+    lint: pass_exact_changed_product_and_focused_test_files
+    typecheck: pass_tsc_noEmit
+    build: pass_next_build_100_static_pages_and_new_GET_route_present
+    formatAndDiff: pass_prettier_and_git_diff_check
+    e2e: not_required_stale_historical_spec_outside_current_route_contract_focused_UI_contract_and_build_cover_changed_surface
+    mainThreadAdversarialReview: pass_no_entitlement_scope_mutation_plaintext_phone_schema_dependency_provider_or_mechanism_drift
   metrics:
-    mandatoryFreshApprovals: 1_guardian_candidate_binding_for_kernel
+    mandatoryFreshApprovals: 1_guardian_task_bound_permission_envelope
     preventableScopeMissApprovals: 0
-    testOnlyExpansions: 1_pre_RED_direct_component_tests_under_standing_test_only_approval
+    testOnlyExpansions: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 0
-    productValueTime: 27m_from_TDD_RED_to_build_GREEN_including_product_review_and_tests
-    mechanismOverhead: 8m_estimated_JIT_contract_state_and_candidate_preparation_including_scope_reconciliation
+    approvalWaitTurns: 1
+    productValueTime: 18m_TDD_implementation_focused_validation_and_adversarial_correction_before_freeze
+    mechanismOverhead: 8m_JIT_contract_guardian_wait_state_validation_and_closeout_preparation
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
-    findingId: F-0107
-    productClosureContribution: F-0107
-    commit: 4ecfb59862f155e4a86734f04937bdf321994f8a
+    taskId: p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
+    findingId: F-0110
+    productClosureContribution: F-0110
+    commit: 7e5c77f7ca58c80f14a23aec578fc25b08ea1f95
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: guardian-f0107-permission-tree-ed1be32c-2026-07-21
+    approvalId: guardian-f0110-permission-tree-3239b2ec-2026-07-21
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -902,9 +900,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 481d7dbed4515c6cc95513ed403274375530342c
-  lastKnownOriginMasterSha: 481d7dbed4515c6cc95513ed403274375530342c
-  lastKnownRemoteMasterSha: 481d7dbed4515c6cc95513ed403274375530342c
+  lastKnownMasterSha: 7e5c77f7ca58c80f14a23aec578fc25b08ea1f95
+  lastKnownOriginMasterSha: 7e5c77f7ca58c80f14a23aec578fc25b08ea1f95
+  lastKnownRemoteMasterSha: 7e5c77f7ca58c80f14a23aec578fc25b08ea1f95
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

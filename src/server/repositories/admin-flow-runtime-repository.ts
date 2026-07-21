@@ -503,7 +503,7 @@ function sortAdminRoles(adminRoles: readonly AdminRole[]): AdminRole[] {
   );
 }
 
-function createAdminUserEffectiveAuthorizationReadModel(
+export function createAdminUserEffectiveAuthorizationReadModel(
   database: AdminFlowRuntimeDatabase,
   now: Date,
 ) {

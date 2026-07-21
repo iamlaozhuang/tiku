@@ -1,5 +1,11 @@
 import { createElement } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import AdminOrganizationPortalRoutePage from "@/app/(admin)/organization/portal/page";
@@ -241,6 +247,61 @@ const standardOrganizationPortalOverviewPayload = {
   },
 };
 
+const advancedEmployeeRosterPayload = {
+  code: 0,
+  message: "ok",
+  data: [
+    {
+      accountStatus: "active",
+      authEditionLabel: "advanced",
+      authStatus: "active",
+      employeeDisplayName: "员工甲",
+      employeePublicId: "employee-public-001",
+      organizationDisplayName: "华东营销中心",
+      phoneMasked: "139****0001",
+    },
+    {
+      accountStatus: "disabled",
+      authEditionLabel: "expired",
+      authStatus: "expired",
+      employeeDisplayName: "员工乙",
+      employeePublicId: "employee-public-002",
+      organizationDisplayName: "华东营销中心下级",
+      phoneMasked: "139****0002",
+    },
+  ],
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    sortBy: "employeeDisplayName",
+    sortOrder: "asc",
+    total: 3,
+  },
+};
+
+const standardEmployeeRosterPayload = {
+  code: 0,
+  message: "ok",
+  data: [
+    {
+      accountStatus: "active",
+      authEditionLabel: "standard",
+      authStatus: "active",
+      employeeDisplayName: "员工丙",
+      employeePublicId: "employee-public-003",
+      organizationDisplayName: "华南营销中心",
+      phoneMasked: "138****0003",
+    },
+  ],
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    sortBy: "employeeDisplayName",
+    sortOrder: "asc",
+    total: 2,
+  },
+};
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -252,6 +313,7 @@ function createJsonResponse(payload: unknown) {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -304,6 +366,10 @@ describe("AdminOrganizationPortalPage", () => {
         return createJsonResponse(advancedOrganizationPortalOverviewPayload);
       }
 
+      if (String(url).startsWith("/api/v1/organization-portal-employees?")) {
+        return createJsonResponse(advancedEmployeeRosterPayload);
+      }
+
       return createJsonResponse({
         code: 404001,
         message: "missing",
@@ -317,6 +383,7 @@ describe("AdminOrganizationPortalPage", () => {
     expect(
       await screen.findByRole("heading", { name: "组织后台" }),
     ).toBeInTheDocument();
+    expect(await screen.findByText("员工甲")).toBeInTheDocument();
 
     const portalShell = screen.getByTestId("organization-portal-shell");
     const supportedDestinations = within(portalShell)
@@ -388,6 +455,7 @@ describe("AdminOrganizationPortalPage", () => {
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
       "/api/v1/organization-portal-overviews",
+      "/api/v1/organization-portal-employees?accountStatus=all&authFilter=all&page=1&pageSize=20",
     ]);
   });
 
@@ -400,6 +468,10 @@ describe("AdminOrganizationPortalPage", () => {
 
       if (String(url) === "/api/v1/organization-portal-overviews") {
         return createJsonResponse(standardOrganizationPortalOverviewPayload);
+      }
+
+      if (String(url).startsWith("/api/v1/organization-portal-employees?")) {
+        return createJsonResponse(standardEmployeeRosterPayload);
       }
 
       return createJsonResponse({
@@ -415,6 +487,7 @@ describe("AdminOrganizationPortalPage", () => {
     expect(
       await screen.findByRole("heading", { name: "组织后台" }),
     ).toBeInTheDocument();
+    expect(await screen.findByText("员工丙")).toBeInTheDocument();
 
     const portalShell = screen.getByTestId("organization-portal-shell");
     expect(portalShell).toHaveTextContent("当前组织范围");
@@ -454,6 +527,81 @@ describe("AdminOrganizationPortalPage", () => {
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
       "/api/v1/organization-portal-overviews",
+      "/api/v1/organization-portal-employees?accountStatus=all&authFilter=all&page=1&pageSize=20",
     ]);
+  });
+
+  it("restores roster URL state and recovers from a no-data error without exposing identifiers", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/organization/portal?employeePage=2&employeePageSize=50&employeeKeyword=%E5%BC%A0&employeeAccountStatus=locked&employeeAuthFilter=advanced",
+    );
+    let rosterRequestCount = 0;
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (String(url) === "/api/v1/organization-portal-overviews") {
+        return createJsonResponse(advancedOrganizationPortalOverviewPayload);
+      }
+
+      if (String(url).startsWith("/api/v1/organization-portal-employees?")) {
+        rosterRequestCount += 1;
+
+        return createJsonResponse(
+          rosterRequestCount === 1
+            ? { code: 500001, message: "Unexpected runtime error.", data: null }
+            : {
+                ...advancedEmployeeRosterPayload,
+                data: [
+                  {
+                    ...advancedEmployeeRosterPayload.data[0],
+                    accountStatus: "locked",
+                    employeeDisplayName: "张三",
+                  },
+                ],
+                pagination: {
+                  ...advancedEmployeeRosterPayload.pagination,
+                  page: 2,
+                  pageSize: 50,
+                  total: 51,
+                },
+              },
+        );
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationPortalPage));
+
+    expect(await screen.findByText("员工名单加载失败，请重试。")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "重新加载" }));
+    expect(await screen.findByText("张三")).toBeVisible();
+    expect(screen.getAllByText("锁定")).toHaveLength(2);
+    expect(screen.getByText("第 2/2 页 · 共 51 人")).toBeVisible();
+    expect(document.body.textContent).not.toContain("employee-public-001");
+
+    const rosterUrls = fetchMock.mock.calls
+      .map(([url]) => String(url))
+      .filter((url) =>
+        url.startsWith("/api/v1/organization-portal-employees?"),
+      );
+    expect(rosterUrls).toEqual([
+      "/api/v1/organization-portal-employees?accountStatus=locked&authFilter=advanced&page=2&pageSize=50&keyword=%E5%BC%A0",
+      "/api/v1/organization-portal-employees?accountStatus=locked&authFilter=advanced&page=2&pageSize=50&keyword=%E5%BC%A0",
+    ]);
+    expect(window.location.search).toContain("employeePage=2");
+    expect(window.location.search).toContain("employeePageSize=50");
+    expect(window.location.search).toContain("employeeAccountStatus=locked");
+    expect(window.location.search).toContain("employeeAuthFilter=advanced");
   });
 });

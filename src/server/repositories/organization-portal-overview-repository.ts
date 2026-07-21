@@ -6,21 +6,35 @@ import {
   desc,
   eq,
   gt,
+  ilike,
   isNull,
   lte,
+  or,
   sql,
+  type SQL,
 } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
-import type { OrganizationPortalOverviewDto } from "../contracts/organization-portal-overview-contract";
-import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
-import { createRuntimeDatabaseForSchema } from "./runtime-database";
-import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 import type {
+  OrganizationPortalEmployeeAuthEditionLabel,
+  OrganizationPortalEmployeeRosterItemDto,
+  OrganizationPortalEmployeeRosterQuery,
+  OrganizationPortalOverviewDto,
+} from "../contracts/organization-portal-overview-contract";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
+import { createAdminUserEffectiveAuthorizationReadModel } from "./admin-flow-runtime-repository";
+import { createRuntimeDatabaseForSchema } from "./runtime-database";
+import {
+  createOrgAuthCoversOrganizationCondition,
+  createOrganizationIsSelfOrDescendantCondition,
+} from "./organization-scope-query";
+import type {
+  OrganizationPortalEmployeeRosterRepository,
   OrganizationPortalOverviewRepository,
   OrganizationPortalOverviewRepositoryInput,
 } from "../services/organization-portal-overview-service";
+import { resolveOrganizationPortalEmployeeAccountStatus } from "../services/organization-portal-overview-service";
 
 type OrganizationPortalOverviewRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
@@ -46,7 +60,8 @@ function createLazyDatabaseGetter(
 
 export function createPostgresOrganizationPortalOverviewRepository(
   options: OrganizationPortalOverviewRepositoryOptions = {},
-): OrganizationPortalOverviewRepository {
+): OrganizationPortalOverviewRepository &
+  OrganizationPortalEmployeeRosterRepository {
   const getDatabase = createLazyDatabaseGetter(
     options.createDatabase ?? createLocalRuntimeDatabase,
   );
@@ -54,6 +69,9 @@ export function createPostgresOrganizationPortalOverviewRepository(
   return {
     async readOverview(input) {
       return readOrganizationPortalOverview(getDatabase(), input);
+    },
+    async readEmployeeRoster(input) {
+      return readOrganizationPortalEmployeeRoster(getDatabase(), input);
     },
   };
 }
@@ -172,6 +190,157 @@ async function readEmployeePreview(
     phoneMasked: maskPhoneForDisplay(row.phone),
     status: row.status,
   }));
+}
+
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (character) => `\\${character}`);
+}
+
+function normalizeEmployeeAuthEditionLabel(
+  value: string,
+): OrganizationPortalEmployeeAuthEditionLabel {
+  return value === "advanced" || value === "expired" || value === "standard"
+    ? value
+    : "none";
+}
+
+function createEmployeeRosterConditions(input: {
+  boundOrganizationId: number;
+  effectiveAuthorization: ReturnType<
+    typeof createAdminUserEffectiveAuthorizationReadModel
+  >;
+  now: Date;
+  query: OrganizationPortalEmployeeRosterQuery;
+}): SQL[] {
+  const conditions: SQL[] = [
+    eq(user.user_type, "employee"),
+    createOrganizationIsSelfOrDescendantCondition({
+      ancestorOrganizationId: input.boundOrganizationId,
+      organizationId: employee.organization_id,
+    }),
+  ];
+
+  if (input.query.keyword !== null) {
+    conditions.push(
+      ilike(user.name, `%${escapeLikePattern(input.query.keyword)}%`),
+    );
+  }
+
+  if (input.query.employeePublicId !== null) {
+    conditions.push(eq(employee.public_id, input.query.employeePublicId));
+  }
+
+  if (input.query.accountStatus === "disabled") {
+    conditions.push(eq(user.status, "disabled"));
+  } else if (input.query.accountStatus === "locked") {
+    conditions.push(
+      and(eq(user.status, "active"), gt(user.locked_until_at, input.now))!,
+    );
+  } else if (input.query.accountStatus === "active") {
+    conditions.push(
+      and(
+        eq(user.status, "active"),
+        or(isNull(user.locked_until_at), lte(user.locked_until_at, input.now)),
+      )!,
+    );
+  }
+
+  if (input.query.authFilter !== "all") {
+    conditions.push(
+      eq(
+        input.effectiveAuthorization.auth_edition_label,
+        input.query.authFilter,
+      ),
+    );
+  }
+
+  return conditions;
+}
+
+async function readOrganizationPortalEmployeeRoster(
+  database: OrganizationPortalOverviewRuntimeDatabase,
+  input: {
+    now: Date;
+    organizationPublicId: string;
+    query: OrganizationPortalEmployeeRosterQuery;
+  },
+): Promise<{
+  employees: OrganizationPortalEmployeeRosterItemDto[];
+  total: number;
+} | null> {
+  const [boundOrganization] = await database
+    .select({ id: organization.id })
+    .from(organization)
+    .where(eq(organization.public_id, input.organizationPublicId))
+    .limit(1);
+
+  if (boundOrganization === undefined) {
+    return null;
+  }
+
+  const effectiveAuthorization = createAdminUserEffectiveAuthorizationReadModel(
+    database,
+    input.now,
+  );
+  const conditions = createEmployeeRosterConditions({
+    boundOrganizationId: boundOrganization.id,
+    effectiveAuthorization,
+    now: input.now,
+    query: input.query,
+  });
+  const whereCondition = and(...conditions);
+  const offset = (input.query.page - 1) * input.query.pageSize;
+  const rows = await database
+    .select({
+      auth_edition_label: effectiveAuthorization.auth_edition_label,
+      auth_status: effectiveAuthorization.auth_status,
+      employee_public_id: employee.public_id,
+      locked_until_at: user.locked_until_at,
+      name: user.name,
+      organization_name: organization.name,
+      phone: user.phone,
+      status: user.status,
+    })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(organization, eq(organization.id, employee.organization_id))
+    .innerJoin(
+      effectiveAuthorization,
+      eq(effectiveAuthorization.user_id, user.id),
+    )
+    .where(whereCondition)
+    .orderBy(asc(user.name), asc(employee.public_id))
+    .limit(input.query.pageSize)
+    .offset(offset);
+  const [totalRow] = await database
+    .select({ value: count() })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(organization, eq(organization.id, employee.organization_id))
+    .innerJoin(
+      effectiveAuthorization,
+      eq(effectiveAuthorization.user_id, user.id),
+    )
+    .where(whereCondition);
+
+  return {
+    employees: rows.map((row) => ({
+      accountStatus: resolveOrganizationPortalEmployeeAccountStatus({
+        lockedUntilAt: row.locked_until_at,
+        now: input.now,
+        status: row.status,
+      }),
+      authEditionLabel: normalizeEmployeeAuthEditionLabel(
+        row.auth_edition_label,
+      ),
+      authStatus: row.auth_status,
+      employeeDisplayName: row.name,
+      employeePublicId: row.employee_public_id,
+      organizationDisplayName: row.organization_name,
+      phoneMasked: maskPhoneForDisplay(row.phone),
+    })),
+    total: totalRow?.value ?? 0,
+  };
 }
 
 async function readAuthorizationOverviews(

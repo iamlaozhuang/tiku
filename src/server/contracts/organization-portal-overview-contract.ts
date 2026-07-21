@@ -29,6 +29,33 @@ export type OrganizationPortalEmployeeDto = {
   status: UserStatus;
 };
 
+export type OrganizationPortalEmployeeAccountStatus = UserStatus | "locked";
+
+export type OrganizationPortalEmployeeAuthEditionLabel =
+  | "none"
+  | "standard"
+  | "advanced"
+  | "expired";
+
+export type OrganizationPortalEmployeeRosterItemDto = {
+  accountStatus: OrganizationPortalEmployeeAccountStatus;
+  authEditionLabel: OrganizationPortalEmployeeAuthEditionLabel;
+  authStatus: AuthStatus | null;
+  employeeDisplayName: string;
+  employeePublicId: string;
+  organizationDisplayName: string;
+  phoneMasked: string;
+};
+
+export type OrganizationPortalEmployeeRosterQuery = {
+  accountStatus: "all" | OrganizationPortalEmployeeAccountStatus;
+  authFilter: "all" | OrganizationPortalEmployeeAuthEditionLabel;
+  employeePublicId: string | null;
+  keyword: string | null;
+  page: number;
+  pageSize: 20 | 50 | 100;
+};
+
 export type OrganizationPortalAuthorizationScopeDto = {
   profession: Profession;
   level: number;

@@ -1,33 +1,27 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-org-auth-reference-picker-2026-07-21",
-  "objective": "Close F-0110 by separating paginated overview lists from action reference data: reuse one searchable paginated active-organization picker for org authorization creation and employee create/import/transfer, replace client-side first-page org_auth quota inference with a repository-authoritative transfer preflight that is revalidated by the existing atomic transfer command, and keep stale or missing references fail-closed. Preserve existing roles, entitlements, quota reservation semantics and public-id boundaries without schema, migration, dependency or persistent database execution.",
+  "taskId": "p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21",
+  "objective": "Close F-0118 by replacing the fixed five-row current-node employee preview with a read-only organization-admin roster whose scope is derived from the bound organization and valid descendant tree, whose search/count/page use one repository predicate, and whose rows expose only employee public ids, masked phones, account lock/disable state and the existing effective-authorization summary. Preserve the platform-owned mutation boundary and fail closed on out-of-scope public ids without schema, migration, persistent database execution or new entitlement semantics.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/AdminOrganizationReferencePicker/AdminOrganizationReferencePicker.tsx",
-    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-    "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-    "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.tsx",
-    "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.tsx",
-    "src/server/contracts/admin-user-org-auth-ops-contract.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "src/server/repositories/employee-org-auth-quota-repository.ts",
-    "src/server/services/admin-organization-org-auth-runtime.ts",
-    "src/app/api/v1/employees/[publicId]/transfer/route.ts",
-    "tests/unit/p1-org-auth-reference-picker.test.ts",
-    "tests/unit/p1-admin-organization-picker.test.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-    "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
-    "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-    "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts",
-    "tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts",
-    "tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts",
-    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/admin-ops-summary-first-ui.test.ts",
-    "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.test.tsx",
-    "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.test.tsx"
+    "src/server/contracts/organization-portal-overview-contract.ts",
+    "src/server/repositories/organization-scope-query.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/repositories/organization-portal-overview-repository.ts",
+    "src/server/services/organization-portal-overview-service.ts",
+    "src/server/services/organization-portal-overview-route.ts",
+    "src/app/api/v1/organization-portal-employees/route.ts",
+    "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
+    "tests/unit/p1-organization-portal-employee-roster.test.ts",
+    "src/server/services/organization-portal-overview-route.test.ts",
+    "tests/unit/organization-portal-admin-entry-surface.test.ts",
+    "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
+    "tests/unit/p1-user-effective-authorization-read-model.test.ts",
+    "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
+    "tests/unit/admin-cross-role-exception-closure.test.ts",
+    "e2e/organization-portal-local-flow.spec.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -42,50 +36,46 @@
     ".github/workflows/**",
     ".env*",
     "schema, migration or persistent database execution",
-    "role, permission, entitlement, quota or default capability expansion",
+    "organization tree mutation or employee mutation",
+    "new role, permission, entitlement, quota or default capability",
+    "plaintext phone disclosure or phone-fragment search",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/AdminOrganizationReferencePicker/AdminOrganizationReferencePicker.tsx",
-    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-    "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-    "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.tsx",
-    "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.tsx",
-    "src/server/contracts/admin-user-org-auth-ops-contract.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "src/server/repositories/employee-org-auth-quota-repository.ts",
-    "src/server/services/admin-organization-org-auth-runtime.ts",
-    "src/app/api/v1/employees/[publicId]/transfer/route.ts",
-    "tests/unit/p1-org-auth-reference-picker.test.ts"
+    "src/server/contracts/organization-portal-overview-contract.ts",
+    "src/server/repositories/organization-scope-query.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/repositories/organization-portal-overview-repository.ts",
+    "src/server/services/organization-portal-overview-service.ts",
+    "src/server/services/organization-portal-overview-route.ts",
+    "src/app/api/v1/organization-portal-employees/route.ts",
+    "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
+    "tests/unit/p1-organization-portal-employee-roster.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-admin-organization-picker.test.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-    "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
-    "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-    "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts",
-    "tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts",
-    "tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts",
-    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/admin-ops-summary-first-ui.test.ts",
-    "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.test.tsx",
-    "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.test.tsx"
+    "src/server/services/organization-portal-overview-route.test.ts",
+    "tests/unit/organization-portal-admin-entry-surface.test.ts",
+    "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
+    "tests/unit/p1-user-effective-authorization-read-model.test.ts",
+    "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
+    "tests/unit/admin-cross-role-exception-closure.test.ts",
+    "e2e/organization-portal-local-flow.spec.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminOrgAuthRedeemPage currently loads organizations, org_auths and employees with one fixed page=1&pageSize=20 snapshot, then reuses those arrays for org-auth creation, employee create/import and transfer review. AdminOpsManagement already contains a tested searchable organization picker suitable for extraction and reuse.",
-    "routeService": "The organization list API already supports keyword/status/page/pageSize. The employee transfer route currently exposes only POST; adding a read-only GET preflight on the same public-id route can share the existing employee-manager authorization boundary.",
-    "repository": "The existing transfer command atomically locks and revalidates target organization and quota reservation. A read-only preflight must query the same current organization-coverage and quota facts without reserving quota, while POST remains the final fail-closed authority.",
-    "schema": "Existing organization revision, org_auth coverage, account_quota and employee_org_auth reservation facts are sufficient. No schema/migration source or persistent database execution is required.",
-    "tests": "Focused RED will cover the 21st/101st active organization, picker search/pagination/race recovery, repository-authoritative transfer preview, stale preview followed by POST rejection, and no first-page org_auth inference; direct mocks and regressions are pre-allowlisted.",
-    "requirements": "docs/01-requirements/modules/06-admin-ops.md and the 2026-07-02 operations authorization UI/UX contract require explicit target selection plus inherited authorization/quota preflight; cross-cutting list rules prohibit treating a fixed first page as a complete reference directory.",
-    "nonClaims": "No new role, entitlement, authorization source, quota rule, schema/migration, real database access, dependency, Provider, external service, secret/env, deployment, PR, force-push or mechanism change."
+    "uiApi": "AdminOrganizationPortalPage renders overview.employees as a complete employee roster although the overview repository returns only five current-node rows. A dedicated GET /api/v1/organization-portal-employees collection will own name search, account/auth filters, page/pageSize and employeePublicId support lookup while the overview remains summary-only.",
+    "routeService": "The existing organization-portal session resolver already restricts access to org_standard_admin and org_advanced_admin and supplies the bound organization public id. The new read-only handler reuses that resolver, normalizes 20/50/100 pagination and returns no-store responses without adding a mutation route.",
+    "repository": "The roster repository will use one bound-organization self-or-descendant predicate for rows and count, stable display-name plus employee-public-id ordering, masked phone mapping, explicit locked/disabled precedence, and the F-0107 effective-authorization read model. Optional employeePublicId lookup remains inside the same scope predicate so out-of-tree ids fail closed as an empty result.",
+    "schema": "Existing organization parent links, employee.public_id, unique employee.user_id, user.locked_until_at, employee_org_auth, org_auth and auth_upgrade facts are sufficient. No schema/migration source or persistent database execution is required.",
+    "tests": "Focused RED covers the 6th/21st/101st employees, descendant inclusion and sibling exclusion, identical row/count predicates, 20/50/100 pagination, stable ordering, URL-restored filters, public-id scoped lookup, masked phones, disabled-over-locked precedence, expired/active authorization summaries and no write controls. Direct route/UI/F-0119/F-0107/tree-scope regressions are pre-allowlisted.",
+    "requirements": "The 2026-07-02 role/auth decision package D04/D09 and 2026-07-07 organization-admin workspace baseline require an organization-scoped read-only roster/status surface while all employee and tree mutation stays platform-owned. ADR-007 and edition-aware authorization requirements keep the effective authorization source and edition semantics unchanged.",
+    "nonClaims": "No new role, entitlement or organization scope beyond the documented bound organization and valid descendants; no employee detail mutation, full phone, raw authorization rows, raw answers, schema/migration, real database access, dependency, Provider, external service, secret/env, deployment, PR, force-push or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0110-reference-picker-focused",
+      "name": "f0118-organization-portal-roster-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -93,62 +83,42 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-org-auth-reference-picker.test.ts",
-        "tests/unit/p1-admin-organization-picker.test.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-        "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
-        "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts",
-        "tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts",
-        "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-        "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.test.tsx",
-        "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.test.tsx"
+        "tests/unit/p1-organization-portal-employee-roster.test.ts",
+        "src/server/services/organization-portal-overview-route.test.ts",
+        "tests/unit/organization-portal-admin-entry-surface.test.ts",
+        "tests/unit/p1-organization-portal-authorization-read-model.test.ts",
+        "tests/unit/p1-user-effective-authorization-read-model.test.ts",
+        "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
+        "tests/unit/admin-cross-role-exception-closure.test.ts"
       ]
     },
     {
-      "name": "f0110-reference-picker-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-        "tests/unit/admin-ops-summary-first-ui.test.ts"
-      ]
-    },
-    {
-      "name": "f0110-reference-picker-lint",
+      "name": "f0118-organization-portal-roster-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/AdminOrganizationReferencePicker/AdminOrganizationReferencePicker.tsx",
-        "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-        "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-        "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.tsx",
-        "src/features/admin/org-auth-redeem/EmployeeCreateActionPanel/EmployeeCreateActionPanel.test.tsx",
-        "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.tsx",
-        "src/features/admin/org-auth-redeem/EmployeeImportPreflightPanel/EmployeeImportPreflightPanel.test.tsx",
-        "src/server/contracts/admin-user-org-auth-ops-contract.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-        "src/server/repositories/employee-org-auth-quota-repository.ts",
-        "src/server/services/admin-organization-org-auth-runtime.ts",
-        "src/app/api/v1/employees/[publicId]/transfer/route.ts",
-        "tests/unit/p1-org-auth-reference-picker.test.ts"
+        "src/server/contracts/organization-portal-overview-contract.ts",
+        "src/server/repositories/organization-scope-query.ts",
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/server/repositories/organization-portal-overview-repository.ts",
+        "src/server/services/organization-portal-overview-service.ts",
+        "src/server/services/organization-portal-overview-route.ts",
+        "src/app/api/v1/organization-portal-employees/route.ts",
+        "src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx",
+        "tests/unit/p1-organization-portal-employee-roster.test.ts"
       ]
     },
     {
-      "name": "f0110-reference-picker-typecheck",
+      "name": "f0118-organization-portal-roster-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0110-reference-picker-build",
+      "name": "f0118-organization-portal-roster-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -157,16 +127,17 @@
   "approvalSources": {
     "dependency": null,
     "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "permission": "guardian-f0118-task-bound-read-only-roster-2026-07-21",
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_permission_reference_lookup_and_database_application_preflight_logic",
+    "category": "permission_existing_requirement_read_only_scope_and_database_application_query",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
+    "existingRequirementVisibilityImplementation": true,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
@@ -175,13 +146,10 @@
     "standing-test-only-allowlist-expansion-2026-07-21",
     "current-user-delegated-p1-guardian-v1-2026-07-21"
   ],
-  "testOnlyExpansion": {
-    "approvalId": "standing-test-only-allowlist-expansion-2026-07-21",
-    "reason": "Direct component tests discovered during the pre-RED caller/mock/fixture scan; validation-only boundary, no product scope expansion."
-  },
+  "conditionalCloseout": true,
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "approvalId": "guardian-f0118-task-bound-read-only-roster-2026-07-21"
   }
 }
