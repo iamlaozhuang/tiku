@@ -4,16 +4,14 @@ import type { PersonalAiGenerationLearningSessionQuestionType } from "../models/
 import type { OrganizationTrainingQuestionSnapshotValue } from "@/db/schema";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type {
+  AiPaperQuestionSourceRepository,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
-import type { NormalizedQuestionListInput } from "../validators/question";
 import type {
   PersonalAiGenerationLearningPaperSourceQuestionResolver,
   PersonalAiGenerationLearningPaperSourceQuestionResolverInput,
 } from "./personal-ai-generation-learning-session-route";
 
-const DEFAULT_PLATFORM_PAGE_SIZE = 100;
 const supportedQuestionTypes = new Set<string>([
   "single_choice",
   "multi_choice",
@@ -22,12 +20,11 @@ const supportedQuestionTypes = new Set<string>([
 ]);
 
 export function createPersonalAiGenerationLearningSessionPaperSourceResolver(input: {
-  questionRepository: Pick<QuestionRepository, "listQuestions">;
+  questionRepository: AiPaperQuestionSourceRepository;
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listEmployeeVisibleQuestionSnapshotsForAiPaperSource"
   >;
-  platformPageSize?: number;
 }): PersonalAiGenerationLearningPaperSourceQuestionResolver {
   return async (resolverInput) => {
     const selectedQuestions = collectSelectedQuestions(
@@ -36,7 +33,6 @@ export function createPersonalAiGenerationLearningSessionPaperSourceResolver(inp
     const platformSourceQuestions = await resolvePlatformSourceQuestions({
       resolverInput,
       questionRepository: input.questionRepository,
-      platformPageSize: input.platformPageSize,
     });
     const enterpriseSourceQuestions = await resolveEnterpriseSourceQuestions({
       resolverInput,
@@ -66,8 +62,7 @@ export function createPersonalAiGenerationLearningSessionPaperSourceResolver(inp
 
 async function resolvePlatformSourceQuestions(input: {
   resolverInput: PersonalAiGenerationLearningPaperSourceQuestionResolverInput;
-  questionRepository: Pick<QuestionRepository, "listQuestions">;
-  platformPageSize?: number;
+  questionRepository: AiPaperQuestionSourceRepository;
 }): Promise<PersonalAiGenerationLearningPaperSourceQuestionDto[]> {
   const selectedPlatformQuestionIds = collectSelectedQuestionIdsBySourceKind(
     input.resolverInput.paperAssemblyContainer,
@@ -78,14 +73,17 @@ async function resolvePlatformSourceQuestions(input: {
     return [];
   }
 
-  const result = await input.questionRepository.listQuestions(
-    createPlatformFormalQuestionQuery({
-      paperAssemblyContainer: input.resolverInput.paperAssemblyContainer,
-      platformPageSize: input.platformPageSize,
-    }),
-  );
+  const container = input.resolverInput.paperAssemblyContainer;
+  const rows =
+    await input.questionRepository.listAvailableAiPaperSourceQuestions({
+      profession: container.profession,
+      level: container.level,
+      subject: container.subject,
+      knowledgeNodePublicIds: null,
+      questionPublicIds: [...selectedPlatformQuestionIds],
+    });
 
-  return result.rows
+  return rows
     .filter(
       (row) =>
         selectedPlatformQuestionIds.has(row.public_id) &&
@@ -142,26 +140,6 @@ async function resolveEnterpriseSourceQuestions(input: {
       ): sourceQuestion is PersonalAiGenerationLearningPaperSourceQuestionDto =>
         sourceQuestion !== null,
     );
-}
-
-function createPlatformFormalQuestionQuery(input: {
-  paperAssemblyContainer: AiPaperPlanAndSelectContainerDto;
-  platformPageSize?: number;
-}): NormalizedQuestionListInput {
-  return {
-    page: 1,
-    pageSize: normalizePlatformPageSize(input.platformPageSize),
-    sortBy: "updatedAt",
-    sortOrder: "desc",
-    profession: input.paperAssemblyContainer.profession,
-    level: input.paperAssemblyContainer.level,
-    subject: input.paperAssemblyContainer.subject,
-    questionType: null,
-    status: "available",
-    keyword: null,
-    knowledgeNodePublicId: null,
-    tagPublicId: null,
-  };
 }
 
 function mapPlatformQuestionRowToSourceQuestion(
@@ -281,10 +259,4 @@ function normalizeNullableText(
   const normalizedValue = value?.trim();
 
   return normalizedValue && normalizedValue.length > 0 ? normalizedValue : null;
-}
-
-function normalizePlatformPageSize(pageSize: number | undefined): number {
-  return pageSize !== undefined && Number.isInteger(pageSize) && pageSize > 0
-    ? pageSize
-    : DEFAULT_PLATFORM_PAGE_SIZE;
 }

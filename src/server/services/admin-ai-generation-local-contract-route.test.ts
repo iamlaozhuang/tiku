@@ -35,8 +35,8 @@ import type {
 import type { AdminRole } from "../models/auth";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type {
+  AiPaperQuestionSourceRepository,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
 import type { SessionService } from "./session-service";
 
@@ -361,7 +361,7 @@ async function postLocalContractRequest(input: {
   paperAssemblyResolver?: () =>
     | AiPaperRoutePlanSelectWiringResult
     | Promise<AiPaperRoutePlanSelectWiringResult>;
-  questionRepository?: Pick<QuestionRepository, "listQuestions">;
+  questionRepository?: AiPaperQuestionSourceRepository;
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
@@ -531,13 +531,10 @@ function createQuestionRow(
 
 function createQuestionRepository(
   questionRows: readonly QuestionAccessRow[],
-): Pick<QuestionRepository, "listQuestions"> {
+): AiPaperQuestionSourceRepository {
   return {
-    async listQuestions() {
-      return {
-        rows: [...questionRows],
-        total: questionRows.length,
-      };
+    async listAvailableAiPaperSourceQuestions() {
+      return [...questionRows];
     },
   };
 }
@@ -1719,23 +1716,20 @@ describe("admin AI generation local contract route handlers", () => {
       createGeneratedResultPersistenceRecorder();
     const questionRepositoryCalls: unknown[] = [];
     const trainingRepositoryCalls: unknown[] = [];
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions(query) {
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions(query) {
         questionRepositoryCalls.push(query);
 
-        return {
-          rows: [
-            createQuestionRow({
-              public_id: "platform_question_public_route_a",
-              question_type: "single_choice",
-            }),
-            createQuestionRow({
-              public_id: "platform_question_public_route_b",
-              question_type: "multi_choice",
-            }),
-          ],
-          total: 2,
-        };
+        return [
+          createQuestionRow({
+            public_id: "platform_question_public_route_a",
+            question_type: "single_choice",
+          }),
+          createQuestionRow({
+            public_id: "platform_question_public_route_b",
+            question_type: "multi_choice",
+          }),
+        ];
       },
     };
     const organizationTrainingRepository: Pick<
@@ -1795,7 +1789,25 @@ describe("admin AI generation local contract route handlers", () => {
     });
     const payload = await response.json();
 
-    expect(questionRepositoryCalls).toHaveLength(2);
+    expect(questionRepositoryCalls).toEqual([
+      {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNodePublicIds: null,
+        questionPublicIds: null,
+      },
+      {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNodePublicIds: null,
+        questionPublicIds: [
+          "platform_question_public_route_a",
+          "platform_question_public_route_b",
+        ],
+      },
+    ]);
     expect(trainingRepositoryCalls).toHaveLength(1);
     expect(payload).toMatchObject({
       code: 0,

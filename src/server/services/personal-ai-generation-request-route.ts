@@ -19,7 +19,7 @@ import type {
 } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
-import type { QuestionRepository } from "../repositories/question-repository";
+import type { AiPaperQuestionSourceRepository } from "../repositories/question-repository";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import {
   getAiGenerationSharedTaskSpec,
@@ -86,7 +86,7 @@ export type PersonalAiGenerationRequestRouteDependencies = {
     "createOrReuseDraftResult"
   >;
   paperAssemblyResolver?: PersonalAiGenerationPaperAssemblyResolver;
-  questionRepository?: Pick<QuestionRepository, "listQuestions">;
+  questionRepository?: AiPaperQuestionSourceRepository;
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"

@@ -106,6 +106,20 @@ export type QuestionListResult = {
   total: number;
 };
 
+export type AiPaperSourceQuestionListInput = {
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  knowledgeNodePublicIds: readonly string[] | null;
+  questionPublicIds: readonly string[] | null;
+};
+
+export type AiPaperQuestionSourceRepository = {
+  listAvailableAiPaperSourceQuestions(
+    input: AiPaperSourceQuestionListInput,
+  ): Promise<QuestionAccessRow[]>;
+};
+
 export type UpdateQuestionInput = NormalizedUpdateQuestionInput & {
   publicId: string;
 };
@@ -140,7 +154,7 @@ export type QuestionRepository = {
 
 export function createPostgresQuestionRepository(
   options: RuntimeDatabaseOptions = {},
-): QuestionRepository {
+): QuestionRepository & AiPaperQuestionSourceRepository {
   const getDatabase = createLazyRuntimeDatabaseGetter(
     options,
     "DATABASE_URL is required for question runtime.",
@@ -187,6 +201,10 @@ export function createPostgresQuestionRepository(
         rows: await hydrateQuestions(database, rows),
         total: totalRow?.value ?? 0,
       };
+    },
+
+    async listAvailableAiPaperSourceQuestions(input) {
+      return listAvailableAiPaperSourceQuestions(getDatabase(), input);
     },
 
     async createQuestion(input, context, options) {
@@ -487,6 +505,89 @@ type QuestionBaseRow = Omit<
   | "tag_public_ids"
 >;
 
+function createQuestionBaseSelection() {
+  return {
+    id: question.id,
+    public_id: question.public_id,
+    question_type: question.question_type,
+    profession: question.profession,
+    level: question.level,
+    subject: question.subject,
+    stem_rich_text: question.stem_rich_text,
+    analysis_rich_text: question.analysis_rich_text,
+    standard_answer_rich_text: question.standard_answer_rich_text,
+    status: question.status,
+    is_locked: question.is_locked,
+    locked_at: question.locked_at,
+    multi_choice_rule: question.multi_choice_rule,
+    scoring_method: question.scoring_method,
+    fill_blank_answers: question.fill_blank_answers,
+    material_id: question.material_id,
+    material_public_id: material.public_id,
+    created_at: question.created_at,
+    updated_at: question.updated_at,
+  };
+}
+
+async function listAvailableAiPaperSourceQuestions(
+  database: RuntimeDatabase,
+  input: AiPaperSourceQuestionListInput,
+): Promise<QuestionAccessRow[]> {
+  const questionPublicIds = normalizeOptionalPublicIds(input.questionPublicIds);
+  const knowledgeNodePublicIds = normalizeOptionalPublicIds(
+    input.knowledgeNodePublicIds,
+  );
+
+  if (
+    (input.questionPublicIds !== null && questionPublicIds.length === 0) ||
+    (input.knowledgeNodePublicIds !== null &&
+      knowledgeNodePublicIds.length === 0)
+  ) {
+    return [];
+  }
+
+  const conditions: SQL[] = [
+    eq(question.profession, input.profession),
+    eq(question.level, input.level),
+    eq(question.subject, input.subject),
+    eq(question.status, "available"),
+  ];
+
+  if (questionPublicIds.length > 0) {
+    conditions.push(inArray(question.public_id, questionPublicIds));
+  }
+
+  const knowledgeNodeCondition = createQuestionKnowledgeNodePublicIdsCondition(
+    knowledgeNodePublicIds,
+  );
+  if (knowledgeNodeCondition !== null) {
+    conditions.push(knowledgeNodeCondition);
+  }
+
+  const rows = await database
+    .select(createQuestionBaseSelection())
+    .from(question)
+    .leftJoin(material, eq(material.id, question.material_id))
+    .where(and(...conditions))
+    .orderBy(desc(question.updated_at), asc(question.public_id));
+
+  return hydrateQuestions(database, rows);
+}
+
+function normalizeOptionalPublicIds(
+  publicIds: readonly string[] | null,
+): string[] {
+  return publicIds === null
+    ? []
+    : [
+        ...new Set(
+          publicIds
+            .map((publicId) => publicId.trim())
+            .filter((publicId) => publicId.length > 0),
+        ),
+      ];
+}
+
 function createQuestionConditions(
   queryInput: NormalizedQuestionListInput,
 ): SQL[] {
@@ -571,6 +672,21 @@ export function createQuestionKnowledgeNodePublicIdCondition(
           on ${knowledgeNode.id} = ${questionKnowledgeNode.knowledge_node_id}
         where ${questionKnowledgeNode.question_id} = ${question.id}
           and ${knowledgeNode.public_id} = ${publicId}
+      )`;
+}
+
+export function createQuestionKnowledgeNodePublicIdsCondition(
+  publicIds: readonly string[],
+): SQL | null {
+  return publicIds.length === 0
+    ? null
+    : sql`exists (
+        select 1
+        from ${questionKnowledgeNode}
+        inner join ${knowledgeNode}
+          on ${knowledgeNode.id} = ${questionKnowledgeNode.knowledge_node_id}
+        where ${questionKnowledgeNode.question_id} = ${question.id}
+          and ${inArray(knowledgeNode.public_id, [...publicIds])}
       )`;
 }
 

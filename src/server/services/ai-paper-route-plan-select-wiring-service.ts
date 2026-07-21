@@ -7,7 +7,7 @@ import type {
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
-import type { QuestionRepository } from "../repositories/question-repository";
+import type { AiPaperQuestionSourceRepository } from "../repositories/question-repository";
 import {
   assembleAiPaperFromRouteVisiblePlan,
   type AiPaperRouteAssemblyFailureCategory,
@@ -28,7 +28,7 @@ export type AiPaperRoutePlanSelectWiringInput = {
   employeePublicId?: string | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
-  questionRepository: Pick<QuestionRepository, "listQuestions">;
+  questionRepository: AiPaperQuestionSourceRepository;
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
@@ -37,7 +37,6 @@ export type AiPaperRoutePlanSelectWiringInput = {
     Record<string, string | null>
   >;
   difficultyByQuestionPublicId?: Readonly<Record<string, string | null>>;
-  platformPageSize?: number;
 };
 
 export type AiPaperRoutePlanSelectWiringResult =
@@ -69,7 +68,6 @@ export async function resolveAndAssembleAiPaperFromRoute(
     knowledgeNodeParentPublicIdsByPublicId:
       input.knowledgeNodeParentPublicIdsByPublicId,
     difficultyByQuestionPublicId: input.difficultyByQuestionPublicId,
-    platformPageSize: input.platformPageSize,
   });
 
   if (sourceResolution.status === "rejected") {

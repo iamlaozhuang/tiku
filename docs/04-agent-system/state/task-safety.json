@@ -1,23 +1,25 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-organization-training-self-answer-recovery-2026-07-21",
-  "objective": "Close F-0144 by composing each currently answerable organization training version with the signed-in employee's persisted answer lifecycle, organization display name and submitted score, and by adding an object-authorized GET path that restores only that employee's in-progress answer snapshot. Preserve the existing advanced organization authorization, current organization scope, single-submit lifecycle and raw-answer privacy boundaries without schema, migration, persistent database execution or entitlement expansion.",
+  "taskId": "p1-remediation-rc-04-ai-paper-candidate-pagination-2026-07-21",
+  "objective": "Close F-0153 by replacing the paginated admin-list reuse in AI paper platform source resolution with one dedicated, complete and stably ordered repository read, and by reloading already selected platform questions through an exact public-id bounded read for personal learning-session and organization-training draft materialization. Preserve existing profession, level, subject, available-status, knowledge-scope, role-source and authorization boundaries without schema, migration, persistent database execution, Provider calls or entitlement expansion.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/services/organization-training-service.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft/route.ts",
-    "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
-    "tests/unit/organization-training-employee-entry-surface.test.ts",
-    "tests/unit/p0-rc-08-operation-id-retry.test.ts",
-    "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
+    "src/server/repositories/question-repository.ts",
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/services/ai-paper-route-source-resolution-service.ts",
+    "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+    "src/server/services/ai-paper-route-plan-select-wiring-service.ts",
+    "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
+    "src/server/services/personal-ai-generation-request-route.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts",
+    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
+    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/services/ai-paper-plan-and-select-service.test.ts",
+    "tests/unit/knowledge-node-ai-final-regression.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -32,41 +34,43 @@
     ".github/workflows/**",
     ".env*",
     "schema, migration or persistent database execution",
-    "new role, entitlement, organization scope, quota or default capability",
-    "cross-employee answers, admin raw-answer access or answer export",
+    "new role, entitlement, authorization scope, quota or default capability",
+    "generated draft inclusion as formal source or enterprise cross-organization source",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/services/organization-training-service.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft/route.ts",
-    "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx"
+    "src/server/repositories/question-repository.ts",
+    "src/server/services/ai-paper-route-source-resolution-service.ts",
+    "src/server/services/ai-paper-route-plan-select-wiring-service.ts",
+    "src/server/services/personal-ai-generation-request-route.ts",
+    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts"
   ],
   "contingencyFiles": [
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "tests/unit/organization-training-employee-entry-surface.test.ts",
-    "tests/unit/p0-rc-08-operation-id-retry.test.ts",
-    "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+    "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts",
+    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/services/ai-paper-plan-and-select-service.test.ts",
+    "tests/unit/knowledge-node-ai-final-regression.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "StudentOrganizationTrainingPage consumes visible-list, derives the primary action from employeeAnswerStatus and currently initializes every form empty. It must load the authenticated employee's in-progress draft before enabling continuation and keep submitted rows on the existing readonly-summary path.",
-    "routeService": "The existing employee session resolver supplies employeePublicId, currentOrganizationPublicId and effective advanced org_auth. The new GET reuses the same context, visible version resolver and own-answer resolver, but the service accepts only an in_progress answer owned by that employee and version.",
-    "repository": "The runtime visible-list query already joins employee, user, employee_org_auth, org_auth and organization but does not join the unique version+employee answer. It must left join that exact self answer once and project status, score and organization name without widening scope or exposing answer items in the list.",
-    "schema": "Existing organization_training_answer has a unique version+employee index and persisted revision, answer_item_snapshot, status, score and submitted_at. Existing organization and version rows provide the display and scope facts. No schema or migration source is required.",
-    "tests": "Repository, service, route and employee UI RED cases cover no-answer, in-progress refresh recovery, submitted result discovery, cross-employee/version denial, no mutation and preserved retry semantics. Existing P0 RC-08 regressions are pre-allowlisted.",
-    "requirements": "CT-REQ-019 and CT-REQ-036, D15, UC-ORGADVEMP-011/012, the advanced organization training module/story and ADR-007 require save/restore, one-submit, own-result discovery and service-enforced advanced organization authorization.",
-    "nonClaims": "No historical submitted-after-transfer read model, entitlement expansion, admin answer access, schema, migration, real database, dependency, Provider, deployment or mechanism change. F-0146 remains separate."
+    "uiApiCallers": "Content, personal and organization AI paper routes all converge through resolveAndAssembleAiPaperFromRoute. Personal learning-session creation and organization draft detail materialization later re-read the selected platform questions.",
+    "routeService": "ai-paper-route-source-resolution-service currently calls listQuestions page 1 with pageSize at most 100. The personal learning-session resolver and admin local-contract route repeat the same first-page lookup before filtering selected public IDs.",
+    "repository": "QuestionRepository listQuestions is an admin pagination contract. The task adds a dedicated AI paper source read that applies profession, level, subject, available status and optional exact knowledge/public-id filters in the database, returns the complete bounded set in stable updatedAt/publicId order and hydrates relationships in batches.",
+    "schema": "Existing question, question_knowledge_node, knowledge_node, options, scoring points and tag tables contain all required source facts. No schema or migration source is needed.",
+    "tests": "Repository condition tests plus source, wiring, personal request, learning-session, admin draft and knowledge-scope regressions cover 101/1000-sized collections, sparse matches beyond the former first page, exact selected-id recovery, deduplication, source scope and insufficiency semantics.",
+    "requirements": "The AI generation recontract traceability requires local assembly from every eligible formal source, maximum 80 selected questions, truthful insufficiency and role-specific source isolation. ADR-002 keeps database reads in the repository and ADR-007 keeps effective authorization in existing callers.",
+    "nonClaims": "No F-0154 metadata repair, F-0170 history join, F-0146 content-version snapshot, schema, migration, real database, Provider, dependency, permission, deployment or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0144-organization-training-self-answer-recovery-focused",
+      "name": "f0153-ai-paper-candidate-pagination-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -74,42 +78,47 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "tests/unit/organization-training-employee-entry-surface.test.ts",
-        "tests/unit/p0-rc-08-operation-id-retry.test.ts",
-        "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+        "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
+        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/services/ai-paper-plan-and-select-service.test.ts",
+        "tests/unit/knowledge-node-ai-final-regression.test.ts"
       ]
     },
     {
-      "name": "f0144-organization-training-self-answer-recovery-lint",
+      "name": "f0153-ai-paper-candidate-pagination-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/contracts/organization-training-contract.ts",
-        "src/server/repositories/organization-training-repository.ts",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/organization-training-service.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-route.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft/route.ts",
-        "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
-        "tests/unit/organization-training-employee-entry-surface.test.ts"
+        "src/server/repositories/question-repository.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/services/ai-paper-route-source-resolution-service.ts",
+        "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+        "src/server/services/ai-paper-route-plan-select-wiring-service.ts",
+        "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
+        "src/server/services/personal-ai-generation-request-route.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
+        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
+        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "tests/unit/knowledge-node-ai-final-regression.test.ts"
       ]
     },
     {
-      "name": "f0144-organization-training-self-answer-recovery-typecheck",
+      "name": "f0153-ai-paper-candidate-pagination-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0144-organization-training-self-answer-recovery-build",
+      "name": "f0153-ai-paper-candidate-pagination-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -123,7 +132,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_read_model_and_existing_advanced_authorization",
+    "category": "bounded_database_application_read_logic_and_existing_ai_authorization",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,

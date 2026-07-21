@@ -5,10 +5,10 @@ import type { PersonalAiGenerationLearningPaperSourceQuestionDto } from "../cont
 import type { OrganizationTrainingQuestionSnapshotValue } from "@/db/schema";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type {
+  AiPaperQuestionSourceRepository,
+  AiPaperSourceQuestionListInput,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
-import type { NormalizedQuestionListInput } from "../validators/question";
 import { createPersonalAiGenerationLearningSessionPaperSourceResolver } from "./personal-ai-generation-learning-session-paper-source-resolver";
 
 const personalUserContext = {
@@ -154,24 +154,21 @@ function createEnterpriseSnapshot(
 
 describe("personal AI generation learning session paper source resolver", () => {
   it("resolves selected platform formal questions and employee-visible enterprise snapshots", async () => {
-    const questionQueries: NormalizedQuestionListInput[] = [];
+    const questionQueries: AiPaperSourceQuestionListInput[] = [];
     const employeeSnapshotQueries: Array<{
       employeePublicId: string;
       organizationPublicId: string;
     }> = [];
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions(query) {
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions(query) {
         questionQueries.push(query);
 
-        return {
-          rows: [
-            createQuestionRow(),
-            createQuestionRow({
-              public_id: "resolver_platform_question_public_unselected",
-            }),
-          ],
-          total: 2,
-        };
+        return [
+          createQuestionRow(),
+          createQuestionRow({
+            public_id: "resolver_platform_question_public_unselected",
+          }),
+        ];
       },
     };
     const organizationTrainingRepository = {
@@ -193,7 +190,6 @@ describe("personal AI generation learning session paper source resolver", () => 
       createPersonalAiGenerationLearningSessionPaperSourceResolver({
         questionRepository,
         organizationTrainingRepository,
-        platformPageSize: 25,
       });
 
     const sourceQuestions = await resolver({
@@ -210,18 +206,11 @@ describe("personal AI generation learning session paper source resolver", () => 
 
     expect(questionQueries).toEqual([
       {
-        page: 1,
-        pageSize: 25,
-        sortBy: "updatedAt",
-        sortOrder: "desc",
         profession: "marketing",
         level: 3,
         subject: "theory",
-        questionType: null,
-        status: "available",
-        keyword: null,
-        knowledgeNodePublicId: null,
-        tagPublicId: null,
+        knowledgeNodePublicIds: null,
+        questionPublicIds: ["resolver_platform_question_public_001"],
       },
     ]);
     expect(employeeSnapshotQueries).toEqual([
@@ -248,6 +237,54 @@ describe("personal AI generation learning session paper source resolver", () => 
         standardAnswerText: "B",
       }),
     ] satisfies PersonalAiGenerationLearningPaperSourceQuestionDto[]);
+  });
+
+  it("reloads a selected platform question by exact public id outside a moving list window", async () => {
+    const aiPaperSourceQueries: unknown[] = [];
+    let legacyListCalls = 0;
+    const questionRepository = {
+      async listQuestions() {
+        legacyListCalls += 1;
+        return { rows: [], total: 1000 };
+      },
+      async listAvailableAiPaperSourceQuestions(query: unknown) {
+        aiPaperSourceQueries.push(query);
+        return [createQuestionRow()];
+      },
+    };
+    const resolver =
+      createPersonalAiGenerationLearningSessionPaperSourceResolver({
+        questionRepository,
+      });
+
+    const sourceQuestions = await resolver({
+      userContext: personalUserContext,
+      ownerScope: {
+        ownerType: "personal",
+        ownerPublicId: personalUserContext.userPublicId,
+        actorPublicId: personalUserContext.userPublicId,
+      },
+      sourceResultPublicId: "resolver_result_public_exact",
+      sourceTaskPublicId: "resolver_task_public_exact",
+      paperAssemblyContainer: createPaperAssemblyContainer(),
+    });
+
+    expect(sourceQuestions).toEqual([
+      expect.objectContaining({
+        questionPublicId: "resolver_platform_question_public_001",
+        sourceKind: "platform_formal_question",
+      }),
+    ]);
+    expect(legacyListCalls).toBe(0);
+    expect(aiPaperSourceQueries).toEqual([
+      {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNodePublicIds: null,
+        questionPublicIds: ["resolver_platform_question_public_001"],
+      },
+    ]);
   });
 
   it("keeps personal paper source resolution platform-only even when enterprise selection is present", async () => {
@@ -288,13 +325,10 @@ describe("personal AI generation learning session paper source resolver", () => 
 
 function createQuestionRepository(
   rows: QuestionAccessRow[],
-): Pick<QuestionRepository, "listQuestions"> {
+): AiPaperQuestionSourceRepository {
   return {
-    async listQuestions() {
-      return {
-        rows,
-        total: rows.length,
-      };
+    async listAvailableAiPaperSourceQuestions() {
+      return rows;
     },
   };
 }

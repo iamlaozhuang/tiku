@@ -14,8 +14,8 @@ import type {
 } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type {
+  AiPaperQuestionSourceRepository,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
@@ -2821,21 +2821,18 @@ describe("personal AI generation request route handlers", () => {
     const resultRepository = createResultRepository();
     const questionRepositoryCalls: unknown[] = [];
     const trainingRepositoryCalls: unknown[] = [];
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions(query) {
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions(query) {
         questionRepositoryCalls.push(query);
 
-        return {
-          rows: [
-            createQuestionRow({
-              public_id: "platform_question_public_employee_a",
-            }),
-            createQuestionRow({
-              public_id: "platform_question_public_employee_b",
-            }),
-          ],
-          total: 2,
-        };
+        return [
+          createQuestionRow({
+            public_id: "platform_question_public_employee_a",
+          }),
+          createQuestionRow({
+            public_id: "platform_question_public_employee_b",
+          }),
+        ];
       },
     };
     const organizationTrainingRepository: Pick<
@@ -2962,22 +2959,19 @@ describe("personal AI generation request route handlers", () => {
   it("uses only platform formal questions for personal advanced student paper assembly", async () => {
     const resultRepository = createResultRepository();
     const trainingRepositoryCalls: unknown[] = [];
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions() {
-        return {
-          rows: [
-            createQuestionRow({
-              public_id: "platform_question_public_personal_a",
-            }),
-            createQuestionRow({
-              public_id: "platform_question_public_personal_b",
-            }),
-            createQuestionRow({
-              public_id: "platform_question_public_personal_c",
-            }),
-          ],
-          total: 3,
-        };
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions() {
+        return [
+          createQuestionRow({
+            public_id: "platform_question_public_personal_a",
+          }),
+          createQuestionRow({
+            public_id: "platform_question_public_personal_b",
+          }),
+          createQuestionRow({
+            public_id: "platform_question_public_personal_c",
+          }),
+        ];
       },
     };
     const organizationTrainingRepository: Pick<

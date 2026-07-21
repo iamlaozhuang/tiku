@@ -7,10 +7,10 @@ import type {
   OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
 import type {
+  AiPaperQuestionSourceRepository,
+  AiPaperSourceQuestionListInput,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
-import type { NormalizedQuestionListInput } from "../validators/question";
 import { createRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-service";
 import { resolveAndAssembleAiPaperFromRoute } from "./ai-paper-route-plan-select-wiring-service";
 
@@ -60,23 +60,20 @@ const routePlanContent = JSON.stringify({
 
 describe("AI组卷 route plan select wiring", () => {
   it("resolves content-admin platform sources and assembles a redacted paper container", async () => {
-    let capturedQuestionQueries: NormalizedQuestionListInput[] = [];
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions(query) {
+    let capturedQuestionQueries: AiPaperSourceQuestionListInput[] = [];
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions(query) {
         capturedQuestionQueries = [...capturedQuestionQueries, query];
 
-        return {
-          rows: [
-            createQuestionRow({ public_id: "platform_question_public_a" }),
-            createQuestionRow({ public_id: "platform_question_public_b" }),
-            createQuestionRow({
-              public_id: "platform_question_public_c",
-              question_type: "true_false",
-              knowledge_node_public_ids: ["knowledge_node_public_b"],
-            }),
-          ],
-          total: 3,
-        };
+        return [
+          createQuestionRow({ public_id: "platform_question_public_a" }),
+          createQuestionRow({ public_id: "platform_question_public_b" }),
+          createQuestionRow({
+            public_id: "platform_question_public_c",
+            question_type: "true_false",
+            knowledge_node_public_ids: ["knowledge_node_public_b"],
+          }),
+        ];
       },
     };
 
@@ -428,23 +425,17 @@ function createTrainingQuestion(publicId: string) {
 
 function createQuestionRepository(
   questionRows: readonly QuestionAccessRow[],
-): Pick<QuestionRepository, "listQuestions"> {
+): AiPaperQuestionSourceRepository {
   return {
-    async listQuestions() {
-      return {
-        rows: [...questionRows],
-        total: questionRows.length,
-      };
+    async listAvailableAiPaperSourceQuestions() {
+      return [...questionRows];
     },
   };
 }
 
-function createThrowingQuestionRepository(): Pick<
-  QuestionRepository,
-  "listQuestions"
-> {
+function createThrowingQuestionRepository(): AiPaperQuestionSourceRepository {
   return {
-    async listQuestions() {
+    async listAvailableAiPaperSourceQuestions() {
       throw new Error("question repository should not be called");
     },
   };

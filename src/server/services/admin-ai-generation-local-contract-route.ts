@@ -76,7 +76,6 @@ import type {
   AdminAiGenerationTaskPersistenceResult,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
-import type { NormalizedQuestionListInput } from "../validators/question";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import {
@@ -85,8 +84,8 @@ import {
 } from "../repositories/organization-training-repository";
 import {
   createPostgresQuestionRepository,
+  type AiPaperQuestionSourceRepository,
   type QuestionAccessRow,
-  type QuestionRepository,
 } from "../repositories/question-repository";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
 import {
@@ -148,10 +147,8 @@ type AdminAiGenerationProviderDisabledRuntimeBridgeOutcome = {
   executionSummary?: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
 };
 
-type AdminAiGenerationPaperAssemblyQuestionRepository = Pick<
-  QuestionRepository,
-  "listQuestions"
->;
+type AdminAiGenerationPaperAssemblyQuestionRepository =
+  AiPaperQuestionSourceRepository;
 
 type AdminAiGenerationPaperAssemblyOrganizationTrainingRepository = Pick<
   OrganizationTrainingRepository,
@@ -1618,11 +1615,16 @@ async function resolvePlatformPaperSourceQuestionDetails(input: {
     return [];
   }
 
-  const result = await input.questionRepository.listQuestions(
-    createPaperSourceQuestionListQuery(input.container),
-  );
+  const rows =
+    await input.questionRepository.listAvailableAiPaperSourceQuestions({
+      profession: input.container.profession,
+      level: input.container.level,
+      subject: input.container.subject,
+      knowledgeNodePublicIds: null,
+      questionPublicIds: [...input.selectedQuestionIds],
+    });
 
-  return result.rows
+  return rows
     .filter(
       (questionRow) =>
         input.selectedQuestionIds.has(questionRow.public_id) &&
@@ -1665,25 +1667,6 @@ async function resolveEnterprisePaperSourceQuestionDetails(input: {
       ): sourceQuestion is OrganizationTrainingPaperSourceQuestionDetail =>
         sourceQuestion !== null,
     );
-}
-
-function createPaperSourceQuestionListQuery(
-  container: AiPaperPlanAndSelectContainerDto,
-): NormalizedQuestionListInput {
-  return {
-    page: 1,
-    pageSize: 100,
-    sortBy: "updatedAt",
-    sortOrder: "desc",
-    profession: container.profession,
-    level: container.level,
-    subject: container.subject,
-    questionType: null,
-    status: "available",
-    keyword: null,
-    knowledgeNodePublicId: null,
-    tagPublicId: null,
-  };
 }
 
 function mapPlatformQuestionRowToPaperSourceDetail(

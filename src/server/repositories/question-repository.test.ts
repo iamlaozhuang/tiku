@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createQuestionKnowledgeNodePublicIdCondition,
+  createQuestionKnowledgeNodePublicIdsCondition,
   createQuestionMaterialPublicIdCondition,
   createQuestionTagPublicIdCondition,
 } from "./question-repository";
@@ -34,6 +35,23 @@ describe("question repository filters", () => {
     expect(containsText(condition, "question_knowledge_node")).toBe(true);
     expect(containsText(condition, "knowledge_node")).toBe(true);
     expect(containsText(condition, "knowledge_node_public_storage")).toBe(true);
+  });
+
+  it("builds one database-level knowledge_node condition for the complete AI paper source set", () => {
+    const condition = createQuestionKnowledgeNodePublicIdsCondition([
+      "knowledge_node_public_storage_a",
+      "knowledge_node_public_storage_b",
+    ]);
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "question_knowledge_node")).toBe(true);
+    expect(containsText(condition, "knowledge_node_public_storage_a")).toBe(
+      true,
+    );
+    expect(containsText(condition, "knowledge_node_public_storage_b")).toBe(
+      true,
+    );
+    expect(createQuestionKnowledgeNodePublicIdsCondition([])).toBeNull();
   });
 
   it("builds a database-level tag binding condition", () => {

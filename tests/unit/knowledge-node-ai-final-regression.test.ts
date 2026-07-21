@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import { normalizeAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
 import type {
+  AiPaperQuestionSourceRepository,
   QuestionAccessRow,
-  QuestionRepository,
 } from "@/server/repositories/question-repository";
 import { resolveAdminWorkspaceRouteAccess } from "@/server/services/admin-workspace-role-guard-service";
 import { resolveAiPaperRouteQuestionSources } from "@/server/services/ai-paper-route-source-resolution-service";
@@ -185,18 +185,15 @@ describe("knowledge node AI final cross-role regression", () => {
   });
 
   it("keeps selected knowledge-node scope from admitting unrelated platform questions during AI paper source resolution", async () => {
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions() {
-        return {
-          rows: [
-            createQuestionRow(),
-            createQuestionRow({
-              public_id: "platform_question_public_unrelated",
-              knowledge_node_public_ids: ["knowledge_node_public_unrelated"],
-            }),
-          ],
-          total: 2,
-        };
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions() {
+        return [
+          createQuestionRow(),
+          createQuestionRow({
+            public_id: "platform_question_public_unrelated",
+            knowledge_node_public_ids: ["knowledge_node_public_unrelated"],
+          }),
+        ];
       },
     };
 

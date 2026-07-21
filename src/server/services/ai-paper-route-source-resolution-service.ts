@@ -6,16 +6,13 @@ import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organ
 import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type {
+  AiPaperQuestionSourceRepository,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
-import type { NormalizedQuestionListInput } from "../validators/question";
 import {
   mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions,
   mapPlatformQuestionRowsToAiPaperQuestions,
 } from "./ai-paper-source-adapter-service";
-
-export const AI_PAPER_SOURCE_RESOLUTION_PLATFORM_PAGE_SIZE = 100;
 
 export type AiPaperRouteSourceResolutionFailureCategory =
   | "missing_organization_context"
@@ -39,7 +36,7 @@ export type AiPaperRouteSourceResolutionInput = {
   organizationPublicId: string | null;
   employeePublicId?: string | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
-  questionRepository: Pick<QuestionRepository, "listQuestions">;
+  questionRepository: AiPaperQuestionSourceRepository;
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
@@ -48,7 +45,6 @@ export type AiPaperRouteSourceResolutionInput = {
     Record<string, string | null>
   >;
   difficultyByQuestionPublicId?: Readonly<Record<string, string | null>>;
-  platformPageSize?: number;
 };
 
 export type AiPaperRouteSourceResolutionResult =
@@ -123,50 +119,22 @@ export async function resolveAiPaperRouteQuestionSources(
 async function listPlatformQuestionRows(
   input: AiPaperRouteSourceResolutionInput,
 ): Promise<QuestionAccessRow[]> {
-  const queries = createPlatformFormalQuestionQueries(input);
-  const rows = await Promise.all(
-    queries.map(async (query) => {
-      const result = await input.questionRepository.listQuestions(query);
-
-      return result.rows;
-    }),
-  );
-
-  return dedupeQuestionRowsByPublicId(rows.flat());
-}
-
-function createPlatformFormalQuestionQueries(
-  input: AiPaperRouteSourceResolutionInput,
-): NormalizedQuestionListInput[] {
   const selectedKnowledgeNodePublicIds =
     getSelectedKnowledgeNodePublicIds(input);
-  const baseQuery: NormalizedQuestionListInput = {
-    page: 1,
-    pageSize: normalizePlatformPageSize(input.platformPageSize),
-    sortBy: "updatedAt",
-    sortOrder: "desc",
-    profession: input.generationParameters.profession,
-    level: input.generationParameters.level,
-    subject: input.generationParameters.subject,
-    questionType: null,
-    status: "available",
-    keyword: null,
-    knowledgeNodePublicId: null,
-    tagPublicId: null,
-  };
+  const rows =
+    await input.questionRepository.listAvailableAiPaperSourceQuestions({
+      profession: input.generationParameters.profession,
+      level: input.generationParameters.level,
+      subject: input.generationParameters.subject,
+      knowledgeNodePublicIds:
+        selectedKnowledgeNodePublicIds.length > 0 &&
+        !input.generationParameters.includeDescendants
+          ? selectedKnowledgeNodePublicIds
+          : null,
+      questionPublicIds: null,
+    });
 
-  if (selectedKnowledgeNodePublicIds.length === 0) {
-    return [baseQuery];
-  }
-
-  if (input.generationParameters.includeDescendants) {
-    return [baseQuery];
-  }
-
-  return selectedKnowledgeNodePublicIds.map((knowledgeNodePublicId) => ({
-    ...baseQuery,
-    knowledgeNodePublicId,
-  }));
+  return dedupeQuestionRowsByPublicId(rows);
 }
 
 function filterQuestionRowsBySelectedKnowledgeScope(
@@ -311,15 +279,6 @@ function requiresEnterpriseSource(role: AiPaperAssemblyRole): boolean {
 
 function isPresentPublicId(publicId: string | null): boolean {
   return publicId !== null && publicId.trim().length > 0;
-}
-
-function normalizePlatformPageSize(pageSize: number | undefined): number {
-  return pageSize !== undefined &&
-    Number.isInteger(pageSize) &&
-    pageSize > 0 &&
-    pageSize <= AI_PAPER_SOURCE_RESOLUTION_PLATFORM_PAGE_SIZE
-    ? pageSize
-    : AI_PAPER_SOURCE_RESOLUTION_PLATFORM_PAGE_SIZE;
 }
 
 function createResolvedSourceResolutionResult(input: {

@@ -7,10 +7,10 @@ import type {
   OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
 import type {
+  AiPaperQuestionSourceRepository,
+  AiPaperSourceQuestionListInput,
   QuestionAccessRow,
-  QuestionRepository,
 } from "../repositories/question-repository";
-import type { NormalizedQuestionListInput } from "../validators/question";
 import { resolveAiPaperRouteQuestionSources } from "./ai-paper-route-source-resolution-service";
 
 const generationParameters = {
@@ -130,25 +130,22 @@ describe("AI组卷 route source resolution", () => {
   it.each(["personal_advanced_student", "content_admin"] as const)(
     "resolves %s from platform formal questions only",
     async (role) => {
-      let capturedQuestionQueries: NormalizedQuestionListInput[] = [];
-      const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-        async listQuestions(query) {
+      let capturedQuestionQueries: AiPaperSourceQuestionListInput[] = [];
+      const questionRepository: AiPaperQuestionSourceRepository = {
+        async listAvailableAiPaperSourceQuestions(query) {
           capturedQuestionQueries = [...capturedQuestionQueries, query];
 
-          return {
-            rows: [
-              createQuestionRow(),
-              createQuestionRow({
-                public_id: "platform_question_unrelated_knowledge",
-                knowledge_node_public_ids: ["knowledge_node_public_unrelated"],
-              }),
-              createQuestionRow({
-                public_id: "platform_question_disabled",
-                status: "disabled",
-              }),
-            ],
-            total: 2,
-          };
+          return [
+            createQuestionRow(),
+            createQuestionRow({
+              public_id: "platform_question_unrelated_knowledge",
+              knowledge_node_public_ids: ["knowledge_node_public_unrelated"],
+            }),
+            createQuestionRow({
+              public_id: "platform_question_disabled",
+              status: "disabled",
+            }),
+          ];
         },
       };
       const organizationTrainingRepository =
@@ -181,65 +178,88 @@ describe("AI组卷 route source resolution", () => {
       });
       expect(capturedQuestionQueries).toEqual([
         {
-          page: 1,
-          pageSize: 100,
-          sortBy: "updatedAt",
-          sortOrder: "desc",
           profession: "marketing",
           level: 3,
           subject: "theory",
-          questionType: null,
-          status: "available",
-          keyword: null,
-          knowledgeNodePublicId: null,
-          tagPublicId: null,
+          knowledgeNodePublicIds: null,
+          questionPublicIds: null,
         },
       ]);
     },
   );
 
+  it("reads the complete eligible platform collection beyond the former first 100 rows", async () => {
+    const completeRows = Array.from({ length: 1000 }, (_, index) =>
+      createQuestionRow({
+        id: index + 1,
+        public_id: `platform_question_public_${String(index + 1).padStart(3, "0")}`,
+      }),
+    );
+    const aiPaperSourceQueries: unknown[] = [];
+    let legacyListCalls = 0;
+    const questionRepository = {
+      async listQuestions() {
+        legacyListCalls += 1;
+        return { rows: completeRows.slice(0, 100), total: 1000 };
+      },
+      async listAvailableAiPaperSourceQuestions(query: unknown) {
+        aiPaperSourceQueries.push(query);
+        return completeRows;
+      },
+    };
+
+    const result = await resolveAiPaperRouteQuestionSources({
+      role: "content_admin",
+      organizationPublicId: null,
+      employeePublicId: null,
+      generationParameters,
+      questionRepository,
+      organizationTrainingRepository:
+        createThrowingOrganizationTrainingRepository(),
+      knowledgeNodeParentPublicIdsByPublicId: {
+        knowledge_node_public_child: "knowledge_node_public_parent",
+      },
+    });
+
+    expect(result.status).toBe("resolved");
+    expect(result.platformQuestions).toHaveLength(1000);
+    expect(result.diagnostics.platformQuestionCount).toBe(1000);
+    expect(legacyListCalls).toBe(0);
+    expect(aiPaperSourceQueries).toEqual([
+      {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNodePublicIds: null,
+        questionPublicIds: null,
+      },
+    ]);
+  });
+
   it("queries each selected platform knowledge node when descendants are not requested", async () => {
-    let capturedQuestionQueries: NormalizedQuestionListInput[] = [];
-    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
-      async listQuestions(query) {
+    let capturedQuestionQueries: AiPaperSourceQuestionListInput[] = [];
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions(query) {
         capturedQuestionQueries = [...capturedQuestionQueries, query];
 
-        if (query.knowledgeNodePublicId === "knowledge_node_public_child") {
-          return {
-            rows: [
-              createQuestionRow({
-                public_id: "platform_question_child",
-                knowledge_node_public_ids: ["knowledge_node_public_child"],
-              }),
-              createQuestionRow({
-                public_id: "platform_question_duplicate",
-                knowledge_node_public_ids: ["knowledge_node_public_child"],
-              }),
-            ],
-            total: 2,
-          };
-        }
-
-        if (query.knowledgeNodePublicId === "knowledge_node_public_sibling") {
-          return {
-            rows: [
-              createQuestionRow({
-                public_id: "platform_question_sibling",
-                knowledge_node_public_ids: ["knowledge_node_public_sibling"],
-              }),
-              createQuestionRow({
-                public_id: "platform_question_duplicate",
-                knowledge_node_public_ids: ["knowledge_node_public_sibling"],
-              }),
-            ],
-            total: 2,
-          };
-        }
-
-        return {
-          rows: [],
-          total: 0,
-        };
+        return [
+          createQuestionRow({
+            public_id: "platform_question_child",
+            knowledge_node_public_ids: ["knowledge_node_public_child"],
+          }),
+          createQuestionRow({
+            public_id: "platform_question_duplicate",
+            knowledge_node_public_ids: ["knowledge_node_public_child"],
+          }),
+          createQuestionRow({
+            public_id: "platform_question_sibling",
+            knowledge_node_public_ids: ["knowledge_node_public_sibling"],
+          }),
+          createQuestionRow({
+            public_id: "platform_question_duplicate",
+            knowledge_node_public_ids: ["knowledge_node_public_sibling"],
+          }),
+        ];
       },
     };
 
@@ -269,8 +289,10 @@ describe("AI组卷 route source resolution", () => {
       "platform_question_sibling",
     ]);
     expect(
-      capturedQuestionQueries.map((query) => query.knowledgeNodePublicId),
-    ).toEqual(["knowledge_node_public_child", "knowledge_node_public_sibling"]);
+      capturedQuestionQueries.map((query) => query.knowledgeNodePublicIds),
+    ).toEqual([
+      ["knowledge_node_public_child", "knowledge_node_public_sibling"],
+    ]);
   });
 
   it("resolves organization admin sources from platform questions and admin-visible training snapshots", async () => {
@@ -406,23 +428,17 @@ describe("AI组卷 route source resolution", () => {
 
 function createQuestionRepository(
   questionRows: readonly QuestionAccessRow[],
-): Pick<QuestionRepository, "listQuestions"> {
+): AiPaperQuestionSourceRepository {
   return {
-    async listQuestions() {
-      return {
-        rows: [...questionRows],
-        total: questionRows.length,
-      };
+    async listAvailableAiPaperSourceQuestions() {
+      return [...questionRows];
     },
   };
 }
 
-function createThrowingQuestionRepository(): Pick<
-  QuestionRepository,
-  "listQuestions"
-> {
+function createThrowingQuestionRepository(): AiPaperQuestionSourceRepository {
   return {
-    async listQuestions() {
+    async listAvailableAiPaperSourceQuestions() {
       throw new Error("question repository should not be called");
     },
   };
