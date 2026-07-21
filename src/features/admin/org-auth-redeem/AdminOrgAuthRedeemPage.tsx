@@ -49,6 +49,7 @@ import type {
   RedeemCodeDetailResultDto,
   RedeemCodeGenerationDto,
   RedeemCodeListDto,
+  RedeemCodePlainTextRevealDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
@@ -3215,13 +3216,17 @@ function EmployeeConfirmationDialog({
 function RedeemCodeList({
   isFiltered,
   onCopyPlainText,
+  onRevealPlainText,
   onViewDetail,
   redeemCodes,
+  revealedPlainTextByPublicId,
 }: {
   isFiltered: boolean;
-  onCopyPlainText: (value: string) => void;
+  onCopyPlainText: (publicId: string, value: string) => void;
+  onRevealPlainText: (publicId: string) => void;
   onViewDetail: (publicId: string) => void;
   redeemCodes: AdminRedeemCodeData["redeemCodes"];
+  revealedPlainTextByPublicId: Record<string, string>;
 }) {
   return (
     <AdminTableFrame ariaLabel="卡密列表区域" minWidthClassName="min-w-[56rem]">
@@ -3261,9 +3266,7 @@ function RedeemCodeList({
           ) : (
             redeemCodes.map((redeemCode) => {
               const visiblePlainText =
-                redeemCode.canViewPlainText && redeemCode.codePlainText !== null
-                  ? redeemCode.codePlainText
-                  : null;
+                revealedPlainTextByPublicId[redeemCode.publicId] ?? null;
 
               return (
                 <tr
@@ -3304,17 +3307,38 @@ function RedeemCodeList({
                       {formatRedeemDeadline(redeemCode.redeemDeadlineAt)}
                     </p>
                     <p className="text-text-muted mt-1 text-xs">
-                      {visiblePlainText === null ? "明文不可用" : "明文可复制"}
+                      {visiblePlainText === null
+                        ? redeemCode.canViewPlainText
+                          ? "明文需按需查看"
+                          : "明文不可用"
+                        : "明文可复制"}
                     </p>
                   </td>
                   <td className="px-4 py-3 align-middle">
                     <div className="flex justify-end gap-2">
+                      {visiblePlainText === null &&
+                      redeemCode.canViewPlainText ? (
+                        <button
+                          aria-label="查看卡密明文"
+                          type="button"
+                          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                          onClick={() => onRevealPlainText(redeemCode.publicId)}
+                        >
+                          <Eye className="size-3.5" aria-hidden="true" />
+                          查看明文
+                        </button>
+                      ) : null}
                       {visiblePlainText === null ? null : (
                         <button
                           aria-label={`复制卡密 ${redeemCode.codeDisplay}`}
                           type="button"
                           className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-                          onClick={() => onCopyPlainText(visiblePlainText)}
+                          onClick={() =>
+                            onCopyPlainText(
+                              redeemCode.publicId,
+                              visiblePlainText,
+                            )
+                          }
                         >
                           <Copy className="size-3.5" aria-hidden="true" />
                           复制
@@ -3344,16 +3368,17 @@ function RedeemCodeList({
 function RedeemCodeDetailPanel({
   onCopyPlainText,
   onClose,
+  onRevealPlainText,
+  plainText,
   redeemCode,
 }: {
-  onCopyPlainText: (value: string) => void;
+  onCopyPlainText: (publicId: string, value: string) => void;
   onClose: () => void;
+  onRevealPlainText: (publicId: string) => void;
+  plainText: string | null;
   redeemCode: RedeemCodeDetailDto;
 }) {
-  const visiblePlainText =
-    redeemCode.canViewPlainText && redeemCode.codePlainText !== null
-      ? redeemCode.codePlainText
-      : null;
+  const visiblePlainText = plainText;
 
   return (
     <AdminDetailDrawer
@@ -3377,12 +3402,25 @@ function RedeemCodeDetailPanel({
               详情视图不展示哈希或内部标识；明文只在接口明确授权时显示。
             </p>
           </div>
+          {visiblePlainText === null && redeemCode.canViewPlainText ? (
+            <button
+              aria-label="查看详情卡密明文"
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+              onClick={() => onRevealPlainText(redeemCode.publicId)}
+            >
+              <Eye className="size-3.5" aria-hidden="true" />
+              查看明文
+            </button>
+          ) : null}
           {visiblePlainText === null ? null : (
             <button
               aria-label={`复制卡密 ${redeemCode.codeDisplay} 明文`}
               type="button"
               className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-              onClick={() => onCopyPlainText(visiblePlainText)}
+              onClick={() =>
+                onCopyPlainText(redeemCode.publicId, visiblePlainText)
+              }
             >
               <Copy className="size-3.5" aria-hidden="true" />
               复制明文
@@ -3484,7 +3522,7 @@ function RedeemCodeDistributionWindow({
 }: {
   generation: GeneratedRedeemCodeSummary;
   onCopyAll: () => void;
-  onCopyOne: (value: string) => void;
+  onCopyOne: (publicId: string, value: string) => void;
   redeemCodes: GeneratedRedeemCodeDistribution;
 }) {
   return (
@@ -3547,7 +3585,9 @@ function RedeemCodeDistributionWindow({
                 aria-label={`复制卡密 ${redeemCode.codeDisplay}`}
                 type="button"
                 className="border-border bg-surface hover:bg-muted hover:text-foreground mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-                onClick={() => onCopyOne(redeemCode.codePlainText)}
+                onClick={() =>
+                  onCopyOne(redeemCode.publicId, redeemCode.codePlainText)
+                }
               >
                 <Copy className="size-3.5" aria-hidden="true" />
                 复制
@@ -6796,11 +6836,12 @@ export function AdminRedeemCodePage() {
   >(null);
   const [selectedRedeemCodeDetail, setSelectedRedeemCodeDetail] =
     useState<RedeemCodeDetailDto | null>(null);
+  const [revealedPlainTextByPublicId, setRevealedPlainTextByPublicId] =
+    useState<Record<string, string>>({});
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const hasUnavailablePlainTextCode = data.redeemCodes.some(
     (redeemCode) =>
-      redeemCode.status === "unused" &&
-      (!redeemCode.canViewPlainText || redeemCode.codePlainText === null),
+      redeemCode.status === "unused" && !redeemCode.canViewPlainText,
   );
   const redeemCodePagination =
     data.pagination ??
@@ -6822,18 +6863,71 @@ export function AdminRedeemCodePage() {
     handleReset();
   }
 
-  function handleCopyRedeemCodePlainText(value: string) {
-    copyTextToClipboard(value);
+  async function handleRevealRedeemCodePlainText(
+    publicId: string,
+    source: "detail" | "list",
+  ) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    const revealResponse = await postAdminApi<RedeemCodePlainTextRevealDto>(
+      `/api/v1/redeem-codes/${encodeURIComponent(publicId)}/reveal-plaintext`,
+      sessionToken,
+      { source },
+    );
+
+    if (revealResponse.code !== 0 || revealResponse.data === null) {
+      setToastMessage({ message: revealResponse.message, tone: "error" });
+      return;
+    }
+
+    const revealedPlainText = revealResponse.data;
+
+    setRevealedPlainTextByPublicId((currentPlainTextByPublicId) => ({
+      ...currentPlainTextByPublicId,
+      [revealedPlainText.publicId]: revealedPlainText.codePlainText,
+    }));
+  }
+
+  async function handleCopyRedeemCodePlainText(input: {
+    publicIds: string[];
+    source: "detail" | "generation" | "list";
+    value: string;
+  }) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    const copyResponse = await postAdminApi<null>(
+      "/api/v1/redeem-codes/copy-plaintext",
+      sessionToken,
+      { publicIds: input.publicIds, source: input.source },
+    );
+
+    if (copyResponse.code !== 0) {
+      setToastMessage({ message: copyResponse.message, tone: "error" });
+      return;
+    }
+
+    copyTextToClipboard(input.value);
     setToastMessage({ message: "卡密明文已复制", tone: "success" });
   }
 
   function handleCopyGeneratedRedeemCodes() {
-    copyTextToClipboard(
-      generatedRedeemCodes
+    void handleCopyRedeemCodePlainText({
+      publicIds: generatedRedeemCodes.map((redeemCode) => redeemCode.publicId),
+      source: "generation",
+      value: generatedRedeemCodes
         .map((redeemCode) => redeemCode.codePlainText)
         .join("\n"),
-    );
-    setToastMessage({ message: "本批次卡密已复制", tone: "success" });
+    });
   }
 
   async function handleViewRedeemCodeDetail(publicId: string) {
@@ -6897,6 +6991,15 @@ export function AdminRedeemCodePage() {
 
     setGeneratedRedeemCodeSummary(createResponse.data.generation);
     setGeneratedRedeemCodes(generatedRedeemCodes);
+    setRevealedPlainTextByPublicId((currentPlainTextByPublicId) => ({
+      ...currentPlainTextByPublicId,
+      ...Object.fromEntries(
+        generatedRedeemCodes.map((redeemCode) => [
+          redeemCode.publicId,
+          redeemCode.codePlainText,
+        ]),
+      ),
+    }));
     setData((currentData) => ({
       pagination:
         currentData.pagination === null
@@ -6909,7 +7012,7 @@ export function AdminRedeemCodePage() {
         ...generatedRedeemCodes.map((redeemCode) => ({
           canViewPlainText: true,
           codeDisplay: maskRedeemCodeDisplay(redeemCode.codeDisplay),
-          codePlainText: redeemCode.codePlainText,
+          codePlainText: null,
           createdAt: redeemCode.createdAt,
           level: redeemCode.level,
           profession: redeemCode.profession,
@@ -6976,7 +7079,17 @@ export function AdminRedeemCodePage() {
           redeemCodeKeyword.trim().length > 0 || redeemCodeStatus !== "all"
         }
         redeemCodes={data.redeemCodes}
-        onCopyPlainText={handleCopyRedeemCodePlainText}
+        revealedPlainTextByPublicId={revealedPlainTextByPublicId}
+        onCopyPlainText={(publicId, value) => {
+          void handleCopyRedeemCodePlainText({
+            publicIds: [publicId],
+            source: "list",
+            value,
+          });
+        }}
+        onRevealPlainText={(publicId) => {
+          void handleRevealRedeemCodePlainText(publicId, "list");
+        }}
         onViewDetail={(publicId) => {
           void handleViewRedeemCodeDetail(publicId);
         }}
@@ -7004,11 +7117,24 @@ export function AdminRedeemCodePage() {
 
       {selectedRedeemCodeDetail === null ? null : (
         <RedeemCodeDetailPanel
+          plainText={
+            revealedPlainTextByPublicId[selectedRedeemCodeDetail.publicId] ??
+            null
+          }
           redeemCode={selectedRedeemCodeDetail}
-          onCopyPlainText={handleCopyRedeemCodePlainText}
+          onCopyPlainText={(publicId, value) => {
+            void handleCopyRedeemCodePlainText({
+              publicIds: [publicId],
+              source: "detail",
+              value,
+            });
+          }}
           onClose={() => {
             setSelectedRedeemCodePublicId(null);
             setSelectedRedeemCodeDetail(null);
+          }}
+          onRevealPlainText={(publicId) => {
+            void handleRevealRedeemCodePlainText(publicId, "detail");
           }}
         />
       )}
@@ -7035,7 +7161,13 @@ export function AdminRedeemCodePage() {
                 generation={generatedRedeemCodeSummary}
                 redeemCodes={generatedRedeemCodes}
                 onCopyAll={handleCopyGeneratedRedeemCodes}
-                onCopyOne={handleCopyRedeemCodePlainText}
+                onCopyOne={(publicId, value) => {
+                  void handleCopyRedeemCodePlainText({
+                    publicIds: [publicId],
+                    source: "generation",
+                    value,
+                  });
+                }}
               />
             </div>
           )}

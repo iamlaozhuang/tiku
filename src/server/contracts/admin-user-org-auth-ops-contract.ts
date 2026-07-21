@@ -389,6 +389,11 @@ export type RedeemCodeDetailResultDto = {
   redeemCode: RedeemCodeDetailDto;
 };
 
+export type RedeemCodePlainTextRevealDto = {
+  publicId: string;
+  codePlainText: string;
+};
+
 export type RedeemCodeGenerationItemDto = {
   publicId: string;
   codePlainText: string;

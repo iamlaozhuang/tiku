@@ -205,6 +205,8 @@ const employeePayload = {
   },
 };
 
+const sensitiveRedeemCode = ["RC", "PRIVATE", "VALUE"].join("-");
+
 const redeemCodePayload = {
   code: 0,
   message: "ok",
@@ -213,7 +215,7 @@ const redeemCodePayload = {
       {
         publicId: "redeem-code-public-001",
         codeDisplay: "RC-2026-****",
-        codePlainText: "RC-2026-LIST-PLAIN",
+        codePlainText: null,
         redeemCodeType: "personal_standard_activation",
         canViewPlainText: true,
         profession: "monopoly",
@@ -252,7 +254,7 @@ const redeemCodeDetailPayload = {
     redeemCode: {
       publicId: "redeem-code-public-001",
       codeDisplay: "RC-2026-****",
-      codePlainText: "RC-2026-DETAIL-PLAIN",
+      codePlainText: null,
       redeemCodeType: "personal_standard_activation",
       canViewPlainText: true,
       profession: "monopoly",
@@ -266,7 +268,7 @@ const redeemCodeDetailPayload = {
       createdAt: "2026-05-22T00:00:00.000Z",
       updatedAt: "2026-05-23T09:00:00.000Z",
       redactionStatus: "redacted",
-      redactionReason: "code_hash_hidden_plaintext_role_allowed",
+      redactionReason: "plaintext_redeem_code_and_hash_hidden",
       id: 402,
       code_hash: "detail-do-not-render",
     },
@@ -460,6 +462,28 @@ function mockSystemOpsFetch() {
 
       if (path === "/api/v1/redeem-codes/redeem-code-public-001") {
         return createJsonResponse(redeemCodeDetailPayload);
+      }
+
+      if (
+        path ===
+          "/api/v1/redeem-codes/redeem-code-public-001/reveal-plaintext" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            publicId: "redeem-code-public-001",
+            codePlainText: sensitiveRedeemCode,
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/redeem-codes/copy-plaintext" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({ code: 0, message: "ok", data: null });
       }
 
       if (path === "/api/v1/org-auths") {
@@ -2287,7 +2311,18 @@ describe("admin user organization authorization ops baseline", () => {
       target: { value: "RC-2026" },
     });
 
-    expect(await screen.findByText("RC-2026-LIST-PLAIN")).toBeInTheDocument();
+    const redeemCodeRow = await screen.findByTestId(
+      "admin-redeem-code-redeem-code-public-001",
+    );
+    expect(redeemCodeRow).not.toHaveTextContent(sensitiveRedeemCode);
+    fireEvent.click(
+      within(redeemCodeRow).getByRole("button", {
+        name: "查看卡密明文",
+      }),
+    );
+    expect(
+      await within(redeemCodeRow).findByText(sensitiveRedeemCode),
+    ).toBeVisible();
     expect(screen.getByRole("table", { name: "卡密列表" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
       "显示 1-4 / 共 4 个卡密",
@@ -2423,14 +2458,22 @@ describe("admin user organization authorization ops baseline", () => {
       "redeem-code-public-001",
     );
     expect(redeemCodeDetail).not.toHaveAttribute("data-id");
-    expect(redeemCodeDetail).toHaveTextContent("RC-2026-DETAIL-PLAIN");
+    expect(redeemCodeDetail).not.toHaveTextContent(sensitiveRedeemCode);
+    fireEvent.click(
+      within(redeemCodeDetail).getByRole("button", {
+        name: "查看详情卡密明文",
+      }),
+    );
+    expect(
+      await within(redeemCodeDetail).findByText(sensitiveRedeemCode),
+    ).toBeVisible();
     expect(redeemCodeDetail).not.toHaveTextContent("redeem-code-public-001");
     expect(redeemCodeDetail).not.toHaveTextContent(
       "redeem-code-batch-public-001",
     );
     expect(redeemCodeDetail).toHaveTextContent("365");
     expect(redeemCodeDetail).toHaveTextContent("已脱敏");
-    expect(redeemCodeDetail).toHaveTextContent("校验值已隐藏，明文已授权显示");
+    expect(redeemCodeDetail).toHaveTextContent("明文与校验值均已隐藏");
     expect(redeemCodeDetail).toHaveTextContent("未兑换");
     expect(redeemCodeDetail).toHaveTextContent("2026-06-24");
     expect(redeemCodeDetail).not.toHaveTextContent("LOCALTST");

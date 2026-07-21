@@ -13,6 +13,9 @@ import {
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
+  type RedeemCodeDetailDto,
+  type RedeemCodePlainTextRevealDto,
+  type RedeemCodeSummaryDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { Profession, RedeemCodeType } from "../models/auth";
 import {
@@ -64,6 +67,17 @@ type RedeemCodeBatchRequestResult =
       response: ApiResponse<null>;
     };
 
+type RedeemCodePlainTextSource = "detail" | "generation" | "list";
+
+type RedeemCodePlainTextCopyRequest = {
+  publicIds: string[];
+  source: RedeemCodePlainTextSource;
+};
+
+type RedeemCodePlainTextCopyRequestResult =
+  | { success: true; value: RedeemCodePlainTextCopyRequest }
+  | { success: false; response: ApiResponse<null> };
+
 type RedeemCodeDetailRouteContext = {
   params: Promise<{ publicId: string }>;
 };
@@ -75,6 +89,10 @@ const adminSessionRequiredResponse = createErrorResponse(
 const adminPermissionDeniedResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.adminPermissionDenied,
   "Admin permission denied.",
+);
+const redeemCodePlainTextAccessUnavailableResponse = createErrorResponse(
+  503606,
+  "Redeem code plaintext access is unavailable.",
 );
 const systemClock: AdminRedeemCodeClock = {
   now() {
@@ -135,6 +153,24 @@ function canReadRedeemCode(actor: AdminRedeemCodeActor): boolean {
 
 function canCreateRedeemCode(actor: AdminRedeemCodeActor): boolean {
   return canReadRedeemCode(actor);
+}
+
+function readRedeemCodeAuditRole(actor: AdminRedeemCodeActor): string {
+  if (actor.roles.includes("super_admin")) {
+    return "super_admin";
+  }
+
+  return actor.roles.includes("ops_admin") ? "ops_admin" : actor.roles[0];
+}
+
+function readRequestIp(request: Request): string | null {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor !== null) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  return request.headers.get("x-real-ip");
 }
 
 async function readRequestJson(request: Request): Promise<unknown> {
@@ -199,6 +235,30 @@ function readStatus(
   return "all";
 }
 
+function maskRedeemCodeSummaryPlainText(
+  redeemCode: RedeemCodeSummaryDto,
+): RedeemCodeSummaryDto {
+  return {
+    ...redeemCode,
+    canViewPlainText: true,
+    codePlainText: null,
+  };
+}
+
+function maskRedeemCodeDetailPlainText(
+  redeemCode: RedeemCodeDetailDto,
+): RedeemCodeDetailDto {
+  return {
+    ...maskRedeemCodeSummaryPlainText(redeemCode),
+    redeemedAt: redeemCode.redeemedAt,
+    durationDay: redeemCode.durationDay,
+    generationGroupId: redeemCode.generationGroupId,
+    updatedAt: redeemCode.updatedAt,
+    redactionStatus: "redacted",
+    redactionReason: "plaintext_redeem_code_and_hash_hidden",
+  };
+}
+
 async function readRedeemCodeDetailPublicId(
   context: RedeemCodeDetailRouteContext,
 ): Promise<string | null> {
@@ -206,6 +266,52 @@ async function readRedeemCodeDetailPublicId(
   const publicId = params.publicId.trim();
 
   return PUBLIC_ID_PATTERN.test(publicId) ? publicId : null;
+}
+
+function readRedeemCodePlainTextSource(
+  value: unknown,
+): RedeemCodePlainTextSource | null {
+  return value === "detail" || value === "generation" || value === "list"
+    ? value
+    : null;
+}
+
+function normalizeRedeemCodePlainTextCopyRequest(
+  input: unknown,
+): RedeemCodePlainTextCopyRequestResult {
+  if (!isRecord(input) || !Array.isArray(input.publicIds)) {
+    return {
+      success: false,
+      response: createErrorResponse(
+        ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+        "Redeem code plaintext copy input is invalid.",
+      ),
+    };
+  }
+
+  const publicIds = input.publicIds
+    .filter((publicId): publicId is string => typeof publicId === "string")
+    .map((publicId) => publicId.trim());
+  const source = readRedeemCodePlainTextSource(input.source);
+  const distinctPublicIds = [...new Set(publicIds)];
+
+  if (
+    source === null ||
+    publicIds.length < 1 ||
+    publicIds.length > REDEEM_CODE_BATCH_CREATE_LIMIT ||
+    distinctPublicIds.length !== input.publicIds.length ||
+    distinctPublicIds.some((publicId) => !PUBLIC_ID_PATTERN.test(publicId))
+  ) {
+    return {
+      success: false,
+      response: createErrorResponse(
+        ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+        "Redeem code plaintext copy input is invalid.",
+      ),
+    };
+  }
+
+  return { success: true, value: { publicIds: distinctPublicIds, source } };
 }
 
 function normalizeRedeemCodeBatchRequest(
@@ -378,6 +484,286 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
     return canReadRedeemCode(actor) ? null : adminPermissionDeniedResponse;
   }
 
+  async function appendRedeemCodePlainTextAuditLog(input: {
+    request: Request;
+    actor: AdminRedeemCodeActor;
+    actionType: "redeem_code.plaintext_copy" | "redeem_code.plaintext_view";
+    targetPublicId: string | null;
+    resultStatus: "failed" | "success";
+    metadataSummary: string;
+  }): Promise<void> {
+    const auditLogRepository = repositories.auditLogRepository;
+
+    if (auditLogRepository === undefined) {
+      throw new Error("Redeem code plaintext audit repository is required.");
+    }
+
+    await auditLogRepository.appendAuditLog({
+      actorPublicId: input.actor.publicId,
+      actorRole: readRedeemCodeAuditRole(input.actor),
+      actionType: input.actionType,
+      targetResourceType: "redeem_code",
+      targetPublicId: input.targetPublicId,
+      resultStatus: input.resultStatus,
+      metadataSummary: input.metadataSummary,
+      requestIp: readRequestIp(input.request),
+    });
+  }
+
+  async function findRedeemCodePlainTextRows(publicIds: string[]) {
+    const findPlainTextRows = repositories.findRedeemCodePlainTextByPublicIds;
+
+    return findPlainTextRows === undefined
+      ? null
+      : findPlainTextRows(publicIds);
+  }
+
+  async function revealRedeemCodePlainText(
+    request: Request,
+    context: RedeemCodeDetailRouteContext,
+  ): Promise<Response> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    const publicId = await readRedeemCodeDetailPublicId(context);
+    const sourceInput = await readRequestJson(request);
+    const source = isRecord(sourceInput)
+      ? readRedeemCodePlainTextSource(sourceInput.source)
+      : null;
+
+    if (!canReadRedeemCode(actor)) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_view",
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext view permission denial metadata",
+      });
+
+      return createJsonResponse(adminPermissionDeniedResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (publicId === null || source === null || source === "generation") {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_view",
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext view validation metadata",
+      });
+
+      return createJsonResponse(
+        createErrorResponse(
+          ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+          "Redeem code plaintext view input is invalid.",
+        ),
+        { headers: NO_STORE_HEADERS, status: 422 },
+      );
+    }
+
+    const rows = await findRedeemCodePlainTextRows([publicId]);
+
+    if (rows === null) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_view",
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext view unavailable metadata",
+      });
+
+      return createJsonResponse(redeemCodePlainTextAccessUnavailableResponse, {
+        headers: NO_STORE_HEADERS,
+        status: 503,
+      });
+    }
+
+    const [row] = rows;
+
+    if (row === undefined || row.publicId !== publicId) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_view",
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext view not found metadata",
+      });
+
+      return createJsonResponse(
+        createErrorResponse(
+          ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
+        ),
+        { headers: NO_STORE_HEADERS, status: 404 },
+      );
+    }
+
+    await appendRedeemCodePlainTextAuditLog({
+      request,
+      actor,
+      actionType: "redeem_code.plaintext_view",
+      targetPublicId: publicId,
+      resultStatus: "success",
+      metadataSummary: `redacted redeem_code plaintext view metadata; source=${source} count=1`,
+    });
+
+    return createJsonResponse(
+      createSuccessResponse<RedeemCodePlainTextRevealDto>({
+        publicId: row.publicId,
+        codePlainText: row.codePlainText,
+      }),
+      { headers: NO_STORE_HEADERS },
+    );
+  }
+
+  async function copyRedeemCodePlainText(request: Request): Promise<Response> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    const copyRequest = normalizeRedeemCodePlainTextCopyRequest(
+      await readRequestJson(request),
+    );
+
+    if (!canReadRedeemCode(actor)) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: copyRequest.success
+          ? copyRequest.value.publicIds[0]
+          : null,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext copy permission denial metadata",
+      });
+
+      return createJsonResponse(adminPermissionDeniedResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (!copyRequest.success) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: null,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext copy validation metadata",
+      });
+
+      return createJsonResponse(copyRequest.response, {
+        headers: NO_STORE_HEADERS,
+        status: 422,
+      });
+    }
+
+    const rows = await findRedeemCodePlainTextRows(copyRequest.value.publicIds);
+
+    if (rows === null) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: null,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext copy unavailable metadata",
+      });
+
+      return createJsonResponse(redeemCodePlainTextAccessUnavailableResponse, {
+        headers: NO_STORE_HEADERS,
+        status: 503,
+      });
+    }
+
+    const hasExactRows = copyRequest.value.publicIds.every(
+      (publicId, index) => rows[index]?.publicId === publicId,
+    );
+    const generationGroupIds = new Set(
+      rows.map((row) => row.generationGroupId),
+    );
+    const hasValidBatchTarget =
+      rows.length === 1 || generationGroupIds.size === 1;
+
+    if (rows.length !== copyRequest.value.publicIds.length || !hasExactRows) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: null,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext copy not found metadata",
+      });
+
+      return createJsonResponse(
+        createErrorResponse(
+          ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
+        ),
+        { headers: NO_STORE_HEADERS, status: 404 },
+      );
+    }
+
+    if (!hasValidBatchTarget) {
+      await appendRedeemCodePlainTextAuditLog({
+        request,
+        actor,
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: null,
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted redeem_code plaintext copy batch mismatch metadata",
+      });
+
+      return createJsonResponse(
+        createErrorResponse(
+          ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+          "Redeem code plaintext copy batch is invalid.",
+        ),
+        { headers: NO_STORE_HEADERS, status: 422 },
+      );
+    }
+
+    const targetPublicId =
+      rows.length === 1 ? rows[0]?.publicId : rows[0]?.generationGroupId;
+
+    await appendRedeemCodePlainTextAuditLog({
+      request,
+      actor,
+      actionType: "redeem_code.plaintext_copy",
+      targetPublicId: targetPublicId ?? null,
+      resultStatus: "success",
+      metadataSummary: `redacted redeem_code plaintext copy metadata; source=${copyRequest.value.source} count=${rows.length}`,
+    });
+
+    return createJsonResponse(createSuccessResponse(null), {
+      headers: NO_STORE_HEADERS,
+    });
+  }
+
   return createRouteHandlersWithErrorEnvelope({
     redeemCodes: {
       async GET(request: Request): Promise<Response> {
@@ -393,7 +779,11 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
 
         return createJsonResponse(
           createPaginatedResponse(
-            { redeemCodes: result.redeemCodes },
+            {
+              redeemCodes: result.redeemCodes.map(
+                maskRedeemCodeSummaryPlainText,
+              ),
+            },
             result.pagination,
           ),
           { headers: NO_STORE_HEADERS },
@@ -418,6 +808,12 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
 
         if (!batchRequest.success) {
           return createJsonResponse(batchRequest.response);
+        }
+
+        const auditLogRepository = repositories.auditLogRepository;
+
+        if (auditLogRepository === undefined) {
+          throw new Error("Redeem code audit repository is required.");
         }
 
         let createdRedeemCodeBatch: Awaited<
@@ -447,15 +843,23 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
         const deadlineSummary =
           createdRedeemCodeBatch.generation.redeemDeadlineAt ?? "long_term";
 
-        await repositories.auditLogRepository?.appendAuditLog({
+        await auditLogRepository.appendAuditLog({
           actorPublicId: actor.publicId,
-          actorRole: actor.roles[0],
+          actorRole: readRedeemCodeAuditRole(actor),
           actionType: "redeem_code.batch_create",
           targetResourceType: "redeem_code",
           targetPublicId: createdRedeemCodeBatch.generation.generationGroupId,
           resultStatus: "success",
           metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodeBatch.generation.count} type=${createdRedeemCodeBatch.generation.redeemCodeType} profession=${createdRedeemCodeBatch.generation.profession} level=${createdRedeemCodeBatch.generation.level} deadline=${deadlineSummary}`,
-          requestIp: null,
+          requestIp: readRequestIp(request),
+        });
+        await appendRedeemCodePlainTextAuditLog({
+          request,
+          actor,
+          actionType: "redeem_code.plaintext_view",
+          targetPublicId: createdRedeemCodeBatch.generation.generationGroupId,
+          resultStatus: "success",
+          metadataSummary: `redacted redeem_code plaintext view metadata; source=generation count=${createdRedeemCodeBatch.generation.count}`,
         });
 
         return createJsonResponse(
@@ -515,10 +919,19 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
             );
           }
 
-          return createJsonResponse(createSuccessResponse({ redeemCode }), {
-            headers: NO_STORE_HEADERS,
-          });
+          return createJsonResponse(
+            createSuccessResponse({
+              redeemCode: maskRedeemCodeDetailPlainText(redeemCode),
+            }),
+            { headers: NO_STORE_HEADERS },
+          );
         },
+      },
+      revealPlainText: {
+        POST: revealRedeemCodePlainText,
+      },
+      copyPlainText: {
+        POST: copyRedeemCodePlainText,
       },
     },
   });

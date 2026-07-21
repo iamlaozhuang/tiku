@@ -57,9 +57,18 @@ export type AdminRedeemCodeRuntimeRepositories = {
   findRedeemCodeDetailByPublicId?(
     publicId: string,
   ): Promise<RedeemCodeDetailDto | null>;
+  findRedeemCodePlainTextByPublicIds?(
+    publicIds: string[],
+  ): Promise<RedeemCodePlainTextAccessRow[]>;
   auditLogRepository?: {
     appendAuditLog(input: AppendRedeemCodeAuditLogInput): Promise<void>;
   };
+};
+
+export type RedeemCodePlainTextAccessRow = {
+  publicId: string;
+  codePlainText: string;
+  generationGroupId: string;
 };
 
 export type CreateRedeemCodeBatchInput = {
@@ -220,7 +229,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
         redeemCodes: rows.map((row) => ({
           publicId: row.public_id,
           codeDisplay: maskRedeemCodeDisplay(row.code_display),
-          codePlainText: row.code_display,
+          codePlainText: null,
           redeemCodeType: row.redeem_code_type,
           canViewPlainText: true,
           profession: row.profession,
@@ -271,7 +280,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
       return {
         publicId: row.public_id,
         codeDisplay: maskRedeemCodeDisplay(row.code_display),
-        codePlainText: row.code_display,
+        codePlainText: null,
         redeemCodeType: row.redeem_code_type,
         canViewPlainText: true,
         profession: row.profession,
@@ -288,8 +297,39 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
         createdAt: row.created_at.toISOString(),
         updatedAt: row.updated_at.toISOString(),
         redactionStatus: "redacted",
-        redactionReason: "code_hash_hidden_plaintext_role_allowed",
+        redactionReason: "plaintext_redeem_code_and_hash_hidden",
       };
+    },
+    async findRedeemCodePlainTextByPublicIds(publicIds) {
+      if (publicIds.length === 0) {
+        return [];
+      }
+
+      const rows = await getDatabase()
+        .select({
+          public_id: redeemCode.public_id,
+          code_display: redeemCode.code_display,
+          generation_group_id: redeemCode.generation_group_id,
+        })
+        .from(redeemCode)
+        .where(inArray(redeemCode.public_id, publicIds));
+      const rowsByPublicId = new Map(
+        rows.map((row) => [row.public_id, row] as const),
+      );
+
+      return publicIds.flatMap((publicId) => {
+        const row = rowsByPublicId.get(publicId);
+
+        return row === undefined
+          ? []
+          : [
+              {
+                publicId: row.public_id,
+                codePlainText: row.code_display,
+                generationGroupId: row.generation_group_id,
+              },
+            ];
+      });
     },
     auditLogRepository: {
       async appendAuditLog(input) {

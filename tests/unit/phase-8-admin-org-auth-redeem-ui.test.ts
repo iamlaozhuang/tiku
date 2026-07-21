@@ -35,6 +35,7 @@ const adminSessionPayload = {
     },
   },
 };
+const sensitiveRedeemCode = ["RC", "PRIVATE", "VALUE"].join("-");
 
 const organizationPayload = {
   code: 0,
@@ -138,9 +139,9 @@ const redeemCodePayload = {
       {
         publicId: "redeem-code-public-001",
         codeDisplay: "RC-2026-****",
-        codePlainText: "RC-2026-0001-PLAIN",
+        codePlainText: null,
         redeemCodeType: "personal_standard_activation",
-        canViewPlainText: false,
+        canViewPlainText: true,
         profession: "monopoly",
         level: 3,
         status: "unused",
@@ -169,7 +170,7 @@ function createJsonResponse(payload: unknown, status = 200) {
   };
 }
 
-function mockAdminFetch() {
+function mockAdminFetch(options: { copyFails?: boolean } = {}) {
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
       const path = String(url);
@@ -350,6 +351,34 @@ function mockAdminFetch() {
         });
       }
 
+      if (
+        path ===
+          "/api/v1/redeem-codes/redeem-code-public-001/reveal-plaintext" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            publicId: "redeem-code-public-001",
+            codePlainText: sensitiveRedeemCode,
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/redeem-codes/copy-plaintext" &&
+        init?.method === "POST"
+      ) {
+        return options.copyFails
+          ? createJsonResponse({
+              code: 503606,
+              message: "Redeem code plaintext access is unavailable.",
+              data: null,
+            })
+          : createJsonResponse({ code: 0, message: "ok", data: null });
+      }
+
       if (path === "/api/v1/redeem-codes" && init?.method === "POST") {
         return createJsonResponse({
           code: 0,
@@ -368,8 +397,7 @@ function mockAdminFetch() {
               {
                 publicId: "redeem-code-public-002",
                 codeDisplay: "RC-2026-****",
-                codePlainText:
-                  redeemCodePayload.data.redeemCodes[0].codePlainText,
+                codePlainText: sensitiveRedeemCode,
                 redeemCodeType: "personal_standard_activation",
                 profession: "monopoly",
                 level: 3,
@@ -401,6 +429,10 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: undefined,
+  });
 });
 
 describe("AdminOrgAuthPage", () => {
@@ -925,7 +957,7 @@ describe("AdminRedeemCodePage", () => {
 
     expect(screen.getByText("正在加载卡密数据")).toBeInTheDocument();
     expect(await screen.findByText("RC-2026-****")).toBeInTheDocument();
-    expect(screen.getByText("卡密明文不可用")).toBeInTheDocument();
+    expect(screen.queryByText("卡密明文不可用")).not.toBeInTheDocument();
 
     const redeemCode = screen.getByTestId(
       "admin-redeem-code-redeem-code-public-001",
@@ -936,7 +968,7 @@ describe("AdminRedeemCodePage", () => {
       "redeem-code-public-001",
     );
     expect(redeemCode).not.toHaveAttribute("data-id");
-    expect(within(redeemCode).getByText("明文不可用")).toBeInTheDocument();
+    expect(within(redeemCode).getByText("明文需按需查看")).toBeInTheDocument();
     expect(redeemCode).toHaveTextContent("兑换截止 长期可兑换");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("do-not-render");
@@ -949,8 +981,91 @@ describe("AdminRedeemCodePage", () => {
     );
   });
 
+  it("reveals on demand and awaits a redacted copy action before using the clipboard", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const clipboardWriteText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: clipboardWriteText },
+    });
+    const fetchMock = mockAdminFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    const redeemCode = await screen.findByTestId(
+      "admin-redeem-code-redeem-code-public-001",
+    );
+    expect(redeemCode).not.toHaveTextContent(sensitiveRedeemCode);
+
+    fireEvent.click(
+      within(redeemCode).getByRole("button", { name: "查看卡密明文" }),
+    );
+    expect(
+      await within(redeemCode).findByText(sensitiveRedeemCode),
+    ).toBeVisible();
+
+    fireEvent.click(
+      within(redeemCode).getByRole("button", {
+        name: "复制卡密 RC-2026-****",
+      }),
+    );
+
+    await waitFor(() => {
+      const copyCall = fetchMock.mock.calls.find(
+        ([url, init]) =>
+          String(url) === "/api/v1/redeem-codes/copy-plaintext" &&
+          init?.method === "POST",
+      );
+      expect(copyCall).toBeDefined();
+      expect(JSON.parse(String(copyCall?.[1]?.body))).toEqual({
+        publicIds: ["redeem-code-public-001"],
+        source: "list",
+      });
+      expect(String(copyCall?.[1]?.body)).not.toContain(sensitiveRedeemCode);
+      expect(clipboardWriteText).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("keeps plaintext out of the clipboard when the copy audit action fails", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const clipboardWriteText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: clipboardWriteText },
+    });
+    mockAdminFetch({ copyFails: true });
+
+    render(createElement(AdminRedeemCodePage));
+
+    const redeemCode = await screen.findByTestId(
+      "admin-redeem-code-redeem-code-public-001",
+    );
+    fireEvent.click(
+      within(redeemCode).getByRole("button", { name: "查看卡密明文" }),
+    );
+    expect(
+      await within(redeemCode).findByText(sensitiveRedeemCode),
+    ).toBeVisible();
+
+    fireEvent.click(
+      within(redeemCode).getByRole("button", {
+        name: "复制卡密 RC-2026-****",
+      }),
+    );
+
+    expect(
+      await screen.findByText("Redeem code plaintext access is unavailable."),
+    ).toBeVisible();
+    expect(clipboardWriteText).not.toHaveBeenCalled();
+  });
+
   it("submits null for long-term redemption and uses the same label across admin surfaces", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const clipboardWriteText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: clipboardWriteText },
+    });
     const fetchMock = mockAdminFetch();
 
     render(createElement(AdminRedeemCodePage));
@@ -1027,6 +1142,24 @@ describe("AdminRedeemCodePage", () => {
     expect(
       screen.getByTestId("admin-redeem-code-redeem-code-public-002"),
     ).toHaveTextContent("兑换截止 长期可兑换");
+
+    fireEvent.click(
+      within(drawer).getByTestId("redeem-code-distribution-copy-all"),
+    );
+    await waitFor(() => {
+      const copyCall = fetchMock.mock.calls.find(
+        ([url, init]) =>
+          String(url) === "/api/v1/redeem-codes/copy-plaintext" &&
+          init?.method === "POST",
+      );
+      expect(copyCall).toBeDefined();
+      expect(JSON.parse(String(copyCall?.[1]?.body))).toEqual({
+        publicIds: ["redeem-code-public-002"],
+        source: "generation",
+      });
+      expect(String(copyCall?.[1]?.body)).not.toContain(sensitiveRedeemCode);
+      expect(clipboardWriteText).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("keeps finite redeem deadline formatting unchanged", async () => {

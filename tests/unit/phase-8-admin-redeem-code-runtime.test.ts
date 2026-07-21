@@ -9,12 +9,25 @@ import type { SessionService } from "@/server/services/session-service";
 const now = new Date("2026-05-22T10:00:00.000Z");
 const testAdminSessionCredential = "admin-session-token";
 const expectedAdminAuthorization = `Bearer ${testAdminSessionCredential}`;
+const sensitiveRedeemCode = ["RC", "PRIVATE", "VALUE"].join("-");
 
 type RedeemCodeDetailRouteHandlers = {
   GET(
     request: Request,
     context: { params: Promise<{ publicId: string }> },
   ): Promise<Response>;
+};
+
+type RedeemCodePlainTextRouteHandlers = {
+  revealPlainText: {
+    POST(
+      request: Request,
+      context: { params: Promise<{ publicId: string }> },
+    ): Promise<Response>;
+  };
+  copyPlainText: {
+    POST(request: Request): Promise<Response>;
+  };
 };
 
 function createSessionService(role: "super_admin" | "content_admin") {
@@ -58,9 +71,17 @@ function createSessionService(role: "super_admin" | "content_admin") {
   } satisfies SessionService;
 }
 
-function createRepositories(): AdminRedeemCodeRuntimeRepositories {
-  return {
-    async createRedeemCodeBatch(input) {
+function createRepositories(input?: {
+  auditError?: Error;
+  auditInputs?: Record<string, unknown>[];
+  includePlainTextTarget?: boolean;
+}): AdminRedeemCodeRuntimeRepositories {
+  const repositories = {
+    async createRedeemCodeBatch(
+      input: Parameters<
+        AdminRedeemCodeRuntimeRepositories["createRedeemCodeBatch"]
+      >[0],
+    ) {
       const redeemDeadlineAt = input.redeemDeadlineAt?.toISOString() ?? null;
 
       return {
@@ -88,13 +109,17 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
         ],
       };
     },
-    async listRedeemCodes(query) {
+    async listRedeemCodes(
+      query: Parameters<
+        AdminRedeemCodeRuntimeRepositories["listRedeemCodes"]
+      >[0],
+    ) {
       return {
         redeemCodes: [
           {
             publicId: "redeem-code-public-001",
             codeDisplay: "RC-2026-****",
-            codePlainText: "RC-2026-LIST-PLAIN",
+            codePlainText: sensitiveRedeemCode,
             redeemCodeType: "personal_standard_activation",
             canViewPlainText: true,
             profession: "monopoly",
@@ -114,7 +139,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
         },
       };
     },
-    async findRedeemCodeDetailByPublicId(publicId) {
+    async findRedeemCodeDetailByPublicId(publicId: string) {
       if (publicId !== "redeem-code-public-001") {
         return null;
       }
@@ -122,7 +147,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
       return {
         publicId: "redeem-code-public-001",
         codeDisplay: "RC-2026-****",
-        codePlainText: "RC-2026-DETAIL-PLAIN",
+        codePlainText: sensitiveRedeemCode,
         redeemCodeType: "personal_standard_activation",
         canViewPlainText: true,
         profession: "monopoly",
@@ -139,7 +164,29 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
         redactionReason: "code_hash_hidden_plaintext_role_allowed",
       };
     },
+    async findRedeemCodePlainTextByPublicIds(publicIds: string[]) {
+      if (input?.includePlainTextTarget === false) {
+        return [];
+      }
+
+      return publicIds.map((publicId) => ({
+        publicId,
+        codePlainText: sensitiveRedeemCode,
+        generationGroupId: "redeem-code-batch-public-001",
+      }));
+    },
+    auditLogRepository: {
+      async appendAuditLog(auditInput: Record<string, unknown>) {
+        if (input?.auditError !== undefined) {
+          throw input.auditError;
+        }
+
+        input?.auditInputs?.push(auditInput);
+      },
+    },
   };
+
+  return repositories as unknown as AdminRedeemCodeRuntimeRepositories;
 }
 
 function createCookieBackedAdminRequest(url: string) {
@@ -159,6 +206,12 @@ function getRedeemCodeDetailRouteHandlers(
       detail: RedeemCodeDetailRouteHandlers;
     }
   ).detail;
+}
+
+function getRedeemCodePlainTextRouteHandlers(
+  handlers: ReturnType<typeof createAdminRedeemCodeRuntimeRouteHandlers>,
+): RedeemCodePlainTextRouteHandlers {
+  return handlers.redeemCodes as unknown as RedeemCodePlainTextRouteHandlers;
 }
 
 describe("phase 8 admin redeem code runtime", () => {
@@ -239,7 +292,7 @@ describe("phase 8 admin redeem code runtime", () => {
           {
             publicId: "redeem-code-public-001",
             codeDisplay: "RC-2026-****",
-            codePlainText: "RC-2026-LIST-PLAIN",
+            codePlainText: null,
             redeemCodeType: "personal_standard_activation",
             canViewPlainText: true,
             profession: "monopoly",
@@ -322,7 +375,7 @@ describe("phase 8 admin redeem code runtime", () => {
         redeemCode: {
           publicId: "redeem-code-public-001",
           codeDisplay: "RC-2026-****",
-          codePlainText: "RC-2026-DETAIL-PLAIN",
+          codePlainText: null,
           redeemCodeType: "personal_standard_activation",
           canViewPlainText: true,
           profession: "monopoly",
@@ -336,7 +389,7 @@ describe("phase 8 admin redeem code runtime", () => {
           createdAt: now.toISOString(),
           updatedAt: "2026-05-23T09:00:00.000Z",
           redactionStatus: "redacted",
-          redactionReason: "code_hash_hidden_plaintext_role_allowed",
+          redactionReason: "plaintext_redeem_code_and_hash_hidden",
         },
       },
     });
@@ -348,6 +401,237 @@ describe("phase 8 admin redeem code runtime", () => {
     expect(serializedPayload).not.toContain("authUserId");
     expect(serializedPayload).not.toContain("password");
     expect(serializedPayload).not.toContain("admin-session-token");
+  });
+
+  it("reveals and copies plaintext only through no-store actions with redacted audits", async () => {
+    const auditInputs: Record<string, unknown>[] = [];
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createSessionService("super_admin"),
+    });
+    const plaintextHandlers = getRedeemCodePlainTextRouteHandlers(handlers);
+    const context = {
+      params: Promise.resolve({ publicId: "redeem-code-public-001" }),
+    };
+    const revealResponse = await plaintextHandlers.revealPlainText.POST(
+      new Request(
+        "http://localhost/api/v1/redeem-codes/redeem-code-public-001/reveal-plaintext",
+        {
+          body: JSON.stringify({ source: "list" }),
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "content-type": "application/json",
+          },
+          method: "POST",
+        },
+      ),
+      context,
+    );
+    const copyResponse = await plaintextHandlers.copyPlainText.POST(
+      new Request("http://localhost/api/v1/redeem-codes/copy-plaintext", {
+        body: JSON.stringify({
+          publicIds: ["redeem-code-public-001"],
+          source: "list",
+        }),
+        headers: {
+          authorization: "Bearer admin-session-token",
+          "content-type": "application/json",
+        },
+        method: "POST",
+      }),
+    );
+
+    expect(revealResponse.headers.get("cache-control")).toBe("no-store");
+    expect(copyResponse.headers.get("cache-control")).toBe("no-store");
+    await expect(revealResponse.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: "redeem-code-public-001",
+        codePlainText: sensitiveRedeemCode,
+      },
+    });
+    await expect(copyResponse.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: null,
+    });
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "redeem_code.plaintext_view",
+        targetPublicId: "redeem-code-public-001",
+        resultStatus: "success",
+      }),
+      expect.objectContaining({
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: "redeem-code-public-001",
+        resultStatus: "success",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain(sensitiveRedeemCode);
+    expect(JSON.stringify(auditInputs)).not.toContain("code_hash");
+  });
+
+  it("does not release plaintext when the audit write fails", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories({
+        auditError: new Error("audit unavailable"),
+      }),
+      sessionService: createSessionService("super_admin"),
+    });
+    const response = await getRedeemCodePlainTextRouteHandlers(
+      handlers,
+    ).revealPlainText.POST(
+      new Request(
+        "http://localhost/api/v1/redeem-codes/redeem-code-public-001/reveal-plaintext",
+        {
+          body: JSON.stringify({ source: "list" }),
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "content-type": "application/json",
+          },
+          method: "POST",
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "redeem-code-public-001" }),
+      },
+    );
+    const responseBody = await response.text();
+
+    expect(response.status).toBe(500);
+    expect(responseBody).not.toContain(sensitiveRedeemCode);
+  });
+
+  it("attributes generation copy-all to its batch without placing card values in audit metadata", async () => {
+    const auditInputs: Record<string, unknown>[] = [];
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createSessionService("super_admin"),
+    });
+    const response = await getRedeemCodePlainTextRouteHandlers(
+      handlers,
+    ).copyPlainText.POST(
+      new Request("http://localhost/api/v1/redeem-codes/copy-plaintext", {
+        body: JSON.stringify({
+          publicIds: ["redeem-code-public-001", "redeem-code-public-002"],
+          source: "generation",
+        }),
+        headers: {
+          authorization: "Bearer admin-session-token",
+          "content-type": "application/json",
+        },
+        method: "POST",
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: null,
+    });
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "redeem_code.plaintext_copy",
+        targetPublicId: "redeem-code-batch-public-001",
+        metadataSummary:
+          "redacted redeem_code plaintext copy metadata; source=generation count=2",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain(sensitiveRedeemCode);
+  });
+
+  it("fails closed and records redacted failures for denied or missing plaintext targets", async () => {
+    const auditInputs: Record<string, unknown>[] = [];
+    const deniedHandlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createSessionService("content_admin"),
+    });
+    const missingHandlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories({
+        auditInputs,
+        includePlainTextTarget: false,
+      }),
+      sessionService: createSessionService("super_admin"),
+    });
+    const createRevealRequest = () =>
+      new Request(
+        "http://localhost/api/v1/redeem-codes/redeem-code-public-001/reveal-plaintext",
+        {
+          body: JSON.stringify({ source: "detail" }),
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "content-type": "application/json",
+          },
+          method: "POST",
+        },
+      );
+    const context = {
+      params: Promise.resolve({ publicId: "redeem-code-public-001" }),
+    };
+    const deniedResponse = await getRedeemCodePlainTextRouteHandlers(
+      deniedHandlers,
+    ).revealPlainText.POST(createRevealRequest(), context);
+    const missingResponse = await getRedeemCodePlainTextRouteHandlers(
+      missingHandlers,
+    ).revealPlainText.POST(createRevealRequest(), context);
+
+    await expect(deniedResponse.json()).resolves.toMatchObject({
+      code: 403601,
+      data: null,
+    });
+    await expect(missingResponse.json()).resolves.toMatchObject({
+      code: 404601,
+      data: null,
+    });
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "redeem_code.plaintext_view",
+        resultStatus: "failed",
+      }),
+      expect.objectContaining({
+        actionType: "redeem_code.plaintext_view",
+        resultStatus: "failed",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain(sensitiveRedeemCode);
+  });
+
+  it("records a redacted batch view before returning the generation distribution window", async () => {
+    const auditInputs: Record<string, unknown>[] = [];
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createSessionService("super_admin"),
+      now: () => now,
+    });
+    const response = await handlers.redeemCodes.POST(
+      new Request("http://localhost/api/v1/redeem-codes", {
+        body: JSON.stringify({
+          count: 1,
+          redeemCodeType: "personal_standard_activation",
+          profession: "monopoly",
+          level: 3,
+          durationDay: 365,
+        }),
+        headers: { authorization: "Bearer admin-session-token" },
+        method: "POST",
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({ code: 0 });
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "redeem_code.batch_create",
+        targetPublicId: "redeem-code-batch-public-001",
+      }),
+      expect.objectContaining({
+        actionType: "redeem_code.plaintext_view",
+        targetPublicId: "redeem-code-batch-public-001",
+        metadataSummary:
+          "redacted redeem_code plaintext view metadata; source=generation count=1",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain("ABCDEFG2");
+    expect(JSON.stringify(auditInputs)).not.toContain("code_hash");
   });
 
   it("rejects detail access for admin roles that cannot read redeem_code operations", async () => {
