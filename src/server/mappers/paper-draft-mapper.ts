@@ -40,6 +40,7 @@ export function mapPaperQuestionToApi(
 
 export function mapPaperDraftToApi(paper: PaperDraftAccessRow): PaperDraftDto {
   const paperSections = paper.paper_sections.map((paperSection) => ({
+    publicId: paperSection.public_id,
     title: paperSection.title,
     description: paperSection.description,
     sortOrder: paperSection.sort_order,
@@ -52,6 +53,9 @@ export function mapPaperDraftToApi(paper: PaperDraftAccessRow): PaperDraftDto {
     (totalCount, paperSection) =>
       totalCount + paperSection.paperQuestions.length,
     0,
+  );
+  const paperQuestions = paper.paper_sections.flatMap(
+    (paperSection) => paperSection.paper_questions,
   );
 
   return {
@@ -76,13 +80,27 @@ export function mapPaperDraftToApi(paper: PaperDraftAccessRow): PaperDraftDto {
     archivedAt: formatNullableTimestamp(paper.archived_at),
     questionCount,
     paperSections,
-    questionGroups: paper.question_groups.map((questionGroup) => ({
-      publicId: questionGroup.public_id,
-      title: questionGroup.title,
-      materialPublicId: questionGroup.material_public_id,
-      materialSnapshot: questionGroup.material_snapshot,
-      sortOrder: questionGroup.sort_order,
-    })),
+    questionGroups: paper.question_groups.map((questionGroup) => {
+      const groupQuestions = paperQuestions.filter(
+        (paperQuestion) =>
+          paperQuestion.question_group_public_id === questionGroup.public_id,
+      );
+      const totalScore = groupQuestions.reduce((sum, paperQuestion) => {
+        const score = Number(paperQuestion.score);
+        return Number.isFinite(score) ? sum + score : sum;
+      }, 0);
+
+      return {
+        publicId: questionGroup.public_id,
+        paperSectionPublicId: questionGroup.paper_section_public_id,
+        title: questionGroup.title,
+        materialPublicId: questionGroup.material_public_id,
+        materialSnapshot: questionGroup.material_snapshot,
+        sortOrder: questionGroup.sort_order,
+        questionCount: groupQuestions.length,
+        totalScore: totalScore.toFixed(1),
+      };
+    }),
     createdAt: paper.created_at.toISOString(),
     updatedAt: paper.updated_at.toISOString(),
   };

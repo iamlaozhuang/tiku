@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeAddPaperQuestionInput,
   normalizePaperCommandInput,
+  normalizePaperSectionCommandInput,
+  normalizeQuestionGroupCommandInput,
   normalizeUpdatePaperQuestionInput,
   PAPER_QUESTION_COUNT_LIMIT,
   validateDraftPaperQuestionCount,
@@ -101,6 +103,132 @@ describe("paper question composition update validation", () => {
       success: false,
       message: "Invalid paper input.",
     });
+  });
+});
+
+describe("paper structure command validation", () => {
+  it("accepts strict section create, update, reorder, and delete commands", () => {
+    expect(
+      normalizePaperSectionCommandInput({
+        action: "create",
+        expectedRevision: 4,
+        title: "案例分析",
+        description: null,
+        sortOrder: 2,
+      }),
+    ).toMatchObject({ success: true, value: { action: "create" } });
+    expect(
+      normalizePaperSectionCommandInput({
+        action: "update",
+        expectedRevision: 4,
+        paperSectionPublicId: "paper_section_public_1",
+        title: "综合案例",
+        description: "更新说明",
+      }),
+    ).toMatchObject({ success: true, value: { action: "update" } });
+    expect(
+      normalizePaperSectionCommandInput({
+        action: "reorder",
+        expectedRevision: 4,
+        paperSectionPublicIds: [
+          "paper_section_public_2",
+          "paper_section_public_1",
+        ],
+      }),
+    ).toMatchObject({ success: true, value: { action: "reorder" } });
+    expect(
+      normalizePaperSectionCommandInput({
+        action: "delete",
+        expectedRevision: 4,
+        paperSectionPublicId: "paper_section_public_1",
+      }),
+    ).toMatchObject({ success: true, value: { action: "delete" } });
+  });
+
+  it("rejects duplicate or malformed section identities", () => {
+    expect(
+      normalizePaperSectionCommandInput({
+        action: "reorder",
+        expectedRevision: 4,
+        paperSectionPublicIds: [
+          "paper_section_public_1",
+          "paper_section_public_1",
+        ],
+      }),
+    ).toEqual({ success: false, message: "Invalid paper input." });
+    expect(
+      normalizePaperSectionCommandInput({
+        action: "delete",
+        expectedRevision: 0,
+        paperSectionPublicId: "",
+      }),
+    ).toEqual({ success: false, message: "Invalid paper input." });
+  });
+
+  it("accepts group lifecycle and explicit membership commands", () => {
+    expect(
+      normalizeQuestionGroupCommandInput({
+        action: "create",
+        expectedRevision: 5,
+        paperSectionPublicId: "paper_section_public_1",
+        materialPublicId: "material_public_1",
+        title: "材料题组",
+        sortOrder: 1,
+      }),
+    ).toMatchObject({ success: true, value: { action: "create" } });
+    expect(
+      normalizeQuestionGroupCommandInput({
+        action: "reorder",
+        expectedRevision: 5,
+        paperSectionPublicId: "paper_section_public_1",
+        questionGroupPublicIds: ["question_group_public_2"],
+      }),
+    ).toMatchObject({ success: true, value: { action: "reorder" } });
+    expect(
+      normalizeQuestionGroupCommandInput({
+        action: "set_question_membership",
+        expectedRevision: 5,
+        paperQuestionPublicId: "paper_question_public_1",
+        questionGroupPublicId: "question_group_public_2",
+      }),
+    ).toMatchObject({
+      success: true,
+      value: { action: "set_question_membership" },
+    });
+    expect(
+      normalizeQuestionGroupCommandInput({
+        action: "set_question_membership",
+        expectedRevision: 5,
+        paperQuestionPublicId: "paper_question_public_1",
+        questionGroupPublicId: null,
+        paperSectionPublicId: "paper_section_public_1",
+      }),
+    ).toMatchObject({
+      success: true,
+      value: { action: "set_question_membership" },
+    });
+  });
+
+  it("rejects ambiguous standalone membership and duplicate group reorder identities", () => {
+    expect(
+      normalizeQuestionGroupCommandInput({
+        action: "set_question_membership",
+        expectedRevision: 5,
+        paperQuestionPublicId: "paper_question_public_1",
+        questionGroupPublicId: null,
+      }),
+    ).toEqual({ success: false, message: "Invalid paper input." });
+    expect(
+      normalizeQuestionGroupCommandInput({
+        action: "reorder",
+        expectedRevision: 5,
+        paperSectionPublicId: "paper_section_public_1",
+        questionGroupPublicIds: [
+          "question_group_public_1",
+          "question_group_public_1",
+        ],
+      }),
+    ).toEqual({ success: false, message: "Invalid paper input." });
   });
 });
 

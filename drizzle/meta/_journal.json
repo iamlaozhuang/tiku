@@ -295,6 +295,13 @@
       "when": 1784683800000,
       "tag": "20260722013000_p1_rc_04_paper_metadata_truth",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1784687400000,
+      "tag": "20260722023000_p1_rc_05_paper_structure_identity",
+      "breakpoints": true
     }
   ]
 }

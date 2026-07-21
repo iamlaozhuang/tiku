@@ -143,6 +143,20 @@ async function readRequestJson(request: Request): Promise<unknown> {
   }
 }
 
+async function readStructureCommandJson(
+  request: Request,
+  allowedActions: string[],
+): Promise<unknown> {
+  const input = await readRequestJson(request);
+
+  return typeof input === "object" &&
+    input !== null &&
+    "action" in input &&
+    allowedActions.includes(String((input as { action: unknown }).action))
+    ? input
+    : null;
+}
+
 function isMultipartFormData(request: Request): boolean {
   return (
     request.headers.get("content-type")?.includes("multipart/form-data") ??
@@ -448,6 +462,73 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
     });
   }
 
+  function createPaperStructureRuntimeHandlers(input: {
+    actionType: string;
+    targetResourceType: "paper_section" | "question_group";
+    mutate: (
+      service: ReturnType<typeof createPaperDraftService>,
+      paperPublicId: string,
+      commandInput: unknown,
+    ) => Promise<ApiResponse<unknown>>;
+  }) {
+    const createHandler = (allowedActions: string[]) =>
+      createRouteHandlerWithErrorEnvelope(
+        async (request: Request, context: RouteContext): Promise<Response> => {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: input.actionType,
+            targetResourceType: input.targetResourceType,
+            targetPublicId: publicId,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            input.actionType,
+            "paper",
+          );
+          const response = await input.mutate(
+            service,
+            publicId,
+            await readStructureCommandJson(request, allowedActions),
+          );
+
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              input.actionType,
+              input.targetResourceType,
+              publicId,
+              response,
+            );
+          }
+
+          return createJsonResponse(response);
+        },
+      );
+
+    return input.targetResourceType === "paper_section"
+      ? {
+          POST: createHandler(["create"]),
+          PATCH: createHandler(["update", "reorder"]),
+          DELETE: createHandler(["delete"]),
+        }
+      : {
+          POST: createHandler(["create"]),
+          PATCH: createHandler([
+            "update",
+            "reorder",
+            "set_question_membership",
+          ]),
+          DELETE: createHandler(["delete"]),
+        };
+  }
+
   return createRouteHandlersWithErrorEnvelope({
     papers: {
       collection: {
@@ -713,6 +794,18 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
           return createJsonResponse(response);
         },
       },
+      paperSections: createPaperStructureRuntimeHandlers({
+        actionType: "paper_section.mutate",
+        mutate: (service, publicId, input) =>
+          service.mutatePaperSections(publicId, input),
+        targetResourceType: "paper_section",
+      }),
+      questionGroups: createPaperStructureRuntimeHandlers({
+        actionType: "question_group.mutate",
+        mutate: (service, publicId, input) =>
+          service.mutateQuestionGroups(publicId, input),
+        targetResourceType: "question_group",
+      }),
       publish: {
         async POST(request: Request, context: RouteContext): Promise<Response> {
           const { publicId } = await context.params;

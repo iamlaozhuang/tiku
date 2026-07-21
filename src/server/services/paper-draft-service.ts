@@ -35,6 +35,8 @@ import {
   normalizePaperListInput,
   normalizePaperCommandInput,
   normalizePaperRevisionInput,
+  normalizePaperSectionCommandInput,
+  normalizeQuestionGroupCommandInput,
   normalizeUpdatePaperInput,
   normalizeUpdatePaperQuestionInput,
   validateDraftPaperQuestionCount,
@@ -63,6 +65,14 @@ export type PaperDraftService = {
   removePaperQuestion(
     paperPublicId: string,
     paperQuestionPublicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<PaperDraftResultDto | null>>;
+  mutatePaperSections(
+    paperPublicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<PaperDraftResultDto | null>>;
+  mutateQuestionGroups(
+    paperPublicId: string,
     input: unknown,
   ): Promise<ApiResponse<PaperDraftResultDto | null>>;
   publishPaper(
@@ -275,6 +285,17 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
   const emptyPaperSection = paper.paper_sections.some(
     (paperSection) => paperSection.paper_questions.length === 0,
   );
+  const populatedQuestionGroupIds = new Set(
+    paperQuestions.flatMap((paperQuestion) =>
+      paperQuestion.question_group_public_id === null ||
+      paperQuestion.question_group_public_id === undefined
+        ? []
+        : [paperQuestion.question_group_public_id],
+    ),
+  );
+  const emptyQuestionGroup = paper.question_groups.some(
+    (questionGroup) => !populatedQuestionGroupIds.has(questionGroup.public_id),
+  );
   const scoringPointMismatch = paperQuestions.some((paperQuestion) => {
     const questionScore = convertScoreToHalfPoints(paperQuestion.score);
 
@@ -402,6 +423,14 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
           {
             code: "empty_paper_section" as const,
             message: "Published paper cannot contain empty paper_section.",
+          },
+        ]
+      : []),
+    ...(emptyQuestionGroup
+      ? [
+          {
+            code: "empty_question_group" as const,
+            message: "Published paper cannot contain empty question_group.",
           },
         ]
       : []),
@@ -662,6 +691,54 @@ export function createPaperDraftService(
       return createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
     },
 
+    async mutatePaperSections(paperPublicId, input) {
+      const commandInput = normalizePaperSectionCommandInput(input);
+      if (!commandInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+      const paper = await paperRepository.findPaperByPublicId(paperPublicId);
+      if (paper === null) {
+        return createPaperNotFoundResponse();
+      }
+      if (
+        paper.paper_status !== "draft" ||
+        paper.revision !== commandInput.value.expectedRevision
+      ) {
+        return createNonDraftPaperResponse();
+      }
+      const updatedPaper = await paperRepository.mutatePaperSections(
+        { paperPublicId, ...commandInput.value },
+        options.mutationContext,
+      );
+      return updatedPaper === null
+        ? createNonDraftPaperResponse()
+        : createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
+    },
+
+    async mutateQuestionGroups(paperPublicId, input) {
+      const commandInput = normalizeQuestionGroupCommandInput(input);
+      if (!commandInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+      const paper = await paperRepository.findPaperByPublicId(paperPublicId);
+      if (paper === null) {
+        return createPaperNotFoundResponse();
+      }
+      if (
+        paper.paper_status !== "draft" ||
+        paper.revision !== commandInput.value.expectedRevision
+      ) {
+        return createNonDraftPaperResponse();
+      }
+      const updatedPaper = await paperRepository.mutateQuestionGroups(
+        { paperPublicId, ...commandInput.value },
+        options.mutationContext,
+      );
+      return updatedPaper === null
+        ? createNonDraftPaperResponse()
+        : createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
+    },
+
     async publishPaper(publicId, input) {
       const commandInput = normalizePaperCommandInput(input);
 
@@ -879,6 +956,18 @@ export function createUnavailablePaperDraftService(): PaperDraftService {
       );
     },
     async removePaperQuestion() {
+      return createErrorResponse(
+        PAPER_RUNTIME_UNAVAILABLE_CODE,
+        "Paper runtime is not configured.",
+      );
+    },
+    async mutatePaperSections() {
+      return createErrorResponse(
+        PAPER_RUNTIME_UNAVAILABLE_CODE,
+        "Paper runtime is not configured.",
+      );
+    },
+    async mutateQuestionGroups() {
       return createErrorResponse(
         PAPER_RUNTIME_UNAVAILABLE_CODE,
         "Paper runtime is not configured.",

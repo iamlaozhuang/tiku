@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
@@ -8,6 +10,7 @@ import * as paperSchema from "./paper";
 import {
   paper,
   paperCommand,
+  paperSection,
   paperScoringPoint,
   question,
   questionGroup,
@@ -187,15 +190,47 @@ describe("paper schema question_type enum", () => {
     expect(getColumnNames(questionGroup)).toEqual(
       expect.arrayContaining(["public_id"]),
     );
+    expect(getColumnNames(paperSection)).toEqual(
+      expect.arrayContaining(["public_id"]),
+    );
     expect(getColumnNames(paperScoringPoint)).toEqual(
       expect.arrayContaining(["public_id"]),
     );
     expect(getIndexNames(questionGroup)).toContain(
       "udx_question_group_public_id",
     );
+    expect(getIndexNames(paperSection)).toEqual(
+      expect.arrayContaining([
+        "udx_paper_section_public_id",
+        "udx_paper_section_paper_id_sort_order",
+      ]),
+    );
+    expect(getIndexNames(questionGroup)).toContain(
+      "udx_question_group_paper_section_id_sort_order",
+    );
     expect(getIndexNames(paperScoringPoint)).toContain(
       "udx_paper_scoring_point_public_id",
     );
+  });
+
+  it("safely backfills paper_section identity and normalizes order before constraints", () => {
+    const migration = readFileSync(
+      resolve(
+        process.cwd(),
+        "drizzle/20260722023000_p1_rc_05_paper_structure_identity.sql",
+      ),
+      "utf8",
+    );
+    expect(migration).toContain(
+      'ALTER TABLE "paper_section" ADD COLUMN "public_id" text;',
+    );
+    expect(migration).toContain('UPDATE "paper_section"');
+    expect(migration.indexOf('UPDATE "paper_section"')).toBeLessThan(
+      migration.indexOf('ALTER COLUMN "public_id" SET NOT NULL'),
+    );
+    expect(migration).toContain("ranked_paper_section");
+    expect(migration).toContain("ranked_question_group");
+    expect(migration).not.toMatch(/DROP|TRUNCATE/iu);
   });
 
   it("persists paper command idempotency keys without exposing internal IDs", () => {

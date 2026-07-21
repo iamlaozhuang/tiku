@@ -171,6 +171,7 @@ function createPaper(
     paper_sections: [
       {
         id: 201,
+        public_id: "paper_section_public_201",
         title: "案例分析",
         description: "技能题",
         sort_order: 1,
@@ -183,6 +184,7 @@ function createPaper(
         id: 401,
         public_id: "question_group_public_123",
         paper_section_id: 201,
+        paper_section_public_id: "paper_section_public_201",
         material_public_id: "material_public_123",
         material_snapshot: {
           materialPublicId: "material_public_123",
@@ -283,6 +285,12 @@ function createRepository(
         total_score: "0.0",
       });
     },
+    async mutatePaperSections() {
+      return createPaper({ revision: 2 });
+    },
+    async mutateQuestionGroups() {
+      return createPaper({ revision: 2 });
+    },
     async publishPaper() {
       return createPaper({
         paper_status: "published",
@@ -348,6 +356,7 @@ describe("paper draft service", () => {
           questionCount: 1,
           paperSections: [
             {
+              publicId: "paper_section_public_201",
               title: "案例分析",
               sortOrder: 1,
               totalScore: "5.0",
@@ -546,6 +555,7 @@ describe("paper draft service", () => {
             paper_sections: [
               {
                 id: 201,
+                public_id: "paper_section_public_201",
                 title: "题量上限",
                 description: null,
                 sort_order: 1,
@@ -653,6 +663,70 @@ describe("paper draft service", () => {
     });
   });
 
+  it("executes independent draft-only paper_section and question_group commands", async () => {
+    const repository = createRepository();
+    const mutatePaperSections = vi.spyOn(repository, "mutatePaperSections");
+    const mutateQuestionGroups = vi.spyOn(repository, "mutateQuestionGroups");
+    const service = createPaperDraftService(repository);
+
+    await expect(
+      service.mutatePaperSections("paper_public_123", {
+        action: "reorder",
+        expectedRevision: 1,
+        paperSectionPublicIds: ["paper_section_public_201"],
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        paper: {
+          revision: 2,
+          paperSections: [{ publicId: "paper_section_public_201" }],
+        },
+      },
+    });
+    expect(mutatePaperSections).toHaveBeenCalledWith(
+      {
+        action: "reorder",
+        expectedRevision: 1,
+        paperPublicId: "paper_public_123",
+        paperSectionPublicIds: ["paper_section_public_201"],
+      },
+      undefined,
+    );
+
+    await expect(
+      service.mutateQuestionGroups("paper_public_123", {
+        action: "set_question_membership",
+        expectedRevision: 1,
+        paperQuestionPublicId: "paper_question_public_123",
+        questionGroupPublicId: "question_group_public_123",
+      }),
+    ).resolves.toMatchObject({ code: 0, data: { paper: { revision: 2 } } });
+    expect(mutateQuestionGroups).toHaveBeenCalledWith(
+      {
+        action: "set_question_membership",
+        expectedRevision: 1,
+        paperPublicId: "paper_public_123",
+        paperQuestionPublicId: "paper_question_public_123",
+        questionGroupPublicId: "question_group_public_123",
+        paperSectionPublicId: null,
+      },
+      undefined,
+    );
+
+    await expect(
+      service.mutatePaperSections("paper_public_123", {
+        action: "reorder",
+        expectedRevision: 1,
+        paperSectionPublicIds: ["duplicate", "duplicate"],
+      }),
+    ).resolves.toEqual({
+      code: 422203,
+      message: "Invalid paper input.",
+      data: null,
+    });
+  });
+
   it("rejects invalid input, missing paper, and non-draft composition changes", async () => {
     const service = createPaperDraftService(
       createRepository({
@@ -757,6 +831,7 @@ describe("paper draft service", () => {
           revision: 1,
           paperSections: [
             {
+              publicId: "paper_section_public_201",
               title: "案例分析",
               description: "技能题",
               sortOrder: 1,
@@ -815,6 +890,8 @@ describe("paper draft service", () => {
           questionGroups: [
             {
               publicId: "question_group_public_123",
+              paperSectionPublicId: "paper_section_public_201",
+              questionCount: 1,
               title: "入库案例题组",
               materialPublicId: "material_public_123",
               materialSnapshot: {
@@ -826,6 +903,7 @@ describe("paper draft service", () => {
                 subject: "skill",
               },
               sortOrder: 1,
+              totalScore: "5.0",
             },
           ],
           createdAt: "2026-05-19T06:00:00.000Z",
@@ -858,6 +936,7 @@ describe("paper draft service", () => {
             paper_sections: [
               {
                 id: 201,
+                public_id: "paper_section_public_201",
                 title: "题量超限",
                 description: null,
                 sort_order: 1,
@@ -890,6 +969,43 @@ describe("paper draft service", () => {
     expect(publishedInputs).toEqual([]);
   });
 
+  it("rejects publishing an empty independently managed question_group", async () => {
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_sections: [
+              {
+                id: 201,
+                public_id: "paper_section_public_201",
+                title: "案例分析",
+                description: null,
+                sort_order: 1,
+                total_score: "5.0",
+                paper_questions: [
+                  createPaperQuestion({
+                    question_group_id: null,
+                    question_group_public_id: null,
+                    question_group_sort_order: null,
+                  }),
+                ],
+              },
+            ],
+          });
+        },
+      }),
+    );
+
+    await expect(
+      service.publishPaper("paper_public_123", paperCommandInput),
+    ).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+  });
+
   it("rejects publishing missing, non-draft, incomplete, and repository-CAS-conflicted papers", async () => {
     const service = createPaperDraftService(
       createRepository({
@@ -912,6 +1028,7 @@ describe("paper draft service", () => {
               paper_sections: [
                 {
                   id: 201,
+                  public_id: "paper_section_public_201",
                   title: "空大题",
                   description: null,
                   sort_order: 1,
@@ -930,6 +1047,7 @@ describe("paper draft service", () => {
               paper_sections: [
                 {
                   id: 201,
+                  public_id: "paper_section_public_201",
                   title: "案例分析",
                   description: "技能题",
                   sort_order: 1,
@@ -960,6 +1078,7 @@ describe("paper draft service", () => {
               paper_sections: [
                 {
                   id: 201,
+                  public_id: "paper_section_public_201",
                   title: "案例分析",
                   description: "技能题",
                   sort_order: 1,
@@ -1044,6 +1163,7 @@ describe("paper draft service", () => {
             paper_sections: [
               {
                 id: 201,
+                public_id: "paper_section_public_201",
                 title: "填空题",
                 description: null,
                 sort_order: 1,
@@ -1104,6 +1224,7 @@ describe("paper draft service", () => {
             paper_sections: [
               {
                 id: 201,
+                public_id: "paper_section_public_201",
                 title: "fill_blank paper_section",
                 description: null,
                 sort_order: 1,
@@ -1155,6 +1276,7 @@ describe("paper draft service", () => {
               paper_sections: [
                 {
                   id: 201,
+                  public_id: "paper_section_public_201",
                   title: "Synthetic paper_section",
                   description: "Synthetic subjective question",
                   sort_order: 1,
@@ -1258,6 +1380,7 @@ describe("paper draft service", () => {
             paper_sections: [
               {
                 id: 201,
+                public_id: "paper_section_public_201",
                 title: "Scoring contract guard",
                 description: null,
                 sort_order: 1,
@@ -1331,6 +1454,7 @@ describe("paper draft service", () => {
             paper_sections: [
               {
                 id: 201,
+                public_id: "paper_section_public_201",
                 title: "案例分析",
                 description: "技能题",
                 sort_order: 1,

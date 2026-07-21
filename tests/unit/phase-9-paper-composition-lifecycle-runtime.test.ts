@@ -128,6 +128,7 @@ function createPaper(
     paper_sections: [
       {
         id: 201,
+        public_id: "paper_section_public_201",
         title: "单选题",
         description: null,
         sort_order: 1,
@@ -228,6 +229,14 @@ function createPaperRepository(
     async removePaperQuestion(_input, context) {
       mutationContexts.push({ operation: "paper_question.remove", context });
       return createPaper({ paper_sections: [] });
+    },
+    async mutatePaperSections(_input, context) {
+      mutationContexts.push({ operation: "paper_section.mutate", context });
+      return createPaper({ revision: 2 });
+    },
+    async mutateQuestionGroups(_input, context) {
+      mutationContexts.push({ operation: "question_group.mutate", context });
+      return createPaper({ revision: 2 });
     },
     async publishPaper(input, context) {
       mutationContexts.push({ operation: "paper.publish", context });
@@ -433,6 +442,69 @@ describe("phase 9 paper composition lifecycle runtime", () => {
     expect(JSON.stringify(auditLogEntries)).not.toContain(
       "admin-session-token",
     );
+  });
+
+  it("applies the existing content-admin boundary to paper structure commands", async () => {
+    const mutationContexts: unknown[] = [];
+    const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+      repositories: createRepositories([], mutationContexts),
+      sessionService: createSessionService("content_admin"),
+    });
+    const response = await handlers.papers.paperSections.POST(
+      new Request(
+        "http://localhost/api/v1/papers/paper-public-001/paper-sections",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+          body: JSON.stringify({
+            action: "create",
+            expectedRevision: 1,
+            title: "案例分析",
+            description: null,
+            sortOrder: 1,
+          }),
+        },
+      ),
+      { params: Promise.resolve({ publicId: "paper-public-001" }) },
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: { paper: { revision: 2 } },
+    });
+    expect(mutationContexts).toEqual([
+      {
+        operation: "paper_section.mutate",
+        context: expect.objectContaining({
+          actorPublicId: "admin-public-001",
+          auditLog: expect.objectContaining({
+            actionType: "paper_section.mutate",
+            targetResourceType: "paper",
+          }),
+        }),
+      },
+    ]);
+
+    const wrongMethodResponse = await handlers.papers.paperSections.POST(
+      new Request(
+        "http://localhost/api/v1/papers/paper-public-001/paper-sections",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+          body: JSON.stringify({
+            action: "delete",
+            expectedRevision: 1,
+            paperSectionPublicId: "paper_section_public_201",
+          }),
+        },
+      ),
+      { params: Promise.resolve({ publicId: "paper-public-001" }) },
+    );
+    await expect(wrongMethodResponse.json()).resolves.toMatchObject({
+      code: 422203,
+      data: null,
+    });
+    expect(mutationContexts).toHaveLength(1);
   });
 
   it("composes, publishes, archives, and copies paper runtime with public identifiers only", async () => {

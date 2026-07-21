@@ -37,6 +37,8 @@ import type {
   NormalizedAddPaperQuestionInput,
   NormalizedCreatePaperInput,
   NormalizedPaperListInput,
+  NormalizedPaperSectionCommandInput,
+  NormalizedQuestionGroupCommandInput,
   NormalizedUpdatePaperInput,
   NormalizedUpdatePaperQuestionInput,
 } from "../validators/paper-draft";
@@ -78,6 +80,7 @@ export type PaperQuestionAccessRow = {
 
 export type PaperSectionAccessRow = {
   id: number;
+  public_id: string;
   title: string;
   description: string | null;
   sort_order: number;
@@ -89,6 +92,7 @@ export type QuestionGroupAccessRow = {
   id: number;
   public_id: string;
   paper_section_id: number;
+  paper_section_public_id: string;
   material_public_id: string;
   material_snapshot: MaterialSnapshotDto;
   title: string;
@@ -146,6 +150,14 @@ export type RemovePaperQuestionInput = {
   paperQuestionPublicId: string;
 };
 
+export type PaperSectionCommandInput = NormalizedPaperSectionCommandInput & {
+  paperPublicId: string;
+};
+
+export type QuestionGroupCommandInput = NormalizedQuestionGroupCommandInput & {
+  paperPublicId: string;
+};
+
 export type PublishPaperInput = {
   commandPublicId: string;
   expectedRevision: number;
@@ -191,6 +203,14 @@ export type PaperDraftRepository = {
   ): Promise<PaperQuestionAccessRow | null>;
   removePaperQuestion(
     input: RemovePaperQuestionInput,
+    context?: ContentMutationContext,
+  ): Promise<PaperDraftAccessRow | null>;
+  mutatePaperSections(
+    input: PaperSectionCommandInput,
+    context?: ContentMutationContext,
+  ): Promise<PaperDraftAccessRow | null>;
+  mutateQuestionGroups(
+    input: QuestionGroupCommandInput,
     context?: ContentMutationContext,
   ): Promise<PaperDraftAccessRow | null>;
   publishPaper(
@@ -244,6 +264,47 @@ export function createPaperQuestionSectionMovePlan(input: {
         sourcePaperSectionId: input.sourcePaperSectionId,
         targetPaperSectionId: input.targetPaperSectionId,
       };
+}
+
+export function isExactPublicIdOrder(
+  actualPublicIds: string[],
+  requestedPublicIds: string[],
+): boolean {
+  if (
+    actualPublicIds.length !== requestedPublicIds.length ||
+    new Set(requestedPublicIds).size !== requestedPublicIds.length
+  ) {
+    return false;
+  }
+
+  const actualSet = new Set(actualPublicIds);
+  return requestedPublicIds.every((publicId) => actualSet.has(publicId));
+}
+
+export function createTwoPhaseSortOrderPlan(publicIds: string[]) {
+  return publicIds.map((publicId, index) => ({
+    publicId,
+    temporarySortOrder: -(index + 1),
+    finalSortOrder: index + 1,
+  }));
+}
+
+export function isQuestionGroupMembershipCompatible(input: {
+  paperId: number;
+  paperSectionId: number;
+  materialPublicId: string | null;
+  groupPaperId: number;
+  groupPaperSectionId: number;
+  groupSectionOwnerPaperId: number;
+  groupMaterialPublicId: string;
+}): boolean {
+  return (
+    input.paperId === input.groupPaperId &&
+    input.paperId === input.groupSectionOwnerPaperId &&
+    input.paperSectionId === input.groupPaperSectionId &&
+    input.materialPublicId !== null &&
+    input.materialPublicId === input.groupMaterialPublicId
+  );
 }
 
 type PaperCommandClaim =
@@ -368,7 +429,14 @@ async function advancePaperRevision(
     paperPublicId: string;
     requiredStatus: PaperStatus;
   },
-): Promise<{ id: number; publicId: string; revision: number } | null> {
+): Promise<{
+  id: number;
+  publicId: string;
+  revision: number;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+} | null> {
   const [row] = await database
     .update(paper)
     .set({
@@ -387,6 +455,9 @@ async function advancePaperRevision(
       id: paper.id,
       publicId: paper.public_id,
       revision: paper.revision,
+      profession: paper.profession,
+      level: paper.level,
+      subject: paper.subject,
     });
 
   return row ?? null;
@@ -949,6 +1020,438 @@ export function createPostgresPaperDraftRepository(
 
         return updatedPaper;
       });
+    },
+
+    async mutatePaperSections(input, context) {
+      const database = getDatabase();
+      const actorAdminId = await resolveActorAdminId(database, context);
+
+      try {
+        return await database.transaction(async (transaction) => {
+          const scopedDatabase = transaction as RuntimeDatabase;
+          const advancedPaper = await advancePaperRevision(scopedDatabase, {
+            actorAdminId,
+            expectedRevision: input.expectedRevision,
+            paperPublicId: input.paperPublicId,
+            requiredStatus: "draft",
+          });
+          if (advancedPaper === null) {
+            return null;
+          }
+
+          if (input.action === "create") {
+            const sectionRows = await listPaperSectionIdentityRows(
+              scopedDatabase,
+              advancedPaper.id,
+            );
+            if (input.sortOrder > sectionRows.length + 1) {
+              throw new PaperMutationConflictError();
+            }
+            const [createdSection] = await transaction
+              .insert(paperSection)
+              .values({
+                description: input.description,
+                paper_id: advancedPaper.id,
+                sort_order: -(sectionRows.length + 1),
+                title: input.title,
+                total_score: "0.0",
+              })
+              .returning({ publicId: paperSection.public_id });
+            if (createdSection === undefined) {
+              throw new PaperMutationConflictError();
+            }
+            const orderedPublicIds = sectionRows.map((row) => row.publicId);
+            orderedPublicIds.splice(
+              input.sortOrder - 1,
+              0,
+              createdSection.publicId,
+            );
+            await applyPaperSectionSortOrderPlan(
+              scopedDatabase,
+              advancedPaper.id,
+              orderedPublicIds,
+            );
+          } else if (input.action === "update") {
+            const [updatedSection] = await transaction
+              .update(paperSection)
+              .set({
+                description: input.description,
+                title: input.title,
+                updated_at: new Date(),
+              })
+              .where(
+                and(
+                  eq(paperSection.paper_id, advancedPaper.id),
+                  eq(paperSection.public_id, input.paperSectionPublicId),
+                ),
+              )
+              .returning({ publicId: paperSection.public_id });
+            if (updatedSection === undefined) {
+              throw new PaperMutationConflictError();
+            }
+          } else if (input.action === "reorder") {
+            const sectionRows = await listPaperSectionIdentityRows(
+              scopedDatabase,
+              advancedPaper.id,
+            );
+            if (
+              !isExactPublicIdOrder(
+                sectionRows.map((row) => row.publicId),
+                input.paperSectionPublicIds,
+              )
+            ) {
+              throw new PaperMutationConflictError();
+            }
+            await applyPaperSectionSortOrderPlan(
+              scopedDatabase,
+              advancedPaper.id,
+              input.paperSectionPublicIds,
+            );
+          } else {
+            const [sectionRow] = await transaction
+              .select({ id: paperSection.id })
+              .from(paperSection)
+              .where(
+                and(
+                  eq(paperSection.paper_id, advancedPaper.id),
+                  eq(paperSection.public_id, input.paperSectionPublicId),
+                ),
+              )
+              .limit(1);
+            if (sectionRow === undefined) {
+              throw new PaperMutationConflictError();
+            }
+            const [groupCountRow] = await transaction
+              .select({ value: count() })
+              .from(questionGroup)
+              .where(eq(questionGroup.paper_section_id, sectionRow.id));
+            const [questionCountRow] = await transaction
+              .select({ value: count() })
+              .from(paperQuestion)
+              .where(eq(paperQuestion.paper_section_id, sectionRow.id));
+            if (
+              (groupCountRow?.value ?? 0) !== 0 ||
+              (questionCountRow?.value ?? 0) !== 0
+            ) {
+              throw new PaperMutationConflictError();
+            }
+            await transaction
+              .delete(paperSection)
+              .where(eq(paperSection.id, sectionRow.id));
+            const remainingRows = await listPaperSectionIdentityRows(
+              scopedDatabase,
+              advancedPaper.id,
+            );
+            if (remainingRows.length > 0) {
+              await applyPaperSectionSortOrderPlan(
+                scopedDatabase,
+                advancedPaper.id,
+                remainingRows.map((row) => row.publicId),
+              );
+            }
+          }
+
+          const updatedPaper = await requirePaperByPublicId(
+            scopedDatabase,
+            input.paperPublicId,
+          );
+          await appendContentMutationAuditLog(
+            scopedDatabase,
+            context,
+            input.paperPublicId,
+          );
+          return updatedPaper;
+        });
+      } catch (error) {
+        if (error instanceof PaperMutationConflictError) {
+          return null;
+        }
+        throw error;
+      }
+    },
+
+    async mutateQuestionGroups(input, context) {
+      const database = getDatabase();
+      const actorAdminId = await resolveActorAdminId(database, context);
+
+      try {
+        return await database.transaction(async (transaction) => {
+          const scopedDatabase = transaction as RuntimeDatabase;
+          const advancedPaper = await advancePaperRevision(scopedDatabase, {
+            actorAdminId,
+            expectedRevision: input.expectedRevision,
+            paperPublicId: input.paperPublicId,
+            requiredStatus: "draft",
+          });
+          if (advancedPaper === null) {
+            return null;
+          }
+
+          if (input.action === "create") {
+            const sectionRow = await findPaperSectionIdentityRow(
+              scopedDatabase,
+              advancedPaper.id,
+              input.paperSectionPublicId,
+            );
+            const materialId = await resolveMaterialId(
+              scopedDatabase,
+              input.materialPublicId,
+            );
+            const materialSnapshot =
+              materialId === null
+                ? null
+                : await findMaterialSnapshotById(scopedDatabase, materialId);
+            if (
+              sectionRow === null ||
+              materialId === null ||
+              materialSnapshot === null ||
+              materialSnapshot.profession !== advancedPaper.profession ||
+              materialSnapshot.level !== advancedPaper.level ||
+              materialSnapshot.subject !== advancedPaper.subject
+            ) {
+              throw new PaperMutationConflictError();
+            }
+            const groupRows = await listQuestionGroupIdentityRows(
+              scopedDatabase,
+              advancedPaper.id,
+              sectionRow.id,
+            );
+            if (input.sortOrder > groupRows.length + 1) {
+              throw new PaperMutationConflictError();
+            }
+            const [createdGroup] = await transaction
+              .insert(questionGroup)
+              .values({
+                material_id: materialId,
+                material_snapshot: materialSnapshot,
+                paper_id: advancedPaper.id,
+                paper_section_id: sectionRow.id,
+                sort_order: -(groupRows.length + 1),
+                title: input.title,
+              })
+              .returning({ publicId: questionGroup.public_id });
+            if (createdGroup === undefined) {
+              throw new PaperMutationConflictError();
+            }
+            const orderedPublicIds = groupRows.map((row) => row.publicId);
+            orderedPublicIds.splice(
+              input.sortOrder - 1,
+              0,
+              createdGroup.publicId,
+            );
+            await applyQuestionGroupSortOrderPlan(
+              scopedDatabase,
+              advancedPaper.id,
+              sectionRow.id,
+              orderedPublicIds,
+            );
+          } else if (input.action === "update") {
+            const [updatedGroup] = await transaction
+              .update(questionGroup)
+              .set({ title: input.title, updated_at: new Date() })
+              .where(
+                and(
+                  eq(questionGroup.paper_id, advancedPaper.id),
+                  eq(questionGroup.public_id, input.questionGroupPublicId),
+                  inArray(
+                    questionGroup.paper_section_id,
+                    transaction
+                      .select({ id: paperSection.id })
+                      .from(paperSection)
+                      .where(eq(paperSection.paper_id, advancedPaper.id)),
+                  ),
+                ),
+              )
+              .returning({ publicId: questionGroup.public_id });
+            if (updatedGroup === undefined) {
+              throw new PaperMutationConflictError();
+            }
+          } else if (input.action === "reorder") {
+            const sectionRow = await findPaperSectionIdentityRow(
+              scopedDatabase,
+              advancedPaper.id,
+              input.paperSectionPublicId,
+            );
+            if (sectionRow === null) {
+              throw new PaperMutationConflictError();
+            }
+            const groupRows = await listQuestionGroupIdentityRows(
+              scopedDatabase,
+              advancedPaper.id,
+              sectionRow.id,
+            );
+            if (
+              !isExactPublicIdOrder(
+                groupRows.map((row) => row.publicId),
+                input.questionGroupPublicIds,
+              )
+            ) {
+              throw new PaperMutationConflictError();
+            }
+            await applyQuestionGroupSortOrderPlan(
+              scopedDatabase,
+              advancedPaper.id,
+              sectionRow.id,
+              input.questionGroupPublicIds,
+            );
+          } else if (input.action === "delete") {
+            const [groupRow] = await transaction
+              .select({
+                id: questionGroup.id,
+                paperSectionId: questionGroup.paper_section_id,
+              })
+              .from(questionGroup)
+              .innerJoin(
+                paperSection,
+                eq(paperSection.id, questionGroup.paper_section_id),
+              )
+              .where(
+                and(
+                  eq(questionGroup.paper_id, advancedPaper.id),
+                  eq(questionGroup.public_id, input.questionGroupPublicId),
+                  eq(paperSection.paper_id, advancedPaper.id),
+                ),
+              )
+              .limit(1);
+            if (groupRow === undefined) {
+              throw new PaperMutationConflictError();
+            }
+            const [questionCountRow] = await transaction
+              .select({ value: count() })
+              .from(paperQuestion)
+              .where(eq(paperQuestion.question_group_id, groupRow.id));
+            if ((questionCountRow?.value ?? 0) !== 0) {
+              throw new PaperMutationConflictError();
+            }
+            await transaction
+              .delete(questionGroup)
+              .where(eq(questionGroup.id, groupRow.id));
+            const remainingRows = await listQuestionGroupIdentityRows(
+              scopedDatabase,
+              advancedPaper.id,
+              groupRow.paperSectionId,
+            );
+            if (remainingRows.length > 0) {
+              await applyQuestionGroupSortOrderPlan(
+                scopedDatabase,
+                advancedPaper.id,
+                groupRow.paperSectionId,
+                remainingRows.map((row) => row.publicId),
+              );
+            }
+          } else {
+            const [paperQuestionRow] = await transaction
+              .select({
+                id: paperQuestion.id,
+                paperId: paperQuestion.paper_id,
+                paperSectionId: paperQuestion.paper_section_id,
+                materialSnapshot: paperQuestion.material_snapshot,
+              })
+              .from(paperQuestion)
+              .innerJoin(
+                paperSection,
+                eq(paperSection.id, paperQuestion.paper_section_id),
+              )
+              .where(
+                and(
+                  eq(paperQuestion.paper_id, advancedPaper.id),
+                  eq(paperQuestion.public_id, input.paperQuestionPublicId),
+                  eq(paperSection.paper_id, advancedPaper.id),
+                ),
+              )
+              .limit(1);
+            if (paperQuestionRow === undefined) {
+              throw new PaperMutationConflictError();
+            }
+
+            let targetSectionId: number;
+            let targetGroupId: number | null;
+            if (input.questionGroupPublicId !== null) {
+              const [groupRow] = await transaction
+                .select({
+                  id: questionGroup.id,
+                  paperId: questionGroup.paper_id,
+                  paperSectionId: questionGroup.paper_section_id,
+                  sectionOwnerPaperId: paperSection.paper_id,
+                  materialPublicId: material.public_id,
+                })
+                .from(questionGroup)
+                .innerJoin(material, eq(material.id, questionGroup.material_id))
+                .innerJoin(
+                  paperSection,
+                  eq(paperSection.id, questionGroup.paper_section_id),
+                )
+                .where(eq(questionGroup.public_id, input.questionGroupPublicId))
+                .limit(1);
+              const materialSnapshot = asNullableMaterialSnapshot(
+                paperQuestionRow.materialSnapshot,
+              );
+              if (
+                groupRow === undefined ||
+                !isQuestionGroupMembershipCompatible({
+                  paperId: paperQuestionRow.paperId,
+                  paperSectionId: groupRow.paperSectionId,
+                  materialPublicId: materialSnapshot?.materialPublicId ?? null,
+                  groupPaperId: groupRow.paperId,
+                  groupPaperSectionId: groupRow.paperSectionId,
+                  groupSectionOwnerPaperId: groupRow.sectionOwnerPaperId,
+                  groupMaterialPublicId: groupRow.materialPublicId,
+                })
+              ) {
+                throw new PaperMutationConflictError();
+              }
+              targetSectionId = groupRow.paperSectionId;
+              targetGroupId = groupRow.id;
+            } else {
+              const sectionRow = await findPaperSectionIdentityRow(
+                scopedDatabase,
+                advancedPaper.id,
+                input.paperSectionPublicId as string,
+              );
+              if (sectionRow === null) {
+                throw new PaperMutationConflictError();
+              }
+              targetSectionId = sectionRow.id;
+              targetGroupId = null;
+            }
+
+            await transaction
+              .update(paperQuestion)
+              .set({
+                paper_section_id: targetSectionId,
+                question_group_id: targetGroupId,
+                updated_at: new Date(),
+              })
+              .where(eq(paperQuestion.id, paperQuestionRow.id));
+            await updatePaperSectionTotalScore(
+              scopedDatabase,
+              paperQuestionRow.paperSectionId,
+            );
+            if (targetSectionId !== paperQuestionRow.paperSectionId) {
+              await updatePaperSectionTotalScore(
+                scopedDatabase,
+                targetSectionId,
+              );
+            }
+          }
+
+          const updatedPaper = await requirePaperByPublicId(
+            scopedDatabase,
+            input.paperPublicId,
+          );
+          await appendContentMutationAuditLog(
+            scopedDatabase,
+            context,
+            input.paperPublicId,
+          );
+          return updatedPaper;
+        });
+      } catch (error) {
+        if (error instanceof PaperMutationConflictError) {
+          return null;
+        }
+        throw error;
+      }
     },
 
     async publishPaper(input, context) {
@@ -1655,11 +2158,16 @@ async function hydratePapers(
       material_snapshot: questionGroup.material_snapshot,
       paper_id: questionGroup.paper_id,
       paper_section_id: questionGroup.paper_section_id,
+      paper_section_public_id: paperSection.public_id,
       sort_order: questionGroup.sort_order,
       title: questionGroup.title,
     })
     .from(questionGroup)
     .innerJoin(material, eq(material.id, questionGroup.material_id))
+    .innerJoin(
+      paperSection,
+      eq(paperSection.id, questionGroup.paper_section_id),
+    )
     .where(inArray(questionGroup.paper_id, paperIds))
     .orderBy(asc(questionGroup.sort_order));
   const paperQuestionRows = await database
@@ -1740,6 +2248,7 @@ async function hydratePapers(
       .filter((sectionRow) => sectionRow.paper_id === paperRow.id)
       .map((sectionRow) => ({
         id: sectionRow.id,
+        public_id: sectionRow.public_id,
         title: sectionRow.title,
         description: sectionRow.description,
         sort_order: sectionRow.sort_order,
@@ -1755,6 +2264,7 @@ async function hydratePapers(
         id: groupRow.id,
         public_id: groupRow.public_id,
         paper_section_id: groupRow.paper_section_id,
+        paper_section_public_id: groupRow.paper_section_public_id,
         material_public_id: groupRow.material_public_id,
         material_snapshot: asMaterialSnapshot(groupRow.material_snapshot),
         title: groupRow.title,
@@ -1828,6 +2338,118 @@ async function buildQuestionSnapshot(
     scoringMethod: sourceQuestion.scoring_method,
     fillBlankAnswers: sourceQuestion.fill_blank_answers ?? [],
   };
+}
+
+type StructureIdentityRow = { id: number; publicId: string };
+
+async function listPaperSectionIdentityRows(
+  database: RuntimeDatabase,
+  paperId: number,
+): Promise<StructureIdentityRow[]> {
+  return database
+    .select({ id: paperSection.id, publicId: paperSection.public_id })
+    .from(paperSection)
+    .where(eq(paperSection.paper_id, paperId))
+    .orderBy(asc(paperSection.sort_order));
+}
+
+async function findPaperSectionIdentityRow(
+  database: RuntimeDatabase,
+  paperId: number,
+  publicId: string,
+): Promise<StructureIdentityRow | null> {
+  const [row] = await database
+    .select({ id: paperSection.id, publicId: paperSection.public_id })
+    .from(paperSection)
+    .where(
+      and(
+        eq(paperSection.paper_id, paperId),
+        eq(paperSection.public_id, publicId),
+      ),
+    )
+    .limit(1);
+
+  return row ?? null;
+}
+
+async function listQuestionGroupIdentityRows(
+  database: RuntimeDatabase,
+  paperId: number,
+  paperSectionId: number,
+): Promise<StructureIdentityRow[]> {
+  return database
+    .select({ id: questionGroup.id, publicId: questionGroup.public_id })
+    .from(questionGroup)
+    .where(
+      and(
+        eq(questionGroup.paper_id, paperId),
+        eq(questionGroup.paper_section_id, paperSectionId),
+      ),
+    )
+    .orderBy(asc(questionGroup.sort_order));
+}
+
+async function applyPaperSectionSortOrderPlan(
+  database: RuntimeDatabase,
+  paperId: number,
+  publicIds: string[],
+): Promise<void> {
+  const plan = createTwoPhaseSortOrderPlan(publicIds);
+  for (const item of plan) {
+    await database
+      .update(paperSection)
+      .set({ sort_order: item.temporarySortOrder, updated_at: new Date() })
+      .where(
+        and(
+          eq(paperSection.paper_id, paperId),
+          eq(paperSection.public_id, item.publicId),
+        ),
+      );
+  }
+  for (const item of plan) {
+    await database
+      .update(paperSection)
+      .set({ sort_order: item.finalSortOrder, updated_at: new Date() })
+      .where(
+        and(
+          eq(paperSection.paper_id, paperId),
+          eq(paperSection.public_id, item.publicId),
+        ),
+      );
+  }
+}
+
+async function applyQuestionGroupSortOrderPlan(
+  database: RuntimeDatabase,
+  paperId: number,
+  paperSectionId: number,
+  publicIds: string[],
+): Promise<void> {
+  const plan = createTwoPhaseSortOrderPlan(publicIds);
+  for (const item of plan) {
+    await database
+      .update(questionGroup)
+      .set({ sort_order: item.temporarySortOrder, updated_at: new Date() })
+      .where(
+        and(
+          eq(questionGroup.paper_id, paperId),
+          eq(questionGroup.paper_section_id, paperSectionId),
+          eq(questionGroup.public_id, item.publicId),
+        ),
+      );
+  }
+  for (const item of plan) {
+    await database
+      .update(questionGroup)
+      .set({ sort_order: item.finalSortOrder, updated_at: new Date() })
+      .where(
+        and(
+          eq(questionGroup.paper_id, paperId),
+          eq(questionGroup.paper_section_id, paperSectionId),
+          eq(questionGroup.public_id, item.publicId),
+        ),
+      );
+  }
 }
 
 async function upsertPaperSection(
@@ -1906,6 +2528,22 @@ async function resolveQuestionGroup(
       .limit(1);
 
     return existingGroup?.id;
+  }
+
+  const [occupiedSortOrder] = await database
+    .select({ id: questionGroup.id })
+    .from(questionGroup)
+    .where(
+      and(
+        eq(questionGroup.paper_id, paperId),
+        eq(questionGroup.paper_section_id, paperSectionId),
+        eq(questionGroup.sort_order, input.sortOrder),
+      ),
+    )
+    .limit(1);
+
+  if (occupiedSortOrder !== undefined) {
+    return undefined;
   }
 
   const materialRow = await findMaterialSnapshotById(database, materialId);

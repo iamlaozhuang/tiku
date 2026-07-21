@@ -23,6 +23,20 @@ async function readRequestJson(request: Request): Promise<unknown> {
   }
 }
 
+async function readStructureCommandJson(
+  request: Request,
+  allowedActions: string[],
+): Promise<unknown> {
+  const input = await readRequestJson(request);
+
+  return typeof input === "object" &&
+    input !== null &&
+    "action" in input &&
+    allowedActions.includes(String((input as { action: unknown }).action))
+    ? input
+    : null;
+}
+
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
 }
@@ -127,6 +141,86 @@ export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
             publicId,
             paperQuestionPublicId,
             input,
+          ),
+        );
+      },
+    },
+    paperSections: {
+      async POST(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        return createJsonResponse(
+          await paperService.mutatePaperSections(
+            publicId,
+            await readStructureCommandJson(request, ["create"]),
+          ),
+        );
+      },
+      async PATCH(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        return createJsonResponse(
+          await paperService.mutatePaperSections(
+            publicId,
+            await readStructureCommandJson(request, ["update", "reorder"]),
+          ),
+        );
+      },
+      async DELETE(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        return createJsonResponse(
+          await paperService.mutatePaperSections(
+            publicId,
+            await readStructureCommandJson(request, ["delete"]),
+          ),
+        );
+      },
+    },
+    questionGroups: {
+      async POST(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        return createJsonResponse(
+          await paperService.mutateQuestionGroups(
+            publicId,
+            await readStructureCommandJson(request, ["create"]),
+          ),
+        );
+      },
+      async PATCH(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        return createJsonResponse(
+          await paperService.mutateQuestionGroups(
+            publicId,
+            await readStructureCommandJson(request, [
+              "update",
+              "reorder",
+              "set_question_membership",
+            ]),
+          ),
+        );
+      },
+      async DELETE(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        return createJsonResponse(
+          await paperService.mutateQuestionGroups(
+            publicId,
+            await readStructureCommandJson(request, ["delete"]),
           ),
         );
       },

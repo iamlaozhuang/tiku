@@ -64,6 +64,7 @@ export type PaperQuestionDto = {
 };
 
 export type PaperSectionDto = {
+  publicId?: string;
   title: string;
   description: string | null;
   sortOrder: number;
@@ -73,10 +74,13 @@ export type PaperSectionDto = {
 
 export type QuestionGroupDto = {
   publicId: string;
+  paperSectionPublicId?: string;
   title: string;
   materialPublicId: string;
   materialSnapshot: MaterialSnapshotDto;
   sortOrder: number;
+  questionCount?: number;
+  totalScore?: string;
 };
 
 export type PaperDraftDto = {
@@ -122,6 +126,7 @@ export type PaperPublishValidationIssueDto = {
     | "paper_question_count_invalid"
     | "paper_has_no_counting_question"
     | "empty_paper_section"
+    | "empty_question_group"
     | "scoring_point_total_mismatch"
     | "fill_blank_score_total_mismatch"
     | "source_reference_unresolved"

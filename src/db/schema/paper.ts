@@ -342,6 +342,11 @@ export const paperSection = pgTable(
   "paper_section",
   {
     id: idColumn(),
+    public_id: text("public_id")
+      .default(
+        sql`'paper_section_' || replace(gen_random_uuid()::text, '-', '')`,
+      )
+      .notNull(),
     paper_id: bigint("paper_id", { mode: "number" })
       .notNull()
       .references(() => paper.id, { onDelete: "cascade" }),
@@ -353,6 +358,11 @@ export const paperSection = pgTable(
     updated_at: updatedAtColumn(),
   },
   (table) => [
+    uniqueIndex("udx_paper_section_public_id").on(table.public_id),
+    uniqueIndex("udx_paper_section_paper_id_sort_order").on(
+      table.paper_id,
+      table.sort_order,
+    ),
     index("idx_paper_section_paper_id").on(table.paper_id),
     index("idx_paper_section_sort_order").on(table.sort_order),
   ],
@@ -382,6 +392,10 @@ export const questionGroup = pgTable(
   },
   (table) => [
     uniqueIndex("udx_question_group_public_id").on(table.public_id),
+    uniqueIndex("udx_question_group_paper_section_id_sort_order").on(
+      table.paper_section_id,
+      table.sort_order,
+    ),
     index("idx_question_group_paper_id").on(table.paper_id),
     index("idx_question_group_paper_section_id").on(table.paper_section_id),
     index("idx_question_group_material_id").on(table.material_id),

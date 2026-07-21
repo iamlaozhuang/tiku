@@ -185,7 +185,7 @@ describe("content admin formal reviewed draft payload", () => {
       level: 3,
       subject: "theory",
       paperType: "mock_paper",
-      source: "content_ai_generation",
+      sourceDescription: "content_ai_generation",
       paperSections: [
         {
           title: "单选题",

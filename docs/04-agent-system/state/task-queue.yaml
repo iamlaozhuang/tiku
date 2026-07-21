@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
+  currentTaskId: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -423,77 +423,82 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21: closed
     p1-remediation-rc-05-question-binding-eligibility-2026-07-21: closed
     p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21: closed
-    p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21: in_progress
+    p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21: closed
+    p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
-    title: Knowledge recommendation stale review guard
-    phase: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
+  - id: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+    title: Paper structure identity and command foundation
+    phase: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0077
-    branch: fix/knowledge-recommendation-stale-review-guard
-    objective: disable stale or non-succeeded recommendation review actions in the UI and independently revalidate the current durable server revision/candidate/eligibility command before static closure
+    productClosureContribution: F-0094_backend_foundation_only
+    branch: feat/paper-structure-identity-commands
+    objective: add stable paper_section identity and independent draft-only paper_section/question_group lifecycle and membership commands as the backend foundation for F-0094 without claiming UI or finding closure
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-05
     findingIds:
-      - F-0077
-    executionStage: candidate_validated_adversarially_reviewed_ready_for_automatic_closeout
+      - F-0094
+    executionStage: implementation_validated_adversarially_reviewed_preparing_final_index
     riskBoundary:
-      category: low_risk_ui_guard_and_static_product_closure
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-      schemaOrMigrationChange: false
+      category: schema_migration_source_and_database_application_structure_commands
+      approvalId: guardian-f0094-paper-structure-foundation-2026-07-21
+      schemaOrMigrationChange: true
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: recommendation_panel_to_dedicated_POST_command_to_durable_task_candidate_question_and_knowledge_node_transaction
-      coreFiles: 4
-      contingencyFiles: 4
+      chain: future_composer_UI_to_two_structure_collection_routes_to_paper_service_repository_and_paper_section_question_group_schema
+      coreFiles: 17
+      contingencyFiles: 12
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      requirements: RAG_knowledge_human_confirmation_superseded_revision_and_active_recommendable_current_scope
-      confirmedResidualRootCause: current_server_already_has_durable_fail_closed_command_but_UI_stale_panel_still_leaves_pending_review_buttons_actionable
+      requirements: module_02_independent_paper_section_and_question_group_identity_lifecycle_order_and_subtotals
+      confirmedResidualRootCause: paper_section_has_no_public_identity_and_both_containers_are_implicit_question_write_side_effects_without_independent_commands
     expectedAcceptance:
-      - stale_or_non_succeeded_recommendation_review_buttons_are_disabled
-      - review_command_requires_task_candidate_identity_exact_question_revision_and_available_question
-      - confirm_rechecks_pending_candidate_and_active_recommendable_same_scope_knowledge_node_under_transaction_locks
-      - binding_and_review_status_change_atomically_or_return_stable_409621
-      - no_F0078_schema_database_execution_permission_Provider_dependency_or_mechanism_change
+      - paper_section_and_question_group_have_stable_public_identity_and_same_paper_order_constraints
+      - draft_only_create_update_reorder_delete_commands_use_expected_revision_and_one_transaction
+      - nonempty_container_delete_cross_paper_identity_and_incompatible_group_membership_fail_closed
+      - paper_question_can_move_between_compatible_group_or_standalone_state_without_snapshot_rewrite
+      - no_UI_closure_migration_execution_permission_learner_snapshot_or_independent_finding_claim
     closeoutProjection:
-      current: low_risk_conditions_satisfied_candidate_validated_and_ready_for_single_kernel_commit
-      triggers: unchanged_final_index_tree_and_stable_base_origin
-      successProjection: one_commit_ff_only_master_canonical_push_sync_and_short_branch_cleanup
+      current: product_candidate_validated_and_adversarially_reviewed_preparing_final_index
+      triggers: final_validation_and_adversarial_review_green_with_unchanged_base_scope_and_risk
+      successProjection: foundation_only_single_commit_ff_only_master_canonical_push_sync_cleanup_then_low_risk_UI_followup
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     verificationEvidence:
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-      tddRed: expected_1_of_54_targeted_UI_failure_before_stale_review_button_guard
-      focusedAndAffectedRegression: pass_66_of_66_across_4_files_on_final_formatted_candidate
-      lint: pass_changed_UI_and_test
+      approvalId: guardian-f0094-paper-structure-foundation-2026-07-21
+      tddRed: expected_8_failures_across_schema_validator_and_repository_safety_contracts
+      focusedAndAffectedRegression: pass_111_of_111_across_13_files_after_test_contract_alignment
+      lint: pass_all_changed_product_and_test_TypeScript
       typecheck: pass_tsc_noEmit
-      build: pass_next_build_100_static_pages
-      formatAndDiff: pass_prettier_and_git_diff_check
-      e2e: not_required_existing_UI_unit_and_static_server_command_coverage
-      mainThreadAdversarialReview: pass_stale_and_non_succeeded_UI_guard_dedicated_task_candidate_revision_status_scope_eligibility_locks_atomic_binding_stable_409_and_no_F0078_or_server_semantic_expansion
+      build: pass_next_build_100_static_pages_including_two_new_routes
+      formatAndDiff: pass_targeted_prettier_generated_snapshot_structure_and_git_diff_check
+      e2e: not_required_foundation_static_level_only
+      mainThreadAdversarialReview: pass_safe_identity_backfill_deterministic_two_phase_exact_set_reorder_nested_ownership_material_compatibility_empty_delete_draft_revision_transaction_no_snapshot_rewrite_method_action_binding_and_F0094_partial_only
     metrics:
-      mandatoryFreshApprovals: 0_covered_by_low_risk_standing_approval
+      mandatoryFreshApprovals: 1_guardian_task_bound_schema_conditional_closeout
       preventableScopeMissApprovals: 0
-      testOnlyExpansions: 0
+      testOnlyExpansions: 1_existing_formal_draft_sourceDescription_assertion
       candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: 8m_JIT_residual_analysis_TDD_UI_guard_and_durable_server_command_adversarial_revalidation
-      mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
+      approvalWaitTurns: 3
+      productValueTime: 28m_JIT_TDD_schema_repository_service_routes_validation_and_adversarial_correction
+      mechanismOverhead: 7m_contract_state_guardian_wait_generation_freeze_and_closeout_preparation
       guardSmokeChanges: 0
+    resumeAnchor:
+      findingId: F-0094
+      task: paper_composer_UI_structure_management_follow_up
+      condition: foundation_closeout_complete_F0094_remains_open
     previousTaskCloseout:
-      taskId: p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21
-      findingId: F-0074
-      productClosureContribution: F-0074
-      commit: a654bc2e3f45802c83007e370e691009c0b14896
-      candidateTree: cb654764e13c0edc75e82369ee79c0b9b540b2ea
+      taskId: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
+      findingId: F-0077
+      productClosureContribution: F-0077
+      commit: 7138c89b5a5e434298496bfe3ca9c281e2764ab0
+      candidateTree: 0f7a2d31c9db8d81c0a2b47bad1973539dce721e
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
@@ -514,6 +519,45 @@ activeTasks:
       F-0160: separate_learner_generation_input_constraint_snapshot
       F-0166: bundle_with_F0167_server_owned_organization_AI_copy_command
       F-0167: bundle_with_F0166_server_owned_organization_AI_copy_command
+  - id: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
+    title: Knowledge recommendation stale review guard
+    phase: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0077
+    branch: fix/knowledge-recommendation-stale-review-guard
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-05
+    findingIds:
+      - F-0077
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    closeout:
+      commit: 7138c89b5a5e434298496bfe3ca9c281e2764ab0
+      candidateTree: 0f7a2d31c9db8d81c0a2b47bad1973539dce721e
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
+    verificationEvidence:
+      tddRed: expected_1_of_54_targeted_UI_failure_before_stale_review_button_guard
+      focusedAndAffectedRegression: pass_66_of_66_across_4_files
+      lint: pass_changed_UI_and_test
+      typecheck: pass_tsc_noEmit
+      build: pass_next_build_100_static_pages
+      fullProfile: passed_once_by_pre_commit_kernel
+      mainThreadAdversarialReview: passed_stale_and_non_succeeded_UI_guard_dedicated_task_candidate_revision_status_scope_eligibility_locks_atomic_binding_stable_409_and_no_F0078_or_server_semantic_expansion
+    metrics:
+      mandatoryFreshApprovals: 0_covered_by_low_risk_standing_approval
+      preventableScopeMissApprovals: 0
+      testOnlyExpansions: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: 8m_JIT_residual_analysis_TDD_UI_guard_and_durable_server_command_adversarial_revalidation
+      mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
+      guardSmokeChanges: 0
   - id: p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21
     title: Material reference snapshot fact source
     phase: p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21

@@ -75,6 +75,7 @@ const paperDto: PaperDraftDto = {
   questionCount: 1,
   paperSections: [
     {
+      publicId: "paper_section_public_201",
       title: "案例分析",
       description: "技能题",
       sortOrder: 1,
@@ -85,6 +86,7 @@ const paperDto: PaperDraftDto = {
   questionGroups: [
     {
       publicId: "question_group_public_123",
+      paperSectionPublicId: "paper_section_public_201",
       title: "入库案例题组",
       materialPublicId: "material_public_123",
       materialSnapshot: materialSnapshotDto,
@@ -176,6 +178,34 @@ function createService(): PaperDraftService {
             paperSections: [],
           },
         },
+      };
+    },
+    async mutatePaperSections(publicId, input) {
+      if (input === null) {
+        return {
+          code: 422203,
+          message: "Invalid paper input.",
+          data: null,
+        };
+      }
+      return {
+        code: 0,
+        message: "ok",
+        data: { paper: { ...paperDto, publicId, revision: 2 } },
+      };
+    },
+    async mutateQuestionGroups(publicId, input) {
+      if (input === null) {
+        return {
+          code: 422203,
+          message: "Invalid paper input.",
+          data: null,
+        };
+      }
+      return {
+        code: 0,
+        message: "ok",
+        data: { paper: { ...paperDto, publicId, revision: 2 } },
       };
     },
     async publishPaper(publicId) {
@@ -429,6 +459,77 @@ describe("paper draft route handlers", () => {
           questionCount: 0,
         },
       },
+    });
+  });
+
+  it("routes public-id-only paper structure commands", async () => {
+    const handlers = createPaperDraftRouteHandlers(createService());
+    const context = {
+      params: Promise.resolve({ publicId: "paper_public_123" }),
+    };
+
+    await expect(
+      handlers.paperSections
+        .POST(
+          new Request(
+            "http://localhost/api/v1/papers/paper_public_123/paper-sections",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                action: "create",
+                expectedRevision: 1,
+                title: "案例分析",
+                description: null,
+                sortOrder: 1,
+              }),
+            },
+          ),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toMatchObject({ code: 0, data: { paper: { revision: 2 } } });
+
+    await expect(
+      handlers.questionGroups
+        .PATCH(
+          new Request(
+            "http://localhost/api/v1/papers/paper_public_123/question-groups",
+            {
+              method: "PATCH",
+              body: JSON.stringify({
+                action: "set_question_membership",
+                expectedRevision: 1,
+                paperQuestionPublicId: "paper_question_public_123",
+                questionGroupPublicId: "question_group_public_123",
+              }),
+            },
+          ),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toMatchObject({ code: 0, data: { paper: { revision: 2 } } });
+
+    await expect(
+      handlers.paperSections
+        .POST(
+          new Request(
+            "http://localhost/api/v1/papers/paper_public_123/paper-sections",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                action: "delete",
+                expectedRevision: 1,
+                paperSectionPublicId: "paper_section_public_201",
+              }),
+            },
+          ),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toEqual({
+      code: 422203,
+      message: "Invalid paper input.",
+      data: null,
     });
   });
 

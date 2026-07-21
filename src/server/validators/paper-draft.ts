@@ -78,6 +78,57 @@ export type NormalizedPaperCommandInput = NormalizedPaperRevisionInput & {
   commandPublicId: string;
 };
 
+export type NormalizedPaperSectionCommandInput =
+  | (NormalizedPaperRevisionInput & {
+      action: "create";
+      title: string;
+      description: string | null;
+      sortOrder: number;
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "update";
+      paperSectionPublicId: string;
+      title: string;
+      description: string | null;
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "reorder";
+      paperSectionPublicIds: string[];
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "delete";
+      paperSectionPublicId: string;
+    });
+
+export type NormalizedQuestionGroupCommandInput =
+  | (NormalizedPaperRevisionInput & {
+      action: "create";
+      paperSectionPublicId: string;
+      materialPublicId: string;
+      title: string;
+      sortOrder: number;
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "update";
+      questionGroupPublicId: string;
+      title: string;
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "reorder";
+      paperSectionPublicId: string;
+      questionGroupPublicIds: string[];
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "delete";
+      questionGroupPublicId: string;
+    })
+  | (NormalizedPaperRevisionInput & {
+      action: "set_question_membership";
+      paperQuestionPublicId: string;
+      questionGroupPublicId: string | null;
+      paperSectionPublicId: string | null;
+    });
+
 export type NormalizedPaperListInput = NormalizedPagination & {
   profession: (typeof professionValues)[number] | null;
   level: number | null;
@@ -130,6 +181,29 @@ function normalizeCommandPublicId(value: unknown): string | null {
   const publicId = normalizeRequiredText(value);
 
   return publicId !== null && publicId.length <= 200 ? publicId : null;
+}
+
+function normalizePublicId(value: unknown): string | null {
+  const publicId = normalizeRequiredText(value);
+
+  return publicId !== null && publicId.length <= 200 ? publicId : null;
+}
+
+function normalizeUniquePublicIds(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length === 0) {
+    return null;
+  }
+
+  const publicIds = value.map(normalizePublicId);
+
+  if (
+    publicIds.some((publicId) => publicId === null) ||
+    new Set(publicIds).size !== publicIds.length
+  ) {
+    return null;
+  }
+
+  return publicIds as string[];
 }
 
 function normalizeExpectedRevision(value: unknown): number | null {
@@ -651,6 +725,188 @@ export function normalizePaperCommandInput(
         success: true,
         value: { ...revisionInput.value, commandPublicId },
       };
+}
+
+export function normalizePaperSectionCommandInput(
+  input: unknown,
+): ValidationResult<NormalizedPaperSectionCommandInput> {
+  if (!isRecord(input)) {
+    return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
+  }
+
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
+  if (expectedRevision === null) {
+    return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
+  }
+
+  if (input.action === "create") {
+    const section = normalizePaperSectionInput(input);
+    return section === null
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: { action: "create", expectedRevision, ...section },
+        };
+  }
+
+  if (input.action === "update") {
+    const paperSectionPublicId = normalizePublicId(input.paperSectionPublicId);
+    const title = normalizeRequiredText(input.title);
+    const description = normalizeOptionalText(input.description);
+    return paperSectionPublicId === null ||
+      title === null ||
+      description === undefined
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: {
+            action: "update",
+            expectedRevision,
+            paperSectionPublicId,
+            title,
+            description,
+          },
+        };
+  }
+
+  if (input.action === "reorder") {
+    const paperSectionPublicIds = normalizeUniquePublicIds(
+      input.paperSectionPublicIds,
+    );
+    return paperSectionPublicIds === null
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: { action: "reorder", expectedRevision, paperSectionPublicIds },
+        };
+  }
+
+  if (input.action === "delete") {
+    const paperSectionPublicId = normalizePublicId(input.paperSectionPublicId);
+    return paperSectionPublicId === null
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: { action: "delete", expectedRevision, paperSectionPublicId },
+        };
+  }
+
+  return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
+}
+
+export function normalizeQuestionGroupCommandInput(
+  input: unknown,
+): ValidationResult<NormalizedQuestionGroupCommandInput> {
+  if (!isRecord(input)) {
+    return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
+  }
+
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
+  if (expectedRevision === null) {
+    return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
+  }
+
+  if (input.action === "create") {
+    const paperSectionPublicId = normalizePublicId(input.paperSectionPublicId);
+    const materialPublicId = normalizePublicId(input.materialPublicId);
+    const title = normalizeRequiredText(input.title);
+    const sortOrder = normalizePositiveInteger(input.sortOrder);
+    return paperSectionPublicId === null ||
+      materialPublicId === null ||
+      title === null ||
+      sortOrder === null
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: {
+            action: "create",
+            expectedRevision,
+            paperSectionPublicId,
+            materialPublicId,
+            title,
+            sortOrder,
+          },
+        };
+  }
+
+  if (input.action === "update" || input.action === "delete") {
+    const questionGroupPublicId = normalizePublicId(
+      input.questionGroupPublicId,
+    );
+    if (questionGroupPublicId === null) {
+      return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
+    }
+    if (input.action === "delete") {
+      return {
+        success: true,
+        value: { action: "delete", expectedRevision, questionGroupPublicId },
+      };
+    }
+    const title = normalizeRequiredText(input.title);
+    return title === null
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: {
+            action: "update",
+            expectedRevision,
+            questionGroupPublicId,
+            title,
+          },
+        };
+  }
+
+  if (input.action === "reorder") {
+    const paperSectionPublicId = normalizePublicId(input.paperSectionPublicId);
+    const questionGroupPublicIds = normalizeUniquePublicIds(
+      input.questionGroupPublicIds,
+    );
+    return paperSectionPublicId === null || questionGroupPublicIds === null
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: {
+            action: "reorder",
+            expectedRevision,
+            paperSectionPublicId,
+            questionGroupPublicIds,
+          },
+        };
+  }
+
+  if (input.action === "set_question_membership") {
+    const paperQuestionPublicId = normalizePublicId(
+      input.paperQuestionPublicId,
+    );
+    const questionGroupPublicId =
+      input.questionGroupPublicId === null
+        ? null
+        : normalizePublicId(input.questionGroupPublicId);
+    const paperSectionPublicId =
+      input.paperSectionPublicId === null ||
+      input.paperSectionPublicId === undefined
+        ? null
+        : normalizePublicId(input.paperSectionPublicId);
+    const groupSelectionValid =
+      questionGroupPublicId !== null && paperSectionPublicId === null;
+    const standaloneSelectionValid =
+      input.questionGroupPublicId === null && paperSectionPublicId !== null;
+    return paperQuestionPublicId === null ||
+      (!groupSelectionValid && !standaloneSelectionValid)
+      ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+      : {
+          success: true,
+          value: {
+            action: "set_question_membership",
+            expectedRevision,
+            paperQuestionPublicId,
+            questionGroupPublicId,
+            paperSectionPublicId,
+          },
+        };
+  }
+
+  return { success: false, message: INVALID_PAPER_INPUT_MESSAGE };
 }
 
 export function normalizePaperListInput(
