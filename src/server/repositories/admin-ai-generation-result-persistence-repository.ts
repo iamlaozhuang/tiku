@@ -1,5 +1,5 @@
 import { adminAiGenerationResult } from "@/db/schema";
-import { and, eq, type SQL } from "drizzle-orm";
+import { and, eq, inArray, type SQL } from "drizzle-orm";
 
 import type {
   AdminAiGenerationResultDto,
@@ -15,6 +15,7 @@ import type {
   CreateAdminAiGenerationResultInput,
   FindAdminAiGenerationResultByTaskQuery,
   InsertAdminAiGenerationDraftResultInput,
+  ListAdminAiGenerationResultsByTaskPublicIdsQuery,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type { AdminAiGenerationResultFormalAdoptionStatus } from "../models/admin-ai-generation-result";
@@ -52,6 +53,19 @@ export function createAdminAiGenerationResultByTaskCondition(
   ) as SQL;
 }
 
+export function createAdminAiGenerationResultsByTaskPublicIdsCondition(
+  query: ListAdminAiGenerationResultsByTaskPublicIdsQuery,
+): SQL {
+  return and(
+    eq(adminAiGenerationResult.workspace, query.workspace),
+    eq(adminAiGenerationResult.owner_type, query.ownerType),
+    eq(adminAiGenerationResult.owner_public_id, query.ownerPublicId),
+    eq(adminAiGenerationResult.generation_kind, query.generationKind),
+    eq(adminAiGenerationResult.result_status, "draft"),
+    inArray(adminAiGenerationResult.task_public_id, query.taskPublicIds),
+  ) as SQL;
+}
+
 export function createAdminAiGenerationResultPersistenceRepository(
   gateway: AdminAiGenerationResultPersistenceGateway,
 ): AdminAiGenerationResultPersistenceRepository {
@@ -71,6 +85,29 @@ export function createAdminAiGenerationResultPersistenceRepository(
       return [...rows]
         .sort(compareAdminAiGenerationResultRows)
         .map(mapAdminAiGenerationResultRowToDto);
+    },
+    async listDraftResultsByTaskPublicIds(query) {
+      const taskPublicIds = [...new Set(query.taskPublicIds)];
+
+      if (taskPublicIds.length === 0) {
+        return [];
+      }
+
+      const rows = await gateway.listResultRowsByTaskPublicIds({
+        ...query,
+        taskPublicIds,
+      });
+      const resultsByTaskPublicId = new Map(
+        rows.map((row) => [row.task_public_id, row]),
+      );
+
+      return taskPublicIds.flatMap((taskPublicId) => {
+        const row = resultsByTaskPublicId.get(taskPublicId);
+
+        return row === undefined
+          ? []
+          : [mapAdminAiGenerationResultRowToDto(row)];
+      });
     },
     async findDraftResultByTaskPublicId(query) {
       const row = await gateway.findResultByTaskPublicId(query);

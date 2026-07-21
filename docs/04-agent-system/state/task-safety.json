@@ -1,25 +1,19 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-ai-paper-candidate-pagination-2026-07-21",
-  "objective": "Close F-0153 by replacing the paginated admin-list reuse in AI paper platform source resolution with one dedicated, complete and stably ordered repository read, and by reloading already selected platform questions through an exact public-id bounded read for personal learning-session and organization-training draft materialization. Preserve existing profession, level, subject, available-status, knowledge-scope, role-source and authorization boundaries without schema, migration, persistent database execution, Provider calls or entitlement expansion.",
+  "taskId": "p1-remediation-rc-04-ai-task-result-history-join-2026-07-21",
+  "objective": "Close F-0170 by making the paginated AI task page the sole history window and loading draft results in one owner-scoped, unpaginated batch by those task public IDs. Preserve existing workspace, owner, generation-kind, role, redaction and formal-adoption boundaries without schema, migration, persistent database execution, Provider calls or entitlement expansion.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/question-repository.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/services/ai-paper-route-source-resolution-service.ts",
-    "src/server/services/ai-paper-route-source-resolution-service.test.ts",
-    "src/server/services/ai-paper-route-plan-select-wiring-service.ts",
-    "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
-    "src/server/services/personal-ai-generation-request-route.ts",
-    "src/server/services/personal-ai-generation-request-route.test.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+    "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
     "src/server/services/admin-ai-generation-local-contract-route.ts",
     "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/services/ai-paper-plan-and-select-service.test.ts",
-    "tests/unit/knowledge-node-ai-final-regression.test.ts"
+    "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -35,42 +29,36 @@
     ".env*",
     "schema, migration or persistent database execution",
     "new role, entitlement, authorization scope, quota or default capability",
-    "generated draft inclusion as formal source or enterprise cross-organization source",
+    "raw AI input, output, provider payload or unredacted generated content",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/question-repository.ts",
-    "src/server/services/ai-paper-route-source-resolution-service.ts",
-    "src/server/services/ai-paper-route-plan-select-wiring-service.ts",
-    "src/server/services/personal-ai-generation-request-route.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
+    "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts",
     "src/server/services/admin-ai-generation-local-contract-route.ts"
   ],
   "contingencyFiles": [
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/services/ai-paper-route-source-resolution-service.test.ts",
-    "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
-    "src/server/services/personal-ai-generation-request-route.test.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
     "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/services/ai-paper-plan-and-select-service.test.ts",
-    "tests/unit/knowledge-node-ai-final-regression.test.ts"
+    "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCallers": "Content, personal and organization AI paper routes all converge through resolveAndAssembleAiPaperFromRoute. Personal learning-session creation and organization draft detail materialization later re-read the selected platform questions.",
-    "routeService": "ai-paper-route-source-resolution-service currently calls listQuestions page 1 with pageSize at most 100. The personal learning-session resolver and admin local-contract route repeat the same first-page lookup before filtering selected public IDs.",
-    "repository": "QuestionRepository listQuestions is an admin pagination contract. The task adds a dedicated AI paper source read that applies profession, level, subject, available status and optional exact knowledge/public-id filters in the database, returns the complete bounded set in stable updatedAt/publicId order and hydrates relationships in batches.",
-    "schema": "Existing question, question_knowledge_node, knowledge_node, options, scoring points and tag tables contain all required source facts. No schema or migration source is needed.",
-    "tests": "Repository condition tests plus source, wiring, personal request, learning-session, admin draft and knowledge-scope regressions cover 101/1000-sized collections, sparse matches beyond the former first page, exact selected-id recovery, deduplication, source scope and insufficiency semantics.",
-    "requirements": "The AI generation recontract traceability requires local assembly from every eligible formal source, maximum 80 selected questions, truthful insufficiency and role-specific source isolation. ADR-002 keeps database reads in the repository and ADR-007 keeps effective authorization in existing callers.",
-    "nonClaims": "No F-0154 metadata repair, F-0170 history join, F-0146 content-version snapshot, schema, migration, real database, Provider, dependency, permission, deployment or mechanism change."
+    "uiApiCallers": "Content and organization AI history UIs consume generatedResult only from the existing admin history GET response; no UI change is needed.",
+    "routeService": "admin-ai-generation-local-contract-route currently applies the same page and offset independently to the all-status task set and the draft-result subset, then joins only those two windows.",
+    "repository": "The result repository and Postgres gateway need one owner/workspace/generation-kind scoped batch read by the current task page public IDs, without a second pagination window.",
+    "schema": "Existing ai_generation_task and admin_ai_generation_result task_public_id relationship is sufficient. No schema or migration source is needed.",
+    "tests": "Route tests cover mixed failed, pending, cancelled and succeeded tasks across a page boundary, late results, reversed completion order and empty pages. Repository tests cover exact task-ID, owner, workspace, generation-kind and draft-status scope in one batch.",
+    "requirements": "SC-BACKEND-LIST-CONTRACT and AI closed-loop traceability require task rows, associated results and total to describe one stable task result set. ADR-002 keeps database access in the repository and ADR-007 preserves existing role authorization.",
+    "nonClaims": "No F-0146 snapshot, F-0154 metadata, UI, schema, migration, real database, Provider, dependency, permission, deployment or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0153-ai-paper-candidate-pagination-focused",
+      "name": "f0170-ai-task-result-history-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -78,47 +66,38 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/ai-paper-route-source-resolution-service.test.ts",
-        "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+        "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
         "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/ai-paper-plan-and-select-service.test.ts",
-        "tests/unit/knowledge-node-ai-final-regression.test.ts"
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
       ]
     },
     {
-      "name": "f0153-ai-paper-candidate-pagination-lint",
+      "name": "f0170-ai-task-result-history-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/question-repository.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/ai-paper-route-source-resolution-service.ts",
-        "src/server/services/ai-paper-route-source-resolution-service.test.ts",
-        "src/server/services/ai-paper-route-plan-select-wiring-service.ts",
-        "src/server/services/ai-paper-route-plan-select-wiring-service.test.ts",
-        "src/server/services/personal-ai-generation-request-route.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
-        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
+        "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
+        "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
+        "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts",
         "src/server/services/admin-ai-generation-local-contract-route.ts",
         "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "tests/unit/knowledge-node-ai-final-regression.test.ts"
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts"
       ]
     },
     {
-      "name": "f0153-ai-paper-candidate-pagination-typecheck",
+      "name": "f0170-ai-task-result-history-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0153-ai-paper-candidate-pagination-build",
+      "name": "f0170-ai-task-result-history-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]

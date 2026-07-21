@@ -8,6 +8,7 @@ import {
   createAdminAiGenerationResultByTaskCondition,
   createAdminAiGenerationResultHistoryCondition,
   createAdminAiGenerationResultPersistenceRepository,
+  createAdminAiGenerationResultsByTaskPublicIdsCondition,
 } from "./admin-ai-generation-result-persistence-repository";
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
@@ -100,6 +101,19 @@ function createGateway(options: {
       )
       .slice(query.offset, query.offset + query.limit),
   );
+  const listResultRowsByTaskPublicIds = vi.fn(async (query) => {
+    const taskPublicIds = new Set(query.taskPublicIds);
+
+    return (options.rows ?? []).filter(
+      (row) =>
+        row.workspace === query.workspace &&
+        row.owner_type === query.ownerType &&
+        row.owner_public_id === query.ownerPublicId &&
+        row.generation_kind === query.generationKind &&
+        row.result_status === "draft" &&
+        taskPublicIds.has(row.task_public_id),
+    );
+  });
   const findResultByTaskPublicId = vi.fn(
     async () => options.existingRow ?? null,
   );
@@ -111,6 +125,7 @@ function createGateway(options: {
 
   const gateway: AdminAiGenerationResultPersistenceGateway = {
     listResultRows,
+    listResultRowsByTaskPublicIds,
     findResultByTaskPublicId,
     findTaskByPublicId,
     insertDraftResult,
@@ -120,6 +135,7 @@ function createGateway(options: {
   return {
     gateway,
     listResultRows,
+    listResultRowsByTaskPublicIds,
     findResultByTaskPublicId,
     findTaskByPublicId,
     insertDraftResult,
@@ -158,6 +174,77 @@ describe("admin AI generation result persistence repository", () => {
     expect(containsText(condition, "owner_type")).toBe(true);
     expect(containsText(condition, "platform")).toBe(true);
     expect(containsText(condition, "task_public_id")).toBe(true);
+  });
+
+  it("builds a draft-only scoped condition for the authoritative task page", () => {
+    const condition = createAdminAiGenerationResultsByTaskPublicIdsCondition({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      taskPublicIds: [
+        "admin_ai_generation_task_public_page_6",
+        "admin_ai_generation_task_public_page_7",
+      ],
+    });
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "workspace")).toBe(true);
+    expect(containsText(condition, "owner_public_id")).toBe(true);
+    expect(containsText(condition, "organization_public_901")).toBe(true);
+    expect(containsText(condition, "generation_kind")).toBe(true);
+    expect(containsText(condition, "paper")).toBe(true);
+    expect(containsText(condition, "result_status")).toBe(true);
+    expect(containsText(condition, "draft")).toBe(true);
+    expect(containsText(condition, "task_public_id")).toBe(true);
+    expect(
+      containsText(condition, "admin_ai_generation_task_public_page_7"),
+    ).toBe(true);
+  });
+
+  it("loads one scoped result batch by the authoritative task page public ids", async () => {
+    const requestedTaskPublicIds = [
+      "admin_ai_generation_task_public_page_6",
+      "admin_ai_generation_task_public_page_7",
+    ];
+    const { gateway, listResultRowsByTaskPublicIds } = createGateway({
+      rows: [
+        createResultRow({
+          public_id: "admin_ai_generation_result_public_page_7",
+          task_public_id: requestedTaskPublicIds[1],
+        }),
+        createResultRow({
+          public_id: "admin_ai_generation_result_public_page_6",
+          task_public_id: requestedTaskPublicIds[0],
+        }),
+        createResultRow({
+          public_id: "admin_ai_generation_result_public_other_page",
+          task_public_id: "admin_ai_generation_task_public_other_page",
+        }),
+      ],
+    });
+    const repository =
+      createAdminAiGenerationResultPersistenceRepository(gateway);
+
+    const results = await repository.listDraftResultsByTaskPublicIds({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      taskPublicIds: [...requestedTaskPublicIds, requestedTaskPublicIds[0]],
+    });
+
+    expect(listResultRowsByTaskPublicIds).toHaveBeenCalledOnce();
+    expect(listResultRowsByTaskPublicIds).toHaveBeenCalledWith({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      taskPublicIds: requestedTaskPublicIds,
+    });
+    expect(results.map((result) => result.taskPublicId)).toEqual(
+      requestedTaskPublicIds,
+    );
   });
 
   it("lists redacted draft results newest first without internal ids or raw snapshots", async () => {

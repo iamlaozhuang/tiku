@@ -464,6 +464,9 @@ function createLocalContractRouteResultPersistenceRepository(): AdminAiGeneratio
     async listDraftResults() {
       return [];
     },
+    async listDraftResultsByTaskPublicIds() {
+      return [];
+    },
     async findDraftResultByTaskPublicId() {
       return null;
     },

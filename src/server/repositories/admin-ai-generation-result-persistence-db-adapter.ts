@@ -34,6 +34,7 @@ import {
   createAdminAiGenerationResultByTaskCondition,
   createAdminAiGenerationResultHistoryCondition,
   createAdminAiGenerationResultPersistenceRepository,
+  createAdminAiGenerationResultsByTaskPublicIdsCondition,
 } from "./admin-ai-generation-result-persistence-repository";
 import {
   createLazyRuntimeDatabaseGetter,
@@ -232,6 +233,23 @@ export function createPostgresAdminAiGenerationResultPersistenceGateway(
         )
         .offset(query.offset)
         .limit(query.limit);
+
+      return rows.map((row) =>
+        mapAdminAiGenerationResultDbRowToRow(
+          normalizeAdminAiGenerationResultDbRow(row),
+        ),
+      );
+    },
+    async listResultRowsByTaskPublicIds(query) {
+      const rows = await getDatabase()
+        .select(adminAiGenerationResultWithFormalAdoptionSelection)
+        .from(adminAiGenerationResult)
+        .leftJoin(
+          adminAiGenerationFormalAdoption,
+          createAdminAiGenerationFormalAdoptionReadCondition(),
+        )
+        .where(createAdminAiGenerationResultsByTaskPublicIdsCondition(query))
+        .orderBy(asc(adminAiGenerationResult.task_public_id));
 
       return rows.map((row) =>
         mapAdminAiGenerationResultDbRowToRow(

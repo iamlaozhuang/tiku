@@ -974,19 +974,43 @@ function createGeneratedResultPersistenceRecorder(
 ): {
   calls: CreateAdminAiGenerationResultInput[];
   historyQueries: AdminAiGenerationResultHistoryQuery[];
+  taskBatchQueries: Array<
+    Pick<
+      AdminAiGenerationResultHistoryQuery,
+      "workspace" | "ownerType" | "ownerPublicId" | "generationKind"
+    > & { taskPublicIds: string[] }
+  >;
   repository: AdminAiGenerationResultPersistenceRepository;
 } {
   const calls: CreateAdminAiGenerationResultInput[] = [];
   const historyQueries: AdminAiGenerationResultHistoryQuery[] = [];
+  const taskBatchQueries: Array<
+    Pick<
+      AdminAiGenerationResultHistoryQuery,
+      "workspace" | "ownerType" | "ownerPublicId" | "generationKind"
+    > & { taskPublicIds: string[] }
+  > = [];
 
   return {
     calls,
     historyQueries,
+    taskBatchQueries,
     repository: {
       async listDraftResults(query) {
         historyQueries.push(query);
 
-        return input.draftResults ?? [];
+        return (input.draftResults ?? []).slice(
+          query.offset,
+          query.offset + (query.limit ?? query.pageSize),
+        );
+      },
+      async listDraftResultsByTaskPublicIds(query) {
+        taskBatchQueries.push(query);
+        const taskPublicIds = new Set(query.taskPublicIds);
+
+        return (input.draftResults ?? []).filter((result) =>
+          taskPublicIds.has(result.taskPublicId),
+        );
       },
       async findDraftResultByTaskPublicId() {
         return null;
@@ -2994,18 +3018,8 @@ describe("admin AI generation local contract route handlers", () => {
         offset: 5,
       },
     ]);
-    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([
-      {
-        workspace: "content",
-        ownerType: "platform",
-        ownerPublicId: "platform_content_review_pool",
-        generationKind: "paper",
-        page: 2,
-        pageSize: 5,
-        limit: 5,
-        offset: 5,
-      },
-    ]);
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([]);
+    expect(generatedResultPersistenceRecorder.taskBatchQueries).toEqual([]);
     expect(payload).toMatchObject({
       code: 0,
       message: "ok",
@@ -3017,6 +3031,70 @@ describe("admin AI generation local contract route handlers", () => {
         sortOrder: "desc",
       },
     });
+  });
+
+  it("joins results to the task page after earlier failed tasks shift the result subset", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_content_question_second_page_success";
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_second_page_success";
+    const taskPersistenceRecorder = createTaskPersistenceRecorder({
+      taskHistoryItems: [
+        createTaskHistoryItem({
+          workspace: "content",
+          generationKind: "question",
+          taskPublicId,
+          resultPublicId,
+          status: "succeeded",
+          requestedAt: "2026-06-26T20:45:00.000Z",
+        }),
+      ],
+    });
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder({
+        draftResults: [
+          createGeneratedResultHistoryItem({
+            workspace: "content",
+            generationKind: "question",
+            taskPublicId,
+            resultPublicId,
+            persistedAt: "2026-06-26T20:46:00.000Z",
+          }),
+        ],
+      });
+
+    const response = await getLocalContractHistory({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      searchParams: "?generationKind=question&page=2&pageSize=5",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+    });
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        items: [
+          {
+            taskPublicId,
+            status: "succeeded",
+            generatedResult: { resultPublicId },
+          },
+        ],
+      },
+      pagination: { page: 2, pageSize: 5 },
+    });
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([]);
+    expect(generatedResultPersistenceRecorder.taskBatchQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        generationKind: "question",
+        taskPublicIds: [taskPublicId],
+      },
+    ]);
   });
 
   it("returns content admin generated result history summaries without raw result payloads", async () => {
@@ -3059,16 +3137,14 @@ describe("admin AI generation local contract route handlers", () => {
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
-    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([]);
+    expect(generatedResultPersistenceRecorder.taskBatchQueries).toEqual([
       {
         workspace: "content",
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
         generationKind: "question",
-        page: 1,
-        pageSize: 10,
-        limit: 10,
-        offset: 0,
+        taskPublicIds: [taskPublicId],
       },
     ]);
     expect(payload).toMatchObject({
@@ -3226,16 +3302,14 @@ describe("admin AI generation local contract route handlers", () => {
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
-    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([]);
+    expect(generatedResultPersistenceRecorder.taskBatchQueries).toEqual([
       {
         workspace: "organization",
         ownerType: "organization",
         ownerPublicId: "organization_public_123",
         generationKind: "paper",
-        page: 1,
-        pageSize: 10,
-        limit: 10,
-        offset: 0,
+        taskPublicIds: [taskPublicId],
       },
     ]);
     expect(payload).toMatchObject({

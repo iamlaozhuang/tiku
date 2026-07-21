@@ -30,7 +30,6 @@ import type {
 } from "../contracts/admin-ai-generation-local-contract";
 import type {
   AdminAiGenerationResultDto,
-  AdminAiGenerationResultHistoryQuery,
   AdminAiGenerationResultPersistenceRepository,
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
@@ -1927,28 +1926,6 @@ function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
   };
 }
 
-function resolveAdminAiGenerationResultHistoryQuery(
-  historyQuery: AdminAiGenerationTaskHistoryQuery,
-): AdminAiGenerationResultHistoryQuery | null {
-  if (
-    historyQuery.ownerType !== "platform" &&
-    historyQuery.ownerType !== "organization"
-  ) {
-    return null;
-  }
-
-  return {
-    workspace: historyQuery.workspace,
-    ownerType: historyQuery.ownerType,
-    ownerPublicId: historyQuery.ownerPublicId,
-    generationKind: historyQuery.generationKind,
-    page: historyQuery.page,
-    pageSize: historyQuery.pageSize,
-    limit: historyQuery.limit,
-    offset: historyQuery.offset,
-  };
-}
-
 async function listAdminAiGenerationTaskHistory(input: {
   actor: AdminAiGenerationActor;
   historyQueryInput: {
@@ -1972,18 +1949,28 @@ async function listAdminAiGenerationTaskHistory(input: {
     return adminAiGenerationPermissionDeniedResponse;
   }
 
-  const generatedResultHistoryQuery =
-    resolveAdminAiGenerationResultHistoryQuery(historyQuery);
-
-  if (generatedResultHistoryQuery === null) {
+  if (
+    historyQuery.ownerType !== "platform" &&
+    historyQuery.ownerType !== "organization"
+  ) {
     return adminAiGenerationPermissionDeniedResponse;
   }
 
-  const [taskHistoryItems, generatedResults] = await Promise.all([
-    input.taskPersistenceRepository.listTaskHistory(historyQuery),
-    input.resultPersistenceRepository.listDraftResults(
-      generatedResultHistoryQuery,
-    ),
+  const taskHistoryItems =
+    await input.taskPersistenceRepository.listTaskHistory(historyQuery);
+  const [generatedResults, historyTotal] = await Promise.all([
+    taskHistoryItems.length === 0
+      ? Promise.resolve([])
+      : input.resultPersistenceRepository.listDraftResultsByTaskPublicIds({
+          workspace: historyQuery.workspace,
+          ownerType: historyQuery.ownerType,
+          ownerPublicId: historyQuery.ownerPublicId,
+          generationKind: historyQuery.generationKind,
+          taskPublicIds: taskHistoryItems.map((task) => task.taskPublicId),
+        }),
+    input.taskPersistenceRepository.countTaskHistory === undefined
+      ? Promise.resolve(taskHistoryItems.length)
+      : input.taskPersistenceRepository.countTaskHistory(historyQuery),
   ]);
   const generatedResultsByTaskPublicId = new Map(
     generatedResults.map((result) => [result.taskPublicId, result]),
@@ -1994,11 +1981,6 @@ async function listAdminAiGenerationTaskHistory(input: {
       generatedResultsByTaskPublicId.get(task.taskPublicId) ?? null,
     ),
   );
-  const historyTotal =
-    input.taskPersistenceRepository.countTaskHistory === undefined
-      ? historyItems.length
-      : await input.taskPersistenceRepository.countTaskHistory(historyQuery);
-
   return createPaginatedResponse(
     {
       workspace: input.workspace,

@@ -111,6 +111,13 @@ export type AdminAiGenerationResultHistoryQuery = {
   offset: number;
 };
 
+export type ListAdminAiGenerationResultsByTaskPublicIdsQuery = Pick<
+  AdminAiGenerationResultHistoryQuery,
+  "workspace" | "ownerType" | "ownerPublicId" | "generationKind"
+> & {
+  taskPublicIds: string[];
+};
+
 export type FindAdminAiGenerationResultByTaskQuery = {
   workspace: AdminAiGenerationWorkspace;
   ownerType: AdminAiGenerationResultOwnerType;
@@ -185,6 +192,9 @@ export type AdminAiGenerationResultPersistenceGateway = {
   listResultRows(
     query: Required<AdminAiGenerationResultHistoryQuery>,
   ): Promise<AdminAiGenerationResultPersistenceRow[]>;
+  listResultRowsByTaskPublicIds(
+    query: ListAdminAiGenerationResultsByTaskPublicIdsQuery,
+  ): Promise<AdminAiGenerationResultPersistenceRow[]>;
   findResultByTaskPublicId(
     query: FindAdminAiGenerationResultByTaskQuery,
   ): Promise<AdminAiGenerationResultPersistenceRow | null>;
@@ -202,6 +212,9 @@ export type AdminAiGenerationResultPersistenceGateway = {
 export type AdminAiGenerationResultPersistenceRepository = {
   listDraftResults(
     query: AdminAiGenerationResultHistoryQuery,
+  ): Promise<AdminAiGenerationResultDto[]>;
+  listDraftResultsByTaskPublicIds(
+    query: ListAdminAiGenerationResultsByTaskPublicIdsQuery,
   ): Promise<AdminAiGenerationResultDto[]>;
   findDraftResultByTaskPublicId(
     query: FindAdminAiGenerationResultByTaskQuery,
