@@ -187,8 +187,14 @@ export type AdminContentKnowledgeRuntimeRepository = {
 export type AdminAuditLogRuntimeRepository = {
   appendAuditLog(input: AppendAuditLogInput): Promise<void>;
   listAuditLogs(
-    query: AdminAiAuditLogListQuery,
+    query: AdminAuditLogRuntimeListQuery,
   ): Promise<AdminFlowPage<AuditLogListDto>>;
+};
+
+export type AdminAuditLogRuntimeListQuery = AdminAiAuditLogListQuery & {
+  actorPublicId?: string | null;
+  fromCreatedAt?: string | null;
+  toCreatedAt?: string | null;
 };
 
 export type AppendAuditLogInput = Omit<
@@ -1835,6 +1841,30 @@ function createPostgresAdminAuditLogRuntimeRepository(
               or target_public_id ilike ${`%${query.keyword}%`}
               or metadata_summary ilike ${`%${query.keyword}%`}
             )`;
+      const actionTypeCondition =
+        query.actionType === "all"
+          ? sql`true`
+          : sql`action_type = ${query.actionType}`;
+      const targetResourceTypeCondition =
+        query.targetResourceType === "all"
+          ? sql`true`
+          : sql`target_resource_type = ${query.targetResourceType}`;
+      const resultStatusCondition =
+        query.resultStatus === "all"
+          ? sql`true`
+          : sql`result_status = ${query.resultStatus}`;
+      const actorPublicIdCondition =
+        query.actorPublicId === undefined || query.actorPublicId === null
+          ? sql`true`
+          : sql`actor_public_id = ${query.actorPublicId}`;
+      const fromCreatedAtCondition =
+        query.fromCreatedAt === undefined || query.fromCreatedAt === null
+          ? sql`true`
+          : sql`created_at >= ${query.fromCreatedAt}::timestamptz`;
+      const toCreatedAtCondition =
+        query.toCreatedAt === undefined || query.toCreatedAt === null
+          ? sql`true`
+          : sql`created_at <= ${query.toCreatedAt}::timestamptz`;
       const orderBy =
         query.sortOrder === "asc" ? sql`created_at asc` : sql`created_at desc`;
 
@@ -1855,6 +1885,12 @@ function createPostgresAdminAuditLogRuntimeRepository(
             created_at
           from audit_log
           where ${keywordCondition}
+            and ${actionTypeCondition}
+            and ${targetResourceTypeCondition}
+            and ${resultStatusCondition}
+            and ${actorPublicIdCondition}
+            and ${fromCreatedAtCondition}
+            and ${toCreatedAtCondition}
           order by ${orderBy}
           limit ${query.pageSize}
           offset ${(query.page - 1) * query.pageSize}
@@ -1866,6 +1902,12 @@ function createPostgresAdminAuditLogRuntimeRepository(
           select count(*)::int as value
           from audit_log
           where ${keywordCondition}
+            and ${actionTypeCondition}
+            and ${targetResourceTypeCondition}
+            and ${resultStatusCondition}
+            and ${actorPublicIdCondition}
+            and ${fromCreatedAtCondition}
+            and ${toCreatedAtCondition}
         `,
         );
 

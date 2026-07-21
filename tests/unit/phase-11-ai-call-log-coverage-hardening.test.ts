@@ -241,14 +241,42 @@ function createRepositories(input: {
     async listAiCallLogs(query) {
       input.capturedQueries.push(query);
 
+      const filteredAiCallLogs = aiCallLogs.filter((aiCallLog) => {
+        const searchableText = [
+          aiCallLog.publicId,
+          aiCallLog.userPublicId ?? "",
+          aiCallLog.organizationPublicId ?? "",
+          aiCallLog.aiFuncType,
+          aiCallLog.callStatus,
+          aiCallLog.providerDisplayName,
+          aiCallLog.modelAlias,
+          aiCallLog.promptSummary ?? "",
+          aiCallLog.outputSummary ?? "",
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return (
+          (query.aiFuncType === "all" ||
+            aiCallLog.aiFuncType === query.aiFuncType) &&
+          (query.callStatus === "all" ||
+            aiCallLog.callStatus === query.callStatus) &&
+          (query.profession === "all" ||
+            aiCallLog.profession === query.profession) &&
+          (query.level === null || aiCallLog.level === query.level) &&
+          (query.keyword === null ||
+            searchableText.includes(query.keyword.toLowerCase()))
+        );
+      });
+
       return {
-        aiCallLogs,
+        aiCallLogs: filteredAiCallLogs,
         pagination: {
           page: query.page,
           pageSize: query.pageSize,
           sortBy: query.sortBy,
           sortOrder: query.sortOrder,
-          total: aiCallLogs.length,
+          total: filteredAiCallLogs.length,
         },
       };
     },

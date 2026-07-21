@@ -625,69 +625,6 @@ function createAdminAccountCreationConflictResponse(
   };
 }
 
-function matchesAuditLogFilter(
-  value: string,
-  expected: string | "all",
-): boolean {
-  return expected === "all" || value === expected;
-}
-
-function matchesAuditLogKeyword(input: {
-  auditLog: Awaited<
-    ReturnType<
-      AdminFlowRuntimeRepositories["auditLogRepository"]["listAuditLogs"]
-    >
-  >["auditLogs"][number];
-  keyword: string | null;
-}): boolean {
-  if (input.keyword === null) {
-    return true;
-  }
-
-  const keyword = input.keyword.toLowerCase();
-  const searchableText = [
-    input.auditLog.actorPublicId,
-    input.auditLog.actorRole,
-    input.auditLog.actionType,
-    input.auditLog.targetResourceType,
-    input.auditLog.targetPublicId ?? "",
-    input.auditLog.resultStatus,
-    input.auditLog.metadataSummary ?? "",
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  return searchableText.includes(keyword);
-}
-
-function filterAuditLogsForQuery(
-  result: Awaited<
-    ReturnType<
-      AdminFlowRuntimeRepositories["auditLogRepository"]["listAuditLogs"]
-    >
-  >,
-  query: AdminAiAuditLogListQuery,
-) {
-  const auditLogs = result.auditLogs.filter(
-    (auditLog) =>
-      matchesAuditLogFilter(auditLog.actionType, query.actionType) &&
-      matchesAuditLogFilter(
-        auditLog.targetResourceType,
-        query.targetResourceType,
-      ) &&
-      matchesAuditLogFilter(auditLog.resultStatus, query.resultStatus) &&
-      matchesAuditLogKeyword({ auditLog, keyword: query.keyword }),
-  );
-
-  return {
-    auditLogs,
-    pagination: {
-      ...result.pagination,
-      total: auditLogs.length,
-    },
-  };
-}
-
 export function createAdminFlowRuntimeRouteHandlers(
   options: AdminFlowRuntimeOptions = {},
 ) {
@@ -1703,10 +1640,8 @@ export function createAdminFlowRuntimeRouteHandlers(
           });
 
           const query = readAdminAiAuditLogListQuery(request);
-          const result = filterAuditLogsForQuery(
-            await repositories.auditLogRepository.listAuditLogs(query),
-            query,
-          );
+          const result =
+            await repositories.auditLogRepository.listAuditLogs(query);
 
           return createJsonResponse(
             createPaginatedResponse(

@@ -29,9 +29,11 @@ export function createPostgresAiCallLogRepository(
         sortBy: query.sortBy,
         sortOrder: query.sortOrder,
         targetResourceType: "all",
+        organizationPublicId: query.organizationPublicId,
+        userPublicId: query.userPublicId,
       });
-      const filteredAiCallLogs = legacyResult.aiCallLogs
-        .map<AiCallLogRecord>((aiCallLog) => ({
+      const aiCallLogs = legacyResult.aiCallLogs.map<AiCallLogRecord>(
+        (aiCallLog) => ({
           aiFuncType: aiCallLog.aiFuncType,
           callStatus: aiCallLog.callStatus,
           completedAt: aiCallLog.completedAt,
@@ -51,18 +53,15 @@ export function createPostgresAiCallLogRepository(
           startedAt: aiCallLog.startedAt,
           totalTokenCount: aiCallLog.totalTokenCount,
           userPublicId: aiCallLog.userPublicId,
-        }))
-        .filter(
-          (aiCallLog) =>
-            (query.organizationPublicId === null ||
-              aiCallLog.organizationPublicId === query.organizationPublicId) &&
-            (query.userPublicId === null ||
-              aiCallLog.userPublicId === query.userPublicId),
-        );
+        }),
+      );
 
       return {
-        aiCallLogs: filteredAiCallLogs,
-        pagination: createAiCallLogPagination(query, filteredAiCallLogs.length),
+        aiCallLogs,
+        pagination: createAiCallLogPagination(
+          query,
+          legacyResult.pagination.total,
+        ),
       };
     },
   };

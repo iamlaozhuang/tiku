@@ -211,56 +211,6 @@ function matchesAiCallLogFilter<TValue>(
   return expected === "all" || value === expected;
 }
 
-function matchesAiCallLogKeyword(input: {
-  aiCallLog: AiCallLogListDto["aiCallLogs"][number];
-  keyword: string | null;
-}): boolean {
-  if (input.keyword === null) {
-    return true;
-  }
-
-  const keyword = input.keyword.toLowerCase();
-  const searchableText = [
-    input.aiCallLog.publicId,
-    input.aiCallLog.userPublicId ?? "",
-    input.aiCallLog.organizationPublicId ?? "",
-    input.aiCallLog.aiFuncType,
-    input.aiCallLog.callStatus,
-    input.aiCallLog.providerDisplayName,
-    input.aiCallLog.modelAlias,
-    input.aiCallLog.promptSummary ?? "",
-    input.aiCallLog.outputSummary ?? "",
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  return searchableText.includes(keyword);
-}
-
-function filterAiCallLogsForQuery(
-  result: Awaited<
-    ReturnType<AdminAiAuditLogRuntimeRepositories["listAiCallLogs"]>
-  >,
-  query: AdminAiAuditLogListQuery,
-) {
-  const aiCallLogs = result.aiCallLogs.filter(
-    (aiCallLog) =>
-      matchesAiCallLogFilter(aiCallLog.aiFuncType, query.aiFuncType) &&
-      matchesAiCallLogFilter(aiCallLog.callStatus, query.callStatus) &&
-      matchesAiCallLogFilter(aiCallLog.profession, query.profession) &&
-      (query.level === null || aiCallLog.level === query.level) &&
-      matchesAiCallLogKeyword({ aiCallLog, keyword: query.keyword }),
-  );
-
-  return {
-    aiCallLogs,
-    pagination: {
-      ...result.pagination,
-      total: aiCallLogs.length,
-    },
-  };
-}
-
 function matchesAiCallLogSummaryKeyword(input: {
   dailySummary: AiCallLogSummaryListDto["dailySummaries"][number];
   keyword: string | null;
@@ -1341,11 +1291,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         const query = readAdminAiAuditLogListQuery(request);
         const result = await readRuntimePage({
           fallbackData: { aiCallLogs: [] as AiCallLogListDto["aiCallLogs"] },
-          loadPage: async () =>
-            filterAiCallLogsForQuery(
-              await repositories.listAiCallLogs(query),
-              query,
-            ),
+          loadPage: async () => repositories.listAiCallLogs(query),
           query,
         });
 

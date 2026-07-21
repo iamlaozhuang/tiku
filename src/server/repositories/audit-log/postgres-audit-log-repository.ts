@@ -1,4 +1,3 @@
-import type { AuditLogListQuery } from "@/server/contracts/audit-log/log-governance-contract";
 import {
   createPostgresAdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositoryOptions,
@@ -28,34 +27,18 @@ export function createPostgresAuditLogRepository(
         sortBy: "createdAt",
         sortOrder: query.sortOrder,
         targetResourceType: query.targetResourceType,
+        actorPublicId: query.actorPublicId,
+        fromCreatedAt: query.fromCreatedAt,
+        toCreatedAt: query.toCreatedAt,
       });
-      const filteredAuditLogs = legacyResult.auditLogs.filter(
-        (auditLog) =>
-          (query.actorPublicId === null ||
-            auditLog.actorPublicId === query.actorPublicId) &&
-          matchesCreatedAtRange(auditLog.createdAt, query),
-      );
 
       return {
-        auditLogs: filteredAuditLogs,
-        pagination: createAuditLogPagination(query, filteredAuditLogs.length),
+        auditLogs: legacyResult.auditLogs,
+        pagination: createAuditLogPagination(
+          query,
+          legacyResult.pagination.total,
+        ),
       };
     },
   };
-}
-
-function matchesCreatedAtRange(
-  createdAt: string,
-  query: AuditLogListQuery,
-): boolean {
-  const createdTimestamp = Date.parse(createdAt);
-  const fromTimestamp =
-    query.fromCreatedAt === null ? null : Date.parse(query.fromCreatedAt);
-  const toTimestamp =
-    query.toCreatedAt === null ? null : Date.parse(query.toCreatedAt);
-
-  return (
-    (fromTimestamp === null || createdTimestamp >= fromTimestamp) &&
-    (toTimestamp === null || createdTimestamp <= toTimestamp)
-  );
 }

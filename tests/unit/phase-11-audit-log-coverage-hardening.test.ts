@@ -83,40 +83,65 @@ function createRepositories(input: {
       async listAuditLogs(query) {
         input.capturedQueries.push(query);
 
+        const auditLogs = [
+          {
+            publicId: "audit-log-user-reset",
+            actorPublicId: "admin-public-001",
+            actorRole: "super_admin",
+            actionType: "user.reset_password",
+            targetResourceType: "user",
+            targetPublicId: "user-public-001",
+            resultStatus: "failed" as const,
+            metadataSummary:
+              "redacted user credential reset permission denial metadata",
+            requestIp: "203.0.113.10",
+            createdAt: now,
+          },
+          {
+            publicId: "audit-log-paper-publish",
+            actorPublicId: "admin-public-001",
+            actorRole: "content_admin",
+            actionType: "paper.publish",
+            targetResourceType: "paper",
+            targetPublicId: "paper-public-001",
+            resultStatus: "success" as const,
+            metadataSummary: "redacted paper mutation metadata",
+            requestIp: "203.0.113.11",
+            createdAt: now,
+          },
+        ].filter((auditLog) => {
+          const searchableText = [
+            auditLog.actorPublicId,
+            auditLog.actorRole,
+            auditLog.actionType,
+            auditLog.targetResourceType,
+            auditLog.targetPublicId,
+            auditLog.resultStatus,
+            auditLog.metadataSummary,
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return (
+            (query.actionType === "all" ||
+              auditLog.actionType === query.actionType) &&
+            (query.targetResourceType === "all" ||
+              auditLog.targetResourceType === query.targetResourceType) &&
+            (query.resultStatus === "all" ||
+              auditLog.resultStatus === query.resultStatus) &&
+            (query.keyword === null ||
+              searchableText.includes(query.keyword.toLowerCase()))
+          );
+        });
+
         return {
-          auditLogs: [
-            {
-              publicId: "audit-log-user-reset",
-              actorPublicId: "admin-public-001",
-              actorRole: "super_admin",
-              actionType: "user.reset_password",
-              targetResourceType: "user",
-              targetPublicId: "user-public-001",
-              resultStatus: "failed",
-              metadataSummary:
-                "redacted user credential reset permission denial metadata",
-              requestIp: "203.0.113.10",
-              createdAt: now,
-            },
-            {
-              publicId: "audit-log-paper-publish",
-              actorPublicId: "admin-public-001",
-              actorRole: "content_admin",
-              actionType: "paper.publish",
-              targetResourceType: "paper",
-              targetPublicId: "paper-public-001",
-              resultStatus: "success",
-              metadataSummary: "redacted paper mutation metadata",
-              requestIp: "203.0.113.11",
-              createdAt: now,
-            },
-          ],
+          auditLogs,
           pagination: {
             page: query.page,
             pageSize: query.pageSize,
             sortBy: query.sortBy,
             sortOrder: query.sortOrder,
-            total: 2,
+            total: auditLogs.length,
           },
         };
       },

@@ -133,11 +133,16 @@ export type AdminAiAuditLogRuntimeRepositories = {
   disableModelConfig?(publicId: string): Promise<boolean>;
   appendAuditLog?(input: AppendModelConfigAuditLogInput): Promise<void>;
   listAiCallLogs(
-    query: AdminAiAuditLogListQuery,
+    query: AdminAiCallLogRuntimeListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<AiCallLogListDto>>;
   summarizeAiCallLogs(
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<AiCallLogSummaryListDto>>;
+};
+
+export type AdminAiCallLogRuntimeListQuery = AdminAiAuditLogListQuery & {
+  organizationPublicId?: string | null;
+  userPublicId?: string | null;
 };
 
 type ModelConfigDatabaseRow = {
@@ -946,6 +951,23 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
     },
 
     async listAiCallLogs(query) {
+      if (
+        query.organizationPublicId !== undefined &&
+        query.organizationPublicId !== null
+      ) {
+        return {
+          aiCallLogs: [],
+          pagination: createPagination(query, 0),
+        };
+      }
+
+      if (query.profession !== "all" || query.level !== null) {
+        return {
+          aiCallLogs: [],
+          pagination: createPagination(query, 0),
+        };
+      }
+
       const database = getDatabase();
       const keywordCondition =
         query.keyword === null
@@ -966,8 +988,16 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         query.callStatus === "all"
           ? sql`true`
           : sql`call_status = ${query.callStatus}::ai_call_status`;
+      const userPublicIdCondition =
+        query.userPublicId === undefined || query.userPublicId === null
+          ? sql`true`
+          : sql`user_public_id = ${query.userPublicId}`;
+      const orderColumn =
+        query.sortBy === "completedAt" ? sql`completed_at` : sql`started_at`;
       const orderBy =
-        query.sortOrder === "asc" ? sql`started_at asc` : sql`started_at desc`;
+        query.sortOrder === "asc"
+          ? sql`${orderColumn} asc`
+          : sql`${orderColumn} desc`;
 
       try {
         const rows = await executeSql<AiCallLogDatabaseRow>(
@@ -996,6 +1026,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             where ${keywordCondition}
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
+              and ${userPublicIdCondition}
             order by ${orderBy}
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
@@ -1009,6 +1040,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             where ${keywordCondition}
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
+              and ${userPublicIdCondition}
           `,
         );
 

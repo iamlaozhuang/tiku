@@ -747,38 +747,45 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-student-home-pagination-2026-07-20
-  title: Student home paper pagination
-  phase: p1-remediation-rc-04-student-home-pagination-2026-07-20
+  id: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
+  title: Admin log pagination total
+  phase: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0019
-  branch: fix/student-home-pagination
+  productClosureContribution: F-0021
+  branch: fix/admin-log-pagination-total
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0019
+    - F-0021
   candidateRootCauseCluster: P1-RC-04
   requirementAnchors:
-    - modules/03-student-experience.md
-    - standards/ui-code.md
+    - modules/06-admin-ops.md
+    - advanced-edition/modules/06-ops-authorization-quota.md
   highRiskApproval:
-    category: low_risk_ui_pagination
-    status: satisfied_by_low_risk_standing_approval
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    category: bounded_database_application_query_logic
+    status: satisfied_by_bounded_medium_risk_standing_approval
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: candidate_preparation
-    reason: focused_regression_and_static_checks_are_green_after_server_driven_home_pagination
-    resumeAction: format_build_review_freeze_then_run_one_full
+    reason: repository_authoritative_query_count_and_service_total_preservation_are_green_after_adversarial_review
+    resumeAction: freeze_candidate_then_run_one_full_profile
   verificationEvidence:
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    tddRed: passed_4_expected_failures_of_20
-    focused: passed_21_of_21
-    affectedRegression: passed_16_of_16
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    allowedFilesExpansionApproval: fresh-allowed-files-f0021-admin-log-pagination-total-2026-07-20
+    testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+    preflightIncludedTestFiles: 3
+    inTaskTestOnlyExpansionCount: 2
+    testOnlyExpansionApprovalRequests: 1_before_standing_authorization
+    weakenedTestAssertions: 0
+    postFreezeTestScopeChanges: 1_due_to_new_user_instruction_after_kernel_started
+    tddRed: passed_4_expected_failures_of_4
+    focused: passed_4_of_4
+    affectedRegression: passed_12_of_12
     lint: passed_exact_affected_files
-    typecheck: passed
+    typecheck: passed_after_one_test_annotation_fix
     build: passed_97_static_pages
-    changedFileFormatDiff: formatter_applied_diff_check_pending_freeze
+    changedFileFormatDiff: passed
     p0GlobalBaseline: pending_single_closeout_full_run
     p0SerialBaseline: pending_single_closeout_full_run
     fullProfile: pending_once_after_candidate_freeze
@@ -789,20 +796,20 @@ currentTask:
     persistentDatabaseExecution: false
     realExternalCall: false
     extraFiles: false
-    approvalRequests: 0
+    approvalRequests: 1_allowed_files_regression_mock_alignment
     approvalIdMismatch: 0
     postApprovalCandidateTreeChanges: 0
     repeatedBlockerReports: 0
-    validationRetryCount: 0
+    validationRetryCount: 2_regression_mock_contract_and_test_type_annotation
     fullRuns: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-learner-history-pagination-2026-07-20
-    findingId: F-0018_and_F-0020
-    commit: e91da44c52f110bf5ace11530d2e7fc480e65b74
+    taskId: p1-remediation-rc-04-student-home-pagination-2026-07-20
+    findingId: F-0019
+    commit: ba342f3dbb50047839428ee67371c8c507746f9b
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    candidateTree: 9ce8f0a6f138933d109f034a22384cb2a5c65201
-    focused: passed_77_of_77
-    affectedRegression: passed_31_of_31
+    candidateTree: 20281951ade8c68e44e2aa44dc874a776615281c
+    focused: passed_21_of_21
+    affectedRegression: passed_16_of_16
     build: passed_97_static_pages
     p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
     p0SerialBaseline: pass_closed_program
@@ -813,7 +820,7 @@ currentTask:
     F-0010: closed_by_redeem_code_sensitive_access_audit
     F-0017: closed_by_redeem_code_batch_idempotency
     F-0018: closed_with_F-0020_by_learner_history_pagination
-    F-0019: separate_current_task
+    F-0019: closed_by_student_home_pagination
     F-0020: closed_with_F-0018_by_learner_history_pagination
     F-0021: separate_admin_log_query_and_total
     F-0022: separate_organization_training_list_projection
@@ -840,12 +847,9 @@ currentTask:
     F-0153: separate_ai_paper_candidate_pagination
     F-0170: separate_ai_task_result_history_join
   nextRiskForecast:
-    - findingIds: [F-0019]
-      risk: low_risk_student_home_pagination
-      approval: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     - findingIds: [F-0021]
-      risk: low_risk_admin_log_query_and_total
-      approval: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      risk: bounded_database_application_query_logic
+      approval: standing-bounded-medium-risk-closeout-approval-2026-07-20
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20
   source: current_user_message
