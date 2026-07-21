@@ -38,6 +38,7 @@ const modelConfigSnapshot = createModelConfigSnapshot({
 
 const userContext = {
   userPublicId: "user_public_123",
+  organizationPublicId: "organization_public_123",
 };
 
 const clock: ExamReportClock = {
@@ -1026,6 +1027,7 @@ describe("exam report service", () => {
     });
     expect(capturedContexts).toHaveLength(1);
     expect(capturedContexts[0]).toMatchObject({
+      organizationPublicId: "organization_public_123",
       profession: "monopoly",
       level: 3,
     });

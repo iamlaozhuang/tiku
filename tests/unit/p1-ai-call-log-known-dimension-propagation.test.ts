@@ -92,6 +92,7 @@ describe("P1 F-0038 AI call log known dimension propagation", () => {
 
     await runtime.generateObjectiveExplanation({
       userPublicId: "user-public-001",
+      organizationPublicId: "organization-public-001",
       mistakeBookPublicId: "mistake-book-public-001",
       questionPublicId: "question-public-001",
       paperQuestionPublicId: "paper-question-public-001",
@@ -109,7 +110,7 @@ describe("P1 F-0038 AI call log known dimension propagation", () => {
 
     expect(appended).toHaveLength(1);
     expect(appended[0]).toMatchObject({
-      organizationPublicId: null,
+      organizationPublicId: "organization-public-001",
       profession: "logistics",
       level: 4,
     });

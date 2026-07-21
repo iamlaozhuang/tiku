@@ -82,6 +82,8 @@ export function createStudentMistakeBookUserResolver(
 
     return {
       userPublicId: sessionResponse.data.user.publicId,
+      organizationPublicId:
+        sessionResponse.data.user.organizationPublicId ?? null,
     };
   };
 }
@@ -252,7 +254,7 @@ export function createGovernedMistakeBookAiExplanationRuntime(input: {
       if (result.aiCallLogDraft !== null) {
         await aiCallLogRepository.appendAiCallLog({
           userPublicId: context.userPublicId,
-          organizationPublicId: null,
+          organizationPublicId: context.organizationPublicId ?? null,
           profession: readSnapshotProfession(context.questionSnapshot),
           level: readSnapshotLevel(context.questionSnapshot),
           answerRecordPublicId: null,

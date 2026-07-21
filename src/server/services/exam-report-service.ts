@@ -33,6 +33,7 @@ import {
 
 export type ExamReportUserContext = {
   userPublicId: string;
+  organizationPublicId?: string | null;
 };
 
 export type ExamReportClock = {
@@ -1026,6 +1027,7 @@ export function createExamReportService(
         await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
           {
             userPublicId: userContext.userPublicId,
+            organizationPublicId: userContext.organizationPublicId ?? null,
             profession: report.profession,
             level: report.level,
             answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,

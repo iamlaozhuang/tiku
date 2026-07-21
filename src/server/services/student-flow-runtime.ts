@@ -323,6 +323,7 @@ export function createDefaultAiScoringRuntime(
       if (result.aiCallLogDraft !== null) {
         const aiCallLog = await aiCallLogRepository.appendAiCallLog({
           userPublicId: context.userPublicId,
+          organizationPublicId: context.organizationPublicId ?? null,
           profession: context.profession,
           level: context.level,
           answerRecordPublicId: context.answerRecordPublicId,
@@ -494,6 +495,8 @@ export function createStudentFlowUserResolver(
 
     return {
       userPublicId: sessionResponse.data.user.publicId,
+      organizationPublicId:
+        sessionResponse.data.user.organizationPublicId ?? null,
     };
   };
 }

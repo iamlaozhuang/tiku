@@ -23,6 +23,7 @@ import {
 
 export type MistakeBookUserContext = {
   userPublicId: string;
+  organizationPublicId?: string | null;
 };
 
 export type MistakeBookClock = {
@@ -63,6 +64,7 @@ export type MistakeBookService = {
 
 export type MistakeBookAiExplanationRuntimeContext = {
   userPublicId: string;
+  organizationPublicId?: string | null;
   mistakeBookPublicId: string;
   questionPublicId: string;
   paperQuestionPublicId: string;
@@ -135,6 +137,7 @@ function createAiExplanationRuntimeContext(
 ): MistakeBookAiExplanationRuntimeContext {
   return {
     userPublicId: userContext.userPublicId,
+    organizationPublicId: userContext.organizationPublicId ?? null,
     mistakeBookPublicId: mistakeBook.public_id,
     questionPublicId: mistakeBook.question_public_id,
     paperQuestionPublicId: mistakeBook.paper_question_public_id,

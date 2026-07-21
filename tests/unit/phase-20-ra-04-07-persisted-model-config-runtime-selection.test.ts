@@ -169,6 +169,7 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
 
     const result = await runtime.scoreSubjectiveAnswer({
       userPublicId: "user-public-001",
+      organizationPublicId: "organization-public-001",
       mockExamPublicId: "mock-exam-public-001",
       profession: "marketing",
       level: 3,
@@ -204,6 +205,7 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
     expect(appendedAiCallLogs).toHaveLength(1);
     expect(appendedAiScoringAttempts).toHaveLength(1);
     expect(appendedAiCallLogs[0]).toMatchObject({
+      organizationPublicId: "organization-public-001",
       profession: "marketing",
       level: 3,
       modelConfigSnapshot: {

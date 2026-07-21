@@ -37,6 +37,7 @@ import { isQuestionScoringContractValid } from "../../lib/question-scoring-contr
 
 export type MockExamUserContext = {
   userPublicId: string;
+  organizationPublicId?: string | null;
 };
 
 export type MockExamClock = {
@@ -90,6 +91,7 @@ export type MockExamAiScoringStatus =
 
 export type MockExamAiScoringRuntimeContext = {
   userPublicId: string;
+  organizationPublicId?: string | null;
   mockExamPublicId: string;
   profession: MockExamRow["profession"];
   level: number;
@@ -811,6 +813,7 @@ function buildAiScoringRuntimeContext(input: {
 
   return {
     userPublicId: input.userContext.userPublicId,
+    organizationPublicId: input.userContext.organizationPublicId ?? null,
     mockExamPublicId: input.mockExam.public_id,
     profession: input.mockExam.profession,
     level: input.mockExam.level,
