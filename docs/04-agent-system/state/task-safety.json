@@ -1,21 +1,22 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20",
-  "objective": "Close F-0017 without schema changes by requiring a client request public ID, deriving an actor-scoped stable generation group, serializing same-request attempts, reusing a matching persisted batch, rejecting mismatched replays, and committing redeem_code rows plus redacted create/view audit rows in one database transaction; do not execute a real database, add entitlement, expose plaintext outside the existing distribution exception, or change dependencies, Provider, external services, safety mechanisms, or secret/env.",
+  "taskId": "p1-remediation-rc-04-learner-history-pagination-2026-07-20",
+  "objective": "Close F-0018 and F-0020 by making current effective authorization and user-removal part of the database-visible set before stable pagination/counting, returning rows and total from one repeatable-read snapshot, and making report search/status server-side query inputs that reset to page one and ignore stale responses; preserve historical report snapshots and stopped-question visibility, do not expand entitlement, change schema/migrations/dependencies/Provider/safety mechanisms/secret-env, call external services, or execute a real database.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "docs/superpowers/plans/2026-07-20-redeem-code-batch-idempotency.md",
-    "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-    "src/server/repositories/admin-redeem-code-runtime-repository.ts",
-    "src/server/services/admin-redeem-code-runtime.ts",
-    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-    "tests/unit/p1-redeem-code-batch-idempotency.test.ts",
-    "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-    "tests/unit/phase-8-admin-redeem-code-runtime.test.ts",
-    "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts",
-    "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts"
+    "docs/superpowers/plans/2026-07-20-learner-history-pagination.md",
+    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
+    "src/server/repositories/mistake-book-repository.test.ts",
+    "src/server/repositories/mistake-book-repository.ts",
+    "src/server/repositories/student-flow-runtime-repository.ts",
+    "src/server/services/exam-report-service.test.ts",
+    "src/server/services/exam-report-service.ts",
+    "src/server/services/mistake-book-service.test.ts",
+    "src/server/services/mistake-book-service.ts",
+    "tests/unit/p1-learner-history-pagination.test.ts",
+    "tests/unit/student-mock-exam-report-ui.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -28,7 +29,7 @@
   ],
   "validationCommands": [
     {
-      "name": "redeem-code-batch-idempotency-focused",
+      "name": "learner-history-pagination-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -36,13 +37,17 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-redeem-code-batch-idempotency.test.ts",
-        "tests/unit/phase-8-admin-redeem-code-runtime.test.ts",
-        "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts"
+        "tests/unit/p1-learner-history-pagination.test.ts",
+        "src/server/repositories/mistake-book-repository.test.ts",
+        "src/server/services/exam-report-service.test.ts",
+        "src/server/services/exam-report-route.test.ts",
+        "src/server/services/mistake-book-service.test.ts",
+        "src/server/services/mistake-book-route.test.ts",
+        "tests/unit/student-mock-exam-report-ui.test.ts"
       ]
     },
     {
-      "name": "redeem-code-batch-idempotency-regression",
+      "name": "learner-history-pagination-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -50,32 +55,36 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts",
-        "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts"
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+        "tests/unit/student-mistake-book-ui.test.ts",
+        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+        "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts",
+        "src/server/validators/exam-report.test.ts",
+        "src/server/validators/mistake-book.test.ts"
       ]
     },
     {
-      "name": "redeem-code-batch-idempotency-lint",
+      "name": "learner-history-pagination-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx",
-        "src/server/repositories/admin-redeem-code-runtime-repository.ts",
-        "src/server/services/admin-redeem-code-runtime.ts",
-        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
-        "tests/unit/p1-redeem-code-batch-idempotency.test.ts",
-        "tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts",
-        "tests/unit/phase-8-admin-redeem-code-runtime.test.ts",
-        "tests/unit/phase-11-redeem-code-batch-management-loop.test.ts",
-        "tests/unit/phase-21-admin-redeem-code-concurrency.test.ts"
+        "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
+        "src/server/repositories/mistake-book-repository.test.ts",
+        "src/server/repositories/mistake-book-repository.ts",
+        "src/server/repositories/student-flow-runtime-repository.ts",
+        "src/server/services/exam-report-service.test.ts",
+        "src/server/services/exam-report-service.ts",
+        "src/server/services/mistake-book-service.test.ts",
+        "src/server/services/mistake-book-service.ts",
+        "tests/unit/p1-learner-history-pagination.test.ts",
+        "tests/unit/student-mock-exam-report-ui.test.ts"
       ]
     },
     {
-      "name": "redeem-code-batch-idempotency-typecheck",
+      "name": "learner-history-pagination-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]

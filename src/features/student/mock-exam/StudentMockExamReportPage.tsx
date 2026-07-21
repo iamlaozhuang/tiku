@@ -3405,15 +3405,17 @@ export function StudentExamReportListPage({
     1,
     Math.ceil(runtimePagination.total / examReportPageSize),
   );
-  const filteredExamReports = displayExamReports.filter((examReport) => {
-    const matchesSearch =
-      searchKeyword.trim().length === 0 ||
-      examReport.paperName.includes(searchKeyword.trim());
-    const matchesStatus =
-      selectedStatus === "all" || examReport.examStatus === selectedStatus;
+  const filteredExamReports = isRuntimeMode
+    ? displayExamReports
+    : displayExamReports.filter((examReport) => {
+        const matchesSearch =
+          searchKeyword.trim().length === 0 ||
+          examReport.paperName.includes(searchKeyword.trim());
+        const matchesStatus =
+          selectedStatus === "all" || examReport.examStatus === selectedStatus;
 
-    return matchesSearch && matchesStatus;
-  });
+        return matchesSearch && matchesStatus;
+      });
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -3424,10 +3426,24 @@ export function StudentExamReportListPage({
 
     async function loadExamReports() {
       const storedSessionValue = getStoredStudentSessionToken();
+      const queryParameters = new URLSearchParams({
+        page: String(currentPage),
+        pageSize: String(examReportPageSize),
+        sortBy: "startedAt",
+      });
+      const normalizedSearch = searchKeyword.trim();
+
+      if (normalizedSearch.length > 0) {
+        queryParameters.set("search", normalizedSearch);
+      }
+
+      if (selectedStatus !== "all") {
+        queryParameters.set("status", selectedStatus);
+      }
 
       try {
         const reportPayload = await fetchStudentApi<ExamReportListResultDto>(
-          `/api/v1/exam-reports?page=${currentPage}&pageSize=${examReportPageSize}&sortBy=startedAt`,
+          `/api/v1/exam-reports?${queryParameters.toString()}`,
           storedSessionValue,
         );
 
@@ -3465,7 +3481,7 @@ export function StudentExamReportListPage({
     return () => {
       isActive = false;
     };
-  }, [currentPage, isRuntimeMode, state]);
+  }, [currentPage, isRuntimeMode, searchKeyword, selectedStatus, state]);
 
   if (displayState === "loading") {
     return (
@@ -3533,7 +3549,10 @@ export function StudentExamReportListPage({
           <span className="text-text-primary">按试卷名称搜索</span>
           <input
             value={searchKeyword}
-            onChange={(event) => setSearchKeyword(event.target.value)}
+            onChange={(event) => {
+              setCurrentPage(1);
+              setSearchKeyword(event.target.value);
+            }}
             className="border-border bg-background text-text-primary focus:ring-primary/20 h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
             placeholder="输入试卷名称"
           />
@@ -3542,9 +3561,10 @@ export function StudentExamReportListPage({
           <span className="text-text-primary">按状态筛选</span>
           <select
             value={selectedStatus}
-            onChange={(event) =>
-              setSelectedStatus(event.target.value as ExamStatus | "all")
-            }
+            onChange={(event) => {
+              setCurrentPage(1);
+              setSelectedStatus(event.target.value as ExamStatus | "all");
+            }}
             className="border-border bg-background text-text-primary focus:ring-primary/20 h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
           >
             <option value="all">全部状态</option>

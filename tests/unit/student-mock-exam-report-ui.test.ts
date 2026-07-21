@@ -2122,16 +2122,77 @@ describe("StudentExamReportListPage", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("loads mock exam records and supports search plus status filtering", async () => {
+  it("resets an out-of-range report page before applying a server filter", async () => {
+    const requestedUrls: string[] = [];
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const requestUrl = String(url);
+      requestedUrls.push(requestUrl);
+      const isFiltered = requestUrl.includes("status=completed");
+      const isSecondPage = requestUrl.includes("page=2");
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: {
+            examReports: [
+              {
+                ...studentExamReportFixture.examReports[0],
+                publicId: isFiltered
+                  ? "filtered-page-one"
+                  : isSecondPage
+                    ? "unfiltered-page-two"
+                    : "unfiltered-page-one",
+                paperName: isFiltered
+                  ? "筛选后第一页"
+                  : isSecondPage
+                    ? "未筛选第二页"
+                    : "未筛选第一页",
+              },
+            ],
+          },
+          pagination: {
+            page: isFiltered ? 1 : isSecondPage ? 2 : 1,
+            pageSize: 20,
+            total: isFiltered ? 1 : 21,
+            sortBy: "startedAt",
+            sortOrder: "desc",
+          },
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentExamReportListPage));
+
+    expect(await screen.findByText("未筛选第一页")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    expect(await screen.findByText("未筛选第二页")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("按状态筛选"), {
+      target: { value: "completed" },
+    });
+
+    expect(await screen.findByText("筛选后第一页")).toBeInTheDocument();
+    expect(requestedUrls.at(-1)).toContain("page=1");
+    expect(requestedUrls.at(-1)).toContain("status=completed");
+    expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
+  });
+
+  it("queries server-side search and status from page one", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const requestedUrls: string[] = [];
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
-        expect(String(url)).toBe(
-          "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt",
-        );
+        requestedUrls.push(String(url));
         expect(init?.headers).toMatchObject({
           authorization: "Bearer unit-test-session-token",
         });
+
+        const isFilteredRequest =
+          String(url).includes("search=%E7%BB%88%E6%AD%A2") &&
+          String(url).includes("status=terminated");
 
         return {
           ok: true,
@@ -2140,25 +2201,26 @@ describe("StudentExamReportListPage", () => {
             code: 0,
             message: "ok",
             data: {
-              examReports: [
-                studentExamReportFixture.examReports[0],
-                {
-                  ...studentExamReportFixture.examReports[0],
-                  publicId: "mock-exam-terminated-001",
-                  examReportPublicId: null,
-                  mockExamPublicId: "mock-exam-terminated-001",
-                  paperName: "营销理论终止记录",
-                  examStatus: "terminated",
-                  totalScore: null,
-                  startedAt: "2026-05-18T08:00:00.000Z",
-                  generatedAt: "2026-05-26T08:00:00.000Z",
-                },
-              ],
+              examReports: isFilteredRequest
+                ? [
+                    {
+                      ...studentExamReportFixture.examReports[0],
+                      publicId: "mock-exam-terminated-001",
+                      examReportPublicId: null,
+                      mockExamPublicId: "mock-exam-terminated-001",
+                      paperName: "营销理论终止记录",
+                      examStatus: "terminated",
+                      totalScore: null,
+                      startedAt: "2026-05-18T08:00:00.000Z",
+                      generatedAt: "2026-05-26T08:00:00.000Z",
+                    },
+                  ]
+                : [studentExamReportFixture.examReports[0]],
             },
             pagination: {
               page: 1,
               pageSize: 20,
-              total: 2,
+              total: 1,
               sortBy: "startedAt",
               sortOrder: "desc",
             },
@@ -2172,7 +2234,6 @@ describe("StudentExamReportListPage", () => {
 
     expect(screen.getByText("正在加载模拟考试记录")).toBeInTheDocument();
     expect(await screen.findByText("营销理论模考卷 A")).toBeInTheDocument();
-    expect(screen.getByText("营销理论终止记录")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("按试卷名称搜索"), {
       target: { value: "终止" },
@@ -2181,11 +2242,83 @@ describe("StudentExamReportListPage", () => {
       target: { value: "terminated" },
     });
 
-    expect(screen.getByText(/2026-05-18/)).toBeInTheDocument();
-
-    expect(screen.getByText("营销理论终止记录")).toBeInTheDocument();
+    expect(await screen.findByText("营销理论终止记录")).toBeInTheDocument();
     expect(screen.queryByText("营销理论模考卷 A")).toBeNull();
     expect(screen.getByText("总分：--")).toBeInTheDocument();
+    expect(requestedUrls.at(-1)).toContain("page=1");
+    expect(requestedUrls.at(-1)).toContain("search=%E7%BB%88%E6%AD%A2");
+    expect(requestedUrls.at(-1)).toContain("status=terminated");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("ignores an older report response after rapid search switching", async () => {
+    type ReportListResponse = {
+      ok: boolean;
+      status: number;
+      json: () => Promise<unknown>;
+    };
+    let resolveSlowRequest:
+      | ((response: ReportListResponse) => void)
+      | undefined;
+    const makeResponse = (paperName: string): ReportListResponse => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        code: 0,
+        message: "ok",
+        data: {
+          examReports: [
+            {
+              ...studentExamReportFixture.examReports[0],
+              publicId: `report-${paperName}`,
+              paperName,
+            },
+          ],
+        },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          total: 1,
+          sortBy: "startedAt",
+          sortOrder: "desc",
+        },
+      }),
+    });
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const requestUrl = String(url);
+
+      if (requestUrl.includes("search=%E6%85%A2")) {
+        return new Promise<ReportListResponse>((resolve) => {
+          resolveSlowRequest = resolve;
+        });
+      }
+
+      return requestUrl.includes("search=%E5%BF%AB")
+        ? makeResponse("快速结果")
+        : makeResponse("初始结果");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentExamReportListPage));
+
+    expect(await screen.findByText("初始结果")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("按试卷名称搜索"), {
+      target: { value: "慢" },
+    });
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("search=%E6%85%A2"),
+        ),
+      ).toBe(true),
+    );
+    fireEvent.change(screen.getByLabelText("按试卷名称搜索"), {
+      target: { value: "快" },
+    });
+
+    expect(await screen.findByText("快速结果")).toBeInTheDocument();
+    resolveSlowRequest?.(makeResponse("过期慢结果"));
+    await waitFor(() => expect(screen.queryByText("过期慢结果")).toBeNull());
+    expect(screen.getByText("快速结果")).toBeInTheDocument();
   });
 });

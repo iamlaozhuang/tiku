@@ -877,25 +877,19 @@ export function createExamReportService(
   return {
     async listExamReports(userContext, query) {
       const normalizedQuery = normalizeExamReportListQuery(query);
-      const [scopes, reportPage] = await Promise.all([
-        listScopes(repository, userContext),
-        repository.listExamReports({
-          userPublicId: userContext.userPublicId,
-          ...normalizedQuery,
-        }),
-      ]);
-      const authorizedReports = reportPage.rows.filter((report) =>
-        hasEffectiveAuthorization(scopes, report),
-      );
+      const reportPage = await repository.listExamReports({
+        userPublicId: userContext.userPublicId,
+        ...normalizedQuery,
+      });
 
       return createPaginatedResponse(
         {
-          examReports: authorizedReports.map(mapExamReportSummaryToApi),
+          examReports: reportPage.rows.map(mapExamReportSummaryToApi),
         },
         {
           page: normalizedQuery.page,
           pageSize: normalizedQuery.pageSize,
-          total: authorizedReports.length,
+          total: reportPage.total,
           sortBy: normalizedQuery.sortBy,
           sortOrder: normalizedQuery.sortOrder,
         },

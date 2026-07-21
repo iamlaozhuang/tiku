@@ -91,6 +91,19 @@ const {
   user,
 } = databaseSchema;
 
+export function createExamReportAuthorizationScopeCondition(
+  scopes: StudentPaperAuthorizationScopeRow[],
+): SQL | null {
+  const scopeConditions = scopes.map((scope) =>
+    and(
+      eq(mockExam.profession, scope.profession),
+      eq(mockExam.level, scope.level),
+    ),
+  );
+
+  return scopeConditions.length === 0 ? null : or(...scopeConditions)!;
+}
+
 function createLazyDatabaseGetter(
   createDatabase: () => StudentFlowRuntimeDatabase,
 ): () => StudentFlowRuntimeDatabase {
@@ -1579,61 +1592,91 @@ function createPostgresExamReportRepository(
     },
     async listExamReports(query) {
       const database = getDatabase();
-      const userId = await findUserIdByPublicId(database, query.userPublicId);
+      const now = getNow(options);
 
-      if (userId === null) {
-        return { rows: [], total: 0 };
-      }
+      return database.transaction(
+        async (transaction) => {
+          const snapshotDatabase = transaction as StudentFlowRuntimeDatabase;
+          const userId = await findUserIdByPublicId(
+            snapshotDatabase,
+            query.userPublicId,
+          );
 
-      const conditions: SQL[] = [eq(mockExam.user_id, userId)];
+          if (userId === null) {
+            return { rows: [], total: 0 };
+          }
 
-      if (query.status !== null) {
-        conditions.push(eq(mockExam.exam_status, query.status));
-      } else {
-        conditions.push(
-          inArray(mockExam.exam_status, [
-            "scoring",
-            "scoring_partial_failed",
-            "completed",
-            "terminated",
-          ]),
-        );
-      }
+          const scopes = await listEffectiveAuthorizationScopes(
+            snapshotDatabase,
+            query.userPublicId,
+            now,
+          );
+          const authorizationCondition =
+            createExamReportAuthorizationScopeCondition(scopes);
 
-      if (query.search !== null) {
-        conditions.push(or(ilike(paper.name, `%${query.search}%`))!);
-      }
+          if (authorizationCondition === null) {
+            return { rows: [], total: 0 };
+          }
 
-      const rows = await database
-        .select({
-          report: examReport,
-          attempt: mockExam,
-          mock_exam_public_id: mockExam.public_id,
-          paper_name: paper.name,
-        })
-        .from(mockExam)
-        .leftJoin(examReport, eq(examReport.mock_exam_id, mockExam.id))
-        .innerJoin(paper, eq(paper.id, mockExam.paper_id))
-        .where(and(...conditions))
-        .orderBy(
-          query.sortOrder === "asc"
-            ? asc(mockExam.started_at)
-            : desc(mockExam.started_at),
-        )
-        .limit(query.pageSize)
-        .offset((query.page - 1) * query.pageSize);
-      const [totalRow] = await database
-        .select({ value: count() })
-        .from(mockExam)
-        .innerJoin(paper, eq(paper.id, mockExam.paper_id))
-        .where(and(...conditions));
+          const conditions: SQL[] = [
+            eq(mockExam.user_id, userId),
+            authorizationCondition,
+          ];
 
-      return {
-        rows: rows.map((row) =>
-          mapExamReportListRow(row.report, row.attempt, row.paper_name),
-        ),
-        total: totalRow?.value ?? 0,
-      };
+          if (query.status !== null) {
+            conditions.push(eq(mockExam.exam_status, query.status));
+          } else {
+            conditions.push(
+              inArray(mockExam.exam_status, [
+                "scoring",
+                "scoring_partial_failed",
+                "completed",
+                "terminated",
+              ]),
+            );
+          }
+
+          if (query.search !== null) {
+            conditions.push(or(ilike(paper.name, `%${query.search}%`))!);
+          }
+
+          const rows = await snapshotDatabase
+            .select({
+              report: examReport,
+              attempt: mockExam,
+              mock_exam_public_id: mockExam.public_id,
+              paper_name: paper.name,
+            })
+            .from(mockExam)
+            .leftJoin(examReport, eq(examReport.mock_exam_id, mockExam.id))
+            .innerJoin(paper, eq(paper.id, mockExam.paper_id))
+            .where(and(...conditions))
+            .orderBy(
+              query.sortOrder === "asc"
+                ? asc(mockExam.started_at)
+                : desc(mockExam.started_at),
+              query.sortOrder === "asc" ? asc(mockExam.id) : desc(mockExam.id),
+            )
+            .limit(query.pageSize)
+            .offset((query.page - 1) * query.pageSize);
+          const [totalRow] = await snapshotDatabase
+            .select({ value: count() })
+            .from(mockExam)
+            .innerJoin(paper, eq(paper.id, mockExam.paper_id))
+            .where(and(...conditions));
+
+          return {
+            rows: rows.map((row) =>
+              mapExamReportListRow(row.report, row.attempt, row.paper_name),
+            ),
+            total: totalRow?.value ?? 0,
+          };
+        },
+        {
+          isolationLevel: "repeatable read",
+          accessMode: "read only",
+        },
+      );
     },
     async findExamReportByPublicId(query) {
       const database = getDatabase();

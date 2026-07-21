@@ -128,10 +128,15 @@ describe("mistake book service", () => {
     });
   });
 
-  it("passes normalized filter query to the repository and excludes removed records from student lists", async () => {
+  it("passes normalized filters and preserves the repository-visible total", async () => {
     const receivedQueries: unknown[] = [];
     const service = createMistakeBookService(
       createRepository({
+        async listEffectiveAuthorizationScopes() {
+          throw new Error(
+            "list pagination must not read scopes outside its snapshot",
+          );
+        },
         async listMistakeBooks(query) {
           receivedQueries.push(query);
 
@@ -146,13 +151,8 @@ describe("mistake book service", () => {
                 is_favorite: true,
                 mastered_at: now,
               }),
-              createMistakeBookRow({
-                public_id: "removed_mistake_book_public_123",
-                is_removed: true,
-                mistake_book_status: "removed",
-              }),
             ],
-            total: 2,
+            total: 41,
           };
         },
       }),
@@ -183,7 +183,7 @@ describe("mistake book service", () => {
       pagination: {
         page: 2,
         pageSize: 50,
-        total: 1,
+        total: 41,
       },
     });
     expect(receivedQueries).toEqual([

@@ -1,4 +1,15 @@
-import { and, asc, count, desc, eq, gt, lte, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
@@ -97,6 +108,19 @@ const {
   user,
 } = databaseSchema;
 
+export function createMistakeBookAuthorizationScopeCondition(
+  scopes: MistakeBookAuthorizationScopeRow[],
+): SQL | null {
+  const scopeConditions = scopes.map((scope) =>
+    and(
+      eq(mistakeBook.profession, scope.profession),
+      eq(mistakeBook.level, scope.level),
+    ),
+  );
+
+  return scopeConditions.length === 0 ? null : or(...scopeConditions)!;
+}
+
 export function createMistakeBookQuestionTypeCondition(
   questionType: QuestionType | null,
 ): SQL | null {
@@ -138,59 +162,89 @@ export function createPostgresMistakeBookRepository(
     },
     async listMistakeBooks(query) {
       const database = getDatabase();
-      const userId = await findActiveUserIdByPublicId(
-        database,
-        query.userPublicId,
+      const now = getNow(options);
+
+      return database.transaction(
+        async (transaction) => {
+          const snapshotDatabase = transaction as MistakeBookRuntimeDatabase;
+          const userId = await findActiveUserIdByPublicId(
+            snapshotDatabase,
+            query.userPublicId,
+          );
+
+          if (userId === null) {
+            return {
+              rows: [],
+              total: 0,
+            };
+          }
+
+          const scopes = await listEffectiveAuthorizationScopes(
+            snapshotDatabase,
+            query.userPublicId,
+            now,
+          );
+          const authorizationCondition =
+            createMistakeBookAuthorizationScopeCondition(scopes);
+
+          if (authorizationCondition === null) {
+            return {
+              rows: [],
+              total: 0,
+            };
+          }
+
+          const conditions: SQL[] = [
+            eq(mistakeBook.user_id, userId),
+            eq(mistakeBook.is_removed, false),
+            authorizationCondition,
+          ];
+          const questionTypeCondition = createMistakeBookQuestionTypeCondition(
+            query.questionType,
+          );
+
+          if (questionTypeCondition !== null) {
+            conditions.push(questionTypeCondition);
+          }
+
+          if (query.source !== null) {
+            conditions.push(eq(mistakeBook.mistake_book_source, query.source));
+          }
+
+          if (query.status !== null) {
+            conditions.push(eq(mistakeBook.mistake_book_status, query.status));
+          }
+
+          if (query.isFavorite !== null) {
+            conditions.push(eq(mistakeBook.is_favorite, query.isFavorite));
+          }
+
+          const orderBy =
+            query.sortOrder === "asc"
+              ? [asc(mistakeBook.latest_wrong_at), asc(mistakeBook.id)]
+              : [desc(mistakeBook.latest_wrong_at), desc(mistakeBook.id)];
+          const rows = await snapshotDatabase
+            .select()
+            .from(mistakeBook)
+            .where(and(...conditions))
+            .orderBy(...orderBy)
+            .limit(query.pageSize)
+            .offset((query.page - 1) * query.pageSize);
+          const [totalRow] = await snapshotDatabase
+            .select({ value: count() })
+            .from(mistakeBook)
+            .where(and(...conditions));
+
+          return {
+            rows: rows.map(mapMistakeBookRow),
+            total: totalRow?.value ?? 0,
+          };
+        },
+        {
+          isolationLevel: "repeatable read",
+          accessMode: "read only",
+        },
       );
-
-      if (userId === null) {
-        return {
-          rows: [],
-          total: 0,
-        };
-      }
-
-      const conditions: SQL[] = [eq(mistakeBook.user_id, userId)];
-      const questionTypeCondition = createMistakeBookQuestionTypeCondition(
-        query.questionType,
-      );
-
-      if (questionTypeCondition !== null) {
-        conditions.push(questionTypeCondition);
-      }
-
-      if (query.source !== null) {
-        conditions.push(eq(mistakeBook.mistake_book_source, query.source));
-      }
-
-      if (query.status !== null) {
-        conditions.push(eq(mistakeBook.mistake_book_status, query.status));
-      }
-
-      if (query.isFavorite !== null) {
-        conditions.push(eq(mistakeBook.is_favorite, query.isFavorite));
-      }
-
-      const orderBy =
-        query.sortOrder === "asc"
-          ? asc(mistakeBook.latest_wrong_at)
-          : desc(mistakeBook.latest_wrong_at);
-      const rows = await database
-        .select()
-        .from(mistakeBook)
-        .where(and(...conditions))
-        .orderBy(orderBy)
-        .limit(query.pageSize)
-        .offset((query.page - 1) * query.pageSize);
-      const [totalRow] = await database
-        .select({ value: count() })
-        .from(mistakeBook)
-        .where(and(...conditions));
-
-      return {
-        rows: rows.map(mapMistakeBookRow),
-        total: totalRow?.value ?? 0,
-      };
     },
     async findMistakeBookByPublicId(query) {
       const database = getDatabase();

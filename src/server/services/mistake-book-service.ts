@@ -222,27 +222,19 @@ export function createMistakeBookService(
   return {
     async listMistakeBooks(userContext, query) {
       const normalizedQuery = normalizeMistakeBookListQuery(query);
-      const [scopes, mistakeBookPage] = await Promise.all([
-        listScopes(repository, userContext),
-        repository.listMistakeBooks({
-          userPublicId: userContext.userPublicId,
-          ...normalizedQuery,
-        }),
-      ]);
-      const authorizedMistakeBooks = mistakeBookPage.rows.filter(
-        (mistakeBook) =>
-          !mistakeBook.is_removed &&
-          hasEffectiveAuthorization(scopes, mistakeBook),
-      );
+      const mistakeBookPage = await repository.listMistakeBooks({
+        userPublicId: userContext.userPublicId,
+        ...normalizedQuery,
+      });
 
       return createPaginatedResponse(
         {
-          mistakeBooks: authorizedMistakeBooks.map(mapMistakeBookItemToApi),
+          mistakeBooks: mistakeBookPage.rows.map(mapMistakeBookItemToApi),
         },
         {
           page: normalizedQuery.page,
           pageSize: normalizedQuery.pageSize,
-          total: authorizedMistakeBooks.length,
+          total: mistakeBookPage.total,
           sortBy: normalizedQuery.sortBy,
           sortOrder: normalizedQuery.sortOrder,
         },

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
-updatedAt: "2026-07-20T23:12:00-07:00"
+currentPhase: p1-remediation-rc-04-learner-history-pagination-2026-07-20
+updatedAt: "2026-07-20T23:45:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -465,12 +465,12 @@ p0RemediationSerialProgram:
       shortBranchCleanup: pass
 p1RemediationSerialProgram:
   programId: p1-remediation-2026-07-16
-  status: ready_for_closeout
+  status: in_progress
   activityStatePolicy: wip_one_dynamic_task_materialization
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
+  currentTaskId: p1-remediation-rc-04-learner-history-pagination-2026-07-20
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -503,6 +503,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-lifecycle-command-atomicity-2026-07-20
     - p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
     - p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
+    - p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20
+    - p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
+    - p1-remediation-rc-04-learner-history-pagination-2026-07-20
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -526,6 +529,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20
     - p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20
     - p1-remediation-rc-03-resource-multi-level-scope-2026-07-20
+    - p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20
+    - p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20
+    - p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -570,7 +576,10 @@ p1RemediationSerialProgram:
     p1-remediation-rc-03-personal-ai-active-context-consumption-2026-07-20: closed
     p1-remediation-rc-03-explicit-learner-authorization-context-selection-2026-07-20: closed
     p1-remediation-rc-03-resource-multi-level-scope-2026-07-20: closed
-    p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20: in_progress
+    p1-remediation-rc-04-org-auth-package-atomicity-2026-07-20: closed
+    p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20: closed
+    p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20: closed
+    p1-remediation-rc-04-learner-history-pagination-2026-07-20: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -735,82 +744,77 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
-  title: Redeem code batch idempotency
-  phase: p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
+  id: p1-remediation-rc-04-learner-history-pagination-2026-07-20
+  title: Learner history authorization and query pagination
+  phase: p1-remediation-rc-04-learner-history-pagination-2026-07-20
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0017
-  branch: fix/redeem-code-batch-idempotency
+  productClosureContribution: F-0018_and_F-0020
+  branch: fix/learner-history-pagination
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-  planPath: docs/superpowers/plans/2026-07-20-redeem-code-batch-idempotency.md
+  planPath: docs/superpowers/plans/2026-07-20-learner-history-pagination.md
   findingIds:
-    - F-0017
+    - F-0018
+    - F-0020
   candidateRootCauseCluster: P1-RC-04
   requirementAnchors:
-    - advanced-edition/modules/06-ops-authorization-quota.md
+    - modules/03-student-experience.md
     - modules/01-user-auth.md
     - architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
   highRiskApproval:
-    category: database_application_layer_and_permission_preserving
+    category: database_application_layer_read_and_permission_contraction
     status: satisfied_by_bounded_medium_risk_standing_approval
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
-    status: candidate_ready_for_single_full
-    reason: atomic_audit_owned_command_actor_scoped_idempotency_and_recoverable_ui_retry_are_green_and_adversarially_reviewed
-    resumeAction: freeze_stage_run_one_full_then_commit_ff_only_push_sync_and_cleanup_under_standing_approval
+    status: candidate_preparation
+    reason: focused_regression_static_and_build_are_green_after_visible_set_query_fix
+    resumeAction: finalize_main_thread_adversarial_review_freeze_candidate_then_run_one_full
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    allowedFileExpansionApproval: current_user_approved_phase_21_redeem_code_concurrency_test_2026_07_20
-    tddRed: passed_8_expected_behavior_failures_plus_1_atomic_command_contract_failure
-    focused: passed_42_of_42
-    affectedRegression: passed_55_of_55
+    tddRed: passed_5_expected_failures_of_65
+    focused: passed_77_of_77
+    affectedRegression: passed_31_of_31
     lint: passed_exact_affected_files
     typecheck: passed
     build: passed_97_static_pages
-    changedFileFormatDiff: passed_prettier_write_and_git_diff_check
-    p0GlobalBaseline: scheduled_single_closeout_full_run
-    p0SerialBaseline: scheduled_single_closeout_full_run
-    fullProfile: scheduled_once_after_candidate_freeze
-    mainThreadAdversarialReview: passed_no_blocker_after_explicit_atomic_command_boundary_fix
+    changedFileFormatDiff: formatter_applied_diff_check_pending_freeze
+    p0GlobalBaseline: pending_single_closeout_full_run
+    p0SerialBaseline: pending_single_closeout_full_run
+    fullProfile: pending_once_after_candidate_freeze
+    mainThreadAdversarialReview: passed_no_blocker_before_freeze
     entitlementExpansion: false
     schemaMigrationSourceChange: false
     migrationExecution: false
     persistentDatabaseExecution: false
     realExternalCall: false
     extraFiles: false
-    approvalRequests: 1
+    approvalRequests: 0
     approvalIdMismatch: 0
     postApprovalCandidateTreeChanges: 0
-    repeatedBlockerReports: 2
-    validationRetryCount: 3
+    repeatedBlockerReports: 0
+    validationRetryCount: 0
     fullRuns: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20
-    findingId: F-0010
-    commit: c77dd5f9147c745a0a9ff945762fc9912cec00b3
+    taskId: p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
+    findingId: F-0017
+    commit: 5d49f9a4478332fe9b69fd8d7080239b5296b093
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    candidateTree: c19cca0b31a4326459add7b6d876df02dfa62b28
-    focused: passed_34_of_34
-    affectedRegression: passed_59_of_59
+    candidateTree: fff3cec4e739bfe7765990ab006515b4daccb452
+    focused: passed_42_of_42
+    affectedRegression: passed_55_of_55
     build: passed_97_static_pages
     p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
     p0SerialBaseline: pass_closed_program
     fullRuns: 1
     mechanismScriptChanges: 0
-    efficiencyEstimate:
-      productValueTimeMinutes: 54
-      mechanismOverheadMinutes: 19
-      mechanismOverheadRatio: 0.26
-      retryCount: 3
   rc04ResidualDisposition:
     F-0007: closed_by_org_auth_package_atomicity
     F-0010: closed_by_redeem_code_sensitive_access_audit
-    F-0017: separate_current_task
-    F-0018: bundle_with_F-0020_learner_report_and_mistake_query_pagination
+    F-0017: closed_by_redeem_code_batch_idempotency
+    F-0018: bundled_current_task_with_F-0020
     F-0019: separate_student_home_pagination
-    F-0020: bundle_with_F-0018_learner_report_and_mistake_query_pagination
+    F-0020: bundled_current_task_with_F-0018
     F-0021: separate_admin_log_query_and_total
     F-0022: separate_organization_training_list_projection
     F-0030: separate_password_reset_transaction
@@ -836,11 +840,11 @@ currentTask:
     F-0153: separate_ai_paper_candidate_pagination
     F-0170: separate_ai_task_result_history_join
   nextRiskForecast:
-    - findingIds: [F-0017]
-      risk: database_application_layer_without_schema
-      approval: standing-bounded-medium-risk-closeout-approval-2026-07-20
     - findingIds: [F-0018, F-0020]
-      risk: low_risk_query_and_ui_pagination
+      risk: database_application_layer_read_and_permission_contraction
+      approval: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    - findingIds: [F-0019]
+      risk: low_risk_student_home_pagination
       approval: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
 boundedMediumRiskStandingAuthorization:
   id: standing-bounded-medium-risk-closeout-approval-2026-07-20

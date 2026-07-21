@@ -283,6 +283,39 @@ describe("exam report service", () => {
     });
   });
 
+  it("uses the repository-visible total without re-filtering the current page", async () => {
+    const service = createExamReportService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          throw new Error(
+            "list pagination must not read scopes outside its snapshot",
+          );
+        },
+        async listExamReports() {
+          return {
+            rows: [createExamReportRow()],
+            total: 41,
+          };
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      service.listExamReports(userContext, { page: "2", pageSize: "20" }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        examReports: [{ publicId: "exam_report_public_123" }],
+      },
+      pagination: {
+        page: 2,
+        pageSize: 20,
+        total: 41,
+      },
+    });
+  });
+
   it("passes terminated status and startedAt sort semantics to the repository", async () => {
     const receivedQueries: unknown[] = [];
     const service = createExamReportService(
