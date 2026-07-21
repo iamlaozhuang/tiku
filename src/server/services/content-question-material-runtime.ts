@@ -452,19 +452,53 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
     return actor;
   }
 
-  function createQuestionServiceForActor(actor: ContentAdminActor) {
+  function createQuestionServiceForActor(
+    actor: ContentAdminActor,
+    request?: Request,
+    actionType?: string,
+  ) {
     return createQuestionService(repositories.questionRepository, {
-      mutationContext: { actorPublicId: actor.publicId },
+      mutationContext: {
+        actorPublicId: actor.publicId,
+        ...(request !== undefined && actionType !== undefined
+          ? {
+              auditLog: {
+                actorRole: actor.roles[0],
+                actionType,
+                targetResourceType: "question" as const,
+                metadataSummary: "redacted question mutation metadata",
+                requestIp: readRequestIp(request),
+              },
+            }
+          : {}),
+      },
     });
   }
 
-  function createMaterialServiceForActor(actor: ContentAdminActor) {
+  function createMaterialServiceForActor(
+    actor: ContentAdminActor,
+    request?: Request,
+    actionType?: string,
+  ) {
     return createMaterialService(repositories.materialRepository, {
-      mutationContext: { actorPublicId: actor.publicId },
+      mutationContext: {
+        actorPublicId: actor.publicId,
+        ...(request !== undefined && actionType !== undefined
+          ? {
+              auditLog: {
+                actorRole: actor.roles[0],
+                actionType,
+                targetResourceType: "material" as const,
+                metadataSummary: "redacted material mutation metadata",
+                requestIp: readRequestIp(request),
+              },
+            }
+          : {}),
+      },
     });
   }
 
-  async function auditQuestionMutation(
+  async function auditFailedQuestionMutation(
     request: Request,
     actor: ContentAdminActor,
     actionType: string,
@@ -480,7 +514,7 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
     });
   }
 
-  async function auditMaterialMutation(
+  async function auditFailedMaterialMutation(
     request: Request,
     actor: ContentAdminActor,
     actionType: string,
@@ -542,18 +576,24 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createQuestionServiceForActor(actorOrError);
+          const service = createQuestionServiceForActor(
+            actorOrError,
+            request,
+            "question.create",
+          );
           const response = await service.createQuestion(
             await readRequestJson(request),
           );
 
-          await auditQuestionMutation(
-            request,
-            actorOrError,
-            "question.create",
-            null,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedQuestionMutation(
+              request,
+              actorOrError,
+              "question.create",
+              null,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -586,19 +626,25 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createQuestionServiceForActor(actorOrError);
+          const service = createQuestionServiceForActor(
+            actorOrError,
+            request,
+            "question.update",
+          );
           const response = await service.updateQuestion(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditQuestionMutation(
-            request,
-            actorOrError,
-            "question.update",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedQuestionMutation(
+              request,
+              actorOrError,
+              "question.update",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -616,16 +662,22 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createQuestionServiceForActor(actorOrError);
+          const service = createQuestionServiceForActor(
+            actorOrError,
+            request,
+            "question.disable",
+          );
           const response = await service.disableQuestion(publicId);
 
-          await auditQuestionMutation(
-            request,
-            actorOrError,
-            "question.disable",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedQuestionMutation(
+              request,
+              actorOrError,
+              "question.disable",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -643,16 +695,22 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createQuestionServiceForActor(actorOrError);
+          const service = createQuestionServiceForActor(
+            actorOrError,
+            request,
+            "question.copy",
+          );
           const response = await service.copyQuestion(publicId);
 
-          await auditQuestionMutation(
-            request,
-            actorOrError,
-            "question.copy",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedQuestionMutation(
+              request,
+              actorOrError,
+              "question.copy",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -784,18 +842,24 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createMaterialServiceForActor(actorOrError);
+          const service = createMaterialServiceForActor(
+            actorOrError,
+            request,
+            "material.create",
+          );
           const response = await service.createMaterial(
             await readRequestJson(request),
           );
 
-          await auditMaterialMutation(
-            request,
-            actorOrError,
-            "material.create",
-            null,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedMaterialMutation(
+              request,
+              actorOrError,
+              "material.create",
+              null,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -828,19 +892,25 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createMaterialServiceForActor(actorOrError);
+          const service = createMaterialServiceForActor(
+            actorOrError,
+            request,
+            "material.update",
+          );
           const response = await service.updateMaterial(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditMaterialMutation(
-            request,
-            actorOrError,
-            "material.update",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedMaterialMutation(
+              request,
+              actorOrError,
+              "material.update",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -858,16 +928,22 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createMaterialServiceForActor(actorOrError);
+          const service = createMaterialServiceForActor(
+            actorOrError,
+            request,
+            "material.disable",
+          );
           const response = await service.disableMaterial(publicId);
 
-          await auditMaterialMutation(
-            request,
-            actorOrError,
-            "material.disable",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedMaterialMutation(
+              request,
+              actorOrError,
+              "material.disable",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -885,16 +961,22 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createMaterialServiceForActor(actorOrError);
+          const service = createMaterialServiceForActor(
+            actorOrError,
+            request,
+            "material.copy",
+          );
           const response = await service.copyMaterial(publicId);
 
-          await auditMaterialMutation(
-            request,
-            actorOrError,
-            "material.copy",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditFailedMaterialMutation(
+              request,
+              actorOrError,
+              "material.copy",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },

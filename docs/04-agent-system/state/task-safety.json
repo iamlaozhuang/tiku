@@ -1,45 +1,98 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-execution-policy-capsule-v1-2026-07-21",
-  "objective": "Persist the already-approved P1 execution policy capsule as one minimal recoverable SSOT in task-queue, leave only a pointer in project-state, and keep this file limited to the current docs/state-only task contract without changing Minimal Safety Kernel semantics or any standing approval boundary.",
+  "taskId": "p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21",
+  "objective": "Close the question/material database partition of F-0031 by committing each successful question or material mutation and its redacted audit_log row in the same application transaction, while failed validation or missing-target paths remain fail-closed and separately audited; do not claim the remaining admin, paper, resource, or knowledge-node partitions closed.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/repositories/content-mutation-audit.ts",
+    "src/server/repositories/question-repository.ts",
+    "src/server/repositories/material-repository.ts",
+    "src/server/services/content-question-material-runtime.ts",
+    "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts",
+    "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+    "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts",
+    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts"
   ],
   "blockedFiles": [
-    "AGENTS.md",
-    "docs/04-agent-system/sop/minimal-safety-kernel.md",
-    ".husky/**",
-    ".github/workflows/**",
-    ".env*",
     "package.json",
     "pnpm-lock.yaml",
+    ".github/workflows/**",
+    ".env*",
     "drizzle/**",
-    "src/**",
-    "tests/**",
-    "scripts/**",
-    "docs/05-execution-logs/**"
+    "src/db/schema/**",
+    "scripts/**"
   ],
   "validationCommands": [
     {
-      "name": "p1-execution-policy-capsule-format-and-parse",
-      "kind": "other",
+      "name": "content-question-material-audit-atomicity-focused",
+      "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "prettier",
-        "--check",
-        "docs/04-agent-system/state/project-state.yaml",
-        "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "vitest",
+        "run",
+        "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts"
       ]
+    },
+    {
+      "name": "content-question-material-audit-atomicity-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
+        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+        "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts",
+        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+        "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts"
+      ]
+    },
+    {
+      "name": "content-question-material-audit-atomicity-lint",
+      "kind": "lint",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "eslint",
+        "src/server/repositories/content-mutation-audit.ts",
+        "src/server/repositories/question-repository.ts",
+        "src/server/repositories/material-repository.ts",
+        "src/server/services/content-question-material-runtime.ts",
+        "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts"
+      ]
+    },
+    {
+      "name": "content-question-material-audit-atomicity-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "content-question-material-audit-atomicity-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null

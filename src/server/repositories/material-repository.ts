@@ -27,6 +27,7 @@ import type {
   NormalizedMaterialListInput,
   NormalizedUpdateMaterialInput,
 } from "../validators/material";
+import { appendContentMutationAuditLog } from "./content-mutation-audit";
 import type { ContentMutationContext } from "./question-repository";
 import {
   createLazyRuntimeDatabaseGetter,
@@ -134,25 +135,33 @@ export function createPostgresMaterialRepository(
     async createMaterial(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .insert(material)
-        .values({
-          content_rich_text: input.contentRichText,
-          created_by_admin_id: actorAdminId,
-          level: input.level,
-          profession: input.profession,
-          public_id: `material-${randomUUID()}`,
-          subject: input.subject,
-          title: input.title,
-          updated_by_admin_id: actorAdminId,
-        })
-        .returning();
+      return database.transaction(async (transaction) => {
+        const [row] = await transaction
+          .insert(material)
+          .values({
+            content_rich_text: input.contentRichText,
+            created_by_admin_id: actorAdminId,
+            level: input.level,
+            profession: input.profession,
+            public_id: `material-${randomUUID()}`,
+            subject: input.subject,
+            title: input.title,
+            updated_by_admin_id: actorAdminId,
+          })
+          .returning();
 
-      if (row === undefined) {
-        throw new Error("Material insert did not return a row.");
-      }
+        if (row === undefined) {
+          throw new Error("Material insert did not return a row.");
+        }
 
-      return row;
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          row.public_id,
+        );
+
+        return row;
+      });
     },
 
     async findMaterialByPublicId(publicId) {
@@ -174,83 +183,115 @@ export function createPostgresMaterialRepository(
     async updateMaterial(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .update(material)
-        .set({
-          content_rich_text: input.contentRichText,
-          level: input.level,
-          profession: input.profession,
-          status: input.status,
-          subject: input.subject,
-          title: input.title,
-          updated_at: sql`greatest(
-            clock_timestamp(),
-            ${material.updated_at} + interval '1 millisecond'
-          )`,
-          updated_by_admin_id: actorAdminId,
-        })
-        .where(
-          and(
-            eq(material.public_id, input.publicId),
-            sql`date_trunc('milliseconds', ${material.updated_at}) = ${input.expectedUpdatedAt}`,
-            eq(material.is_locked, false),
-          ),
-        )
-        .returning();
+      return database.transaction(async (transaction) => {
+        const [row] = await transaction
+          .update(material)
+          .set({
+            content_rich_text: input.contentRichText,
+            level: input.level,
+            profession: input.profession,
+            status: input.status,
+            subject: input.subject,
+            title: input.title,
+            updated_at: sql`greatest(
+              clock_timestamp(),
+              ${material.updated_at} + interval '1 millisecond'
+            )`,
+            updated_by_admin_id: actorAdminId,
+          })
+          .where(
+            and(
+              eq(material.public_id, input.publicId),
+              sql`date_trunc('milliseconds', ${material.updated_at}) = ${input.expectedUpdatedAt}`,
+              eq(material.is_locked, false),
+            ),
+          )
+          .returning();
 
-      if (row === undefined) {
-        return null;
-      }
+        if (row === undefined) {
+          return null;
+        }
 
-      return row;
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          row.public_id,
+        );
+
+        return row;
+      });
     },
 
     async disableMaterial(publicId, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .update(material)
-        .set({
-          status: "disabled",
-          updated_at: new Date(),
-          updated_by_admin_id: actorAdminId,
-        })
-        .where(eq(material.public_id, publicId))
-        .returning();
+      return database.transaction(async (transaction) => {
+        const [row] = await transaction
+          .update(material)
+          .set({
+            status: "disabled",
+            updated_at: new Date(),
+            updated_by_admin_id: actorAdminId,
+          })
+          .where(eq(material.public_id, publicId))
+          .returning();
 
-      return row ?? null;
+        if (row === undefined) {
+          return null;
+        }
+
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          row.public_id,
+        );
+
+        return row;
+      });
     },
 
     async copyMaterial(publicId, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const sourceMaterial = await findMaterialByPublicId(database, publicId);
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const sourceMaterial = await findMaterialByPublicId(
+          scopedDatabase,
+          publicId,
+        );
 
-      if (sourceMaterial === null) {
-        return null;
-      }
+        if (sourceMaterial === null) {
+          return null;
+        }
 
-      const [row] = await database
-        .insert(material)
-        .values({
-          content_rich_text: sourceMaterial.content_rich_text,
-          created_by_admin_id: actorAdminId,
-          is_locked: false,
-          level: sourceMaterial.level,
-          profession: sourceMaterial.profession,
-          public_id: `material-${randomUUID()}`,
-          status: "available",
-          subject: sourceMaterial.subject,
-          title: `${sourceMaterial.title} copy`,
-          updated_by_admin_id: actorAdminId,
-        })
-        .returning();
+        const [row] = await scopedDatabase
+          .insert(material)
+          .values({
+            content_rich_text: sourceMaterial.content_rich_text,
+            created_by_admin_id: actorAdminId,
+            is_locked: false,
+            level: sourceMaterial.level,
+            profession: sourceMaterial.profession,
+            public_id: `material-${randomUUID()}`,
+            status: "available",
+            subject: sourceMaterial.subject,
+            title: `${sourceMaterial.title} copy`,
+            updated_by_admin_id: actorAdminId,
+          })
+          .returning();
 
-      if (row === undefined) {
-        throw new Error("Material copy insert did not return a row.");
-      }
+        if (row === undefined) {
+          throw new Error("Material copy insert did not return a row.");
+        }
 
-      return row;
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          row.public_id,
+        );
+
+        return row;
+      });
     },
   };
 }

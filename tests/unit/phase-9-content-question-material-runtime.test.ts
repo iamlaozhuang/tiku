@@ -115,7 +115,9 @@ function createQuestionRow(
   };
 }
 
-function createQuestionRepository(): QuestionRepository {
+function createQuestionRepository(
+  mutationContexts: unknown[] = [],
+): QuestionRepository {
   return {
     async listQuestions(query) {
       return {
@@ -135,8 +137,8 @@ function createQuestionRepository(): QuestionRepository {
         total: 1,
       };
     },
-    async createQuestion(input) {
-      return createQuestionRow({
+    async createQuestion(input, context) {
+      const row = createQuestionRow({
         question_type: input.questionType,
         profession: input.profession,
         level: input.level,
@@ -144,31 +146,44 @@ function createQuestionRepository(): QuestionRepository {
         stem_rich_text: input.stemRichText,
         material_public_id: input.materialPublicId,
       });
+      mutationContexts.push({ context, targetPublicId: row.public_id });
+      return row;
     },
     async findQuestionByPublicId(publicId) {
       return createQuestionRow({ public_id: publicId });
     },
-    async updateQuestion(input) {
-      return createQuestionRow({
+    async updateQuestion(input, context) {
+      const row = createQuestionRow({
         public_id: input.publicId,
         stem_rich_text: input.stemRichText,
         status: input.status,
       });
+      mutationContexts.push({ context, targetPublicId: row.public_id });
+      return row;
     },
-    async disableQuestion(publicId) {
-      return createQuestionRow({ public_id: publicId, status: "disabled" });
+    async disableQuestion(publicId, context) {
+      const row = createQuestionRow({
+        public_id: publicId,
+        status: "disabled",
+      });
+      mutationContexts.push({ context, targetPublicId: row.public_id });
+      return row;
     },
-    async copyQuestion(publicId) {
-      return createQuestionRow({
+    async copyQuestion(publicId, context) {
+      const row = createQuestionRow({
         public_id: `${publicId}-copy`,
         is_locked: false,
         locked_at: null,
       });
+      mutationContexts.push({ context, targetPublicId: row.public_id });
+      return row;
     },
   };
 }
 
-function createMaterialRepository(): MaterialRepository {
+function createMaterialRepository(
+  mutationContexts: unknown[] = [],
+): MaterialRepository {
   return {
     async listMaterials(query) {
       return {
@@ -181,14 +196,16 @@ function createMaterialRepository(): MaterialRepository {
         total: 1,
       };
     },
-    async createMaterial(input) {
-      return createMaterialRow({
+    async createMaterial(input, context) {
+      const row = createMaterialRow({
         title: input.title,
         content_rich_text: input.contentRichText,
         profession: input.profession,
         level: input.level,
         subject: input.subject,
       });
+      mutationContexts.push({ context, targetPublicId: row.public_id });
+      return row;
     },
     async findMaterialByPublicId(publicId) {
       return createMaterialRow({ public_id: publicId });
@@ -215,10 +232,11 @@ function createMaterialRepository(): MaterialRepository {
 
 function createRepositories(
   auditLogEntries: unknown[] = [],
+  mutationContexts: unknown[] = [],
 ): ContentQuestionMaterialRuntimeRepositories {
   return {
-    questionRepository: createQuestionRepository(),
-    materialRepository: createMaterialRepository(),
+    questionRepository: createQuestionRepository(mutationContexts),
+    materialRepository: createMaterialRepository(mutationContexts),
     knowledgeNodeRepository: {
       async listKnowledgeNodes(query) {
         return {
@@ -563,8 +581,9 @@ describe("phase 9 content question material runtime", () => {
 
   it("audits successful question and material mutations without exposing secrets", async () => {
     const auditLogEntries: unknown[] = [];
+    const mutationContexts: unknown[] = [];
     const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
-      repositories: createRepositories(auditLogEntries),
+      repositories: createRepositories(auditLogEntries, mutationContexts),
       sessionService: createSessionService("content_admin"),
     });
     const headers = { authorization: "Bearer admin-session-token" };
@@ -619,38 +638,57 @@ describe("phase 9 content question material runtime", () => {
       }),
     );
 
-    expect(auditLogEntries).toEqual([
+    expect(mutationContexts).toEqual([
       expect.objectContaining({
-        actionType: "question.create",
-        targetResourceType: "question",
-        resultStatus: "success",
-      }),
-      expect.objectContaining({
-        actionType: "question.update",
-        targetResourceType: "question",
+        context: expect.objectContaining({
+          actorPublicId: "admin-public-001",
+          auditLog: expect.objectContaining({
+            actionType: "question.create",
+            targetResourceType: "question",
+          }),
+        }),
         targetPublicId: "question-public-001",
-        resultStatus: "success",
       }),
       expect.objectContaining({
-        actionType: "question.disable",
-        targetResourceType: "question",
+        context: expect.objectContaining({
+          auditLog: expect.objectContaining({
+            actionType: "question.update",
+            targetResourceType: "question",
+          }),
+        }),
         targetPublicId: "question-public-001",
-        resultStatus: "success",
       }),
       expect.objectContaining({
-        actionType: "question.copy",
-        targetResourceType: "question",
+        context: expect.objectContaining({
+          auditLog: expect.objectContaining({
+            actionType: "question.disable",
+            targetResourceType: "question",
+          }),
+        }),
         targetPublicId: "question-public-001",
-        resultStatus: "success",
       }),
       expect.objectContaining({
-        actionType: "material.create",
-        targetResourceType: "material",
-        resultStatus: "success",
+        context: expect.objectContaining({
+          auditLog: expect.objectContaining({
+            actionType: "question.copy",
+            targetResourceType: "question",
+          }),
+        }),
+        targetPublicId: "question-public-001-copy",
+      }),
+      expect.objectContaining({
+        context: expect.objectContaining({
+          auditLog: expect.objectContaining({
+            actionType: "material.create",
+            targetResourceType: "material",
+          }),
+        }),
+        targetPublicId: "material-public-001",
       }),
     ]);
+    expect(auditLogEntries).toEqual([]);
 
-    const serializedAuditLogEntries = JSON.stringify(auditLogEntries);
+    const serializedAuditLogEntries = JSON.stringify(mutationContexts);
     expect(serializedAuditLogEntries).not.toContain("admin-session-token");
     expect(serializedAuditLogEntries).not.toContain("password");
     expect(serializedAuditLogEntries).not.toContain("secret");

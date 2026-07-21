@@ -39,14 +39,20 @@ import type {
   NormalizedUpdateQuestionInput,
 } from "../validators/question";
 import {
-  createLazyRuntimeDatabaseGetter,
-  type RuntimeDatabase,
-  type RuntimeDatabaseOptions,
-} from "./runtime-database";
+  appendContentMutationAuditLog,
+  type ContentMutationContext,
+} from "./content-mutation-audit";
 import {
   enqueueKnowledgeRecommendationTask,
   supersedeKnowledgeRecommendationTasks,
 } from "./knowledge-recommendation-runtime-repository";
+import {
+  createLazyRuntimeDatabaseGetter,
+  type RuntimeDatabase,
+  type RuntimeDatabaseOptions,
+} from "./runtime-database";
+
+export type { ContentMutationContext } from "./content-mutation-audit";
 
 export type QuestionOptionAccessRow = {
   id: number;
@@ -102,10 +108,6 @@ export type QuestionListResult = {
 
 export type UpdateQuestionInput = NormalizedUpdateQuestionInput & {
   publicId: string;
-};
-
-export type ContentMutationContext = {
-  actorPublicId: string;
 };
 
 export type QuestionCreateOptions = {
@@ -248,6 +250,12 @@ export function createPostgresQuestionRepository(
           },
         );
 
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          createdQuestion.public_id,
+        );
+
         return createdQuestion;
       });
     },
@@ -335,6 +343,12 @@ export function createPostgresQuestionRepository(
           },
         );
 
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          reloadedQuestion.public_id,
+        );
+
         return reloadedQuestion;
       });
     },
@@ -362,7 +376,22 @@ export function createPostgresQuestionRepository(
         }
 
         await supersedeKnowledgeRecommendationTasks(scopedDatabase, row.id);
-        return findQuestionByPublicId(scopedDatabase, row.public_id);
+        const disabledQuestion = await findQuestionByPublicId(
+          scopedDatabase,
+          row.public_id,
+        );
+
+        if (disabledQuestion === null) {
+          throw new Error("Disabled question could not be loaded.");
+        }
+
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          disabledQuestion.public_id,
+        );
+
+        return disabledQuestion;
       });
     },
 
@@ -436,6 +465,12 @@ export function createPostgresQuestionRepository(
             questionUpdatedAt: copiedQuestion.updated_at,
             requestedByUserPublicId: null,
           },
+        );
+
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          copiedQuestion.public_id,
         );
 
         return copiedQuestion;

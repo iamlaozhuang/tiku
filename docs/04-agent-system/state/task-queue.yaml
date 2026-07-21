@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-execution-policy-capsule-v1-2026-07-21
+  currentTaskId: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -241,6 +241,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
     - p1-remediation-rc-04-student-home-pagination-2026-07-20
+    - p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -268,6 +269,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-redeem-code-sensitive-access-audit-2026-07-20
     - p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
+    - p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -321,7 +323,59 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21: closed
     p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21: closed
     p1-execution-policy-capsule-v1-2026-07-21: closed
+    p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21: closed
 activeTasks:
+  - id: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
+    title: Content question and material audit atomicity
+    phase: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0031_question_material_partition
+    branch: fix/content-question-material-audit-atomicity
+    objective: close only the question and material database partition of F-0031 by making each successful mutation and its redacted audit_log row one application transaction
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0031
+    highRiskApproval:
+      category: bounded_database_application_transaction_logic
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
+    partitionBoundary:
+      included:
+        - question_mutations
+        - material_mutations
+      excluded:
+        - admin_account_mutations
+        - paper_mutations
+        - resource_mutations
+        - knowledge_node_mutations
+    findingDisposition:
+      F-0031: in_progress_question_material_partition_closed_other_domain_partitions_pending
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      preflightIncludedTestFiles: 9
+      inTaskTestOnlyExpansionCount: 0
+      tddRed: expected_missing_transactional_audit_module
+      focused: passed_12_of_12
+      affectedRegression: passed_32_of_32
+      lint: passed_exact_affected_files
+      typecheck: passed
+      build: passed_97_static_pages
+      mainThreadAdversarialReview: passed_atomic_success_audit_redaction_failure_propagation_and_partition_boundary
+      entitlementExpansion: false
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
+    previousTaskCloseout:
+      taskId: p1-execution-policy-capsule-v1-2026-07-21
+      commit: 020fd5654bf71b24633ada058ef9d35d13f51938
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   - id: p1-execution-policy-capsule-v1-2026-07-21
     title: P1 execution policy capsule v1
     phase: p1-execution-policy-capsule-v1-2026-07-21
