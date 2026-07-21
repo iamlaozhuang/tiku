@@ -514,9 +514,13 @@ function createPaperCommandPublicId(commandKind: string): string {
   return `paper-command-${commandKind}-${uniqueSuffix}`;
 }
 
-function createPaperAssetFormData(values: PaperAssetFormValues) {
+function createPaperAssetFormData(
+  values: PaperAssetFormValues,
+  commandPublicId: string,
+) {
   const formData = new FormData();
 
+  formData.set("commandPublicId", commandPublicId);
   formData.set("paperPublicId", values.paperPublicId);
   formData.set("paperAttachmentUsage", "paper_source");
   formData.set("profession", values.profession);
@@ -747,6 +751,14 @@ export function AdminPaperManagement({
 
     setIsSubmitting(true);
     setActionError(null);
+    const commandKey = [
+      "paper-asset",
+      values.paperPublicId,
+      values.file.name,
+      values.file.size,
+      values.file.lastModified,
+    ].join(":");
+    const commandPublicId = getOrCreatePaperCommandPublicId(commandKey);
 
     try {
       const response = await mutateAdminMultipartApi<{
@@ -754,7 +766,7 @@ export function AdminPaperManagement({
       }>(
         "/api/v1/paper-assets",
         sessionToken,
-        createPaperAssetFormData(values),
+        createPaperAssetFormData(values, commandPublicId),
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -763,6 +775,7 @@ export function AdminPaperManagement({
       }
 
       const paperAsset = response.data.paperAsset;
+      paperCommandPublicIdsRef.current.delete(commandKey);
       setPapers((currentPapers) =>
         currentPapers.map((paper) =>
           paper.publicId === values.paperPublicId

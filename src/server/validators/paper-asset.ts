@@ -3,6 +3,7 @@ import type { NormalizedPagination } from "./pagination";
 import { normalizePagination } from "./pagination";
 
 export type NormalizedCreatePaperAssetInput = {
+  commandPublicId: string;
   paperPublicId: string;
   paperAttachmentUsage: (typeof paperAttachmentUsageValues)[number];
   fileName: string;
@@ -87,6 +88,14 @@ export function normalizeCreatePaperAssetInput(
   }
 
   const paperPublicId = normalizeRequiredText(input.paperPublicId);
+  const normalizedCommandPublicId = normalizeRequiredText(
+    input.commandPublicId,
+  );
+  const commandPublicId =
+    normalizedCommandPublicId !== null &&
+    normalizedCommandPublicId.length <= 200
+      ? normalizedCommandPublicId
+      : null;
   const fileName = normalizeRequiredText(input.fileName);
   const objectKey = normalizeRequiredText(input.objectKey);
   const contentType = normalizeRequiredText(input.contentType);
@@ -94,6 +103,7 @@ export function normalizeCreatePaperAssetInput(
   const fileHash = normalizeRequiredText(input.fileHash);
 
   if (
+    commandPublicId === null ||
     paperPublicId === null ||
     !isPaperAttachmentUsage(input.paperAttachmentUsage) ||
     fileName === null ||
@@ -111,6 +121,7 @@ export function normalizeCreatePaperAssetInput(
   return {
     success: true,
     value: {
+      commandPublicId,
       paperPublicId,
       paperAttachmentUsage: input.paperAttachmentUsage,
       fileName,

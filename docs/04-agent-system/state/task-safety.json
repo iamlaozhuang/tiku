@@ -1,11 +1,26 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-execution-policy-capsule-v1-1-2026-07-21",
-  "objective": "Strengthen the repository P1 execution policy capsule to v1.1 within state-only files, without changing Minimal Safety Kernel semantics or expanding product, approval, data, dependency, provider, or remote boundaries.",
+  "taskId": "p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21",
+  "objective": "Close only the F-0031 paper_asset create database partition by reusing the existing paper_command idempotency record and one database transaction for paper_asset, redacted audit_log, and command completion; preserve the existing deterministic local storage behavior and leave durable file lifecycle compensation plus the local resource catalog partition open.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+    "src/server/validators/paper-asset.ts",
+    "src/server/repositories/paper-asset-repository.ts",
+    "src/server/services/paper-asset-service.ts",
+    "src/server/services/paper-asset-service.test.ts",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
+    "src/server/services/paper-asset-route.ts",
+    "src/server/services/paper-asset-route.test.ts",
+    "src/server/services/local-paper-asset-storage.ts",
+    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-paper-database-audit-atomicity.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -13,63 +28,148 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/**",
-    "tests/**",
+    "src/db/schema/**",
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
-    ".env*"
+    ".env*",
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+    "src/server/validators/paper-asset.ts",
+    "src/server/repositories/paper-asset-repository.ts",
+    "src/server/services/paper-asset-service.ts",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
+    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts"
   ],
-  "contingencyFiles": [],
+  "contingencyFiles": [
+    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+    "src/server/services/paper-asset-service.test.ts",
+    "src/server/services/paper-asset-route.ts",
+    "src/server/services/paper-asset-route.test.ts",
+    "src/server/services/local-paper-asset-storage.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-paper-database-audit-atomicity.test.ts"
+  ],
+  "authoritativeChainEvidence": {
+    "uiCaller": "src/features/admin/paper-management/AdminPaperManagementClient.tsx:735",
+    "apiBinding": "src/app/api/v1/paper-assets/route.ts:7",
+    "routeHandler": "src/server/services/paper-composition-lifecycle-runtime.ts:816",
+    "service": "src/server/services/paper-asset-service.ts:90",
+    "repository": "src/server/repositories/paper-asset-repository.ts:106",
+    "schema": "src/db/schema/paper.ts:437 and src/db/schema/paper.ts:452 reuse existing paper_command and paper_asset tables without schema change",
+    "storage": "src/server/services/local-paper-asset-storage.ts:90 uses deterministic content-addressed writes",
+    "directTests": [
+      "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+      "src/server/services/paper-asset-service.test.ts",
+      "src/server/services/paper-asset-route.test.ts",
+      "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+      "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
+    ]
+  },
   "validationCommands": [
     {
-      "name": "policy-state-format",
+      "name": "paper-asset-create-focused",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
+        "src/server/services/paper-asset-service.test.ts",
+        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
+      ]
+    },
+    {
+      "name": "paper-asset-create-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "vitest",
+        "run",
+        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+        "src/server/services/paper-asset-route.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+        "tests/unit/p1-paper-database-audit-atomicity.test.ts"
+      ]
+    },
+    {
+      "name": "paper-asset-create-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "prettier",
-        "--check",
-        "docs/04-agent-system/state/project-state.yaml",
-        "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "eslint",
+        "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
+        "src/server/validators/paper-asset.ts",
+        "src/server/repositories/paper-asset-repository.ts",
+        "src/server/services/paper-asset-service.ts",
+        "src/server/services/paper-composition-lifecycle-runtime.ts",
+        "src/server/services/local-paper-asset-storage.ts",
+        "src/server/services/paper-asset-service.test.ts",
+        "src/server/services/paper-asset-route.test.ts",
+        "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts"
       ]
     },
     {
-      "name": "policy-state-diff",
+      "name": "paper-asset-create-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "paper-asset-create-build",
       "kind": "other",
-      "executable": "git",
-      "arguments": ["diff", "--cached", "--check"]
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "currentAuthorization": {
-    "approvalId": "START_P1_EXECUTION_POLICY_CAPSULE_V1_1",
-    "source": "current_user_message",
-    "baseSha": "7f11dfc9d409fd0e5029589bc712c4ee09567cc0",
-    "conditionalCloseout": true,
-    "allowedOperations": [
-      "state_only_implementation",
-      "one_reviewable_commit",
-      "ff_only_merge_to_master",
-      "one_ordinary_push_to_canonical_origin_master",
-      "sync_verification",
-      "short_branch_cleanup"
-    ],
-    "canonicalPushTarget": "https://github.com/iamlaozhuang/tiku.git#refs/heads/master"
+  "applicableStandingApprovals": [
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
+  "riskBoundary": {
+    "category": "bounded_database_application_transaction_logic",
+    "schemaOrMigrationChange": false,
+    "persistentDatabaseExecution": false,
+    "entitlementExpansion": false,
+    "realExternalCall": false,
+    "newCapability": false,
+    "durableFileLifecycleCompensation": false
+  },
+  "metrics": {
+    "mandatoryFreshApprovals": 0,
+    "preventableScopeMissApprovals": 0,
+    "candidateReapprovals": 0,
+    "approvalWaitTurns": 0,
+    "productValueTime": "15m",
+    "mechanismOverhead": "3m_to_candidate_freeze_closeout_terminal_time_pending",
+    "guardSmokeChanges": 0
   },
   "push": {
     "target": "origin/master",

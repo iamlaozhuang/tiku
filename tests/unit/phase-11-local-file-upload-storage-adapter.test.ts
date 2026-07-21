@@ -129,6 +129,7 @@ describe("phase 11 local file upload storage adapter", () => {
     });
     const formData = new FormData();
 
+    formData.set("commandPublicId", "paper-asset-command-local-upload-001");
     formData.set("paperPublicId", "paper-public-001");
     formData.set("paperAttachmentUsage", "paper_source");
     formData.set("profession", "marketing");
@@ -164,6 +165,7 @@ describe("phase 11 local file upload storage adapter", () => {
     });
     expect(capturedPaperAssetInputs).toEqual([
       expect.objectContaining({
+        commandPublicId: "paper-asset-command-local-upload-001",
         fileName: "local-paper-source.md",
         objectKey: expect.stringMatching(
           /^dev\/paper-asset\/marketing\/\d{6}\/[a-f0-9]{64}\.md$/,

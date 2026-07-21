@@ -120,7 +120,7 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
     );
   });
 
-  it("keeps external audit for failed delete and all multipart create results", () => {
+  it("keeps external audit only for failed create and delete responses", () => {
     const paperAssetRoutes = runtimeSource.slice(
       runtimeSource.indexOf("paperAssets: {"),
     );
@@ -129,6 +129,7 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
     const createRoute = paperAssetRoutes.slice(createStart, deleteStart);
     const deleteRoute = paperAssetRoutes.slice(deleteStart);
 
+    expect(createRoute).toContain("if (response.code !== 0)");
     expect(createRoute).toContain("await auditPaperMutation(");
     expect(deleteRoute).toContain("if (response.code !== 0)");
     expect(deleteRoute).toContain("await auditPaperMutation(");

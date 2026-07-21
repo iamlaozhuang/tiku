@@ -119,10 +119,21 @@ describe("paper asset service", () => {
   });
 
   it("creates and reads paper_attachment_usage metadata with standard DTO fields", async () => {
-    const service = createPaperAssetService(createRepository());
+    const service = createPaperAssetService(createRepository(), {
+      mutationContext: {
+        actorPublicId: "admin_public_content",
+        auditLog: {
+          actorRole: "content_admin",
+          actionType: "paper_asset.create",
+          metadataSummary: "redacted paper_asset mutation metadata",
+          requestIp: null,
+        },
+      },
+    });
 
     await expect(
       service.createPaperAsset({
+        commandPublicId: "paper-asset-command-service-test",
         paperPublicId: "paper_public_123",
         paperAttachmentUsage: "answer_analysis",
         fileName: "analysis.pdf",

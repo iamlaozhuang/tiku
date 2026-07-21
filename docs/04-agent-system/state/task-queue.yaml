@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-execution-policy-capsule-v1-1-2026-07-21
+  currentTaskId: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -249,6 +249,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-resource-upload-saga-2026-07-21
     - p1-execution-policy-capsule-v1-1-2026-07-21
+    - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -283,6 +284,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-resource-upload-saga-2026-07-21
+    - p1-execution-policy-capsule-v1-1-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -343,12 +345,73 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-delete-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-resource-upload-saga-2026-07-21: closed
-    p1-execution-policy-capsule-v1-1-2026-07-21: in_progress
+    p1-execution-policy-capsule-v1-1-2026-07-21: closed
+    p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: in_progress
 activeTasks:
+  - id: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
+    title: Paper asset create idempotency and audit atomicity
+    phase: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0031_paper_asset_create_database_partition
+    branch: fix/paper-asset-create-idempotency-audit
+    objective: close only paper_asset create database idempotency and audit atomicity while leaving durable file lifecycle compensation open
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0031
+    riskBoundary:
+      category: bounded_database_application_transaction_logic
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      entitlementExpansion: false
+      realExternalCall: false
+    executionStage: verified_ready_for_conditional_closeout
+    partitionBoundary:
+      included:
+        - paper_asset_create_database_mutation
+        - paper_command_idempotent_replay
+        - transactional_paper_asset_redacted_audit_and_command_completion
+      excluded:
+        - paper_asset_durable_file_lifecycle_compensation
+        - local_resource_catalog_adapter
+        - schema_or_migration_change
+        - persistent_database_execution
+        - provider_or_external_service_calls
+    findingDisposition:
+      F-0031: paper_asset_create_database_partition_ready_to_close_file_lifecycle_and_local_catalog_remain_open
+    verificationEvidence:
+      preflightIncludedTestFiles: 8
+      inTaskTestOnlyExpansionCount: 0
+      tddRed: expected_5_missing_contract_failures_plus_2_bounded_identity_and_conflict_failures
+      focused: passed_14_of_14
+      affectedRegression: passed_27_of_27
+      lint: passed_exact_affected_files
+      typecheck: passed
+      build: passed_97_static_pages
+      mainThreadAdversarialReview: passed_actor_and_request_bound_replay_transactional_asset_audit_command_completion_redaction_conflict_fail_closed_no_entitlement_schema_real_database_or_external_call_and_explicit_file_lifecycle_boundary
+    conditionalCloseoutProjection:
+      currentState: product_candidate_verified_not_yet_committed_or_pushed
+      trigger: standing_authorization_scope_commit_hook_ff_only_canonical_push_sync_and_cleanup_all_succeed
+      projectedOutcome: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      actualPushSyncEvidence: terminal_only_after_success
+    applicableStandingApprovals:
+      - standing-bounded-medium-risk-closeout-approval-2026-07-20
+      - standing-test-only-allowlist-expansion-2026-07-21
+    metrics:
+      mandatoryFreshApprovals: 0
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: 15m
+      mechanismOverhead: 3m_to_candidate_freeze_closeout_terminal_time_pending
+      guardSmokeChanges: 0
   - id: p1-execution-policy-capsule-v1-1-2026-07-21
     title: P1 execution policy capsule v1.1
     phase: p1-execution-policy-capsule-v1-1-2026-07-21
-    status: in_progress
+    status: closed
     priority: governance
     taskKind: docs_state_only
     branch: codex/p1-execution-policy-capsule-v1-1
@@ -359,11 +422,13 @@ activeTasks:
       source: current_user_message
       baseSha: 7f11dfc9d409fd0e5029589bc712c4ee09567cc0
       conditionalCloseout: true
-    conditionalCloseoutProjection:
-      currentState: state_only_candidate_in_progress_not_yet_committed_or_pushed
-      trigger: exact_scope_validation_review_commit_ff_only_push_sync_and_cleanup_all_succeed
-      projectedOutcome: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      actualPushSyncEvidence: terminal_only_after_success
+    closeout:
+      commit: fb79872d70774d892638c44a6ce0300239db9c80
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-04-resource-upload-saga-2026-07-21
     title: Resource upload saga
     phase: p1-remediation-rc-04-resource-upload-saga-2026-07-21

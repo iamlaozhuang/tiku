@@ -253,6 +253,7 @@ function createPaperRepository(
 
 function createPaperAssetRepository(
   deleteMutationContexts: unknown[] = [],
+  createMutationContexts: unknown[] = [],
 ): PaperAssetRepository {
   return {
     async listPaperAssets(query) {
@@ -265,7 +266,8 @@ function createPaperAssetRepository(
         total: 1,
       };
     },
-    async createPaperAsset(input) {
+    async createPaperAsset(input, context) {
+      createMutationContexts.push(context);
       return createPaperAsset({
         paper_public_id: input.paperPublicId,
         paper_attachment_usage: input.paperAttachmentUsage,
@@ -290,11 +292,13 @@ function createRepositories(
   auditLogEntries: unknown[] = [],
   mutationContexts: unknown[] = [],
   paperAssetDeleteMutationContexts: unknown[] = [],
+  paperAssetCreateMutationContexts: unknown[] = [],
 ): PaperCompositionLifecycleRuntimeRepositories {
   return {
     paperRepository: createPaperRepository(mutationContexts),
     paperAssetRepository: createPaperAssetRepository(
       paperAssetDeleteMutationContexts,
+      paperAssetCreateMutationContexts,
     ),
     auditLogRepository: {
       async appendAuditLog(input) {
@@ -317,6 +321,7 @@ const paperInput = {
 };
 
 const paperAssetInput = {
+  commandPublicId: "paper-asset-command-phase-9-001",
   paperPublicId: "paper-public-001",
   paperAttachmentUsage: "paper_source",
   fileName: "monopoly-theory.pdf",
@@ -656,11 +661,13 @@ describe("phase 9 paper composition lifecycle runtime", () => {
   it("manages paper_asset metadata without exposing object keys or secrets", async () => {
     const auditLogEntries: unknown[] = [];
     const paperAssetDeleteMutationContexts: unknown[] = [];
+    const paperAssetCreateMutationContexts: unknown[] = [];
     const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
       repositories: createRepositories(
         auditLogEntries,
         [],
         paperAssetDeleteMutationContexts,
+        paperAssetCreateMutationContexts,
       ),
       sessionService: createSessionService("content_admin"),
     });
@@ -735,11 +742,16 @@ describe("phase 9 paper composition lifecycle runtime", () => {
     expect(serializedAuditLogEntries).not.toContain("admin-session-token");
     expect(serializedAuditLogEntries).not.toContain("dev/paper-asset");
     expect(serializedAuditLogEntries).not.toContain("secret");
-    expect(auditLogEntries).toEqual([
+    expect(auditLogEntries).toEqual([]);
+    expect(paperAssetCreateMutationContexts).toEqual([
       expect.objectContaining({
-        actionType: "paper_asset.create",
-        targetResourceType: "paper_asset",
-        resultStatus: "success",
+        actorPublicId: "admin-public-001",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "paper_asset.create",
+          metadataSummary: "redacted paper_asset mutation metadata",
+          requestIp: null,
+        }),
       }),
     ]);
     expect(paperAssetDeleteMutationContexts).toEqual([

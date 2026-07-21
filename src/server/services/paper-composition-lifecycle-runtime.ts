@@ -10,6 +10,7 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import {
   createPostgresPaperAssetRepository,
+  type PaperAssetCreateMutationContext,
   type PaperAssetDeleteMutationContext,
   type PaperAssetRepository,
 } from "../repositories/paper-asset-repository";
@@ -205,6 +206,7 @@ async function readPaperAssetMutationInput(
 
   const formData = await request.formData();
   const paperPublicId = readRequiredFormText(formData, "paperPublicId");
+  const commandPublicId = readRequiredFormText(formData, "commandPublicId");
   const paperAttachmentUsage = readPaperAttachmentUsage(
     readRequiredFormText(formData, "paperAttachmentUsage"),
   );
@@ -215,6 +217,7 @@ async function readPaperAssetMutationInput(
   const file = formData.get("file");
 
   if (
+    commandPublicId === null ||
     paperPublicId === null ||
     paperAttachmentUsage === null ||
     profession === null ||
@@ -223,14 +226,17 @@ async function readPaperAssetMutationInput(
     return null;
   }
 
-  return storeLocalPaperAssetFile({
-    file,
-    fileName,
-    paperAttachmentUsage,
-    paperPublicId,
-    profession,
-    storageRoot,
-  });
+  return {
+    ...(await storeLocalPaperAssetFile({
+      file,
+      fileName,
+      paperAttachmentUsage,
+      paperPublicId,
+      profession,
+      storageRoot,
+    })),
+    commandPublicId,
+  };
 }
 
 function readPaperQuery(request: Request): Record<string, unknown> {
@@ -388,15 +394,33 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
     };
   }
 
+  function createPaperAssetCreateMutationContext(
+    request: Request,
+    actor: ContentAdminActor,
+  ): PaperAssetCreateMutationContext {
+    return {
+      actorPublicId: actor.publicId,
+      auditLog: {
+        actorRole: actor.roles[0],
+        actionType: "paper_asset.create",
+        metadataSummary: "redacted paper_asset mutation metadata",
+        requestIp: readRequestIp(request),
+      },
+    };
+  }
+
   function createPaperAssetServiceForActor(
     actor: ContentAdminActor,
     request?: Request,
   ) {
     return createPaperAssetService(repositories.paperAssetRepository, {
-      mutationContext: { actorPublicId: actor.publicId },
       ...(request === undefined
         ? {}
         : {
+            mutationContext: createPaperAssetCreateMutationContext(
+              request,
+              actor,
+            ),
             deleteMutationContext: createPaperAssetDeleteMutationContext(
               request,
               actor,
@@ -830,7 +854,10 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperAssetServiceForActor(actorOrError);
+          const service = createPaperAssetServiceForActor(
+            actorOrError,
+            request,
+          );
           const response = await service.createPaperAsset(
             await readPaperAssetMutationInput(
               request,
@@ -838,15 +865,17 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             ),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper_asset.create",
-            "paper_asset",
-            null,
-            response,
-            "paperAsset",
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper_asset.create",
+              "paper_asset",
+              null,
+              response,
+              "paperAsset",
+            );
+          }
 
           return createJsonResponse(response);
         },

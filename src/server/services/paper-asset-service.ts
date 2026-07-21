@@ -13,11 +13,12 @@ import {
   mapPaperAssetResultToApi,
   mapPaperAssetToApi,
 } from "../mappers/paper-asset-mapper";
-import type {
-  PaperAssetDeleteMutationContext,
-  PaperAssetRepository,
+import {
+  PaperAssetCommandConflictError,
+  type PaperAssetCreateMutationContext,
+  type PaperAssetDeleteMutationContext,
+  type PaperAssetRepository,
 } from "../repositories/paper-asset-repository";
-import type { ContentMutationContext } from "../repositories/question-repository";
 import {
   normalizeCreatePaperAssetInput,
   normalizePaperAssetListInput,
@@ -39,12 +40,13 @@ export type PaperAssetService = {
 };
 
 export type PaperAssetServiceOptions = {
-  mutationContext?: ContentMutationContext;
+  mutationContext?: PaperAssetCreateMutationContext;
   deleteMutationContext?: PaperAssetDeleteMutationContext;
 };
 
 const INVALID_PAPER_ASSET_INPUT_CODE = 422205;
 const PAPER_ASSET_NOT_FOUND_CODE = 404204;
+const PAPER_ASSET_COMMAND_CONFLICT_CODE = 409208;
 const PAPER_ASSET_RUNTIME_UNAVAILABLE_CODE = 503204;
 const PAPER_ASSET_CONTRACT_TERM = "paper_asset";
 const PAPER_ATTACHMENT_USAGE_CONTRACT_TERM = "paper_attachment_usage";
@@ -62,6 +64,13 @@ function createPaperAssetNotFoundResponse(): ApiResponse<null> {
   return createErrorResponse(
     PAPER_ASSET_NOT_FOUND_CODE,
     "Paper asset does not exist.",
+  );
+}
+
+function createPaperAssetCommandConflictResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_ASSET_COMMAND_CONFLICT_CODE,
+    "Paper asset command conflicts with an existing request.",
   );
 }
 
@@ -94,10 +103,24 @@ export function createPaperAssetService(
         return createInvalidPaperAssetInputResponse();
       }
 
-      const paperAsset = await paperAssetRepository.createPaperAsset(
-        paperAssetInput.value,
-        options.mutationContext,
-      );
+      if (options.mutationContext === undefined) {
+        throw new Error("Paper asset create requires mutation audit context.");
+      }
+
+      let paperAsset;
+
+      try {
+        paperAsset = await paperAssetRepository.createPaperAsset(
+          paperAssetInput.value,
+          options.mutationContext,
+        );
+      } catch (error) {
+        if (error instanceof PaperAssetCommandConflictError) {
+          return createPaperAssetCommandConflictResponse();
+        }
+
+        throw error;
+      }
 
       if (paperAsset === null) {
         return createPaperAssetNotFoundResponse();

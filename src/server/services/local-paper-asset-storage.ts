@@ -16,7 +16,10 @@ export type StoreLocalPaperAssetFileInput = {
   uploadedAt?: Date;
 };
 
-export type StoredLocalPaperAssetMetadata = NormalizedCreatePaperAssetInput;
+export type StoredLocalPaperAssetMetadata = Omit<
+  NormalizedCreatePaperAssetInput,
+  "commandPublicId"
+>;
 
 export type StoreLocalResourceFileInput = {
   file: File;
