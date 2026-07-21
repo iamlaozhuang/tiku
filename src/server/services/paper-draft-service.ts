@@ -765,10 +765,13 @@ export function createPaperDraftService(
         return createPaperDeleteConflictResponse();
       }
 
-      const deleted = await paperRepository.deletePaper({
-        paperPublicId: publicId,
-        expectedRevision: revisionInput.value.expectedRevision,
-      });
+      const deleted = await paperRepository.deletePaper(
+        {
+          paperPublicId: publicId,
+          expectedRevision: revisionInput.value.expectedRevision,
+        },
+        options.mutationContext,
+      );
 
       if (!deleted) {
         return createPaperDeleteConflictResponse();

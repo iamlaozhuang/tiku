@@ -346,9 +346,29 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
     return actor;
   }
 
-  function createPaperServiceForActor(actor: ContentAdminActor) {
+  function createPaperServiceForActor(
+    actor: ContentAdminActor,
+    request?: Request,
+    actionType?: string,
+    targetResourceType?: "paper" | "paper_question",
+  ) {
     return createPaperDraftService(repositories.paperRepository, {
-      mutationContext: { actorPublicId: actor.publicId },
+      mutationContext: {
+        actorPublicId: actor.publicId,
+        ...(request !== undefined &&
+        actionType !== undefined &&
+        targetResourceType !== undefined
+          ? {
+              auditLog: {
+                actorRole: actor.roles[0],
+                actionType,
+                targetResourceType: targetResourceType,
+                metadataSummary: `redacted ${targetResourceType} mutation metadata`,
+                requestIp: readRequestIp(request),
+              },
+            }
+          : {}),
+      },
     });
   }
 
@@ -405,19 +425,26 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
               return createJsonResponse(actorOrError);
             }
 
-            const service = createPaperServiceForActor(actorOrError);
+            const service = createPaperServiceForActor(
+              actorOrError,
+              request,
+              "paper.create",
+              "paper",
+            );
             const response = await service.createPaper(
               await readRequestJson(request),
             );
 
-            await auditPaperMutation(
-              request,
-              actorOrError,
-              "paper.create",
-              "paper",
-              null,
-              response,
-            );
+            if (response.code !== 0) {
+              await auditPaperMutation(
+                request,
+                actorOrError,
+                "paper.create",
+                "paper",
+                null,
+                response,
+              );
+            }
 
             return createJsonResponse(response);
           },
@@ -451,20 +478,27 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper.update",
+            "paper",
+          );
           const response = await service.updatePaper(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper.update",
-            "paper",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper.update",
+              "paper",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -483,20 +517,27 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper.delete",
+            "paper",
+          );
           const response = await service.deletePaper(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper.delete",
-            "paper",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper.delete",
+              "paper",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -514,21 +555,28 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper_question.add",
+            "paper_question",
+          );
           const response = await service.addQuestionToDraftPaper(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper_question.add",
-            "paper_question",
-            null,
-            response,
-            "paperQuestion",
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper_question.add",
+              "paper_question",
+              null,
+              response,
+              "paperQuestion",
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -547,22 +595,29 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper_question.update",
+            "paper_question",
+          );
           const response = await service.updatePaperQuestion(
             publicId,
             paperQuestionPublicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper_question.update",
-            "paper_question",
-            paperQuestionPublicId,
-            response,
-            "paperQuestion",
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper_question.update",
+              "paper_question",
+              paperQuestionPublicId,
+              response,
+              "paperQuestion",
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -581,21 +636,28 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper_question.remove",
+            "paper_question",
+          );
           const response = await service.removePaperQuestion(
             publicId,
             paperQuestionPublicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper_question.remove",
-            "paper_question",
-            paperQuestionPublicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper_question.remove",
+              "paper_question",
+              paperQuestionPublicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -613,20 +675,27 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper.publish",
+            "paper",
+          );
           const response = await service.publishPaper(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper.publish",
-            "paper",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper.publish",
+              "paper",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -644,20 +713,27 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper.archive",
+            "paper",
+          );
           const response = await service.archivePaper(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper.archive",
-            "paper",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper.archive",
+              "paper",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },
@@ -675,20 +751,27 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const service = createPaperServiceForActor(actorOrError);
+          const service = createPaperServiceForActor(
+            actorOrError,
+            request,
+            "paper.copy",
+            "paper",
+          );
           const response = await service.copyPaper(
             publicId,
             await readRequestJson(request),
           );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper.copy",
-            "paper",
-            publicId,
-            response,
-          );
+          if (response.code !== 0) {
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper.copy",
+              "paper",
+              publicId,
+              response,
+            );
+          }
 
           return createJsonResponse(response);
         },

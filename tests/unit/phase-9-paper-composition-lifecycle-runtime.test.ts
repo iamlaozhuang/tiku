@@ -153,7 +153,9 @@ function createPaperAsset(
   };
 }
 
-function createPaperRepository(): PaperDraftRepository {
+function createPaperRepository(
+  mutationContexts: unknown[] = [],
+): PaperDraftRepository {
   let currentPaperStatus: PaperDraftAccessRow["paper_status"] = "draft";
 
   return {
@@ -168,7 +170,8 @@ function createPaperRepository(): PaperDraftRepository {
         total: 1,
       };
     },
-    async createPaper(input) {
+    async createPaper(input, context) {
+      mutationContexts.push({ operation: "paper.create", context });
       return createPaper({
         name: input.name,
         profession: input.profession,
@@ -188,27 +191,32 @@ function createPaperRepository(): PaperDraftRepository {
         paper_status: currentPaperStatus,
       });
     },
-    async updatePaper(input) {
+    async updatePaper(input, context) {
+      mutationContexts.push({ operation: "paper.update", context });
       return createPaper({ public_id: input.publicId, name: input.name });
     },
-    async addQuestionToDraftPaper(input) {
+    async addQuestionToDraftPaper(input, context) {
+      mutationContexts.push({ operation: "paper_question.add", context });
       return createPaperQuestion({
         source_question_public_id: input.questionPublicId,
         score: input.score,
         sort_order: input.sortOrder,
       });
     },
-    async updatePaperQuestion(input) {
+    async updatePaperQuestion(input, context) {
+      mutationContexts.push({ operation: "paper_question.update", context });
       return createPaperQuestion({
         public_id: input.paperQuestionPublicId,
         score: input.score,
         sort_order: input.sortOrder,
       });
     },
-    async removePaperQuestion() {
+    async removePaperQuestion(_input, context) {
+      mutationContexts.push({ operation: "paper_question.remove", context });
       return createPaper({ paper_sections: [] });
     },
-    async publishPaper(input) {
+    async publishPaper(input, context) {
+      mutationContexts.push({ operation: "paper.publish", context });
       currentPaperStatus = "published";
 
       return createPaper({
@@ -217,7 +225,8 @@ function createPaperRepository(): PaperDraftRepository {
         published_at: createdAt,
       });
     },
-    async archivePaper(input) {
+    async archivePaper(input, context) {
+      mutationContexts.push({ operation: "paper.archive", context });
       currentPaperStatus = "archived";
 
       return createPaper({
@@ -227,10 +236,12 @@ function createPaperRepository(): PaperDraftRepository {
         archived_at: createdAt,
       });
     },
-    async deletePaper() {
+    async deletePaper(_input, context) {
+      mutationContexts.push({ operation: "paper.delete", context });
       return true;
     },
-    async copyPaper() {
+    async copyPaper(_input, context) {
+      mutationContexts.push({ operation: "paper.copy", context });
       return createPaper({
         public_id: "paper-copy-public-001",
         name: "专卖理论模拟卷（副本）",
@@ -274,9 +285,10 @@ function createPaperAssetRepository(): PaperAssetRepository {
 
 function createRepositories(
   auditLogEntries: unknown[] = [],
+  mutationContexts: unknown[] = [],
 ): PaperCompositionLifecycleRuntimeRepositories {
   return {
-    paperRepository: createPaperRepository(),
+    paperRepository: createPaperRepository(mutationContexts),
     paperAssetRepository: createPaperAssetRepository(),
     auditLogRepository: {
       async appendAuditLog(input) {
@@ -367,8 +379,9 @@ describe("phase 9 paper composition lifecycle runtime", () => {
 
   it("composes, publishes, archives, and copies paper runtime with public identifiers only", async () => {
     const auditLogEntries: unknown[] = [];
+    const mutationContexts: unknown[] = [];
     const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
-      repositories: createRepositories(auditLogEntries),
+      repositories: createRepositories(auditLogEntries, mutationContexts),
       sessionService: createSessionService("content_admin"),
     });
     const headers = { authorization: "Bearer admin-session-token" };
@@ -385,6 +398,17 @@ describe("phase 9 paper composition lifecycle runtime", () => {
           commandPublicId: "paper-command-create-002",
         }),
       }),
+    );
+    const updatePaperResponse = await handlers.papers.detail.PATCH(
+      new Request("http://localhost/api/v1/papers/paper-public-001", {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({
+          ...paperInput,
+          expectedRevision: 1,
+        }),
+      }),
+      paperContext,
     );
     const addQuestionResponse = await handlers.papers.questions.POST(
       new Request("http://localhost/api/v1/papers/paper-public-001/questions", {
@@ -439,6 +463,7 @@ describe("phase 9 paper composition lifecycle runtime", () => {
 
     const payload = {
       createPaper: await createPaperResponse.json(),
+      updatePaper: await updatePaperResponse.json(),
       addQuestion: await addQuestionResponse.json(),
       publish: await publishResponse.json(),
       archive: await archiveResponse.json(),
@@ -446,6 +471,15 @@ describe("phase 9 paper composition lifecycle runtime", () => {
     };
 
     expect(payload.createPaper).toMatchObject({
+      code: 0,
+      data: {
+        paper: {
+          publicId: "paper-public-001",
+          paperStatus: "draft",
+        },
+      },
+    });
+    expect(payload.updatePaper).toMatchObject({
       code: 0,
       data: {
         paper: {
@@ -497,12 +531,119 @@ describe("phase 9 paper composition lifecycle runtime", () => {
     expect(serializedPayload).not.toContain('"id"');
     expect(serializedPayload).not.toContain("paper_id");
     expect(serializedPayload).not.toContain("admin-session-token");
+    expect(auditLogEntries).toEqual([]);
+    expect(mutationContexts).toEqual([
+      {
+        operation: "paper.create",
+        context: {
+          actorPublicId: "admin-public-001",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper.create",
+            targetResourceType: "paper",
+            metadataSummary: "redacted paper mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
+      {
+        operation: "paper.update",
+        context: {
+          actorPublicId: "admin-public-001",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper.update",
+            targetResourceType: "paper",
+            metadataSummary: "redacted paper mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
+      {
+        operation: "paper_question.add",
+        context: {
+          actorPublicId: "admin-public-001",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper_question.add",
+            targetResourceType: "paper_question",
+            metadataSummary: "redacted paper_question mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
+      {
+        operation: "paper.publish",
+        context: {
+          actorPublicId: "admin-public-001",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper.publish",
+            targetResourceType: "paper",
+            metadataSummary: "redacted paper mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
+      {
+        operation: "paper.archive",
+        context: {
+          actorPublicId: "admin-public-001",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper.archive",
+            targetResourceType: "paper",
+            metadataSummary: "redacted paper mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
+      {
+        operation: "paper.copy",
+        context: {
+          actorPublicId: "admin-public-001",
+          auditLog: {
+            actorRole: "content_admin",
+            actionType: "paper.copy",
+            targetResourceType: "paper",
+            metadataSummary: "redacted paper mutation metadata",
+            requestIp: null,
+          },
+        },
+      },
+    ]);
+  });
+
+  it("records failed database commands outside the transaction without duplicating success audits", async () => {
+    const auditLogEntries: unknown[] = [];
+    const mutationContexts: unknown[] = [];
+    const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+      repositories: createRepositories(auditLogEntries, mutationContexts),
+      sessionService: createSessionService("content_admin"),
+    });
+
+    const response = await handlers.papers.collection.POST(
+      new Request("http://localhost/api/v1/papers", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({}),
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 422203,
+      data: null,
+    });
+    expect(mutationContexts).toEqual([]);
     expect(auditLogEntries).toEqual([
-      expect.objectContaining({ actionType: "paper.create" }),
-      expect.objectContaining({ actionType: "paper_question.add" }),
-      expect.objectContaining({ actionType: "paper.publish" }),
-      expect.objectContaining({ actionType: "paper.archive" }),
-      expect.objectContaining({ actionType: "paper.copy" }),
+      expect.objectContaining({
+        actorPublicId: "admin-public-001",
+        actionType: "paper.create",
+        targetResourceType: "paper",
+        targetPublicId: null,
+        resultStatus: "failed",
+        metadataSummary: "redacted paper mutation metadata",
+      }),
     ]);
   });
 

@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
+  currentTaskId: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -242,6 +242,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
     - p1-remediation-rc-04-student-home-pagination-2026-07-20
     - p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
+    - p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -270,6 +271,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-redeem-code-batch-idempotency-2026-07-20
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
     - p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
+    - p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -324,7 +326,70 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21: closed
     p1-execution-policy-capsule-v1-2026-07-21: closed
     p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21: closed
+    p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21: closed
 activeTasks:
+  - id: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
+    title: Paper database audit atomicity
+    phase: p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0031_paper_database_partition
+    branch: fix/paper-database-audit-atomicity
+    objective: close only the database-backed paper and paper_question partition of F-0031 with shared mutation and redacted audit_log transactions while excluding paper_asset filesystem operations
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0031
+    highRiskApproval:
+      category: bounded_database_application_transaction_logic
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    allowedFilesExpansionApproval: current-user-paper-draft-service-delete-context-allowlist-approval-2026-07-21
+    executionStage: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
+    partitionBoundary:
+      included:
+        - paper_database_mutations
+        - paper_question_database_mutations
+      excluded:
+        - paper_asset_filesystem_mutations
+        - admin_account_mutations
+        - resource_mutations
+        - knowledge_node_mutations
+    findingDisposition:
+      F-0031: in_progress_paper_database_partition_closed_other_domain_partitions_pending
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      allowedFilesExpansionApproval: current-user-paper-draft-service-delete-context-allowlist-approval-2026-07-21
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      preflightIncludedTestFiles: 9
+      inTaskTestOnlyExpansionCount: 0
+      tddRed: expected_2_failures_runtime_audit_context_and_delete_context_forwarding
+      adversarialRed: expected_1_failure_paper_update_context_miswire
+      focused: passed_20_of_20
+      affectedRegression: passed_28_of_28
+      lint: passed_exact_affected_files
+      typecheck: passed
+      build: passed_97_static_pages
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullProfile: pass_build_p0_global_p0_serial_format_and_diff
+      mainThreadAdversarialReview: passed_atomic_success_audit_failure_propagation_redaction_and_filesystem_partition_boundary
+      entitlementExpansion: false
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
+    closeout:
+      commit: finalized_by_commit_containing_this_state
+      status: ready_for_commit_ff_only_merge_push_sync_and_cleanup
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
+      findingId: F-0031_question_material_partition
+      commit: d22279bf8f5b22a141cb785d3f65c85b6cde98fc
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   - id: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21
     title: Content question and material audit atomicity
     phase: p1-remediation-rc-04-content-question-material-audit-atomicity-2026-07-21

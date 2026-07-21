@@ -6,7 +6,7 @@ import type { RuntimeDatabase } from "./runtime-database";
 export type ContentMutationAuditInput = {
   actorRole: string;
   actionType: string;
-  targetResourceType: "question" | "material";
+  targetResourceType: "question" | "material" | "paper" | "paper_question";
   metadataSummary: string;
   requestIp: string | null;
 };

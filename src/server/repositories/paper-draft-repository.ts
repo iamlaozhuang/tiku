@@ -39,7 +39,10 @@ import type {
   NormalizedUpdatePaperInput,
   NormalizedUpdatePaperQuestionInput,
 } from "../validators/paper-draft";
-import type { ContentMutationContext } from "./question-repository";
+import {
+  appendContentMutationAuditLog,
+  type ContentMutationContext,
+} from "./content-mutation-audit";
 import {
   createLazyRuntimeDatabaseGetter,
   type RuntimeDatabase,
@@ -192,7 +195,10 @@ export type PaperDraftRepository = {
     input: ArchivePaperInput,
     context?: ContentMutationContext,
   ): Promise<PaperDraftAccessRow | null>;
-  deletePaper(input: DeletePaperInput): Promise<boolean>;
+  deletePaper(
+    input: DeletePaperInput,
+    context?: ContentMutationContext,
+  ): Promise<boolean>;
   copyPaper(
     input: CopyPaperInput,
     context?: ContentMutationContext,
@@ -462,6 +468,11 @@ export function createPostgresPaperDraftRepository(
           );
 
           if (replayedPaper !== null) {
+            await appendContentMutationAuditLog(
+              transaction as RuntimeDatabase,
+              context,
+              replayedPaper.public_id,
+            );
             return replayedPaper;
           }
         }
@@ -506,6 +517,12 @@ export function createPostgresPaperDraftRepository(
           throw new Error("Created paper could not be loaded.");
         }
 
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          createdPaper.public_id,
+        );
+
         return createdPaper;
       });
     },
@@ -517,42 +534,54 @@ export function createPostgresPaperDraftRepository(
     async updatePaper(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .update(paper)
-        .set({
-          duration_minute: input.durationMinute,
-          level: input.level,
-          name: input.name,
-          paper_type: input.paperType,
-          profession: input.profession,
-          source: input.source,
-          subject: input.subject,
-          total_score: input.totalScore,
-          revision: sql`${paper.revision} + 1`,
-          updated_at: new Date(),
-          updated_by_admin_id: actorAdminId,
-          year: input.year,
-        })
-        .where(
-          and(
-            eq(paper.public_id, input.publicId),
-            eq(paper.paper_status, "draft"),
-            eq(paper.revision, input.expectedRevision),
-          ),
-        )
-        .returning({ public_id: paper.public_id });
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const [row] = await transaction
+          .update(paper)
+          .set({
+            duration_minute: input.durationMinute,
+            level: input.level,
+            name: input.name,
+            paper_type: input.paperType,
+            profession: input.profession,
+            source: input.source,
+            subject: input.subject,
+            total_score: input.totalScore,
+            revision: sql`${paper.revision} + 1`,
+            updated_at: new Date(),
+            updated_by_admin_id: actorAdminId,
+            year: input.year,
+          })
+          .where(
+            and(
+              eq(paper.public_id, input.publicId),
+              eq(paper.paper_status, "draft"),
+              eq(paper.revision, input.expectedRevision),
+            ),
+          )
+          .returning({ public_id: paper.public_id });
 
-      if (row === undefined) {
-        return null;
-      }
+        if (row === undefined) {
+          return null;
+        }
 
-      const updatedPaper = await findPaperByPublicId(database, row.public_id);
+        const updatedPaper = await findPaperByPublicId(
+          scopedDatabase,
+          row.public_id,
+        );
 
-      if (updatedPaper === null) {
-        throw new Error("Updated paper could not be loaded.");
-      }
+        if (updatedPaper === null) {
+          throw new Error("Updated paper could not be loaded.");
+        }
 
-      return updatedPaper;
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          updatedPaper.public_id,
+        );
+
+        return updatedPaper;
+      });
     },
 
     async addQuestionToDraftPaper(input, context) {
@@ -579,10 +608,20 @@ export function createPostgresPaperDraftRepository(
             requestHash,
           });
           if (commandClaim.kind === "replay") {
-            return findPaperQuestionByPublicId(
+            const replayedPaperQuestion = await findPaperQuestionByPublicId(
               scopedDatabase,
               commandClaim.resultPublicId,
             );
+
+            if (replayedPaperQuestion !== null) {
+              await appendContentMutationAuditLog(
+                scopedDatabase,
+                context,
+                replayedPaperQuestion.public_id,
+              );
+            }
+
+            return replayedPaperQuestion;
           }
           if (commandClaim.kind !== "claimed") {
             throw new PaperCommandConflictError();
@@ -711,10 +750,18 @@ export function createPostgresPaperDraftRepository(
             resultPublicId: paperQuestionRow.public_id,
           });
 
-          return requirePaperQuestionByPublicId(
+          const createdPaperQuestion = await requirePaperQuestionByPublicId(
             scopedDatabase,
             paperQuestionRow.public_id,
           );
+
+          await appendContentMutationAuditLog(
+            scopedDatabase,
+            context,
+            createdPaperQuestion.public_id,
+          );
+
+          return createdPaperQuestion;
         });
       } catch (error) {
         if (error instanceof PaperMutationConflictError) {
@@ -824,10 +871,18 @@ export function createPostgresPaperDraftRepository(
           );
         }
 
-        return requirePaperQuestionByPublicId(
+        const updatedPaperQuestion = await requirePaperQuestionByPublicId(
           scopedDatabase,
           input.paperQuestionPublicId,
         );
+
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          updatedPaperQuestion.public_id,
+        );
+
+        return updatedPaperQuestion;
       });
     },
 
@@ -865,7 +920,18 @@ export function createPostgresPaperDraftRepository(
           existingPaperQuestion.paper_section_id,
         );
 
-        return requirePaperByPublicId(scopedDatabase, input.paperPublicId);
+        const updatedPaper = await requirePaperByPublicId(
+          scopedDatabase,
+          input.paperPublicId,
+        );
+
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          input.paperQuestionPublicId,
+        );
+
+        return updatedPaper;
       });
     },
 
@@ -892,10 +958,20 @@ export function createPostgresPaperDraftRepository(
           requestHash,
         });
         if (commandClaim.kind === "replay") {
-          return findPaperByPublicId(
+          const replayedPaper = await findPaperByPublicId(
             scopedDatabase,
             commandClaim.resultPublicId,
           );
+
+          if (replayedPaper !== null) {
+            await appendContentMutationAuditLog(
+              scopedDatabase,
+              context,
+              replayedPaper.public_id,
+            );
+          }
+
+          return replayedPaper;
         }
         if (commandClaim.kind !== "claimed") {
           throw new PaperCommandConflictError();
@@ -952,7 +1028,18 @@ export function createPostgresPaperDraftRepository(
           resultPublicId: row.public_id,
         });
 
-        return requirePaperByPublicId(scopedDatabase, row.public_id);
+        const publishedPaper = await requirePaperByPublicId(
+          scopedDatabase,
+          row.public_id,
+        );
+
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          publishedPaper.public_id,
+        );
+
+        return publishedPaper;
       });
     },
 
@@ -995,14 +1082,22 @@ export function createPostgresPaperDraftRepository(
           archivedAt,
         );
 
-        return requirePaperByPublicId(
+        const archivedPaper = await requirePaperByPublicId(
           transaction as RuntimeDatabase,
           row.public_id,
         );
+
+        await appendContentMutationAuditLog(
+          transaction as RuntimeDatabase,
+          context,
+          archivedPaper.public_id,
+        );
+
+        return archivedPaper;
       });
     },
 
-    async deletePaper(input) {
+    async deletePaper(input, context) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
@@ -1042,7 +1137,17 @@ export function createPostgresPaperDraftRepository(
           )
           .returning({ public_id: paper.public_id });
 
-        return deletedRow !== undefined;
+        if (deletedRow === undefined) {
+          return false;
+        }
+
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          deletedRow.public_id,
+        );
+
+        return true;
       });
     },
 
@@ -1060,10 +1165,20 @@ export function createPostgresPaperDraftRepository(
           requestHash,
         });
         if (commandClaim.kind === "replay") {
-          return findPaperByPublicId(
+          const replayedPaper = await findPaperByPublicId(
             scopedDatabase,
             commandClaim.resultPublicId,
           );
+
+          if (replayedPaper !== null) {
+            await appendContentMutationAuditLog(
+              scopedDatabase,
+              context,
+              replayedPaper.public_id,
+            );
+          }
+
+          return replayedPaper;
         }
         if (commandClaim.kind !== "claimed") {
           throw new PaperCommandConflictError();
@@ -1319,6 +1434,12 @@ export function createPostgresPaperDraftRepository(
         if (copiedPaper === null) {
           throw new Error("Paper copy could not be loaded atomically.");
         }
+
+        await appendContentMutationAuditLog(
+          scopedDatabase,
+          context,
+          copiedPaper.public_id,
+        );
 
         return copiedPaper;
       });
