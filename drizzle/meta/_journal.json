@@ -274,6 +274,13 @@
       "when": 1784671200000,
       "tag": "20260721220000_p1_rc_04_ai_call_log_fact_query",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1784676600000,
+      "tag": "20260721233000_p1_rc_04_ai_call_log_versioned_pricing",
+      "breakpoints": true
     }
   ]
 }

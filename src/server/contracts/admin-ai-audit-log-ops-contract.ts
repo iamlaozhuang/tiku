@@ -159,6 +159,9 @@ export type ModelConfigSummaryDto = {
   fallbackPriority: number;
   snapshotPolicy: ModelConfigSnapshotPolicy;
   configVersion: number;
+  pricingVersion: string | null;
+  inputTokenPriceCnyPerMillion: string | null;
+  outputTokenPriceCnyPerMillion: string | null;
   timeoutSecond: number;
   maxRetryCount: number;
   updatedAt: string;

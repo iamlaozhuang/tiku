@@ -282,6 +282,15 @@ export const modelConfig = pgTable(
     snapshot_policy: text("snapshot_policy")
       .default("redacted_metadata")
       .notNull(),
+    pricing_version: text("pricing_version"),
+    input_token_price_cny_per_million: numeric(
+      "input_token_price_cny_per_million",
+      { precision: 18, scale: 6 },
+    ),
+    output_token_price_cny_per_million: numeric(
+      "output_token_price_cny_per_million",
+      { precision: 18, scale: 6 },
+    ),
     fallback_model_config_id: bigint("fallback_model_config_id", {
       mode: "number",
     }).references((): AnyPgColumn => modelConfig.id, { onDelete: "set null" }),
@@ -301,6 +310,20 @@ export const modelConfig = pgTable(
     ),
     index("idx_model_config_fallback_model_config_id").on(
       table.fallback_model_config_id,
+    ),
+    check(
+      "model_config_pricing_tuple_check",
+      sql`(
+        ${table.pricing_version} is null
+        and ${table.input_token_price_cny_per_million} is null
+        and ${table.output_token_price_cny_per_million} is null
+      ) or (
+        ${table.pricing_version} is not null
+        and ${table.input_token_price_cny_per_million} is not null
+        and ${table.output_token_price_cny_per_million} is not null
+        and ${table.input_token_price_cny_per_million} >= 0
+        and ${table.output_token_price_cny_per_million} >= 0
+      )`,
     ),
   ],
 );

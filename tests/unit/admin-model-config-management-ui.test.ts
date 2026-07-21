@@ -138,6 +138,9 @@ describe("admin model config management UI", () => {
             fallbackPriority: 10,
             snapshotPolicy: "redacted_metadata",
             configVersion: 1,
+            pricingVersion: null,
+            inputTokenPriceCnyPerMillion: null,
+            outputTokenPriceCnyPerMillion: null,
             timeoutSecond: 15,
             maxRetryCount: 1,
             updatedAt: "2026-05-26T00:00:00.000Z",
@@ -195,6 +198,13 @@ describe("admin model config management UI", () => {
       "model-provider-public-001",
     );
     expect(screen.getByLabelText("备用模型配置")).toBeInTheDocument();
+    expect(screen.getByLabelText("价格版本")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("输入 Token 单价（元/百万 Token）"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("输出 Token 单价（元/百万 Token）"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("供应商业务标识")).toBeNull();
     expect(screen.queryByText("备用模型配置业务标识")).toBeNull();
     const configRow = screen.getByTestId(
@@ -204,6 +214,7 @@ describe("admin model config management UI", () => {
     expect(configRow).not.toHaveTextContent("model-config-public-fallback");
     expect(configRow).toHaveTextContent("优先级： 10");
     expect(configRow).toHaveTextContent("脱敏元数据");
+    expect(configRow).toHaveTextContent("本地成本估算：未配置");
     fireEvent.click(
       within(configRow).getByRole("button", {
         name: "测试 Local Explanation 的连接",
@@ -238,6 +249,99 @@ describe("admin model config management UI", () => {
       ),
     ).toBeInTheDocument();
     expect(document.body.textContent).not.toContain(rawPromptBody);
+  });
+
+  it("submits a complete versioned pricing tuple without claiming calibration", async () => {
+    const submittedForms: unknown[] = [];
+
+    render(
+      createElement(AdminModelConfigManagement, {
+        canManageModelConfig: true,
+        initialModelProviders: [
+          {
+            publicId: "model-provider-public-synthetic",
+            providerKey: "synthetic",
+            displayName: "Synthetic Provider",
+            baseUrl: null,
+            isEnabled: true,
+            secretStatus: "not_configured",
+            maskedSecret: null,
+            providerMetadata: { runtime: "unit" },
+            updatedAt: "2026-07-21T00:00:00.000Z",
+          },
+        ],
+        onSaveConfig: async (form) => {
+          submittedForms.push(form);
+          return {
+            publicId: "model-config-public-synthetic",
+            providerPublicId: form.modelProviderPublicId,
+            providerDisplayName: "Synthetic Provider",
+            providerKey: "synthetic",
+            modelName: form.modelName,
+            modelAlias: form.modelAlias,
+            displayName: form.displayName,
+            aiFuncType: form.aiFuncType,
+            apiKeyDisplay: null,
+            secretStatus: "not_configured",
+            maskedSecret: null,
+            fallbackModelConfigPublicId: null,
+            isEnabled: true,
+            status: "enabled",
+            fallbackPriority: 0,
+            snapshotPolicy: "redacted_metadata",
+            configVersion: 1,
+            pricingVersion: form.pricingVersion,
+            inputTokenPriceCnyPerMillion: form.inputTokenPriceCnyPerMillion,
+            outputTokenPriceCnyPerMillion: form.outputTokenPriceCnyPerMillion,
+            timeoutSecond: 15,
+            maxRetryCount: 1,
+            updatedAt: "2026-07-21T00:00:00.000Z",
+          };
+        },
+      }),
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
+    fireEvent.change(screen.getByLabelText("模型供应商"), {
+      target: { value: "model-provider-public-synthetic" },
+    });
+    fireEvent.change(screen.getByLabelText("模型名称"), {
+      target: { value: "synthetic-model" },
+    });
+    fireEvent.change(screen.getByLabelText("模型别名"), {
+      target: { value: "synthetic-model" },
+    });
+    fireEvent.change(screen.getByLabelText("配置显示名称"), {
+      target: { value: "Synthetic model" },
+    });
+    fireEvent.change(screen.getByLabelText("价格版本"), {
+      target: { value: "synthetic-v1" },
+    });
+    fireEvent.change(
+      screen.getByLabelText("输入 Token 单价（元/百万 Token）"),
+      {
+        target: { value: "2.000000" },
+      },
+    );
+    fireEvent.change(
+      screen.getByLabelText("输出 Token 单价（元/百万 Token）"),
+      {
+        target: { value: "8.000000" },
+      },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "保存配置" }));
+
+    expect(await screen.findByText("模型配置已保存。")).toBeInTheDocument();
+    expect(submittedForms).toContainEqual(
+      expect.objectContaining({
+        pricingVersion: "synthetic-v1",
+        inputTokenPriceCnyPerMillion: "2.000000",
+        outputTokenPriceCnyPerMillion: "8.000000",
+      }),
+    );
+    expect(document.body).toHaveTextContent(
+      "不代表 Provider 实际账单或成本校准",
+    );
   });
 
   it("shows Prompt full text only when the prompt DTO and role both allow it", () => {
@@ -312,6 +416,9 @@ describe("admin model config management UI", () => {
             fallbackPriority: 1,
             snapshotPolicy: "redacted_metadata",
             configVersion: 1,
+            pricingVersion: "synthetic-v1",
+            inputTokenPriceCnyPerMillion: "2.000000",
+            outputTokenPriceCnyPerMillion: "8.000000",
             timeoutSecond: 15,
             maxRetryCount: 1,
             updatedAt: "2026-05-26T00:00:00.000Z",

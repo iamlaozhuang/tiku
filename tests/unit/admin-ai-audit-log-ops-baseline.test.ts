@@ -517,6 +517,9 @@ describe("admin ai and audit log ops baseline", () => {
                   fallbackPriority: 10,
                   snapshotPolicy: "redacted_metadata",
                   configVersion: 1,
+                  pricingVersion: "synthetic-v1",
+                  inputTokenPriceCnyPerMillion: "2.000000",
+                  outputTokenPriceCnyPerMillion: "8.000000",
                   timeoutSecond: 15,
                   maxRetryCount: 1,
                   updatedAt: "2026-05-26T00:00:00.000Z",
@@ -604,6 +607,11 @@ describe("admin ai and audit log ops baseline", () => {
     expect(
       screen.getByTestId("admin-model-config-runtime-model-config-001"),
     ).toHaveAttribute("data-public-id", "runtime-model-config-001");
+    expect(
+      screen.getByTestId("admin-model-config-runtime-model-config-001"),
+    ).toHaveTextContent(
+      "本地成本估算：synthetic-v1 / 输入 2.000000 元/百万 Token / 输出 8.000000 元/百万 Token",
+    );
     expect(
       screen.getByTestId("admin-audit-log-runtime-audit-log-001"),
     ).toHaveTextContent("redacted runtime metadata");

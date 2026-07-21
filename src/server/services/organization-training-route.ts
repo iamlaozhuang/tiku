@@ -1457,6 +1457,10 @@ function createCatalogBackedScoringProvenanceResolver(
         modelName: modelConfig.modelName,
         displayName: modelConfig.displayName,
         configVersion: modelConfig.configVersion,
+        pricingVersion: modelConfig.pricingVersion,
+        inputTokenPriceCnyPerMillion: modelConfig.inputTokenPriceCnyPerMillion,
+        outputTokenPriceCnyPerMillion:
+          modelConfig.outputTokenPriceCnyPerMillion,
         timeoutSecond: modelConfig.timeoutSecond,
         maxRetryCount: modelConfig.maxRetryCount,
         fallbackModelConfigPublicId: modelConfig.fallbackModelConfigPublicId,

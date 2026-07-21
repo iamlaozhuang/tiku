@@ -105,6 +105,11 @@ function createRepositories(): AdminAiAuditLogRuntimeRepositories {
       fallbackPriority: 0,
       snapshotPolicy: "redacted_metadata",
       configVersion: modelConfigSnapshot.configVersion,
+      pricingVersion: modelConfigSnapshot.pricingVersion,
+      inputTokenPriceCnyPerMillion:
+        modelConfigSnapshot.inputTokenPriceCnyPerMillion,
+      outputTokenPriceCnyPerMillion:
+        modelConfigSnapshot.outputTokenPriceCnyPerMillion,
       timeoutSecond: modelConfigSnapshot.timeoutSecond,
       maxRetryCount: modelConfigSnapshot.maxRetryCount,
       updatedAt: "2026-05-21T00:00:00.000Z",

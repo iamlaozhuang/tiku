@@ -33,6 +33,9 @@ export type RedactedModelConfigRuntimeSnapshot = {
   modelName: string;
   displayName: string;
   configVersion: number;
+  pricingVersion: string | null;
+  inputTokenPriceCnyPerMillion: string | null;
+  outputTokenPriceCnyPerMillion: string | null;
   timeoutSecond: number;
   maxRetryCount: number;
   fallbackModelConfigPublicId: string | null;
@@ -156,6 +159,9 @@ export function createRedactedModelConfigRuntimeSnapshot(
     modelName: snapshot.modelName,
     displayName: snapshot.displayName,
     configVersion: snapshot.configVersion,
+    pricingVersion: snapshot.pricingVersion,
+    inputTokenPriceCnyPerMillion: snapshot.inputTokenPriceCnyPerMillion,
+    outputTokenPriceCnyPerMillion: snapshot.outputTokenPriceCnyPerMillion,
     timeoutSecond: snapshot.timeoutSecond,
     maxRetryCount: snapshot.maxRetryCount,
     fallbackModelConfigPublicId: snapshot.fallbackModelConfigPublicId,
@@ -239,6 +245,11 @@ export function createPersistedModelConfigRuntimeCatalog(
           modelName: modelConfig.modelName,
           displayName: modelConfig.displayName,
           configVersion: modelConfig.configVersion,
+          pricingVersion: modelConfig.pricingVersion,
+          inputTokenPriceCnyPerMillion:
+            modelConfig.inputTokenPriceCnyPerMillion,
+          outputTokenPriceCnyPerMillion:
+            modelConfig.outputTokenPriceCnyPerMillion,
           timeoutSecond: modelConfig.timeoutSecond,
           maxRetryCount: modelConfig.maxRetryCount,
           fallbackModelConfigPublicId: modelConfig.fallbackModelConfigPublicId,

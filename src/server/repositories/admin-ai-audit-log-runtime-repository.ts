@@ -24,10 +24,11 @@ import type {
   PromptTemplateSummaryDto,
   RedactedMetadata,
 } from "../contracts/admin-ai-audit-log-ops-contract";
-import type {
-  AiCallStatus,
-  ModelConfigSnapshot,
-  RedactedJsonObject,
+import {
+  calculateEstimatedCostCny,
+  type AiCallStatus,
+  type ModelConfigSnapshot,
+  type RedactedJsonObject,
 } from "../models/ai-rag";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 import type {
@@ -167,6 +168,9 @@ type ModelConfigDatabaseRow = {
   status: string | null;
   fallback_priority: number | null;
   snapshot_policy: string | null;
+  pricing_version: string | null;
+  input_token_price_cny_per_million: string | null;
+  output_token_price_cny_per_million: string | null;
   timeout_second: number;
   max_retry_count: number;
   fallback_model_config_public_id: string | null;
@@ -496,6 +500,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               mc.status,
               mc.fallback_priority,
               mc.snapshot_policy,
+              mc.pricing_version,
+              mc.input_token_price_cny_per_million,
+              mc.output_token_price_cny_per_million,
               mc.timeout_second,
               mc.max_retry_count,
               fallback.public_id as fallback_model_config_public_id,
@@ -559,6 +566,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             max_retry_count,
             fallback_priority,
             snapshot_policy,
+            pricing_version,
+            input_token_price_cny_per_million,
+            output_token_price_cny_per_million,
             fallback_model_config_id,
             created_at,
             updated_at
@@ -577,6 +587,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             ${input.maxRetryCount},
             ${input.fallbackPriority},
             ${input.snapshotPolicy},
+            ${input.pricingVersion},
+            ${input.inputTokenPriceCnyPerMillion}::numeric,
+            ${input.outputTokenPriceCnyPerMillion}::numeric,
             fallback.id,
             now(),
             now()
@@ -600,6 +613,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             status,
             fallback_priority,
             snapshot_policy,
+            pricing_version,
+            input_token_price_cny_per_million,
+            output_token_price_cny_per_million,
             timeout_second,
             max_retry_count,
             (select public_id from model_config where id = fallback_model_config_id) as fallback_model_config_public_id,
@@ -633,6 +649,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             max_retry_count = ${input.maxRetryCount},
             fallback_priority = ${input.fallbackPriority},
             snapshot_policy = ${input.snapshotPolicy},
+            pricing_version = ${input.pricingVersion},
+            input_token_price_cny_per_million = ${input.inputTokenPriceCnyPerMillion}::numeric,
+            output_token_price_cny_per_million = ${input.outputTokenPriceCnyPerMillion}::numeric,
             fallback_model_config_id = fallback.id,
             updated_at = now()
           from model_provider mp
@@ -656,6 +675,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             model_config.status,
             model_config.fallback_priority,
             model_config.snapshot_policy,
+            model_config.pricing_version,
+            model_config.input_token_price_cny_per_million,
+            model_config.output_token_price_cny_per_million,
             model_config.timeout_second,
             model_config.max_retry_count,
             fallback.public_id as fallback_model_config_public_id,
@@ -853,6 +875,11 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
     async appendAiCallLog(input) {
       const database = getDatabase();
       const publicId = `ai-call-log-${randomUUID()}`;
+      const estimatedCostCny = calculateEstimatedCostCny({
+        modelConfigSnapshot: input.modelConfigSnapshot,
+        promptTokenCount: input.promptTokenCount,
+        completionTokenCount: input.completionTokenCount,
+      });
 
       try {
         await executeSql(
@@ -910,7 +937,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               ${input.promptTokenCount},
               ${input.completionTokenCount},
               ${input.totalTokenCount},
-              ${input.estimatedCostCny ?? null}::numeric,
+              ${estimatedCostCny}::numeric,
               ${input.latencyMs},
               ${input.startedAt.toISOString()},
               ${input.completedAt?.toISOString() ?? null},
@@ -928,7 +955,7 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         }
       }
 
-      return mapAppendInputToSummary(publicId, input);
+      return mapAppendInputToSummary(publicId, input, estimatedCostCny);
     },
 
     async enableModelConfig(publicId) {
@@ -1305,6 +1332,9 @@ async function listLegacyModelConfigs(
         null::text as status,
         null::int as fallback_priority,
         null::text as snapshot_policy,
+        null::text as pricing_version,
+        null::numeric as input_token_price_cny_per_million,
+        null::numeric as output_token_price_cny_per_million,
         mc.timeout_second,
         mc.max_retry_count,
         fallback.public_id as fallback_model_config_public_id,
@@ -1414,6 +1444,9 @@ function mapModelConfigRow(row: ModelConfigDatabaseRow): ModelConfigSummaryDto {
     fallbackPriority: row.fallback_priority ?? 0,
     snapshotPolicy: toModelConfigSnapshotPolicy(row.snapshot_policy),
     configVersion: row.config_version,
+    pricingVersion: row.pricing_version,
+    inputTokenPriceCnyPerMillion: row.input_token_price_cny_per_million,
+    outputTokenPriceCnyPerMillion: row.output_token_price_cny_per_million,
     timeoutSecond: row.timeout_second,
     maxRetryCount: row.max_retry_count,
     updatedAt: toIsoString(row.updated_at),
@@ -1446,6 +1479,7 @@ function mapPromptTemplateRow(
 function mapAppendInputToSummary(
   publicId: string,
   input: AppendAiCallLogInput,
+  estimatedCostCny: string | null,
 ): AiCallLogSummaryDto {
   return {
     publicId,
@@ -1465,7 +1499,7 @@ function mapAppendInputToSummary(
     promptTokenCount: input.promptTokenCount,
     completionTokenCount: input.completionTokenCount,
     totalTokenCount: input.totalTokenCount,
-    estimatedCostCny: input.estimatedCostCny ?? null,
+    estimatedCostCny,
     latencyMs: input.latencyMs,
     startedAt: input.startedAt.toISOString(),
     completedAt: input.completedAt?.toISOString() ?? null,

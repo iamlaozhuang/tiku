@@ -18,6 +18,9 @@ export type NormalizedModelConfigInput = {
   modelAlias: string;
   displayName: string;
   configVersion: number;
+  pricingVersion: string | null;
+  inputTokenPriceCnyPerMillion: string | null;
+  outputTokenPriceCnyPerMillion: string | null;
   timeoutSecond: number;
   maxRetryCount: number;
   fallbackModelConfigPublicId: string | null;
@@ -148,6 +151,20 @@ function normalizeMaxRetryCount(value: unknown): number | null {
   return maxRetryCount;
 }
 
+function normalizeTokenPriceCnyPerMillion(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const match = /^(0|[1-9]\d{0,11})(?:\.(\d{1,6}))?$/.exec(value.trim());
+
+  if (match === null) {
+    return null;
+  }
+
+  return `${match[1]}.${(match[2] ?? "").padEnd(6, "0")}`;
+}
+
 function normalizeModelConfigStatus(
   value: unknown,
   isEnabled: boolean,
@@ -235,6 +252,21 @@ export function normalizeModelConfigInput(
   );
   const fallbackPriority = normalizeNonNegativeInteger(input.fallbackPriority);
   const isEnabled = normalizeBoolean(input.isEnabled, false);
+  const pricingVersion = normalizeOptionalString(input.pricingVersion);
+  const inputTokenPriceCnyPerMillion = normalizeTokenPriceCnyPerMillion(
+    input.inputTokenPriceCnyPerMillion,
+  );
+  const outputTokenPriceCnyPerMillion = normalizeTokenPriceCnyPerMillion(
+    input.outputTokenPriceCnyPerMillion,
+  );
+  const hasAnyPricingInput =
+    pricingVersion !== null ||
+    inputTokenPriceCnyPerMillion !== null ||
+    outputTokenPriceCnyPerMillion !== null;
+  const hasCompletePricingTuple =
+    pricingVersion !== null &&
+    inputTokenPriceCnyPerMillion !== null &&
+    outputTokenPriceCnyPerMillion !== null;
 
   if (
     modelProviderPublicId === null ||
@@ -245,7 +277,8 @@ export function normalizeModelConfigInput(
     configVersion === null ||
     timeoutSecond === null ||
     maxRetryCount === null ||
-    fallbackPriority === null
+    fallbackPriority === null ||
+    (hasAnyPricingInput && !hasCompletePricingTuple)
   ) {
     return null;
   }
@@ -261,6 +294,13 @@ export function normalizeModelConfigInput(
     modelAlias,
     displayName,
     configVersion,
+    pricingVersion: hasCompletePricingTuple ? pricingVersion : null,
+    inputTokenPriceCnyPerMillion: hasCompletePricingTuple
+      ? inputTokenPriceCnyPerMillion
+      : null,
+    outputTokenPriceCnyPerMillion: hasCompletePricingTuple
+      ? outputTokenPriceCnyPerMillion
+      : null,
     timeoutSecond,
     maxRetryCount,
     fallbackModelConfigPublicId,

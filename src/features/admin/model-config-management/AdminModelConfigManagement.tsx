@@ -55,6 +55,9 @@ const emptyConfigForm = {
   modelName: "",
   modelAlias: "",
   displayName: "",
+  pricingVersion: "",
+  inputTokenPriceCnyPerMillion: "",
+  outputTokenPriceCnyPerMillion: "",
   fallbackModelConfigPublicId: "",
   fallbackPriority: "0",
 };
@@ -461,8 +464,21 @@ function AdminModelConfigPanel({
   onTestConnection: (publicId: string) => void;
   onToggle: (publicId: string) => void;
 }) {
+  const pricingValues = [
+    form.pricingVersion,
+    form.inputTokenPriceCnyPerMillion,
+    form.outputTokenPriceCnyPerMillion,
+  ];
+  const hasAnyPricingValue = pricingValues.some(
+    (value) => value.trim().length > 0,
+  );
+  const hasCompletePricingTuple = pricingValues.every(
+    (value) => value.trim().length > 0,
+  );
   const canSave =
-    form.modelName.trim().length > 0 && form.displayName.trim().length > 0;
+    form.modelName.trim().length > 0 &&
+    form.displayName.trim().length > 0 &&
+    (!hasAnyPricingValue || hasCompletePricingTuple);
 
   return (
     <div
@@ -502,6 +518,29 @@ function AdminModelConfigPanel({
               value={form.displayName}
               onChange={(value) => onChange({ ...form, displayName: value })}
             />
+            <AdminTextField
+              label="价格版本"
+              value={form.pricingVersion}
+              onChange={(value) => onChange({ ...form, pricingVersion: value })}
+            />
+            <AdminTextField
+              label="输入 Token 单价（元/百万 Token）"
+              value={form.inputTokenPriceCnyPerMillion}
+              onChange={(value) =>
+                onChange({ ...form, inputTokenPriceCnyPerMillion: value })
+              }
+            />
+            <AdminTextField
+              label="输出 Token 单价（元/百万 Token）"
+              value={form.outputTokenPriceCnyPerMillion}
+              onChange={(value) =>
+                onChange({ ...form, outputTokenPriceCnyPerMillion: value })
+              }
+            />
+            <p className="text-text-muted text-xs leading-5">
+              三项需同时填写；仅保存版本化本地成本估算元数据，不代表 Provider
+              实际账单或成本校准。
+            </p>
             <AdminSelectField
               label="备用模型配置"
               options={modelConfigs.map((modelConfig) => [
@@ -810,6 +849,11 @@ function AdminConfigRow({
           {formatModelConfigStatus(modelConfig.status)} / 优先级：{" "}
           {modelConfig.fallbackPriority} / {fallbackText} /{" "}
           {formatModelConfigStatus(modelConfig.snapshotPolicy)} / {runtimeText}
+        </p>
+        <p className="text-text-muted mt-1 text-xs">
+          {modelConfig.pricingVersion === null
+            ? "本地成本估算：未配置"
+            : `本地成本估算：${modelConfig.pricingVersion} / 输入 ${modelConfig.inputTokenPriceCnyPerMillion} 元/百万 Token / 输出 ${modelConfig.outputTokenPriceCnyPerMillion} 元/百万 Token`}
         </p>
         <div className="mt-2 flex flex-wrap gap-1">
           <AdminMetadataBadge label="仅元数据" />

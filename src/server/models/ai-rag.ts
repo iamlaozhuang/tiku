@@ -99,6 +99,9 @@ export type ModelConfigSnapshotInput = {
   modelName: string;
   displayName: string;
   configVersion: number;
+  pricingVersion?: string | null;
+  inputTokenPriceCnyPerMillion?: string | null;
+  outputTokenPriceCnyPerMillion?: string | null;
   timeoutSecond: number;
   maxRetryCount: number;
   fallbackModelConfigPublicId: string | null;
@@ -106,7 +109,16 @@ export type ModelConfigSnapshotInput = {
   promptTemplateVersion: number;
 };
 
-export type ModelConfigSnapshot = ModelConfigSnapshotInput;
+export type ModelConfigSnapshot = Omit<
+  ModelConfigSnapshotInput,
+  | "pricingVersion"
+  | "inputTokenPriceCnyPerMillion"
+  | "outputTokenPriceCnyPerMillion"
+> & {
+  pricingVersion: string | null;
+  inputTokenPriceCnyPerMillion: string | null;
+  outputTokenPriceCnyPerMillion: string | null;
+};
 
 export type RedactionReason =
   | "prompt"
@@ -328,12 +340,82 @@ export function createModelConfigSnapshot(
     modelName: input.modelName,
     displayName: input.displayName,
     configVersion: input.configVersion,
+    pricingVersion: input.pricingVersion ?? null,
+    inputTokenPriceCnyPerMillion: input.inputTokenPriceCnyPerMillion ?? null,
+    outputTokenPriceCnyPerMillion: input.outputTokenPriceCnyPerMillion ?? null,
     timeoutSecond: input.timeoutSecond,
     maxRetryCount: input.maxRetryCount,
     fallbackModelConfigPublicId: input.fallbackModelConfigPublicId,
     promptTemplateKey: input.promptTemplateKey,
     promptTemplateVersion: input.promptTemplateVersion,
   };
+}
+
+const TOKEN_PRICE_SCALE = 6;
+const TOKEN_PRICE_DIVISOR = BigInt(1_000_000);
+const ROUNDING_DIVISOR = BigInt(2);
+
+function parseTokenPriceCnyPerMillion(value: string): bigint | null {
+  const match = /^(0|[1-9]\d{0,11})(?:\.(\d{1,6}))?$/.exec(value);
+
+  if (match === null) {
+    return null;
+  }
+
+  const fraction = (match[2] ?? "").padEnd(TOKEN_PRICE_SCALE, "0");
+  return BigInt(match[1]) * TOKEN_PRICE_DIVISOR + BigInt(fraction || "0");
+}
+
+function formatScaledCny(value: bigint): string {
+  const integerPart = value / TOKEN_PRICE_DIVISOR;
+  const fractionPart = (value % TOKEN_PRICE_DIVISOR)
+    .toString()
+    .padStart(6, "0");
+
+  return `${integerPart}.${fractionPart}`;
+}
+
+export function calculateEstimatedCostCny(input: {
+  modelConfigSnapshot: ModelConfigSnapshot;
+  promptTokenCount: number | null;
+  completionTokenCount: number | null;
+}): string | null {
+  const { modelConfigSnapshot, promptTokenCount, completionTokenCount } = input;
+
+  if (
+    typeof modelConfigSnapshot.pricingVersion !== "string" ||
+    modelConfigSnapshot.pricingVersion.trim().length === 0 ||
+    typeof modelConfigSnapshot.inputTokenPriceCnyPerMillion !== "string" ||
+    typeof modelConfigSnapshot.outputTokenPriceCnyPerMillion !== "string" ||
+    promptTokenCount === null ||
+    completionTokenCount === null ||
+    !Number.isSafeInteger(promptTokenCount) ||
+    !Number.isSafeInteger(completionTokenCount) ||
+    promptTokenCount < 0 ||
+    completionTokenCount < 0
+  ) {
+    return null;
+  }
+
+  const inputPrice = parseTokenPriceCnyPerMillion(
+    modelConfigSnapshot.inputTokenPriceCnyPerMillion,
+  );
+  const outputPrice = parseTokenPriceCnyPerMillion(
+    modelConfigSnapshot.outputTokenPriceCnyPerMillion,
+  );
+
+  if (inputPrice === null || outputPrice === null) {
+    return null;
+  }
+
+  const scaledCostNumerator =
+    BigInt(promptTokenCount) * inputPrice +
+    BigInt(completionTokenCount) * outputPrice;
+  const roundedScaledCost =
+    (scaledCostNumerator + TOKEN_PRICE_DIVISOR / ROUNDING_DIVISOR) /
+    TOKEN_PRICE_DIVISOR;
+
+  return formatScaledCny(roundedScaledCost);
 }
 
 export function createFailureMessageDigest(value: unknown): string {

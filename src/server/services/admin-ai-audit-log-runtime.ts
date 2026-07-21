@@ -618,6 +618,11 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
       modelName: input.modelConfig.modelName,
       displayName: input.modelConfig.displayName,
       configVersion: input.modelConfig.configVersion,
+      pricingVersion: input.modelConfig.pricingVersion,
+      inputTokenPriceCnyPerMillion:
+        input.modelConfig.inputTokenPriceCnyPerMillion,
+      outputTokenPriceCnyPerMillion:
+        input.modelConfig.outputTokenPriceCnyPerMillion,
       timeoutSecond: input.modelConfig.timeoutSecond,
       maxRetryCount: input.modelConfig.maxRetryCount,
       fallbackModelConfigPublicId:
