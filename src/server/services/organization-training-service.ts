@@ -744,6 +744,9 @@ export type OrganizationTrainingService = {
   submitEmployeeAnswer(
     command: OrganizationTrainingSubmitEmployeeAnswerCommand,
   ): Promise<OrganizationTrainingEmployeeAnswerResult>;
+  getEmployeeAnswerDraft(
+    command: OrganizationTrainingGetEmployeeAnswerReadonlySummaryCommand,
+  ): Promise<OrganizationTrainingEmployeeAnswerResult>;
   getEmployeeAnswerReadonlySummary(
     command: OrganizationTrainingGetEmployeeAnswerReadonlySummaryCommand,
   ): Promise<OrganizationTrainingEmployeeAnswerResult>;
@@ -3353,6 +3356,54 @@ export function createOrganizationTrainingService(
 
         throw error;
       }
+    },
+
+    async getEmployeeAnswerDraft(command) {
+      const normalizedEmployeeContext = normalizeEmployeeContext(
+        command.employeeContext,
+      );
+      if (normalizedEmployeeContext === null) {
+        return createEmployeeAnswerBlockedResult("invalid_employee_context");
+      }
+
+      const contextBlockedReason = getEmployeeContextBlockedReason(
+        normalizedEmployeeContext.authorizationContext,
+      );
+      if (contextBlockedReason !== null) {
+        return createEmployeeAnswerBlockedResult(contextBlockedReason);
+      }
+
+      if (
+        !isVersionVisibleToEmployee(command.version, normalizedEmployeeContext)
+      ) {
+        return createEmployeeAnswerBlockedResult("version_not_visible");
+      }
+
+      const notAnswerableReason = getVersionNotAnswerableReason(
+        command.version,
+        clock.now(),
+      );
+      if (notAnswerableReason !== null) {
+        return createEmployeeAnswerBlockedResult(notAnswerableReason);
+      }
+
+      if (
+        command.existingAnswer === null ||
+        command.existingAnswer.answerStatus !== "in_progress" ||
+        command.existingAnswer.scoreSummary !== null ||
+        command.existingAnswer.submittedAt !== null ||
+        command.existingAnswer.resultSummaryVisible ||
+        (command.existingAnswer.questionResults ?? []).length > 0 ||
+        !isOwnAnswer(
+          command.existingAnswer,
+          normalizedEmployeeContext,
+          command.version,
+        )
+      ) {
+        return createEmployeeAnswerBlockedResult("history_not_visible");
+      }
+
+      return { success: true, answer: command.existingAnswer };
     },
 
     async getEmployeeAnswerReadonlySummary(command) {

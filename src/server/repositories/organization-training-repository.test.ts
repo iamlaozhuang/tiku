@@ -2151,6 +2151,88 @@ describe("organization training repository", () => {
     });
   });
 
+  it("composes each visible version with only the requested employee answer lifecycle", async () => {
+    const inProgressVersionRow = {
+      ...createVersionRow({
+        public_id: "training_version_public_in_progress",
+      }),
+      organization_name: "Test Organization",
+      employee_answer_status: "in_progress",
+      employee_answer_score: "4",
+      employee_answer_total_score: "5",
+    } as unknown as OrganizationTrainingVersionRow;
+    const notStartedVersionRow = {
+      ...createVersionRow({
+        public_id: "training_version_public_not_started",
+      }),
+      organization_name: "Test Organization",
+      employee_answer_status: null,
+      employee_answer_score: null,
+      employee_answer_total_score: null,
+    } as unknown as OrganizationTrainingVersionRow;
+    const submittedVersionRow = {
+      ...createVersionRow({
+        public_id: "training_version_public_submitted",
+      }),
+      organization_name: "Test Organization",
+      employee_answer_status: "submitted",
+      employee_answer_score: "4",
+      employee_answer_total_score: "5",
+    } as unknown as OrganizationTrainingVersionRow;
+    const scoringVersionRow = {
+      ...createVersionRow({
+        public_id: "training_version_public_scoring",
+      }),
+      organization_name: "Test Organization",
+      employee_answer_status: "scoring",
+      employee_answer_score: "4",
+      employee_answer_total_score: "5",
+    } as unknown as OrganizationTrainingVersionRow;
+    const { gateway } = createGateway({
+      employeeVisibleVersionRows: [
+        inProgressVersionRow,
+        notStartedVersionRow,
+        submittedVersionRow,
+        scoringVersionRow,
+      ],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const versions = await repository.listEmployeeVisibleVersions({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+
+    expect(versions).toEqual([
+      expect.objectContaining({
+        publicId: "training_version_public_in_progress",
+        organizationName: "Test Organization",
+        employeeAnswerStatus: "in_progress",
+        submittedScoreSummary: null,
+      }),
+      expect.objectContaining({
+        publicId: "training_version_public_not_started",
+        organizationName: "Test Organization",
+        employeeAnswerStatus: "not_started",
+        submittedScoreSummary: null,
+      }),
+      expect.objectContaining({
+        publicId: "training_version_public_submitted",
+        organizationName: "Test Organization",
+        employeeAnswerStatus: "submitted",
+        submittedScoreSummary: { score: 4, totalScore: 5 },
+      }),
+      expect.objectContaining({
+        publicId: "training_version_public_scoring",
+        organizationName: "Test Organization",
+        employeeAnswerStatus: "scoring",
+        submittedScoreSummary: null,
+      }),
+    ]);
+    expect(JSON.stringify(versions)).not.toContain("answerItemSnapshot");
+    expect(JSON.stringify(versions)).not.toContain("answer_item_snapshot");
+  });
+
   it("isolates incomplete historical versions from admin and employee list reads without inferring scope", async () => {
     const validVersion = createVersionRow({
       public_id: "training_version_public_valid",

@@ -821,22 +821,22 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
-  title: Organization analytics database pagination
-  phase: p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
+  id: p1-remediation-rc-04-organization-training-self-answer-recovery-2026-07-21
+  title: Organization training self-answer recovery
+  phase: p1-remediation-rc-04-organization-training-self-answer-recovery-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0128
-  branch: fix/organization-analytics-database-pagination
+  productClosureContribution: F-0144
+  branch: fix/organization-training-self-answer-recovery
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0128
+    - F-0144
   candidateRootCauseCluster: P1-RC-04
-  objective: move employee-statistics stable employee pagination, distinct count and answer-row narrowing into the PostgreSQL repository while preserving scope and summary-only privacy
+  objective: compose answerable training versions with the signed-in employee lifecycle and restore only that employee's in-progress persisted answer after refresh
   executionStage: candidate_validated_adversarially_reviewed_ready_for_automatic_closeout
   riskBoundary:
-    category: bounded_database_application_query_logic_and_existing_advanced_authorization
+    category: bounded_database_application_read_model_and_existing_advanced_authorization
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
@@ -844,20 +844,21 @@ currentTask:
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: AdminOrganizationAnalyticsPage_to_employee_statistics_route_to_service_to_repository_to_organization_training_answer_employee_user
-    coreFiles: 7
-    contingencyFiles: 4
+    chain: StudentOrganizationTrainingPage_to_visible_list_and_employee_answer_draft_GET_to_route_service_repository_to_version_employee_answer_organization
+    coreFiles: 9
+    contingencyFiles: 6
     sameTaskAuthoritativeCallChainExpansion: 0
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: advanced_organization_analytics_module_employee_answer_statistics_story_role_auth_decision_package_and_ADR_007
-    confirmedResidualRootCause: runtime_repository_returns_every_submitted_answer_without_order_count_limit_or_offset_and_service_slices_an_unordered_in_memory_employee_projection_while_claiming_name_ascending
+    requirements: CT_REQ_019_CT_REQ_036_D15_UC_ORGADVEMP_011_012_advanced_organization_training_module_story_and_ADR_007
+    confirmedResidualRootCause: production_visible_list_never_composes_the_unique_self_answer_and_UI_never_reads_an_in_progress_persisted_answer_so_refresh_reconstructs_an_empty_not_started_form
   expectedAcceptance:
-    - database_pages_distinct_employees_by_display_name_then_public_id_for_20_50_100_windows
-    - row_and_distinct_count_queries_share_the_same_scope_status_and_date_predicate
-    - answer_rows_are_loaded_only_for_employee_ids_selected_on_the_requested_page
-    - service_does_not_slice_again_and_pagination_total_and_sort_metadata_match_the_repository_execution
-    - no_scope_authorization_privacy_UI_schema_migration_real_DB_dependency_Provider_or_mechanism_change
+    - visible_list_projects_organization_name_and_exact_self_answer_status_without_answer_items
+    - no_answer_is_not_started_in_progress_is_continue_and_submitted_exposes_only_score_summary
+    - draft_GET_requires_the_existing_advanced_employee_context_visible_version_and_exact_employee_ownership
+    - UI_loads_the_in_progress_snapshot_before_editing_and_preserves_revision_for_save_or_submit
+    - cross_employee_or_cross_version_access_fails_closed_and_submitted_results_remain_on_readonly_summary
+    - no_entitlement_scope_schema_migration_real_DB_dependency_Provider_or_mechanism_change
   closeoutProjection:
     current: bounded_medium_risk_conditions_satisfied_candidate_validated_and_ready_for_single_kernel_commit
     triggers: unchanged_final_index_tree_and_stable_base_origin
@@ -865,31 +866,31 @@ currentTask:
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    tddRed: expected_3_of_3_failures_before_implementation
-    focusedAndAffectedRegression: pass_52_of_52_across_5_files
+    tddRed: expected_4_of_142_failures_before_implementation_plus_3_adversarial_failures_before_fail_closed_guards
+    focusedAndAffectedRegression: pass_153_of_153_across_6_files
     lint: pass_all_changed_product_and_test_files
     typecheck: pass_tsc_noEmit
     build: pass_next_build_100_static_pages
-    formatAndDiff: pass_prettier_and_git_diff_check
-    e2e: not_required_no_UI_or_runtime_external_side_effect_change
-    mainThreadAdversarialReview: pass_same_row_count_predicate_stable_name_public_id_order_page_scoped_answer_load_no_scope_privacy_or_authorization_change
+    formatAndDiff: pass_prettier_with_git_diff_check_pending_final_index_freeze
+    e2e: not_required_component_interaction_route_repository_and_build_cover_the_local_UI_read_path_without_external_side_effect
+    mainThreadAdversarialReview: pass_exact_self_answer_join_no_raw_list_content_no_pre_submit_result_leak_no_store_draft_GET_object_authorization_revision_restore_and_failed_recovery_mutation_lock
   metrics:
     mandatoryFreshApprovals: 0_covered_by_bounded_medium_risk_standing_approval
     preventableScopeMissApprovals: 0
     testOnlyExpansions: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: 14m_TDD_repository_page_query_service_consumption_regressions_and_adversarial_review
-    mechanismOverhead: 5m_JIT_contract_state_validation_and_closeout_preparation
+    productValueTime: 18m_root_cause_TDD_implementation_and_adversarial_fail_closed_corrections
+    mechanismOverhead: 6m_JIT_contract_state_validation_format_and_closeout_preparation
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
-    findingId: F-0118
-    productClosureContribution: F-0118
-    commit: 81f2df2e330f718dbe491ddab2afd487d091068e
-    candidateTree: 6ac03302cbb6573fd2afe52d533f021ef9b867c4
+    taskId: p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
+    findingId: F-0128
+    productClosureContribution: F-0128
+    commit: d982d2e2b013e870b1fbacc3d17fc1f9fad2a3ee
+    candidateTree: c650fd8f9f98cf68cdafc00b97c994a970aad50c
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: guardian-f0118-task-bound-read-only-roster-2026-07-21
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -903,9 +904,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 81f2df2e330f718dbe491ddab2afd487d091068e
-  lastKnownOriginMasterSha: 81f2df2e330f718dbe491ddab2afd487d091068e
-  lastKnownRemoteMasterSha: 81f2df2e330f718dbe491ddab2afd487d091068e
+  lastKnownMasterSha: d982d2e2b013e870b1fbacc3d17fc1f9fad2a3ee
+  lastKnownOriginMasterSha: d982d2e2b013e870b1fbacc3d17fc1f9fad2a3ee
+  lastKnownRemoteMasterSha: d982d2e2b013e870b1fbacc3d17fc1f9fad2a3ee
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

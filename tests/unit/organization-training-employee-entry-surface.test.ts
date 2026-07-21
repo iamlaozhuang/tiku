@@ -509,6 +509,103 @@ describe("StudentOrganizationTrainingPage", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("restores an in-progress answer after refresh before continuing edits", async () => {
+    const restoredDraftAnswer = {
+      ...draftAnswer,
+      revision: 3,
+      trainingVersionPublicId: inProgressVisibleVersion.publicId,
+      answerItems: [
+        {
+          questionPublicId: "organization-training-question-ui-003",
+          selectedOptionPublicIds: ["organization-training-option-ui-c"],
+          textAnswer: null,
+        },
+      ],
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+        const method = init?.method ?? "GET";
+
+        if (path.endsWith("/visible-list") && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { versions: [inProgressVisibleVersion] },
+          });
+        }
+
+        if (path.endsWith("/employee-answers/draft") && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { answer: restoredDraftAnswer },
+          });
+        }
+
+        if (
+          path.endsWith("/employee-answers/draft-save") &&
+          method === "POST"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { answer: restoredDraftAnswer },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentOrganizationTrainingPage));
+
+    const row = await screen.findByTestId(
+      "organization-training-row-organization-training-version-ui-002",
+    );
+    fireEvent.click(within(row).getByRole("button", { name: "继续训练" }));
+
+    const workspace = screen.getByTestId(
+      "organization-training-workspace-organization-training-version-ui-002",
+    );
+    await waitFor(() =>
+      expect(
+        within(workspace).getByLabelText("A. 记录事实并形成改进动作"),
+      ).toBeChecked(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/organization-trainings/organization-training-version-ui-002/employee-answers/draft",
+      expect.objectContaining({ method: "GET" }),
+    );
+
+    fireEvent.click(
+      within(workspace).getByRole("button", { name: "保存草稿" }),
+    );
+    await waitFor(() =>
+      expect(
+        readJsonRequestBody(
+          fetchMock,
+          "/api/v1/organization-trainings/organization-training-version-ui-002/employee-answers/draft-save",
+          "POST",
+        ),
+      ).toMatchObject({
+        expectedRevision: 3,
+        answerItems: [
+          {
+            questionPublicId: "organization-training-question-ui-003",
+            selectedOptionPublicIds: ["organization-training-option-ui-c"],
+            textAnswer: null,
+          },
+        ],
+      }),
+    );
+  });
+
   it("suppresses duplicate draft requests while one action is in flight", async () => {
     let releaseDraft: (() => void) | undefined;
     const draftBarrier = new Promise<void>((resolve) => {

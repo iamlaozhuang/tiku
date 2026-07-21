@@ -1,19 +1,23 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21",
-  "objective": "Close F-0128 by moving employee-statistics page selection, stable employeeDisplayName plus employeePublicId ordering, distinct employee count and answer-row narrowing into the PostgreSQL repository path. Preserve the existing organization scope, date range, advanced-admin authorization and summary-only privacy contract without schema, migration, persistent database execution or UI behavior changes.",
+  "taskId": "p1-remediation-rc-04-organization-training-self-answer-recovery-2026-07-21",
+  "objective": "Close F-0144 by composing each currently answerable organization training version with the signed-in employee's persisted answer lifecycle, organization display name and submitted score, and by adding an object-authorized GET path that restores only that employee's in-progress answer snapshot. Preserve the existing advanced organization authorization, current organization scope, single-submit lifecycle and raw-answer privacy boundaries without schema, migration, persistent database execution or entitlement expansion.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/organization-analytics-repository.ts",
-    "src/server/services/organization-analytics-service.ts",
-    "src/server/services/organization-analytics-route.ts",
-    "tests/unit/p1-organization-analytics-database-pagination.test.ts",
-    "src/server/repositories/organization-analytics-repository.test.ts",
-    "src/server/services/organization-analytics-service.test.ts",
-    "src/server/services/organization-analytics-route.test.ts",
-    "tests/unit/organization-analytics-admin-entry-surface.test.ts"
+    "src/server/contracts/organization-training-contract.ts",
+    "src/server/repositories/organization-training-repository.ts",
+    "src/server/repositories/organization-training-repository.test.ts",
+    "src/server/services/organization-training-service.ts",
+    "src/server/services/organization-training-service.test.ts",
+    "src/server/services/organization-training-route.ts",
+    "src/server/services/organization-training-route.test.ts",
+    "src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft/route.ts",
+    "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
+    "tests/unit/organization-training-employee-entry-surface.test.ts",
+    "tests/unit/p0-rc-08-operation-id-retry.test.ts",
+    "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -28,37 +32,41 @@
     ".github/workflows/**",
     ".env*",
     "schema, migration or persistent database execution",
-    "organization analytics authorization or privacy expansion",
-    "raw employee answers, personal AI content or export",
+    "new role, entitlement, organization scope, quota or default capability",
+    "cross-employee answers, admin raw-answer access or answer export",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/organization-analytics-repository.ts",
-    "src/server/services/organization-analytics-service.ts",
-    "src/server/services/organization-analytics-route.ts",
-    "tests/unit/p1-organization-analytics-database-pagination.test.ts"
+    "src/server/contracts/organization-training-contract.ts",
+    "src/server/repositories/organization-training-repository.ts",
+    "src/server/services/organization-training-service.ts",
+    "src/server/services/organization-training-route.ts",
+    "src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft/route.ts",
+    "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx"
   ],
   "contingencyFiles": [
-    "src/server/repositories/organization-analytics-repository.test.ts",
-    "src/server/services/organization-analytics-service.test.ts",
-    "src/server/services/organization-analytics-route.test.ts",
-    "tests/unit/organization-analytics-admin-entry-surface.test.ts"
+    "src/server/repositories/organization-training-repository.test.ts",
+    "src/server/services/organization-training-service.test.ts",
+    "src/server/services/organization-training-route.test.ts",
+    "tests/unit/organization-training-employee-entry-surface.test.ts",
+    "tests/unit/p0-rc-08-operation-id-retry.test.ts",
+    "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminOrganizationAnalyticsPage already sends page/pageSize and renders the returned pagination. No UI contract change is required.",
-    "routeService": "The employee-statistics route resolves the existing org_advanced_admin context and visible organization scope before repository access. The service currently asks for every employee summary input and slices in memory; it must consume one repository page and its distinct total instead.",
-    "repository": "The runtime repository currently loads every submitted organization_training_answer row in the visible scope/date range without order, count, limit or offset. The corrected path pages distinct employees by employeeDisplayName and employeePublicId, counts with the same predicate, then loads submissions only for the selected employee ids.",
-    "schema": "Existing organization_training_answer.employee_public_id, employee/user joins, organization_public_id, status and submitted_at support the correction. No schema or migration source is required.",
-    "tests": "Focused RED proves row/count predicate identity, stable same-name ordering, 21/51/101 employee windows, page-scoped submission loading and truthful service pagination. Existing repository/service/route/UI regressions are pre-allowlisted.",
-    "requirements": "Advanced organization analytics module and employee-answer-statistics story require summary-only scoped analytics, stable 20/50/100 pagination and no raw answers/export. ADR-007 keeps the advanced authorization source unchanged.",
-    "nonClaims": "No entitlement, scope, privacy, schema, migration, real database, UI, export, Provider, dependency, deployment or mechanism change."
+    "uiApi": "StudentOrganizationTrainingPage consumes visible-list, derives the primary action from employeeAnswerStatus and currently initializes every form empty. It must load the authenticated employee's in-progress draft before enabling continuation and keep submitted rows on the existing readonly-summary path.",
+    "routeService": "The existing employee session resolver supplies employeePublicId, currentOrganizationPublicId and effective advanced org_auth. The new GET reuses the same context, visible version resolver and own-answer resolver, but the service accepts only an in_progress answer owned by that employee and version.",
+    "repository": "The runtime visible-list query already joins employee, user, employee_org_auth, org_auth and organization but does not join the unique version+employee answer. It must left join that exact self answer once and project status, score and organization name without widening scope or exposing answer items in the list.",
+    "schema": "Existing organization_training_answer has a unique version+employee index and persisted revision, answer_item_snapshot, status, score and submitted_at. Existing organization and version rows provide the display and scope facts. No schema or migration source is required.",
+    "tests": "Repository, service, route and employee UI RED cases cover no-answer, in-progress refresh recovery, submitted result discovery, cross-employee/version denial, no mutation and preserved retry semantics. Existing P0 RC-08 regressions are pre-allowlisted.",
+    "requirements": "CT-REQ-019 and CT-REQ-036, D15, UC-ORGADVEMP-011/012, the advanced organization training module/story and ADR-007 require save/restore, one-submit, own-result discovery and service-enforced advanced organization authorization.",
+    "nonClaims": "No historical submitted-after-transfer read model, entitlement expansion, admin answer access, schema, migration, real database, dependency, Provider, deployment or mechanism change. F-0146 remains separate."
   },
   "validationCommands": [
     {
-      "name": "f0128-organization-analytics-database-pagination-focused",
+      "name": "f0144-organization-training-self-answer-recovery-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -66,38 +74,42 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-organization-analytics-database-pagination.test.ts",
-        "src/server/repositories/organization-analytics-repository.test.ts",
-        "src/server/services/organization-analytics-service.test.ts",
-        "src/server/services/organization-analytics-route.test.ts",
-        "tests/unit/organization-analytics-admin-entry-surface.test.ts"
+        "src/server/repositories/organization-training-repository.test.ts",
+        "src/server/services/organization-training-service.test.ts",
+        "src/server/services/organization-training-route.test.ts",
+        "tests/unit/organization-training-employee-entry-surface.test.ts",
+        "tests/unit/p0-rc-08-operation-id-retry.test.ts",
+        "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
       ]
     },
     {
-      "name": "f0128-organization-analytics-database-pagination-lint",
+      "name": "f0144-organization-training-self-answer-recovery-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/organization-analytics-repository.ts",
-        "src/server/services/organization-analytics-service.ts",
-        "src/server/services/organization-analytics-route.ts",
-        "tests/unit/p1-organization-analytics-database-pagination.test.ts",
-        "src/server/repositories/organization-analytics-repository.test.ts",
-        "src/server/services/organization-analytics-service.test.ts",
-        "src/server/services/organization-analytics-route.test.ts"
+        "src/server/contracts/organization-training-contract.ts",
+        "src/server/repositories/organization-training-repository.ts",
+        "src/server/repositories/organization-training-repository.test.ts",
+        "src/server/services/organization-training-service.ts",
+        "src/server/services/organization-training-service.test.ts",
+        "src/server/services/organization-training-route.ts",
+        "src/server/services/organization-training-route.test.ts",
+        "src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft/route.ts",
+        "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
+        "tests/unit/organization-training-employee-entry-surface.test.ts"
       ]
     },
     {
-      "name": "f0128-organization-analytics-database-pagination-typecheck",
+      "name": "f0144-organization-training-self-answer-recovery-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0128-organization-analytics-database-pagination-build",
+      "name": "f0144-organization-training-self-answer-recovery-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -111,7 +123,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_query_logic_and_existing_advanced_authorization",
+    "category": "bounded_database_application_read_model_and_existing_advanced_authorization",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,

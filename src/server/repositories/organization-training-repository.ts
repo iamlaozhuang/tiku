@@ -231,6 +231,16 @@ export type OrganizationTrainingEmployeeVisibleVersionListInput = {
   visibleOrganizationPublicIds?: readonly string[];
 };
 
+export type OrganizationTrainingEmployeeVisibleVersionRow =
+  OrganizationTrainingVersionRow & {
+    organization_name?: string | null;
+    employee_answer_status?:
+      | EmployeeOrganizationTrainingAnswerDto["answerStatus"]
+      | null;
+    employee_answer_score?: number | string | null;
+    employee_answer_total_score?: number | string | null;
+  };
+
 export type OrganizationTrainingEmployeeVisibleQuestionSnapshotSourceInput =
   OrganizationTrainingEmployeeVisibleVersionListInput;
 
@@ -367,7 +377,7 @@ export type OrganizationTrainingVersionGateway = {
   ): Promise<OrganizationTrainingEmployeeAnswerPersistenceLineage | null>;
   listPublishedVersionsForEmployeeOrganization(
     input: OrganizationTrainingEmployeeVisibleVersionListInput,
-  ): Promise<OrganizationTrainingVersionRow[]>;
+  ): Promise<OrganizationTrainingEmployeeVisibleVersionRow[]>;
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
@@ -671,7 +681,7 @@ export function createOrganizationTrainingRepository(
         normalizedInput,
       );
     const versions = rows
-      .map(tryMapAuthorizationScopedOrganizationTrainingVersionRowToDto)
+      .map(tryMapEmployeeVisibleOrganizationTrainingVersionRowToDto)
       .filter(
         (version): version is OrganizationTrainingPublishedVersionDto =>
           version !== null,
@@ -1205,6 +1215,44 @@ function tryMapAuthorizationScopedOrganizationTrainingVersionRowToDto(
         ...version,
         authorizationPublicId: row.authorization_public_id,
       };
+}
+
+function tryMapEmployeeVisibleOrganizationTrainingVersionRowToDto(
+  row: OrganizationTrainingEmployeeVisibleVersionRow,
+): OrganizationTrainingPublishedVersionDto | null {
+  const version =
+    tryMapAuthorizationScopedOrganizationTrainingVersionRowToDto(row);
+
+  if (version === null) {
+    return null;
+  }
+
+  const score = Number(row.employee_answer_score);
+  const totalScore = Number(row.employee_answer_total_score);
+  const hasSubmittedStatus =
+    row.employee_answer_status === "submitted" ||
+    row.employee_answer_status === "read_only";
+  const hasScoreSummary =
+    hasSubmittedStatus &&
+    row.employee_answer_score !== null &&
+    row.employee_answer_score !== undefined &&
+    row.employee_answer_total_score !== null &&
+    row.employee_answer_total_score !== undefined &&
+    Number.isFinite(score) &&
+    score >= 0 &&
+    Number.isFinite(totalScore) &&
+    totalScore >= 0;
+
+  return {
+    ...version,
+    organizationName:
+      typeof row.organization_name === "string" &&
+      row.organization_name.trim().length > 0
+        ? row.organization_name.trim()
+        : null,
+    employeeAnswerStatus: row.employee_answer_status ?? "not_started",
+    submittedScoreSummary: hasScoreSummary ? { score, totalScore } : null,
+  };
 }
 
 export function createPostgresOrganizationTrainingRepository(
@@ -3733,7 +3781,7 @@ async function findVersionOrganizationPublicIdByVersionPublicId(
 async function listPublishedVersionsForEmployeeOrganization(
   database: RuntimeDatabase,
   input: OrganizationTrainingEmployeeVisibleVersionListInput,
-): Promise<OrganizationTrainingVersionRow[]> {
+): Promise<OrganizationTrainingEmployeeVisibleVersionRow[]> {
   const now = new Date();
   const activeUpgradeExists = createActiveAdvancedOrgAuthUpgradeExistsSql(now);
   const visibleOrganizationPublicIds =
@@ -3742,7 +3790,14 @@ async function listPublishedVersionsForEmployeeOrganization(
       ? [input.organizationPublicId]
       : [...input.visibleOrganizationPublicIds];
   const rows = await database
-    .select(organizationTrainingVersionSelection)
+    .select({
+      ...organizationTrainingVersionSelection,
+      organization_name: organization.name,
+      employee_answer_status:
+        organizationTrainingAnswer.organization_training_answer_status,
+      employee_answer_score: organizationTrainingAnswer.score,
+      employee_answer_total_score: organizationTrainingAnswer.total_score,
+    })
     .from(organizationTrainingVersion)
     .innerJoin(
       employee,
@@ -3761,6 +3816,16 @@ async function listPublishedVersionsForEmployeeOrganization(
     )
     .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
     .innerJoin(organization, eq(employee.organization_id, organization.id))
+    .leftJoin(
+      organizationTrainingAnswer,
+      and(
+        eq(
+          organizationTrainingAnswer.organization_training_version_id,
+          organizationTrainingVersion.id,
+        ),
+        eq(organizationTrainingAnswer.employee_id, employee.id),
+      ),
+    )
     .where(
       and(
         eq(employee.public_id, input.employeePublicId),
@@ -3784,7 +3849,7 @@ async function listPublishedVersionsForEmployeeOrganization(
     )
     .orderBy(desc(organizationTrainingVersion.published_at));
 
-  return rows as OrganizationTrainingVersionRow[];
+  return rows as OrganizationTrainingEmployeeVisibleVersionRow[];
 }
 
 export function createOrganizationTrainingVisibleOrganizationPublicIdArraySql(

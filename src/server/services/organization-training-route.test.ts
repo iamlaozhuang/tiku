@@ -872,6 +872,18 @@ function createEmployeeAnswerReadonlySummaryRequest(
   );
 }
 
+function createEmployeeAnswerDraftRequest(
+  init: Omit<RequestInit, "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${takeDownPathPublicId}/employee-answers/draft`,
+    {
+      ...init,
+      method: "GET",
+    },
+  );
+}
+
 function createRouteContext(publicId = publishPathPublicId) {
   return {
     params: Promise.resolve({
@@ -3183,6 +3195,63 @@ describe("organization training employee answer route handlers", () => {
     expect(serializedPayload).not.toContain("rawAnswer");
     expect(serializedPayload).not.toContain("providerPayload");
     expect(serializedPayload).not.toMatch(/"id":|"employeeId":/);
+  });
+
+  it("restores only the current employee in-progress answer through a no-store GET", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const draftAnswer = createEmployeeAnswer({
+      revision: 3,
+      answerItems: [
+        {
+          questionPublicId: "training_question_route_public_401",
+          selectedOptionPublicIds: ["training_question_route_option_a"],
+          textAnswer: null,
+        },
+      ],
+      questionResults: [],
+    });
+    runtimeRepositoryMock.findEmployeeAnswerByVersion.mockResolvedValueOnce(
+      draftAnswer,
+    );
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+    const handlersWithDraftRecovery = handlers as typeof handlers & {
+      employeeAnswerDraft: {
+        GET: typeof handlers.employeeAnswerReadonlySummary.GET;
+      };
+    };
+
+    expect(typeof handlersWithDraftRecovery.employeeAnswerDraft?.GET).toBe(
+      "function",
+    );
+
+    const response = await handlersWithDraftRecovery.employeeAnswerDraft.GET(
+      createEmployeeAnswerDraftRequest({
+        headers: {
+          authorization: "Bearer organization_training_employee_session_401",
+        },
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: { answer: draftAnswer },
+    });
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(
+      runtimeRepositoryMock.findEmployeeAnswerByVersion,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: takeDownPathPublicId,
+      employeePublicId: "employee_route_public_401",
+    });
   });
 
   it("rejects malformed employee answer payloads with a generic envelope", async () => {

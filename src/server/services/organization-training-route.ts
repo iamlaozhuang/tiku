@@ -378,6 +378,7 @@ type OrganizationTrainingRouteService = Pick<
       | "listEmployeeVisibleVersions"
       | "saveEmployeeAnswerDraft"
       | "submitEmployeeAnswer"
+      | "getEmployeeAnswerDraft"
       | "getEmployeeAnswerReadonlySummary"
     >
   >;
@@ -504,6 +505,14 @@ async function readRequestJson(request: Request): Promise<unknown> {
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
+}
+
+function createNoStoreJsonResponse<TData>(
+  response: ApiResponse<TData>,
+): Response {
+  return Response.json(response, {
+    headers: { "cache-control": "no-store" },
+  });
 }
 
 function normalizeRequiredText(value: string | null): string | null {
@@ -1832,6 +1841,9 @@ export function createOrganizationTrainingRouteHandlers(
   const submitEmployeeAnswerService =
     organizationTrainingService.submitEmployeeAnswer ??
     defaultEmployeeAnswerServiceResult;
+  const getEmployeeAnswerDraftService =
+    organizationTrainingService.getEmployeeAnswerDraft ??
+    defaultEmployeeAnswerServiceResult;
   const getEmployeeAnswerReadonlySummaryService =
     organizationTrainingService.getEmployeeAnswerReadonlySummary ??
     defaultEmployeeAnswerServiceResult;
@@ -2637,6 +2649,68 @@ export function createOrganizationTrainingRouteHandlers(
         }
 
         return createJsonResponse(
+          createSuccessResponse({
+            answer: result.answer,
+          }),
+        );
+      },
+    },
+    employeeAnswerDraft: {
+      async GET(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const pathPublicId = await resolvePathPublicId(context);
+        const employeeContext = await resolveEmployeeContext({
+          request,
+          pathPublicId,
+        });
+
+        if (employeeContext === null) {
+          return createNoStoreJsonResponse(
+            createEmployeeAnswerContextUnavailableResponse(),
+          );
+        }
+
+        if (
+          !canUseEmployeeOrganizationTrainingAnswerContext(
+            employeeContext.authorizationContext,
+          )
+        ) {
+          return createNoStoreJsonResponse(
+            createEmployeeAnswerBlockedResponse(),
+          );
+        }
+
+        const version = await resolvePublishedVersion({
+          request,
+          trainingVersionPublicId: pathPublicId,
+          employeeContext,
+        });
+
+        if (version === null) {
+          return createNoStoreJsonResponse(
+            createEmployeeAnswerVersionUnavailableResponse(),
+          );
+        }
+
+        const result = await getEmployeeAnswerDraftService({
+          employeeContext,
+          version,
+          existingAnswer: await resolveEmployeeAnswer({
+            request,
+            trainingVersionPublicId: pathPublicId,
+            employeeContext,
+          }),
+        });
+
+        if (!result.success) {
+          return createNoStoreJsonResponse(
+            createEmployeeAnswerBlockedResponse(),
+          );
+        }
+
+        return createNoStoreJsonResponse(
           createSuccessResponse({
             answer: result.answer,
           }),

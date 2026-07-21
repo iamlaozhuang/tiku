@@ -3315,4 +3315,102 @@ describe("organization training service", () => {
     expect(JSON.stringify(summaryResult)).not.toContain("examReportPublicId");
     expect(JSON.stringify(summaryResult)).not.toContain("mistakeBookPublicId");
   });
+
+  it("returns only the signed-in employee in-progress answer for draft recovery", async () => {
+    const { service } = createServiceFixture();
+    const serviceWithDraftRecovery = service as typeof service & {
+      getEmployeeAnswerDraft: typeof service.getEmployeeAnswerReadonlySummary;
+    };
+    const employeeContext = {
+      employeePublicId: "employee_public_123",
+      currentOrganizationPublicId: "organization_branch_public_456",
+      visibleOrganizationPublicIds: [
+        "organization_branch_public_456",
+        "organization_public_123",
+      ],
+      authorizationContext: createAdvancedOrgAuthContext(),
+    };
+    const draftAnswer = createSubmittedEmployeeAnswer({
+      revision: 3,
+      answerStatus: "in_progress",
+      scoreSummary: null,
+      submittedAt: null,
+      resultSummaryVisible: false,
+      answerItems: [
+        {
+          questionPublicId: "training_question_public_123",
+          selectedOptionPublicIds: ["training_question_option_a"],
+          textAnswer: null,
+        },
+      ],
+      questionResults: [],
+    });
+
+    expect(typeof serviceWithDraftRecovery.getEmployeeAnswerDraft).toBe(
+      "function",
+    );
+
+    await expect(
+      serviceWithDraftRecovery.getEmployeeAnswerDraft({
+        employeeContext,
+        version: createPublishedVersion(),
+        existingAnswer: draftAnswer,
+      }),
+    ).resolves.toEqual({ success: true, answer: draftAnswer });
+
+    await expect(
+      serviceWithDraftRecovery.getEmployeeAnswerDraft({
+        employeeContext,
+        version: createPublishedVersion(),
+        existingAnswer: createSubmittedEmployeeAnswer(),
+      }),
+    ).resolves.toEqual({
+      success: false,
+      reason: "history_not_visible",
+      message: "Organization training employee answer is blocked.",
+    });
+
+    await expect(
+      serviceWithDraftRecovery.getEmployeeAnswerDraft({
+        employeeContext,
+        version: createPublishedVersion(),
+        existingAnswer: createSubmittedEmployeeAnswer({
+          employeePublicId: "employee_public_other",
+          answerStatus: "in_progress",
+          scoreSummary: null,
+          submittedAt: null,
+        }),
+      }),
+    ).resolves.toEqual({
+      success: false,
+      reason: "history_not_visible",
+      message: "Organization training employee answer is blocked.",
+    });
+
+    await expect(
+      serviceWithDraftRecovery.getEmployeeAnswerDraft({
+        employeeContext,
+        version: createPublishedVersion(),
+        existingAnswer: createSubmittedEmployeeAnswer({
+          answerStatus: "in_progress",
+          scoreSummary: null,
+          submittedAt: null,
+          questionResults: [
+            {
+              questionPublicId: "training_question_public_123",
+              score: 2,
+              maxScore: 2,
+              standardAnswer: "A",
+              analysis: "must not be exposed before submit",
+              scoringPointResults: [],
+            },
+          ],
+        }),
+      }),
+    ).resolves.toEqual({
+      success: false,
+      reason: "history_not_visible",
+      message: "Organization training employee answer is blocked.",
+    });
+  });
 });

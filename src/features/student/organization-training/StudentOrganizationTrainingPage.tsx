@@ -58,7 +58,11 @@ type AnswerItemFormValue = {
   textAnswer: string;
 };
 
-type AnswerPendingAction = "saving" | "submitting" | "loading_result";
+type AnswerPendingAction =
+  | "saving"
+  | "submitting"
+  | "loading_draft"
+  | "loading_result";
 
 type AnswerFeedback = {
   kind: "error" | "success";
@@ -138,6 +142,41 @@ function createInitialAnswerState(
     feedback: null,
     pendingAction: null,
     values: createInitialAnswerValues(version),
+  };
+}
+
+function createRecoveredAnswerValues(
+  version: OrganizationTrainingPublishedVersionDto,
+  answer: EmployeeOrganizationTrainingAnswerDto,
+): AnswerFormValues {
+  const answerItemsByQuestionPublicId = new Map(
+    (answer.answerItems ?? []).map((answerItem) => [
+      answerItem.questionPublicId,
+      answerItem,
+    ]),
+  );
+
+  return {
+    answerItemsByQuestionPublicId: Object.fromEntries(
+      (version.questions ?? []).map((question) => {
+        const persistedAnswerItem = answerItemsByQuestionPublicId.get(
+          question.publicId,
+        );
+        const validOptionPublicIds = new Set(
+          question.options.map((option) => option.publicId),
+        );
+
+        return [
+          question.publicId,
+          {
+            selectedOptionPublicIds: (
+              persistedAnswerItem?.selectedOptionPublicIds ?? []
+            ).filter((publicId) => validOptionPublicIds.has(publicId)),
+            textAnswer: persistedAnswerItem?.textAnswer ?? "",
+          },
+        ];
+      }),
+    ),
   };
 }
 
@@ -802,6 +841,74 @@ export function StudentOrganizationTrainingPage() {
     }
   }
 
+  async function handleLoadDraft(
+    version: OrganizationTrainingPublishedVersionDto,
+  ) {
+    const sessionValue = readStudentSessionRequestToken();
+    const trainingVersionPublicId = version.publicId;
+    const currentState =
+      answerStateByVersionPublicId[trainingVersionPublicId] ??
+      createInitialAnswerState(version);
+
+    if (currentState.pendingAction !== null || currentState.answer !== null) {
+      return;
+    }
+
+    updateAnswerState(trainingVersionPublicId, (state) => ({
+      ...state,
+      feedback: null,
+      pendingAction: "loading_draft",
+    }));
+
+    try {
+      const response = await fetchStudentApi<AnswerPayload>(
+        `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/draft`,
+        sessionValue,
+        { method: "GET" },
+      );
+
+      if (isStudentUnauthorizedResponse(response)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (handleActionAccessDenied(trainingVersionPublicId, response)) {
+        return;
+      }
+
+      if (
+        response.code !== 0 ||
+        response.data === null ||
+        response.data.answer.answerStatus !== "in_progress"
+      ) {
+        updateAnswerState(trainingVersionPublicId, (state) => ({
+          ...state,
+          feedback: { kind: "error", text: "草稿恢复失败，请返回列表刷新" },
+        }));
+        return;
+      }
+
+      const draftAnswer = response.data.answer;
+
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        answer: draftAnswer,
+        feedback: { kind: "success", text: "草稿已恢复" },
+        values: createRecoveredAnswerValues(version, draftAnswer),
+      }));
+    } catch {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        feedback: { kind: "error", text: "草稿恢复失败，请返回列表刷新" },
+      }));
+    } finally {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        pendingAction: null,
+      }));
+    }
+  }
+
   function handleSelectTraining(
     version: OrganizationTrainingPublishedVersionDto,
   ) {
@@ -813,6 +920,11 @@ export function StudentOrganizationTrainingPage() {
 
     if (isReadonlyTraining(version, answerState.answer)) {
       void handleLoadReadonlySummary(version.publicId);
+      return;
+    }
+
+    if (version.employeeAnswerStatus === "in_progress") {
+      void handleLoadDraft(version);
     }
   }
 
@@ -1027,13 +1139,16 @@ function TrainingVersionWorkspace({
 
   const questions = version.questions ?? [];
   const isReadonly = isReadonlyTraining(version, answerState.answer);
+  const requiresDraftRecovery =
+    version.employeeAnswerStatus === "in_progress" &&
+    answerState.answer === null;
   const answerStatusLabel = isReadonly
     ? "已提交"
     : answerState.answer?.answerStatus === "in_progress" ||
         version.employeeAnswerStatus === "in_progress"
       ? "进行中"
       : "未开始";
-  const isPending = answerState.pendingAction !== null;
+  const isPending = answerState.pendingAction !== null || requiresDraftRecovery;
 
   return (
     <article
@@ -1088,7 +1203,7 @@ function TrainingVersionWorkspace({
                   answerState.values,
                   question.publicId,
                 )}
-                disabled={isReadonly}
+                disabled={isReadonly || requiresDraftRecovery}
                 key={question.publicId}
                 question={question}
                 onChange={(updater) =>
