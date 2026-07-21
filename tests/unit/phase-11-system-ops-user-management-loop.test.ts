@@ -65,8 +65,8 @@ function createAdminFlowRepositories(input: {
           },
         };
       },
-      async resetUserPassword() {
-        throw new Error("resetUserPassword is not used by this test");
+      async resetUserPasswordAtomically() {
+        throw new Error("resetUserPasswordAtomically is not used by this test");
       },
       async disableUser(publicId) {
         input.mutationInputs.push({ action: "disableUser", publicId });

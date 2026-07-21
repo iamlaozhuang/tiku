@@ -58,21 +58,13 @@ function createRepositories(input: {
           },
         };
       },
-      async resetUserPassword(publicId) {
+      async resetUserPasswordAtomically(resetInput) {
         input.mutationInputs.push({
-          action: "resetUserPassword",
-          publicId,
+          action: "resetUserPasswordAtomically",
+          publicId: resetInput.publicId,
         });
 
-        return publicId === "user-public-001";
-      },
-      async revokeUserSessions(publicId) {
-        input.mutationInputs.push({
-          action: "revokeUserSessions",
-          publicId,
-        });
-
-        return publicId === "user-public-001";
+        return resetInput.publicId === "user-public-001";
       },
     },
     contentKnowledgeRepository: {
@@ -297,18 +289,12 @@ describe("phase 11 auth session account hardening", () => {
       },
     });
     expect(mutationInputs).toEqual([
-      { action: "resetUserPassword", publicId: "user-public-001" },
-      { action: "revokeUserSessions", publicId: "user-public-001" },
+      {
+        action: "resetUserPasswordAtomically",
+        publicId: "user-public-001",
+      },
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "user.reset_password",
-        targetResourceType: "user",
-        targetPublicId: "user-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted user credential reset metadata",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
     expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
       '"id"',
     );

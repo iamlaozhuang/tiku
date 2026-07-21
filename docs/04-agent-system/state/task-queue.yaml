@@ -318,7 +318,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-learner-history-pagination-2026-07-20: closed
     p1-remediation-rc-04-student-home-pagination-2026-07-20: closed
     p1-remediation-rc-04-admin-log-pagination-total-2026-07-20: closed
-    p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21: in_progress
+    p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21: closed
+    p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21: in_progress
 activeTasks:
   - id: p1-remediation-rc-04-student-home-pagination-2026-07-20
     title: Student home paper pagination
@@ -491,7 +492,7 @@ activeTasks:
   - id: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
     title: Organization training lifecycle pagination
     phase: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0022
@@ -507,7 +508,7 @@ activeTasks:
       category: bounded_database_application_query_logic
       status: satisfied_by_bounded_medium_risk_standing_approval
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    executionStage: verified_candidate_ready_for_commit
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
@@ -540,6 +541,11 @@ activeTasks:
       repeatedBlockerReports: 0
       validationRetryCount: 1
       fullRuns: 1
+    closeout:
+      commit: 1745dc735ddda78bf10c99a2ab1ec5bc3a3bf558
+      candidateTree: d002e384a4072b3ebcaa82a4a2fc5fa181c39ef4
+      status: committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     previousTaskCloseout:
       taskId: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
       findingId: F-0021
@@ -548,6 +554,72 @@ activeTasks:
       candidateTree: cc4656385a1d3be3ac0de37d0c3cd8626b822a71
       focused: passed_4_of_4
       affectedRegression: passed_12_of_12
+      build: passed_97_static_pages
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullRuns: 1
+      mechanismScriptChanges: 0
+  - id: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
+    title: User password reset atomicity
+    phase: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0030
+    branch: fix/user-password-reset-atomicity
+    dependsOn:
+      - p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
+    objective: close F-0030 by moving credential update, active-session revocation and redacted success audit into one locked repository transaction
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0030
+    highRiskApproval:
+      category: bounded_permission_and_database_application_transaction_logic
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: verified_candidate_ready_for_commit
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      preflightIncludedTestFiles: 12
+      inTaskTestOnlyExpansionCount: 1
+      testOnlyExpansionReason: legacy_runtime_fixture_signature_alignment_and_shared_identity_lock_regression
+      testOnlyExpansionApprovalRequests: 0
+      weakenedTestAssertions: 0
+      postFreezeTestScopeChanges: 0
+      tddRed: passed_4_expected_failures_of_14
+      focused: passed_18_of_18
+      affectedRegression: passed_65_of_65
+      lint: passed_exact_affected_files_zero_warnings
+      typecheck: passed
+      build: passed_97_static_pages
+      changedFileFormatDiff: passed_pre_and_post_full
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      fullProfile: passed_once_after_product_candidate_freeze
+      candidateTreeBeforeCloseoutEvidence: 99430873aa4448c8b3fc6b1b393a014d49d42f8d
+      mainThreadAdversarialReview: passed_shared_identity_lock_one_transaction_session_and_audit_failure_injection_no_legacy_reset_sink
+      entitlementExpansion: false
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      realExternalCall: false
+      extraFiles: false
+      approvalRequests: 0
+      approvalIdMismatch: 0
+      postApprovalCandidateTreeChanges: 0
+      repeatedBlockerReports: 0
+      validationRetryCount: 0
+      fullRuns: 1
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
+      findingId: F-0022
+      commit: 1745dc735ddda78bf10c99a2ab1ec5bc3a3bf558
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      candidateTree: d002e384a4072b3ebcaa82a4a2fc5fa181c39ef4
+      focused: passed_149_of_149
+      affectedRegression: passed_19_of_19
       build: passed_97_static_pages
       p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
       p0SerialBaseline: pass_closed_program

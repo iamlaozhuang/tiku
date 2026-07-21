@@ -146,9 +146,12 @@ function createAdminFlowRepositories(input: {
     async getUserDetail(publicId: string) {
       return publicId === "user-public-001" ? userDetailPayload : null;
     },
-    async resetUserPassword(publicId: string) {
-      input.mutationInputs.push({ action: "resetUserPassword", publicId });
-      return publicId === "user-public-001";
+    async resetUserPasswordAtomically(resetInput: { publicId: string }) {
+      input.mutationInputs.push({
+        action: "resetUserPasswordAtomically",
+        publicId: resetInput.publicId,
+      });
+      return resetInput.publicId === "user-public-001";
     },
     async disableUser(publicId: string) {
       input.mutationInputs.push({ action: "disableUser", publicId });
@@ -459,19 +462,14 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     );
     await expect(enableResponse.json()).resolves.toEqual(createOkPayload(null));
     expect(mutationInputs).toEqual([
-      { action: "resetUserPassword", publicId: "user-public-001" },
-      { action: "revokeUserSessions", publicId: "user-public-001" },
+      {
+        action: "resetUserPasswordAtomically",
+        publicId: "user-public-001",
+      },
       { action: "disableUser", publicId: "user-public-001" },
       { action: "enableUser", publicId: "user-public-001" },
     ]);
     expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actorRole: "ops_admin",
-        actionType: "user.reset_password",
-        resultStatus: "success",
-        metadataSummary: "redacted user credential reset metadata",
-        requestIp: "203.0.113.30",
-      }),
       expect.objectContaining({
         actorRole: "ops_admin",
         actionType: "user.disable",

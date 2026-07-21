@@ -93,13 +93,9 @@ function createAdminOpsRepositories() {
           },
         };
       },
-      async resetUserPassword(publicId) {
-        resetInputs.push(publicId);
-        return publicId === "user-public-001";
-      },
-      async revokeUserSessions(publicId) {
-        resetInputs.push(`revoke:${publicId}`);
-        return publicId === "user-public-001";
+      async resetUserPasswordAtomically(resetInput) {
+        resetInputs.push(resetInput.publicId);
+        return resetInput.publicId === "user-public-001";
       },
     },
     contentKnowledgeRepository: {
@@ -760,19 +756,8 @@ describe("phase 9 admin ops runtime ui completion", () => {
         },
       },
     });
-    expect(resetInputs).toEqual(["user-public-001", "revoke:user-public-001"]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actorPublicId: "admin-public-001",
-        actorRole: "super_admin",
-        actionType: "user.reset_password",
-        targetResourceType: "user",
-        targetPublicId: "user-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted user credential reset metadata",
-        requestIp: "203.0.113.10",
-      }),
-    ]);
+    expect(resetInputs).toEqual(["user-public-001"]);
+    expect(auditInputs).toEqual([]);
     expect(JSON.stringify({ auditInputs, resetInputs })).not.toContain(
       "RuntimeGeneratedA123",
     );

@@ -747,49 +747,51 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
-  title: Organization training lifecycle pagination
-  phase: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
+  id: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
+  title: User password reset atomicity
+  phase: p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0022
-  branch: fix/organization-training-lifecycle-pagination
+  productClosureContribution: F-0030
+  branch: fix/user-password-reset-atomicity
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0022
+    - F-0030
   candidateRootCauseCluster: P1-RC-04
   requirementAnchors:
-    - advanced-edition/modules/04-organization-training.md
-    - traceability/2026-07-02-organization-training-ui-ux-contract.md
+    - modules/01-user-auth.md
+    - modules/06-admin-ops.md
+    - ../02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
   highRiskApproval:
-    category: bounded_database_application_query_logic
+    category: bounded_permission_and_database_application_transaction_logic
     status: satisfied_by_bounded_medium_risk_standing_approval
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
   currentExecutionGate:
     status: verified_candidate_ready_for_commit
-    reason: frozen_candidate_passed_single_full_profile_p0_baselines_format_diff_and_adversarial_review
+    reason: frozen_product_candidate_passed_single_full_profile_p0_baselines_format_diff_and_adversarial_review
     resumeAction: commit_ff_only_merge_canonical_push_sync_and_cleanup_under_standing_approval
   verificationEvidence:
     approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
-    preflightIncludedTestFiles: 8
-    inTaskTestOnlyExpansionCount: 0
+    preflightIncludedTestFiles: 12
+    inTaskTestOnlyExpansionCount: 1
+    testOnlyExpansionReason: legacy_runtime_fixture_signature_alignment_and_shared_identity_lock_regression
     testOnlyExpansionApprovalRequests: 0
     weakenedTestAssertions: 0
     postFreezeTestScopeChanges: 0
-    tddRed: passed_8_expected_failures_of_149
-    focused: passed_149_of_149
-    affectedRegression: passed_19_of_19
-    lint: passed_exact_affected_files_zero_warnings_after_obsolete_reader_cleanup
+    tddRed: passed_4_expected_failures_of_14
+    focused: passed_18_of_18
+    affectedRegression: passed_65_of_65
+    lint: passed_exact_affected_files_zero_warnings
     typecheck: passed
     build: passed_97_static_pages
     changedFileFormatDiff: passed_pre_and_post_full
     p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
     p0SerialBaseline: pass_closed_program
     fullProfile: passed_once_after_product_candidate_freeze
-    candidateTreeBeforeCloseoutEvidence: 14b42bed3b9dec26e892b7291c6fea39c09651c2
-    mainThreadAdversarialReview: passed_no_unbounded_alternate_get_no_n_plus_one_no_scope_or_integrity_regression
+    candidateTreeBeforeCloseoutEvidence: 99430873aa4448c8b3fc6b1b393a014d49d42f8d
+    mainThreadAdversarialReview: passed_shared_identity_lock_one_transaction_session_and_audit_failure_injection_no_legacy_reset_sink
     entitlementExpansion: false
     schemaMigrationSourceChange: false
     migrationExecution: false
@@ -800,16 +802,16 @@ currentTask:
     approvalIdMismatch: 0
     postApprovalCandidateTreeChanges: 0
     repeatedBlockerReports: 0
-    validationRetryCount: 1
+    validationRetryCount: 0
     fullRuns: 1
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-admin-log-pagination-total-2026-07-20
-    findingId: F-0021
-    commit: 2282e12e98c6f9cf12058c568048496b6ccddb74
+    taskId: p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21
+    findingId: F-0022
+    commit: 1745dc735ddda78bf10c99a2ab1ec5bc3a3bf558
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    candidateTree: cc4656385a1d3be3ac0de37d0c3cd8626b822a71
-    focused: passed_4_of_4
-    affectedRegression: passed_12_of_12
+    candidateTree: d002e384a4072b3ebcaa82a4a2fc5fa181c39ef4
+    focused: passed_149_of_149
+    affectedRegression: passed_19_of_19
     build: passed_97_static_pages
     p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
     p0SerialBaseline: pass_closed_program

@@ -1442,15 +1442,10 @@ export function createAdminFlowRuntimeRouteHandlers(
             });
           }
 
-          const resetUserPassword =
-            repositories.userOrgAuthRepository.resetUserPassword;
-          const revokeUserSessions =
-            repositories.userOrgAuthRepository.revokeUserSessions;
+          const resetUserPasswordAtomically =
+            repositories.userOrgAuthRepository.resetUserPasswordAtomically;
 
-          if (
-            resetUserPassword === undefined ||
-            revokeUserSessions === undefined
-          ) {
+          if (resetUserPasswordAtomically === undefined) {
             await repositories.auditLogRepository.appendAuditLog({
               actorPublicId: actor.publicId,
               actorRole: actor.roles[0],
@@ -1469,26 +1464,27 @@ export function createAdminFlowRuntimeRouteHandlers(
           }
 
           const oneTimePasswordPlainText = createOneTimePassword();
-          const didReset = await resetUserPassword(publicId, {
+          const didReset = await resetUserPasswordAtomically({
+            actor: {
+              publicId: actor.publicId,
+              requestIp: readRequestIp(request),
+              role: actor.roles[0],
+            },
             newPassword: oneTimePasswordPlainText,
-          });
-
-          if (didReset) {
-            await revokeUserSessions(publicId);
-          }
-
-          await repositories.auditLogRepository.appendAuditLog({
-            actorPublicId: actor.publicId,
-            actorRole: actor.roles[0],
-            actionType: "user.reset_password",
-            targetResourceType: "user",
-            targetPublicId: publicId,
-            resultStatus: didReset ? "success" : "failed",
-            metadataSummary: "redacted user credential reset metadata",
-            requestIp: readRequestIp(request),
+            publicId,
           });
 
           if (!didReset) {
+            await repositories.auditLogRepository.appendAuditLog({
+              actorPublicId: actor.publicId,
+              actorRole: actor.roles[0],
+              actionType: "user.reset_password",
+              targetResourceType: "user",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted user credential reset metadata",
+              requestIp: readRequestIp(request),
+            });
             return createJsonResponse(userNotFoundResponse, {
               headers: NO_STORE_HEADERS,
             });

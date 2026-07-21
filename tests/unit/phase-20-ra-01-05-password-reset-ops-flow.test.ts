@@ -53,21 +53,21 @@ function createRepositories(input: {
           },
         };
       },
-      async resetUserPassword(publicId, resetInput?: unknown) {
+      async resetUserPasswordAtomically(resetInput: {
+        actor: {
+          publicId: string;
+          requestIp: string | null;
+          role: string;
+        };
+        newPassword: string;
+        publicId: string;
+      }) {
         input.resetInputs.push({
-          publicId,
+          action: "resetUserPasswordAtomically",
           resetInput,
         });
 
-        return publicId === "user-public-001";
-      },
-      async revokeUserSessions(publicId) {
-        input.resetInputs.push({
-          publicId,
-          action: "revokeUserSessions",
-        });
-
-        return publicId === "user-public-001";
+        return resetInput.publicId === "user-public-001";
       },
     },
     contentKnowledgeRepository: {
@@ -142,25 +142,19 @@ describe("phase 20 RA-01-05 password reset ops flow", () => {
     });
     expect(resetInputs).toEqual([
       {
-        publicId: "user-public-001",
-        resetInput: { newPassword: "ServerGeneratedA123" },
-      },
-      {
-        publicId: "user-public-001",
-        action: "revokeUserSessions",
+        action: "resetUserPasswordAtomically",
+        resetInput: {
+          actor: {
+            publicId: "admin-public-001",
+            requestIp: null,
+            role: "super_admin",
+          },
+          newPassword: "ServerGeneratedA123",
+          publicId: "user-public-001",
+        },
       },
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actorPublicId: "admin-public-001",
-        actorRole: "super_admin",
-        actionType: "user.reset_password",
-        targetResourceType: "user",
-        targetPublicId: "user-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted user credential reset metadata",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
 
     expect(JSON.stringify({ payload, auditInputs })).not.toContain(
       "OperatorChosenPass2026",
@@ -198,8 +192,16 @@ describe("phase 20 RA-01-05 password reset ops flow", () => {
     });
     expect(resetInputs).toEqual([
       {
-        publicId: "missing-user",
-        resetInput: { newPassword: "MissingUserGeneratedA123" },
+        action: "resetUserPasswordAtomically",
+        resetInput: {
+          actor: {
+            publicId: "admin-public-001",
+            requestIp: null,
+            role: "super_admin",
+          },
+          newPassword: "MissingUserGeneratedA123",
+          publicId: "missing-user",
+        },
       },
     ]);
     expect(auditInputs).toEqual([
@@ -215,11 +217,11 @@ describe("phase 20 RA-01-05 password reset ops flow", () => {
     expect(JSON.stringify(auditInputs)).not.toContain("OperatorChosenPass2026");
   });
 
-  it("fails closed before changing the password when session revocation is unavailable", async () => {
+  it("fails closed before generating a password when the atomic reset command is unavailable", async () => {
     const auditInputs: unknown[] = [];
     const resetInputs: unknown[] = [];
     const repositories = createRepositories({ auditInputs, resetInputs });
-    delete repositories.userOrgAuthRepository.revokeUserSessions;
+    delete repositories.userOrgAuthRepository.resetUserPasswordAtomically;
     let generatorCallCount = 0;
     const handlers = createAdminFlowRuntimeRouteHandlers({
       createOneTimePassword: () => {

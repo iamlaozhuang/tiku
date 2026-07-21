@@ -1,25 +1,24 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-organization-training-lifecycle-pagination-2026-07-21",
-  "objective": "Close F-0022 by replacing the unbounded draft-then-version organization-training admin list with one bounded homogeneous database projection that applies scope and lifecycle filters before a real count, uses stable global activity-time ordering, and returns only the requested page; align service, route, UI, and URL state to the 20/50/100 page-size contract. Preserve metadata-only redaction, historical-version fail-closed integrity warnings, organization scope, and existing lifecycle actions. Do not change schema/migrations, dependencies, entitlement or authorization semantics, Provider/external services, safety mechanisms, deployment, secret/env, or execute a persistent database write.",
+  "taskId": "p1-remediation-rc-04-user-password-reset-atomicity-2026-07-21",
+  "objective": "Close F-0030 by replacing the route-level password-update, session-revocation, and success-audit sequence with one repository-owned transaction that locks the target identity and atomically updates the credential, revokes every active session, and appends a redacted audit_log row. Preserve server-generated one-time password distribution, no-store responses, existing super_admin/ops_admin authorization, not-found behavior, and failure auditing. Do not change schema/migrations, dependencies, entitlement or authorization scope, Provider/external services, safety mechanisms, deployment, secret/env, or execute a persistent database write.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
-    "src/features/admin/organization-training/organization-training-list-url.test.ts",
-    "src/features/admin/organization-training/organization-training-list-url.ts",
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/services/organization-training-service.ts",
-    "tests/unit/admin-student-uiux-consistency-closeout.test.ts",
-    "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
-    "tests/unit/organization-training-admin-entry-surface.test.ts",
-    "tests/unit/p0-rc-08-organization-training-integrity.test.ts"
+    "src/server/repositories/admin-flow-runtime-repository.test.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/auth/local-session-runtime.test.ts",
+    "src/server/services/admin-flow-runtime.test.ts",
+    "src/server/services/admin-flow-runtime.ts",
+    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
+    "tests/unit/phase-11-auth-session-account-hardening.test.ts",
+    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+    "tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts",
+    "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
+    "tests/unit/phase-21-admin-permission-boundary-review.test.ts",
+    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+    "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -32,7 +31,7 @@
   ],
   "validationCommands": [
     {
-      "name": "organization-training-lifecycle-pagination-focused",
+      "name": "user-password-reset-atomicity-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -40,15 +39,13 @@
         "exec",
         "vitest",
         "run",
-        "src/features/admin/organization-training/organization-training-list-url.test.ts",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "tests/unit/organization-training-admin-entry-surface.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.test.ts",
+        "tests/unit/phase-11-auth-session-account-hardening.test.ts",
+        "tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts"
       ]
     },
     {
-      "name": "organization-training-lifecycle-pagination-regression",
+      "name": "user-password-reset-atomicity-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -56,34 +53,37 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p0-rc-08-organization-training-integrity.test.ts",
-        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
-        "tests/unit/admin-student-uiux-consistency-closeout.test.ts"
+        "src/server/services/admin-flow-runtime.test.ts",
+        "src/server/auth/local-session-runtime.test.ts",
+        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
+        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+        "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
+        "tests/unit/phase-21-admin-permission-boundary-review.test.ts",
+        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+        "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts"
       ]
     },
     {
-      "name": "organization-training-lifecycle-pagination-lint",
+      "name": "user-password-reset-atomicity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
-        "src/features/admin/organization-training/organization-training-list-url.test.ts",
-        "src/features/admin/organization-training/organization-training-list-url.ts",
-        "src/server/contracts/organization-training-contract.ts",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/repositories/organization-training-repository.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "src/server/services/organization-training-route.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-service.ts",
-        "tests/unit/organization-training-admin-entry-surface.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.test.ts",
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/server/services/admin-flow-runtime.ts",
+        "tests/unit/phase-11-auth-session-account-hardening.test.ts",
+        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
+        "tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts",
+        "tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts",
+        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+        "tests/unit/phase-9-multi-client-rest-contract-verification.test.ts"
       ]
     },
     {
-      "name": "organization-training-lifecycle-pagination-typecheck",
+      "name": "user-password-reset-atomicity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -92,7 +92,7 @@
   "approvalSources": {
     "dependency": null,
     "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": null,
+    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },

@@ -9,7 +9,9 @@ import { sql } from "drizzle-orm";
 import {
   admin as adminTable,
   auditLog as auditLogTable,
+  authAccount as authAccountTable,
   authSession as authSessionTable,
+  user as userTable,
 } from "@/db/schema";
 
 const TEST_CREDENTIAL_FIELD_NAME = ["pass", "word"].join("") as "password";
@@ -23,6 +25,9 @@ function createAwaitableSelectBuilder(rows: unknown[]) {
     },
     from(...tables: unknown[]) {
       void tables;
+      return builder;
+    },
+    for() {
       return builder;
     },
     getSQL() {
@@ -243,6 +248,86 @@ function createAdminCreationConflictDatabase() {
   };
 
   return { database, events };
+}
+
+function createUserPasswordResetDatabase(input?: {
+  auditFailure?: boolean;
+  sessionFailure?: boolean;
+}) {
+  const events: string[] = [];
+  const auditValues: unknown[] = [];
+  const transaction = {
+    delete(table: unknown) {
+      events.push(table === authSessionTable ? "delete_sessions" : "delete");
+
+      return {
+        async where() {
+          if (input?.sessionFailure === true && table === authSessionTable) {
+            throw new Error("simulated user session revocation failure");
+          }
+
+          return undefined;
+        },
+      };
+    },
+    async execute() {
+      events.push("lock_identity");
+      return [];
+    },
+    insert(table: unknown) {
+      events.push(table === auditLogTable ? "insert_audit" : "insert");
+
+      return {
+        async values(values: unknown) {
+          auditValues.push(values);
+          if (input?.auditFailure === true && table === auditLogTable) {
+            throw new Error("simulated user reset audit failure");
+          }
+
+          return undefined;
+        },
+      };
+    },
+    select() {
+      const builder = createAwaitableSelectBuilder([
+        { auth_user_id: "auth-user-target-001" },
+      ]);
+      const originalFrom = builder.from;
+
+      builder.from = function from(table?: unknown) {
+        events.push(table === userTable ? "lock_user" : "select");
+        return originalFrom.call(builder);
+      };
+
+      return builder;
+    },
+    update(table: unknown) {
+      events.push(table === authAccountTable ? "update_password" : "update");
+
+      return {
+        set() {
+          return {
+            where() {
+              return {
+                async returning() {
+                  return [{ id: 301 }];
+                },
+              };
+            },
+          };
+        },
+      };
+    },
+  };
+  const database = {
+    async transaction<T>(
+      callback: (transactionValue: typeof transaction) => Promise<T>,
+    ) {
+      return callback(transaction);
+    },
+  };
+
+  return { auditValues, database, events };
 }
 
 describe("admin flow runtime repository backend accounts", () => {
@@ -607,5 +692,96 @@ describe("admin flow runtime repository backend accounts", () => {
     expect(fixture.updatedTables).toEqual([adminTable]);
     expect(fixture.deletedTables).toEqual([authSessionTable]);
     expect(fixture.insertedTables).toEqual([auditLogTable]);
+  });
+
+  it("updates the user password, revokes sessions and appends redacted audit in one locked transaction", async () => {
+    const fixture = createUserPasswordResetDatabase();
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.resetUserPasswordAtomically?.({
+        actor: {
+          publicId: "admin-actor-super-001",
+          requestIp: "127.0.0.1",
+          role: "super_admin",
+        },
+        newPassword: "ServerGeneratedA123",
+        publicId: "user-public-target-001",
+      }),
+    ).resolves.toBe(true);
+    expect(fixture.events).toEqual([
+      "lock_user",
+      "lock_identity",
+      "update_password",
+      "delete_sessions",
+      "insert_audit",
+    ]);
+    expect(fixture.auditValues).toEqual([
+      expect.objectContaining({
+        action_type: "user.reset_password",
+        actor_public_id: "admin-actor-super-001",
+        metadata_summary: "redacted user credential reset metadata",
+        result_status: "success",
+        target_public_id: "user-public-target-001",
+        target_resource_type: "user",
+      }),
+    ]);
+    expect(JSON.stringify(fixture.auditValues)).not.toContain(
+      "ServerGeneratedA123",
+    );
+  });
+
+  it("propagates an audit failure from the same user reset transaction", async () => {
+    const fixture = createUserPasswordResetDatabase({ auditFailure: true });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.resetUserPasswordAtomically?.({
+        actor: {
+          publicId: "admin-actor-super-001",
+          requestIp: null,
+          role: "super_admin",
+        },
+        newPassword: "ServerGeneratedA123",
+        publicId: "user-public-target-001",
+      }),
+    ).rejects.toThrow("simulated user reset audit failure");
+    expect(fixture.events).toEqual([
+      "lock_user",
+      "lock_identity",
+      "update_password",
+      "delete_sessions",
+      "insert_audit",
+    ]);
+  });
+
+  it("propagates session revocation failure before writing a success audit", async () => {
+    const fixture = createUserPasswordResetDatabase({ sessionFailure: true });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.resetUserPasswordAtomically?.({
+        actor: {
+          publicId: "admin-actor-super-001",
+          requestIp: null,
+          role: "super_admin",
+        },
+        newPassword: "ServerGeneratedA123",
+        publicId: "user-public-target-001",
+      }),
+    ).rejects.toThrow("simulated user session revocation failure");
+    expect(fixture.events).toEqual([
+      "lock_user",
+      "lock_identity",
+      "update_password",
+      "delete_sessions",
+    ]);
+    expect(fixture.auditValues).toEqual([]);
   });
 });

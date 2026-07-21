@@ -180,8 +180,10 @@ function createAdminFlowRepositories(input: {
           pagination: createPagination("registeredAt"),
         };
       },
-      async resetUserPassword() {
-        throw new Error("resetUserPassword is not used by this contract test");
+      async resetUserPasswordAtomically() {
+        throw new Error(
+          "resetUserPasswordAtomically is not used by this contract test",
+        );
       },
     },
     contentKnowledgeRepository: {

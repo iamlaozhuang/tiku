@@ -96,8 +96,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
   resetAdminAccountPassword?(
     input: AdminAccountPasswordResetRepositoryInput,
   ): Promise<AdminAccountMutationRepositoryResult>;
-  resetUserPassword?(
-    publicId: string,
+  resetUserPasswordAtomically?(
     input: UserPasswordResetRepositoryInput,
   ): Promise<boolean>;
   disableUser?(
@@ -154,7 +153,13 @@ export type AdminAccountMutationRepositoryResult =
     };
 
 export type UserPasswordResetRepositoryInput = {
+  actor: {
+    publicId: string;
+    requestIp: string | null;
+    role: AdminRole;
+  };
   newPassword: string;
+  publicId: string;
 };
 
 export type AdminAccountCreationRepositoryResult =
@@ -1002,36 +1007,8 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     async resetAdminAccountPassword(input) {
       return resetAdminAccountPassword(getDatabase(), input);
     },
-    async resetUserPassword(publicId, input) {
-      const database = getDatabase();
-      const [userRow] = await database
-        .select({
-          auth_user_id: user.auth_user_id,
-        })
-        .from(user)
-        .where(and(eq(user.public_id, publicId), isNotNull(user.auth_user_id)))
-        .limit(1);
-
-      if (
-        userRow?.auth_user_id === undefined ||
-        userRow.auth_user_id === null
-      ) {
-        return false;
-      }
-
-      const passwordHash = await hashPassword(input.newPassword);
-      const rows = await database
-        .update(authAccount)
-        .set({
-          [authPasswordColumn]: passwordHash,
-          updated_at: new Date(),
-        })
-        .where(eq(authAccount.user_id, userRow.auth_user_id))
-        .returning({
-          id: authAccount.id,
-        });
-
-      return rows.length > 0;
+    async resetUserPasswordAtomically(input) {
+      return resetUserPasswordAtomically(getDatabase(), input);
     },
     async disableUser(publicId, operator) {
       return updateUserStatus(getDatabase(), publicId, "disabled", {
@@ -1587,6 +1564,67 @@ async function revokeUserSessions(
     .where(eq(authSession.user_id, userRow.auth_user_id));
 
   return true;
+}
+
+async function resetUserPasswordAtomically(
+  database: AdminFlowRuntimeDatabase,
+  input: UserPasswordResetRepositoryInput,
+): Promise<boolean> {
+  const passwordHash = await hashPassword(input.newPassword);
+
+  return database.transaction(async (transaction) => {
+    const [userRow] = await transaction
+      .select({ auth_user_id: user.auth_user_id })
+      .from(user)
+      .where(
+        and(eq(user.public_id, input.publicId), isNotNull(user.auth_user_id)),
+      )
+      .limit(1);
+
+    if (userRow?.auth_user_id === undefined || userRow.auth_user_id === null) {
+      return false;
+    }
+
+    await transaction.execute(
+      sql`select pg_advisory_xact_lock(hashtext(${userRow.auth_user_id}))`,
+    );
+    const now = new Date();
+    const updatedCredentials = await transaction
+      .update(authAccount)
+      .set({
+        [authPasswordColumn]: passwordHash,
+        updated_at: now,
+      })
+      .where(
+        and(
+          eq(authAccount.user_id, userRow.auth_user_id),
+          eq(authAccount.provider_id, credentialProviderId),
+        ),
+      )
+      .returning({ id: authAccount.id });
+
+    if (updatedCredentials.length === 0) {
+      return false;
+    }
+
+    await transaction
+      .delete(authSession)
+      .where(eq(authSession.user_id, userRow.auth_user_id));
+    await transaction.insert(auditLog).values({
+      action_type: "user.reset_password",
+      actor_public_id: input.actor.publicId,
+      actor_role: input.actor.role,
+      created_at: now,
+      metadata_summary: "redacted user credential reset metadata",
+      public_id: `audit-log-${randomUUID()}`,
+      request_ip: input.actor.requestIp,
+      result_status: "success",
+      target_public_id: input.publicId,
+      target_resource_type: "user",
+    });
+
+    return true;
+  });
 }
 
 async function terminateUserActiveFlows(
