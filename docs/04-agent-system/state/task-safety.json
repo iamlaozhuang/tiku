@@ -1,15 +1,16 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-admin-organization-picker-2026-07-21",
-  "objective": "Close F-0046 by replacing the backend-admin creator's fixed first-100 organization snapshot with an explicit, server-searched and paginated active-organization picker. The picker must expose loading, empty and error states, ignore stale rapid-search responses, require an explicit organization selection, and preserve the repository's fail-closed active-organization recheck without changing roles, permissions, schema or API semantics.",
+  "taskId": "p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21",
+  "objective": "Close the remaining F-0049 race by moving the active-organization recheck under the existing shared organization-scope lock and into the same transaction as the shared account-phone identity lock, account writes and redacted success audit. Preserve stable conflict/not-found responses and failed audits without expanding roles, permissions, entitlement, schema or API capability.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-    "tests/unit/p1-admin-organization-picker.test.ts",
-    "tests/unit/admin-ops-summary-first-ui.test.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/repositories/admin-flow-runtime-repository.test.ts",
+    "src/server/repositories/account-phone-identity-lock.test.ts",
     "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
     "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
   ],
   "blockedFiles": [
@@ -22,34 +23,36 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "src/server/**",
     "src/db/**",
     "drizzle/**",
-    "authorization or permission business semantics",
-    "real database writes, Provider calls, external services, deployment, PR or force-push"
+    "role, permission, authorization or entitlement expansion",
+    "schema, migration or persistent database execution",
+    "Provider calls, external services, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-    "tests/unit/p1-admin-organization-picker.test.ts"
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/repositories/admin-flow-runtime-repository.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/admin-ops-summary-first-ui.test.ts",
+    "src/server/repositories/account-phone-identity-lock.test.ts",
     "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
     "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "AdminOpsManagement creates organization-bound admin accounts and already calls GET /api/v1/organizations; the fixed page=1/pageSize=100 snapshot is the confirmed F-0046 failure boundary.",
-    "handlerService": "admin-organization-org-auth-runtime already parses page, pageSize, keyword and status and returns a paginated envelope; no server contract change is required.",
-    "repositorySchema": "admin-organization-org-auth-runtime-repository already filters and paginates the organization query, while admin-flow-runtime-repository rechecks organization.status=active during account creation.",
-    "tests": "A new focused UI test covers the 101st organization through search, status=active filtering, pagination, stale rapid-search responses, explicit selection, and empty/error states; existing admin UI and server regression suites remain unchanged.",
-    "nonClaims": "No role, permission, entitlement, schema, migration, database execution, API capability, dependency, Provider, external service or mechanism change."
+    "uiApi": "AdminOpsManagement sends an explicit organizationPublicId through the existing POST /api/v1/admin-accounts contract; F-0046 already made that selection complete and explicit.",
+    "handlerService": "admin-flow-runtime already validates creation permission, maps repository phone conflicts and organization_not_found to stable responses, and writes redacted failed audits; no service or API contract change is needed.",
+    "repository": "admin-flow-runtime-repository already locks the shared phone identity and writes account rows plus the redacted success audit atomically, but its active organization lookup remains outside that transaction.",
+    "schemaMigration": "organization status and account relations already exist; the shared organization-scope advisory lock is the authoritative concurrency boundary, so no schema or migration change is required.",
+    "tests": "Focused repository tests prove organization scope lock then active recheck then phone identity lock and writes, including fail-closed missing/inactive organization behavior; existing phone-lock, lifecycle and admin regressions cover unchanged conflict/audit semantics.",
+    "nonClaims": "No role, permission, entitlement, schema, migration, persistent database execution, dependency, Provider, external service or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "admin-organization-picker-focused",
+      "name": "admin-account-create-preconditions-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -57,12 +60,12 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-admin-organization-picker.test.ts",
-        "tests/unit/admin-ops-summary-first-ui.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.test.ts",
+        "src/server/repositories/account-phone-identity-lock.test.ts"
       ]
     },
     {
-      "name": "admin-organization-picker-regression",
+      "name": "admin-account-create-preconditions-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -71,23 +74,24 @@
         "vitest",
         "run",
         "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/p1-lifecycle-command-atomicity.test.ts",
         "tests/unit/phase-11-system-ops-organization-management-loop.test.ts"
       ]
     },
     {
-      "name": "admin-organization-picker-lint",
+      "name": "admin-account-create-preconditions-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
-        "tests/unit/p1-admin-organization-picker.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/server/repositories/admin-flow-runtime-repository.test.ts"
       ]
     },
     {
-      "name": "admin-organization-picker-typecheck",
+      "name": "admin-account-create-preconditions-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
@@ -95,24 +99,27 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
-    "permission": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "low_risk_product_ui_query_consumption",
-    "noAuthorizationOrEntitlementChange": true,
-    "noSchemaMigrationDatabaseExecutionDependencyProviderOrMechanismChange": true
+    "category": "bounded_medium_risk_database_application_transaction_and_permission_contraction",
+    "entitlementExpansion": false,
+    "schemaMigrationSourceChange": false,
+    "persistentDatabaseExecution": false,
+    "realExternalCall": false,
+    "mechanismChange": false
   },
   "push": {
     "target": "origin/master",
     "requiresFreshApproval": true,
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "conditionalCloseout": false
   }
 }

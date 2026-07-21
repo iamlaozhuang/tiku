@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-admin-organization-picker-2026-07-21
+  currentTaskId: p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -518,6 +518,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21
     - p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
     - p1-remediation-rc-04-admin-organization-picker-2026-07-21
+    - p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -555,6 +556,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21
     - p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21
     - p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
+    - p1-remediation-rc-04-admin-organization-picker-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -614,7 +616,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-ai-call-log-operations-filters-2026-07-21: closed
     p1-remediation-rc-04-ai-call-log-organization-attribution-2026-07-21: closed
     p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21: closed
-    p1-remediation-rc-04-admin-organization-picker-2026-07-21: in_progress
+    p1-remediation-rc-04-admin-organization-picker-2026-07-21: closed
+    p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -779,76 +782,75 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-admin-organization-picker-2026-07-21
-  title: Admin account active organization search picker
-  phase: p1-remediation-rc-04-admin-organization-picker-2026-07-21
+  id: p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21
+  title: Admin account creation transactional preconditions
+  phase: p1-remediation-rc-04-admin-account-create-preconditions-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0046_complete_static_closure
-  branch: fix/admin-organization-picker
+  productClosureContribution: F-0049_complete_static_closure
+  branch: fix/admin-account-create-preconditions
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0046
+    - F-0049
   candidateRootCauseCluster: P1-RC-04
-  objective: replace the backend-admin creator fixed first-100 organization snapshot with an explicit server-searched paginated active-organization picker that is complete, race-safe and fail-closed
-  executionStage: verified_ready_for_low_risk_closeout
+  objective: move the active organization recheck under the shared organization scope lock and into the same transaction as the phone identity lock, account writes and redacted success audit
+  executionStage: verified_ready_for_bounded_medium_risk_closeout
   riskBoundary:
-    category: low_risk_product_UI_query_consumption
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    category: bounded_medium_risk_database_application_transaction_and_permission_contraction
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementChange: false
     realExternalCall: false
   preRedImpactScan:
-    chain: AdminOpsManagement_to_GET_organizations_existing_query_runtime_repository_schema_plus_direct_UI_and_server_regressions
+    chain: AdminOpsManagement_to_POST_admin_accounts_to_admin_flow_service_to_admin_flow_repository_to_shared_organization_scope_and_phone_identity_locks_to_existing_schema_plus_direct_repository_and_regression_tests
     coreFiles: 5
-    contingencyFiles: 3
+    contingencyFiles: 4
     directCallerCalleeMocksFixturesReviewed: true
-    existingServerCapabilities: keyword_status_page_pageSize_sort_and_pagination
-    existingCreationRecheck: organization_status_active_fail_closed
+    confirmedResidualRootCause: active_organization_lookup_remains_outside_the_account_creation_transaction
+    alreadyCovered: phone_conflict_shared_lock_stable_responses_failed_audit_and_atomic_success_audit
   expectedAcceptance:
-    - active_filter_is_always_sent
-    - organization_after_first_100_is_reachable_by_server_search_or_pagination
-    - rapid_search_stale_response_cannot_replace_latest_results
-    - loading_empty_and_error_states_are_explicit
-    - organization_selection_is_explicit_and_creation_rechecks_active_status
+    - organization_scope_lock_precedes_active_organization_recheck
+    - active_organization_recheck_phone_identity_lock_account_writes_and_success_audit_share_one_transaction
+    - missing_or_inactive_organization_fails_closed_before_phone_lock_or_writes
+    - phone_conflicts_and_failed_audits_preserve_existing_stable_semantics
+    - no_role_permission_entitlement_schema_API_or_external_behavior_expansion
   tddRed:
-    command: corepack.cmd pnpm@10.15.1 exec vitest run tests/unit/p1-admin-organization-picker.test.ts
-    result: failed_as_expected_3_of_3
-    failureBoundary: fixed_unfiltered_first_100_snapshot_without_search_pagination_race_protection_or_explicit_states
+    command: corepack.cmd pnpm@10.15.1 exec vitest run src/server/repositories/admin-flow-runtime-repository.test.ts
+    result: failed_as_expected_2_of_16
+    failureBoundary: organization_lookup_attempted_on_database_before_entering_transaction
   verificationEvidence:
-    focused: passed_16_of_16_across_2_suites
-    affectedRegression: passed_36_of_36_across_2_suites
-    lint: pass
+    focused: passed_20_of_20_across_2_suites
+    affectedRegression: passed_42_of_42_across_3_suites
+    lint: pass_exact_repository_and_test
     typecheck: pass
     format: pass_targeted_prettier
     diffCheck: pass
   adversarialReview:
-    serverSearchAndPaginationReachOrganizationsBeyondFirst100: pass
-    activeFilterSentAndInactiveRowsRejectedClientSide: pass
-    repositoryCreationActiveRecheckPreserved: pass
-    staleRapidSearchResponseCannotReplaceLatest: pass
-    explicitSelectionRequiredWithoutSilentFirstResultDefault: pass
-    loadingEmptyErrorAndRetryStatesPresent: pass
-    noRolePermissionEntitlementSchemaDatabaseDependencyProviderOrMechanismChange: pass
+    organizationScopeLockSqlIdentityAndOrder: pass
+    activeOrganizationRecheckInsideSameTransaction: pass
+    missingOrInactiveOrganizationStopsBeforePhoneLockAndWrites: pass
+    phoneIdentityConflictLockAndStableResponsePreserved: pass
+    successAuditRemainsAtomicAndFailedAuditServicePathPreserved: pass
+    noEntitlementSchemaMigrationDatabaseExecutionDependencyProviderOrMechanismChange: pass
     exactAllowedFilesAndValidationCoverage: pass
   metrics:
     mandatoryFreshApprovals: 0
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: 12m_TDD_implementation_focused_regression_and_review
-    mechanismOverhead: 7m_JIT_contract_state_updates_and_kernel_preparation
+    productValueTime: 12m_JIT_TDD_implementation_validation_and_review
+    mechanismOverhead: 6m_contract_state_and_closeout_preparation
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-ai-call-log-versioned-pricing-2026-07-21
-    findingId: F-0038
-    productClosureContribution: F-0038_complete_static_closure
-    commit: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
-    tree: 1ed9ce8c965018a1ab3c18709d876117f38097b4
+    taskId: p1-remediation-rc-04-admin-organization-picker-2026-07-21
+    findingId: F-0046
+    productClosureContribution: F-0046_complete_static_closure
+    commit: 9275faf690c36fdea95b9fdc3ce704cc1925775e
+    tree: b4bc53d099eb33c5f60e2ff691d603dfca0e8ce6
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: fresh-schema-start-f0038-ai-call-log-versioned-pricing-2026-07-21
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -862,9 +864,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
-  lastKnownOriginMasterSha: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
-  lastKnownRemoteMasterSha: 5a02227df038e5ae68bf82d3f9b0c0bce7019e1f
+  lastKnownMasterSha: 9275faf690c36fdea95b9fdc3ce704cc1925775e
+  lastKnownOriginMasterSha: 9275faf690c36fdea95b9fdc3ce704cc1925775e
+  lastKnownRemoteMasterSha: 9275faf690c36fdea95b9fdc3ce704cc1925775e
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

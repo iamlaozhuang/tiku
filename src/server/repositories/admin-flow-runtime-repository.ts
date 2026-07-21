@@ -48,7 +48,10 @@ import { adminRoleValues, type AdminRole } from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { setEmployeeAccountStatusWithQuota } from "./employee-org-auth-quota-repository";
 import { findAccountPhoneIdentityConflictUnderLock } from "./account-phone-identity-lock";
-import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
+import {
+  createOrgAuthCoversOrganizationCondition,
+  lockOrganizationScopeMutation,
+} from "./organization-scope-query";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
@@ -869,32 +872,6 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     },
     async createAdminAccount(input, actor) {
       const database = getDatabase();
-      const targetOrganizationRow =
-        input.organizationPublicId === null
-          ? null
-          : (
-              await database
-                .select({ id: organization.id })
-                .from(organization)
-                .where(
-                  and(
-                    eq(organization.public_id, input.organizationPublicId),
-                    eq(organization.status, "active"),
-                  ),
-                )
-                .limit(1)
-            )[0];
-
-      if (
-        input.organizationPublicId !== null &&
-        targetOrganizationRow === undefined
-      ) {
-        return {
-          reason: "organization_not_found",
-          status: "not_found",
-        };
-      }
-
       const now = new Date();
       const authUserId = `auth-user-${randomUUID()}`;
       const adminPublicId = `admin-public-${randomUUID()}`;
@@ -903,8 +880,30 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         ? "ops_admin_scoped_org_admin"
         : "super_admin";
 
-      const accountPhoneConflict = await database.transaction(
+      const creationPreconditionFailure = await database.transaction(
         async (transaction) => {
+          let targetOrganizationId: number | null = null;
+
+          if (input.organizationPublicId !== null) {
+            await lockOrganizationScopeMutation(transaction);
+            const [targetOrganizationRow] = await transaction
+              .select({ id: organization.id })
+              .from(organization)
+              .where(
+                and(
+                  eq(organization.public_id, input.organizationPublicId),
+                  eq(organization.status, "active"),
+                ),
+              )
+              .limit(1);
+
+            if (targetOrganizationRow === undefined) {
+              return "organization_not_found" as const;
+            }
+
+            targetOrganizationId = targetOrganizationRow.id;
+          }
+
           const conflict = await findAccountPhoneIdentityConflictUnderLock(
             transaction,
             input.phone,
@@ -960,15 +959,11 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
             });
           }
 
-          if (
-            targetOrganizationRow !== null &&
-            targetOrganizationRow !== undefined &&
-            createdAdminRow !== undefined
-          ) {
+          if (targetOrganizationId !== null && createdAdminRow !== undefined) {
             await transaction.insert(adminOrganization).values({
               admin_id: createdAdminRow.id,
               created_at: now,
-              organization_id: targetOrganizationRow.id,
+              organization_id: targetOrganizationId,
             });
           }
 
@@ -985,10 +980,17 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         },
       );
 
-      if (accountPhoneConflict !== null) {
+      if (creationPreconditionFailure === "organization_not_found") {
+        return {
+          reason: "organization_not_found",
+          status: "not_found",
+        };
+      }
+
+      if (creationPreconditionFailure !== null) {
         return {
           reason:
-            accountPhoneConflict === "admin"
+            creationPreconditionFailure === "admin"
               ? "admin_phone_exists"
               : "learner_employee_phone_exists",
           status: "conflict",

@@ -8,11 +8,13 @@ import {
 import { sql } from "drizzle-orm";
 import {
   admin as adminTable,
+  adminOrganization as adminOrganizationTable,
   adminRoleAssignment as adminRoleAssignmentTable,
   auditLog as auditLogTable,
   authAccount as authAccountTable,
   authSession as authSessionTable,
   authUser as authUserTable,
+  organization as organizationTable,
   user as userTable,
 } from "@/db/schema";
 
@@ -222,8 +224,12 @@ function createAdminLifecycleDatabase(input: {
 function createAdminCreationConflictDatabase() {
   const events: string[] = [];
   const transaction = {
-    async execute() {
-      events.push("lock");
+    async execute(query: unknown) {
+      events.push(
+        JSON.stringify(query).includes("account_phone_identity_lock")
+          ? "lock_identity"
+          : "unexpected_lock",
+      );
       return [];
     },
     select() {
@@ -252,14 +258,27 @@ function createAdminCreationConflictDatabase() {
   return { database, events };
 }
 
-function createAdminCreationDatabase(input?: { auditFailure?: boolean }) {
+function createAdminCreationDatabase(input?: {
+  auditFailure?: boolean;
+  organizationRows?: unknown[];
+}) {
   const events: string[] = [];
   const auditValues: unknown[] = [];
-  const selectRows = [[], []] as unknown[][];
+  const selectRows =
+    input?.organizationRows === undefined
+      ? ([[], []] as unknown[][])
+      : ([input.organizationRows, [], []] as unknown[][]);
   let selectIndex = 0;
   const transaction = {
-    async execute() {
-      events.push("lock_identity");
+    async execute(query: unknown) {
+      const serializedQuery = JSON.stringify(query);
+      events.push(
+        serializedQuery.includes("organization_scope_lock")
+          ? "lock_scope"
+          : serializedQuery.includes("account_phone_identity_lock")
+            ? "lock_identity"
+            : "unexpected_lock",
+      );
       return [];
     },
     select() {
@@ -270,7 +289,18 @@ function createAdminCreationDatabase(input?: { auditFailure?: boolean }) {
       }
 
       selectIndex += 1;
-      return createAwaitableSelectBuilder(rows);
+      const builder = createAwaitableSelectBuilder(rows);
+      const originalFrom = builder.from;
+
+      builder.from = function from(table?: unknown) {
+        if (table === organizationTable) {
+          events.push("select_organization");
+        }
+
+        return originalFrom.call(builder, table);
+      };
+
+      return builder;
     },
     insert(table: unknown) {
       const event =
@@ -282,9 +312,11 @@ function createAdminCreationDatabase(input?: { auditFailure?: boolean }) {
               ? "insert_admin"
               : table === adminRoleAssignmentTable
                 ? "insert_admin_role"
-                : table === auditLogTable
-                  ? "insert_audit"
-                  : "insert_other";
+                : table === adminOrganizationTable
+                  ? "insert_admin_organization"
+                  : table === auditLogTable
+                    ? "insert_audit"
+                    : "insert_other";
 
       events.push(event);
 
@@ -448,6 +480,77 @@ describe("admin flow runtime repository backend accounts", () => {
     );
   });
 
+  it("locks and rechecks the active organization before phone identity and account writes", async () => {
+    const fixture = createAdminCreationDatabase({
+      organizationRows: [{ id: 202 }],
+    });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.createAdminAccount?.(
+        {
+          phone: "13900000007",
+          name: "Created Organization Admin",
+          [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
+          adminRole: "org_standard_admin",
+          organizationPublicId: "organization-public-202",
+        },
+        {
+          publicId: "admin-public-operator",
+          roles: ["super_admin"],
+          requestIp: "127.0.0.1",
+        },
+      ),
+    ).resolves.toMatchObject({
+      status: "created",
+      adminAccount: {
+        adminRole: "org_standard_admin",
+        organizationPublicId: "organization-public-202",
+      },
+    });
+    expect(fixture.events).toEqual([
+      "lock_scope",
+      "select_organization",
+      "lock_identity",
+      "insert_auth_user",
+      "insert_auth_account",
+      "insert_admin",
+      "insert_admin_role",
+      "insert_admin_organization",
+      "insert_audit",
+    ]);
+  });
+
+  it("fails closed before phone locking or writes when the organization is inactive or missing", async () => {
+    const fixture = createAdminCreationDatabase({ organizationRows: [] });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.createAdminAccount?.(
+        {
+          phone: "13900000007",
+          name: "Rejected Organization Admin",
+          [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
+          adminRole: "org_standard_admin",
+          organizationPublicId: "organization-public-inactive",
+        },
+        {
+          publicId: "admin-public-operator",
+          roles: ["super_admin"],
+          requestIp: null,
+        },
+      ),
+    ).resolves.toEqual({
+      reason: "organization_not_found",
+      status: "not_found",
+    });
+    expect(fixture.events).toEqual(["lock_scope", "select_organization"]);
+  });
+
   it("propagates creation audit failure from the account transaction", async () => {
     const fixture = createAdminCreationDatabase({ auditFailure: true });
     const repositories = createPostgresAdminFlowRuntimeRepositories({
@@ -498,7 +601,7 @@ describe("admin flow runtime repository backend accounts", () => {
       reason: "admin_phone_exists",
       status: "conflict",
     });
-    expect(fixture.events).toEqual(["lock", "admin"]);
+    expect(fixture.events).toEqual(["lock_identity", "admin"]);
   });
 
   it("fails closed when an operations admin targets a platform or mixed-role account", () => {
