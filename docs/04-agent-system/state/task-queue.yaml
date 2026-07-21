@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21
+  currentTaskId: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -245,6 +245,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21
+    - p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -276,6 +277,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21
     - p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21
+    - p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -333,7 +335,71 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-paper-database-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-admin-account-creation-audit-atomicity-2026-07-21: closed
     p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21: closed
+    p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21: closed
 activeTasks:
+  - id: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
+    title: Resource database audit atomicity
+    phase: p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0031_resource_database_non_upload_partition
+    branch: fix/resource-database-audit-atomicity
+    objective: close only database-backed resource update publish rebuild-request disable and enable mutations by sharing each existing repository transaction with its redacted success audit while preserving local adapter behavior
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-04
+    findingIds:
+      - F-0031
+    highRiskApproval:
+      category: bounded_database_application_transaction_logic
+      status: satisfied_by_bounded_medium_risk_standing_approval
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    executionStage: verified_ready_for_atomic_commit_ff_only_push_and_cleanup
+    partitionBoundary:
+      included:
+        - resource_update_markdown_database_mutation
+        - resource_publish_markdown_database_mutation
+        - resource_rebuild_vector_request_database_mutation
+        - resource_disable_database_mutation
+        - resource_enable_database_mutation
+      excluded:
+        - resource_upload_file_and_database_mutation
+        - local_resource_file_and_catalog_mutations
+        - paper_asset_file_and_database_mutations
+    findingDisposition:
+      F-0031: in_progress_resource_database_partition_closed_cross_resource_upload_local_catalog_and_paper_asset_pending
+    verificationEvidence:
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      testOnlyAllowlistExpansionApproval: standing-test-only-allowlist-expansion-2026-07-21
+      preflightIncludedTestFiles: 5
+      inTaskTestOnlyExpansionCount: 0
+      confirmedSharedRootCause: route_success_audit_runs_after_database_transaction_commit
+      confirmedSharedFix: existing_repository_transaction_contains_mutation_and_redacted_success_audit
+      localAdapterRequirement: retain_external_success_audit_until_cross_resource_saga_task
+      tddRed: expected_8_failures_missing_transactional_audit_context_and_source_aware_external_audit
+      focused: passed_32_of_32
+      affectedRegression: passed_27_of_27_after_explicit_general_level_list_fixture_alignment
+      lint: passed_exact_affected_files
+      typecheck: passed
+      build: passed_97_static_pages
+      p0GlobalBaseline: pass_35_findings_143_impacts_21_runtime_pending_8_clusters_0_cycles
+      p0SerialBaseline: pass_closed_program
+      mainThreadAdversarialReview: passed_required_context_same_transaction_failure_propagation_replay_audit_redaction_no_duplicate_database_success_audit_and_local_fallback_preservation
+      schemaMigrationSourceChange: false
+      migrationExecution: false
+      persistentDatabaseExecution: false
+      permissionOrEntitlementChange: false
+      realExternalCall: false
+      extraFiles: false
+    closeout:
+      commit: finalized_by_commit_containing_this_state
+      status: ready_for_commit_ff_only_merge_push_sync_and_cleanup
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21
+      findingId: F-0031_knowledge_node_database_partition
+      commit: 2fcb73b104f90d9a12c2aaca72ef28c4d1818d7d
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
   - id: p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21
     title: Knowledge node audit atomicity
     phase: p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21

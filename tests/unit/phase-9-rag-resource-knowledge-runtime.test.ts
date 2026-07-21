@@ -48,6 +48,7 @@ function createAdminSessionService(
 function createRuntimeRepositories(input: {
   auditLogEntries: unknown[];
   knowledgeNodeMutationContexts?: unknown[];
+  resourceMutationContexts?: unknown[];
 }): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   return {
     resourceRepository: {
@@ -105,7 +106,12 @@ function createRuntimeRepositories(input: {
           updatedAt: createdAt,
         };
       },
-      async requestResourceIndexRebuild(resourcePublicId) {
+      async requestResourceIndexRebuild(
+        resourcePublicId,
+        _requestPublicId,
+        mutationContext,
+      ) {
+        input.resourceMutationContexts?.push(mutationContext);
         return {
           status: "accepted",
           generationPublicId: "resource-index-generation-public-001",
@@ -198,8 +204,12 @@ describe("phase 9 RAG resource knowledge runtime", () => {
 
   it("creates a durable resource index generation without fabricating ready chunks", async () => {
     const auditLogEntries: unknown[] = [];
+    const resourceMutationContexts: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
-      repositories: createRuntimeRepositories({ auditLogEntries }),
+      repositories: createRuntimeRepositories({
+        auditLogEntries,
+        resourceMutationContexts,
+      }),
       sessionService: createAdminSessionService("content_admin"),
     });
 
@@ -238,15 +248,18 @@ describe("phase 9 RAG resource knowledge runtime", () => {
     expect(JSON.stringify(payload)).not.toContain('"id"');
     expect(JSON.stringify(payload)).not.toContain("admin-session-token");
     expect(JSON.stringify(payload)).not.toContain("许可证办理需要核验");
-    expect(auditLogEntries).toEqual([
+    expect(resourceMutationContexts).toEqual([
       expect.objectContaining({
         actorPublicId: "admin-public-001",
-        actionType: "resource.rebuild_vector",
-        targetResourceType: "resource",
-        targetPublicId: "resource-public-001",
-        resultStatus: "success",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "resource.rebuild_vector",
+          metadataSummary: "redacted resource vector rebuild metadata",
+          requestIp: null,
+        }),
       }),
     ]);
+    expect(auditLogEntries).toEqual([]);
   });
 
   it("rejects a disabled resource rebuild without invoking the generation writer", async () => {

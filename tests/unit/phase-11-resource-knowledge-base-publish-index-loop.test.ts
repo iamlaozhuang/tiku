@@ -61,6 +61,7 @@ function createRepositories(input: {
   auditLogEntries: unknown[];
   listQueries?: unknown[];
   publishCalls: string[];
+  resourceMutationContexts?: unknown[];
 }): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   return {
     resourceRepository: {
@@ -115,8 +116,9 @@ function createRepositories(input: {
           updatedAt,
         };
       },
-      async publishResourceMarkdown(publicId) {
+      async publishResourceMarkdown(publicId, mutationContext) {
         input.publishCalls.push(publicId);
+        input.resourceMutationContexts?.push(mutationContext);
 
         if (publicId !== "resource-public-draft") {
           return { status: "not_found" };
@@ -143,7 +145,12 @@ function createRepositories(input: {
           },
         };
       },
-      async requestResourceIndexRebuild(resourcePublicId) {
+      async requestResourceIndexRebuild(
+        resourcePublicId,
+        _requestPublicId,
+        mutationContext,
+      ) {
+        input.resourceMutationContexts?.push(mutationContext);
         return {
           status: "accepted",
           generationPublicId: "resource-index-generation-public-draft",
@@ -314,8 +321,13 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
   it("publishes a Markdown draft through a publicId route and writes redacted audit evidence", async () => {
     const auditLogEntries: unknown[] = [];
     const publishCalls: string[] = [];
+    const resourceMutationContexts: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
-      repositories: createRepositories({ auditLogEntries, publishCalls }),
+      repositories: createRepositories({
+        auditLogEntries,
+        publishCalls,
+        resourceMutationContexts,
+      }),
       sessionService: createAdminSessionService(),
     });
 
@@ -347,17 +359,20 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       },
     });
     expect(publishCalls).toEqual(["resource-public-draft"]);
-    expect(auditLogEntries).toEqual([
+    expect(resourceMutationContexts).toEqual([
       expect.objectContaining({
-        actionType: "resource.publish_markdown",
-        targetResourceType: "resource",
-        targetPublicId: "resource-public-draft",
-        resultStatus: "success",
-        metadataSummary: "redacted resource publish metadata",
+        actorPublicId: "admin-public-010",
+        auditLog: expect.objectContaining({
+          actorRole: "content_admin",
+          actionType: "resource.publish_markdown",
+          metadataSummary: "redacted resource publish metadata",
+          requestIp: null,
+        }),
       }),
     ]);
+    expect(auditLogEntries).toEqual([]);
     expect(JSON.stringify(payload)).not.toContain("bounded fixture markdown");
-    expect(JSON.stringify(auditLogEntries)).not.toContain(
+    expect(JSON.stringify(resourceMutationContexts)).not.toContain(
       "admin-session-token",
     );
   });

@@ -167,15 +167,19 @@ export type RagResourceRuntimeRepository = {
     publicId: string,
     markdownContent: string,
     markdownContentHash: string,
+    mutationContext: ResourceMutationContext,
   ): Promise<AdminResourceOpsListDto["resources"][number] | null>;
   disableResource?(
     publicId: string,
+    mutationContext: ResourceMutationContext,
   ): Promise<AdminResourceOpsListDto["resources"][number] | null>;
   enableResource?(
     publicId: string,
+    mutationContext: ResourceMutationContext,
   ): Promise<AdminResourceOpsListDto["resources"][number] | null>;
   publishResourceMarkdown(
     publicId: string,
+    mutationContext: ResourceMutationContext,
   ): Promise<ResourcePublishMarkdownResult>;
   findResourceForIndexing(
     publicId: string,
@@ -183,6 +187,7 @@ export type RagResourceRuntimeRepository = {
   requestResourceIndexRebuild?(
     resourcePublicId: string,
     requestPublicId: string,
+    mutationContext: ResourceMutationContext,
   ): Promise<ResourceIndexGenerationRequestResult>;
   completeResourceIndexGeneration?(
     input: CompleteResourceIndexGenerationInput,
@@ -200,6 +205,21 @@ export type RagResourceRuntimeRepository = {
     knowledgeNodePublicIds: string[];
     includeDescendants: boolean;
   }): Promise<PersistedResourceRetrievalChunk[]>;
+};
+
+export type ResourceMutationContext = {
+  actorPublicId: string;
+  auditLog: {
+    actorRole: string;
+    actionType:
+      | "resource.update_markdown"
+      | "resource.publish_markdown"
+      | "resource.rebuild_vector"
+      | "resource.disable"
+      | "resource.enable";
+    metadataSummary: string;
+    requestIp: string | null;
+  };
 };
 
 export type RagKnowledgeNodeRuntimeRepository = {
@@ -375,6 +395,7 @@ function createPostgresRagResourceRuntimeRepository(
       publicId,
       markdownContent,
       markdownContentHash,
+      mutationContext,
     ) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
@@ -453,10 +474,15 @@ function createPostgresRagResourceRuntimeRepository(
           (
             await listResourceKnowledgeNodePublicIds(scopedDatabase, [row.id])
           ).get(row.id) ?? [];
+        await appendResourceMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
         return mapResourceOpsRow(row, knowledgeNodePublicIds);
       });
     },
-    async disableResource(publicId) {
+    async disableResource(publicId, mutationContext) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
@@ -510,10 +536,15 @@ function createPostgresRagResourceRuntimeRepository(
           (
             await listResourceKnowledgeNodePublicIds(scopedDatabase, [row.id])
           ).get(row.id) ?? [];
+        await appendResourceMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
         return mapResourceOpsRow(row, knowledgeNodePublicIds);
       });
     },
-    async enableResource(publicId) {
+    async enableResource(publicId, mutationContext) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
@@ -580,10 +611,15 @@ function createPostgresRagResourceRuntimeRepository(
           (
             await listResourceKnowledgeNodePublicIds(scopedDatabase, [row.id])
           ).get(row.id) ?? [];
+        await appendResourceMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
         return mapResourceOpsRow(row, knowledgeNodePublicIds);
       });
     },
-    async publishResourceMarkdown(publicId) {
+    async publishResourceMarkdown(publicId, mutationContext) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
@@ -650,6 +686,11 @@ function createPostgresRagResourceRuntimeRepository(
           (
             await listResourceKnowledgeNodePublicIds(scopedDatabase, [row.id])
           ).get(row.id) ?? [];
+        await appendResourceMutationAuditLog(
+          scopedDatabase,
+          mutationContext,
+          row.public_id,
+        );
         return {
           status: "published",
           resource: mapResourceOpsRow(row, knowledgeNodePublicIds),
@@ -694,11 +735,16 @@ function createPostgresRagResourceRuntimeRepository(
             updatedAt: row.updated_at,
           };
     },
-    async requestResourceIndexRebuild(resourcePublicId, requestPublicId) {
+    async requestResourceIndexRebuild(
+      resourcePublicId,
+      requestPublicId,
+      mutationContext,
+    ) {
       return requestResourceIndexRebuild(
         getDatabase(),
         resourcePublicId,
         requestPublicId,
+        mutationContext,
       );
     },
     async completeResourceIndexGeneration(input) {
@@ -823,6 +869,7 @@ async function requestResourceIndexRebuild(
   database: RuntimeDatabase,
   resourcePublicId: string,
   requestPublicId: string,
+  mutationContext: ResourceMutationContext,
 ): Promise<ResourceIndexGenerationRequestResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
@@ -881,6 +928,11 @@ async function requestResourceIndexRebuild(
         };
       }
 
+      await appendResourceMutationAuditLog(
+        scopedDatabase,
+        mutationContext,
+        resourceRow.public_id,
+      );
       return {
         status: "accepted",
         generationPublicId: existingRequest.public_id,
@@ -942,6 +994,12 @@ async function requestResourceIndexRebuild(
       })
       .where(eq(resource.id, resourceRow.id));
 
+    await appendResourceMutationAuditLog(
+      scopedDatabase,
+      mutationContext,
+      resourceRow.public_id,
+    );
+
     return {
       status: "accepted",
       generationPublicId,
@@ -949,6 +1007,24 @@ async function requestResourceIndexRebuild(
       resourceStatus: nextResourceStatus,
       replayed: false,
     };
+  });
+}
+
+async function appendResourceMutationAuditLog(
+  database: RuntimeDatabase,
+  mutationContext: ResourceMutationContext,
+  targetPublicId: string,
+): Promise<void> {
+  await database.insert(auditLog).values({
+    public_id: `audit-log-${randomUUID()}`,
+    actor_public_id: mutationContext.actorPublicId,
+    actor_role: mutationContext.auditLog.actorRole,
+    action_type: mutationContext.auditLog.actionType,
+    target_resource_type: "resource",
+    target_public_id: targetPublicId,
+    result_status: "success",
+    metadata_summary: mutationContext.auditLog.metadataSummary,
+    request_ip: mutationContext.auditLog.requestIp,
   });
 }
 

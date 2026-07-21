@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-knowledge-node-audit-atomicity-2026-07-21",
-  "objective": "Close only the knowledge_node database partition of F-0031 by committing each create, update, or disable mutation and its redacted success audit_log row in one repository transaction; keep resource and paper_asset mutations out of scope.",
+  "taskId": "p1-remediation-rc-04-resource-database-audit-atomicity-2026-07-21",
+  "objective": "Close only the database-backed resource update_markdown, publish_markdown, rebuild_vector request, disable, and enable partition of F-0031 by committing each successful mutation and its redacted audit_log row in one existing repository transaction while preserving local adapter success auditing; exclude upload, local file/catalog mutations, and paper_asset.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
     "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
     "src/server/services/rag-resource-knowledge-runtime.ts",
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
     "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
     "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts"
   ],
   "blockedFiles": [
     "package.json",
@@ -22,13 +22,14 @@
     "drizzle/**",
     "src/db/schema/**",
     "scripts/**",
+    "src/server/services/local-paper-asset-storage.ts",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
     "src/server/services/paper-asset-service.ts",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/local-paper-asset-storage.ts"
+    "src/server/repositories/paper-asset-repository.ts"
   ],
   "validationCommands": [
     {
-      "name": "knowledge-node-audit-atomicity-focused",
+      "name": "resource-database-audit-atomicity-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -36,14 +37,14 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
         "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts"
       ]
     },
     {
-      "name": "knowledge-node-audit-atomicity-regression",
+      "name": "resource-database-audit-atomicity-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -51,12 +52,12 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts"
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts"
       ]
     },
     {
-      "name": "knowledge-node-audit-atomicity-lint",
+      "name": "resource-database-audit-atomicity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -65,19 +66,19 @@
         "eslint",
         "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
         "src/server/services/rag-resource-knowledge-runtime.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
         "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts"
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts"
       ]
     },
     {
-      "name": "knowledge-node-audit-atomicity-typecheck",
+      "name": "resource-database-audit-atomicity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "knowledge-node-audit-atomicity-build",
+      "name": "resource-database-audit-atomicity-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]

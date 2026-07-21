@@ -46,6 +46,7 @@ import {
   type RagKnowledgeNodeRuntimeRepository,
   type RagResourceKnowledgeRuntimeRepositories,
   type RagResourceRuntimeRepository,
+  type ResourceMutationContext,
 } from "../repositories/rag-resource-knowledge-runtime-repository";
 import {
   parseKnowledgeNodeMutationInput,
@@ -800,6 +801,28 @@ function createKnowledgeNodeMutationContext(
   };
 }
 
+function createResourceMutationContext(
+  request: Request,
+  actor: ContentAdminActor,
+  actionType: ResourceMutationContext["auditLog"]["actionType"],
+  metadataSummary: string,
+): ResourceMutationContext {
+  return {
+    actorPublicId: actor.publicId,
+    auditLog: {
+      actorRole: actor.roles[0],
+      actionType,
+      metadataSummary,
+      requestIp: readRequestIp(request),
+    },
+  };
+}
+
+type ResourceMutationExecution<TData> = {
+  response: ApiResponse<TData>;
+  successAuditLocation: "database" | "external";
+};
+
 function createResourceVectorResult(
   resourcePublicId: string,
   resourceStatus: ResourceVectorRebuildResultDto["resourceVector"]["resourceStatus"],
@@ -867,24 +890,31 @@ async function rebuildResourceVector(input: {
   resourceRepository: RagResourceRuntimeRepository;
   publicId: string;
   requestPublicId: string;
-}): Promise<ApiResponse<ResourceVectorRebuildResultDto | null>> {
+  mutationContext: ResourceMutationContext;
+}): Promise<ResourceMutationExecution<ResourceVectorRebuildResultDto | null>> {
   const resourceForIndexing =
     await input.resourceRepository.findResourceForIndexing(input.publicId);
 
   if (resourceForIndexing === null) {
-    return input.allowLocalResourceAdapter
-      ? rebuildLocalResourceVector({
-          publicId: input.publicId,
-          storageRoot: input.localResourceStorageRoot,
-        })
-      : resourceNotFoundResponse;
+    return {
+      response: input.allowLocalResourceAdapter
+        ? await rebuildLocalResourceVector({
+            publicId: input.publicId,
+            storageRoot: input.localResourceStorageRoot,
+          })
+        : resourceNotFoundResponse,
+      successAuditLocation: "external",
+    };
   }
 
   if (!canRequestResourceIndexRebuild(resourceForIndexing.resourceStatus)) {
-    return createErrorResponse(
-      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
-      "Resource status does not allow index rebuild.",
-    );
+    return {
+      response: createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+        "Resource status does not allow index rebuild.",
+      ),
+      successAuditLocation: "external",
+    };
   }
 
   const chunkingResult = buildResourceChunks({
@@ -904,44 +934,60 @@ async function rebuildResourceVector(input: {
   });
 
   if (chunkingResult.status === "skipped") {
-    return createErrorResponse(
-      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
-      "Resource is not ready for vector rebuild.",
-    );
+    return {
+      response: createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
+        "Resource is not ready for vector rebuild.",
+      ),
+      successAuditLocation: "external",
+    };
   }
 
   if (input.resourceRepository.requestResourceIndexRebuild === undefined) {
-    return createErrorResponse(
-      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
-      "Durable resource index generation is unavailable.",
-    );
+    return {
+      response: createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+        "Durable resource index generation is unavailable.",
+      ),
+      successAuditLocation: "external",
+    };
   }
 
   const generationRequest =
     await input.resourceRepository.requestResourceIndexRebuild(
       input.publicId,
       input.requestPublicId,
+      input.mutationContext,
     );
 
   if (generationRequest.status === "not_found") {
-    return resourceNotFoundResponse;
+    return {
+      response: resourceNotFoundResponse,
+      successAuditLocation: "external",
+    };
   }
 
   if (generationRequest.status === "conflict") {
-    return createErrorResponse(
-      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
-      "Resource index generation request conflicts with current state.",
-    );
+    return {
+      response: createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+        "Resource index generation request conflicts with current state.",
+      ),
+      successAuditLocation: "external",
+    };
   }
 
-  return createSuccessResponse(
-    createPendingResourceVectorResult(
-      resourceForIndexing.publicId,
-      generationRequest.resourceStatus,
-      generationRequest.generationPublicId,
-      generationRequest.replayed,
+  return {
+    response: createSuccessResponse(
+      createPendingResourceVectorResult(
+        resourceForIndexing.publicId,
+        generationRequest.resourceStatus,
+        generationRequest.generationPublicId,
+        generationRequest.replayed,
+      ),
     ),
-  );
+    successAuditLocation: "database",
+  };
 }
 
 async function publishResourceMarkdown(input: {
@@ -949,27 +995,40 @@ async function publishResourceMarkdown(input: {
   localResourceStorageRoot: string;
   resourceRepository: RagResourceRuntimeRepository;
   publicId: string;
-}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  mutationContext: ResourceMutationContext;
+}): Promise<
+  ResourceMutationExecution<{ resource: AdminResourceOpsSummaryDto } | null>
+> {
   const publishResult = await input.resourceRepository.publishResourceMarkdown(
     input.publicId,
+    input.mutationContext,
   );
 
   if (publishResult.status === "not_found") {
-    return input.allowLocalResourceAdapter
-      ? publishLocalResourceMarkdown({
-          publicId: input.publicId,
-          storageRoot: input.localResourceStorageRoot,
-        })
-      : resourceNotFoundResponse;
+    return {
+      response: input.allowLocalResourceAdapter
+        ? await publishLocalResourceMarkdown({
+            publicId: input.publicId,
+            storageRoot: input.localResourceStorageRoot,
+          })
+        : resourceNotFoundResponse,
+      successAuditLocation: "external",
+    };
   }
 
   if (publishResult.status === "conflict") {
     void publishResult.currentStatus;
     void publishResult.reason;
-    return resourcePublishConflictResponse;
+    return {
+      response: resourcePublishConflictResponse,
+      successAuditLocation: "external",
+    };
   }
 
-  return createSuccessResponse({ resource: publishResult.resource });
+  return {
+    response: createSuccessResponse({ resource: publishResult.resource }),
+    successAuditLocation: "database",
+  };
 }
 
 async function getResourceDetail(input: {
@@ -1003,7 +1062,10 @@ async function updateResourceMarkdown(input: {
   request: Request;
   resourceRepository: RagResourceRuntimeRepository;
   storageRoot: string;
-}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  mutationContext: ResourceMutationContext;
+}): Promise<
+  ResourceMutationExecution<{ resource: AdminResourceOpsSummaryDto } | null>
+> {
   const requestBody = await readRequestJson(input.request);
   const markdownContent =
     typeof requestBody === "object" &&
@@ -1014,7 +1076,10 @@ async function updateResourceMarkdown(input: {
       : "";
 
   if (markdownContent.length === 0) {
-    return validationFailedResponse;
+    return {
+      response: validationFailedResponse,
+      successAuditLocation: "external",
+    };
   }
 
   if (input.resourceRepository.updateResourceMarkdown !== undefined) {
@@ -1023,24 +1088,31 @@ async function updateResourceMarkdown(input: {
         input.publicId,
         markdownContent,
         createMarkdownContentHash(markdownContent),
+        input.mutationContext,
       );
 
     if (resourceSummary !== null) {
-      return createSuccessResponse({ resource: resourceSummary });
+      return {
+        response: createSuccessResponse({ resource: resourceSummary }),
+        successAuditLocation: "database",
+      };
     }
   }
 
-  return input.allowLocalResourceAdapter
-    ? updateLocalResourceMarkdown({
-        publicId: input.publicId,
-        request: new Request(input.request.url, {
-          method: input.request.method,
-          headers: input.request.headers,
-          body: JSON.stringify({ markdownContent }),
-        }),
-        storageRoot: input.storageRoot,
-      })
-    : resourceNotFoundResponse;
+  return {
+    response: input.allowLocalResourceAdapter
+      ? await updateLocalResourceMarkdown({
+          publicId: input.publicId,
+          request: new Request(input.request.url, {
+            method: input.request.method,
+            headers: input.request.headers,
+            body: JSON.stringify({ markdownContent }),
+          }),
+          storageRoot: input.storageRoot,
+        })
+      : resourceNotFoundResponse,
+    successAuditLocation: "external",
+  };
 }
 
 async function disableResource(input: {
@@ -1048,20 +1120,30 @@ async function disableResource(input: {
   publicId: string;
   resourceRepository: RagResourceRuntimeRepository;
   storageRoot: string;
-}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  mutationContext: ResourceMutationContext;
+}): Promise<
+  ResourceMutationExecution<{ resource: AdminResourceOpsSummaryDto } | null>
+> {
   if (input.resourceRepository.disableResource !== undefined) {
     const resourceSummary = await input.resourceRepository.disableResource(
       input.publicId,
+      input.mutationContext,
     );
 
     if (resourceSummary !== null) {
-      return createSuccessResponse({ resource: resourceSummary });
+      return {
+        response: createSuccessResponse({ resource: resourceSummary }),
+        successAuditLocation: "database",
+      };
     }
   }
 
-  return input.allowLocalResourceAdapter
-    ? disableLocalResource(input)
-    : resourceNotFoundResponse;
+  return {
+    response: input.allowLocalResourceAdapter
+      ? await disableLocalResource(input)
+      : resourceNotFoundResponse,
+    successAuditLocation: "external",
+  };
 }
 
 async function enableResource(input: {
@@ -1069,20 +1151,30 @@ async function enableResource(input: {
   publicId: string;
   resourceRepository: RagResourceRuntimeRepository;
   storageRoot: string;
-}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  mutationContext: ResourceMutationContext;
+}): Promise<
+  ResourceMutationExecution<{ resource: AdminResourceOpsSummaryDto } | null>
+> {
   if (input.resourceRepository.enableResource !== undefined) {
     const resourceSummary = await input.resourceRepository.enableResource(
       input.publicId,
+      input.mutationContext,
     );
 
     if (resourceSummary !== null) {
-      return createSuccessResponse({ resource: resourceSummary });
+      return {
+        response: createSuccessResponse({ resource: resourceSummary }),
+        successAuditLocation: "database",
+      };
     }
   }
 
-  return input.allowLocalResourceAdapter
-    ? enableLocalResource(input)
-    : resourceEnableConflictResponse;
+  return {
+    response: input.allowLocalResourceAdapter
+      ? await enableLocalResource(input)
+      : resourceEnableConflictResponse,
+    successAuditLocation: "external",
+  };
 }
 
 async function uploadLocalResource(input: {
@@ -1835,28 +1927,39 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await updateResourceMarkdown({
+          const result = await updateResourceMarkdown({
             allowLocalResourceAdapter,
             publicId,
             request,
             resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
+            mutationContext: createResourceMutationContext(
+              request,
+              actorOrError,
+              "resource.update_markdown",
+              "redacted local resource markdown metadata",
+            ),
           });
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "resource.update_markdown",
-              targetResourceType: "resource",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted local resource markdown metadata",
-            },
-          );
+          if (
+            result.response.code !== 0 ||
+            result.successAuditLocation === "external"
+          ) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.update_markdown",
+                targetResourceType: "resource",
+                targetPublicId: publicId,
+                resultStatus: result.response.code === 0 ? "success" : "failed",
+                metadataSummary: "redacted local resource markdown metadata",
+              },
+            );
+          }
 
-          return createJsonResponse(response);
+          return createJsonResponse(result.response);
         },
       },
       publish: {
@@ -1872,27 +1975,38 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await publishResourceMarkdown({
+          const result = await publishResourceMarkdown({
             allowLocalResourceAdapter,
             localResourceStorageRoot,
             resourceRepository: repositories.resourceRepository,
             publicId,
+            mutationContext: createResourceMutationContext(
+              request,
+              actorOrError,
+              "resource.publish_markdown",
+              "redacted resource publish metadata",
+            ),
           });
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "resource.publish_markdown",
-              targetResourceType: "resource",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted resource publish metadata",
-            },
-          );
+          if (
+            result.response.code !== 0 ||
+            result.successAuditLocation === "external"
+          ) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.publish_markdown",
+                targetResourceType: "resource",
+                targetPublicId: publicId,
+                resultStatus: result.response.code === 0 ? "success" : "failed",
+                metadataSummary: "redacted resource publish metadata",
+              },
+            );
+          }
 
-          return createJsonResponse(response);
+          return createJsonResponse(result.response);
         },
       },
       rebuildVector: {
@@ -1908,28 +2022,39 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await rebuildResourceVector({
+          const result = await rebuildResourceVector({
             allowLocalResourceAdapter,
             localResourceStorageRoot,
             resourceRepository: repositories.resourceRepository,
             publicId,
             requestPublicId: readResourceIndexRequestPublicId(request),
+            mutationContext: createResourceMutationContext(
+              request,
+              actorOrError,
+              "resource.rebuild_vector",
+              "redacted resource vector rebuild metadata",
+            ),
           });
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "resource.rebuild_vector",
-              targetResourceType: "resource",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted resource vector rebuild metadata",
-            },
-          );
+          if (
+            result.response.code !== 0 ||
+            result.successAuditLocation === "external"
+          ) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.rebuild_vector",
+                targetResourceType: "resource",
+                targetPublicId: publicId,
+                resultStatus: result.response.code === 0 ? "success" : "failed",
+                metadataSummary: "redacted resource vector rebuild metadata",
+              },
+            );
+          }
 
-          return createJsonResponse(response);
+          return createJsonResponse(result.response);
         },
       },
       disable: {
@@ -1945,27 +2070,38 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await disableResource({
+          const result = await disableResource({
             allowLocalResourceAdapter,
             publicId,
             resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
+            mutationContext: createResourceMutationContext(
+              request,
+              actorOrError,
+              "resource.disable",
+              "redacted local resource disable metadata",
+            ),
           });
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "resource.disable",
-              targetResourceType: "resource",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted local resource disable metadata",
-            },
-          );
+          if (
+            result.response.code !== 0 ||
+            result.successAuditLocation === "external"
+          ) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.disable",
+                targetResourceType: "resource",
+                targetPublicId: publicId,
+                resultStatus: result.response.code === 0 ? "success" : "failed",
+                metadataSummary: "redacted local resource disable metadata",
+              },
+            );
+          }
 
-          return createJsonResponse(response);
+          return createJsonResponse(result.response);
         },
       },
       enable: {
@@ -1981,27 +2117,38 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await enableResource({
+          const result = await enableResource({
             allowLocalResourceAdapter,
             publicId,
             resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
+            mutationContext: createResourceMutationContext(
+              request,
+              actorOrError,
+              "resource.enable",
+              "redacted local resource enable metadata",
+            ),
           });
 
-          await appendAuditLog(
-            repositories.auditLogRepository,
-            request,
-            actorOrError,
-            {
-              actionType: "resource.enable",
-              targetResourceType: "resource",
-              targetPublicId: publicId,
-              resultStatus: response.code === 0 ? "success" : "failed",
-              metadataSummary: "redacted local resource enable metadata",
-            },
-          );
+          if (
+            result.response.code !== 0 ||
+            result.successAuditLocation === "external"
+          ) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.enable",
+                targetResourceType: "resource",
+                targetPublicId: publicId,
+                resultStatus: result.response.code === 0 ? "success" : "failed",
+                metadataSummary: "redacted local resource enable metadata",
+              },
+            );
+          }
 
-          return createJsonResponse(response);
+          return createJsonResponse(result.response);
         },
       },
     },
