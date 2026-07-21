@@ -1,23 +1,22 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21",
-  "objective": "Close F-0105 by rejecting self-referential, cross-ai-function and cyclic model_config fallback references at the authoritative database mutation boundary, rejecting duplicate reorder identifiers and priorities before mutation, and applying each homogeneous fallback-priority reorder atomically only when every requested model_config exists. Preserve the existing one-hop runtime fallback policy, model permissions, Provider configuration, pricing semantics and schema.",
+  "taskId": "p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21",
+  "objective": "Close F-0106 by classifying identity keywords so phone matching accepts only a normalized complete phone and uses equality while names remain fuzzy, requiring an enumerated business reason for every single-record reveal or copy request, and atomically enforcing a per-actor disclosure budget with the redacted audit decision on the existing audit_log boundary. Preserve masked list/detail responses, current eligible roles and no-store delivery without schema, migration, dependency or entitlement changes.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/validators/ai-rag.ts",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "src/server/validators/ai-rag.test.ts",
-    "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-    "tests/unit/phase-12-model-config-server-runtime.test.ts",
-    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-    "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+    "src/server/contracts/admin-user-org-auth-ops-contract.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/services/admin-flow-runtime.ts",
+    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
+    "tests/unit/p1-phone-search-disclosure-controls.test.ts",
+    "tests/unit/phone-visibility-enforcement.test.ts",
+    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+    "src/server/repositories/admin-flow-runtime-repository.test.ts",
+    "src/server/services/admin-flow-runtime.test.ts",
+    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -32,39 +31,38 @@
     ".github/workflows/**",
     ".env*",
     "persistent database writes or migration execution",
-    "permission or entitlement changes",
+    "role, permission, entitlement or disclosure eligibility expansion",
     "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/validators/ai-rag.ts",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/validators/ai-rag.test.ts",
-    "tests/unit/p1-model-config-fallback-aggregate.test.ts"
+    "src/server/contracts/admin-user-org-auth-ops-contract.ts",
+    "src/server/repositories/admin-flow-runtime-repository.ts",
+    "src/server/services/admin-flow-runtime.ts",
+    "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
+    "tests/unit/p1-phone-search-disclosure-controls.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "tests/unit/phase-12-model-config-server-runtime.test.ts",
-    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-    "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+    "tests/unit/phone-visibility-enforcement.test.ts",
+    "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+    "src/server/repositories/admin-flow-runtime-repository.test.ts",
+    "src/server/services/admin-flow-runtime.test.ts",
+    "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+    "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApi": "The admin UI creates model_config records through POST /api/v1/model-configs; reorder-fallback is a direct API command and has no separate client-side authority.",
-    "routeService": "The App Router delegates create, update and reorder to admin-ai-audit-log-runtime, which validates shape but currently cannot prove referenced model_config identity or transaction outcomes.",
-    "repository": "create and update resolve fallback by public_id without same ai_func_type, self or cycle predicates; reorder performs independent UPDATE statements, ignores affected rows and always returns success.",
-    "schema": "model_config has the self foreign key and ai_func_type/fallback_priority index but no cross-row constraint; this task keeps schema unchanged and enforces the invariant in conditional SQL plus one database transaction.",
-    "tests": "Focused RED binds duplicate rejection, same-function/non-self/non-cycle SQL predicates, one locked homogeneous set, exact affected-row verification and rollback-safe all-or-nothing behavior.",
-    "nonClaims": "No schema or migration source, migration execution, persistent database write, permission change, real Provider call, pricing semantic change, dependency, mechanism, deployment or external side effect."
+    "uiApi": "AdminOpsManagement owns the explicit user-detail reveal and copy gestures and currently sends empty POST bodies; both App Router routes delegate directly to the shared runtime handler.",
+    "routeService": "admin-flow-runtime authorizes each request and sets no-store, but currently ignores the body and appends a fixed audit after fetching the phone.",
+    "repository": "admin and user list conditions apply percent-wildcard phone matching to every keyword; getUserPhoneForDisclosure is a loose read separate from audit and has no shared disclosure budget.",
+    "schema": "Existing user, admin and audit_log tables provide exact phone identity, actor/action/time audit facts and transactional locking; this task changes no schema or migration and executes no persistent database.",
+    "tests": "Focused RED covers short numeric fragments, exact phone equality, required enumerated reasons, atomic disclosure/audit/rate decisions, no-store, redaction, copy separation and UI body propagation; direct regressions cover runtime, repository and admin operations UI.",
+    "nonClaims": "No new role or entitlement, schema/migration source or execution, real database access, dependency, Provider, external service, secret/env, deployment, PR, force-push or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0105-model-config-fallback-focused",
+      "name": "f0106-phone-controls-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -72,13 +70,14 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-        "src/server/validators/ai-rag.test.ts",
-        "tests/unit/phase-12-model-config-server-runtime.test.ts"
+        "tests/unit/p1-phone-search-disclosure-controls.test.ts",
+        "tests/unit/phone-visibility-enforcement.test.ts",
+        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts",
+        "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
       ]
     },
     {
-      "name": "f0105-model-config-fallback-regression",
+      "name": "f0106-phone-controls-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -86,38 +85,37 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-        "tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts",
-        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+        "src/server/repositories/admin-flow-runtime-repository.test.ts",
+        "src/server/services/admin-flow-runtime.test.ts",
+        "tests/unit/admin-user-org-auth-ops-baseline.test.ts",
+        "tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts"
       ]
     },
     {
-      "name": "f0105-model-config-fallback-lint",
+      "name": "f0106-phone-controls-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/validators/ai-rag.ts",
-        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-        "src/server/services/admin-ai-audit-log-runtime.ts",
-        "src/server/validators/ai-rag.test.ts",
-        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-        "tests/unit/phase-12-model-config-server-runtime.test.ts"
+        "src/server/contracts/admin-user-org-auth-ops-contract.ts",
+        "src/server/repositories/admin-flow-runtime-repository.ts",
+        "src/server/services/admin-flow-runtime.ts",
+        "src/features/admin/admin-ops-management/AdminOpsManagement.tsx",
+        "tests/unit/p1-phone-search-disclosure-controls.test.ts",
+        "tests/unit/phone-visibility-enforcement.test.ts",
+        "tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts"
       ]
     },
     {
-      "name": "f0105-model-config-fallback-typecheck",
+      "name": "f0106-phone-controls-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0105-model-config-fallback-build",
+      "name": "f0106-phone-controls-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -126,22 +124,23 @@
   "approvalSources": {
     "dependency": null,
     "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": null,
+    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_transaction_and_validation_logic",
+    "category": "bounded_permission_privacy_contraction_and_database_application_transaction_logic",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,
-    "permissionOrEntitlementChange": false,
+    "permissionOrEntitlementExpansion": false,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
   "applicableStandingApprovals": [
     "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
+    "standing-test-only-allowlist-expansion-2026-07-21",
+    "current-user-delegated-p1-guardian-v1-2026-07-21"
   ],
   "push": {
     "target": "origin/master",

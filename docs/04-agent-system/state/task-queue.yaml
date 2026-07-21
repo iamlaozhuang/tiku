@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
+  currentTaskId: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -268,6 +268,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
     - p1-remediation-rc-04-paper-metadata-truth-2026-07-21
     - p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
+    - p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -321,6 +322,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21
     - p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21
     - p1-remediation-rc-04-paper-metadata-truth-2026-07-21
+    - p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -400,49 +402,52 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-knowledge-recommendation-failure-recovery-2026-07-21: closed
     p1-remediation-rc-04-f0083-single-source-static-closure-2026-07-21: closed
     p1-remediation-rc-04-paper-metadata-truth-2026-07-21: closed
-    p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21: in_progress
+    p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21: closed
+    p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
-    title: Model config fallback aggregate invariants
-    phase: p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
+  - id: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
+    title: Exact phone search and audited disclosure controls
+    phase: p1-remediation-rc-04-phone-search-disclosure-controls-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0105
-    branch: fix/model-config-fallback-aggregate
-    objective: reject invalid fallback references and make homogeneous model config priority reorder all-or-nothing
+    productClosureContribution: F-0106
+    branch: fix/phone-search-disclosure-controls
+    objective: enforce exact phone search and reasoned rate-limited atomic phone disclosure auditing
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-04
     findingIds:
-      - F-0105
+      - F-0106
     executionStage: candidate_frozen_ready_for_standing_closeout
     riskBoundary:
-      category: bounded_database_application_transaction_and_validation_logic
+      category: bounded_permission_privacy_contraction_and_database_application_transaction_logic
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
-      authorizationOrEntitlementChange: false
+      authorizationOrEntitlementExpansion: false
       realExternalCall: false
       standingCloseout: true
     preRedImpactScan:
-      chain: admin_model_config_UI_and_direct_API_to_App_Router_to_admin_AI_runtime_to_validator_to_Postgres_repository_to_existing_model_config_self_reference
-      coreFiles: 7
-      contingencyFiles: 8
+      chain: AdminOpsManagement_to_reveal_copy_routes_to_admin_flow_runtime_to_user_repository_and_existing_audit_log
+      coreFiles: 8
+      contingencyFiles: 6
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedResidualRootCause: fallback_and_priority_are_mutated_as_loose_fields_without_reference_compatibility_or_one_aggregate_transaction
-      atomicReason: fallback_reference_validity_and_same_function_priority_order_define_one_model_selection_aggregate_and_partial_reorder_is_not_a_valid_state
+      testOnlyExpansion: standing-test-only-allowlist-expansion-2026-07-21_for_static_user_detail_boundary_delimiter
+      confirmedResidualRootCause: sensitive_phone_keywords_are_not_classified_and_disclosure_reason_rate_decision_phone_read_and_audit_are_not_one_command
+      atomicReason: a_phone_must_not_leave_the_authoritative_boundary_without_the_same_transaction_reserving_budget_and_recording_the_redacted_outcome
     expectedAcceptance:
-      - create_and_update_reject_missing_cross_function_self_and_cyclic_fallback_targets
-      - reorder_rejects_duplicate_public_ids_duplicate_priorities_mixed_function_types_and_missing_ids
-      - every_valid_reorder_locks_validates_and_updates_the_exact_set_in_one_transaction
-      - failure_or_affected_row_mismatch_rolls_back_without_partial_success
-      - no_schema_migration_permission_Provider_pricing_dependency_or_mechanism_change
+      - short_numeric_fragments_never_match_phone_while_complete_normalized_phone_uses_equality_and_names_remain_fuzzy
+      - reveal_and_copy_require_an_enumerated_reason_and_optional_bounded_note_contract
+      - one_transaction_per_valid_disclosure_locks_actor_budget_reads_one_phone_and_records_a_redacted_success_failure_or_rate_limit_audit
+      - every_response_is_no_store_and_full_phone_never_enters_list_detail_audit_error_or_copy_response
+      - no_schema_migration_real_database_permission_expansion_dependency_Provider_or_mechanism_change
     implementationEvidence:
-      red: initial_5_expected_failures_plus_adversarial_followup_RED_proved_duplicate_acceptance_transaction_escape_missing_reference_predicates_inbound_drift_and_incomplete_function_set
-      green: focused_16_of_16_and_affected_regression_32_of_32_passed_before_freeze
-      preliminaryQuality: exact_lint_and_repository_typecheck_passed_before_freeze
-      review: adversarial_pass_same_function_non_self_acyclic_inbound_safe_unique_priority_full_set_locked_atomic_no_partial_success_no_scope_or_risk_drift
+      red: initial_8_of_8_failures_plus_2_adversarial_followup_RED_for_no_store_error_boundary_and_effective_multi_role_audit_role
+      green: focused_24_of_24_affected_regression_69_of_69_and_targeted_DOM_clearance_1_of_1_passed_before_freeze
+      preliminaryQuality: exact_lint_typecheck_and_build_99_routes_passed_before_freeze
+      buildRetry: first_attempt_failed_only_on_transient_Google_Fonts_network_then_same_candidate_retry_passed_without_file_change
+      review: adversarial_pass_exact_phone_only_name_fuzzy_reason_allowlist_actor_budget_lock_atomic_redacted_audit_no_store_all_failures_copy_request_semantics_and_DOM_clearance
     closeoutProjection:
       current: frozen_candidate_ready_for_kernel_and_declared_validation
       triggers: standing_approval_scope_match_then_all_declared_validation_and_commit_hook_green_without_diff_drift
@@ -453,16 +458,16 @@ activeTasks:
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: 7m_root_cause_TDD_implementation_and_adversarial_correction_before_freeze
-      mechanismOverhead: 4m_contract_state_format_and_validation_coordination_before_closeout
+      productValueTime: 18m_JIT_root_cause_TDD_implementation_and_adversarial_corrections_before_freeze
+      mechanismOverhead: 7m_contract_state_format_validation_coordination_and_one_transient_font_retry_before_closeout
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-04-paper-metadata-truth-2026-07-21
-      findingId: F-0095
-      productClosureContribution: F-0095_complete_metadata_edit_and_truthful_projection_closure
-      commit: 4cc4dee05da54d4bcaafc8a1462c17a98ed64c6e
+      taskId: p1-remediation-rc-04-model-config-fallback-aggregate-2026-07-21
+      findingId: F-0105
+      productClosureContribution: F-0105_complete_fallback_aggregate_closure
+      commit: 481d7dbed4515c6cc95513ed403274375530342c
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: fresh-schema-start-f0095-paper-metadata-truth-2026-07-21
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

@@ -43,7 +43,9 @@ import type {
   AdminAuthOperationListQuery,
   AdminUserDetailDto,
   AdminUserListDto,
+  UserPhoneDisclosureReasonCode,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import { classifyAdminIdentityKeyword } from "../contracts/admin-user-org-auth-ops-contract";
 import { adminRoleValues, type AdminRole } from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { setEmployeeAccountStatusWithQuota } from "./employee-org-auth-quota-repository";
@@ -82,7 +84,9 @@ export type AdminUserOrgAuthRuntimeRepository = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
   getUserDetail?(publicId: string): Promise<AdminUserDetailDto | null>;
-  getUserPhoneForDisclosure?(publicId: string): Promise<string | null>;
+  discloseUserPhoneAtomically?(
+    input: UserPhoneDisclosureRepositoryInput,
+  ): Promise<UserPhoneDisclosureRepositoryResult>;
   createAdminAccount?(
     input: AdminAccountCreationInputDto,
     actor: AdminAccountLifecycleRepositoryActor,
@@ -165,6 +169,23 @@ export type UserPasswordResetRepositoryInput = {
   newPassword: string;
   publicId: string;
 };
+
+export type UserPhoneDisclosureRepositoryInput = {
+  actionType: "user.phone_reveal" | "user.phone_copy";
+  actor: {
+    publicId: string;
+    requestIp: string | null;
+    role: AdminRole;
+  };
+  publicId: string;
+  reasonCode: UserPhoneDisclosureReasonCode;
+  reasonNoteProvided: boolean;
+};
+
+export type UserPhoneDisclosureRepositoryResult =
+  | { status: "disclosed"; phone: string }
+  | { status: "not_found" }
+  | { status: "rate_limited"; retryAfterSecond: number };
 
 export type AdminAccountCreationRepositoryResult =
   | ({
@@ -465,11 +486,11 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       ];
 
       if (query.keyword !== null) {
+        const identityKeyword = classifyAdminIdentityKeyword(query.keyword);
         conditions.push(
-          or(
-            ilike(admin.name, `%${query.keyword}%`),
-            ilike(admin.phone, `%${query.keyword}%`),
-          )!,
+          identityKeyword.kind === "exact_phone"
+            ? eq(admin.phone, identityKeyword.value)
+            : ilike(admin.name, `%${identityKeyword.value}%`),
         );
       }
 
@@ -861,15 +882,8 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         authorizations,
       };
     },
-    async getUserPhoneForDisclosure(publicId) {
-      const database = getDatabase();
-      const [userRow] = await database
-        .select({ phone: user.phone })
-        .from(user)
-        .where(eq(user.public_id, publicId))
-        .limit(1);
-
-      return userRow?.phone ?? null;
+    async discloseUserPhoneAtomically(input) {
+      return discloseUserPhoneAtomically(getDatabase(), input);
     },
     async createAdminAccount(input, actor) {
       const database = getDatabase();
@@ -1644,6 +1658,97 @@ async function resetUserPasswordAtomically(
   });
 }
 
+const USER_PHONE_DISCLOSURE_MAX_ATTEMPT = 10;
+const USER_PHONE_DISCLOSURE_RETRY_AFTER_SECOND = 60;
+
+async function discloseUserPhoneAtomically(
+  database: AdminFlowRuntimeDatabase,
+  input: UserPhoneDisclosureRepositoryInput,
+): Promise<UserPhoneDisclosureRepositoryResult> {
+  return database.transaction(async (transaction) => {
+    await transaction.execute(
+      sql`select pg_advisory_xact_lock(hashtext(${`phone_disclosure:${input.actor.publicId}`}))`,
+    );
+    const [attemptCountRow] = await transaction
+      .select({ value: count() })
+      .from(auditLog)
+      .where(
+        and(
+          eq(auditLog.actor_public_id, input.actor.publicId),
+          inArray(auditLog.action_type, [
+            "user.phone_reveal",
+            "user.phone_copy",
+          ]),
+          eq(auditLog.target_resource_type, "user"),
+          sql`${auditLog.created_at} >= now() - interval '1 minute'`,
+        ),
+      );
+    const recentAttemptCount = attemptCountRow?.value ?? 0;
+
+    if (recentAttemptCount >= USER_PHONE_DISCLOSURE_MAX_ATTEMPT) {
+      await insertUserPhoneDisclosureAudit(transaction, input, {
+        resultStatus: "failed",
+        status: "rate_limited",
+      });
+
+      return {
+        status: "rate_limited",
+        retryAfterSecond: USER_PHONE_DISCLOSURE_RETRY_AFTER_SECOND,
+      };
+    }
+
+    const [userRow] = await transaction
+      .select({ phone: user.phone })
+      .from(user)
+      .where(eq(user.public_id, input.publicId))
+      .limit(1);
+
+    if (userRow === undefined) {
+      await insertUserPhoneDisclosureAudit(transaction, input, {
+        resultStatus: "failed",
+        status: "not_found",
+      });
+
+      return { status: "not_found" };
+    }
+
+    await insertUserPhoneDisclosureAudit(transaction, input, {
+      resultStatus: "success",
+      status: "disclosed",
+    });
+
+    return { status: "disclosed", phone: userRow.phone };
+  });
+}
+
+async function insertUserPhoneDisclosureAudit(
+  transaction: Parameters<
+    Parameters<AdminFlowRuntimeDatabase["transaction"]>[0]
+  >[0],
+  input: UserPhoneDisclosureRepositoryInput,
+  decision: {
+    resultStatus: "success" | "failed";
+    status: "disclosed" | "not_found" | "rate_limited";
+  },
+): Promise<void> {
+  await transaction.insert(auditLog).values({
+    action_type: input.actionType,
+    actor_public_id: input.actor.publicId,
+    actor_role: input.actor.role,
+    metadata_summary: [
+      "redacted phone disclosure",
+      `reason_code=${input.reasonCode}`,
+      `reason_note=${input.reasonNoteProvided ? "provided" : "absent"}`,
+      `decision=${decision.status}`,
+    ].join("; "),
+    public_id: `audit-log-${randomUUID()}`,
+    request_ip: input.actor.requestIp,
+    result_status: decision.resultStatus,
+    target_public_id: input.publicId,
+    target_resource_type: "user",
+  });
+}
+
 async function terminateUserActiveFlows(
   database: AdminFlowRuntimeDatabase,
   publicId: string,
@@ -2031,11 +2136,11 @@ function createUserConditions(query: AdminAuthOperationListQuery): SQL[] {
   const conditions: SQL[] = [];
 
   if (query.keyword !== null) {
+    const identityKeyword = classifyAdminIdentityKeyword(query.keyword);
     conditions.push(
-      or(
-        ilike(user.name, `%${query.keyword}%`),
-        ilike(user.phone, `%${query.keyword}%`),
-      )!,
+      identityKeyword.kind === "exact_phone"
+        ? eq(user.phone, identityKeyword.value)
+        : ilike(user.name, `%${identityKeyword.value}%`),
     );
   }
 

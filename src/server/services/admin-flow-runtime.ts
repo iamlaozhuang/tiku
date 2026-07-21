@@ -39,6 +39,7 @@ import {
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   createAdminAccountListQuery,
   createAdminAuthOperationListQuery,
+  normalizeUserPhoneDisclosureInput,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
@@ -151,7 +152,11 @@ const userPhoneDisclosureUnavailableResponse = createErrorResponse(
 );
 const userPhoneDisclosureValidationFailedResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
-  "User identifier is invalid.",
+  "User identifier or phone disclosure reason is invalid.",
+);
+const userPhoneDisclosureRateLimitedResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.rateLimited,
+  "User phone disclosure rate limit exceeded.",
 );
 const USER_PUBLIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u;
 const NO_STORE_HEADERS = {
@@ -240,6 +245,20 @@ function canReadUserManagement(actor: AdminFlowActor): boolean {
 
 function canDiscloseUserPhone(actor: AdminFlowActor): boolean {
   return canReadUserManagement(actor);
+}
+
+function getUserPhoneDisclosureActorRole(
+  actor: AdminFlowActor,
+): "super_admin" | "ops_admin" {
+  if (actor.roles.includes("super_admin")) {
+    return "super_admin";
+  }
+
+  if (actor.roles.includes("ops_admin")) {
+    return "ops_admin";
+  }
+
+  throw new Error("Eligible phone disclosure role is required.");
 }
 
 async function readUserPublicId(context: {
@@ -1187,6 +1206,21 @@ export function createAdminFlowRuntimeRouteHandlers(
     context: { params: Promise<{ publicId: string }> };
     actionType: "user.phone_reveal" | "user.phone_copy";
   }): Promise<Response> {
+    try {
+      return await executeUserPhoneDisclosure(input);
+    } catch {
+      return createJsonResponse(userPhoneDisclosureUnavailableResponse, {
+        status: 503,
+        headers: NO_STORE_HEADERS,
+      });
+    }
+  }
+
+  async function executeUserPhoneDisclosure(input: {
+    request: Request;
+    context: { params: Promise<{ publicId: string }> };
+    actionType: "user.phone_reveal" | "user.phone_copy";
+  }): Promise<Response> {
     const actor = await requireAdminActor(input.request);
 
     if (actor === null) {
@@ -1213,7 +1247,11 @@ export function createAdminFlowRuntimeRouteHandlers(
       });
     }
 
-    if (publicId === null) {
+    const disclosureInput = normalizeUserPhoneDisclosureInput(
+      await readJsonBody(input.request),
+    );
+
+    if (publicId === null || !disclosureInput.success) {
       await appendUserPhoneDisclosureAuditLog({
         repositories,
         request: input.request,
@@ -1229,9 +1267,10 @@ export function createAdminFlowRuntimeRouteHandlers(
       });
     }
 
-    if (
-      repositories.userOrgAuthRepository.getUserPhoneForDisclosure === undefined
-    ) {
+    const discloseUserPhoneAtomically =
+      repositories.userOrgAuthRepository.discloseUserPhoneAtomically;
+
+    if (discloseUserPhoneAtomically === undefined) {
       await appendUserPhoneDisclosureAuditLog({
         repositories,
         request: input.request,
@@ -1247,43 +1286,39 @@ export function createAdminFlowRuntimeRouteHandlers(
       });
     }
 
-    const phone =
-      await repositories.userOrgAuthRepository.getUserPhoneForDisclosure(
-        publicId,
-      );
+    const disclosureResult = await discloseUserPhoneAtomically({
+      actionType: input.actionType,
+      actor: {
+        publicId: actor.publicId,
+        requestIp: readRequestIp(input.request),
+        role: getUserPhoneDisclosureActorRole(actor),
+      },
+      publicId,
+      reasonCode: disclosureInput.value.reasonCode,
+      reasonNoteProvided: disclosureInput.value.reasonNote !== null,
+    });
 
-    if (phone === null) {
-      await appendUserPhoneDisclosureAuditLog({
-        repositories,
-        request: input.request,
-        actor,
-        actionType: input.actionType,
-        targetPublicId: publicId,
-        resultStatus: "failed",
-        metadataSummary: "redacted phone disclosure not found metadata",
-      });
-
+    if (disclosureResult.status === "not_found") {
       return createJsonResponse(userNotFoundResponse, {
         headers: NO_STORE_HEADERS,
       });
     }
 
-    await appendUserPhoneDisclosureAuditLog({
-      repositories,
-      request: input.request,
-      actor,
-      actionType: input.actionType,
-      targetPublicId: publicId,
-      resultStatus: "success",
-      metadataSummary:
-        input.actionType === "user.phone_reveal"
-          ? "redacted phone reveal metadata"
-          : "redacted phone copy request metadata",
-    });
+    if (disclosureResult.status === "rate_limited") {
+      return createJsonResponse(userPhoneDisclosureRateLimitedResponse, {
+        status: 429,
+        headers: {
+          ...NO_STORE_HEADERS,
+          "retry-after": `${disclosureResult.retryAfterSecond}`,
+        },
+      });
+    }
 
     return createJsonResponse(
       input.actionType === "user.phone_reveal"
-        ? createSuccessResponse<UserPhoneRevealDto>({ phone })
+        ? createSuccessResponse<UserPhoneRevealDto>({
+            phone: disclosureResult.phone,
+          })
         : createSuccessResponse(null),
       { headers: NO_STORE_HEADERS },
     );

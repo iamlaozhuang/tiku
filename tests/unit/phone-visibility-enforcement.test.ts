@@ -116,8 +116,18 @@ function createAdminFlowRepositories(input: {
           authorizations: [],
         };
       },
-      async getUserPhoneForDisclosure() {
-        return input.phone === undefined ? rawPhone : input.phone;
+      async discloseUserPhoneAtomically(disclosureInput) {
+        const phone = input.phone === undefined ? rawPhone : input.phone;
+
+        input.onAudit?.({
+          actionType: disclosureInput.actionType,
+          metadataSummary: `redacted phone disclosure reason_code=${disclosureInput.reasonCode}`,
+          resultStatus: phone === null ? "failed" : "success",
+        });
+
+        return phone === null
+          ? { status: "not_found" }
+          : { status: "disclosed", phone };
       },
     },
     contentKnowledgeRepository: {
@@ -272,19 +282,37 @@ describe("phone visibility enforcement", () => {
     const context = {
       params: Promise.resolve({ publicId: "user-public-001" }),
     };
-    const request = new Request(
+    const revealRequest = new Request(
       "http://localhost/api/v1/users/user-public-001/reveal-phone",
       {
-        headers: { authorization: `Bearer ${sessionCredential}` },
+        body: JSON.stringify({ reasonCode: "account_support" }),
+        headers: {
+          authorization: `Bearer ${sessionCredential}`,
+          "content-type": "application/json",
+        },
+        method: "POST",
+      },
+    );
+    const copyRequest = new Request(
+      "http://localhost/api/v1/users/user-public-001/copy-phone",
+      {
+        body: JSON.stringify({ reasonCode: "identity_verification" }),
+        headers: {
+          authorization: `Bearer ${sessionCredential}`,
+          "content-type": "application/json",
+        },
         method: "POST",
       },
     );
 
     const revealResponse = await handlers.users.revealPhone.POST(
-      request,
+      revealRequest,
       context,
     );
-    const copyResponse = await handlers.users.copyPhone.POST(request, context);
+    const copyResponse = await handlers.users.copyPhone.POST(
+      copyRequest,
+      context,
+    );
 
     expect(revealResponse.headers.get("cache-control")).toBe("no-store");
     expect(copyResponse.headers.get("cache-control")).toBe("no-store");
@@ -326,21 +354,26 @@ describe("phone visibility enforcement", () => {
       }),
       sessionService: createSessionService(["content_admin"]),
     });
-    const request = new Request("http://localhost/api/v1/users", {
-      headers: { authorization: `Bearer ${sessionCredential}` },
-      method: "POST",
-    });
+    const createRequest = () =>
+      new Request("http://localhost/api/v1/users", {
+        body: JSON.stringify({ reasonCode: "account_support" }),
+        headers: {
+          authorization: `Bearer ${sessionCredential}`,
+          "content-type": "application/json",
+        },
+        method: "POST",
+      });
 
     const invalidResponse = await opsAdminHandlers.users.copyPhone.POST(
-      request,
+      createRequest(),
       { params: Promise.resolve({ publicId: "invalid public id" }) },
     );
     const missingResponse = await opsAdminHandlers.users.revealPhone.POST(
-      request,
+      createRequest(),
       { params: Promise.resolve({ publicId: "user-public-001" }) },
     );
     const deniedResponse = await contentAdminHandlers.users.revealPhone.POST(
-      request,
+      createRequest(),
       { params: Promise.resolve({ publicId: "user-public-001" }) },
     );
 

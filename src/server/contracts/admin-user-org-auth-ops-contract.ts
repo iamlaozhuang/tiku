@@ -30,8 +30,31 @@ export const ADMIN_AUTH_OPERATION_ERROR_CODES = {
   adminPermissionDenied: 403601,
   resourceNotFound: 404601,
   concurrentConflict: 409601,
+  rateLimited: 429601,
   validationFailed: 422601,
 } as const;
+
+export const USER_PHONE_DISCLOSURE_REASON_CODES = [
+  "account_support",
+  "identity_verification",
+  "security_investigation",
+] as const;
+
+export type UserPhoneDisclosureReasonCode =
+  (typeof USER_PHONE_DISCLOSURE_REASON_CODES)[number];
+
+export type UserPhoneDisclosureInputDto = {
+  reasonCode: UserPhoneDisclosureReasonCode;
+  reasonNote: string | null;
+};
+
+export type UserPhoneDisclosureInputResult =
+  | { success: true; value: UserPhoneDisclosureInputDto }
+  | { success: false };
+
+export type AdminIdentityKeyword =
+  | { kind: "exact_phone"; value: string }
+  | { kind: "name"; value: string };
 
 export type AdminAuthOperationPageSize =
   (typeof ADMIN_AUTH_OPERATION_PAGE_SIZE_OPTIONS)[number];
@@ -562,6 +585,58 @@ export function createAdminAccountListQuery(
       typeof organizationPublicId === "string"
         ? normalizeKeyword(organizationPublicId)
         : null,
+  };
+}
+
+export function classifyAdminIdentityKeyword(
+  value: string,
+): AdminIdentityKeyword {
+  const keyword = value.trim();
+
+  return /^1[3-9]\d{9}$/u.test(keyword)
+    ? { kind: "exact_phone", value: keyword }
+    : { kind: "name", value: keyword };
+}
+
+export function normalizeUserPhoneDisclosureInput(
+  input: unknown,
+): UserPhoneDisclosureInputResult {
+  if (typeof input !== "object" || input === null) {
+    return { success: false };
+  }
+
+  const { reasonCode, reasonNote } = input as Record<string, unknown>;
+
+  if (
+    typeof reasonCode !== "string" ||
+    !USER_PHONE_DISCLOSURE_REASON_CODES.includes(
+      reasonCode as UserPhoneDisclosureReasonCode,
+    )
+  ) {
+    return { success: false };
+  }
+
+  if (
+    reasonNote !== undefined &&
+    reasonNote !== null &&
+    typeof reasonNote !== "string"
+  ) {
+    return { success: false };
+  }
+
+  const normalizedReasonNote =
+    typeof reasonNote === "string" ? reasonNote.trim() : "";
+
+  if (normalizedReasonNote.length > 120) {
+    return { success: false };
+  }
+
+  return {
+    success: true,
+    value: {
+      reasonCode: reasonCode as UserPhoneDisclosureReasonCode,
+      reasonNote: normalizedReasonNote || null,
+    },
   };
 }
 

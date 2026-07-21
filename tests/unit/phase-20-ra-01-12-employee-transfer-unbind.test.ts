@@ -169,7 +169,7 @@ describe("phase 20 RA-01-12 employee transfer unbind", () => {
     const userDetailSource = extractBetween(
       adminRepositorySource,
       "async getUserDetail(publicId)",
-      "async getUserPhoneForDisclosure(publicId)",
+      "async discloseUserPhoneAtomically(input)",
     );
 
     expect(sessionMapperSource).toContain('row.user_type === "employee"');

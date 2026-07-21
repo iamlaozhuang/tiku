@@ -1087,23 +1087,52 @@ describe("phase 9 admin ops runtime ui completion", () => {
       name: "查看学员甲完整手机号",
     });
     expect(document.body).not.toHaveTextContent("13900000002");
+    expect(revealButton).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("手机号披露理由"), {
+      target: { value: "account_support" },
+    });
+    fireEvent.change(screen.getByLabelText("手机号披露说明（可选）"), {
+      target: { value: "已完成账号支持身份核验" },
+    });
+    expect(revealButton).toBeEnabled();
 
     fireEvent.click(revealButton);
 
     await waitFor(() => {
       expect(
-        fetchMock.mock.calls.some(
-          ([input, init]) =>
-            String(input).includes(
+        fetchMock.mock.calls.some(([input, init]) => {
+          if (
+            !String(input).includes(
               "/api/v1/users/user-public-001/reveal-phone",
-            ) && init?.method === "POST",
-        ),
+            ) ||
+            init?.method !== "POST"
+          ) {
+            return false;
+          }
+
+          return true;
+        }),
       ).toBe(true);
+    });
+    const revealCall = fetchMock.mock.calls.find(([input]) =>
+      String(input).includes("/api/v1/users/user-public-001/reveal-phone"),
+    );
+    expect(JSON.parse(String(revealCall?.[1]?.body))).toEqual({
+      reasonCode: "account_support",
+      reasonNote: "已完成账号支持身份核验",
     });
     expect(await screen.findByText("学员甲 / 13900000002")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "复制学员甲完整手机号" }),
     ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭用户详情" }));
+    expect(document.body).not.toHaveTextContent("13900000002");
+
+    fireEvent.click(screen.getByRole("button", { name: "查看学员甲详情" }));
+    expect(await screen.findByText("学员甲 / 139****0002")).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("13900000002");
   });
 
   it("renders super admin account creation on a bootstrap-only ops workspace", async () => {
@@ -1148,9 +1177,17 @@ describe("phase 9 admin ops runtime ui completion", () => {
     const accountCreationRegion = screen.getByRole("region", {
       name: "后台账号创建",
     });
-    expect(
-      within(accountCreationRegion).getByLabelText("绑定组织"),
-    ).toHaveValue("organization-public-001");
+    const organizationSelect = within(accountCreationRegion).getByLabelText(
+      "后台账号绑定组织",
+    );
+    expect(organizationSelect).toHaveValue("");
+    await within(accountCreationRegion).findByRole("option", {
+      name: "杭州烟草",
+    });
+    fireEvent.change(organizationSelect, {
+      target: { value: "organization-public-001" },
+    });
+    expect(organizationSelect).toHaveValue("organization-public-001");
 
     fireEvent.change(screen.getByLabelText("手机号"), {
       target: { value: "13900009010" },

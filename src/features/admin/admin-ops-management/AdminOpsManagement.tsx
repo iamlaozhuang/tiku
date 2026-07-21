@@ -55,6 +55,7 @@ import type {
   AdminUserDetailDto,
   AdminUserListDto,
   AdminUserPasswordResetResultDto,
+  UserPhoneDisclosureReasonCode,
   UserPhoneRevealDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -830,7 +831,11 @@ export function AdminOpsManagement() {
     setUserDetailState("ready");
   }
 
-  async function handleRevealUserPhone(publicId: string) {
+  async function handleRevealUserPhone(
+    publicId: string,
+    reasonCode: UserPhoneDisclosureReasonCode,
+    reasonNote: string,
+  ) {
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -843,6 +848,10 @@ export function AdminOpsManagement() {
       const response = await postAdminApi<UserPhoneRevealDto>(
         `/api/v1/users/${publicId}/reveal-phone`,
         sessionToken,
+        {
+          reasonCode,
+          reasonNote: reasonNote.trim() || null,
+        },
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -858,7 +867,12 @@ export function AdminOpsManagement() {
     }
   }
 
-  async function handleCopyUserPhone(publicId: string, phone: string) {
+  async function handleCopyUserPhone(
+    publicId: string,
+    phone: string,
+    reasonCode: UserPhoneDisclosureReasonCode,
+    reasonNote: string,
+  ) {
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -870,6 +884,10 @@ export function AdminOpsManagement() {
       const response = await postAdminApi<null>(
         `/api/v1/users/${publicId}/copy-phone`,
         sessionToken,
+        {
+          reasonCode,
+          reasonNote: reasonNote.trim() || null,
+        },
       );
 
       if (response.code !== 0) {
@@ -1334,7 +1352,7 @@ export function AdminOpsManagement() {
           role="tabpanel"
         >
           <AdminListToolbar
-            description="按姓名或手机号、账号状态和用户类型筛选；查看详情后再执行重置或启停操作。"
+            description="按姓名或完整手机号、账号状态和用户类型筛选；查看详情后再执行重置或启停操作。"
             resultLabel={`共 ${usersPagination.total} 个用户`}
             title="学员与员工账号筛选"
           >
@@ -1345,7 +1363,7 @@ export function AdminOpsManagement() {
               <Input
                 aria-label="搜索用户"
                 className={adminListControlClassName}
-                placeholder="姓名或手机号"
+                placeholder="姓名或完整手机号"
                 value={userKeyword}
                 onChange={(event) =>
                   handleUserKeywordChange(event.target.value)
@@ -1468,7 +1486,7 @@ export function AdminOpsManagement() {
               <Input
                 aria-label="搜索后台账号"
                 className={adminListControlClassName}
-                placeholder="姓名或手机号"
+                placeholder="姓名或完整手机号"
                 value={adminAccountKeyword}
                 onChange={(event) =>
                   handleAdminAccountKeywordChange(event.target.value)
@@ -1642,6 +1660,7 @@ export function AdminOpsManagement() {
       ) : null}
 
       <AdminUserDetailPanel
+        key={selectedUserDetail?.user.publicId ?? "admin-user-detail"}
         canDisclosePhone={canDiscloseUserPhone(data.currentAdminRoles)}
         detail={selectedUserDetail}
         isRevealingPhone={isRevealingUserPhone}
@@ -1651,8 +1670,8 @@ export function AdminOpsManagement() {
             ? revealedUserPhone.phone
             : null
         }
-        onCopyPhone={(publicId, phone) =>
-          void handleCopyUserPhone(publicId, phone)
+        onCopyPhone={(publicId, phone, reasonCode, reasonNote) =>
+          void handleCopyUserPhone(publicId, phone, reasonCode, reasonNote)
         }
         onClose={() => {
           setSelectedUserDetail(null);
@@ -1673,7 +1692,9 @@ export function AdminOpsManagement() {
             userName,
           );
         }}
-        onRevealPhone={(publicId) => void handleRevealUserPhone(publicId)}
+        onRevealPhone={(publicId, reasonCode, reasonNote) =>
+          void handleRevealUserPhone(publicId, reasonCode, reasonNote)
+        }
       />
 
       {confirmationState === null ? null : (
@@ -2467,14 +2488,28 @@ function AdminUserDetailPanel({
   detail: AdminUserDetailDto | null;
   isRevealingPhone: boolean;
   onClose: () => void;
-  onCopyPhone: (publicId: string, phone: string) => void;
+  onCopyPhone: (
+    publicId: string,
+    phone: string,
+    reasonCode: UserPhoneDisclosureReasonCode,
+    reasonNote: string,
+  ) => void;
   onDisableUser: (publicId: string, userName: string) => void;
   onEnableUser: (publicId: string, userName: string) => void;
-  onRevealPhone: (publicId: string) => void;
+  onRevealPhone: (
+    publicId: string,
+    reasonCode: UserPhoneDisclosureReasonCode,
+    reasonNote: string,
+  ) => void;
   onResetPassword: (publicId: string, userName: string) => void;
   revealedPhone: string | null;
   state: "idle" | "loading" | "ready" | "error";
 }) {
+  const [reasonCode, setReasonCode] = useState<
+    UserPhoneDisclosureReasonCode | ""
+  >("");
+  const [reasonNote, setReasonNote] = useState("");
+
   if (state === "idle") {
     return null;
   }
@@ -2523,11 +2558,48 @@ function AdminUserDetailPanel({
           <div className="flex flex-wrap gap-2">
             {canDisclosePhone ? (
               <>
+                <label className="text-text-secondary flex min-w-52 flex-col gap-1 text-xs">
+                  <span>手机号披露理由</span>
+                  <select
+                    aria-label="手机号披露理由"
+                    className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+                    value={reasonCode}
+                    onChange={(event) =>
+                      setReasonCode(
+                        event.target.value as
+                          | UserPhoneDisclosureReasonCode
+                          | "",
+                      )
+                    }
+                  >
+                    <option value="">请选择理由</option>
+                    <option value="account_support">账号支持</option>
+                    <option value="identity_verification">身份核验</option>
+                    <option value="security_investigation">安全调查</option>
+                  </select>
+                </label>
+                <label className="text-text-secondary flex min-w-60 flex-col gap-1 text-xs">
+                  <span>手机号披露说明（可选）</span>
+                  <Input
+                    aria-label="手机号披露说明（可选）"
+                    maxLength={120}
+                    value={reasonNote}
+                    onChange={(event) => setReasonNote(event.target.value)}
+                  />
+                </label>
                 <Button
                   aria-label={`查看${user.name}完整手机号`}
-                  disabled={isRevealingPhone || revealedPhone !== null}
+                  disabled={
+                    reasonCode === "" ||
+                    isRevealingPhone ||
+                    revealedPhone !== null
+                  }
                   variant="outline"
-                  onClick={() => onRevealPhone(user.publicId)}
+                  onClick={() =>
+                    reasonCode === ""
+                      ? undefined
+                      : onRevealPhone(user.publicId, reasonCode, reasonNote)
+                  }
                 >
                   <Eye aria-hidden="true" />
                   {isRevealingPhone ? "查看中" : "查看完整手机号"}
@@ -2535,8 +2607,18 @@ function AdminUserDetailPanel({
                 {revealedPhone !== null ? (
                   <Button
                     aria-label={`复制${user.name}完整手机号`}
+                    disabled={reasonCode === ""}
                     variant="outline"
-                    onClick={() => onCopyPhone(user.publicId, revealedPhone)}
+                    onClick={() =>
+                      reasonCode === ""
+                        ? undefined
+                        : onCopyPhone(
+                            user.publicId,
+                            revealedPhone,
+                            reasonCode,
+                            reasonNote,
+                          )
+                    }
                   >
                     <Copy aria-hidden="true" />
                     复制手机号
