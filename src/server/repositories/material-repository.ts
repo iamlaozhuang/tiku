@@ -8,12 +8,20 @@ import {
   eq,
   ilike,
   inArray,
+  isNotNull,
   or,
   sql,
   type SQL,
 } from "drizzle-orm";
 
-import { admin, material, paper, question, questionGroup } from "@/db/schema";
+import {
+  admin,
+  material,
+  paper,
+  paperQuestion,
+  question,
+  questionGroup,
+} from "@/db/schema";
 import type {
   MaterialStatus,
   PaperStatus,
@@ -64,6 +72,44 @@ export type MaterialPaperReferenceRow = {
   paper_status: PaperStatus;
   updated_at: Date;
 };
+
+export type MaterialPaperReferenceFactRow = MaterialPaperReferenceRow & {
+  material_id: number;
+};
+
+export function mergeMaterialPaperReferenceRows(
+  questionGroupRows: readonly MaterialPaperReferenceFactRow[],
+  paperQuestionSnapshotRows: readonly MaterialPaperReferenceFactRow[],
+): Map<number, MaterialPaperReferenceRow[]> {
+  const referencesByMaterialId = new Map<
+    number,
+    Map<string, MaterialPaperReferenceRow>
+  >();
+
+  for (const row of [...questionGroupRows, ...paperQuestionSnapshotRows]) {
+    const references =
+      referencesByMaterialId.get(row.material_id) ??
+      new Map<string, MaterialPaperReferenceRow>();
+    references.set(row.paper_public_id, {
+      paper_public_id: row.paper_public_id,
+      name: row.name,
+      paper_status: row.paper_status,
+      updated_at: row.updated_at,
+    });
+    referencesByMaterialId.set(row.material_id, references);
+  }
+
+  return new Map(
+    Array.from(referencesByMaterialId, ([materialId, references]) => [
+      materialId,
+      Array.from(references.values()).sort(
+        (left, right) =>
+          left.updated_at.getTime() - right.updated_at.getTime() ||
+          left.paper_public_id.localeCompare(right.paper_public_id),
+      ),
+    ]),
+  );
+}
 
 export type MaterialReferenceRows = {
   questions: MaterialQuestionReferenceRow[];
@@ -430,8 +476,7 @@ async function listMaterialReferencesByMaterialId(
     });
   }
 
-  const seenPaperKeys = new Set<string>();
-  const paperRows = await database
+  const questionGroupPaperRows = await database
     .select({
       material_id: questionGroup.material_id,
       paper_public_id: paper.public_id,
@@ -444,20 +489,34 @@ async function listMaterialReferencesByMaterialId(
     .where(inArray(questionGroup.material_id, materialIds))
     .orderBy(asc(paper.updated_at));
 
-  for (const row of paperRows) {
-    const paperKey = `${row.material_id}:${row.paper_public_id}`;
+  const snapshotMaterialPublicId = sql<string>`
+    ${paperQuestion.material_snapshot} ->> 'materialPublicId'
+  `;
+  const paperQuestionSnapshotRows = await database
+    .select({
+      material_id: material.id,
+      paper_public_id: paper.public_id,
+      name: paper.name,
+      paper_status: paper.paper_status,
+      updated_at: paper.updated_at,
+    })
+    .from(paperQuestion)
+    .innerJoin(paper, eq(paper.id, paperQuestion.paper_id))
+    .innerJoin(material, eq(material.public_id, snapshotMaterialPublicId))
+    .where(
+      and(
+        isNotNull(paperQuestion.material_snapshot),
+        inArray(material.id, materialIds),
+      ),
+    )
+    .orderBy(asc(paper.updated_at));
 
-    if (seenPaperKeys.has(paperKey)) {
-      continue;
-    }
-
-    seenPaperKeys.add(paperKey);
-    ensureReferences(row.material_id).papers.push({
-      paper_public_id: row.paper_public_id,
-      name: row.name,
-      paper_status: row.paper_status,
-      updated_at: row.updated_at,
-    });
+  const paperReferencesByMaterialId = mergeMaterialPaperReferenceRows(
+    questionGroupPaperRows,
+    paperQuestionSnapshotRows,
+  );
+  for (const [materialId, paperReferences] of paperReferencesByMaterialId) {
+    ensureReferences(materialId).papers.push(...paperReferences);
   }
 
   return referencesByMaterialId;

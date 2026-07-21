@@ -1,19 +1,18 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-question-binding-eligibility-2026-07-21",
-  "objective": "Close F-0053 by making question create and update resolve material, knowledge_node and tag bindings inside the repository transaction; reject missing bindings, require available material and active recommendable knowledge_node for new bindings, preserve already-bound disabled references during unrelated edits and copies, lock checked binding rows through the write, and return a stable fail-closed input error without partial mutation. Do not change schema, execute a database, expand authorization, or address recommendation review semantics from F-0077.",
+  "taskId": "p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21",
+  "objective": "Close F-0074 by making the material paper-reference read model include paper_question material_snapshot facts for ungrouped questions, retain question_group references for empty groups, deduplicate papers across both sources, and keep reference counts aligned with the published-paper lock source. Do not change schema, execute a database, change paper composition semantics, or address independent paper identity findings.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/question-repository.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/services/question-service.ts",
-    "src/server/services/question-service.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "src/server/repositories/material-repository.ts",
+    "src/server/repositories/material-repository.test.ts",
+    "src/server/services/material-service.test.ts",
     "tests/unit/phase-9-content-question-material-runtime.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts"
+    "tests/unit/admin-question-material-ui.test.ts",
+    "src/features/admin/content-detail/AdminContentDetail.test.tsx",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -28,37 +27,36 @@
     ".github/workflows/**",
     ".env*",
     "schema, migration or persistent database execution",
-    "new role, entitlement, authorization scope, quota or default capability",
-    "recommendation review command, F-0077, paper composition or learner snapshot behavior",
-    "Provider, external service, secret/env, deployment, PR or force-push"
+    "paper composition, question_group validation or snapshot write semantics",
+    "F-0094, F-0096, F-0097, F-0098 or other independent finding",
+    "permission, Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/question-repository.ts",
-    "src/server/services/question-service.ts"
+    "src/server/repositories/material-repository.ts"
   ],
   "contingencyFiles": [
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/services/question-service.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "src/server/repositories/material-repository.test.ts",
+    "src/server/services/material-service.test.ts",
     "tests/unit/phase-9-content-question-material-runtime.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts"
+    "tests/unit/admin-question-material-ui.test.ts",
+    "src/features/admin/content-detail/AdminContentDetail.test.tsx",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCallers": "Question editors and AI formal adoption submit public material, knowledge_node and tag identifiers through the existing question create/update contract; UI option filtering is not an authorization or integrity boundary.",
-    "routeService": "The question route delegates to question-service. The service currently validates shape and content images but does not map binding eligibility failures to a stable business response.",
-    "repository": "question-repository currently resolves material before the transaction and silently maps a missing material to null; knowledge_node and tag bindings resolve after child rows are deleted, while knowledge_node checks existence only. The minimal fix is transaction-local shared row locks, explicit eligibility checks and pre-resolved child IDs before mutation.",
-    "schema": "Existing material.status, knowledge_node.kn_status and knowledge_node.is_recommendable fields are sufficient. No schema or migration source is needed.",
-    "tests": "Repository focused tests will characterize missing/new-disabled/preserved-disabled bindings and stable ordered IDs; service tests will prove create/update map binding failures to 422 without success; affected P0, phase-9, formal-adoption and editor regressions remain green.",
-    "requirements": "US-02-01 permits explicit bindings; disabled material must not enter new content flows, while existing published/snapshotted references remain valid. Knowledge-node selection is limited to active recommendable nodes, while already-bound questions survive later node disablement.",
-    "nonClaims": "No profession-match expansion, recommendation review state machine, real database concurrency execution, schema, permission, Provider, dependency or mechanism change."
+    "uiApiCallers": "Material list and detail UI consume references.papers through the existing mapper and service; no DTO or UI change is required.",
+    "routeService": "Material routes delegate unchanged to material-service, which returns repository rows and preserves reference arrays.",
+    "repository": "material-repository currently derives paper references only from question_group.material_id. paper_question.material_snapshot is the published lock fact source and can contain a materialPublicId even when question_group_id is null.",
+    "schema": "Existing material.public_id and paper_question.material_snapshot JSONB are sufficient. No schema or migration source is needed.",
+    "tests": "A repository-focused pure merge contract will cover snapshot-only references, question_group-only empty-group references and cross-source deduplication; service, phase-9, UI and P0 aggregate regressions must remain green.",
+    "requirements": "US-02-06 AC-2/AC-4 require published-reference lock correctness and visible question/paper reference lists; module 02 explicitly allows a question to carry material without requiring a question_group.",
+    "nonClaims": "No real PostgreSQL execution, query-plan claim, paper composition mutation, schema, permission, Provider, dependency or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "f0053-question-binding-focused",
+      "name": "f0074-material-reference-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -66,36 +64,34 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/question-service.test.ts",
-        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+        "src/server/repositories/material-repository.test.ts",
+        "src/server/services/material-service.test.ts",
         "tests/unit/phase-9-content-question-material-runtime.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts"
+        "tests/unit/admin-question-material-ui.test.ts",
+        "src/features/admin/content-detail/AdminContentDetail.test.tsx",
+        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts"
       ]
     },
     {
-      "name": "f0053-question-binding-lint",
+      "name": "f0074-material-reference-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/repositories/question-repository.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/question-service.ts",
-        "src/server/services/question-service.test.ts"
+        "src/server/repositories/material-repository.ts",
+        "src/server/repositories/material-repository.test.ts"
       ]
     },
     {
-      "name": "f0053-question-binding-typecheck",
+      "name": "f0074-material-reference-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0053-question-binding-build",
+      "name": "f0074-material-reference-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -109,7 +105,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_binding_integrity",
+    "category": "bounded_database_application_read_model_integrity",
     "schemaOrMigrationChange": false,
     "migrationExecution": false,
     "persistentDatabaseExecution": false,

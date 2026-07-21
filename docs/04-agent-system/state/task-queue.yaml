@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-question-binding-eligibility-2026-07-21
+  currentTaskId: p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -421,24 +421,25 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-ai-task-result-history-join-2026-07-21: closed
     p1-remediation-rc-05-content-editor-status-preservation-2026-07-21: closed
     p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21: closed
-    p1-remediation-rc-05-question-binding-eligibility-2026-07-21: in_progress
+    p1-remediation-rc-05-question-binding-eligibility-2026-07-21: closed
+    p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-05-question-binding-eligibility-2026-07-21
-    title: Question binding eligibility and fail-closed resolution
-    phase: p1-remediation-rc-05-question-binding-eligibility-2026-07-21
+  - id: p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21
+    title: Material reference snapshot fact source
+    phase: p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0053
-    branch: fix/question-binding-eligibility
-    objective: resolve question bindings inside the write transaction, reject missing or newly ineligible references, preserve already-bound disabled references and return stable fail-closed input errors without partial mutation
+    productClosureContribution: F-0074
+    branch: fix/material-reference-snapshot-fact-source
+    objective: include paper_question material_snapshot facts in the material paper-reference read model while retaining empty question_group references and deduplicating papers across both sources
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-05
     findingIds:
-      - F-0053
+      - F-0074
     executionStage: candidate_validated_adversarially_reviewed_ready_for_automatic_closeout
     riskBoundary:
-      category: bounded_database_application_binding_integrity
+      category: bounded_database_application_read_model_integrity
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
@@ -446,20 +447,20 @@ activeTasks:
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: question_editor_and_AI_adoption_to_routes_to_question_service_to_question_repository_to_existing_binding_status_fields
-      coreFiles: 5
+      chain: material_UI_to_route_to_service_to_material_repository_to_question_group_and_paper_question_snapshot_facts
+      coreFiles: 4
       contingencyFiles: 6
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      requirements: US_02_01_US_02_06_knowledge_node_active_recommendable_and_content_binding_integrity
-      confirmedResidualRootCause: material_is_resolved_before_transaction_with_missing_to_null_and_knowledge_nodes_are_resolved_after_child_deletes_by_existence_only
+      requirements: US_02_06_AC_2_AC_4_and_module_02_material_snapshot_locking
+      confirmedResidualRootCause: reference_read_model_only_queries_question_group_while_publish_lock_consumes_all_paper_question_material_snapshots
     expectedAcceptance:
-      - missing_material_knowledge_node_or_tag_fails_closed_with_stable_422
-      - new_material_binding_requires_available_and_new_knowledge_node_binding_requires_active_recommendable
-      - already_bound_disabled_material_and_knowledge_node_can_be_preserved_during_unrelated_edit_or_copy
-      - eligibility_rows_are_share_locked_and_all_binding_IDs_resolve_before_mutation_inside_one_transaction
-      - no_F0077_profession_schema_database_execution_permission_dependency_Provider_or_mechanism_change
+      - ungrouped_paper_question_material_snapshot_contributes_its_paper_reference
+      - empty_question_group_material_reference_remains_visible
+      - the_same_paper_from_group_and_snapshot_sources_is_deduplicated_per_material
+      - reference_counts_and_locked_published_source_use_the_same_snapshot_fact
+      - no_composition_schema_database_execution_permission_dependency_Provider_or_mechanism_change
     closeoutProjection:
       current: bounded_medium_risk_conditions_satisfied_candidate_validated_and_ready_for_single_kernel_commit
       triggers: unchanged_final_index_tree_and_stable_base_origin
@@ -467,31 +468,31 @@ activeTasks:
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     verificationEvidence:
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      tddRed: expected_4_of_18_failures_before_binding_eligibility_error_and_pure_eligibility_contracts
-      focusedAndAffectedRegression: pass_56_of_56_across_6_files_on_final_formatted_candidate
-      lint: pass_all_changed_product_and_test_files
+      tddRed: expected_1_of_1_failure_before_snapshot_and_group_fact_merge_contract
+      focusedAndAffectedRegression: pass_86_of_86_across_6_files_on_final_formatted_candidate
+      lint: pass_changed_repository_and_test
       typecheck: pass_tsc_noEmit
       build: pass_next_build_100_static_pages
       formatAndDiff: pass_prettier_and_git_diff_check
       e2e: not_required_no_UI_contract_or_real_database_execution
-      mainThreadAdversarialReview: pass_missing_disabled_nonrecommendable_preserved_existing_ordered_IDs_transaction_before_mutation_share_locks_stable_422_and_no_F0077_schema_permission_or_runtime_expansion
+      mainThreadAdversarialReview: pass_snapshot_only_ungrouped_empty_group_retention_cross_source_dedup_stable_order_and_no_composition_schema_runtime_or_independent_finding_expansion
     metrics:
       mandatoryFreshApprovals: 0_covered_by_bounded_medium_risk_standing_approval
       preventableScopeMissApprovals: 0
       testOnlyExpansions: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: 11m_JIT_chain_TDD_transactional_binding_implementation_and_adversarial_review
-      mechanismOverhead: 4m_contract_state_requirement_skill_reads_validation_and_closeout_preparation
+      productValueTime: 7m_JIT_fact_source_analysis_TDD_query_merge_and_adversarial_review
+      mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21
-      findingId: F-0055
-      productClosureContribution: F-0055
-      commit: 2901e4a5a6ddbbff17246584e1335164fb8b970f
-      candidateTree: 6f57a92b3820fe2e4a233db283d1ca938ae3bd24
+      taskId: p1-remediation-rc-05-question-binding-eligibility-2026-07-21
+      findingId: F-0053
+      productClosureContribution: F-0053
+      commit: ed5ddd7a00a02dd1d614655c2f9e16e497c909b8
+      candidateTree: c8ec48614a262757add24e10ede323007c08197a
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
@@ -512,6 +513,45 @@ activeTasks:
       F-0160: separate_learner_generation_input_constraint_snapshot
       F-0166: bundle_with_F0167_server_owned_organization_AI_copy_command
       F-0167: bundle_with_F0166_server_owned_organization_AI_copy_command
+  - id: p1-remediation-rc-05-question-binding-eligibility-2026-07-21
+    title: Question binding eligibility and fail-closed resolution
+    phase: p1-remediation-rc-05-question-binding-eligibility-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0053
+    branch: fix/question-binding-eligibility
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-05
+    findingIds:
+      - F-0053
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    closeout:
+      commit: ed5ddd7a00a02dd1d614655c2f9e16e497c909b8
+      candidateTree: c8ec48614a262757add24e10ede323007c08197a
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
+    verificationEvidence:
+      tddRed: expected_4_of_18_failures_before_binding_eligibility_error_and_pure_eligibility_contracts
+      focusedAndAffectedRegression: pass_56_of_56_across_6_files
+      lint: pass_all_changed_product_and_test_files
+      typecheck: pass_tsc_noEmit
+      build: pass_next_build_100_static_pages
+      fullProfile: passed_once_by_pre_commit_kernel
+      mainThreadAdversarialReview: passed_missing_disabled_nonrecommendable_preserved_existing_ordered_IDs_transaction_before_mutation_share_locks_stable_422_and_no_F0077_schema_permission_or_runtime_expansion
+    metrics:
+      mandatoryFreshApprovals: 0_covered_by_bounded_medium_risk_standing_approval
+      preventableScopeMissApprovals: 0
+      testOnlyExpansions: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: 11m_JIT_chain_TDD_transactional_binding_implementation_and_adversarial_review
+      mechanismOverhead: 4m_contract_state_requirement_skill_reads_validation_and_closeout_preparation
+      guardSmokeChanges: 0
   - id: p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21
     title: Content write concurrency static closure
     phase: p1-remediation-rc-05-content-write-concurrency-static-closure-2026-07-21
