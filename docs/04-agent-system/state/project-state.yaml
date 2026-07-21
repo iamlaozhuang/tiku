@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+  currentTaskId: p1-remediation-rc-04-f0031-static-closure-2026-07-21
   currentCandidateClusterId: P1-RC-04
   candidateClusterOrder:
     - P1-RC-01
@@ -510,6 +510,7 @@ p1RemediationSerialProgram:
     - p1-execution-policy-capsule-v1-1-2026-07-21
     - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
     - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+    - p1-remediation-rc-04-f0031-static-closure-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -539,6 +540,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-learner-history-pagination-2026-07-20
     - p1-execution-policy-capsule-v1-1-2026-07-21
     - p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
+    - p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -590,7 +592,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-student-home-pagination-2026-07-20: closed
     p1-execution-policy-capsule-v1-1-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
-    p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: in_progress
+    p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
+    p1-remediation-rc-04-f0031-static-closure-2026-07-21: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -755,80 +758,66 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
-  title: Paper asset upload saga
-  phase: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+  id: p1-remediation-rc-04-f0031-static-closure-2026-07-21
+  title: F-0031 production boundary static closure
+  phase: p1-remediation-rc-04-f0031-static-closure-2026-07-21
   status: in_progress
   priority: p1
-  taskKind: product_remediation
-  productClosureContribution: F-0031_paper_asset_durable_file_lifecycle_partition
-  branch: fix/paper-asset-upload-saga
+  taskKind: product_static_closure
+  productClosureContribution: F-0031_complete_static_closure
+  branch: fix/f0031-static-closure
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0031
   candidateRootCauseCluster: P1-RC-04
-  objective: close paper_asset durable file lifecycle with a persistent upload operation and resumable transactional completion
-  highRiskApproval:
-    category: schema_migration_source_and_database_application_logic
-    approvalId: fresh-schema-start-f0031-paper-asset-upload-saga-2026-07-21
-    status: approved_task_bound_conditional_closeout
-    conditionalCloseout: true
-    baseSha: 18f460500ade1117cfe96d656d859581def433d2
-  executionStage: verified_conditional_closeout_ready_for_single_commit_ff_only_push_sync_cleanup
-  partitionBoundary:
-    included:
-      - persistent_paper_asset_upload_operation
-      - stable_operation_owned_object_path
-      - actor_and_request_bound_idempotent_replay
-      - resumable_file_store_state
-      - transactional_paper_asset_redacted_audit_and_operation_completion
-    excluded:
-      - local_resource_catalog_adapter
-      - migration_execution
-      - persistent_database_execution
-      - provider_or_external_service_calls
-      - permission_or_entitlement_change
-  approvalFingerprint: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21|paper_asset_file_write_precedes_durable_operation_and_transactional_asset_audit_completion|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|18f460500ade1117cfe96d656d859581def433d2
+  objective: close F-0031 statically after proving all production mutation partitions are covered and the explicit local resource adapter is not reachable from production API construction
+  executionStage: verified_ready_for_single_commit_ff_only_push_sync_cleanup
+  riskBoundary:
+    category: low_risk_no_product_code_change
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    schemaOrMigrationChange: false
+    persistentDatabaseExecution: false
+    entitlementExpansion: false
+    realExternalCall: false
+  closureBoundary:
+    productionApiConstruction: all_resource_routes_construct_handlers_without_local_adapter_options
+    defaultRuntime: database_repository_and_durable_resource_upload_saga
+    localAdapter: explicit_test_only_option_not_a_production_authority_path
+    requiredEvidence: current_source_plus_existing_partition_and_local_adapter_regressions
+  findingDisposition:
+    F-0031: closed_all_production_partitions_covered_explicit_local_adapter_not_production_reachable
   verificationEvidence:
-    tddRed: expected_5_contract_and_adversarial_failures_before_green
-    focused: passed_22_of_22
-    affectedRegression: passed_34_of_34
-    lint: passed_exact_affected_typescript_files
-    typecheck: passed
-    drizzleMigrationCheck: passed_source_only_without_database_connection_or_execution
-    stateParse: passed_strict_json_and_yaml
-    formatter: passed_exact_applicable_files_after_pre_freeze_write
-    build: passed_97_static_pages
-    diffCheck: passed
-    mainThreadAdversarialReview: passed_operation_before_file_write_actor_paper_request_bound_replay_stable_operation_path_transactional_asset_audit_completion_fixed_redaction_legacy_bypass_removed_no_entitlement_real_database_external_call_or_extra_file
+    productionRouteScan: passed_6_of_6_resource_routes_construct_default_runtime_without_local_adapter_options
+    productionSourceScan: passed_no_useLocalResourceAdapter_reference_outside_runtime_definition
+    affectedRegression: passed_85_of_85_across_11_files
+    mainThreadAdversarialReview: passed_no_production_local_adapter_injection_no_product_diff_no_schema_database_permission_provider_external_or_mechanism_change
   conditionalCloseoutProjection:
-    currentState: verified_uncommitted_candidate_on_approved_short_branch
+    currentState: verified_uncommitted_state_only_candidate
     triggerConditions:
-      - final_frozen_tree_validation_green
-      - base_and_canonical_remote_unchanged
+      - exact_three_file_diff
       - minimal_safety_kernel_commit_path_green
+      - base_and_canonical_remote_unchanged
     projectedOutcome:
       - one_reviewable_commit
       - ff_only_merge_to_master
       - one_ordinary_push_to_canonical_origin_master
-      - master_origin_sync_and_clean_verification
-      - short_branch_cleanup
+      - sync_verification_and_short_branch_cleanup
   previousTaskCloseout:
-    taskId: p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21
-    findingId: F-0031_paper_asset_create_database_partition
-    commit: 18f460500ade1117cfe96d656d859581def433d2
+    taskId: p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21
+    findingId: F-0031_paper_asset_durable_file_lifecycle_partition
+    commit: 2bff15ab46958a62b6fbc461440769170064d1e8
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
     worktreeCleanup: pass
     metrics:
-      mandatoryFreshApprovals: 0
+      mandatoryFreshApprovals: 1
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: 15m
-      mechanismOverhead: 4m_including_closeout
+      approvalWaitTurns: 2
+      productValueTime: terminal_clock_not_reconstructable_product_analysis_tdd_and_implementation_completed
+      mechanismOverhead: terminal_clock_not_reconstructable_includes_two_approval_wait_turns_and_one_validation_selection_correction
       guardSmokeChanges: 0
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
@@ -839,9 +828,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 18f460500ade1117cfe96d656d859581def433d2
-  lastKnownOriginMasterSha: 18f460500ade1117cfe96d656d859581def433d2
-  lastKnownRemoteMasterSha: 18f460500ade1117cfe96d656d859581def433d2
+  lastKnownMasterSha: 2bff15ab46958a62b6fbc461440769170064d1e8
+  lastKnownOriginMasterSha: 2bff15ab46958a62b6fbc461440769170064d1e8
+  lastKnownRemoteMasterSha: 2bff15ab46958a62b6fbc461440769170064d1e8
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

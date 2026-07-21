@@ -1,31 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21",
-  "objective": "Close only the remaining F-0031 paper_asset durable file lifecycle partition with a persistent upload operation, actor/request-bound idempotency, a stable operation-owned object path, resumable file-store state, and transactional paper_asset, redacted audit_log, and operation completion; exclude the local resource catalog partition.",
+  "taskId": "p1-remediation-rc-04-f0031-static-closure-2026-07-21",
+  "objective": "Close F-0031 without product code changes by proving every production mutation partition is covered and the explicit local resource adapter is reachable only through injected test options, never through production API construction.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260721183000_p1_rc_04_paper_asset_upload_saga.sql",
-    "drizzle/meta/20260721183000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/server/validators/paper-asset.ts",
-    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
-    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-    "src/server/services/paper-asset-service.test.ts",
-    "src/server/services/paper-asset-route.ts",
-    "src/server/services/paper-asset-route.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
     "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-resource-upload-saga.test.ts",
+    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
+    "tests/unit/p1-paper-asset-upload-saga.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
     "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
   ],
   "blockedFiles": [
@@ -34,62 +24,41 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
+    "src/**",
+    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
-    ".env*",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts"
+    ".env*"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260721183000_p1_rc_04_paper_asset_upload_saga.sql",
-    "drizzle/meta/20260721183000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "contingencyFiles": [
-    "src/server/validators/paper-asset.ts",
-    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
-    "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-    "src/server/services/paper-asset-service.test.ts",
-    "src/server/services/paper-asset-route.ts",
-    "src/server/services/paper-asset-route.test.ts",
-    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
     "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/p1-resource-upload-saga.test.ts",
+    "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
+    "tests/unit/p1-paper-asset-upload-saga.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
     "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiCaller": "src/features/admin/paper-management/AdminPaperManagementClient.tsx:739",
-    "apiBinding": "src/app/api/v1/paper-assets/route.ts:7",
-    "routeHandler": "src/server/services/paper-composition-lifecycle-runtime.ts:841",
-    "service": "src/server/services/paper-asset-service.ts:98",
-    "repository": "src/server/repositories/paper-asset-repository.ts:126",
-    "schema": "src/db/schema/paper.ts paper_asset plus new paper_asset_upload_operation",
-    "storage": "src/server/services/local-paper-asset-storage.ts:90",
-    "directTests": [
-      "src/db/schema/paper.test.ts",
-      "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-      "src/server/services/paper-asset-service.test.ts",
-      "src/server/services/paper-asset-route.test.ts",
-      "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-      "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-      "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
-    ]
+    "productionApiCallers": "src/app/api/v1/resources/** construct createRagResourceKnowledgeRuntimeRouteHandlers() without options",
+    "defaultRuntime": "src/server/services/rag-resource-knowledge-runtime.ts defaults allowLocalResourceAdapter to false and uses the database repository",
+    "explicitLocalAdapter": "localResourceStorageRoot/useLocalResourceAdapter are supplied only by isolated tests",
+    "closedPartitions": "admin account, question/material, paper, knowledge_node, database resource, resource upload, paper_asset delete/create/upload",
+    "findingLedger": "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml#F-0031"
   },
   "validationCommands": [
     {
-      "name": "paper-asset-upload-saga-focused",
+      "name": "f0031-production-partition-regression",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -97,137 +66,74 @@
         "exec",
         "vitest",
         "run",
+        "tests/unit/p1-content-question-material-audit-atomicity.test.ts",
+        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
+        "tests/unit/p1-admin-account-creation-audit-atomicity.test.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
+        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+        "tests/unit/p1-resource-upload-saga.test.ts",
+        "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
         "tests/unit/p1-paper-asset-upload-saga.test.ts",
-        "src/db/schema/paper.test.ts",
-        "src/server/services/paper-asset-service.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
         "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
       ]
     },
     {
-      "name": "paper-asset-upload-saga-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-        "src/server/services/paper-asset-route.test.ts",
-        "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts"
-      ]
-    },
-    {
-      "name": "paper-asset-upload-saga-lint",
+      "name": "f0031-state-format",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "eslint",
-        "src/db/schema/paper.ts",
-        "src/db/schema/paper.test.ts",
-        "src/server/repositories/paper-asset-repository.ts",
-        "src/server/services/paper-asset-service.ts",
-        "src/server/services/paper-composition-lifecycle-runtime.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/server/validators/paper-asset.ts",
-        "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
-        "src/features/admin/paper-management/AdminPaperManagementClient.test.tsx",
-        "src/server/services/paper-asset-service.test.ts",
-        "src/server/services/paper-asset-route.test.ts",
-        "tests/unit/p1-paper-asset-upload-saga.test.ts",
-        "tests/unit/p1-paper-asset-create-idempotency-audit.test.ts",
-        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-        "tests/unit/p1-paper-database-audit-atomicity.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts"
+        "prettier",
+        "--check",
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/task-queue.yaml",
+        "docs/04-agent-system/state/task-safety.json"
       ]
-    },
-    {
-      "name": "paper-asset-upload-saga-typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "paper-asset-upload-saga-build",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "fresh-schema-start-f0031-paper-asset-upload-saga-2026-07-21",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "approvalEnvelope": {
-    "approvalId": "fresh-schema-start-f0031-paper-asset-upload-saga-2026-07-21",
-    "status": "approved_task_bound_conditional_closeout",
-    "taskId": "p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21",
-    "rootCause": "paper_asset_file_write_precedes_durable_operation_and_transactional_asset_audit_completion",
-    "riskCategory": "schema_migration_source_and_database_application_logic",
-    "baseSha": "18f460500ade1117cfe96d656d859581def433d2",
-    "conditionalCloseout": true,
-    "requestedOperations": [
-      "schema_and_migration_source_implementation_without_execution",
-      "product_and_test_implementation",
-      "offline_drizzle_generation",
-      "validation_and_main_thread_adversarial_review",
-      "one_reviewable_commit",
-      "ff_only_merge_to_master",
-      "one_ordinary_push_to_canonical_origin_master",
-      "sync_verification",
-      "short_branch_cleanup"
-    ],
-    "explicitlyForbidden": [
-      "migration_execution",
-      "persistent_database_write_or_real_data_access",
-      "dependency_or_lockfile_change",
-      "permission_or_entitlement_change",
-      "provider_or_external_service_call",
-      "secret_or_env_change",
-      "deployment",
-      "pull_request",
-      "force_push",
-      "noncanonical_remote",
-      "subagent"
-    ],
-    "canonicalPushTarget": "https://github.com/iamlaozhuang/tiku.git#refs/heads/master",
-    "approvalFingerprint": "p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21|paper_asset_file_write_precedes_durable_operation_and_transactional_asset_audit_completion|schema_migration_source_and_database_application_logic|exact_core_and_contingency_scope|implementation_commit_ff_only_canonical_push_sync_cleanup|18f460500ade1117cfe96d656d859581def433d2"
+  "applicableStandingApprovals": [
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
+  "riskBoundary": {
+    "category": "low_risk_no_product_code_change",
+    "schemaOrMigrationChange": false,
+    "persistentDatabaseExecution": false,
+    "entitlementExpansion": false,
+    "realExternalCall": false,
+    "productSourceChange": false
+  },
+  "findingDisposition": {
+    "F-0031": "closed_all_production_partitions_covered_explicit_local_adapter_not_production_reachable"
   },
   "verificationEvidence": {
-    "tddRed": "expected_5_contract_and_adversarial_failures_before_green",
-    "focused": "passed_22_of_22",
-    "affectedRegression": "passed_34_of_34",
-    "lint": "passed_exact_affected_typescript_files",
-    "typecheck": "passed",
-    "drizzleMigrationCheck": "passed_source_only_without_database_connection_or_execution",
-    "stateParse": "passed_strict_json_and_yaml",
-    "formatter": "passed_exact_applicable_files_after_pre_freeze_write",
-    "build": "passed_97_static_pages",
-    "diffCheck": "passed",
-    "mainThreadAdversarialReview": "passed_operation_before_file_write_actor_paper_request_bound_replay_stable_operation_path_transactional_asset_audit_completion_fixed_redaction_legacy_bypass_removed_no_entitlement_real_database_external_call_or_extra_file"
+    "productionRouteScan": "passed_6_of_6_resource_routes_construct_default_runtime_without_local_adapter_options",
+    "productionSourceScan": "passed_no_useLocalResourceAdapter_reference_outside_runtime_definition",
+    "affectedRegression": "passed_85_of_85_across_11_files",
+    "mainThreadAdversarialReview": "passed_no_production_local_adapter_injection_no_product_diff_no_schema_database_permission_provider_external_or_mechanism_change"
   },
   "conditionalCloseoutProjection": {
-    "currentState": "verified_uncommitted_candidate_on_approved_short_branch",
+    "currentState": "verified_uncommitted_state_only_candidate",
     "triggerConditions": [
-      "final_frozen_tree_validation_green",
-      "base_and_canonical_remote_unchanged",
-      "minimal_safety_kernel_commit_path_green"
+      "exact_three_file_diff",
+      "minimal_safety_kernel_commit_path_green",
+      "base_and_canonical_remote_unchanged"
     ],
     "projectedOutcome": [
       "one_reviewable_commit",
       "ff_only_merge_to_master",
       "one_ordinary_push_to_canonical_origin_master",
-      "master_origin_sync_and_clean_verification",
-      "short_branch_cleanup"
+      "sync_verification_and_short_branch_cleanup"
     ]
   },
   "push": {
