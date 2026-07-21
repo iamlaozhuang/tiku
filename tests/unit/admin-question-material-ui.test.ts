@@ -3097,6 +3097,60 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 
+  it("disables pending recommendation review actions after the question revision becomes stale", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `为题目 ${marketingQuestionReadableName} 推荐知识点`,
+      }),
+    );
+
+    const panel = await screen.findByTestId(
+      "knowledge-recommendation-panel-question-marketing-001",
+    );
+    const acceptButton = screen.getByRole("button", {
+      name: "采纳推荐 Sampling v2",
+    });
+    const discardButton = screen.getByRole("button", {
+      name: "丢弃推荐 Segmentation",
+    });
+    expect(acceptButton).toBeEnabled();
+    expect(discardButton).toBeEnabled();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `编辑题目 ${marketingQuestionReadableName}`,
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("题干"), {
+      target: { value: "updated stale recommendation guard stem" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
+
+    await screen.findByText("题目“单选题 编辑后的题干”已保存");
+    expect(panel).toHaveAttribute("data-stale", "true");
+    expect(acceptButton).toBeDisabled();
+    expect(discardButton).toBeDisabled();
+    fireEvent.click(acceptButton);
+    fireEvent.click(discardButton);
+    expect(
+      fetchMock.mock.calls.filter(
+        ([url, init]) =>
+          String(url).endsWith("/recommend-knowledge-nodes") &&
+          init?.method === "POST" &&
+          typeof init.body === "string" &&
+          (init.body.includes('"action":"confirm"') ||
+            init.body.includes('"action":"ignore"')),
+      ),
+    ).toHaveLength(0);
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
   it("distinguishes network, non-JSON, failed-task, and successful-empty recommendation outcomes with retry", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const baseFetch = mockWritableContentFetch();

@@ -4720,7 +4720,12 @@ function KnowledgeRecommendationReviewPanel({
                   <div className="flex flex-wrap gap-2">
                     <Button
                       aria-label={`采纳推荐 ${recommendationName}`}
-                      disabled={!isReadableRecommendation || !isReviewPending}
+                      disabled={
+                        isStale ||
+                        taskStatus !== "succeeded" ||
+                        !isReadableRecommendation ||
+                        !isReviewPending
+                      }
                       size="sm"
                       type="button"
                       variant="secondary"
@@ -4737,7 +4742,12 @@ function KnowledgeRecommendationReviewPanel({
                     </Button>
                     <Button
                       aria-label={`丢弃推荐 ${recommendationName}`}
-                      disabled={!isReadableRecommendation || !isReviewPending}
+                      disabled={
+                        isStale ||
+                        taskStatus !== "succeeded" ||
+                        !isReadableRecommendation ||
+                        !isReviewPending
+                      }
                       size="sm"
                       type="button"
                       variant="outline"
