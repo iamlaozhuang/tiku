@@ -61,10 +61,10 @@ function createRequestFlow(
   const requestFlowResponse = buildPersonalAiGenerationRequestFlowReadModel({
     userPublicId: "student_public_route_provider_121",
     authorizationPublicId: "personal_auth_public_route_provider_121",
-    aiFuncType: "explanation",
-    questionPublicId: "question_public_route_provider_121",
-    answerRecordPublicId: "answer_record_public_route_provider_121",
-    paperPublicId: "paper_public_route_provider_121",
+    aiFuncType: null,
+    questionPublicId: null,
+    answerRecordPublicId: null,
+    paperPublicId: null,
     mockExamPublicId: null,
     redeemCodePublicId: null,
     auditLogPublicId: null,
@@ -89,6 +89,7 @@ function createRequestFlow(
     resultPublicId: null,
     evidenceStatus: "none",
     citationCount: 0,
+    generationParameters: sufficientGroundingContext.generationParameters,
   });
 
   expect(requestFlowResponse.code).toBe(0);
@@ -341,9 +342,9 @@ describe("personal AI generation route-integrated provider execution service", (
         taskPublicId: "ai_generation_task_public_route_provider_121",
         taskType: "ai_question_generation",
         routeWorkflow: "personal_ai_question_generation",
-        aiFuncType: "explanation",
-        questionPublicId: "question_public_route_provider_121",
-        answerRecordPublicId: "answer_record_public_route_provider_121",
+        aiFuncType: null,
+        questionPublicId: null,
+        answerRecordPublicId: null,
       },
     });
     expect(outcome).toEqual({
@@ -397,7 +398,8 @@ describe("personal AI generation route-integrated provider execution service", (
     expect(executorInputs[0].requestContext).toMatchObject({
       taskType: "ai_paper_generation",
       routeWorkflow: "personal_ai_paper_generation",
-      aiFuncType: "explanation",
+      aiFuncType: null,
+      questionPublicId: null,
     });
   });
 

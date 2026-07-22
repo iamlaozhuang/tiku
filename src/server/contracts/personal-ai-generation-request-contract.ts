@@ -20,7 +20,7 @@ export type PersonalAiGenerationRequestContextDto = {
     quotaOwnerType: AiGenerationTaskRequestOwnerType;
     quotaOwnerPublicId: string;
   };
-  aiFuncType: PersonalAiGenerationFuncType;
+  aiFuncType: PersonalAiGenerationFuncType | null;
   runtimeStatus: PersonalAiGenerationRuntimeStatus;
   selectedContext: PersonalAiGenerationRequestContextSelection;
   contextReferences: {
@@ -34,10 +34,10 @@ export type PersonalAiGenerationRequestContextDto = {
 export type PersonalAiGenerationRequestDto = {
   userPublicId: string;
   authorizationPublicId: string;
-  aiFuncType: PersonalAiGenerationFuncType;
+  aiFuncType: PersonalAiGenerationFuncType | null;
   runtimeStatus: PersonalAiGenerationRuntimeStatus;
   generationContext: {
-    questionPublicId: string;
+    questionPublicId: string | null;
     answerRecordPublicId: string | null;
     paperPublicId: string | null;
     mockExamPublicId: string | null;

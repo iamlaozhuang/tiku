@@ -28,8 +28,8 @@ export type PersonalAiGenerationRequestInput = {
   organizationPublicId: string | null;
   quotaOwnerType: AiGenerationTaskRequestOwnerType;
   quotaOwnerPublicId: string;
-  aiFuncType: PersonalAiGenerationFuncType;
-  questionPublicId: string;
+  aiFuncType: PersonalAiGenerationFuncType | null;
+  questionPublicId: string | null;
   answerRecordPublicId: string | null;
   paperPublicId: string | null;
   mockExamPublicId: string | null;

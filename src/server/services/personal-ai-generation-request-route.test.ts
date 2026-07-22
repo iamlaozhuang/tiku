@@ -12,6 +12,7 @@ import type {
   PersonalAiGenerationRequestPersistenceResult,
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
+import { PersonalAiGenerationSnapshotConflictError } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type {
   AiPaperQuestionSourceRepository,
@@ -2117,8 +2118,8 @@ describe("personal AI generation request route handlers", () => {
         requestState: {
           status: "ready",
           selectedContext: {
-            contextType: "paper",
-            contextPublicId: "paper_public_123",
+            contextType: "none",
+            contextPublicId: null,
           },
           action: {
             actionType: "submit_personal_ai_generation_request",
@@ -2353,9 +2354,9 @@ describe("personal AI generation request route handlers", () => {
       },
       requestContext: {
         taskPublicId: "ai_generation_task_public_route_123",
-        aiFuncType: "explanation",
-        questionPublicId: "question_public_123",
-        answerRecordPublicId: "answer_record_public_123",
+        aiFuncType: null,
+        questionPublicId: null,
+        answerRecordPublicId: null,
       },
     });
     expect(payload).toMatchObject({
@@ -3551,7 +3552,8 @@ describe("personal AI generation request route handlers", () => {
         requestPublicId: "personal_ai_request_public_route_123",
         taskPublicId: "ai_generation_task_public_route_123",
         taskType: "ai_question_generation",
-        aiFuncType: "explanation",
+        aiFuncType: null,
+        authorizationSource: "personal_auth",
         authorizationPublicId: "personal_auth_public_123",
         actorPublicId: userContext.userPublicId,
         ownerType: "personal",
@@ -3560,9 +3562,9 @@ describe("personal AI generation request route handlers", () => {
         quotaOwnerType: "personal",
         quotaOwnerPublicId: userContext.userPublicId,
         effectiveEdition: "advanced",
-        questionPublicId: "question_public_123",
-        answerRecordPublicId: "answer_record_public_123",
-        paperPublicId: "paper_public_123",
+        questionPublicId: null,
+        answerRecordPublicId: null,
+        paperPublicId: null,
         mockExamPublicId: null,
         idempotencyKeyHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
         requestedAt,
@@ -3574,6 +3576,7 @@ describe("personal AI generation request route handlers", () => {
         isScopeAllowed: true,
         isQuotaAvailable: true,
         isRuntimeConfigReady: true,
+        generationParameters: sufficientGroundingContext.generationParameters,
       },
     ]);
     expect(requestRepository.createCalls[0]?.idempotencyKeyHash).not.toBe(
@@ -3755,6 +3758,49 @@ describe("personal AI generation request route handlers", () => {
     expect(requestRepository.createCalls).toHaveLength(1);
     expect(serializedPayload).not.toContain("database stack");
     expect(serializedPayload).not.toContain("internal connection details");
+  });
+
+  it("returns a conflict without retrying when the idempotency snapshot differs", async () => {
+    const requestRepository = createRequestRepository([], {
+      createError: new PersonalAiGenerationSnapshotConflictError(),
+    });
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      { requestRepository },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409016,
+      message:
+        "Personal AI generation request conflicts with an existing idempotency key.",
+      data: null,
+    });
+    expect(requestRepository.createCalls).toHaveLength(1);
+  });
+
+  it("rejects client-owned snapshot fields before persistence", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      { requestRepository },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        generationSnapshotVersion: 1,
+        generationInputSnapshot: {},
+        generationConstraintSnapshot: {},
+        generationSnapshotDigest: `sha256:${"a".repeat(64)}`,
+      }),
+    );
+
+    expect((await response.json()).code).toBe(400015);
+    expect(requestRepository.createCalls).toEqual([]);
   });
 
   it("normalizes request ownership public ids from the resolver user context", async () => {

@@ -17,6 +17,7 @@ import type {
   PersonalAiGenerationRequestRepository,
   PersonalAiGenerationTaskType,
 } from "../repositories/personal-ai-generation-request-repository";
+import { PersonalAiGenerationSnapshotConflictError } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type { AiPaperQuestionSourceRepository } from "../repositories/question-repository";
@@ -45,6 +46,7 @@ import {
   resolveEffectivePersonalAiGenerationAuthorizationContext,
   type PersonalAiGenerationAuthorizationOwnershipRepository,
 } from "./personal-ai-generation-authorization-context";
+import { normalizePersonalAiGenerationRequestInput } from "../validators/personal-ai-generation-request";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -112,6 +114,9 @@ const PERSONAL_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
 const REQUEST_PERSISTENCE_UNAVAILABLE_CODE = 500018;
 const REQUEST_PERSISTENCE_UNAVAILABLE_MESSAGE =
   "Personal AI generation request could not be persisted.";
+const REQUEST_SNAPSHOT_CONFLICT_CODE = 409016;
+const REQUEST_SNAPSHOT_CONFLICT_MESSAGE =
+  "Personal AI generation request conflicts with an existing idempotency key.";
 const RESULT_MATERIALIZATION_UNAVAILABLE_CODE = 500019;
 const RESULT_MATERIALIZATION_UNAVAILABLE_MESSAGE =
   "Personal AI generation result could not be materialized.";
@@ -345,17 +350,6 @@ function isPersonalAiGenerationTaskType(
   return value === "ai_question_generation" || value === "ai_paper_generation";
 }
 
-function isPersonalAiGenerationFuncType(
-  value: string | null,
-): value is CreatePersonalAiGenerationRequestInput["aiFuncType"] {
-  return (
-    value === "explanation" ||
-    value === "hint" ||
-    value === "kn_recommendation" ||
-    value === "learning_suggestion"
-  );
-}
-
 function isEvidenceStatus(
   value: string | null,
 ): value is NonNullable<
@@ -368,6 +362,12 @@ function isPersonalAiGenerationRequestOwnerType(
   value: string | null,
 ): value is PersonalAiGenerationRequestOwnerType {
   return value === "personal" || value === "organization";
+}
+
+function isPersonalAiGenerationAuthorizationSource(
+  value: string | null,
+): value is CreatePersonalAiGenerationRequestInput["authorizationSource"] {
+  return value === "personal_auth" || value === "org_auth";
 }
 
 function matchesPersistentAuthorizationBoundary(input: {
@@ -416,6 +416,11 @@ function createServerOwnedLocalBrowserRequestInput(
 ): Record<string, unknown> {
   return {
     ...input,
+    aiFuncType: null,
+    questionPublicId: null,
+    answerRecordPublicId: null,
+    paperPublicId: null,
+    mockExamPublicId: null,
     effectiveEdition: "advanced",
     isAuthorizationActive: true,
     isScopeAllowed: true,
@@ -572,7 +577,6 @@ function createPersistentRequestInput(
   const requestPublicId = normalizeRequiredText(input.requestPublicId);
   const taskPublicId = normalizeRequiredText(input.taskPublicId);
   const taskType = normalizeRequiredText(input.taskType);
-  const aiFuncType = normalizeRequiredText(input.aiFuncType);
   const authorizationPublicId = normalizeRequiredText(
     input.authorizationPublicId,
   );
@@ -586,7 +590,6 @@ function createPersistentRequestInput(
   const quotaOwnerType = normalizeRequiredText(input.quotaOwnerType);
   const quotaOwnerPublicId = normalizeRequiredText(input.quotaOwnerPublicId);
   const effectiveEdition = normalizeRequiredText(input.effectiveEdition);
-  const questionPublicId = normalizeRequiredText(input.questionPublicId);
   const clientIdempotencyKeyHash = normalizeRequiredText(
     input.idempotencyKeyHash,
   );
@@ -596,28 +599,30 @@ function createPersistentRequestInput(
   const isScopeAllowed = normalizeBoolean(input.isScopeAllowed);
   const isQuotaAvailable = normalizeBoolean(input.isQuotaAvailable);
   const isRuntimeConfigReady = normalizeBoolean(input.isRuntimeConfigReady);
+  const normalizedRequest = normalizePersonalAiGenerationRequestInput(input);
 
   if (
     requestPublicId === null ||
     taskPublicId === null ||
     !isPersonalAiGenerationTaskType(taskType) ||
-    !isPersonalAiGenerationFuncType(aiFuncType) ||
     authorizationPublicId === null ||
     actorPublicId === null ||
     authorizationSource === null ||
+    !isPersonalAiGenerationAuthorizationSource(authorizationSource) ||
     !isPersonalAiGenerationRequestOwnerType(ownerType) ||
     ownerPublicId === null ||
     !isPersonalAiGenerationRequestOwnerType(quotaOwnerType) ||
     quotaOwnerPublicId === null ||
     effectiveEdition === null ||
-    questionPublicId === null ||
     clientIdempotencyKeyHash === null ||
     !isEvidenceStatus(evidenceStatus) ||
     citationCount === null ||
     isAuthorizationActive === null ||
     isScopeAllowed === null ||
     isQuotaAvailable === null ||
-    isRuntimeConfigReady === null
+    isRuntimeConfigReady === null ||
+    !normalizedRequest.success ||
+    normalizedRequest.value.generationParameters === null
   ) {
     return null;
   }
@@ -655,7 +660,8 @@ function createPersistentRequestInput(
     requestPublicId,
     taskPublicId,
     taskType,
-    aiFuncType,
+    aiFuncType: null,
+    authorizationSource,
     authorizationPublicId,
     actorPublicId,
     ownerType,
@@ -664,10 +670,10 @@ function createPersistentRequestInput(
     quotaOwnerType,
     quotaOwnerPublicId,
     effectiveEdition,
-    questionPublicId,
-    answerRecordPublicId: normalizeOptionalText(input.answerRecordPublicId),
-    paperPublicId: normalizeOptionalText(input.paperPublicId),
-    mockExamPublicId: normalizeOptionalText(input.mockExamPublicId),
+    questionPublicId: null,
+    answerRecordPublicId: null,
+    paperPublicId: null,
+    mockExamPublicId: null,
     idempotencyKeyHash,
     requestedAt,
     resultPublicId: normalizeOptionalText(input.resultPublicId),
@@ -678,6 +684,7 @@ function createPersistentRequestInput(
     isScopeAllowed,
     isQuotaAvailable,
     isRuntimeConfigReady,
+    generationParameters: normalizedRequest.value.generationParameters,
   };
 }
 
@@ -925,7 +932,7 @@ async function createRequestInputWithPersistentRequestMetadata(
   input: Record<string, unknown>,
   requestRepository: PersonalAiGenerationRequestRouteRepository,
   requestedAt: Date,
-): Promise<Record<string, unknown> | null> {
+): Promise<Record<string, unknown> | "snapshot_conflict" | null> {
   if (requestRepository.createOrReuseRequest === undefined) {
     return input;
   }
@@ -952,7 +959,11 @@ async function createRequestInputWithPersistentRequestMetadata(
       citationCount: historyItem.citationCount,
       aiCallLogPublicId: historyItem.aiCallLogPublicId,
     };
-  } catch {
+  } catch (error) {
+    if (error instanceof PersonalAiGenerationSnapshotConflictError) {
+      return "snapshot_conflict";
+    }
+
     return null;
   }
 }
@@ -1186,6 +1197,15 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                 requestRepository,
                 now(),
               );
+
+            if (localBrowserRequestInput === "snapshot_conflict") {
+              return createJsonResponse(
+                createErrorResponse(
+                  REQUEST_SNAPSHOT_CONFLICT_CODE,
+                  REQUEST_SNAPSHOT_CONFLICT_MESSAGE,
+                ),
+              );
+            }
 
             if (localBrowserRequestInput === null) {
               return createJsonResponse(

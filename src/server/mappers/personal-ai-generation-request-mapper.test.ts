@@ -16,11 +16,131 @@ function createPersistenceRow(
     evidence_status: "sufficient",
     citation_count: 3,
     ai_call_log_public_id: "ai_call_log_public_201",
+    generation_snapshot_version: null,
+    generation_input_snapshot: null,
+    generation_constraint_snapshot: null,
+    generation_snapshot_digest: null,
     ...overrides,
   };
 }
 
 describe("personal AI generation request mapper", () => {
+  it("maps complete snapshots to a redacted reconstructable history view and legacy rows to unavailable", () => {
+    const available = mapPersonalAiGenerationRequestRowToHistoryDto(
+      createPersistenceRow({
+        generation_snapshot_version: 1,
+        generation_input_snapshot: {
+          generationParameters: {
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            knowledgeNode: null,
+            knowledgeNodeMode: "balanced",
+            knowledgeNodePublicIds: [],
+            includeDescendants: false,
+            knowledgeNodeSupplement: null,
+            sourcePreference: null,
+            questionType: "single_choice",
+            questionCount: 3,
+            difficulty: "medium",
+            learningObjective: null,
+            questionTypeDistribution: null,
+            paperStructure: null,
+          },
+        },
+        generation_constraint_snapshot: {
+          authorizationSource: "personal_auth",
+          authorizationPublicId: "personal_auth_secret_public_160",
+          ownerType: "personal",
+          ownerPublicId: "student_secret_public_160",
+          organizationPublicId: null,
+          quotaOwnerType: "personal",
+          quotaOwnerPublicId: "student_secret_public_160",
+          effectiveEdition: "advanced",
+          profession: "marketing",
+          level: 3,
+        },
+        generation_snapshot_digest: `sha256:${"a".repeat(64)}`,
+      }),
+    );
+
+    expect(available.generationSnapshot).toEqual({
+      status: "available",
+      schemaVersion: 1,
+      generationParameters: expect.objectContaining({
+        profession: "marketing",
+        questionCount: 3,
+      }),
+      constraints: {
+        authorizationSource: "personal_auth",
+        effectiveEdition: "advanced",
+        profession: "marketing",
+        level: 3,
+        redactionStatus: "redacted",
+      },
+    });
+    expect(JSON.stringify(available)).not.toContain(
+      "personal_auth_secret_public_160",
+    );
+    expect(JSON.stringify(available)).not.toContain(
+      "student_secret_public_160",
+    );
+    expect(
+      mapPersonalAiGenerationRequestRowToHistoryDto(createPersistenceRow())
+        .generationSnapshot,
+    ).toEqual({
+      status: "unavailable",
+      reason: "legacy_snapshot_unavailable",
+    });
+  });
+
+  it("fails closed for malformed or non-canonical persisted snapshots", () => {
+    const malformed = createPersistenceRow({
+      generation_snapshot_version: 1,
+      generation_input_snapshot: {
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodeMode: "balanced",
+          knowledgeNodePublicIds: [],
+          includeDescendants: false,
+          knowledgeNodeSupplement: null,
+          sourcePreference: null,
+          questionType: "single_choice",
+          questionCount: 3,
+          difficulty: "medium",
+          learningObjective: null,
+          questionTypeDistribution: null,
+          paperStructure: null,
+          providerCredential: "must-not-leak",
+        },
+      },
+      generation_constraint_snapshot: {
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal_auth_public_160",
+        ownerType: "personal",
+        ownerPublicId: "student_public_160",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "student_public_160",
+        effectiveEdition: "advanced",
+        profession: "marketing",
+        level: 3,
+      },
+      generation_snapshot_digest: `sha256:${"a".repeat(64)}`,
+    });
+
+    const dto = mapPersonalAiGenerationRequestRowToHistoryDto(malformed);
+
+    expect(dto.generationSnapshot).toEqual({
+      status: "unavailable",
+      reason: "legacy_snapshot_unavailable",
+    });
+    expect(JSON.stringify(dto)).not.toContain("must-not-leak");
+  });
+
   it("maps persistence rows to redacted camelCase request history DTOs", () => {
     const dto = mapPersonalAiGenerationRequestRowToHistoryDto({
       ...createPersistenceRow(),
@@ -40,6 +160,10 @@ describe("personal AI generation request mapper", () => {
       evidenceStatus: "sufficient",
       citationCount: 3,
       aiCallLogPublicId: "ai_call_log_public_201",
+      generationSnapshot: {
+        status: "unavailable",
+        reason: "legacy_snapshot_unavailable",
+      },
       redactionStatus: "redacted",
     });
 

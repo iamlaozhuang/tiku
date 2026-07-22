@@ -553,6 +553,10 @@ export const aiGenerationTask = pgTable(
     paper_public_id: text("paper_public_id"),
     mock_exam_public_id: text("mock_exam_public_id"),
     idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    generation_snapshot_version: integer("generation_snapshot_version"),
+    generation_input_snapshot: jsonb("generation_input_snapshot"),
+    generation_constraint_snapshot: jsonb("generation_constraint_snapshot"),
+    generation_snapshot_digest: text("generation_snapshot_digest"),
     task_status: aiGenerationTaskStatusEnum("task_status")
       .default("pending")
       .notNull(),
@@ -598,6 +602,18 @@ export const aiGenerationTask = pgTable(
       table.task_status,
     ),
     index("idx_ai_generation_task_ai_call_log_id").on(table.ai_call_log_id),
+    check(
+      "chk_ai_generation_task_snapshot_completeness",
+      sql`(
+        (${table.generation_snapshot_version} is null and ${table.generation_input_snapshot} is null and ${table.generation_constraint_snapshot} is null and ${table.generation_snapshot_digest} is null)
+        or
+        (${table.generation_snapshot_version} = 1 and ${table.generation_input_snapshot} is not null and ${table.generation_constraint_snapshot} is not null and ${table.generation_snapshot_digest} is not null)
+      )`,
+    ),
+    check(
+      "chk_ai_generation_task_snapshot_digest",
+      sql`${table.generation_snapshot_digest} is null or ${table.generation_snapshot_digest} ~ '^sha256:[0-9a-f]{64}$'`,
+    ),
   ],
 );
 

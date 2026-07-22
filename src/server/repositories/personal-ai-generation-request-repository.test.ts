@@ -6,6 +6,8 @@ import type {
 } from "./personal-ai-generation-request-repository";
 import {
   PERSONAL_AI_GENERATION_TASK_TYPES,
+  PersonalAiGenerationSnapshotConflictError,
+  createPersonalAiGenerationSnapshotEnvelope,
   createPersonalAiGenerationRequestHistoryCondition,
   createPersonalAiGenerationRequestIdempotencyCondition,
   createPersonalAiGenerationRequestRepository,
@@ -47,10 +49,32 @@ function createPersistenceRow(
     evidence_status: "none",
     citation_count: 0,
     ai_call_log_public_id: null,
+    generation_snapshot_version: null,
+    generation_input_snapshot: null,
+    generation_constraint_snapshot: null,
+    generation_snapshot_digest: null,
     owner_public_id: "student_public_301",
     actor_public_id: "student_public_301",
     authorization_public_id: "personal_auth_public_301",
     ...overrides,
+  };
+}
+
+function createGenerationParameters(questionCount = 3) {
+  return {
+    profession: "marketing" as const,
+    level: 3 as const,
+    subject: "theory" as const,
+    knowledgeNode: null,
+    knowledgeNodeMode: "balanced" as const,
+    knowledgeNodePublicIds: [],
+    includeDescendants: false,
+    knowledgeNodeSupplement: null,
+    sourcePreference: null,
+    questionType: "single_choice",
+    questionCount,
+    difficulty: "medium",
+    learningObjective: null,
   };
 }
 
@@ -154,6 +178,8 @@ function createGateway(
     },
     async insertPendingRequest(input) {
       insertInputs.push(input);
+      const snapshotEnvelope =
+        createPersonalAiGenerationSnapshotEnvelope(input);
 
       return createPersistenceRow({
         public_id: input.taskPublicId,
@@ -164,12 +190,74 @@ function createGateway(
         idempotency_key_hash: input.idempotencyKeyHash,
         owner_public_id: input.ownerPublicId,
         actor_public_id: input.actorPublicId,
+        generation_snapshot_version: snapshotEnvelope.generationSnapshotVersion,
+        generation_input_snapshot: snapshotEnvelope.generationInputSnapshot,
+        generation_constraint_snapshot:
+          snapshotEnvelope.generationConstraintSnapshot,
+        generation_snapshot_digest: snapshotEnvelope.generationSnapshotDigest,
       });
     },
   };
 }
 
 describe("personal AI generation request repository", () => {
+  it("canonicalizes equivalent generation input and binds task and authorization constraints into the digest", () => {
+    const createEnvelope = (overrides: Record<string, unknown> = {}) =>
+      createPersonalAiGenerationSnapshotEnvelope({
+        taskType: "ai_question_generation",
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: [
+            "knowledge_node_public_b",
+            "knowledge_node_public_a",
+          ],
+          includeDescendants: true,
+          knowledgeNodeSupplement: null,
+          sourcePreference: "prefer_platform",
+          questionType: "single_choice",
+          questionCount: 3,
+          difficulty: "medium",
+          learningObjective: "practice",
+        },
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal_auth_public_160",
+        ownerType: "personal",
+        ownerPublicId: "student_public_160",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "student_public_160",
+        effectiveEdition: "advanced",
+        ...overrides,
+      });
+
+    const first = createEnvelope();
+    const equivalent = createEnvelope({
+      generationParameters: {
+        ...first.generationInputSnapshot.generationParameters,
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_a",
+          "knowledge_node_public_b",
+        ],
+      },
+    });
+
+    expect(equivalent).toEqual(first);
+    expect(first.generationSnapshotVersion).toBe(1);
+    expect(first.generationSnapshotDigest).toMatch(/^sha256:[0-9a-f]{64}$/u);
+    expect(
+      createEnvelope({ taskType: "ai_paper_generation" })
+        .generationSnapshotDigest,
+    ).not.toBe(first.generationSnapshotDigest);
+    expect(
+      createEnvelope({ authorizationPublicId: "personal_auth_public_changed" })
+        .generationSnapshotDigest,
+    ).not.toBe(first.generationSnapshotDigest);
+  });
+
   it("builds owner-scoped personal request history conditions", () => {
     const condition = createPersonalAiGenerationRequestHistoryCondition({
       authorizationPublicId: "personal_auth_public_301",
@@ -423,6 +511,18 @@ describe("personal AI generation request repository", () => {
   });
 
   it("reuses an existing request by owner idempotency key", async () => {
+    const envelope = createPersonalAiGenerationSnapshotEnvelope({
+      taskType: "ai_question_generation",
+      generationParameters: createGenerationParameters(),
+      authorizationSource: "personal_auth",
+      authorizationPublicId: "personal_auth_public_304",
+      ownerType: "personal",
+      ownerPublicId: "student_public_304",
+      organizationPublicId: null,
+      quotaOwnerType: "personal",
+      quotaOwnerPublicId: "student_public_304",
+      effectiveEdition: "advanced",
+    });
     const gateway = createGateway([
       createPersistenceRow({
         public_id: "ai_generation_task_public_existing",
@@ -431,6 +531,10 @@ describe("personal AI generation request repository", () => {
         idempotency_key_hash: "sha256:personal_ai_generation_existing",
         owner_public_id: "student_public_304",
         actor_public_id: "student_public_304",
+        generation_snapshot_version: envelope.generationSnapshotVersion,
+        generation_input_snapshot: envelope.generationInputSnapshot,
+        generation_constraint_snapshot: envelope.generationConstraintSnapshot,
+        generation_snapshot_digest: envelope.generationSnapshotDigest,
       }),
     ]);
     const repository = createPersonalAiGenerationRequestRepository(gateway);
@@ -439,7 +543,8 @@ describe("personal AI generation request repository", () => {
       requestPublicId: "personal_ai_request_public_new",
       taskPublicId: "ai_generation_task_public_new",
       taskType: "ai_question_generation",
-      aiFuncType: "explanation",
+      aiFuncType: null,
+      authorizationSource: "personal_auth",
       authorizationPublicId: "personal_auth_public_304",
       actorPublicId: "student_public_304",
       ownerType: "personal",
@@ -448,7 +553,7 @@ describe("personal AI generation request repository", () => {
       quotaOwnerType: "personal",
       quotaOwnerPublicId: "student_public_304",
       effectiveEdition: "advanced",
-      questionPublicId: "question_public_304",
+      questionPublicId: null,
       answerRecordPublicId: null,
       paperPublicId: null,
       mockExamPublicId: null,
@@ -458,12 +563,87 @@ describe("personal AI generation request repository", () => {
       isScopeAllowed: true,
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
+      generationParameters: createGenerationParameters(),
     });
 
     expect(result.persistenceStatus).toBe("reused");
     expect(result.historyItem.taskPublicId).toBe(
       "ai_generation_task_public_existing",
     );
+    expect(gateway.insertInputs).toEqual([]);
+  });
+
+  it("fails closed when an idempotency key is replayed with a different snapshot", async () => {
+    const envelope = createPersonalAiGenerationSnapshotEnvelope({
+      taskType: "ai_question_generation",
+      generationParameters: {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNode: null,
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        includeDescendants: false,
+        knowledgeNodeSupplement: null,
+        sourcePreference: null,
+        questionType: "single_choice",
+        questionCount: 3,
+        difficulty: "medium",
+        learningObjective: null,
+      },
+      authorizationSource: "personal_auth",
+      authorizationPublicId: "personal_auth_public_160",
+      ownerType: "personal",
+      ownerPublicId: "student_public_160",
+      organizationPublicId: null,
+      quotaOwnerType: "personal",
+      quotaOwnerPublicId: "student_public_160",
+      effectiveEdition: "advanced",
+    });
+    const gateway = createGateway([
+      createPersistenceRow({
+        idempotency_key_hash: "sha256:replay_160",
+        owner_public_id: "student_public_160",
+        actor_public_id: "student_public_160",
+        generation_snapshot_version: 1,
+        generation_input_snapshot: envelope.generationInputSnapshot,
+        generation_constraint_snapshot: envelope.generationConstraintSnapshot,
+        generation_snapshot_digest: envelope.generationSnapshotDigest,
+      }),
+    ]);
+    const repository = createPersonalAiGenerationRequestRepository(gateway);
+
+    await expect(
+      repository.createOrReuseRequest({
+        requestPublicId: "request_new_160",
+        taskPublicId: "task_new_160",
+        taskType: "ai_question_generation",
+        aiFuncType: null,
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal_auth_public_160",
+        actorPublicId: "student_public_160",
+        ownerType: "personal",
+        ownerPublicId: "student_public_160",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "student_public_160",
+        effectiveEdition: "advanced",
+        questionPublicId: null,
+        answerRecordPublicId: null,
+        paperPublicId: null,
+        mockExamPublicId: null,
+        idempotencyKeyHash: "sha256:replay_160",
+        requestedAt: new Date("2026-07-21T12:00:00.000Z"),
+        isAuthorizationActive: true,
+        isScopeAllowed: true,
+        isQuotaAvailable: true,
+        isRuntimeConfigReady: true,
+        generationParameters: {
+          ...envelope.generationInputSnapshot.generationParameters,
+          questionCount: 4,
+        },
+      }),
+    ).rejects.toBeInstanceOf(PersonalAiGenerationSnapshotConflictError);
     expect(gateway.insertInputs).toEqual([]);
   });
 
@@ -475,7 +655,8 @@ describe("personal AI generation request repository", () => {
       requestPublicId: "personal_ai_request_public_created",
       taskPublicId: "ai_generation_task_public_created",
       taskType: "ai_question_generation",
-      aiFuncType: "explanation",
+      aiFuncType: null,
+      authorizationSource: "personal_auth",
       authorizationPublicId: "personal_auth_public_305",
       actorPublicId: "student_public_305",
       ownerType: "personal",
@@ -484,9 +665,9 @@ describe("personal AI generation request repository", () => {
       quotaOwnerType: "personal",
       quotaOwnerPublicId: "student_public_305",
       effectiveEdition: "advanced",
-      questionPublicId: "question_public_305",
-      answerRecordPublicId: "answer_record_public_305",
-      paperPublicId: "paper_public_305",
+      questionPublicId: null,
+      answerRecordPublicId: null,
+      paperPublicId: null,
       mockExamPublicId: null,
       idempotencyKeyHash: "sha256:personal_ai_generation_created",
       requestedAt: new Date("2026-06-12T12:00:00.000Z"),
@@ -494,6 +675,7 @@ describe("personal AI generation request repository", () => {
       isScopeAllowed: true,
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
+      generationParameters: createGenerationParameters(),
     });
 
     expect(result).toMatchObject({
@@ -517,7 +699,8 @@ describe("personal AI generation request repository", () => {
       requestPublicId: "personal_ai_request_public_server_owned",
       taskPublicId: "ai_generation_task_public_server_owned",
       taskType: "ai_question_generation",
-      aiFuncType: "explanation",
+      aiFuncType: null,
+      authorizationSource: "personal_auth",
       authorizationPublicId: "personal_auth_public_server_owned",
       actorPublicId: "student_public_server_owned",
       ownerType: "personal",
@@ -526,9 +709,9 @@ describe("personal AI generation request repository", () => {
       quotaOwnerType: "personal",
       quotaOwnerPublicId: "student_public_server_owned",
       effectiveEdition: "advanced",
-      questionPublicId: "question_public_server_owned",
-      answerRecordPublicId: "answer_record_public_server_owned",
-      paperPublicId: "paper_public_server_owned",
+      questionPublicId: null,
+      answerRecordPublicId: null,
+      paperPublicId: null,
       mockExamPublicId: null,
       idempotencyKeyHash: "sha256:personal_ai_generation_server_owned",
       requestedAt: new Date("2026-06-12T12:30:00.000Z"),
@@ -540,6 +723,7 @@ describe("personal AI generation request repository", () => {
       isScopeAllowed: true,
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
+      generationParameters: createGenerationParameters(),
     });
 
     expect(gateway.insertInputs).toHaveLength(1);

@@ -53,6 +53,10 @@ function getForeignKeyNames(
   );
 }
 
+function getCheckNames(table: Parameters<typeof getTableConfig>[0]): string[] {
+  return getTableConfig(table).checks.map((schemaCheck) => schemaCheck.name);
+}
+
 describe("AI/RAG model config and prompt template schema baseline", () => {
   it("defines the approved Phase 5 table names", () => {
     expect([
@@ -595,6 +599,10 @@ describe("personal learning AI task persistence schema", () => {
         "paper_public_id",
         "mock_exam_public_id",
         "idempotency_key_hash",
+        "generation_snapshot_version",
+        "generation_input_snapshot",
+        "generation_constraint_snapshot",
+        "generation_snapshot_digest",
         "task_status",
         "retry_count",
         "failure_category",
@@ -642,6 +650,15 @@ describe("personal learning AI task persistence schema", () => {
     expect(getForeignKeyNames(aiGenerationTask)).toEqual(
       expect.arrayContaining([
         "ai_generation_task_ai_call_log_id_ai_call_log_id_fk",
+      ]),
+    );
+  });
+
+  it("requires learner generation snapshot fields to be all-null legacy or all-present version one", () => {
+    expect(getCheckNames(aiGenerationTask)).toEqual(
+      expect.arrayContaining([
+        "chk_ai_generation_task_snapshot_completeness",
+        "chk_ai_generation_task_snapshot_digest",
       ]),
     );
   });

@@ -1,9 +1,14 @@
 import { aiGenerationTask } from "@/db/schema";
 import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { createHash } from "node:crypto";
 
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
-import type { AiGenerationTaskRequestOwnerType } from "../models/ai-generation-task-request";
+import type {
+  AiGenerationTaskRequestAuthorizationSource,
+  AiGenerationTaskRequestOwnerType,
+} from "../models/ai-generation-task-request";
 import type { AiFuncType, EvidenceStatus } from "../models/ai-rag";
 import {
   mapPersonalAiGenerationRequestRowToHistoryDto,
@@ -27,6 +32,42 @@ export type PersonalAiGenerationRequestOwnerType = Extract<
   "personal" | "organization"
 >;
 
+export const PERSONAL_AI_GENERATION_SNAPSHOT_SCHEMA_VERSION = 1 as const;
+
+export type PersonalAiGenerationInputSnapshot = {
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+};
+
+export type PersonalAiGenerationConstraintSnapshot = {
+  authorizationSource: Extract<
+    AiGenerationTaskRequestAuthorizationSource,
+    "personal_auth" | "org_auth"
+  >;
+  authorizationPublicId: string;
+  ownerType: PersonalAiGenerationRequestOwnerType;
+  ownerPublicId: string;
+  organizationPublicId: string | null;
+  quotaOwnerType: PersonalAiGenerationRequestOwnerType;
+  quotaOwnerPublicId: string;
+  effectiveEdition: string;
+  profession: AiGenerationRouteIntegratedGenerationParameters["profession"];
+  level: AiGenerationRouteIntegratedGenerationParameters["level"];
+};
+
+export type PersonalAiGenerationSnapshotEnvelope = {
+  generationSnapshotVersion: typeof PERSONAL_AI_GENERATION_SNAPSHOT_SCHEMA_VERSION;
+  generationInputSnapshot: PersonalAiGenerationInputSnapshot;
+  generationConstraintSnapshot: PersonalAiGenerationConstraintSnapshot;
+  generationSnapshotDigest: string;
+};
+
+export class PersonalAiGenerationSnapshotConflictError extends Error {
+  constructor() {
+    super("personal AI generation idempotency snapshot conflict.");
+    this.name = "PersonalAiGenerationSnapshotConflictError";
+  }
+}
+
 export type ListPersonalAiGenerationRequestHistoryQuery = {
   authorizationPublicId: string;
   ownerType?: PersonalAiGenerationRequestOwnerType;
@@ -43,7 +84,11 @@ export type CreatePersonalAiGenerationRequestInput = {
   requestPublicId: string;
   taskPublicId: string;
   taskType: PersonalAiGenerationTaskType;
-  aiFuncType: Exclude<AiFuncType, "scoring">;
+  aiFuncType: Exclude<AiFuncType, "scoring"> | null;
+  authorizationSource: Extract<
+    AiGenerationTaskRequestAuthorizationSource,
+    "personal_auth" | "org_auth"
+  >;
   authorizationPublicId: string;
   actorPublicId: string;
   ownerType: PersonalAiGenerationRequestOwnerType;
@@ -52,7 +97,7 @@ export type CreatePersonalAiGenerationRequestInput = {
   quotaOwnerType: PersonalAiGenerationRequestOwnerType;
   quotaOwnerPublicId: string;
   effectiveEdition: string;
-  questionPublicId: string;
+  questionPublicId: string | null;
   answerRecordPublicId: string | null;
   paperPublicId: string | null;
   mockExamPublicId: string | null;
@@ -66,6 +111,7 @@ export type CreatePersonalAiGenerationRequestInput = {
   isScopeAllowed: boolean;
   isQuotaAvailable: boolean;
   isRuntimeConfigReady: boolean;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
 };
 
 export type PersonalAiGenerationRequestPersistenceResult = {
@@ -132,7 +178,131 @@ const personalAiGenerationRequestSelection = {
   evidence_status: aiGenerationTask.evidence_status,
   citation_count: aiGenerationTask.citation_count,
   ai_call_log_public_id: aiGenerationTask.ai_call_log_public_id,
+  generation_snapshot_version: aiGenerationTask.generation_snapshot_version,
+  generation_input_snapshot: aiGenerationTask.generation_input_snapshot,
+  generation_constraint_snapshot:
+    aiGenerationTask.generation_constraint_snapshot,
+  generation_snapshot_digest: aiGenerationTask.generation_snapshot_digest,
 };
+
+function compareCanonicalStrings(
+  leftValue: string,
+  rightValue: string,
+): number {
+  return leftValue < rightValue ? -1 : leftValue > rightValue ? 1 : 0;
+}
+
+function canonicalizeGenerationParameters(
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+): AiGenerationRouteIntegratedGenerationParameters {
+  return {
+    profession: generationParameters.profession,
+    level: generationParameters.level,
+    subject: generationParameters.subject,
+    knowledgeNode: generationParameters.knowledgeNode,
+    knowledgeNodeMode: generationParameters.knowledgeNodeMode,
+    knowledgeNodePublicIds: [
+      ...new Set(generationParameters.knowledgeNodePublicIds),
+    ].sort(compareCanonicalStrings),
+    includeDescendants: generationParameters.includeDescendants,
+    knowledgeNodeSupplement: generationParameters.knowledgeNodeSupplement,
+    sourcePreference: generationParameters.sourcePreference,
+    questionType: generationParameters.questionType,
+    questionCount: generationParameters.questionCount,
+    difficulty: generationParameters.difficulty,
+    learningObjective: generationParameters.learningObjective,
+    questionTypeDistribution:
+      generationParameters.questionTypeDistribution ?? null,
+    paperStructure: generationParameters.paperStructure ?? null,
+  };
+}
+
+function canonicalizeJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(canonicalizeJsonValue);
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([leftKey], [rightKey]) =>
+        compareCanonicalStrings(leftKey, rightKey),
+      )
+      .map(([key, childValue]) => [key, canonicalizeJsonValue(childValue)]),
+  );
+}
+
+function stringifyCanonicalJson(value: unknown): string {
+  return JSON.stringify(canonicalizeJsonValue(value));
+}
+
+export function createPersonalAiGenerationSnapshotEnvelope(
+  input: Pick<
+    CreatePersonalAiGenerationRequestInput,
+    | "taskType"
+    | "generationParameters"
+    | "authorizationSource"
+    | "authorizationPublicId"
+    | "ownerType"
+    | "ownerPublicId"
+    | "organizationPublicId"
+    | "quotaOwnerType"
+    | "quotaOwnerPublicId"
+    | "effectiveEdition"
+  >,
+): PersonalAiGenerationSnapshotEnvelope {
+  const generationInputSnapshot: PersonalAiGenerationInputSnapshot = {
+    generationParameters: canonicalizeGenerationParameters(
+      input.generationParameters,
+    ),
+  };
+  const generationConstraintSnapshot: PersonalAiGenerationConstraintSnapshot = {
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    ownerType: input.ownerType,
+    ownerPublicId: input.ownerPublicId,
+    organizationPublicId: input.organizationPublicId,
+    quotaOwnerType: input.quotaOwnerType,
+    quotaOwnerPublicId: input.quotaOwnerPublicId,
+    effectiveEdition: input.effectiveEdition,
+    profession: generationInputSnapshot.generationParameters.profession,
+    level: generationInputSnapshot.generationParameters.level,
+  };
+  const digestPayload = {
+    schemaVersion: PERSONAL_AI_GENERATION_SNAPSHOT_SCHEMA_VERSION,
+    taskType: input.taskType,
+    generationInputSnapshot,
+    generationConstraintSnapshot,
+  };
+
+  return {
+    generationSnapshotVersion: PERSONAL_AI_GENERATION_SNAPSHOT_SCHEMA_VERSION,
+    generationInputSnapshot,
+    generationConstraintSnapshot,
+    generationSnapshotDigest: `sha256:${createHash("sha256")
+      .update(stringifyCanonicalJson(digestPayload))
+      .digest("hex")}`,
+  };
+}
+
+function assertMatchingPersonalAiGenerationSnapshot(
+  row: PersonalAiGenerationRequestPersistenceRow,
+  expected: PersonalAiGenerationSnapshotEnvelope,
+): void {
+  if (
+    row.generation_snapshot_version !== expected.generationSnapshotVersion ||
+    row.generation_snapshot_digest !== expected.generationSnapshotDigest ||
+    stringifyCanonicalJson(row.generation_input_snapshot) !==
+      stringifyCanonicalJson(expected.generationInputSnapshot) ||
+    stringifyCanonicalJson(row.generation_constraint_snapshot) !==
+      stringifyCanonicalJson(expected.generationConstraintSnapshot)
+  ) {
+    throw new PersonalAiGenerationSnapshotConflictError();
+  }
+}
 
 export function createPersonalAiGenerationRequestHistoryCondition(query: {
   authorizationPublicId: string;
@@ -205,6 +375,8 @@ export function createPersonalAiGenerationRequestRepository(
         .map(mapPersonalAiGenerationRequestRowToHistoryDto);
     },
     async createOrReuseRequest(input) {
+      const snapshotEnvelope =
+        createPersonalAiGenerationSnapshotEnvelope(input);
       const existingRow = await gateway.findRequestByIdempotencyKey({
         ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
@@ -213,6 +385,10 @@ export function createPersonalAiGenerationRequestRepository(
       });
 
       if (existingRow !== null) {
+        assertMatchingPersonalAiGenerationSnapshot(
+          existingRow,
+          snapshotEnvelope,
+        );
         return {
           persistenceStatus: "reused",
           historyItem:
@@ -235,6 +411,8 @@ export function createPersonalAiGenerationRequestRepository(
       if (resolvedRow === null) {
         throw new Error("personal AI generation request persistence failed.");
       }
+
+      assertMatchingPersonalAiGenerationSnapshot(resolvedRow, snapshotEnvelope);
 
       return {
         persistenceStatus: insertedRow === null ? "reused" : "created",
@@ -324,6 +502,9 @@ export function createPostgresPersonalAiGenerationRequestRepository(
       return row;
     },
     async insertPendingRequest(input) {
+      const snapshotEnvelope =
+        createPersonalAiGenerationSnapshotEnvelope(input);
+
       const [row] = await getDatabase()
         .insert(aiGenerationTask)
         .values({
@@ -344,6 +525,12 @@ export function createPostgresPersonalAiGenerationRequestRepository(
           paper_public_id: input.paperPublicId,
           mock_exam_public_id: input.mockExamPublicId,
           idempotency_key_hash: input.idempotencyKeyHash,
+          generation_snapshot_version:
+            snapshotEnvelope.generationSnapshotVersion,
+          generation_input_snapshot: snapshotEnvelope.generationInputSnapshot,
+          generation_constraint_snapshot:
+            snapshotEnvelope.generationConstraintSnapshot,
+          generation_snapshot_digest: snapshotEnvelope.generationSnapshotDigest,
           task_status: "pending",
           retry_count: 0,
           result_public_id: input.resultPublicId ?? null,

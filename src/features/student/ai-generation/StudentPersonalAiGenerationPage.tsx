@@ -52,7 +52,6 @@ import type {
   AiGenerationRouteIntegratedSourcePreference,
 } from "@/server/contracts/route-integrated-provider-execution-contract";
 import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
-import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 import { createPersonalAiLearningSessionQuestion } from "@/server/validators/personal-ai-generation-learning-session";
 
 type StudentPersonalAiGenerationPageState =
@@ -114,11 +113,6 @@ type StudentPersonalAiGenerationRequestDraft = {
   userPublicId: string;
   requestPublicId: string;
   authorizationPublicId: string;
-  aiFuncType: PersonalAiGenerationFuncType;
-  questionPublicId: string;
-  answerRecordPublicId: string | null;
-  paperPublicId: string | null;
-  mockExamPublicId: string | null;
   redeemCodePublicId: string | null;
   auditLogPublicId: string | null;
   aiCallLogPublicId: string | null;
@@ -699,11 +693,6 @@ const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft 
     userPublicId: "student-public-001",
     requestPublicId: "personal-ai-request-public-001",
     authorizationPublicId: "personal-auth-public-001",
-    aiFuncType: "explanation",
-    questionPublicId: "question-public-001",
-    answerRecordPublicId: "answer-record-public-001",
-    paperPublicId: "paper-public-001",
-    mockExamPublicId: null,
     redeemCodePublicId: null,
     auditLogPublicId: null,
     aiCallLogPublicId: null,

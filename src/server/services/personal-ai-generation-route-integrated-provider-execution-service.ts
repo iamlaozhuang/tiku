@@ -45,8 +45,8 @@ export type PersonalAiGenerationRouteIntegratedProviderRequestContext = {
   routeWorkflow:
     | "personal_ai_question_generation"
     | "personal_ai_paper_generation";
-  aiFuncType: string;
-  questionPublicId: string;
+  aiFuncType: string | null;
+  questionPublicId: string | null;
   answerRecordPublicId: string | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
 };

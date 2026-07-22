@@ -3,6 +3,69 @@ import { describe, expect, it } from "vitest";
 import { normalizePersonalAiGenerationRequestInput } from "./personal-ai-generation-request";
 
 describe("personal AI generation request validator", () => {
+  it("accepts real learner generation parameters without demo lineage", () => {
+    expect(
+      normalizePersonalAiGenerationRequestInput({
+        userPublicId: "student_public_160",
+        authorizationPublicId: "personal_auth_public_160",
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: [
+            "knowledge_node_public_b",
+            "knowledge_node_public_a",
+          ],
+          includeDescendants: true,
+          knowledgeNodeSupplement: null,
+          sourcePreference: "prefer_platform",
+          questionType: "single_choice",
+          questionCount: 3,
+          difficulty: "medium",
+          learningObjective: "weak point practice",
+        },
+      }),
+    ).toMatchObject({
+      success: true,
+      value: {
+        aiFuncType: null,
+        questionPublicId: null,
+        answerRecordPublicId: null,
+        paperPublicId: null,
+        mockExamPublicId: null,
+      },
+    });
+  });
+
+  it("rejects client attempts to submit server-owned snapshot fields", () => {
+    expect(
+      normalizePersonalAiGenerationRequestInput({
+        userPublicId: "student_public_160",
+        authorizationPublicId: "personal_auth_public_160",
+        generationSnapshotVersion: 1,
+        generationInputSnapshot: {},
+        generationConstraintSnapshot: {},
+        generationSnapshotDigest: `sha256:${"a".repeat(64)}`,
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodePublicIds: [],
+          questionType: "single_choice",
+          questionCount: 3,
+          difficulty: "medium",
+          learningObjective: null,
+        },
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid personal AI generation request input.",
+    });
+  });
+
   it("normalizes ai_hint input while ignoring request-only fixtures", () => {
     expect(
       normalizePersonalAiGenerationRequestInput({

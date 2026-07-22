@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
+currentPhase: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
+  currentTaskId: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -821,84 +821,88 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
-  title: Atomic content AI formal adoption command
-  phase: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
-  status: in_progress
+  id: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+  title: Learner AI generation input and constraint snapshot
+  phase: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+  status: closed
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0029
-  branch: fix/formal-adoption-atomic-command
+  productClosureContribution: F-0160
+  branch: fix/personal-ai-generation-input-snapshot
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0029
+    - F-0160
   candidateRootCauseCluster: P1-RC-05
-  objective: execute adoption review persistence, full question or paper draft creation, paper composition, audit effects and final target metadata as one database transaction with deterministic replay
+  objective: remove learner generation demo lineage and persist truthful versioned input and authorization-bound constraint snapshots with fail-closed idempotent replay and redacted reconstructable history
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: closed_static_product_verified
   riskBoundary:
-    category: bounded_database_application_transaction_orchestration
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    schemaOrMigrationChange: false
+    category: schema_migration_source_and_database_application_logic
+    approvalId: guardian-f0160-personal-ai-generation-input-snapshot-2026-07-21
+    schemaOrMigrationChange: true
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: content_formal_adoption_route_to_transactional_runtime_unit_of_work_to_adoption_question_and_paper_repositories
-    coreFiles: 4
-    contingencyFiles: 8
-    preflightTestFiles: 8
-    sameTaskAuthoritativeCallChainExpansion: 0
+    chain: learner_UI_to_personal_generation_route_and_validator_to_task_repository_and_ai_generation_task_schema_to_history_mapper_and_UI
+    coreFiles: 19
+    contingencyFiles: 9
+    preflightTestFiles: 10
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: formal_adoption_must_be_single_traceable_all_or_nothing_command
-    confirmedResidualRootCause: production_runtime_constructs_three_independent_repository_transactions_and_treats_nonzero_service_responses_as_normal_completion
-  protectedRegressions:
-    F-0155: server_owned_digest_bound_reviewed_draft
-    F-0156: persisted_review_decision_idempotency_and_conflict
+    confirmedResidualRootCause: real_question_and_paper_generation_is_encoded_as_demo_question_explanation_lineage_and_normalized_generation_parameters_are_not_persisted
+    scopeAmendment: guardian-f0160-direct-provider-context-null-lineage-amendment-01-2026-07-21_two_direct_nullable_provider_context_files
   expectedAcceptance:
-    - production_default_runtime_executes_adoption_question_or_complete_paper_and_metadata_in_one_outer_transaction
-    - any_nonzero_writer_or_metadata_result_forces_outer_transaction_rollback
-    - thrown_failures_force_outer_transaction_rollback_and_preserve_standard_error_envelope
-    - committed_response_loss_replay_returns_the_single_draft_created_target_without_reinvoking_writers
-    - paper_question_failure_cannot_commit_shell_partial_questions_audit_or_adoption
-    - no_schema_migration_real_database_permission_provider_dependency_or_mechanism_change
-  validationEvidence:
-    tddRed: pass_3_expected_transaction_wrapper_failures_across_8_runtime_tests
-    focused: pass_8_files_77_tests
-    changedServiceReplayTest: pass_1_file_4_tests_after_fixture_type_correction
-    lint: pass
-    typecheck: pass
-    build: pass_100_static_pages_with_preexisting_NFT_warning_only
-    formatAndDiff: pass
-    adversarialReview: pass_single_outer_transaction_nonzero_and_exception_rollback_committed_replay_writer_bypass_existing_composition_failure_regression_no_scope_or_risk_expansion
-    runtimeDatabaseProof: not_claimed_static_and_synthetic_only
-  closureEvidence:
-    F-0029: production_default_formal_adoption_is_one_outer_transaction_and_committed_replay_returns_the_single_persisted_target_without_writer_reentry
-    F-0155: remains_closed_server_owned_digest_bound_reviewed_draft_regression_green
-    F-0156: remains_closed_persisted_decision_idempotency_and_conflict_regression_green
+    - new_learner_question_and_paper_tasks_persist_versioned_normalized_input_and_authorization_bound_constraint_snapshots
+    - demo_ai_function_question_answer_record_and_paper_references_are_absent_from_real_requests_and_new_rows
+    - same_idempotency_key_with_different_snapshot_fails_closed
+    - history_exposes_redacted_reconstructable_snapshots_and_marks_legacy_rows_unavailable_without_fabrication
+    - additive_migration_source_only_with_no_real_database_execution
+    - no_permission_provider_dependency_mechanism_or_other_finding_change
+  snapshotIntegrityContract:
+    serverOwned: version_input_constraint_and_digest_from_validated_parameters_and_authoritative_authorization_context
+    canonicalization: deterministic_allowlisted_explicit_null_array_and_set_semantics
+    digestBinding: task_type_input_constraints_and_schema_version
+    idempotency: same_key_same_snapshot_reuse_different_snapshot_fail_closed_without_side_effect
+    legacy: all_snapshot_fields_null_and_history_explicitly_unavailable
+    redaction: no_secret_internal_id_raw_authorization_provider_payload_answer_or_unnecessary_PII
+    migration: additive_nullable_legacy_compatible_no_backfill_or_existing_semantic_change
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    triggers: TDD_green_validation_main_thread_review_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-    successProjection: F0029_closed_then_resume_next_eligible_RC05_residual
+    triggers: guardian_approval_then_TDD_migration_source_generation_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0160_closed_then_JIT_F0166_F0167_bundle
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0
-    preventableScopeMissApprovals: 0
+    mandatoryFreshApprovals: 1
+    preventableScopeMissApprovals: 1
     candidateReapprovals: 0
-    approvalWaitTurns: 0
-    productValueTime: not_reliably_reconstructable_after_context_compaction
-    mechanismOverhead: fresh_validation_approximately_90_seconds_plus_candidate_closeout_pending
+    conditionalCandidateBindingRetries: 1_generated_snapshot_prettier_applied_by_lint_staged_before_kernel
+    approvalWaitTurns: 1
+    productValueTime: terminal_clock_not_reconstructable_includes_TDD_schema_snapshot_idempotency_history_and_adversarial_hardening
+    mechanismOverhead: terminal_clock_not_reconstructable_includes_parent_approval_scope_amendment_state_contract_validation_and_closeout
     guardSmokeChanges: 0
+  validationEvidence:
+    tddRed: pass_7_expected_failures_across_5_files_before_implementation
+    focused: pass_10_files_204_tests
+    amendmentFocused: pass_4_files_87_tests_then_final_suite
+    lint: pass_all_17_changed_TypeScript_and_test_files
+    typecheck: pass
+    build: pass_100_static_pages_with_preexisting_NFT_warning_only
+    schemaMigrationSource: pass_4_additive_nullable_columns_2_checks_no_data_or_destructive_SQL_snapshot_parent_exact_and_no_unrelated_schema_drift
+    formatAndDiff: pass_including_generated_snapshot_prettier_applied_by_lint_staged
+    stateContractParse: pass_JSON_and_YAML_23_changed_files_all_within_28_allowed_files
+    adversarialReview: pass_server_owned_null_lineage_exact_allowlisted_canonicalization_same_key_snapshot_conflict_malformed_history_fail_closed_redaction_no_provider_permission_dependency_or_real_DB_change
+    runtimeDatabaseProof: not_claimed_static_and_synthetic_only
+  closureEvidence:
+    F-0160: learner_question_and_paper_generation_now_persists_truthful_versioned_input_and_authorization_constraint_snapshots_without_demo_lineage_and_history_marks_legacy_or_malformed_snapshots_unavailable
+    residual: F0166_F0167_organization_AI_command_bundle_remains_separate_and_unstarted
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
+    taskId: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
     findingIds:
-      - F-0155
-      - F-0156
-    commit: c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e
+      - F-0029
+    commit: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -912,9 +916,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e
-  lastKnownOriginMasterSha: c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e
-  lastKnownRemoteMasterSha: c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e
+  lastKnownMasterSha: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
+  lastKnownOriginMasterSha: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
+  lastKnownRemoteMasterSha: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

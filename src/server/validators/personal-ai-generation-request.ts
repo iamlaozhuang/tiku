@@ -42,6 +42,12 @@ const authorizationSourceValues = [
 const ownerTypeValues = ["personal", "organization", "platform"] as const;
 const professionValues = ["monopoly", "marketing", "logistics"] as const;
 const subjectValues = ["theory", "skill"] as const;
+const serverOwnedSnapshotFieldNames = [
+  "generationSnapshotVersion",
+  "generationInputSnapshot",
+  "generationConstraintSnapshot",
+  "generationSnapshotDigest",
+] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -266,6 +272,13 @@ export function normalizePersonalAiGenerationRequestInput(
     };
   }
 
+  if (serverOwnedSnapshotFieldNames.some((fieldName) => fieldName in input)) {
+    return {
+      success: false,
+      message: INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_MESSAGE,
+    };
+  }
+
   const userPublicId = normalizeRequiredText(input.userPublicId);
   const authorizationSource = resolveAuthorizationSource(
     input.authorizationSource,
@@ -282,8 +295,11 @@ export function normalizePersonalAiGenerationRequestInput(
   const quotaOwnerType = resolveOwnerType(input.quotaOwnerType);
   const quotaOwnerPublicId =
     normalizeOptionalText(input.quotaOwnerPublicId) ?? userPublicId;
-  const aiFuncType = normalizePersonalAiGenerationFuncType(input.aiFuncType);
-  const questionPublicId = normalizeRequiredText(input.questionPublicId);
+  const aiFuncType =
+    input.aiFuncType === null || input.aiFuncType === undefined
+      ? null
+      : normalizePersonalAiGenerationFuncType(input.aiFuncType);
+  const questionPublicId = normalizeOptionalText(input.questionPublicId);
   const paperPublicId = normalizeOptionalText(input.paperPublicId);
   const mockExamPublicId = normalizeOptionalText(input.mockExamPublicId);
   const generationParameters = normalizeGenerationParameters(
@@ -293,6 +309,11 @@ export function normalizePersonalAiGenerationRequestInput(
     input.generationParameters !== null &&
     input.generationParameters !== undefined &&
     generationParameters === null;
+  const hasLegacyLineage = aiFuncType !== null || questionPublicId !== null;
+  const hasCompleteLegacyLineage =
+    aiFuncType !== null && questionPublicId !== null;
+  const hasGenerationCommand = generationParameters !== null;
+  const hasPartialLegacyLineage = hasLegacyLineage && !hasCompleteLegacyLineage;
 
   if (
     userPublicId === null ||
@@ -302,9 +323,9 @@ export function normalizePersonalAiGenerationRequestInput(
     ownerPublicId === null ||
     quotaOwnerType === null ||
     quotaOwnerPublicId === null ||
-    aiFuncType === null ||
-    questionPublicId === null ||
-    hasInvalidExplicitGenerationParameters
+    hasInvalidExplicitGenerationParameters ||
+    hasPartialLegacyLineage ||
+    (!hasGenerationCommand && !hasCompleteLegacyLineage)
   ) {
     return {
       success: false,

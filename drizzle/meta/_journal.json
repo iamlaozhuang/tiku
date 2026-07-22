@@ -316,6 +316,13 @@
       "when": 1784694600000,
       "tag": "20260722043000_p1_rc_05_paper_asset_file_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1784696859134,
+      "tag": "20260722053000_p1_rc_05_personal_ai_generation_input_snapshot",
+      "breakpoints": true
     }
   ]
 }

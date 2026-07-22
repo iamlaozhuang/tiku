@@ -2345,11 +2345,6 @@ describe("StudentPersonalAiGenerationPage", () => {
       userPublicId: localSessionUserPublicId,
       requestPublicId: expect.stringMatching(/^personal-ai-request-public-/),
       authorizationPublicId: "authorization-context-ui-001",
-      aiFuncType: "explanation",
-      questionPublicId: "question-public-001",
-      answerRecordPublicId: "answer-record-public-001",
-      paperPublicId: "paper-public-001",
-      mockExamPublicId: null,
       redeemCodePublicId: null,
       auditLogPublicId: null,
       aiCallLogPublicId: null,
@@ -2405,9 +2400,6 @@ describe("StudentPersonalAiGenerationPage", () => {
       String(requestBody.requestPublicId),
       String(requestBody.taskPublicId),
       String(requestBody.authorizationPublicId),
-      String(requestBody.questionPublicId),
-      String(requestBody.answerRecordPublicId),
-      String(requestBody.paperPublicId),
       String(requestBody.userPublicId),
       insufficientGeneratedPracticeResponse.data.resultState.resultPublicId,
     ]);
@@ -2877,7 +2869,6 @@ describe("StudentPersonalAiGenerationPage", () => {
     await waitFor(() => expect(submittedBodies).toHaveLength(1));
     expect(submittedBodies[0]).toMatchObject({
       taskType: "ai_paper_generation",
-      aiFuncType: "explanation",
       responseMode: "local_browser_experience",
       effectiveEdition: "advanced",
       isAuthorizationActive: true,
@@ -2885,6 +2876,10 @@ describe("StudentPersonalAiGenerationPage", () => {
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
     });
+    expect(submittedBodies[0]).not.toHaveProperty("aiFuncType");
+    expect(submittedBodies[0]).not.toHaveProperty("questionPublicId");
+    expect(submittedBodies[0]).not.toHaveProperty("answerRecordPublicId");
+    expect(submittedBodies[0]).not.toHaveProperty("paperPublicId");
     expect(JSON.stringify(submittedBodies[0])).not.toContain(
       "unit-test-session-token",
     );

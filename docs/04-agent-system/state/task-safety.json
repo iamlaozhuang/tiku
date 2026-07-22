@@ -1,20 +1,36 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21",
-  "objective": "Close F-0029 by executing content AI formal-adoption review persistence, complete question or paper draft creation, all paper composition writes, audit effects, and final adoption target metadata inside one database transaction. Any writer or metadata failure must roll back the full command; committed replay must return the single persisted target without creating duplicates. Preserve the F-0155/F-0156 digest and decision contracts and do not change schema, permissions, Provider behavior, formal content semantics, or public API envelopes.",
+  "taskId": "p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21",
+  "objective": "Close F-0160 by removing demo question, answer-record, paper, and AI-function lineage from learner AI question/paper generation requests; persist a versioned, server-normalized generation input snapshot and authorization-bound constraint snapshot on each new ai_generation_task; expose a redacted reconstructable history view; and make same-idempotency-key/different-snapshot replay fail closed. Legacy rows remain explicitly unavailable rather than receiving fabricated snapshots. Do not execute migration, access a real database, change Provider behavior, permissions, dependencies, or unrelated AI task families.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "src/server/services/paper-draft-service.test.ts"
+    "src/db/schema/ai-rag.ts",
+    "src/db/schema/ai-rag.test.ts",
+    "drizzle/20260722053000_p1_rc_05_personal_ai_generation_input_snapshot.sql",
+    "drizzle/meta/20260722053000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/contracts/personal-ai-generation-request-contract.ts",
+    "src/server/contracts/personal-ai-generation-request-history-contract.ts",
+    "src/server/models/personal-ai-generation-request.ts",
+    "src/server/validators/personal-ai-generation-request.ts",
+    "src/server/validators/personal-ai-generation-request.test.ts",
+    "src/server/services/personal-ai-generation-request-service.ts",
+    "src/server/services/personal-ai-generation-request-service.test.ts",
+    "src/server/services/personal-ai-generation-request-context-service.ts",
+    "src/server/services/personal-ai-generation-request-context-service.test.ts",
+    "src/server/repositories/personal-ai-generation-request-repository.ts",
+    "src/server/repositories/personal-ai-generation-request-repository.test.ts",
+    "src/server/mappers/personal-ai-generation-request-mapper.ts",
+    "src/server/mappers/personal-ai-generation-request-mapper.test.ts",
+    "src/server/services/personal-ai-generation-request-route.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -22,44 +38,61 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/db/schema/**",
-    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "question, paper, adoption, audit, or public API business semantics",
-    "permission, role, entitlement, Provider, external service, secret/env, deployment, PR or force-push",
-    "real database execution or runtime acceptance",
-    "another independent finding"
+    "migration execution or real database/data access",
+    "Provider/external service, model pricing, prompt/RAG runtime, secret/env or deployment",
+    "role, entitlement, quota, authorization business semantics or capability expansion",
+    "organization AI generation, admin generation, scoring tasks, formal adoption or another finding",
+    "PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts"
+    "src/db/schema/ai-rag.ts",
+    "src/db/schema/ai-rag.test.ts",
+    "drizzle/20260722053000_p1_rc_05_personal_ai_generation_input_snapshot.sql",
+    "drizzle/meta/20260722053000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/contracts/personal-ai-generation-request-contract.ts",
+    "src/server/contracts/personal-ai-generation-request-history-contract.ts",
+    "src/server/models/personal-ai-generation-request.ts",
+    "src/server/validators/personal-ai-generation-request.ts",
+    "src/server/services/personal-ai-generation-request-service.ts",
+    "src/server/repositories/personal-ai-generation-request-repository.ts",
+    "src/server/mappers/personal-ai-generation-request-mapper.ts",
+    "src/server/services/personal-ai-generation-request-route.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx"
   ],
   "contingencyFiles": [
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "src/server/services/paper-draft-service.test.ts"
+    "src/server/validators/personal-ai-generation-request.test.ts",
+    "src/server/services/personal-ai-generation-request-service.test.ts",
+    "src/server/services/personal-ai-generation-request-context-service.ts",
+    "src/server/services/personal-ai-generation-request-context-service.test.ts",
+    "src/server/repositories/personal-ai-generation-request-repository.test.ts",
+    "src/server/mappers/personal-ai-generation-request-mapper.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirement": "A reviewed content AI result may enter formal content only as one traceable command; partial or duplicate formal drafts violate review lineage and draft integrity.",
-    "routeService": "The route currently constructs adoption, question, and paper repositories independently; the service then commits adoption, invokes draft writers, and finally updates target metadata as three separate phases.",
-    "repository": "Question create and paper create/add-question writers are individually transactional and already accept RuntimeDatabaseOptions, but no outer transaction spans the whole adoption command.",
-    "database": "Drizzle PostgreSQL transaction objects support nested transaction/savepoint calls, so all existing repositories can share one outer transaction through the existing createDatabase injection without schema changes.",
-    "rootCause": "The production runtime lacks a unit-of-work boundary; service error responses resolve normally, so a wrapper must deliberately roll back on any nonzero response as well as thrown failures.",
-    "findingDecision": "F-0029 is one atomic command boundary. F-0155 and F-0156 are already closed and remain protected regressions rather than reopened work."
+    "requirement": "Advanced-edition AI task traceability requires persisted input and generation-constraint snapshots so history and call lineage can be reconstructed without inventing facts.",
+    "uiCaller": "StudentPersonalAiGenerationPage spreads a demo draft containing question-public-001, answer-record-public-001, paper-public-001 and explanation into every real AI question/paper request.",
+    "routeService": "The local-browser route validates effective authorization and generation parameters but createPersistentRequestInput discards those parameters while requiring the demo lineage fields.",
+    "repository": "The request repository persists fake associations and reuses any owner/idempotency match without verifying that the normalized generation request is identical.",
+    "schema": "ai_generation_task has no generation input snapshot, constraint snapshot, contract version or request digest.",
+    "history": "The history selection and DTO expose status/result only, so a refreshed client cannot reconstruct the requested generation scope or distinguish legacy unavailable rows.",
+    "rootCause": "The learner generation command models a generic question explanation request while the real product operation is a task-type plus normalized generation-parameter command; persistence therefore stores placeholder lineage and omits the authoritative command snapshot.",
+    "findingDecision": "F-0160 is one schema-backed learner generation snapshot root cause. F-0166/F-0167 remain a separate organization AI command bundle."
   },
   "validationCommands": [
     {
-      "name": "f0029-formal-adoption-atomic-command",
+      "name": "f0160-personal-ai-generation-snapshot-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -67,36 +100,49 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/repositories/paper-draft-repository.test.ts",
-        "src/server/services/paper-draft-service.test.ts"
+        "src/db/schema/ai-rag.test.ts",
+        "src/server/validators/personal-ai-generation-request.test.ts",
+        "src/server/services/personal-ai-generation-request-service.test.ts",
+        "src/server/services/personal-ai-generation-request-context-service.test.ts",
+        "src/server/repositories/personal-ai-generation-request-repository.test.ts",
+        "src/server/mappers/personal-ai-generation-request-mapper.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+        "tests/unit/student-personal-ai-generation-ui.test.ts"
       ]
     },
     {
-      "name": "f0029-formal-adoption-atomic-command-lint",
+      "name": "f0160-personal-ai-generation-snapshot-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts"
+        "src/db/schema/ai-rag.ts",
+        "src/server/contracts/personal-ai-generation-request-contract.ts",
+        "src/server/contracts/personal-ai-generation-request-history-contract.ts",
+        "src/server/models/personal-ai-generation-request.ts",
+        "src/server/validators/personal-ai-generation-request.ts",
+        "src/server/services/personal-ai-generation-request-service.ts",
+        "src/server/services/personal-ai-generation-request-context-service.ts",
+        "src/server/repositories/personal-ai-generation-request-repository.ts",
+        "src/server/mappers/personal-ai-generation-request-mapper.ts",
+        "src/server/services/personal-ai-generation-request-route.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx"
       ]
     },
     {
-      "name": "f0029-formal-adoption-atomic-command-typecheck",
+      "name": "f0160-personal-ai-generation-snapshot-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0029-formal-adoption-atomic-command-build",
+      "name": "f0160-personal-ai-generation-snapshot-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -104,52 +150,92 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": "guardian-f0160-personal-ai-generation-input-snapshot-2026-07-21",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_transaction_orchestration",
-    "schemaOrMigrationChange": false,
+    "category": "schema_migration_source_and_database_application_logic",
+    "schemaOrMigrationChange": true,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
-  "standingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
+  "standingApprovals": ["standing-test-only-allowlist-expansion-2026-07-21"],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingIds": ["F-0029"],
-    "task": "close the atomic formal-adoption unit of work, then continue the next eligible RC-05 residual",
-    "condition": "do not claim runtime database proof, change schema, or reopen F-0155/F-0156"
+    "findingIds": ["F-0160"],
+    "task": "persist truthful learner generation input and constraint snapshots, remove demo lineage, close F-0160, then JIT the F-0166/F-0167 organization AI command bundle",
+    "condition": "do not execute migration or real DB, fabricate legacy snapshots, change authorization semantics, or enter F-0166/F-0167"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21",
-    "findingIds": ["F-0155", "F-0156"],
-    "commit": "c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e",
+    "taskId": "p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21",
+    "findingIds": ["F-0029"],
+    "commit": "1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true
   },
-  "candidateEvidence": {
-    "executionStage": "validated_reviewed_conditional_closeout_ready",
-    "tddRed": "3 expected failures across 8 runtime tests because the transactional command wrapper did not exist",
-    "focused": "8 files, 77 tests passed; the directly changed service replay test also passed after the fixture type correction",
-    "lint": "passed",
-    "typecheck": "passed after removing an invalid test-only rejectAction field",
-    "build": "passed with 100 static pages and the pre-existing NFT tracing warning only",
-    "formatAndDiff": "passed",
-    "adversarialReview": "passed: production defaults share one outer transaction across adoption, question, paper composition, audits and final metadata; nonzero responses and exceptions roll back; committed replay bypasses all writers; existing paper composition failure and repository transaction regressions remain green; no schema, permission, Provider, dependency or mechanism expansion",
-    "runtimeDatabaseProof": "not_claimed_static_and_synthetic_transaction_harness_only"
+  "freshApproval": {
+    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
+    "approvalId": "guardian-f0160-personal-ai-generation-input-snapshot-2026-07-21",
+    "risk": "database",
+    "approvalMode": "task_bound_pre_red_schema_migration_source_with_conditional_closeout",
+    "baseSha": "1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc",
+    "fingerprint": "eb51ad8f3022609ac09716220fe0cefcade25c267d83f82414fd3d661bb2c3f6",
+    "snapshotIntegrityContract": [
+      "server_generates_version_input_constraint_and_digest_from_validated_normalized_parameters_and_authoritative_authorization_context",
+      "one_deterministic_allowlisted_canonicalizer_explicitly_defines_null_array_and_set_semantics",
+      "digest_binds_task_type_input_constraints_and_schema_version",
+      "snapshot_is_immutable_and_same_key_different_snapshot_fails_closed_without_overwrite_duplicate_or_side_effect",
+      "authorization_constraint_is_creation_time_audit_fact_not_a_current_credential",
+      "new_rows_atomically_store_all_snapshot_fields_legacy_rows_remain_all_null_and_history_returns_unavailable",
+      "snapshot_and_history_exclude_secrets_internal_ids_raw_authorization_provider_payload_answers_and_unnecessary_PII",
+      "migration_is_additive_nullable_legacy_compatible_and_contains_no_backfill_or_existing_semantic_change"
+    ],
+    "invalidatedBy": [
+      "base_or_origin_drift",
+      "file_outside_allowed_envelope",
+      "destructive_or_data_migration_or_real_database_need",
+      "permission_provider_dependency_or_mechanism_change",
+      "snapshot_platform_expansion_beyond_learner_generation",
+      "loss_of_server_ownership_legacy_unavailable_idempotent_fail_closed_or_redaction_boundary"
+    ],
+    "scopeAmendments": [
+      {
+        "amendmentId": "guardian-f0160-direct-provider-context-null-lineage-amendment-01-2026-07-21",
+        "requestFingerprint": "f0160-direct-provider-context-null-lineage-amendment-01-1b71c6da8-2026-07-21",
+        "files": [
+          "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+          "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts"
+        ],
+        "boundary": "nullable aiFuncType and questionPublicId propagation only; no Provider behavior change"
+      }
+    ]
+  },
+  "validationEvidence": {
+    "tddRed": "pass_7_expected_failures_across_5_files_before_implementation",
+    "focused": "pass_10_files_204_tests",
+    "lint": "pass_all_17_changed_TypeScript_and_test_files",
+    "typecheck": "pass",
+    "build": "pass_100_static_pages_with_preexisting_NFT_warning_only",
+    "schemaMigrationSource": "pass_4_additive_nullable_columns_2_checks_no_data_or_destructive_SQL_snapshot_parent_exact_and_no_unrelated_schema_drift",
+    "formatAndDiff": "pass_including_generated_snapshot_prettier_applied_by_lint_staged",
+    "conditionalCandidateBindingRetries": "1_generated_snapshot_prettier_applied_by_lint_staged_before_kernel",
+    "stateContractParse": "pass_JSON_and_YAML_23_changed_files_all_within_28_allowed_files",
+    "adversarialReview": "pass_server_owned_null_lineage_exact_allowlisted_canonicalization_same_key_snapshot_conflict_malformed_history_fail_closed_redaction_no_provider_permission_dependency_or_real_DB_change",
+    "runtimeDatabaseProof": "not_claimed_static_and_synthetic_only"
+  },
+  "closureEvidence": {
+    "F-0160": "learner_question_and_paper_generation_now_persists_truthful_versioned_input_and_authorization_constraint_snapshots_without_demo_lineage_and_history_marks_legacy_or_malformed_snapshots_unavailable",
+    "residual": "F0166_F0167_organization_AI_command_bundle_remains_separate_and_unstarted"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "approvalId": "guardian-f0160-personal-ai-generation-input-snapshot-2026-07-21"
   }
 }
