@@ -1,26 +1,11 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21",
-  "objective": "Close F-0097 by retiring the never-wired and contract-incompatible /api/v1/exam-papers route family and its isolated adapter stack, naming /api/v1/papers as the only canonical formal paper REST boundary, and preserving an executable regression against reintroducing the alias. Do not change the canonical paper implementation, paper lifecycle semantics, schema, permissions, dependencies, Provider behavior, or historical audit evidence.",
+  "taskId": "p1-remediation-rc-06-covered-resource-foundations-2026-07-21",
+  "objective": "Close F-0032, F-0085, and F-0087 without product-code changes by independently proving that current production routes use transactional database-backed resource facts, durable generation-based atomic index switching, and random stable resource public identifiers. Record the remaining RC-06 findings as separate confirmed roots and resume at F-0069. Do not modify product source, tests, schema, dependencies, permissions, Provider behavior, mechanisms, or historical evidence.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md",
-    "docs/01-requirements/traceability/unified-use-case-technical-matrix.md",
-    "src/app/api/v1/exam-papers/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/copy/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/publish/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/unpublish/route.ts",
-    "src/server/contracts/question-paper/exam-paper-contract.ts",
-    "src/server/repositories/question-paper/question-paper-repository.ts",
-    "src/server/services/question-paper/route-handlers.ts",
-    "src/server/validators/question-paper/exam-paper-validator.ts",
-    "tests/unit/question-paper/question-paper-rest-layering.test.ts",
-    "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "tests/unit/admin-paper-ui.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -28,13 +13,8 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md",
-    "src/app/api/v1/papers/**",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/contracts/question-paper/material-lifecycle-boundary.ts",
-    "src/db/**",
+    "src/**",
+    "tests/**",
     "drizzle/**",
     "migrations/**",
     "package.json",
@@ -42,42 +22,38 @@
     ".github/workflows/**",
     ".env*",
     "schema/migration or real database/data access",
-    "paper lifecycle, permission, entitlement, Provider, external service, secret/env or deployment",
+    "permission, entitlement, Provider, external service, secret/env or deployment",
     "PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md",
-    "docs/01-requirements/traceability/unified-use-case-technical-matrix.md",
-    "src/app/api/v1/exam-papers/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/copy/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/publish/route.ts",
-    "src/app/api/v1/exam-papers/[publicId]/unpublish/route.ts",
-    "src/server/contracts/question-paper/exam-paper-contract.ts",
-    "src/server/repositories/question-paper/question-paper-repository.ts",
-    "src/server/services/question-paper/route-handlers.ts",
-    "src/server/validators/question-paper/exam-paper-validator.ts",
-    "tests/unit/question-paper/question-paper-rest-layering.test.ts",
-    "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
-  "contingencyFiles": [
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "tests/unit/admin-paper-ui.test.ts"
-  ],
+  "contingencyFiles": [],
   "authoritativeChainEvidence": {
-    "requirements": "ADR-002 makes /api/v1 a stable multi-client boundary while the paper requirement SSOT defines one draft/published/archived paper lifecycle.",
-    "canonicalRoute": "/api/v1/papers is wired to the production paper composition lifecycle runtime and is the only route family used by product callers.",
-    "aliasRoute": "/api/v1/exam-papers constructs an empty optional repository in every App Router entry and therefore returns 503 before authorization or business handling.",
-    "isolatedStack": "The exam-paper contract, repository, validator and handler are referenced only by the dead routes and their injected-stub test.",
-    "rootCause": "An early layering scaffold was published and documented as a REST capability but was never connected to the canonical paper aggregate, leaving two incompatible public contracts.",
-    "disposition": "separate_confirmed_root_cause_retire_nonfunctional_alias_and_keep_only_canonical_papers"
+    "F-0032": "Production App Router handlers construct the default PostgreSQL repositories; the local JSON adapter is reachable only by explicit test/local dependency injection. Resource metadata, upload operations, knowledge-node links, generations, and chunks are persisted transactionally.",
+    "F-0085": "resource_index_generation owns pending/ready/failed/superseded facts; rebuild requests retain a ready active generation, completion atomically inserts chunks and switches the active generation, failures retain stale citations, and retrieval joins only active ready generation facts.",
+    "F-0087": "Production upload preparation allocates resource-${randomUUID()} independently from the full content hash used for deterministic object storage and replay fingerprinting; the production path does not silently replace resources by a truncated hash identifier.",
+    "residualDisposition": {
+      "covered": ["F-0032", "F-0085", "F-0087"],
+      "separate": [
+        "F-0037",
+        "F-0069",
+        "F-0073",
+        "F-0082",
+        "F-0086",
+        "F-0089",
+        "F-0090"
+      ],
+      "bundle": [],
+      "runtimeHold": [],
+      "next": "F-0069 knowledge-node subtree move and rename atomicity"
+    }
   },
   "validationCommands": [
     {
-      "name": "f0097-canonical-paper-rest-focused",
+      "name": "rc06-covered-resource-foundations-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -85,34 +61,27 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-        "tests/unit/admin-paper-ui.test.ts",
+        "tests/unit/p0-rc-05-schema-migration-source.test.ts",
+        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
+        "tests/unit/p1-resource-upload-saga.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+        "tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "f0097-canonical-paper-rest-lint",
-      "kind": "lint",
+      "name": "rc06-covered-resource-foundations-format",
+      "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
-        "eslint",
-        "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts"
+        "prettier",
+        "--check",
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/task-queue.yaml",
+        "docs/04-agent-system/state/task-safety.json"
       ]
-    },
-    {
-      "name": "f0097-canonical-paper-rest-typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "f0097-canonical-paper-rest-build",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
     }
   ],
   "approvalSources": {
@@ -123,7 +92,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_nonfunctional_api_alias_retirement",
+    "category": "low_risk_state_only_independent_static_closure",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -131,19 +100,18 @@
     "dependencyOrMechanismChange": false
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   ],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingIds": ["F-0097"],
-    "task": "retire the nonfunctional exam-papers alias, close F-0097, then complete RC-05 residual reconciliation",
-    "condition": "do not modify canonical paper behavior, historical audits, schema, permission, dependency, Provider or mechanism"
+    "findingIds": ["F-0069"],
+    "task": "JIT-freeze and TDD the knowledge-node subtree move and rename atomicity boundary",
+    "condition": "do not combine unrelated RC-06 findings or change schema, dependencies, permissions, Provider behavior, mechanisms, or historical evidence"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21",
-    "findingIds": ["F-0166", "F-0167"],
-    "commit": "28b3fb320f4ab13681d02a65abd579ad6f7f30b7",
+    "taskId": "p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21",
+    "findingIds": ["F-0097"],
+    "commit": "04d8d596927e3ac1e671a6367cc47f69b1406e87",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,

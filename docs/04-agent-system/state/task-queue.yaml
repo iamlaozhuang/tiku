@@ -200,8 +200,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
-  currentCandidateClusterId: P1-RC-05
+  currentTaskId: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+  currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -286,6 +286,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
     - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
     - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
+    - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -356,6 +357,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
     - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
     - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
+    - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -462,7 +464,88 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21: closed
     p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21: closed
     p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21: closed
+    p1-remediation-rc-06-covered-resource-foundations-2026-07-21: closed
 activeTasks:
+  - id: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+    title: RC-06 covered resource persistence, index generation, and identity closure
+    phase: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_static_closure
+    productClosureContribution: F-0032_and_F-0085_and_F-0087
+    branch: fix/rc06-covered-resource-foundations
+    objective: independently close three already-covered resource findings and record the remaining RC-06 findings by confirmed root without product-code changes
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0032
+      - F-0085
+      - F-0087
+    executionStage: validated_reviewed_conditional_closeout_ready
+    findingStatus: closed_static_product_verified
+    riskBoundary:
+      category: low_risk_state_only_independent_static_closure
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    independentClosureEvidence:
+      F-0032: production_routes_default_to_transactional_PostgreSQL_resource_upload_relation_and_chunk_facts_while_JSON_adapter_requires_explicit_test_injection
+      F-0085: durable_generation_facts_preserve_active_ready_chunks_until_atomic_success_and_mark_failed_rebuild_citations_stale
+      F-0087: production_upload_allocates_random_resource_public_id_independent_from_full_content_hash_and_never_replaces_by_truncated_hash
+    rc06ResidualDisposition:
+      covered:
+        - F-0032
+        - F-0085
+        - F-0087
+      separate:
+        - F-0037
+        - F-0069
+        - F-0073
+        - F-0082
+        - F-0086
+        - F-0089
+        - F-0090
+      bundle: []
+      runtimeHold: []
+      nextResumeAnchor: F-0069_knowledge_node_subtree_move_and_rename_atomicity
+    expectedAcceptance:
+      - each_covered_finding_has_independent_current_code_and_test_evidence
+      - local_test_adapter_is_not_misrepresented_as_the_production_resource_fact_source
+      - remaining_findings_are_not_mechanically_bundled_by_RC_membership
+      - no_product_schema_database_permission_provider_dependency_mechanism_or_historical_evidence_change
+    closeoutProjection:
+      current: validated_reviewed_conditional_closeout_ready
+      triggers: focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0032_F0085_F0087_closed_then_F0069_JIT_contract_and_RED
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_low_risk_standing_closeout
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: independent_static_revalidation_and_three_finding_closure
+      mechanismOverhead: contract_state_validation_kernel_and_closeout
+      guardSmokeChanges: 0
+    validationEvidence:
+      focused: 5_files_36_tests_passed
+      stateParse: JSON_and_both_YAML_files_passed_strict_parse
+      format: targeted_Pretty_check_passed
+      diffCheck: passed
+      firstCommitAttempt: rejected_before_commit_because_python_is_not_an_allowed_kernel_validation_executable_then_contract_was_corrected
+      review: pass_three_independent_closures_match_current_production_paths_and_remaining_findings_stay_separate
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
+      findingIds:
+        - F-0097
+      commit: 04d8d596927e3ac1e671a6367cc47f69b1406e87
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
     title: Canonical paper REST boundary and exam-papers alias retirement
     phase: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
