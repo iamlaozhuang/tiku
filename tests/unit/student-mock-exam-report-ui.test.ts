@@ -594,6 +594,318 @@ describe("StudentMockExamPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders one question_group page, autosaves every changed child, and navigates by group", async () => {
+    const createQuestion = (
+      paperQuestionPublicId: string,
+      stemRichText: string,
+    ) => ({
+      paperQuestionPublicId,
+      questionPublicId: `question-${paperQuestionPublicId}`,
+      questionType: "short_answer",
+      stemRichText,
+      questionOptions: [],
+      score: "10.0",
+    });
+    const groupedMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-grouped-navigation",
+      subject: "skill" as const,
+      questionCount: 3,
+      paperSnapshot: {
+        snapshotVersion: 2,
+        name: "技能题组模考",
+        paperSections: [
+          {
+            publicId: "paper-section-grouped-1",
+            title: "技能大题一",
+            sortOrder: 1,
+            paperQuestions: [],
+            questionGroups: [
+              {
+                publicId: "question-group-grouped-1",
+                title: "材料一题组",
+                sortOrder: 1,
+                totalScore: "20.0",
+                materialSnapshot: {
+                  materialPublicId: "material-grouped-1",
+                  title: "材料一",
+                  contentRichText: "材料一正文",
+                },
+                paperQuestions: [
+                  createQuestion("paper-question-grouped-1-a", "题组一子题 A"),
+                  createQuestion("paper-question-grouped-1-b", "题组一子题 B"),
+                ],
+              },
+            ],
+          },
+          {
+            publicId: "paper-section-grouped-2",
+            title: "技能大题二",
+            sortOrder: 2,
+            paperQuestions: [],
+            questionGroups: [
+              {
+                publicId: "question-group-grouped-2",
+                title: "材料二题组",
+                sortOrder: 1,
+                totalScore: "10.0",
+                materialSnapshot: {
+                  materialPublicId: "material-grouped-2",
+                  title: "材料二",
+                  contentRichText: "材料二正文",
+                },
+                paperQuestions: [
+                  createQuestion("paper-question-grouped-2-a", "题组二子题 A"),
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: groupedMockExam.publicId,
+        mockExams: [
+          {
+            mockExam: groupedMockExam,
+            examReportPublicId: "exam-report-grouped-navigation",
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByText("第 1 / 2 组")).toBeInTheDocument();
+    const firstGroup = screen.getByTestId(
+      "mock-exam-question-group-question-group-grouped-1",
+    );
+    expect(within(firstGroup).getByText("材料一题组")).toBeInTheDocument();
+    expect(within(firstGroup).getByText("题组共 20.0 分")).toBeInTheDocument();
+    expect(within(firstGroup).getAllByText("材料一")).toHaveLength(1);
+    expect(within(firstGroup).getByText("材料一正文")).toBeInTheDocument();
+    expect(within(firstGroup).getByText("题组一子题 A")).toBeInTheDocument();
+    expect(within(firstGroup).getByText("题组一子题 B")).toBeInTheDocument();
+
+    for (const [index, answerInput] of within(firstGroup)
+      .getAllByLabelText("文字答案")
+      .entries()) {
+      fireEvent.change(answerInput, {
+        target: { value: `题组一作答 ${index + 1}` },
+      });
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: "下一组" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("第 2 / 2 组")).toBeInTheDocument(),
+    );
+    expect(screen.getByText("已保存").parentElement).toHaveTextContent("2 / 3");
+    const secondGroup = screen.getByTestId(
+      "mock-exam-question-group-question-group-grouped-2",
+    );
+    expect(within(secondGroup).getByText("题组二子题 A")).toBeInTheDocument();
+    expect(within(secondGroup).getAllByText("材料二")).toHaveLength(1);
+    expect(screen.queryByText("材料一正文")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "题号 1" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("第 1 / 2 组")).toBeInTheDocument(),
+    );
+    expect(screen.getAllByLabelText("文字答案")[0]).toHaveValue("题组一作答 1");
+    expect(screen.getAllByLabelText("文字答案")[1]).toHaveValue("题组一作答 2");
+  });
+
+  it("fails closed without reordering a noncontiguous mock_exam question_group", async () => {
+    const createQuestion = (
+      paperQuestionPublicId: string,
+      stemRichText: string,
+      questionGroupPublicId: string | null,
+    ) => ({
+      paperQuestionPublicId,
+      questionPublicId: `question-${paperQuestionPublicId}`,
+      questionType: "short_answer",
+      paperSectionTitle: "技能模块",
+      questionGroupPublicId,
+      questionGroupTitle:
+        questionGroupPublicId === null ? null : "非连续材料题组",
+      stemRichText,
+      questionOptions: [],
+      score: "1.0",
+    });
+    const malformedMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-noncontiguous-group",
+      subject: "skill" as const,
+      questionCount: 3,
+      paperSnapshot: {
+        name: "非连续题组模考",
+        paperSections: [
+          {
+            title: "技能模块",
+            paperQuestions: [
+              createQuestion(
+                "paper-question-noncontiguous-first",
+                "Group first",
+                "question-group-noncontiguous",
+              ),
+              createQuestion(
+                "paper-question-noncontiguous-standalone",
+                "Standalone middle",
+                null,
+              ),
+              createQuestion(
+                "paper-question-noncontiguous-last",
+                "Group last",
+                "question-group-noncontiguous",
+              ),
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: malformedMockExam.publicId,
+        mockExams: [
+          {
+            mockExam: malformedMockExam,
+            examReportPublicId: "exam-report-noncontiguous-group",
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByText("第 1 / 3 题")).toBeInTheDocument();
+    expect(screen.getByText("Group first")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        "mock-exam-question-group-question-group-noncontiguous",
+      ),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+    await waitFor(() =>
+      expect(screen.getByText("Standalone middle")).toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+    await waitFor(() =>
+      expect(screen.getByText("Group last")).toBeInTheDocument(),
+    );
+  });
+
+  it("keeps every grouped child in the durable retry queue when autosave is offline", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const createQuestion = (paperQuestionPublicId: string, title: string) => ({
+      paperQuestionPublicId,
+      questionPublicId: `question-${paperQuestionPublicId}`,
+      questionType: "short_answer",
+      stemRichText: title,
+      questionOptions: [],
+      score: "1.0",
+    });
+    const groupedMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-grouped-offline",
+      paperPublicId: "paper-grouped-offline",
+      subject: "skill" as const,
+      questionCount: 3,
+      paperSnapshot: {
+        snapshotVersion: 2,
+        name: "离线题组模考",
+        paperSections: [
+          {
+            publicId: "paper-section-offline",
+            title: "离线技能模块",
+            sortOrder: 1,
+            paperQuestions: [],
+            questionGroups: [
+              {
+                publicId: "question-group-offline-1",
+                title: "离线题组一",
+                sortOrder: 1,
+                totalScore: "2.0",
+                materialSnapshot: {
+                  materialPublicId: "material-offline-1",
+                  title: "离线材料一",
+                  contentRichText: "离线材料一正文",
+                },
+                paperQuestions: [
+                  createQuestion("paper-question-offline-1-a", "离线子题 A"),
+                  createQuestion("paper-question-offline-1-b", "离线子题 B"),
+                ],
+              },
+              {
+                publicId: "question-group-offline-2",
+                title: "离线题组二",
+                sortOrder: 2,
+                totalScore: "1.0",
+                materialSnapshot: {
+                  materialPublicId: "material-offline-2",
+                  title: "离线材料二",
+                  contentRichText: "离线材料二正文",
+                },
+                paperQuestions: [
+                  createQuestion("paper-question-offline-2-a", "离线子题 C"),
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    let answerAttemptCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: RequestInfo | URL) => {
+        if (String(url) === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam: groupedMockExam, answerRecords: [] },
+            }),
+          };
+        }
+
+        if (String(url).endsWith("/answers")) {
+          answerAttemptCount += 1;
+          throw new Error("offline");
+        }
+
+        throw new Error(`unexpected request: ${String(url)}`);
+      }),
+    );
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: groupedMockExam.paperPublicId,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "离线题组模考" }),
+    ).toBeInTheDocument();
+    for (const [index, answerInput] of screen
+      .getAllByLabelText("文字答案")
+      .entries()) {
+      fireEvent.change(answerInput, {
+        target: { value: `离线作答 ${index + 1}` },
+      });
+    }
+    fireEvent.click(screen.getByRole("button", { name: "下一组" }));
+
+    await waitFor(() => expect(answerAttemptCount).toBe(2));
+    expect(screen.getByTestId("mock-exam-answer-save-retry")).toHaveTextContent(
+      "2 题待重新保存",
+    );
+    expect(screen.getByText("第 2 / 2 组")).toBeInTheDocument();
+  });
+
   it("renders local seed mock exam snapshots that store objective choices as options", () => {
     const runtimeMockExam = {
       ...studentMockExamFixture.mockExams[0].mockExam,

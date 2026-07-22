@@ -1,13 +1,17 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21",
-  "objective": "Complete the independently verifiable F-0098 exam_report presentation partition by grouping immutable question results under their authoritative paper_section and question_group public identity, rendering each group heading once and calculating a display-only group score subtotal from the existing result facts. Preserve standalone questions, result ordering, scoring status, learner visibility and immutable legacy reports; do not change snapshot production, scoring, persistence, permissions, mock_exam navigation or organization training.",
+  "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21",
+  "objective": "Complete F-0098 by making mock_exam consume the immutable paper_section and question_group hierarchy as grouped navigation pages: render shared group material once, render every ordered child question within the authoritative group, preserve per-question answer identity/autosave/revision/retry semantics, and keep standalone and legacy snapshots compatible. Run the final static acceptance matrix for the already-closed snapshot, practice and report partitions; do not change snapshot production, scoring, persistence, permissions or organization training.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
     "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "tests/unit/student-mock-exam-report-ui.test.ts"
+    "tests/unit/student-mock-exam-report-ui.test.ts",
+    "tests/unit/student-practice-ui.test.ts",
+    "src/lib/published-paper-snapshot.test.ts",
+    "src/server/services/mock-exam-service.test.ts",
+    "src/server/services/exam-report-service.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -15,14 +19,15 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/server/**",
+    "src/server/** except the untouched direct validation tests listed in allowedFiles",
     "src/db/schema/**",
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "mock_exam answer or navigation behavior",
+    "exam_report presentation changes",
+    "practice behavior changes",
     "organization training source/import implementation",
     "permission, entitlement, role or learner visibility changes",
     "dependency, Provider, external service, secret/env, deployment, PR or force-push",
@@ -34,17 +39,23 @@
     "docs/04-agent-system/state/task-safety.json",
     "src/features/student/mock-exam/StudentMockExamReportPage.tsx"
   ],
-  "contingencyFiles": ["tests/unit/student-mock-exam-report-ui.test.ts"],
+  "contingencyFiles": [
+    "tests/unit/student-mock-exam-report-ui.test.ts",
+    "tests/unit/student-practice-ui.test.ts",
+    "src/lib/published-paper-snapshot.test.ts",
+    "src/server/services/mock-exam-service.test.ts",
+    "src/server/services/exam-report-service.test.ts"
+  ],
   "authoritativeChainEvidence": {
-    "requirement": "Module 02 section 3.7 requires question_group to remain a visible structural container with a system-computed subtotal; F-0098 requires reports to preserve group hierarchy rather than present repeated flat children.",
-    "producer": "The closed foundation commit 885558610 records paperSectionTitle, questionGroupPublicId and questionGroupTitle on each immutable report result and emits a question_group summary without changing scoring facts.",
-    "consumer": "StudentExamReportPage currently parses those fields but still renders one undifferentiated flat result list, repeating the same group label on every child and exposing no group subtotal.",
-    "tests": "student-mock-exam-report-ui is the direct caller and regression surface; no server mock, route, repository, schema or migration change is required.",
-    "nonClaims": "This task closes only the exam_report grouped presentation partition. F-0098 remains open_partitioned for grouped mock_exam navigation and final independent acceptance."
+    "requirement": "Module 02 section 3.7 and D14 require skill flows to preserve paper_section and question_group, share one material container, keep child scoring independent and expose group navigation.",
+    "producer": "Foundation commit 885558610 emits a versioned nested snapshot and the shared reader preserves ordered section, group and child public identity; report commit 960c88b9e consumes the same immutable identity.",
+    "consumer": "StudentMockExamPage extracts the group fields but flattens them back into one-question pages, repeats shared material and exposes only a flat answer navigator.",
+    "tests": "student-mock-exam-report-ui is the direct implementation regression. Existing snapshot, practice, mock service and report service tests form the final static F-0098 acceptance matrix and remain untouched unless a same-root test correction is required.",
+    "nonClaims": "This task does not modify organization training, AI selection/scoring, persistence, permission or runtime database behavior; those independent findings remain separate."
   },
   "validationCommands": [
     {
-      "name": "f0098-grouped-report-ui-focused",
+      "name": "f0098-grouped-mock-navigation-and-static-acceptance",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -52,11 +63,15 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/student-mock-exam-report-ui.test.ts"
+        "tests/unit/student-mock-exam-report-ui.test.ts",
+        "tests/unit/student-practice-ui.test.ts",
+        "src/lib/published-paper-snapshot.test.ts",
+        "src/server/services/mock-exam-service.test.ts",
+        "src/server/services/exam-report-service.test.ts"
       ]
     },
     {
-      "name": "f0098-grouped-report-ui-lint",
+      "name": "f0098-grouped-mock-navigation-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -68,13 +83,13 @@
       ]
     },
     {
-      "name": "f0098-grouped-report-ui-typecheck",
+      "name": "f0098-grouped-mock-navigation-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0098-grouped-report-ui-build",
+      "name": "f0098-grouped-mock-navigation-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -88,7 +103,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_learner_report_read_projection",
+    "category": "low_risk_learner_mock_exam_navigation_projection",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -102,33 +117,33 @@
   "conditionalCloseout": true,
   "resumeAnchor": {
     "findingId": "F-0098",
-    "task": "grouped mock_exam navigation and final independent acceptance",
-    "condition": "after grouped report closeout, continue the same finding without reopening the foundation or expanding into organization training"
+    "task": "close F-0098 after grouped mock navigation and the final static acceptance matrix pass, then perform the next RC-05 residual disposition",
+    "condition": "do not claim organization training or runtime database acceptance; preserve their independent finding boundaries"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21",
+    "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21",
     "findingId": "F-0098",
-    "commit": "88555861039c19a3e1e92f64ed5b0323b35a2266",
+    "commit": "960c88b9ee8544ff49b58e9a3e35495bb34cd01b",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true
   },
   "validationEvidence": {
-    "tddRed": "group heading absent, noncontiguous repeated group identity reordered, and non-decimal score text was coerced before the fail-closed fixes",
-    "focused": "pass: 1 file, 46 tests",
+    "tddRed": "flat question progress and repeated material before group page implementation, followed by a missing group subtotal before strict total-score projection",
+    "focused": "pass: 5 files, 129 tests",
     "lint": "pass: component and direct test",
     "typecheck": "pass",
     "build": "pass: 100 static pages; pre-existing NFT trace warning only",
     "formatAndDiff": "pass",
-    "adversarialReview": "pass: public identity is authoritative; same-title distinct groups stay separate; conflicting, incomplete or noncontiguous group identity fails closed without reordering; invalid or pending subtotal facts are not fabricated"
+    "adversarialReview": "pass: public group identity is authoritative; conflicting, incomplete or noncontiguous groups fail closed without reordering; shared material renders once; every child keeps independent answer revision, autosave, submit and durable retry semantics; no server, permission or persistence scope changed"
   },
   "executionMetrics": {
     "mandatoryFreshApprovals": 0,
     "preventableScopeMissApprovals": 0,
     "candidateReapprovals": 0,
     "approvalWaitTurns": 0,
-    "productValueTime": "9m",
+    "productValueTime": "13m",
     "mechanismOverhead": "4m",
     "guardSmokeChanges": 0
   },

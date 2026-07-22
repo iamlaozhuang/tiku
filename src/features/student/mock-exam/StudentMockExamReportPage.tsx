@@ -417,6 +417,7 @@ type MockExamPaperQuestion = {
   paperSectionTitle: string;
   questionGroupPublicId: string | null;
   questionGroupTitle: string | null;
+  questionGroupTotalScore: string | null;
   materialTitle: string | null;
   materialRichText: string | null;
   stemRichText: string;
@@ -427,6 +428,18 @@ type MockExamPaperQuestion = {
 type MockExamQuestionOption = {
   label: string;
   content: string;
+};
+
+type MockExamQuestionPage = {
+  pageKey: string;
+  firstQuestionIndex: number;
+  paperSectionTitle: string;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
+  questionGroupTotalScore: string | null;
+  materialTitle: string | null;
+  materialRichText: string | null;
+  questions: MockExamPaperQuestion[];
 };
 
 type ReportQuestionResult = {
@@ -727,6 +740,17 @@ function getStringField(
   return typeof sourceRecord[key] === "string" ? sourceRecord[key] : null;
 }
 
+function getNonNegativeDecimalField(
+  sourceRecord: Record<string, unknown>,
+  key: string,
+): string | null {
+  const value = getStringField(sourceRecord, key);
+
+  return value !== null && /^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value)
+    ? value
+    : null;
+}
+
 function getQuestionOptions(value: unknown): MockExamQuestionOption[] {
   if (!Array.isArray(value)) {
     return [];
@@ -940,6 +964,10 @@ function mapMockExamQuestion(
       questionGroup === null
         ? getStringField(value, "questionGroupTitle")
         : getStringField(questionGroup, "title"),
+    questionGroupTotalScore:
+      questionGroup === null
+        ? getNonNegativeDecimalField(value, "questionGroupTotalScore")
+        : getNonNegativeDecimalField(questionGroup, "totalScore"),
     materialTitle:
       materialSnapshot === null
         ? null
@@ -954,10 +982,10 @@ function mapMockExamQuestion(
   };
 }
 
-function extractMockExamQuestions(
+function extractMockExamQuestionPages(
   paperSnapshot: Record<string, unknown>,
-): MockExamPaperQuestion[] {
-  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot)
+): MockExamQuestionPage[] {
+  const questions = listPublishedPaperSnapshotQuestionEntries(paperSnapshot)
     .map(({ paperSection, questionGroup, paperQuestion }) =>
       mapMockExamQuestion(
         paperQuestion,
@@ -967,6 +995,136 @@ function extractMockExamQuestions(
       ),
     )
     .filter((question): question is MockExamPaperQuestion => question !== null);
+
+  const groupMetadataByPublicId = new Map<
+    string,
+    {
+      paperSectionTitle: string;
+      questionGroupTitle: string;
+      questionGroupTotalScore: string | null;
+      materialTitle: string | null;
+      materialRichText: string | null;
+    }
+  >();
+  const invalidGroupPublicIds = new Set<string>();
+  const completedGroupPublicIds = new Set<string>();
+  let activeGroupPublicId: string | null = null;
+
+  for (const question of questions) {
+    const questionGroupPublicId = question.questionGroupPublicId;
+
+    if (questionGroupPublicId !== activeGroupPublicId) {
+      if (activeGroupPublicId !== null) {
+        completedGroupPublicIds.add(activeGroupPublicId);
+      }
+
+      if (
+        questionGroupPublicId !== null &&
+        completedGroupPublicIds.has(questionGroupPublicId)
+      ) {
+        invalidGroupPublicIds.add(questionGroupPublicId);
+      }
+
+      activeGroupPublicId = questionGroupPublicId;
+    }
+
+    if (
+      questionGroupPublicId === null ||
+      question.questionGroupTitle === null
+    ) {
+      if (questionGroupPublicId !== null) {
+        invalidGroupPublicIds.add(questionGroupPublicId);
+      }
+      continue;
+    }
+
+    const previousMetadata = groupMetadataByPublicId.get(questionGroupPublicId);
+
+    if (
+      previousMetadata !== undefined &&
+      (previousMetadata.paperSectionTitle !== question.paperSectionTitle ||
+        previousMetadata.questionGroupTitle !== question.questionGroupTitle ||
+        previousMetadata.questionGroupTotalScore !==
+          question.questionGroupTotalScore ||
+        previousMetadata.materialTitle !== question.materialTitle ||
+        previousMetadata.materialRichText !== question.materialRichText)
+    ) {
+      invalidGroupPublicIds.add(questionGroupPublicId);
+      continue;
+    }
+
+    groupMetadataByPublicId.set(questionGroupPublicId, {
+      paperSectionTitle: question.paperSectionTitle,
+      questionGroupTitle: question.questionGroupTitle,
+      questionGroupTotalScore: question.questionGroupTotalScore,
+      materialTitle: question.materialTitle,
+      materialRichText: question.materialRichText,
+    });
+  }
+
+  return questions.reduce<MockExamQuestionPage[]>((pages, question) => {
+    const previousPage = pages.at(-1);
+    const firstQuestionIndex =
+      previousPage === undefined
+        ? 0
+        : previousPage.firstQuestionIndex + previousPage.questions.length;
+    const canGroup =
+      question.questionGroupPublicId !== null &&
+      question.questionGroupTitle !== null &&
+      !invalidGroupPublicIds.has(question.questionGroupPublicId);
+
+    if (!canGroup) {
+      return [
+        ...pages,
+        {
+          pageKey: `paper_question:${question.paperQuestionPublicId}`,
+          firstQuestionIndex,
+          paperSectionTitle: question.paperSectionTitle,
+          questionGroupPublicId: null,
+          questionGroupTitle: null,
+          questionGroupTotalScore: null,
+          materialTitle: question.materialTitle,
+          materialRichText: question.materialRichText,
+          questions: [question],
+        },
+      ];
+    }
+
+    const pageKey = `question_group:${question.questionGroupPublicId}`;
+
+    if (previousPage?.pageKey === pageKey) {
+      return [
+        ...pages.slice(0, -1),
+        {
+          ...previousPage,
+          questions: [...previousPage.questions, question],
+        },
+      ];
+    }
+
+    return [
+      ...pages,
+      {
+        pageKey,
+        firstQuestionIndex,
+        paperSectionTitle: question.paperSectionTitle,
+        questionGroupPublicId: question.questionGroupPublicId,
+        questionGroupTitle: question.questionGroupTitle,
+        questionGroupTotalScore: question.questionGroupTotalScore,
+        materialTitle: question.materialTitle,
+        materialRichText: question.materialRichText,
+        questions: [question],
+      },
+    ];
+  }, []);
+}
+
+function extractMockExamQuestions(
+  paperSnapshot: Record<string, unknown>,
+): MockExamPaperQuestion[] {
+  return extractMockExamQuestionPages(paperSnapshot).flatMap(
+    (page) => page.questions,
+  );
 }
 
 function getPaperName(mockExam: MockExamDto): string {
@@ -1768,10 +1926,16 @@ export function StudentMockExamPage({
             mockExamFixture.mockExam.publicId === selectedMockExamPublicId,
         ) ?? null);
   const mockExam = selectedMockExamFixture?.mockExam ?? null;
-  const questions = useMemo(
+  const questionPages = useMemo(
     () =>
-      mockExam === null ? [] : extractMockExamQuestions(mockExam.paperSnapshot),
+      mockExam === null
+        ? []
+        : extractMockExamQuestionPages(mockExam.paperSnapshot),
     [mockExam],
+  );
+  const questions = useMemo(
+    () => questionPages.flatMap((page) => page.questions),
+    [questionPages],
   );
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedLabelsByQuestion, setSelectedLabelsByQuestion] = useState(
@@ -2425,19 +2589,19 @@ export function StudentMockExamPage({
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex] ?? questions[0];
-  const selectedLabels =
-    selectedLabelsByQuestion[currentQuestion.paperQuestionPublicId] ?? [];
-  const textAnswer =
-    textAnswerByQuestion[currentQuestion.paperQuestionPublicId] ?? "";
-  const currentAnswerSelection = isOptionMockExamQuestion(
-    currentQuestion.questionType,
-  )
-    ? selectedLabels
-    : [textAnswer];
-  const isCurrentQuestionSaved = areAnswerSelectionsEqual(
-    savedAnswerByQuestion[currentQuestion.paperQuestionPublicId],
-    currentAnswerSelection,
+  const currentPageIndex = Math.max(
+    questionPages.findIndex(
+      (page) =>
+        currentQuestionIndex >= page.firstQuestionIndex &&
+        currentQuestionIndex < page.firstQuestionIndex + page.questions.length,
+    ),
+    0,
+  );
+  const currentPage = questionPages[currentPageIndex] ?? questionPages[0];
+  const currentQuestion = currentPage.questions[0] ?? questions[0];
+  const isQuestionGroupPage = currentPage.questionGroupPublicId !== null;
+  const usesGroupedNavigation = questionPages.some(
+    (page) => page.questionGroupPublicId !== null,
   );
   const answeredCount = Object.keys(savedAnswerByQuestion).length;
   const unansweredCount = Math.max(questions.length - answeredCount, 0);
@@ -2446,26 +2610,33 @@ export function StudentMockExamPage({
     currentServerTimeMillisecond ?? new Date(mockExam.serverNow).getTime(),
   );
 
-  function handleToggleLabel(label: string) {
+  function handleToggleLabel(question: MockExamPaperQuestion, label: string) {
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
     const nextSelectedLabels =
-      currentQuestion.questionType === "multi_choice"
-        ? includesLabel(selectedLabels, label)
-          ? selectedLabels.filter((selectedLabel) => selectedLabel !== label)
-          : [...selectedLabels, label]
-        : includesLabel(selectedLabels, label)
+      question.questionType === "multi_choice"
+        ? includesLabel(questionSelectedLabels, label)
+          ? questionSelectedLabels.filter(
+              (selectedLabel) => selectedLabel !== label,
+            )
+          : [...questionSelectedLabels, label]
+        : includesLabel(questionSelectedLabels, label)
           ? []
           : [label];
 
     setSelectedLabelsByQuestion({
       ...selectedLabelsByQuestion,
-      [currentQuestion.paperQuestionPublicId]: nextSelectedLabels,
+      [question.paperQuestionPublicId]: nextSelectedLabels,
     });
   }
 
-  function handleChangeTextAnswer(textAnswerValue: string) {
+  function handleChangeTextAnswer(
+    question: MockExamPaperQuestion,
+    textAnswerValue: string,
+  ) {
     setTextAnswerByQuestion({
       ...textAnswerByQuestion,
-      [currentQuestion.paperQuestionPublicId]: textAnswerValue,
+      [question.paperQuestionPublicId]: textAnswerValue,
     });
   }
 
@@ -2473,14 +2644,19 @@ export function StudentMockExamPage({
     mockExamPublicId: string,
     question: MockExamPaperQuestion,
   ) {
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+
     return {
       mockExamPublicId,
       paperQuestionPublicId: question.paperQuestionPublicId,
       selectedLabels: isOptionMockExamQuestion(question.questionType)
-        ? selectedLabels
+        ? questionSelectedLabels
         : [],
       textAnswer: isTextMockExamQuestion(question.questionType)
-        ? textAnswer
+        ? questionTextAnswer
         : null,
       operationId: `answer_operation_${crypto.randomUUID()}`,
       expectedRevision:
@@ -2509,16 +2685,19 @@ export function StudentMockExamPage({
   }
 
   function queuePendingAnswer(pendingAnswer: MockExamPendingAnswer) {
-    const nextPendingAnswerByQuestion = {
-      ...pendingAnswerByQuestion,
-      [pendingAnswer.paperQuestionPublicId]: pendingAnswer,
-    };
+    setPendingAnswerByQuestion((currentPendingAnswers) => {
+      const nextPendingAnswerByQuestion = {
+        ...currentPendingAnswers,
+        [pendingAnswer.paperQuestionPublicId]: pendingAnswer,
+      };
 
-    setPendingAnswerByQuestion(nextPendingAnswerByQuestion);
-    writePendingMockExamAnswers(
-      pendingAnswer.mockExamPublicId,
-      nextPendingAnswerByQuestion,
-    );
+      writePendingMockExamAnswers(
+        pendingAnswer.mockExamPublicId,
+        nextPendingAnswerByQuestion,
+      );
+
+      return nextPendingAnswerByQuestion;
+    });
     markAnswerSaved(pendingAnswer);
   }
 
@@ -2539,17 +2718,16 @@ export function StudentMockExamPage({
     });
   }
 
-  async function handleSaveAnswer(): Promise<boolean> {
+  async function handleSaveAnswer(
+    question: MockExamPaperQuestion,
+  ): Promise<boolean> {
     if (mockExam === null) {
       return false;
     }
 
     if (isRuntimeMode) {
       const storedSessionValue = getStoredStudentSessionToken();
-      const pendingAnswer = createPendingAnswer(
-        mockExam.publicId,
-        currentQuestion,
-      );
+      const pendingAnswer = createPendingAnswer(mockExam.publicId, question);
 
       try {
         const answerPayload = await sendMockExamAnswer(
@@ -2582,14 +2760,19 @@ export function StudentMockExamPage({
       }
     }
 
-    setSavedAnswerByQuestion({
-      ...savedAnswerByQuestion,
-      [currentQuestion.paperQuestionPublicId]: isOptionMockExamQuestion(
-        currentQuestion.questionType,
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+
+    setSavedAnswerByQuestion((currentSavedAnswers) => ({
+      ...currentSavedAnswers,
+      [question.paperQuestionPublicId]: isOptionMockExamQuestion(
+        question.questionType,
       )
-        ? selectedLabels
-        : [textAnswer],
-    });
+        ? questionSelectedLabels
+        : [questionTextAnswer],
+    }));
 
     return true;
   }
@@ -2638,18 +2821,79 @@ export function StudentMockExamPage({
   }
 
   async function handleNavigateToQuestion(questionIndex: number) {
-    const hasCurrentAnswer =
-      selectedLabels.length > 0 || textAnswer.trim().length > 0;
+    for (const question of currentPage.questions) {
+      const questionSelectedLabels =
+        selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+      const questionTextAnswer =
+        textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+      const questionAnswerSelection = isOptionMockExamQuestion(
+        question.questionType,
+      )
+        ? questionSelectedLabels
+        : [questionTextAnswer];
+      const hasAnswer =
+        questionSelectedLabels.length > 0 ||
+        questionTextAnswer.trim().length > 0;
+      const isQuestionSaved = areAnswerSelectionsEqual(
+        savedAnswerByQuestion[question.paperQuestionPublicId],
+        questionAnswerSelection,
+      );
 
-    if (hasCurrentAnswer && !isCurrentQuestionSaved) {
-      const didPersistCurrentAnswer = await handleSaveAnswer();
+      if (!hasAnswer || isQuestionSaved) {
+        continue;
+      }
+
+      const didPersistCurrentAnswer = await handleSaveAnswer(question);
 
       if (!didPersistCurrentAnswer) {
         return;
       }
     }
 
-    setCurrentQuestionIndex(questionIndex);
+    const targetPage = questionPages.find(
+      (page) =>
+        questionIndex >= page.firstQuestionIndex &&
+        questionIndex < page.firstQuestionIndex + page.questions.length,
+    );
+
+    if (targetPage !== undefined) {
+      setCurrentQuestionIndex(targetPage.firstQuestionIndex);
+    }
+  }
+
+  function renderMockExamAnswerPanel(question: MockExamPaperQuestion) {
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+    const questionAnswerSelection = isOptionMockExamQuestion(
+      question.questionType,
+    )
+      ? questionSelectedLabels
+      : [questionTextAnswer];
+    const isQuestionSaved = areAnswerSelectionsEqual(
+      savedAnswerByQuestion[question.paperQuestionPublicId],
+      questionAnswerSelection,
+    );
+
+    return isOptionMockExamQuestion(question.questionType) ? (
+      <MockExamQuestionPanel
+        question={question}
+        selectedLabels={questionSelectedLabels}
+        isSaved={isQuestionSaved}
+        onToggleLabel={(label) => handleToggleLabel(question, label)}
+        onSaveAnswer={() => void handleSaveAnswer(question)}
+      />
+    ) : (
+      <MockExamTextAnswerPanel
+        textAnswer={questionTextAnswer}
+        isSaved={isQuestionSaved}
+        onChangeTextAnswer={(textAnswerValue) =>
+          handleChangeTextAnswer(question, textAnswerValue)
+        }
+        onSaveAnswer={() => void handleSaveAnswer(question)}
+      />
+    );
   }
 
   async function generateRuntimeExamReport(
@@ -2814,16 +3058,31 @@ export function StudentMockExamPage({
     if (isRuntimeMode) {
       const storedSessionValue = getStoredStudentSessionToken();
       const answersToFlush = { ...pendingAnswerByQuestion };
-      const hasCurrentAnswer =
-        selectedLabels.length > 0 || textAnswer.trim().length > 0;
 
-      if (hasCurrentAnswer && !isCurrentQuestionSaved) {
-        const currentPendingAnswer = createPendingAnswer(
-          mockExam.publicId,
-          currentQuestion,
+      for (const question of questions) {
+        const questionSelectedLabels =
+          selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+        const questionTextAnswer =
+          textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+        const questionAnswerSelection = isOptionMockExamQuestion(
+          question.questionType,
+        )
+          ? questionSelectedLabels
+          : [questionTextAnswer];
+        const hasAnswer =
+          questionSelectedLabels.length > 0 ||
+          questionTextAnswer.trim().length > 0;
+        const isQuestionSaved = areAnswerSelectionsEqual(
+          savedAnswerByQuestion[question.paperQuestionPublicId],
+          questionAnswerSelection,
         );
-        answersToFlush[currentPendingAnswer.paperQuestionPublicId] =
-          currentPendingAnswer;
+
+        if (!hasAnswer || isQuestionSaved) {
+          continue;
+        }
+
+        const pendingAnswer = createPendingAnswer(mockExam.publicId, question);
+        answersToFlush[pendingAnswer.paperQuestionPublicId] = pendingAnswer;
       }
 
       const remainingPendingAnswers: Record<string, MockExamPendingAnswer> = {};
@@ -3049,7 +3308,9 @@ export function StudentMockExamPage({
         <div>
           <p className="text-text-secondary text-xs">进度</p>
           <p className="text-text-primary mt-1 text-sm font-semibold">
-            第 {currentQuestionIndex + 1} / {questions.length} 题
+            {usesGroupedNavigation
+              ? `第 ${currentPageIndex + 1} / ${questionPages.length} 组`
+              : `第 ${currentQuestionIndex + 1} / ${questions.length} 题`}
           </p>
         </div>
         <div>
@@ -3060,51 +3321,90 @@ export function StudentMockExamPage({
         </div>
       </div>
 
-      <article className="bg-surface ring-border space-y-5 rounded-xl p-4 shadow-sm ring-1">
-        <div className="space-y-2">
-          <div className="text-text-secondary flex items-center gap-2 text-xs">
-            <FileText className="size-3.5" aria-hidden="true" />
-            <span>{currentQuestion.paperSectionTitle}</span>
-            {currentQuestion.questionGroupTitle === null ? null : (
-              <span>{currentQuestion.questionGroupTitle}</span>
+      {isQuestionGroupPage ? (
+        <article
+          data-testid={`mock-exam-question-group-${currentPage.questionGroupPublicId}`}
+          data-public-id={currentPage.questionGroupPublicId ?? undefined}
+          className="bg-surface ring-border space-y-5 rounded-xl p-4 shadow-sm ring-1"
+        >
+          <div className="space-y-2">
+            <div className="text-text-secondary flex items-center gap-2 text-xs">
+              <FileText className="size-3.5" aria-hidden="true" />
+              <span>{currentPage.paperSectionTitle}</span>
+            </div>
+            <h2 className="font-heading text-text-primary text-lg font-semibold">
+              {currentPage.questionGroupTitle ?? "材料题组"}
+            </h2>
+            {currentPage.questionGroupTotalScore === null ? null : (
+              <p className="text-text-secondary text-sm">
+                题组共 {currentPage.questionGroupTotalScore} 分
+              </p>
             )}
           </div>
-          {currentQuestion.materialRichText === null ? null : (
+
+          {currentPage.materialRichText === null ? null : (
             <div className="border-border bg-background space-y-2 rounded-lg border p-3 text-sm leading-6">
               <p className="text-text-primary font-medium">
-                {currentQuestion.materialTitle ?? "材料"}
+                {currentPage.materialTitle ?? "材料"}
               </p>
               <StudentRichText
-                value={currentQuestion.materialRichText}
+                value={currentPage.materialRichText}
                 className="text-text-secondary"
               />
             </div>
           )}
-          <p className="font-heading text-text-primary text-lg leading-7 font-semibold">
-            {currentQuestion.stemRichText}
-          </p>
-          <p className="text-text-secondary text-sm">
-            本题 {currentQuestion.score} 分
-          </p>
-        </div>
 
-        {isOptionMockExamQuestion(currentQuestion.questionType) ? (
-          <MockExamQuestionPanel
-            question={currentQuestion}
-            selectedLabels={selectedLabels}
-            isSaved={isCurrentQuestionSaved}
-            onToggleLabel={handleToggleLabel}
-            onSaveAnswer={() => void handleSaveAnswer()}
-          />
-        ) : (
-          <MockExamTextAnswerPanel
-            textAnswer={textAnswer}
-            isSaved={isCurrentQuestionSaved}
-            onChangeTextAnswer={handleChangeTextAnswer}
-            onSaveAnswer={() => void handleSaveAnswer()}
-          />
-        )}
-      </article>
+          <div className="space-y-6">
+            {currentPage.questions.map((question, questionIndex) => (
+              <section
+                key={question.paperQuestionPublicId}
+                data-public-id={question.paperQuestionPublicId}
+                className="border-border space-y-4 border-t pt-5 first:border-t-0 first:pt-0"
+              >
+                <div className="space-y-2">
+                  <p className="text-brand-primary text-xs font-medium">
+                    子题 {questionIndex + 1} / {currentPage.questions.length}
+                  </p>
+                  <p className="font-heading text-text-primary text-lg leading-7 font-semibold">
+                    {question.stemRichText}
+                  </p>
+                  <p className="text-text-secondary text-sm">
+                    本题 {question.score} 分
+                  </p>
+                </div>
+                {renderMockExamAnswerPanel(question)}
+              </section>
+            ))}
+          </div>
+        </article>
+      ) : (
+        <article className="bg-surface ring-border space-y-5 rounded-xl p-4 shadow-sm ring-1">
+          <div className="space-y-2">
+            <div className="text-text-secondary flex items-center gap-2 text-xs">
+              <FileText className="size-3.5" aria-hidden="true" />
+              <span>{currentQuestion.paperSectionTitle}</span>
+            </div>
+            {currentQuestion.materialRichText === null ? null : (
+              <div className="border-border bg-background space-y-2 rounded-lg border p-3 text-sm leading-6">
+                <p className="text-text-primary font-medium">
+                  {currentQuestion.materialTitle ?? "材料"}
+                </p>
+                <StudentRichText
+                  value={currentQuestion.materialRichText}
+                  className="text-text-secondary"
+                />
+              </div>
+            )}
+            <p className="font-heading text-text-primary text-lg leading-7 font-semibold">
+              {currentQuestion.stemRichText}
+            </p>
+            <p className="text-text-secondary text-sm">
+              本题 {currentQuestion.score} 分
+            </p>
+          </div>
+          {renderMockExamAnswerPanel(currentQuestion)}
+        </article>
+      )}
 
       <div className="bg-surface ring-border space-y-3 rounded-xl p-4 shadow-sm ring-1">
         <div className="flex items-center gap-2">
@@ -3116,45 +3416,63 @@ export function StudentMockExamPage({
             答题卡
           </h2>
         </div>
-        <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
-          {questions.map((question, questionIndex) => {
-            const isSaved =
-              savedAnswerByQuestion[question.paperQuestionPublicId] !==
-              undefined;
-            const isCurrent = questionIndex === currentQuestionIndex;
+        <div className="space-y-3">
+          {questionPages.map((questionPage, questionPageIndex) => (
+            <div key={questionPage.pageKey} className="space-y-2">
+              {questionPage.questionGroupTitle === null ? null : (
+                <p className="text-text-secondary text-xs font-medium">
+                  {questionPage.paperSectionTitle} ·{" "}
+                  {questionPage.questionGroupTitle}
+                </p>
+              )}
+              <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
+                {questionPage.questions.map((question, pageQuestionIndex) => {
+                  const questionIndex =
+                    questionPage.firstQuestionIndex + pageQuestionIndex;
+                  const isSaved =
+                    savedAnswerByQuestion[question.paperQuestionPublicId] !==
+                    undefined;
+                  const isCurrent = questionPageIndex === currentPageIndex;
 
-            return (
-              <button
-                key={question.paperQuestionPublicId}
-                type="button"
-                onClick={() => void handleNavigateToQuestion(questionIndex)}
-                className={`h-10 rounded-lg text-sm font-semibold transition-transform active:scale-[0.98] ${
-                  isCurrent
-                    ? "bg-primary text-primary-foreground"
-                    : isSaved
-                      ? "bg-success/10 text-success"
-                      : "border-border text-text-primary border bg-transparent"
-                }`}
-              >
-                题号 {questionIndex + 1}
-              </button>
-            );
-          })}
+                  return (
+                    <button
+                      key={question.paperQuestionPublicId}
+                      type="button"
+                      onClick={() =>
+                        void handleNavigateToQuestion(questionIndex)
+                      }
+                      className={`h-10 rounded-lg text-sm font-semibold transition-transform active:scale-[0.98] ${
+                        isCurrent
+                          ? "bg-primary text-primary-foreground"
+                          : isSaved
+                            ? "bg-success/10 text-success"
+                            : "border-border text-text-primary border bg-transparent"
+                      }`}
+                    >
+                      题号 {questionIndex + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          disabled={currentQuestionIndex === questions.length - 1}
+          disabled={currentPageIndex === questionPages.length - 1}
           onClick={() =>
             void handleNavigateToQuestion(
-              Math.min(currentQuestionIndex + 1, questions.length - 1),
+              questionPages[
+                Math.min(currentPageIndex + 1, questionPages.length - 1)
+              ].firstQuestionIndex,
             )
           }
           className="border-border text-text-primary flex h-10 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          下一题
+          {usesGroupedNavigation ? "下一组" : "下一题"}
         </button>
         <button
           type="button"

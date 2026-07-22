@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
+  currentTaskId: p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -280,6 +280,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
     - p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
     - p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
+    - p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -443,25 +444,26 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21: closed
     p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21: closed
     p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21: closed
-    p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21: in_progress
+    p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21: closed
+    p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
-    title: Published paper snapshot grouped exam_report presentation
-    phase: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
+  - id: p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21
+    title: Published paper snapshot grouped mock_exam navigation
+    phase: p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0098_grouped_exam_report_presentation_partial
-    branch: fix/published-paper-snapshot-grouped-learning-ui
-    objective: group immutable exam_report question results by paper_section and question_group identity, render one group heading and a display-only subtotal, and preserve standalone and legacy reports
+    productClosureContribution: F-0098_final_grouped_mock_navigation_and_static_acceptance
+    branch: fix/published-paper-snapshot-grouped-mock-navigation
+    objective: render immutable question_group as one mock_exam navigation page with shared material once and independent ordered child answers, then run final static F-0098 acceptance
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-05
     findingIds:
       - F-0098
     executionStage: validated_reviewed_conditional_closeout_ready
-    findingStatus: open_partitioned
+    findingStatus: ready_for_static_closeout
     riskBoundary:
-      category: low_risk_learner_report_read_projection
+      category: low_risk_learner_mock_exam_navigation_projection
       approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
@@ -469,46 +471,48 @@ activeTasks:
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: immutable_exam_report_snapshot_to_StudentExamReportPage_parser_group_projection_and_direct_UI_regression
+      chain: nested_published_snapshot_shared_reader_to_mock_exam_question_pages_answer_state_autosave_retry_and_answer_navigator
       coreFiles: 4
-      contingencyFiles: 1
+      contingencyFiles: 5
+      preflightTestFiles: 5
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      confirmedResidualRootCause: report_results_now_preserve_group_identity_but_the_student_UI_still_flattens_every_child_and_repeats_the_group_label
+      confirmedResidualRootCause: mock_exam_extracts_group_identity_but_flattens_it_back_into_repeated_one_question_pages_and_a_flat_answer_navigator
     expectedAcceptance:
-      - each_question_group_public_identity_renders_one_container_heading
-      - group_score_subtotal_is_computed_from_existing_result_facts_without_changing_scoring
-      - standalone_and_legacy_results_remain_visible_in_stable_order
-      - same_title_distinct_group_public_ids_do_not_merge
+      - one_question_group_public_identity_forms_one_navigation_page_with_material_rendered_once
+      - every_ordered_child_keeps_independent_public_identity_answer_revision_autosave_retry_and_submit_semantics
+      - standalone_and_legacy_questions_remain_compatible
+      - malformed_conflicting_or_noncontiguous_group_identity_fails_closed_without_reordering
+      - final_snapshot_practice_mock_report_static_acceptance_matrix_passes
       - no_server_snapshot_scoring_schema_permission_dependency_or_mechanism_change
-      - F0098_remains_open_only_for_grouped_mock_exam_navigation_and_final_independent_acceptance
+      - F0098_closes_without_claiming_organization_training_or_runtime_database_acceptance
     validationEvidence:
-      tddRed: pass_group_heading_missing_noncontiguous_identity_reordered_and_nondecimal_score_coerced_before_fixes
-      focused: pass_1_file_46_tests
+      tddRed: pass_flat_question_progress_and_repeated_material_before_group_page_implementation_then_missing_group_subtotal_before_strict_total_score_projection
+      focused: pass_5_files_129_tests
       lint: pass_component_and_direct_test
       typecheck: pass
       build: pass_100_static_pages_with_preexisting_nft_trace_warning_only
       formatAndDiff: pass
-      adversarialReview: pass_public_identity_not_title_is_authoritative_conflicting_incomplete_or_noncontiguous_groups_fail_closed_without_reordering_and_invalid_subtotals_are_not_fabricated
+      adversarialReview: pass_public_group_identity_is_authoritative_conflicting_incomplete_or_noncontiguous_groups_fail_closed_without_reordering_shared_material_renders_once_each_child_keeps_independent_answer_revision_autosave_submit_and_durable_retry_semantics_and_no_server_permission_or_persistence_scope_changed
     closeoutProjection:
       current: validated_reviewed_conditional_closeout_ready
       triggers: TDD_green_validation_main_thread_review_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-      successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0098_grouped_mock_exam_navigation
+      successProjection: F0098_closed_single_commit_ff_only_master_canonical_push_sync_cleanup_then_next_RC05_residual_disposition
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     executionMetrics:
       mandatoryFreshApprovals: 0
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: 9m
+      productValueTime: 13m
       mechanismOverhead: 4m
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+      taskId: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
       findingId: F-0098
-      productClosureContribution: F-0098_versioned_nested_snapshot_and_shared_consumer_foundation_partial
-      commit: 88555861039c19a3e1e92f64ed5b0323b35a2266
+      productClosureContribution: F-0098_grouped_exam_report_presentation_partial
+      commit: 960c88b9ee8544ff49b58e9a3e35495bb34cd01b
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       masterOriginSync: pass
