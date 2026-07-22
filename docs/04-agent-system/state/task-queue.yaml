@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
+  currentTaskId: p1-prerequisite-supply-chain-high-remediation-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -294,7 +294,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-resource-private-download-2026-07-22
     - p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
     - p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
+    - p1-prerequisite-supply-chain-high-remediation-2026-07-22
   completedTaskIds:
+    - p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
@@ -484,12 +486,109 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22: closed
     p1-remediation-rc-06-resource-private-download-2026-07-22: closed
     p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: closed
-    p1-prerequisite-rc-06-officeparser-dependency-2026-07-22: in_progress
+    p1-prerequisite-rc-06-officeparser-dependency-2026-07-22: closed
+    p1-prerequisite-supply-chain-high-remediation-2026-07-22: in_progress
 activeTasks:
+  - id: p1-prerequisite-supply-chain-high-remediation-2026-07-22
+    title: P1 supply-chain high advisory remediation
+    phase: p1-prerequisite-supply-chain-high-remediation-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: dependency_supply_chain_remediation
+    productClosureContribution: none_prerequisite_only
+    branch: fix/supply-chain-high-remediation
+    objective: remove the approved Better Auth brace-expansion and fast-uri high advisories and strictly assess the remaining Next sharp advisory
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0082
+    executionStage: configuration_security_TDD_and_supply_chain_validation
+    findingStatus: F0082_remains_open
+    riskBoundary:
+      category: dependency_supply_chain_remediation_and_bounded_configuration_security_contraction
+      approvalId: user-p1-supply-chain-high-remediation-2026-07-22
+      amendmentApprovalId: guardian-sharp-optimizer-unreachable-amendment-2026-07-22
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: package_manifest_to_Better_Auth_patch_closure_and_shadcn_transitive_brace_expansion_fast_uri_plus_Next_optional_sharp_reachability
+      coreFiles: 7
+      contingencyFiles: 0
+      preflightTestFiles: 7
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: four_patchable_advisories_and_one_sharp_advisory_requiring_untrusted_decode_reachability_proof
+    expectedAcceptance:
+      - exact_better_auth_and_drizzle_adapter_1_6_13
+      - brace_expansion_1_1_16_and_5_0_7_plus_fast_uri_3_1_4_without_direct_or_override
+      - four_target_high_advisories_absent_and_no_new_moderate_high_critical
+      - actual_Next_normalization_allows_only_build_controlled_static_media_and_rejects_API_user_local_and_remote_sources
+      - sharp_only_time_bounded_residual_owner_review_deadline_and_early_triggers_recorded
+      - focused_auth_tests_typecheck_build_format_diff_state_and_kernel_green
+    auditRemediation:
+      baselineHigh: 5
+      requiredRemovedAdvisories: 4
+      onlyConditionalResidual: GHSA-f88m-g3jw-g9cj
+      status: four_removed_no_new_advisory_sharp_configuration_contraction_validated_pending_kernel
+    sharpAssessment:
+      nextVersion: 16.2.6
+      sharpVersion: 0.34.5
+      nextDeclaredRange: ^0.34.5
+      status: security_closure_validated_pending_final_kernel_and_closeout
+      approvalId: guardian-sharp-optimizer-unreachable-amendment-2026-07-22
+      normalizedAllowedLocalSource: /_next/static/media/**_with_empty_search_only
+      remoteSources: all_rejected
+      owner: current_P1_Goal_and_repository_maintainer
+      reviewBy: 2026-08-21
+      earlyTriggers: supported_Next_allows_sharp_gte_0_35_or_image_usage_config_public_path_or_regression_changes
+      validation:
+        tddRed: 4_expected_failures_of_10_on_unrestricted_API_sources
+        tddGreen: 10_of_10
+        focusedAuth: 5_files_60_tests
+        focusedConfigQr: 3_files_17_tests
+        auditDelta: four_high_removed_zero_added_only_controlled_sharp_high_remains
+        registry: 567_signatures_and_109_attestations_verified
+        licenses: no_unknown_custom_or_unlicensed_entry
+        typecheck: pass
+        build: pass_with_preexisting_NFT_process_cwd_warning_outside_scope
+        adversarialReview: pass_exact_seven_files_optimizer_gate_and_dependency_delta
+    closeoutProjection:
+      current: configuration_security_TDD_and_supply_chain_validation
+      triggers: four_advisories_removed_sharp_contract_satisfied_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: supply_chain_prerequisite_closed_then_F0082_product_JIT
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    approvalEnvelope:
+      delegationId: current-user-delegated-p1-guardian-v1-2026-07-21
+      approvalId: user-p1-supply-chain-high-remediation-2026-07-22
+      amendmentApprovalId: guardian-sharp-optimizer-unreachable-amendment-2026-07-22
+      requestFingerprint: 95a53adb7261e13ed514bb51f3934e285b7b05dca214f30324bfc9d64f07705b
+      baseSha: 20f8b97f0f0579fb9df3bbdc665fff95eb5abe18
+      conditionalCloseout: true
+    executionMetrics:
+      mandatoryFreshApprovals: 2_user_supply_chain_authorization_plus_guardian_configuration_amendment
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: dependency_security_patch_and_sharp_reachability_assessment
+      mechanismOverhead: C2_contract_materialization
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
+      findingIds:
+        - F-0082
+      commit: 20f8b97f0f0579fb9df3bbdc665fff95eb5abe18
+      status: dependency_prerequisite_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: open
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
     title: Office document parser dependency prerequisite
     phase: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: dependency_prerequisite
     productClosureContribution: none_prerequisite_for_F0082
@@ -499,7 +598,7 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-06
     findingIds:
       - F-0082
-    executionStage: validated_ready_for_kernel_commit
+    executionStage: dependency_prerequisite_closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: open_partitioned
     riskBoundary:
       category: dependency

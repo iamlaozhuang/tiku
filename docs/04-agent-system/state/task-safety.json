@@ -1,13 +1,15 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-prerequisite-rc-06-officeparser-dependency-2026-07-22",
-  "objective": "Introduce the exact officeparser 7.4.0 runtime dependency as an isolated prerequisite for the F-0082 DOCX, PPTX, and extractable-PDF conversion partition, without importing it into product code, changing runtime behavior, or claiming any F-0082 product closure.",
+  "taskId": "p1-prerequisite-supply-chain-high-remediation-2026-07-22",
+  "objective": "Remediate the four approved Better Auth, brace-expansion, and fast-uri high advisories through exact direct patch pins and normal compatible transitive resolution, then either prove the remaining Next sharp advisory unreachable under the current product configuration as a time-bounded residual or stop for a precise amendment; do not implement F-0082 product behavior or claim any product finding closed.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
     "package.json",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "next.config.ts",
+    "tests/unit/p1-next-image-optimizer-unreachable.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -16,60 +18,160 @@
     ".husky/**",
     ".github/workflows/**",
     ".env*",
-    "drizzle/**",
     "src/**",
-    "tests/**",
+    "all tests except tests/unit/p1-next-image-optimizer-unreachable.test.ts; tests/unit/next-dev-origin-config.test.ts and QR regressions remain read-only",
+    "drizzle/**",
     "schema/migration or real database/data",
     "Provider/external service/secret/env/deployment/PR/force-push/non-canonical remote/Subagent/kernel/guard/smoke",
-    "any product implementation, converter invocation, OCR, network fetch, background worker, F-0082 closure, or other finding"
+    "officeparser product import, converter, OCR, network fetch, Next or shadcn direct upgrade, override, resolution, patch-package, fork, audit ignore, or other dependency"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
     "package.json",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "next.config.ts",
+    "tests/unit/p1-next-image-optimizer-unreachable.test.ts"
   ],
   "contingencyFiles": [],
-  "authoritativeChainEvidence": {
-    "requirement": "US-05-03 and RAG module 6.3 require DOCX, Markdown, PPTX, and extractable-text PDF conversion; OCR is excluded.",
-    "currentRuntime": "local-text-document-parser returns converter_unavailable for DOCX, PPTX, and PDF, while package.json contains no document conversion library.",
-    "dependencyDecision": "officeparser 7.4.0 provides one project-wrappable Node API for DOCX, PPTX, and PDF parsing plus Markdown generation, AbortSignal cancellation, magic-based binary type detection, and explicit ZIP decompression limits.",
-    "securityBoundary": "The package documents an inherently large untrusted-file attack surface and requires caller-owned validation, limits, and isolation; this prerequisite does not invoke the package and the later product task must keep OCR, remote workers, external fetches, and raw third-party output outside the boundary.",
-    "rootCause": "F-0082 cannot implement its format-conversion partition from the current installed baseline without an approved maintained parser dependency; the dependency gate requires an isolated commit before product integration."
+  "baseSha": "20f8b97f0f0579fb9df3bbdc665fff95eb5abe18",
+  "branch": "fix/supply-chain-high-remediation",
+  "approvedRemediation": {
+    "authorizationId": "user-p1-supply-chain-high-remediation-2026-07-22",
+    "directPins": {
+      "better-auth": "1.6.13",
+      "@better-auth/drizzle-adapter": "1.6.13"
+    },
+    "transitivePatches": {
+      "brace-expansion": ["1.1.16", "5.0.7"],
+      "fast-uri": ["3.1.4"]
+    },
+    "resolvedByNormalSemverProbe": "pnpm_10_34_4_update_named_transitives_depth_Infinity_lockfile_only_selected_the_exact_patched_versions; final lock retains only those generated target entries and verifies with frozen install",
+    "requiredRemovedAdvisories": [
+      "GHSA-86j7-9j95-vpqj",
+      "GHSA-3jxr-9vmj-r5cp",
+      "GHSA-4c8g-83qw-93j6",
+      "GHSA-v2hh-gcrm-f6hx"
+    ]
   },
-  "dependencyIntroduction": {
-    "humanApproval": "user-f0082-officeparser-dependency-2026-07-22",
-    "package": "officeparser",
-    "versionRange": "7.4.0",
-    "changeType": "add_runtime_dependency_exact_version",
-    "purpose": "DOCX, PPTX, and extractable-text PDF to controlled Markdown conversion for F-0082",
-    "futureImportBoundary": "src/server/services/local-text-document-parser.ts_or_a_project_owned_resource_document_converter_adapter_only",
-    "licenseCompatibility": "MIT_compatible_with_repository_use",
-    "alternativeConsidered": "separate mammoth plus pdfjs-dist plus a PPTX parser",
-    "alternativeRejected": "multiple parser APIs and transitive boundaries increase integration and review surface while still leaving PPTX on a less coherent implementation path",
-    "abandonmentRisk": "single_maintainer_and_large_parser_surface_require_exact_pin_wrapper_contract_and_future_replacement_isolation",
-    "securityMaintenanceRisk": "untrusted_archive_and_PDF_parsing_can_exhaust_CPU_or_memory; later use must set strict decompression limits, disable OCR and external access, enforce timeout and magic match, reject empty or unsafe output, and keep F-0082 open if process isolation is not proven",
-    "compatibilityImpact": "Effective runtime floor is Node_gte_22_13_0 because officeparser transitive file-type_22_0_1 and pdfjs-dist_6_1_200 require it; repository package-manager metadata already requires Node_gte_22_13, the approved local build runtime is Node_22_14_0, and this task makes no unverified deployment target claim; server-only dependency must not enter the browser bundle",
-    "bundleRuntimeImpact": "server_dependency_with_approximately_12MB_unpacked_package_plus_five_transitive_dependencies_including_pdfjs_dist_and_tesseract_js; OCR_and_remote_worker_paths_must_remain_disabled",
-    "fallbackPolicy": "fail_closed_to_conversion_failed_without_fabricated_Markdown; no alternate external converter or OCR",
-    "validation": "exact_version_integrity_provenance_lifecycle_and_production_license_review_import_smoke_prod_high_audit_Node_22_14_typecheck_build_format_and_diff"
+  "sharpAssessment": {
+    "advisory": "GHSA-f88m-g3jw-g9cj",
+    "currentVersion": "0.34.5",
+    "nextVersion": "16.2.6",
+    "nextDeclaredRange": "^0.34.5",
+    "status": "security_closure_validated_pending_final_kernel_and_closeout",
+    "vulnerablePath": "public contact-config QR image -> unrestricted local Next image optimizer URL -> sharp 0.34.5 untrusted byte decode",
+    "securityInvariant": "after actual Next normalization only build-controlled /_next/static/media/** with empty search may match locally; every API or other user-selected local source and every remote source must be rejected before internal fetch or sharp decode",
+    "approvalId": "guardian-sharp-optimizer-unreachable-amendment-2026-07-22",
+    "requestFingerprint": "95a53adb7261e13ed514bb51f3934e285b7b05dca214f30324bfc9d64f07705b",
+    "approvedConfiguration": {
+      "localPatterns": [],
+      "remotePatterns": []
+    },
+    "controlledResidual": {
+      "allowedOnlyAfterGreen": true,
+      "status": "eligible_after_focused_audit_typecheck_build_and_actual_normalization_green_pending_final_kernel",
+      "owner": "current P1 Goal / repository maintainer",
+      "reviewBy": "2026-08-21",
+      "earlyTriggers": [
+        "a supported Next release permits sharp >=0.35",
+        "repository adds next/image, next/legacy/image, or direct sharp product usage",
+        "images configuration is widened",
+        "a public or user-uploaded image path is added",
+        "the optimizer-unreachable regression fails"
+      ]
+    }
+  },
+  "verificationEvidence": {
+    "tddRed": "new optimizer boundary test: 4 expected failures of 10 because normalized local pattern was ** and API/QR sources passed parameter validation",
+    "tddGreen": "10 of 10 optimizer boundary tests passed after exact images localPatterns and remotePatterns contraction",
+    "focused": {
+      "auth": "5 files / 60 tests passed",
+      "configurationAndQr": "3 files / 17 tests passed"
+    },
+    "audit": {
+      "command": "corepack.cmd pnpm@10.34.4 audit --prod --json and --audit-level high",
+      "baseline": "5 high / 1 moderate / 1 low",
+      "candidate": "1 high / 1 moderate / 1 low",
+      "removed": [
+        "GHSA-86j7-9j95-vpqj",
+        "GHSA-3jxr-9vmj-r5cp",
+        "GHSA-4c8g-83qw-93j6",
+        "GHSA-v2hh-gcrm-f6hx"
+      ],
+      "added": [],
+      "onlyHighResidual": "GHSA-f88m-g3jw-g9cj via next -> sharp 0.34.5",
+      "baselineReportSha256": "983a5ed3a7ced5251e8bb26a9b9fbff4ef6dee94943aa107f592101a026df423",
+      "candidateReportSha256": "72b0009b58b9fba630dc377508cddcfe5b03f83f3d99986bbb7b401786f6290a"
+    },
+    "registry": "npm audit signatures: 567 packages verified and 109 attestations verified; five changed package versions expose registry integrity/signatures and Better Auth packages expose SLSA provenance",
+    "licenses": "production tree contains only reviewed SPDX licenses and no unknown/custom/unlicensed entry",
+    "typecheck": "tsc --noEmit exit 0",
+    "build": "Next production build exit 0; existing outputFileTracingRoot process.cwd NFT warning remains outside approved scope and does not alter optimizer gate",
+    "adversarialReview": "pass: exact seven-file envelope; actual Next normalization permits only build-controlled static media with empty search; API, query, remote and recursive optimizer sources fail before fetch/decode; native QR regressions pass; no product Next image or sharp import; only two exact direct dependency pins, approved Better Auth closure and three exact transitive patch entries changed; pnpm policy unchanged",
+    "finalKernel": "pending"
   },
   "validationCommands": [
     {
-      "name": "officeparser-typecheck",
+      "name": "supply-chain-auth-focused-test",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.34.4",
+        "exec",
+        "vitest",
+        "run",
+        "src/server/auth/local-session-runtime.test.ts",
+        "src/server/services/employee-import-command-crypto.test.ts",
+        "src/server/services/session-service.test.ts",
+        "tests/unit/local-acceptance-session-bootstrap.test.ts",
+        "tests/unit/phase-11-auth-session-account-hardening.test.ts",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "name": "sharp-optimizer-unreachable-focused-test",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.34.4",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/p1-next-image-optimizer-unreachable.test.ts",
+        "tests/unit/next-dev-origin-config.test.ts",
+        "tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "name": "supply-chain-targeted-lint",
+      "kind": "lint",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.34.4",
+        "exec",
+        "eslint",
+        "next.config.ts",
+        "tests/unit/p1-next-image-optimizer-unreachable.test.ts",
+        "tests/unit/next-dev-origin-config.test.ts"
+      ]
+    },
+    {
+      "name": "supply-chain-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "officeparser-build",
+      "name": "supply-chain-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "officeparser-format",
+      "name": "supply-chain-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -84,14 +186,15 @@
       ]
     },
     {
-      "name": "officeparser-diff-check",
+      "name": "supply-chain-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
     }
   ],
   "approvalSources": {
-    "dependency": "user-f0082-officeparser-baseline-delta-amendment-2026-07-22",
+    "dependency": "user-p1-supply-chain-high-remediation-2026-07-22",
+    "configurationSecurity": "guardian-sharp-optimizer-unreachable-amendment-2026-07-22",
     "database": null,
     "permission": null,
     "deployment": null,
@@ -106,100 +209,32 @@
     "dependencyOrMechanismChange": true
   },
   "conditionalCloseout": true,
-  "approvalEnvelope": {
-    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
-    "approvalId": "user-f0082-officeparser-dependency-2026-07-22",
-    "amendmentApprovalId": "user-f0082-officeparser-baseline-delta-amendment-2026-07-22",
-    "approvalFingerprint": "9d99413532f2790b3989c083d4bd062fa157c1368b60586ae952730838a2b2fd",
-    "baseSha": "c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1",
-    "requestedOperations": [
-      "add_exact_officeparser_7_4_0_dependency",
-      "refresh_pnpm_lockfile",
-      "validate",
-      "one_reviewable_dependency_only_commit",
-      "ff_only_master",
-      "canonical_origin_master_push",
-      "sync_and_cleanup"
-    ],
-    "conditionalCloseout": true,
-    "effectiveRuntimeFloor": "Node.js >=22.13.0",
-    "approvedLocalRuntime": "Node.js 22.14.0",
-    "failureConditions": [
-      "base_or_origin_drift",
-      "file_outside_five_file_envelope",
-      "officeparser_not_exactly_7_4_0",
-      "effective_Node_floor_not_proven",
-      "high_or_critical_production_advisory",
-      "unacceptable_production_license",
-      "unexpected_lifecycle_script_or_source",
-      "product_import_or_bundle_entry",
-      "risk_expansion"
-    ]
-  },
-  "baselineDeltaAuditGate": {
-    "status": "passed",
-    "command": "corepack.cmd pnpm@10.34.4 audit --prod --audit-level high",
-    "baseSha": "c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1",
-    "allowedExistingAdvisories": [
-      "GHSA-86j7-9j95-vpqj",
-      "GHSA-3jxr-9vmj-r5cp",
-      "GHSA-4c8g-83qw-93j6",
-      "GHSA-v2hh-gcrm-f6hx",
-      "GHSA-f88m-g3jw-g9cj"
-    ],
-    "candidateRequirement": "no new high or critical advisory, affected package, dependency path, or severity increase; officeparser 27-package closure has zero high or critical",
-    "forbiddenResponse": "no ignore, override, audit configuration exclusion, threshold downgrade, report editing, or claim that repository supply chain is clean",
-    "followUpTask": "p1-prerequisite-supply-chain-high-remediation-2026-07-22",
-    "evidence": {
-      "baselineExitCode": 1,
-      "candidateExitCode": 1,
-      "normalizedHighCriticalExactMatch": true,
-      "baselineReportSha256": "53a15b9049e71477528d3ca01d286882dae9ace376e8e554ae320a27c20a7938",
-      "candidateReportSha256": "7f3281ab440b756b4fe3a89137b21e8d10ed8f71e49d33ad6e4b26e6b9f41d75",
-      "reportDirectory": "C:/Users/jzzhu/AppData/Local/Temp/tiku-f0082-officeparser-audit-fd250a5986e8426e9f6092f6d9687d87",
-      "baselineProductionDependencyCount": 574,
-      "candidateProductionDependencyCount": 611,
-      "officeparserHighCriticalCount": 0
-    }
-  },
-  "validationEvidence": {
-    "exactVersionList": "pass_officeparser_7_4_0_registry_npmjs",
-    "importLicenseSmoke": "pass_MIT_and_OfficeParser_parseOffice_function",
-    "registrySupplyChain": "pass_1766_registry_signatures_and_340_attestations_verified; officeparser_SLSA_provenance_and_lock_integrity_match",
-    "dependencyClosure": "pass_37_new_lock_entries_all_reachable_from_officeparser; 2_shared_existing_entries; 0_modified_or_removed_existing_entries",
-    "productionLicenses": "pass_27_installed_logical_closure_only_MIT_Apache_2_0_BSD_2_Clause_BSD_3_Clause",
-    "lifecycle": "pass_install_used_ignore_scripts; tesseract_opencollective_postinstall_identified_and_not_executed; no_product_runtime_invocation",
-    "runtimeCompatibility": "pass_Node_22_14_0_satisfies_effective_Node_gte_22_13_0_floor",
-    "baselineDeltaAudit": "pass_same_five_pre_existing_high_zero_critical_and_no_officeparser_path",
-    "typecheck": "pass_exit_0",
-    "build": "pass_exit_0_with_pre_existing_next_NFT_dynamic_path_warning_not_related_to_officeparser",
-    "formatDiffState": "pass",
-    "productAndBundleImportScan": "pass_zero_officeparser_matches_in_src_tests_or_next_build_output"
-  },
-  "adversarialReview": {
-    "status": "pass",
-    "conclusion": "dependency-only five-file envelope; exact pin; lock changes are only the complete officeparser closure; no product import, OCR, network, runtime behavior, new advisory, existing resolution mutation, or F-0082 closure claim",
-    "residual": "five pre-existing high advisories remain and are reserved for p1-prerequisite-supply-chain-high-remediation-2026-07-22"
-  },
-  "resumeAnchor": {
-    "findingIds": ["F-0082"],
-    "task": "After the isolated dependency prerequisite closes, materialize the separate F-0082 format-authenticity and office-conversion product task; keep durable uploaded/converting/retry/delete and parser process-isolation residuals explicit unless independently implemented and validated.",
-    "condition": "no product implementation in this dependency commit and no OCR, external call, schema, real database, permission, deployment, mechanism, or other finding change"
-  },
+  "closeoutConditions": [
+    "four approved advisories absent",
+    "no new moderate high or critical advisory",
+    "no new direct dependency",
+    "sharp is the only high residual and actual Next normalization rejects every API user local and remote source before fetch or decode",
+    "focused tests typecheck build format diff state supply-chain review and kernel pass",
+    "one dependency-supply-chain commit ff-only canonical push sync and cleanup"
+  ],
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22",
-    "findingIds": ["F-0037"],
-    "commit": "c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1",
-    "status": "foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "findingStatus": "open_partitioned",
+    "taskId": "p1-prerequisite-rc-06-officeparser-dependency-2026-07-22",
+    "commit": "20f8b97f0f0579fb9df3bbdc665fff95eb5abe18",
+    "status": "dependency_prerequisite_closed_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "findingIds": ["F-0082"],
+    "findingStatus": "open",
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true,
     "worktreeCleanup": true
   },
+  "resumeAnchor": {
+    "findingIds": ["F-0082"],
+    "task": "After this independent supply-chain prerequisite closes, materialize the F-0082 format-authenticity and office-conversion product task without claiming durable lifecycle, retry, delete, parser isolation, or full finding closure unless independently implemented and validated."
+  },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "user-f0082-officeparser-baseline-delta-amendment-2026-07-22"
+    "approvalId": "user-p1-supply-chain-high-remediation-2026-07-22"
   }
 }
