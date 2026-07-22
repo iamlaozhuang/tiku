@@ -93,6 +93,8 @@ type LocalResourceDetailDto = {
   resource: AdminResourceOpsSummaryDto;
   localOnly: boolean;
   markdownContent: string | null;
+  sourceContentHash: string | null;
+  markdownContentHash: string | null;
 };
 
 type RebuildState =
@@ -128,6 +130,9 @@ type MarkdownReviewState =
       status: "idle";
     }
   | {
+      expectedSourceContentHash: string;
+      expectedMarkdownContentHash: string;
+      expectedUpdatedAt: string;
       markdownContent: string;
       resource: AdminResourceOpsSummaryDto;
       status: "editing" | "submitting";
@@ -621,11 +626,16 @@ async function getLocalResourceDetail(
 
 async function patchLocalResourceMarkdown(
   resourcePublicId: string,
-  markdownContent: string,
+  command: {
+    markdownContent: string;
+    expectedSourceContentHash: string;
+    expectedMarkdownContentHash: string;
+    expectedUpdatedAt: string;
+  },
   sessionToken: string,
 ): Promise<AdminResourceOpsSummaryDto | null> {
   const response = await fetch(createResourcePath(resourcePublicId), {
-    body: JSON.stringify({ markdownContent }),
+    body: JSON.stringify(command),
     headers: {
       ...createAdminAuthHeaders(sessionToken),
       "content-type": "application/json",
@@ -1187,7 +1197,21 @@ export function AdminResourceKnowledgeManagement() {
       return;
     }
 
+    if (
+      resourceDetail.sourceContentHash === null ||
+      resourceDetail.markdownContentHash === null
+    ) {
+      setToastMessage({
+        message: "解析草稿来源不可验证，请重新上传",
+        tone: "error",
+      });
+      return;
+    }
+
     setMarkdownReviewState({
+      expectedSourceContentHash: resourceDetail.sourceContentHash,
+      expectedMarkdownContentHash: resourceDetail.markdownContentHash,
+      expectedUpdatedAt: resourceDetail.resource.updatedAt,
       markdownContent: resourceDetail.markdownContent,
       resource: resourceDetail.resource,
       status: "editing",
@@ -1221,7 +1245,14 @@ export function AdminResourceKnowledgeManagement() {
     try {
       const savedResource = await patchLocalResourceMarkdown(
         markdownReviewState.resource.publicId,
-        markdownReviewState.markdownContent,
+        {
+          markdownContent: markdownReviewState.markdownContent,
+          expectedSourceContentHash:
+            markdownReviewState.expectedSourceContentHash,
+          expectedMarkdownContentHash:
+            markdownReviewState.expectedMarkdownContentHash,
+          expectedUpdatedAt: markdownReviewState.expectedUpdatedAt,
+        },
         sessionToken,
       );
 

@@ -194,6 +194,30 @@ export type ResourcePublishMarkdownResult =
       reason: "resource_not_publishable" | "missing_markdown_content";
     };
 
+export type UpdateResourceMarkdownInput = {
+  publicId: string;
+  markdownContent: string;
+  markdownContentHash: string;
+  expectedSourceContentHash: string;
+  expectedMarkdownContentHash: string;
+  expectedUpdatedAt: string;
+  mutationContext: ResourceMutationContext;
+};
+
+export type UpdateResourceMarkdownResult =
+  | {
+      status: "updated";
+      resource: AdminResourceOpsListDto["resources"][number];
+    }
+  | { status: "not_found" }
+  | {
+      status: "conflict";
+      reason:
+        | "resource_not_editable"
+        | "resource_lineage_mismatch"
+        | "resource_stale_revision";
+    };
+
 export type RagResourceRuntimeRepository = {
   prepareResourceUpload?(
     input: PrepareResourceUploadInput,
@@ -212,13 +236,12 @@ export type RagResourceRuntimeRepository = {
   findResourceDetail?(publicId: string): Promise<{
     resource: AdminResourceOpsListDto["resources"][number];
     markdownContent: string | null;
+    sourceContentHash: string | null;
+    markdownContentHash: string | null;
   } | null>;
   updateResourceMarkdown?(
-    publicId: string,
-    markdownContent: string,
-    markdownContentHash: string,
-    mutationContext: ResourceMutationContext,
-  ): Promise<AdminResourceOpsListDto["resources"][number] | null>;
+    input: UpdateResourceMarkdownInput,
+  ): Promise<UpdateResourceMarkdownResult>;
   disableResource?(
     publicId: string,
     mutationContext: ResourceMutationContext,
@@ -560,6 +583,7 @@ function createPostgresRagResourceRuntimeRepository(
           id: resource.id,
           ...createResourceOpsReturningSelection(),
           markdown_content: resource.markdown_content,
+          content_hash: resource.content_hash,
         })
         .from(resource)
         .where(eq(resource.public_id, publicId))
@@ -577,29 +601,60 @@ function createPostgresRagResourceRuntimeRepository(
       return {
         resource: mapResourceOpsRow(row, knowledgeNodePublicIds),
         markdownContent: row.markdown_content,
+        sourceContentHash: row.content_hash,
+        markdownContentHash: row.markdown_content_hash,
       };
     },
-    async updateResourceMarkdown(
-      publicId,
-      markdownContent,
-      markdownContentHash,
-      mutationContext,
-    ) {
+    async updateResourceMarkdown(input) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
+        const expectedUpdatedAt = new Date(input.expectedUpdatedAt);
         const resourceQuery = scopedDatabase
           .select({
             id: resource.id,
             resource_status: resource.resource_status,
+            content_hash: resource.content_hash,
+            markdown_content_hash: resource.markdown_content_hash,
+            updated_at: resource.updated_at,
           })
           .from(resource)
-          .where(eq(resource.public_id, publicId))
+          .where(eq(resource.public_id, input.publicId))
           .limit(1);
         const [resourceRow] = await resourceQuery.for("update");
 
         if (resourceRow === undefined) {
-          return null;
+          return { status: "not_found" };
+        }
+
+        if (
+          resourceRow.resource_status !== "draft" &&
+          resourceRow.resource_status !== "rag_ready"
+        ) {
+          return {
+            status: "conflict",
+            reason: "resource_not_editable",
+          };
+        }
+
+        if (
+          resourceRow.content_hash === null ||
+          resourceRow.markdown_content_hash === null ||
+          resourceRow.content_hash !== input.expectedSourceContentHash ||
+          resourceRow.markdown_content_hash !==
+            input.expectedMarkdownContentHash
+        ) {
+          return {
+            status: "conflict",
+            reason: "resource_lineage_mismatch",
+          };
+        }
+
+        if (resourceRow.updated_at.getTime() !== expectedUpdatedAt.getTime()) {
+          return {
+            status: "conflict",
+            reason: "resource_stale_revision",
+          };
         }
 
         const [activeGeneration] = await scopedDatabase
@@ -614,7 +669,45 @@ function createPostgresRagResourceRuntimeRepository(
           )
           .limit(1);
         const hasActiveGeneration = activeGeneration !== undefined;
-        const now = new Date();
+        const now = new Date(
+          Math.max(Date.now(), resourceRow.updated_at.getTime() + 1),
+        );
+        const nextStatus: ResourceStatus =
+          resourceRow.resource_status === "rag_ready" ? "rag_ready" : "draft";
+        const [row] = await scopedDatabase
+          .update(resource)
+          .set({
+            markdown_content: input.markdownContent,
+            markdown_content_hash: input.markdownContentHash,
+            resource_status: nextStatus,
+            is_vector_stale: hasActiveGeneration,
+            indexing_error_message: null,
+            updated_at: now,
+          })
+          .where(
+            and(
+              eq(resource.id, resourceRow.id),
+              inArray(resource.resource_status, ["draft", "rag_ready"]),
+              eq(resource.content_hash, input.expectedSourceContentHash),
+              eq(
+                resource.markdown_content_hash,
+                input.expectedMarkdownContentHash,
+              ),
+              eq(resource.updated_at, expectedUpdatedAt),
+            ),
+          )
+          .returning({
+            id: resource.id,
+            ...createResourceOpsReturningSelection(),
+          });
+
+        if (row === undefined) {
+          return {
+            status: "conflict",
+            reason: "resource_stale_revision",
+          };
+        }
+
         await scopedDatabase
           .update(resourceIndexGeneration)
           .set({
@@ -632,31 +725,6 @@ function createPostgresRagResourceRuntimeRepository(
               ]),
             ),
           );
-        const nextStatus: ResourceStatus =
-          resourceRow.resource_status === "disabled"
-            ? "disabled"
-            : hasActiveGeneration
-              ? "rag_ready"
-              : "draft";
-        const [row] = await scopedDatabase
-          .update(resource)
-          .set({
-            markdown_content: markdownContent,
-            markdown_content_hash: markdownContentHash,
-            resource_status: nextStatus,
-            is_vector_stale: hasActiveGeneration,
-            indexing_error_message: null,
-            updated_at: now,
-          })
-          .where(eq(resource.id, resourceRow.id))
-          .returning({
-            id: resource.id,
-            ...createResourceOpsReturningSelection(),
-          });
-
-        if (row === undefined) {
-          return null;
-        }
 
         const knowledgeNodePublicIds =
           (
@@ -664,10 +732,13 @@ function createPostgresRagResourceRuntimeRepository(
           ).get(row.id) ?? [];
         await appendResourceMutationAuditLog(
           scopedDatabase,
-          mutationContext,
+          input.mutationContext,
           row.public_id,
         );
-        return mapResourceOpsRow(row, knowledgeNodePublicIds);
+        return {
+          status: "updated",
+          resource: mapResourceOpsRow(row, knowledgeNodePublicIds),
+        };
       });
     },
     async disableResource(publicId, mutationContext) {

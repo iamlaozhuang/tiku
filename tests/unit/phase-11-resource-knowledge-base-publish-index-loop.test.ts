@@ -563,11 +563,14 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       }),
       { params: Promise.resolve({ publicId: resourcePublicId }) },
     );
-    await expect(detailResponse.json()).resolves.toMatchObject({
+    const detailPayload = await detailResponse.json();
+    expect(detailPayload).toMatchObject({
       code: 0,
       data: {
         localOnly: true,
         markdownContent: expect.any(String),
+        sourceContentHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+        markdownContentHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
       },
     });
 
@@ -575,6 +578,9 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
         body: JSON.stringify({
           markdownContent: "# 本地资源验证\n\n## 第一节\n\n已校对摘要",
+          expectedSourceContentHash: detailPayload.data.sourceContentHash,
+          expectedMarkdownContentHash: detailPayload.data.markdownContentHash,
+          expectedUpdatedAt: detailPayload.data.resource.updatedAt,
         }),
         headers: {
           authorization: "Bearer admin-session-token",
@@ -1027,10 +1033,11 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
 
   it("marks DOCX PPTX and PDF local resource uploads as conversion failed without converter dependencies", async () => {
     const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-formats-"));
+    const auditLogEntries: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
       localResourceStorageRoot: storageRoot,
       repositories: createRepositories({
-        auditLogEntries: [],
+        auditLogEntries,
         publishCalls: [],
       }),
       sessionService: createAdminSessionService(),
@@ -1091,6 +1098,36 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       expect(JSON.stringify(uploadPayload)).not.toContain(
         "controlled binary placeholder",
       );
+
+      const resourcePublicId = uploadPayload.data.resource.publicId as string;
+      const detailResponse = await handlers.resources.detail.GET(
+        new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
+          headers: { authorization: "Bearer admin-session-token" },
+        }),
+        { params: Promise.resolve({ publicId: resourcePublicId }) },
+      );
+      const detailPayload = await detailResponse.json();
+      const patchResponse = await handlers.resources.detail.PATCH(
+        new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
+          body: JSON.stringify({
+            markdownContent: "# 绕过转换失败的手写正文",
+            expectedSourceContentHash: detailPayload.data.sourceContentHash,
+            expectedMarkdownContentHash: "0".repeat(64),
+            expectedUpdatedAt: detailPayload.data.resource.updatedAt,
+          }),
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "content-type": "application/json",
+          },
+          method: "PATCH",
+        }),
+        { params: Promise.resolve({ publicId: resourcePublicId }) },
+      );
+      const patchPayload = await patchResponse.json();
+
+      expect(patchPayload.code).not.toBe(0);
+      expect(patchPayload.data).toBeNull();
+      expect(auditLogEntries.at(-1)).toMatchObject({ resultStatus: "failed" });
     }
   });
 });

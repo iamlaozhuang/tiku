@@ -1,21 +1,19 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22",
-  "objective": "Close F-0089 by making Markdown chunking deterministically enforce the configured maximum for long no-whitespace Chinese and mixed-language text, while improving the existing isolated keyword-only fallback with deterministic Chinese bigram tokenization. Preserve heading metadata, overlap, authorization and level filtering, persisted semantic/rerank behavior, evidence contracts, and all Provider/index lifecycle boundaries; do not add dependencies or claim semantic synonym coverage from keyword fallback.",
+  "taskId": "p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22",
+  "objective": "Close F-0086 by making Markdown review a fail-closed conditional command: only draft or rag_ready resources with an existing converted Markdown artifact may be edited; the request must bind the source content hash, prior Markdown hash, and resource updatedAt revision; oversized or stale edits and conversion_failed/unconverted resources must be rejected without mutation or success audit. Preserve existing content-admin authorization, publish/index semantics, and the isolated local test adapter without schema, dependency, Provider, or permission changes.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/rag/chunking.ts",
-    "src/server/services/rag-retrieval-service.ts",
-    "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
-    "src/rag/chunking.test.ts",
-    "src/server/services/rag-retrieval-service.test.ts",
-    "src/rag/retrieval.test.ts",
-    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+    "tests/unit/p1-resource-markdown-lineage-guard.test.ts",
     "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
     "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts"
+    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
+    "tests/unit/admin-resource-knowledge-ui-layout.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -31,36 +29,35 @@
     ".github/workflows/**",
     ".env*",
     "schema/migration or real database/data access",
-    "permission, entitlement, Provider, external service, secret/env or deployment",
-    "embedding generation, vector index lifecycle, resource upload/update/download, other RC-06 findings, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
+    "permission or entitlement change, Provider, external service, secret/env, deployment, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke",
+    "resource upload/conversion implementation, file storage, publish/index lifecycle, download, or other RC-06 findings"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/rag/chunking.ts",
-    "src/server/services/rag-retrieval-service.ts",
-    "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts"
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+    "tests/unit/p1-resource-markdown-lineage-guard.test.ts"
   ],
   "contingencyFiles": [
-    "src/rag/chunking.test.ts",
-    "src/server/services/rag-retrieval-service.test.ts",
-    "src/rag/retrieval.test.ts",
-    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
     "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
     "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts"
+    "tests/unit/p1-resource-database-audit-atomicity.test.ts",
+    "tests/unit/admin-resource-knowledge-ui-layout.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirements": "US-05-07 requires overlong Markdown paragraphs to split while preserving headings; RAG retrieval requires keyword recall plus authorization and level filtering before citations.",
-    "caller": "Resource index generation calls createRagChunks; keyword-only local retrieval calls buildRagRetrievalContextFromChunks.",
-    "service": "rag-retrieval-service currently scores local chunks with tokens split only at non-letter/non-number boundaries.",
-    "algorithm": "chunking splitLongText only breaks on whitespace and mergeShortChunkPieces can merge above target; continuous Chinese becomes one oversized chunk and whole Chinese sentences become unmatched single tokens.",
-    "rootCause": "Both local algorithms assume whitespace-delimited language instead of treating Unicode text length and Chinese boundaries as invariants."
+    "requirements": "RAG module 6.5-6.6 requires Markdown to originate from an uploaded file conversion, forbids manual replacement after conversion failure, and permits review only for converted drafts or the explicit rag_ready edit branch.",
+    "caller": "AdminResourceKnowledgeManagement fetches resource detail and PATCHes the edited Markdown.",
+    "routeService": "rag-resource-knowledge-runtime authenticates content admins but currently validates only a non-empty Markdown string.",
+    "repository": "updateResourceMarkdown locks the resource row but currently accepts conversion_failed and stale edits, then promotes most states to draft.",
+    "existingFacts": "resource.content_hash, resource.markdown_content_hash, and resource.updated_at already provide source identity, prior artifact identity, and optimistic revision without schema changes.",
+    "rootCause": "Markdown review is modeled as an unconditional generic update instead of a lineage-bound, version-checked state command."
   },
   "validationCommands": [
     {
-      "name": "f0089-chinese-rag-focused-test",
+      "name": "f0086-resource-markdown-lineage-focused-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -68,46 +65,43 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
-        "src/rag/chunking.test.ts",
-        "src/server/services/rag-retrieval-service.test.ts",
-        "src/rag/retrieval.test.ts",
-        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
+        "tests/unit/p1-resource-markdown-lineage-guard.test.ts",
         "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
         "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts",
+        "tests/unit/p1-resource-database-audit-atomicity.test.ts",
+        "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "f0089-chinese-rag-lint",
+      "name": "f0086-resource-markdown-lineage-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/rag/chunking.ts",
-        "src/server/services/rag-retrieval-service.ts",
-        "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
-        "src/rag/chunking.test.ts",
-        "src/server/services/rag-retrieval-service.test.ts"
+        "src/server/services/rag-resource-knowledge-runtime.ts",
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+        "tests/unit/p1-resource-markdown-lineage-guard.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts"
       ]
     },
     {
-      "name": "f0089-chinese-rag-typecheck",
+      "name": "f0086-resource-markdown-lineage-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0089-chinese-rag-build",
+      "name": "f0086-resource-markdown-lineage-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
     },
     {
-      "name": "f0089-chinese-rag-format",
+      "name": "f0086-resource-markdown-lineage-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -118,23 +112,23 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/rag/chunking.ts",
-        "src/server/services/rag-retrieval-service.ts",
-        "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
-        "src/rag/chunking.test.ts",
-        "src/server/services/rag-retrieval-service.test.ts"
+        "src/server/services/rag-resource-knowledge-runtime.ts",
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+        "tests/unit/p1-resource-markdown-lineage-guard.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts"
       ]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_local_text_algorithm",
+    "category": "bounded_medium_risk_database_application_logic",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -142,19 +136,19 @@
     "dependencyOrMechanismChange": false
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingIds": ["F-0089"],
-    "task": "TDD and close the Chinese chunking and isolated keyword fallback defect, then resume the next separate RC-06 finding",
-    "condition": "no dependency, Provider, embedding, vector index lifecycle, schema, permission, resource lifecycle, mechanism, or unrelated RC-06 scope"
+    "findingIds": ["F-0086"],
+    "task": "TDD and close the resource Markdown lineage and stale-write defect, then resume the next separate RC-06 finding",
+    "condition": "no schema, migration, real database, permission, Provider, dependency, resource upload/conversion, file storage, mechanism, or unrelated finding scope"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-question-detail-read-model-2026-07-22",
-    "findingIds": ["F-0073"],
-    "commit": "5d49a9222556ed35aa6430aa9c77ecfc31388e2a",
+    "taskId": "p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22",
+    "findingIds": ["F-0089"],
+    "commit": "505e4a5a6ff5aaf413ac3b3b3e53bee7098c8903",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -163,6 +157,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

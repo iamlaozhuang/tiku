@@ -168,9 +168,12 @@ type LocalResourceDetailDto = {
   resource: AdminResourceOpsSummaryDto;
   localOnly: boolean;
   markdownContent: string | null;
+  sourceContentHash: string | null;
+  markdownContentHash: string | null;
 };
 
 export const localResourceMaxFileSizeByte = 50 * 1024 * 1024;
+export const resourceMarkdownMaxContentSizeByte = 1024 * 1024;
 
 export type LocalResourceRagRetrievalInput = {
   storageRoot?: string;
@@ -218,6 +221,10 @@ const knowledgeNodeMutationConflictResponse = createErrorResponse(
 const resourcePublishConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
   "Resource cannot be published from its current state.",
+);
+const resourceMarkdownUpdateConflictResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+  "Resource Markdown changed or cannot be edited from its current state.",
 );
 const resourceEnableConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
@@ -611,6 +618,53 @@ function isUploadFile(value: unknown): value is File {
 
 function createMarkdownContentHash(markdownContent: string) {
   return createHash("sha256").update(markdownContent).digest("hex");
+}
+
+type ResourceMarkdownUpdateCommand = {
+  markdownContent: string;
+  expectedSourceContentHash: string;
+  expectedMarkdownContentHash: string;
+  expectedUpdatedAt: string;
+};
+
+const sha256HashPattern = /^[a-f0-9]{64}$/u;
+
+function parseResourceMarkdownUpdateCommand(
+  requestBody: unknown,
+): ResourceMarkdownUpdateCommand | null {
+  if (typeof requestBody !== "object" || requestBody === null) {
+    return null;
+  }
+
+  const body = requestBody as Record<string, unknown>;
+  const markdownContent =
+    typeof body.markdownContent === "string" ? body.markdownContent.trim() : "";
+  const expectedSourceContentHash =
+    typeof body.expectedSourceContentHash === "string"
+      ? body.expectedSourceContentHash
+      : "";
+  const expectedMarkdownContentHash =
+    typeof body.expectedMarkdownContentHash === "string"
+      ? body.expectedMarkdownContentHash
+      : "";
+  const expectedUpdatedAt =
+    typeof body.expectedUpdatedAt === "string" ? body.expectedUpdatedAt : "";
+  const parsedUpdatedAt = new Date(expectedUpdatedAt);
+
+  return markdownContent.length > 0 &&
+    Buffer.byteLength(markdownContent, "utf8") <=
+      resourceMarkdownMaxContentSizeByte &&
+    sha256HashPattern.test(expectedSourceContentHash) &&
+    sha256HashPattern.test(expectedMarkdownContentHash) &&
+    !Number.isNaN(parsedUpdatedAt.getTime()) &&
+    parsedUpdatedAt.toISOString() === expectedUpdatedAt
+    ? {
+        markdownContent,
+        expectedSourceContentHash,
+        expectedMarkdownContentHash,
+        expectedUpdatedAt,
+      }
+    : null;
 }
 
 function createLocalResourcePublicId(metadata: StoredLocalResourceMetadata) {
@@ -1097,6 +1151,8 @@ async function getResourceDetail(input: {
         resource: detail.resource,
         localOnly: false,
         markdownContent: detail.markdownContent,
+        sourceContentHash: detail.sourceContentHash,
+        markdownContentHash: detail.markdownContentHash,
       });
     }
   }
@@ -1117,15 +1173,9 @@ async function updateResourceMarkdown(input: {
   ResourceMutationExecution<{ resource: AdminResourceOpsSummaryDto } | null>
 > {
   const requestBody = await readRequestJson(input.request);
-  const markdownContent =
-    typeof requestBody === "object" &&
-    requestBody !== null &&
-    typeof (requestBody as { markdownContent?: unknown }).markdownContent ===
-      "string"
-      ? (requestBody as { markdownContent: string }).markdownContent.trim()
-      : "";
+  const command = parseResourceMarkdownUpdateCommand(requestBody);
 
-  if (markdownContent.length === 0) {
+  if (command === null) {
     return {
       response: validationFailedResponse,
       successAuditLocation: "external",
@@ -1133,18 +1183,27 @@ async function updateResourceMarkdown(input: {
   }
 
   if (input.resourceRepository.updateResourceMarkdown !== undefined) {
-    const resourceSummary =
-      await input.resourceRepository.updateResourceMarkdown(
-        input.publicId,
-        markdownContent,
-        createMarkdownContentHash(markdownContent),
-        input.mutationContext,
-      );
+    const updateResult = await input.resourceRepository.updateResourceMarkdown({
+      publicId: input.publicId,
+      markdownContent: command.markdownContent,
+      markdownContentHash: createMarkdownContentHash(command.markdownContent),
+      expectedSourceContentHash: command.expectedSourceContentHash,
+      expectedMarkdownContentHash: command.expectedMarkdownContentHash,
+      expectedUpdatedAt: command.expectedUpdatedAt,
+      mutationContext: input.mutationContext,
+    });
 
-    if (resourceSummary !== null) {
+    if (updateResult.status === "updated") {
       return {
-        response: createSuccessResponse({ resource: resourceSummary }),
+        response: createSuccessResponse({ resource: updateResult.resource }),
         successAuditLocation: "database",
+      };
+    }
+
+    if (updateResult.status === "conflict") {
+      return {
+        response: resourceMarkdownUpdateConflictResponse,
+        successAuditLocation: "external",
       };
     }
   }
@@ -1153,11 +1212,7 @@ async function updateResourceMarkdown(input: {
     response: input.allowLocalResourceAdapter
       ? await updateLocalResourceMarkdown({
           publicId: input.publicId,
-          request: new Request(input.request.url, {
-            method: input.request.method,
-            headers: input.request.headers,
-            body: JSON.stringify({ markdownContent }),
-          }),
+          command,
           storageRoot: input.storageRoot,
         })
       : resourceNotFoundResponse,
@@ -1602,12 +1657,14 @@ async function getLocalResourceDetail(input: {
     resource: mapLocalResourceEntry(resource),
     localOnly: true,
     markdownContent: resource.markdownContent,
+    sourceContentHash: resource.fileHash,
+    markdownContentHash: resource.markdownContentHash,
   });
 }
 
 async function updateLocalResourceMarkdown(input: {
   publicId: string;
-  request: Request;
+  command: ResourceMarkdownUpdateCommand;
   storageRoot: string;
 }): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
   const resource = await findLocalResource(input);
@@ -1616,36 +1673,30 @@ async function updateLocalResourceMarkdown(input: {
     return resourceNotFoundResponse;
   }
 
-  const requestBody = await readRequestJson(input.request);
-
   if (
-    typeof requestBody !== "object" ||
-    requestBody === null ||
-    typeof (requestBody as { markdownContent?: unknown }).markdownContent !==
-      "string"
+    (resource.resourceStatus !== "draft" &&
+      resource.resourceStatus !== "rag_ready") ||
+    resource.markdownContentHash === null ||
+    resource.fileHash !== input.command.expectedSourceContentHash ||
+    resource.markdownContentHash !==
+      input.command.expectedMarkdownContentHash ||
+    resource.updatedAt !== input.command.expectedUpdatedAt
   ) {
-    return validationFailedResponse;
+    return resourceMarkdownUpdateConflictResponse;
   }
 
-  const markdownContent = (
-    requestBody as { markdownContent: string }
-  ).markdownContent.trim();
-
-  if (markdownContent.length === 0) {
-    return validationFailedResponse;
-  }
-
+  const markdownContent = input.command.markdownContent;
   const markdownContentHash = createMarkdownContentHash(markdownContent);
-  const now = new Date().toISOString();
+  const now = new Date(
+    Math.max(Date.now(), new Date(resource.updatedAt).getTime() + 1),
+  ).toISOString();
   const hasActiveChunkSnapshot = resource.activeChunkSnapshot.length > 0;
   const nextResource: LocalResourceCatalogEntry = {
     ...resource,
     resourceStatus:
-      resource.resourceStatus === "disabled"
-        ? "disabled"
-        : resource.resourceStatus === "rag_ready" && hasActiveChunkSnapshot
-          ? "rag_ready"
-          : "draft",
+      resource.resourceStatus === "rag_ready" && hasActiveChunkSnapshot
+        ? "rag_ready"
+        : "draft",
     markdownContent,
     markdownContentHash,
     indexingErrorMessage: null,
