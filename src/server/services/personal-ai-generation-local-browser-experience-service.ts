@@ -138,6 +138,10 @@ async function mapPersonalAiGenerationRequestFlowToRouteLocalBrowserExperience(
       options,
     );
 
+  if (requestFlow.flowStatus === "reused") {
+    return localBrowserExperience;
+  }
+
   const runtimeBridge =
     await buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
       requestFlow,

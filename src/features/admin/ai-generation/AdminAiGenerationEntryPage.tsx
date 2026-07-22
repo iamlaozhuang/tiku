@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   FileText,
@@ -2397,7 +2397,7 @@ function AdminAiGenerationTaskHistoryPanel({
             const currentContentAdminReviewedDraft =
               workspace === "content" &&
               taskItem.generatedResult !== null &&
-              currentLocalContractSummary?.generatedResult.resultPublicId ===
+              currentLocalContractSummary?.generatedResult?.resultPublicId ===
                 taskItem.generatedResult.resultPublicId
                 ? createContentAdminFormalReviewedDraftPayload({
                     localContractSummary: currentLocalContractSummary,
@@ -2413,7 +2413,7 @@ function AdminAiGenerationTaskHistoryPanel({
             const currentContentAdminTraceabilitySummary =
               workspace === "content" &&
               taskItem.generatedResult !== null &&
-              currentLocalContractSummary?.generatedResult.resultPublicId ===
+              currentLocalContractSummary?.generatedResult?.resultPublicId ===
                 taskItem.generatedResult.resultPublicId
                 ? createContentAdminGenerationTraceabilitySummary({
                     generatedResult: taskItem.generatedResult,
@@ -3137,6 +3137,10 @@ export function AdminAiGenerationEntryPage({
   const [requestErrorMessage, setRequestErrorMessage] = useState<string | null>(
     null,
   );
+  const idempotencyIntentRef = useRef<{
+    fingerprint: string;
+    key: string;
+  } | null>(null);
   const [historyState, setHistoryState] =
     useState<AdminAiGenerationHistoryState>("loading");
   const [generationAvailabilityState, setGenerationAvailabilityState] =
@@ -3639,12 +3643,28 @@ export function AdminAiGenerationEntryPage({
     setLocalContractSummary(null);
 
     try {
+      const idempotencyFingerprint = JSON.stringify({
+        generationKind,
+        generationParameters,
+      });
+      const idempotencyIntent =
+        idempotencyIntentRef.current?.fingerprint === idempotencyFingerprint
+          ? idempotencyIntentRef.current
+          : {
+              fingerprint: idempotencyFingerprint,
+              key: globalThis.crypto.randomUUID(),
+            };
+      idempotencyIntentRef.current = idempotencyIntent;
       const requestResponse =
         await fetchAdminApi<AdminAiGenerationLocalContractDto>(
           getAdminAiGenerationRequestPath(workspace),
           sessionToken,
           {
-            body: JSON.stringify({ generationKind, generationParameters }),
+            body: JSON.stringify({
+              generationKind,
+              generationParameters,
+              idempotencyKey: idempotencyIntent.key,
+            }),
             headers: {
               "content-type": "application/json",
             },
@@ -3667,6 +3687,7 @@ export function AdminAiGenerationEntryPage({
 
       setLocalContractSummary(requestResponse.data);
       setRequestState("accepted");
+      idempotencyIntentRef.current = null;
       await refreshTaskHistory(sessionToken, ADMIN_AI_GENERATION_HISTORY_PAGE);
     } catch {
       setRequestErrorMessage(providerExecutionCopy.error);

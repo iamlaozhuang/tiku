@@ -942,6 +942,7 @@ function createPersonalAiGenerationRequestBody(
   sessionUser: AuthContextDto["user"],
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
   authorizationContext: EffectiveAuthorizationContextDto,
+  requestIdentifiers = createPersonalAiGenerationRequestIdentifiers(),
 ) {
   const userPublicId = sessionUser.publicId;
   const ownerType =
@@ -961,7 +962,7 @@ function createPersonalAiGenerationRequestBody(
   return {
     responseMode: "local_browser_experience",
     ...draft,
-    ...createPersonalAiGenerationRequestIdentifiers(),
+    ...requestIdentifiers,
     authorizationPublicId: authorizationContext.authorizationPublicId,
     authorizationSource: authorizationContext.authorizationSource,
     ownerType,
@@ -3433,6 +3434,12 @@ export function StudentPersonalAiGenerationPage() {
   const requestHistoryLoadSequenceRef = useRef(0);
   const resultHistoryLoadSequenceRef = useRef(0);
   const resultDetailLoadSequenceRef = useRef(0);
+  const idempotencyIntentRef = useRef<{
+    fingerprint: string;
+    identifiers: ReturnType<
+      typeof createPersonalAiGenerationRequestIdentifiers
+    >;
+  } | null>(null);
   const [aiQuestionCount, setAiQuestionCount] = useState(
     AI_QUESTION_DEFAULT_QUESTION_COUNT,
   );
@@ -3963,6 +3970,40 @@ export function StudentPersonalAiGenerationPage() {
               generationAuthorizationContext,
             )
           : null;
+      const generationParameters = createStudentGenerationParameters(
+        generationAuthorizationContext,
+        taskType,
+        generationQuestionCount,
+        generationKnowledgeScopeState,
+        generationSourcePreference,
+        taskType === "ai_paper_generation"
+          ? {
+              questionTypeDistribution:
+                mapStudentAiPaperQuestionTypeDistribution(
+                  aiPaperQuestionTypeDistribution,
+                ),
+              paperStructure: mapStudentAiPaperStructure(aiPaperStructure),
+              difficulty: mapStudentAiDifficulty(aiPaperDifficulty),
+              learningObjective: normalizeKnowledgeNodeSupplement(
+                aiPaperLearningObjective,
+              ),
+            }
+          : undefined,
+      );
+      const idempotencyFingerprint = JSON.stringify({
+        authorizationPublicId:
+          generationAuthorizationContext.authorizationPublicId,
+        generationParameters,
+        taskType,
+      });
+      const idempotencyIntent =
+        idempotencyIntentRef.current?.fingerprint === idempotencyFingerprint
+          ? idempotencyIntentRef.current
+          : {
+              fingerprint: idempotencyFingerprint,
+              identifiers: createPersonalAiGenerationRequestIdentifiers(),
+            };
+      idempotencyIntentRef.current = idempotencyIntent;
 
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
@@ -3977,28 +4018,9 @@ export function StudentPersonalAiGenerationPage() {
               createPersonalAiGenerationRequestBody(
                 createPersonalAiGenerationDraftForTask(taskType),
                 sessionResponse.data.user,
-                createStudentGenerationParameters(
-                  generationAuthorizationContext,
-                  taskType,
-                  generationQuestionCount,
-                  generationKnowledgeScopeState,
-                  generationSourcePreference,
-                  taskType === "ai_paper_generation"
-                    ? {
-                        questionTypeDistribution:
-                          mapStudentAiPaperQuestionTypeDistribution(
-                            aiPaperQuestionTypeDistribution,
-                          ),
-                        paperStructure:
-                          mapStudentAiPaperStructure(aiPaperStructure),
-                        difficulty: mapStudentAiDifficulty(aiPaperDifficulty),
-                        learningObjective: normalizeKnowledgeNodeSupplement(
-                          aiPaperLearningObjective,
-                        ),
-                      }
-                    : undefined,
-                ),
+                generationParameters,
                 generationAuthorizationContext,
+                idempotencyIntent.identifiers,
               ),
             ),
           },
@@ -4028,6 +4050,7 @@ export function StudentPersonalAiGenerationPage() {
 
       setExperience(response.data);
       setPageState("ready");
+      idempotencyIntentRef.current = null;
       await loadAiGenerationHistories(
         taskType,
         PERSONAL_AI_GENERATION_HISTORY_PAGE,

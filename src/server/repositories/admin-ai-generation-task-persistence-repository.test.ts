@@ -27,6 +27,7 @@ import type { AiPaperAssemblyRole } from "../contracts/ai-paper-plan-and-select-
 import type { AdminRole } from "../models/auth";
 import {
   ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
+  createAdminAiGenerationTaskPersistenceInput,
   createAdminAiGenerationTaskPersistenceRepository,
 } from "./admin-ai-generation-task-persistence-repository";
 import {
@@ -336,6 +337,7 @@ async function createAcceptedLocalContract(input: {
 
   const response = await collection.POST(
     createPostRequest(input.workspace, {
+      idempotencyKey: "018f47ac-7c2e-4f4d-8f5a-9d6c2c1e4901",
       generationKind: input.generationKind,
       generationParameters: {
         ...defaultAdminGenerationParameters,
@@ -530,6 +532,10 @@ function createPersistenceRow(
     source_question_public_id: null,
     source_paper_public_id: null,
     redaction_status: "redacted",
+    generation_snapshot_version: null,
+    generation_input_snapshot: null,
+    generation_constraint_snapshot: null,
+    generation_snapshot_digest: null,
     ...overrides,
   };
 }
@@ -607,6 +613,10 @@ function createGateway(
         paper_write_status: input.paperWriteStatus,
         source_question_public_id: input.sourceQuestionPublicId,
         source_paper_public_id: input.sourcePaperPublicId,
+        generation_snapshot_version: input.generationSnapshotVersion,
+        generation_input_snapshot: input.generationInputSnapshot,
+        generation_constraint_snapshot: input.generationConstraintSnapshot,
+        generation_snapshot_digest: input.generationSnapshotDigest,
       });
 
       rows.push(row);
@@ -647,6 +657,7 @@ describe("admin AI generation task persistence repository", () => {
 
     const result = await repository.createOrReuseTask({
       localContract,
+      generationParameters: defaultAdminGenerationParameters,
       requestPublicId: "admin_ai_generation_request_public_content_901",
       requestedAt: new Date("2026-06-26T19:00:00.000Z"),
     });
@@ -678,10 +689,10 @@ describe("admin AI generation task persistence repository", () => {
       citationCount: 0,
       aiCallLogPublicId: null,
       runtimeStatus: "local_contract_only",
-      runtimeBridgeStatus: "provider_call_succeeded",
-      providerCallExecuted: true,
-      envSecretAccessed: true,
-      providerConfigurationRead: true,
+      runtimeBridgeStatus: "provider_call_blocked",
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
       costCalibrationExecuted: false,
       questionWriteStatus: "blocked_without_follow_up_task",
       paperWriteStatus: "blocked_without_follow_up_task",
@@ -730,6 +741,7 @@ describe("admin AI generation task persistence repository", () => {
 
     const result = await repository.createOrReuseTask({
       localContract,
+      generationParameters: defaultAdminGenerationParameters,
       requestPublicId: "admin_ai_generation_request_public_org_901",
       requestedAt: new Date("2026-06-26T19:05:00.000Z"),
     });
@@ -802,6 +814,7 @@ describe("admin AI generation task persistence repository", () => {
 
     const result = await repository.createOrReuseTask({
       localContract: providerEnabledLocalContract,
+      generationParameters: defaultAdminGenerationParameters,
       requestPublicId: "admin_ai_generation_request_public_provider_901",
       requestedAt: new Date("2026-06-26T19:07:00.000Z"),
     });
@@ -830,11 +843,29 @@ describe("admin AI generation task persistence repository", () => {
       adminRoles: ["content_admin"],
       generationKind: "question",
     });
+    const matchingGenerationParameters = {
+      ...defaultAdminGenerationParameters,
+      knowledgeNodePublicIds: [
+        "knowledge_node_public_b",
+        "knowledge_node_public_a",
+      ],
+    };
+    const matchingInput = createAdminAiGenerationTaskPersistenceInput({
+      localContract,
+      generationParameters: matchingGenerationParameters,
+      requestPublicId: "admin_ai_generation_request_new_901",
+      requestedAt: new Date("2026-06-26T19:10:00.000Z"),
+    });
     const gateway = createGateway([
       createPersistenceRow({
         public_id: "admin_ai_generation_task_existing_901",
         request_public_id: "admin_ai_generation_request_existing_901",
         idempotency_key_hash: localContract.taskRequest.idempotency.keyHash,
+        generation_snapshot_version: matchingInput.generationSnapshotVersion,
+        generation_input_snapshot: matchingInput.generationInputSnapshot,
+        generation_constraint_snapshot:
+          matchingInput.generationConstraintSnapshot,
+        generation_snapshot_digest: matchingInput.generationSnapshotDigest,
       }),
     ]);
     const repository =
@@ -842,6 +873,14 @@ describe("admin AI generation task persistence repository", () => {
 
     const result = await repository.createOrReuseTask({
       localContract,
+      generationParameters: {
+        ...matchingGenerationParameters,
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_a",
+          "knowledge_node_public_b",
+          "knowledge_node_public_a",
+        ],
+      },
       requestPublicId: "admin_ai_generation_request_new_901",
       requestedAt: new Date("2026-06-26T19:10:00.000Z"),
     });
@@ -854,6 +893,19 @@ describe("admin AI generation task persistence repository", () => {
         status: "pending",
       },
     });
+    expect(gateway.insertInputs).toEqual([]);
+
+    await expect(
+      repository.createOrReuseTask({
+        localContract,
+        generationParameters: {
+          ...matchingGenerationParameters,
+          questionCount: defaultAdminGenerationParameters.questionCount + 1,
+        },
+        requestPublicId: "admin_ai_generation_request_conflicting_901",
+        requestedAt: new Date("2026-06-26T19:11:00.000Z"),
+      }),
+    ).rejects.toThrow("admin AI generation idempotency snapshot conflict");
     expect(gateway.insertInputs).toEqual([]);
   });
 
@@ -870,6 +922,7 @@ describe("admin AI generation task persistence repository", () => {
       ...localContract,
       runtimeBridge: {
         ...localContract.runtimeBridge,
+        bridgeStatus: "provider_call_succeeded",
         providerCallExecuted: false,
       },
     } as unknown as AdminAiGenerationLocalContractDto;
@@ -897,6 +950,7 @@ describe("admin AI generation task persistence repository", () => {
     await expect(
       repository.createOrReuseTask({
         localContract: unsafeProviderContract,
+        generationParameters: defaultAdminGenerationParameters,
         requestPublicId: "admin_ai_generation_request_unsafe_provider_901",
         requestedAt: new Date("2026-06-26T19:15:00.000Z"),
       }),
@@ -904,6 +958,7 @@ describe("admin AI generation task persistence repository", () => {
     await expect(
       repository.createOrReuseTask({
         localContract: unsafeFormalWriteContract,
+        generationParameters: defaultAdminGenerationParameters,
         requestPublicId: "admin_ai_generation_request_unsafe_formal_901",
         requestedAt: new Date("2026-06-26T19:16:00.000Z"),
       }),
@@ -911,6 +966,7 @@ describe("admin AI generation task persistence repository", () => {
     await expect(
       repository.createOrReuseTask({
         localContract: unsafeOrganizationOwnedBoundaryContract,
+        generationParameters: defaultAdminGenerationParameters,
         requestPublicId:
           "admin_ai_generation_request_unsafe_organization_boundary_901",
         requestedAt: new Date("2026-06-26T19:17:00.000Z"),

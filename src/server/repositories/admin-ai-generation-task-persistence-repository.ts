@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type {
   AdminAiGenerationPersistenceTaskType,
   AdminAiGenerationTaskPersistenceDto,
@@ -8,6 +10,7 @@ import type {
   CreateOrReuseAdminAiGenerationTaskInput,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminAiGenerationLocalContractBaseDto } from "../contracts/admin-ai-generation-local-contract";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import type { AiGenerationTaskResultKind } from "../models/ai-generation-task-request";
 
@@ -18,6 +21,13 @@ export const ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES = [
 
 const UNSAFE_ADMIN_AI_GENERATION_PERSISTENCE_BOUNDARY_ERROR =
   "unsafe admin AI generation task persistence boundary";
+
+export class AdminAiGenerationSnapshotConflictError extends Error {
+  constructor() {
+    super("admin AI generation idempotency snapshot conflict.");
+    this.name = "AdminAiGenerationSnapshotConflictError";
+  }
+}
 
 export function createAdminAiGenerationTaskPersistenceRepository(
   gateway: AdminAiGenerationTaskPersistenceGateway,
@@ -33,6 +43,7 @@ export function createAdminAiGenerationTaskPersistenceRepository(
       });
 
       if (existingRow !== null) {
+        assertMatchingAdminAiGenerationSnapshot(existingRow, createInput);
         return {
           persistenceStatus: "reused",
           task: mapAdminAiGenerationTaskPersistenceRowToDto(existingRow),
@@ -54,6 +65,8 @@ export function createAdminAiGenerationTaskPersistenceRepository(
       if (resolvedRow === null) {
         throw new Error("admin AI generation task persistence failed.");
       }
+
+      assertMatchingAdminAiGenerationSnapshot(resolvedRow, createInput);
 
       return {
         persistenceStatus: insertedRow === null ? "reused" : "created",
@@ -83,6 +96,10 @@ export function createAdminAiGenerationTaskPersistenceInput(
   const taskType = resolveAdminAiGenerationPersistenceTaskType(
     taskRequest.taskType,
   );
+  const snapshot = createAdminAiGenerationSnapshotEnvelope({
+    ...input,
+    taskType,
+  });
 
   return {
     requestPublicId: input.requestPublicId,
@@ -123,7 +140,126 @@ export function createAdminAiGenerationTaskPersistenceInput(
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
     redactionStatus: "redacted",
+    ...snapshot,
   };
+}
+
+function compareCanonicalStrings(
+  leftValue: string,
+  rightValue: string,
+): number {
+  return leftValue < rightValue ? -1 : leftValue > rightValue ? 1 : 0;
+}
+
+function canonicalizeJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(canonicalizeJsonValue);
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([leftKey], [rightKey]) =>
+        compareCanonicalStrings(leftKey, rightKey),
+      )
+      .map(([key, childValue]) => [key, canonicalizeJsonValue(childValue)]),
+  );
+}
+
+function stringifyCanonicalJson(value: unknown): string {
+  return JSON.stringify(canonicalizeJsonValue(value));
+}
+
+function canonicalizeGenerationParameters(
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+): AiGenerationRouteIntegratedGenerationParameters {
+  return {
+    profession: generationParameters.profession,
+    level: generationParameters.level,
+    subject: generationParameters.subject,
+    knowledgeNode: generationParameters.knowledgeNode,
+    knowledgeNodeMode: generationParameters.knowledgeNodeMode,
+    knowledgeNodePublicIds: [
+      ...new Set(generationParameters.knowledgeNodePublicIds),
+    ].sort(compareCanonicalStrings),
+    includeDescendants: generationParameters.includeDescendants,
+    knowledgeNodeSupplement: generationParameters.knowledgeNodeSupplement,
+    sourcePreference: generationParameters.sourcePreference,
+    questionType: generationParameters.questionType,
+    questionCount: generationParameters.questionCount,
+    difficulty: generationParameters.difficulty,
+    learningObjective: generationParameters.learningObjective,
+    questionTypeDistribution:
+      generationParameters.questionTypeDistribution ?? null,
+    paperStructure: generationParameters.paperStructure ?? null,
+  };
+}
+
+function createAdminAiGenerationSnapshotEnvelope(
+  input: CreateOrReuseAdminAiGenerationTaskInput & {
+    taskType: AdminAiGenerationPersistenceTaskType;
+  },
+): Pick<
+  CreateAdminAiGenerationTaskPersistenceInput,
+  | "generationSnapshotVersion"
+  | "generationInputSnapshot"
+  | "generationConstraintSnapshot"
+  | "generationSnapshotDigest"
+> {
+  const taskRequest = input.localContract.taskRequest;
+  const generationInputSnapshot = {
+    generationParameters: canonicalizeGenerationParameters(
+      input.generationParameters,
+    ),
+  };
+  const generationConstraintSnapshot = {
+    workspace: input.localContract.workspace,
+    actorPublicId: taskRequest.actorPublicId,
+    authorizationSource: taskRequest.authorizationSource,
+    authorizationPublicId: taskRequest.authorizationPublicId,
+    ownerType: taskRequest.ownerType,
+    ownerPublicId: taskRequest.ownerPublicId,
+    organizationPublicId: taskRequest.organizationPublicId,
+    quotaOwnerType: taskRequest.quotaOwnerType,
+    quotaOwnerPublicId: taskRequest.quotaOwnerPublicId,
+    effectiveEdition: "advanced",
+    profession: input.generationParameters.profession,
+    level: input.generationParameters.level,
+  };
+  const digestPayload = {
+    schemaVersion: 1,
+    taskType: input.taskType,
+    generationInputSnapshot,
+    generationConstraintSnapshot,
+  };
+
+  return {
+    generationSnapshotVersion: 1,
+    generationInputSnapshot,
+    generationConstraintSnapshot,
+    generationSnapshotDigest: `sha256:${createHash("sha256")
+      .update(stringifyCanonicalJson(digestPayload))
+      .digest("hex")}`,
+  };
+}
+
+function assertMatchingAdminAiGenerationSnapshot(
+  row: AdminAiGenerationTaskPersistenceRow,
+  expected: CreateAdminAiGenerationTaskPersistenceInput,
+): void {
+  if (
+    row.generation_snapshot_version !== expected.generationSnapshotVersion ||
+    row.generation_snapshot_digest !== expected.generationSnapshotDigest ||
+    stringifyCanonicalJson(row.generation_input_snapshot) !==
+      stringifyCanonicalJson(expected.generationInputSnapshot) ||
+    stringifyCanonicalJson(row.generation_constraint_snapshot) !==
+      stringifyCanonicalJson(expected.generationConstraintSnapshot)
+  ) {
+    throw new AdminAiGenerationSnapshotConflictError();
+  }
 }
 
 export function mapAdminAiGenerationTaskPersistenceRowToDto(

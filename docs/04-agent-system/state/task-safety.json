@@ -1,19 +1,28 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22",
-  "objective": "Close F-0178 by freezing a valid primary/fallback model attempt plan before execution, retrying only approved transient or output-validation failures, recording each attempt against its actual model snapshot, and returning unavailable only after the permitted attempts fail; subjective scoring remains single-model.",
+  "taskId": "p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22",
+  "objective": "Close F-0025 by atomically claiming a stable user-intent idempotency identity before any admin or personal AI Provider/paper-assembly side effect, rejecting same-key/different-canonical-input conflicts, returning the existing task/result without Provider execution on replay, and keeping one stable client intent across an unchanged retry.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/model-config-runtime.ts",
-    "src/server/services/ai-explanation-hint-service.ts",
-    "src/server/services/ai-explanation-hint-service.test.ts",
-    "src/server/services/student-mistake-book-runtime.ts",
-    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts"
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts",
+    "src/server/contracts/admin-ai-generation-local-contract.ts",
+    "src/server/contracts/admin-ai-generation-task-persistence-contract.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-repository.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
+    "src/server/services/personal-ai-generation-local-browser-experience-service.ts",
+    "src/server/services/personal-ai-generation-local-browser-experience-service.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -24,50 +33,61 @@
     ".env*",
     "package.json",
     "pnpm-lock.yaml",
+    "src/db/schema/**",
+    "drizzle/**",
     "all source and test files outside the exact allowedFiles list",
-    "schema migration database execution permission Provider external service secret deployment PR force-push and non-canonical remote"
+    "schema migration real database execution permission expansion real Provider external service secret deployment PR force-push and non-canonical remote"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/model-config-runtime.ts",
-    "src/server/services/ai-explanation-hint-service.ts",
-    "src/server/services/student-mistake-book-runtime.ts",
-    "src/server/services/ai-explanation-hint-service.test.ts",
-    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-    "tests/unit/phase-8-student-mistake-book-runtime.test.ts"
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+    "src/server/contracts/admin-ai-generation-local-contract.ts",
+    "src/server/contracts/admin-ai-generation-task-persistence-contract.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-repository.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
+    "src/server/services/personal-ai-generation-local-browser-experience-service.ts",
+    "src/server/services/personal-ai-generation-local-browser-experience-service.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts"
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "tests/unit/student-personal-ai-generation-ui.test.ts"
   ],
-  "branch": "fix/ai-explanation-hint-runtime-fallback",
+  "branch": "fix/ai-generation-provider-idempotency",
   "preRedImpactScan": {
-    "authoritativeChain": "persisted model_config catalog -> model-config runtime resolver -> frozen explanation/hint attempt plan -> shared explanation/hint service -> mistake-book governed runtime -> per-attempt ai_call_log",
+    "authoritativeChain": "admin/student UI stable intent -> authenticated route normalization and authorization scope -> canonical task snapshot/digest -> durable ai_generation_task claim -> only created claim may execute Provider/paper assembly -> reused claim returns existing task/result",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 9,
+    "coreFileCount": 18,
     "contingencyFileCount": 2,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "the resolver selects one enabled model before execution and the service catches one runner failure into unavailable, so no runtime fallback attempt or per-attempt log exists",
-    "currentProductionAssembly": "mistake-book objective explanation; the shared service also enforces the hint contract while no current production practice/hint composition exists"
+    "confirmedRootCause": "admin execution persists the idempotency claim only after Provider and paper assembly, personal replay persists first but still enters the Provider bridge, and both UIs rotate identifiers on every unchanged submit",
+    "residualDisposition": {
+      "F-0148": "separate_quota_ledger_and_reservation_root_cause",
+      "F-0149": "separate_full_task_failure_cancel_retry_timeout_recovery_root_cause"
+    }
   },
   "acceptance": [
-    "primary and valid fallback snapshots are resolved once before the request attempt begins",
-    "primary success does not call fallback",
-    "timeout rate-limit 5xx network and explicit output-validation failures may call fallback exactly once",
-    "non-retryable 4xx and unknown failures do not call fallback",
-    "primary failure plus fallback success records two logs using the respective model snapshots",
-    "both permitted attempts failing returns unavailable and records both failed attempts",
-    "disabled missing cross-function fixture or otherwise invalid fallback is never executed",
-    "pre-disabled primary preserves the existing direct fallback selection behavior",
-    "subjective scoring continues to disable fallback",
-    "no real Provider external database schema dependency permission or mechanism change"
+    "admin and personal unchanged retries reuse one stable client intent while a successful accepted response releases it for a later new intent",
+    "admin claim and canonical snapshot conflict decision occur before Provider paper assembly result persistence or other side effects",
+    "only the created admin claim executes Provider and paper assembly; concurrent or later reuse returns the existing task status and optional result with zero Provider calls",
+    "personal reused tasks never enter Provider paper assembly or result materialization",
+    "same owner and idempotency identity with a different task type canonical input or authorization constraint fails closed",
+    "authorization scoping prevents one raw client intent from crossing owner or selected authorization boundaries",
+    "no schema migration real database execution quota semantics permission Provider configuration dependency or mechanism change"
   ],
   "validationCommands": [
     {
-      "name": "ai-explanation-hint-runtime-fallback-focused",
+      "name": "ai-generation-provider-idempotency-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -75,46 +95,59 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/ai-explanation-hint-service.test.ts",
-        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
+        "src/server/services/personal-ai-generation-local-browser-experience-service.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "tests/unit/student-personal-ai-generation-ui.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "ai-explanation-hint-runtime-fallback-lint",
+      "name": "ai-generation-provider-idempotency-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/server/services/model-config-runtime.ts",
-        "src/server/services/ai-explanation-hint-service.ts",
-        "src/server/services/ai-explanation-hint-service.test.ts",
-        "src/server/services/student-mistake-book-runtime.ts",
-        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
-        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts"
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+        "tests/unit/student-personal-ai-generation-ui.test.ts",
+        "src/server/contracts/admin-ai-generation-local-contract.ts",
+        "src/server/contracts/admin-ai-generation-task-persistence-contract.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
+        "src/server/services/personal-ai-generation-local-browser-experience-service.ts",
+        "src/server/services/personal-ai-generation-local-browser-experience-service.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts"
       ]
     },
     {
-      "name": "ai-explanation-hint-runtime-fallback-typecheck",
+      "name": "ai-generation-provider-idempotency-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "ai-explanation-hint-runtime-fallback-build",
+      "name": "ai-generation-provider-idempotency-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "ai-explanation-hint-runtime-fallback-format",
+      "name": "ai-generation-provider-idempotency-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -125,16 +158,25 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/services/model-config-runtime.ts",
-        "src/server/services/ai-explanation-hint-service.ts",
-        "src/server/services/ai-explanation-hint-service.test.ts",
-        "src/server/services/student-mistake-book-runtime.ts",
-        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
-        "tests/unit/phase-8-student-mistake-book-runtime.test.ts"
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+        "src/server/contracts/admin-ai-generation-local-contract.ts",
+        "src/server/contracts/admin-ai-generation-task-persistence-contract.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
+        "src/server/services/personal-ai-generation-local-browser-experience-service.ts",
+        "src/server/services/personal-ai-generation-local-browser-experience-service.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts"
       ]
     },
     {
-      "name": "ai-explanation-hint-runtime-fallback-diff-check",
+      "name": "ai-generation-provider-idempotency-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -142,7 +184,7 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
@@ -152,7 +194,7 @@
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "bounded_provider_adapter_pure_logic_and_local_mock_validation",
+    "category": "bounded_database_application_logic_provider_adapter_pure_logic_and_low_risk_UI",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -160,24 +202,40 @@
     "dependencyOrMechanismChange": false
   },
   "validationEvidence": {
-    "focused": "5 files and 38 tests passed after final product formatting",
-    "lint": "targeted ESLint passed",
+    "red": "personal reused route executed Provider once before the fix",
+    "focused": "9 files 240 tests passed serially before final canonicalization tightening; affected repository and route tests passed after tightening",
+    "lint": "targeted allowed source and tests passed",
     "typecheck": "tsc --noEmit passed",
-    "build": "Next.js production build passed with one pre-existing NFT trace warning outside this diff",
-    "formatAndDiff": "Prettier applied before freeze; git diff check pending final state update",
-    "mainThreadAdversarialReview": "passed: fallback is limited to explanation/hint, invalid cross-function/self/fixture fallback cannot execute, non-retryable 4xx and unknown errors stop after primary, each actual attempt log persists before the next attempt, log failure stops fallback, failure completion tokens are zero, snapshots are copied before execution, scoring remains single-model, and no real Provider call or scope expansion exists"
+    "build": "Next 16.2.6 production build passed with one pre-existing NFT tracing warning",
+    "formatAndDiff": "Prettier applied within allowedFiles and git diff --check passed"
+  },
+  "adversarialReview": {
+    "status": "green",
+    "proved": [
+      "admin durable claim and snapshot conflict decision precede Provider and paper assembly",
+      "admin replay returns existing pending or completed result state with zero Provider execution",
+      "personal replay returns existing state without entering the route Provider bridge",
+      "stable client retry intent is retained after failure and released after accepted success",
+      "snapshot digest binds task type canonical input workspace actor owner and authorization constraints",
+      "equivalent knowledge-node sets canonicalize while semantic drift fails closed",
+      "no schema migration real database Provider permission quota dependency or mechanism change"
+    ],
+    "residuals": [
+      "F-0148 retains quota ledger and reservation semantics",
+      "F-0149 retains failed cancelled retry timeout and pending task recovery semantics"
+    ]
   },
   "conditionalCloseout": true,
   "closeoutConditions": [
     "actual diff remains an exact subset of allowedFiles",
-    "all validation and the main-thread adversarial review are green",
-    "no real Provider call capability configuration credential or external side effect is added",
+    "all focused regression lint typecheck build format diff and main-thread adversarial review are green",
+    "no schema migration real database permission quota Provider configuration dependency or mechanism scope appears",
     "one commit ff-only canonical push sync and cleanup under the bounded-medium standing approval"
   ],
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22",
-    "findingIds": ["F-0175"],
-    "commit": "de3c630a960614100993e72c2f44656709dbb30b",
+    "taskId": "p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22",
+    "findingIds": ["F-0178"],
+    "commit": "536dffb627838e9974e866e424509645c9f0944b",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -185,8 +243,8 @@
   },
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
-    "nextFinding": "P1-RC-07 residual root-cause bundle JIT",
-    "disposition": "after F-0178 closeout continue without reopening closed F-0035 F-0039 F-0104 F-0159 F-0175"
+    "nextFinding": "F-0025",
+    "disposition": "F-0025 separate from F-0148 quota ledger and F-0149 full task lifecycle"
   },
   "push": {
     "target": "origin/master",

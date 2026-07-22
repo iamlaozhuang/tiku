@@ -50,6 +50,12 @@ function createPersistenceInput(
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
     redactionStatus: "redacted",
+    generationSnapshotVersion: 1,
+    generationInputSnapshot: {
+      generationParameters: { profession: "marketing" },
+    },
+    generationConstraintSnapshot: { ownerPublicId: "organization_public_901" },
+    generationSnapshotDigest: `sha256:${"a".repeat(64)}`,
     ...overrides,
   };
 }
@@ -93,6 +99,10 @@ describe("admin AI generation task persistence DB adapter", () => {
       is_quota_available: true,
       is_runtime_config_ready: true,
       ai_call_log_public_id: null,
+      generation_snapshot_version: 1,
+      generation_input_snapshot: input.generationInputSnapshot,
+      generation_constraint_snapshot: input.generationConstraintSnapshot,
+      generation_snapshot_digest: input.generationSnapshotDigest,
       requested_at: input.requestedAt,
     });
     for (const protectedTerm of protectedAiTerms()) {
@@ -178,6 +188,10 @@ describe("admin AI generation task persistence DB adapter", () => {
       source_paper_public_id: null,
       content_visibility: "summary_only",
       redaction_status: "redacted",
+      generation_snapshot_version: input.generationSnapshotVersion,
+      generation_input_snapshot: input.generationInputSnapshot,
+      generation_constraint_snapshot: input.generationConstraintSnapshot,
+      generation_snapshot_digest: input.generationSnapshotDigest,
     });
 
     expect(row satisfies AdminAiGenerationTaskPersistenceRow).toMatchObject({
@@ -195,6 +209,10 @@ describe("admin AI generation task persistence DB adapter", () => {
       paper_write_status: "blocked_without_follow_up_task",
       content_visibility: "summary_only",
       redaction_status: "redacted",
+      generation_snapshot_version: input.generationSnapshotVersion,
+      generation_input_snapshot: input.generationInputSnapshot,
+      generation_constraint_snapshot: input.generationConstraintSnapshot,
+      generation_snapshot_digest: input.generationSnapshotDigest,
     });
     expect(JSON.stringify(row)).not.toMatch(/"id":/u);
     expect(JSON.stringify(row)).not.toContain("metadata_id");
@@ -238,6 +256,10 @@ describe("admin AI generation task persistence DB adapter", () => {
       source_paper_public_id: null,
       content_visibility: "summary_only",
       redaction_status: "redacted",
+      generation_snapshot_version: input.generationSnapshotVersion,
+      generation_input_snapshot: input.generationInputSnapshot,
+      generation_constraint_snapshot: input.generationConstraintSnapshot,
+      generation_snapshot_digest: input.generationSnapshotDigest,
     });
 
     expect(providerExecutedRow).toMatchObject({
@@ -283,6 +305,10 @@ describe("admin AI generation task persistence DB adapter", () => {
         source_paper_public_id: null,
         content_visibility: "summary_only",
         redaction_status: "redacted",
+        generation_snapshot_version: input.generationSnapshotVersion,
+        generation_input_snapshot: input.generationInputSnapshot,
+        generation_constraint_snapshot: input.generationConstraintSnapshot,
+        generation_snapshot_digest: input.generationSnapshotDigest,
       }),
     ).toThrow("unsafe admin AI generation provider boundary");
   });

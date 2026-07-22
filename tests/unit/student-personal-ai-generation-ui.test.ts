@@ -2977,6 +2977,82 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
   });
 
+  it("reuses request identifiers for an unchanged failed personal AI generation retry", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Array<Record<string, unknown>> = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          submittedBodies.push(
+            JSON.parse(String(init?.body)) as Record<string, unknown>,
+          );
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              submittedBodies.length === 1
+                ? {
+                    code: 500018,
+                    message: "Personal AI generation request failed.",
+                    data: null,
+                  }
+                : localExperienceResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+    await waitFor(() => expect(submittedBodies).toHaveLength(2));
+
+    expect(submittedBodies[1]).toMatchObject({
+      requestPublicId: submittedBodies[0].requestPublicId,
+      taskPublicId: submittedBodies[0].taskPublicId,
+      idempotencyKeyHash: submittedBodies[0].idempotencyKeyHash,
+    });
+  });
+
   it("refreshes server-backed request history after successful submit", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = createPersonalAiGenerationFetchMockWithHistorySequence([

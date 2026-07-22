@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 
 import { createContentAdminFormalReviewedDraftPayload } from "@/lib/admin-ai-generation-formal-draft-payload";
 
@@ -76,6 +76,7 @@ import type {
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
+import { AdminAiGenerationSnapshotConflictError } from "../repositories/admin-ai-generation-task-persistence-repository";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import {
   createPostgresOrganizationTrainingRepository,
@@ -137,6 +138,7 @@ type AdminAiGenerationRuntimeBridgeControlInput =
 type AdminAiGenerationRequestPublicIdInput = {
   actorPublicId: string;
   generationKind: AdminAiGenerationKind;
+  idempotencyKey: string;
   taskPublicId?: string | null;
   workspace: AdminAiGenerationWorkspace;
 };
@@ -229,6 +231,7 @@ export type AdminAiGenerationRuntimeBridgeControl = {
 const ADMIN_AI_GENERATION_PERMISSION_DENIED_CODE = 403011;
 const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
 const ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE = 409015;
+const ADMIN_AI_GENERATION_IDEMPOTENCY_CONFLICT_CODE = 409016;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
 const ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
@@ -270,6 +273,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function normalizeGenerationKind(value: unknown): AdminAiGenerationKind | null {
   return value === "question" || value === "paper" ? value : null;
+}
+
+function normalizeIdempotencyKey(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(
+    normalized,
+  )
+    ? normalized
+    : null;
 }
 
 const routeIntegratedProfessionValues = [
@@ -551,7 +568,7 @@ function createDefaultRequestPublicId(
     input.workspace,
     input.generationKind,
     input.actorPublicId,
-    randomUUID().replaceAll("-", ""),
+    input.idempotencyKey.replaceAll("-", ""),
   ].join("_");
 }
 
@@ -559,6 +576,7 @@ function createAdminAiGenerationPolicyInput(input: {
   actor: AdminAiGenerationActor;
   generationKind: AdminAiGenerationKind;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
+  idempotencyKey: string;
   organizationAuthorizationContext?: EffectiveAuthorizationContextDto;
   requestPublicId: string;
   workspace: AdminAiGenerationWorkspace;
@@ -580,8 +598,15 @@ function createAdminAiGenerationPolicyInput(input: {
     requestScopeIdentity,
     workspace: input.workspace,
   });
-  const idempotencyScopeSegment =
-    createPublicIdScopeSegment(requestScopeIdentity);
+  const idempotencyScopeDigest = createHash("sha256")
+    .update(
+      JSON.stringify([
+        input.workspace,
+        input.actor.publicId,
+        input.idempotencyKey,
+      ]),
+    )
+    .digest("hex");
 
   if (input.workspace === "content") {
     return {
@@ -600,7 +625,7 @@ function createAdminAiGenerationPolicyInput(input: {
       isScopeAllowed: true,
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
-      idempotencyKeyHash: `sha256:content_${input.generationKind}_${input.actor.publicId}_${idempotencyScopeSegment}`,
+      idempotencyKeyHash: `sha256:admin_${idempotencyScopeDigest}`,
       existingTaskPublicId: null,
       existingTaskStatus: null,
       resultPublicId: null,
@@ -640,7 +665,7 @@ function createAdminAiGenerationPolicyInput(input: {
     isScopeAllowed: true,
     isQuotaAvailable: true,
     isRuntimeConfigReady: true,
-    idempotencyKeyHash: `sha256:organization_${input.generationKind}_${input.actor.publicId}_${idempotencyScopeSegment}`,
+    idempotencyKeyHash: `sha256:admin_${idempotencyScopeDigest}`,
     existingTaskPublicId: null,
     existingTaskStatus: null,
     resultPublicId: null,
@@ -930,7 +955,8 @@ async function buildAdminAiGenerationLocalContract(input: {
     requestPublicIdInput: AdminAiGenerationRequestPublicIdInput,
   ) => string;
   generationKind: AdminAiGenerationKind;
-  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  idempotencyKey: string;
   organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
   organizationAuthorizationContext?: EffectiveAuthorizationContextDto;
   questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
@@ -945,6 +971,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   const requestPublicId = input.createRequestPublicId({
     actorPublicId: input.actor.publicId,
     generationKind: input.generationKind,
+    idempotencyKey: input.idempotencyKey,
     taskPublicId: null,
     workspace: input.workspace,
   });
@@ -968,17 +995,76 @@ async function buildAdminAiGenerationLocalContract(input: {
   const resultPublicId = createAdminAiGenerationResultPublicId(
     taskRequest.taskPublicId,
   );
-  const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
-    runtimeBridgeControl: input.runtimeBridgeControl,
-    runtimeBridgeInput: createAdminAiGenerationRuntimeBridgeInput({
-      actor: input.actor,
-      generationKind: input.generationKind,
+  const runtimeBridgeInput = createAdminAiGenerationRuntimeBridgeInput({
+    actor: input.actor,
+    generationKind: input.generationKind,
+    generationParameters: input.generationParameters,
+    requestPublicId,
+    resultPublicId,
+    taskRequest,
+    workspace: input.workspace,
+  });
+  const claimLocalContract = {
+    runtimeStatus: "local_contract_only",
+    workspace: input.workspace,
+    generationKind: input.generationKind,
+    flowStatus: "accepted",
+    redactionStatus: "redacted",
+    taskRequest,
+    resultState: {
+      status: taskRequest.initialStatus ?? "pending",
+      taskPublicId: taskRequest.taskPublicId,
+      resultPublicId: null,
+      contentVisibility: "summary_only",
+      evidenceStatus: "none",
+      citationCount: 0,
+      redactionStatus: "redacted",
+    },
+    runtimeBridge:
+      createDefaultAdminAiGenerationRuntimeBridge(runtimeBridgeInput),
+    formalContentBoundary: {
+      questionWriteStatus: "blocked_without_follow_up_task",
+      paperWriteStatus: "blocked_without_follow_up_task",
+    },
+    organizationOwnedDraftBoundary:
+      createAdminAiGenerationOrganizationOwnedDraftBoundary({
+        workspace: input.workspace,
+        ownerPublicId: taskRequest.ownerPublicId,
+        organizationPublicId: taskRequest.organizationPublicId,
+      }),
+    paperAssembly: null,
+  } satisfies AdminAiGenerationLocalContractBaseDto;
+  let taskPersistence: AdminAiGenerationTaskPersistenceResult;
+
+  try {
+    taskPersistence = await input.taskPersistenceRepository.createOrReuseTask({
+      localContract: claimLocalContract,
       generationParameters: input.generationParameters,
       requestPublicId,
-      resultPublicId,
-      taskRequest,
-      workspace: input.workspace,
-    }),
+      requestedAt,
+    });
+  } catch (error) {
+    if (error instanceof AdminAiGenerationSnapshotConflictError) {
+      return createErrorResponse(
+        ADMIN_AI_GENERATION_IDEMPOTENCY_CONFLICT_CODE,
+        "Admin AI generation idempotency input conflicts with the existing task.",
+      );
+    }
+
+    throw error;
+  }
+
+  if (taskPersistence.persistenceStatus === "reused") {
+    return createReusedAdminAiGenerationLocalContractResponse({
+      localContract: claimLocalContract,
+      resultPersistenceRepository: input.resultPersistenceRepository,
+      taskPersistence,
+    });
+  }
+
+  const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
+    runtimeBridgeControl: input.runtimeBridgeControl,
+    runtimeBridgeInput,
   });
   const expectedStructuredPreviewKind =
     createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
@@ -1043,12 +1129,6 @@ async function buildAdminAiGenerationLocalContract(input: {
     paperAssembly: paperAssemblyResult.paperAssembly,
   } satisfies AdminAiGenerationLocalContractBaseDto;
 
-  const taskPersistence =
-    await input.taskPersistenceRepository.createOrReuseTask({
-      localContract,
-      requestPublicId,
-      requestedAt,
-    });
   const organizationTrainingPaperDraftDetail =
     await resolveOrganizationTrainingPaperDraftDetailSnapshot({
       localContractSummary: localContract,
@@ -1145,22 +1225,84 @@ async function resolveAdminAiGenerationPaperAssembly(input: {
   };
 }
 
+async function createReusedAdminAiGenerationLocalContractResponse(input: {
+  localContract: AdminAiGenerationLocalContractBaseDto;
+  resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
+  taskPersistence: AdminAiGenerationTaskPersistenceResult;
+}): Promise<ApiResponse<AdminAiGenerationLocalContractDto>> {
+  const task = input.taskPersistence.task;
+  if (task.ownerType === "personal") {
+    throw new Error("invalid admin AI generation task owner boundary.");
+  }
+  const existingResult =
+    await input.resultPersistenceRepository.findDraftResultByTaskPublicId({
+      workspace: task.workspace,
+      ownerType: task.ownerType,
+      ownerPublicId: task.ownerPublicId,
+      taskPublicId: task.taskPublicId,
+    });
+  const generatedResult: AdminAiGenerationResultPersistenceResult | null =
+    existingResult === null
+      ? null
+      : {
+          persistenceStatus: "reused",
+          result: existingResult,
+        };
+  const localContract =
+    generatedResult === null
+      ? {
+          ...input.localContract,
+          resultState: {
+            ...input.localContract.resultState,
+            status: task.status,
+            taskPublicId: task.taskPublicId,
+            resultPublicId: task.resultPublicId,
+            evidenceStatus: task.evidenceStatus,
+            citationCount: task.citationCount,
+          },
+        }
+      : createAdminAiGenerationResolvedLocalContract({
+          generatedResult,
+          localContract: input.localContract,
+        });
+
+  return createSuccessResponse({
+    ...localContract,
+    taskPersistence:
+      mapAdminAiGenerationTaskPersistenceResultToLocalContractDto({
+        generatedResult,
+        taskPersistence: input.taskPersistence,
+      }),
+    generatedResult:
+      generatedResult === null
+        ? null
+        : mapAdminAiGenerationResultPersistenceResultToLocalContractDto(
+            generatedResult,
+          ),
+  });
+}
+
 function mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(input: {
-  generatedResult: AdminAiGenerationResultPersistenceResult;
+  generatedResult: AdminAiGenerationResultPersistenceResult | null;
   taskPersistence: AdminAiGenerationTaskPersistenceResult;
 }): AdminAiGenerationLocalContractTaskPersistenceDto {
   const result = input.taskPersistence;
+  const generatedResult = input.generatedResult?.result ?? null;
 
   return {
     persistenceStatus: result.persistenceStatus,
     requestPublicId: result.task.requestPublicId,
     taskPublicId: result.task.taskPublicId,
-    status: "succeeded",
-    resultPublicId: input.generatedResult.result.resultPublicId,
+    status: generatedResult === null ? result.task.status : "succeeded",
+    resultPublicId:
+      generatedResult?.resultPublicId ?? result.task.resultPublicId,
     contentVisibility: result.task.contentVisibility,
     evidenceStatus:
-      input.generatedResult.result.evidenceReference.evidenceStatus,
-    citationCount: input.generatedResult.result.evidenceReference.citationCount,
+      generatedResult?.evidenceReference.evidenceStatus ??
+      result.task.evidenceStatus,
+    citationCount:
+      generatedResult?.evidenceReference.citationCount ??
+      result.task.citationCount,
     redactionStatus: result.task.redactionStatus,
   };
 }
@@ -2110,8 +2252,15 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
                 isRecord(body) ? body.generationParameters : null,
                 resolveTaskType(generationKind),
               );
+        const idempotencyKey = normalizeIdempotencyKey(
+          isRecord(body) ? body.idempotencyKey : null,
+        );
 
-        if (generationKind === null || generationParameters === null) {
+        if (
+          generationKind === null ||
+          generationParameters === null ||
+          idempotencyKey === null
+        ) {
           return createJsonResponse(invalidAdminAiGenerationRequestResponse);
         }
 
@@ -2144,6 +2293,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             createRequestPublicId,
             generationKind,
             generationParameters,
+            idempotencyKey,
             organizationTrainingRepository,
             organizationAuthorizationContext:
               organizationAuthorizationContext ?? undefined,

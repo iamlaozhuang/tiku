@@ -631,6 +631,55 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(screen.queryByText("rawOutput")).not.toBeInTheDocument();
   });
 
+  it("reuses one idempotency key for an unchanged failed admin generation retry", async () => {
+    const fetchMock = mockAdminAiGenerationFetch({
+      requestResponse: {
+        code: 409015,
+        message: "Admin AI generation is temporarily unavailable.",
+        data: {
+          rejectionReason: "provider_execution_unavailable",
+          runtimeBridgeStatus: "provider_call_blocked",
+          providerCallExecuted: false,
+          providerConfigurationRead: false,
+          envSecretAccessed: false,
+          costCalibrationExecuted: false,
+          redactionStatus: "redacted",
+        },
+      },
+    });
+
+    render(
+      <AdminAiGenerationEntryPage
+        generationKind="question"
+        workspace="content"
+      />,
+    );
+
+    const submitButton = await screen.findByRole("button", {
+      name: "生成题目草稿",
+    });
+    fireEvent.click(submitButton);
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.filter(([, init]) => init?.method === "POST"),
+      ).toHaveLength(1);
+    });
+    fireEvent.click(submitButton);
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.filter(([, init]) => init?.method === "POST"),
+      ).toHaveLength(2);
+    });
+
+    const postBodies = fetchMock.mock.calls
+      .filter(([, init]) => init?.method === "POST")
+      .map(([, init]) => JSON.parse(String(init?.body)));
+    expect(postBodies[0].idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u,
+    );
+    expect(postBodies[1].idempotencyKey).toBe(postBodies[0].idempotencyKey);
+  });
+
   it("uses business wording for AI paper controls instead of schema identifiers", async () => {
     mockAdminAiGenerationFetch();
 

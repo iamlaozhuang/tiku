@@ -75,6 +75,10 @@ export type AdminAiGenerationTaskPersistenceDbRow = {
   source_question_public_id: string | null;
   source_paper_public_id: string | null;
   redaction_status: string;
+  generation_snapshot_version: number | null;
+  generation_input_snapshot: unknown | null;
+  generation_constraint_snapshot: unknown | null;
+  generation_snapshot_digest: string | null;
 };
 
 const adminAiGenerationTaskPersistenceDbSelection = {
@@ -115,6 +119,11 @@ const adminAiGenerationTaskPersistenceDbSelection = {
     adminAiGenerationTaskMetadata.source_question_public_id,
   source_paper_public_id: adminAiGenerationTaskMetadata.source_paper_public_id,
   redaction_status: adminAiGenerationTaskMetadata.redaction_status,
+  generation_snapshot_version: aiGenerationTask.generation_snapshot_version,
+  generation_input_snapshot: aiGenerationTask.generation_input_snapshot,
+  generation_constraint_snapshot:
+    aiGenerationTask.generation_constraint_snapshot,
+  generation_snapshot_digest: aiGenerationTask.generation_snapshot_digest,
 };
 
 export function createAdminAiGenerationTaskMetadataPublicId(
@@ -154,6 +163,10 @@ export function createAdminAiGenerationTaskInsertValue(
     is_quota_available: true,
     is_runtime_config_ready: true,
     ai_call_log_public_id: null,
+    generation_snapshot_version: input.generationSnapshotVersion,
+    generation_input_snapshot: input.generationInputSnapshot,
+    generation_constraint_snapshot: input.generationConstraintSnapshot,
+    generation_snapshot_digest: input.generationSnapshotDigest,
     requested_at: input.requestedAt,
     created_at: input.requestedAt,
     updated_at: input.requestedAt,
@@ -395,6 +408,10 @@ export function mapAdminAiGenerationTaskPersistenceDbRowToRow(
     source_question_public_id: row.source_question_public_id,
     source_paper_public_id: row.source_paper_public_id,
     redaction_status: toRedactionStatus(row.redaction_status),
+    generation_snapshot_version: row.generation_snapshot_version,
+    generation_input_snapshot: row.generation_input_snapshot,
+    generation_constraint_snapshot: row.generation_constraint_snapshot,
+    generation_snapshot_digest: row.generation_snapshot_digest,
   };
 }
 

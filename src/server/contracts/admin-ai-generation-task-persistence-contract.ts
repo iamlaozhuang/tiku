@@ -15,6 +15,7 @@ import type {
   AiGenerationTaskResultKind,
 } from "../models/ai-generation-task-request";
 import type { EvidenceStatus } from "../models/ai-rag";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "./route-integrated-provider-execution-contract";
 
 export type AdminAiGenerationPersistenceTaskType = Extract<
   AiGenerationTaskType,
@@ -63,6 +64,10 @@ export type CreateAdminAiGenerationTaskPersistenceInput = {
   sourceQuestionPublicId: string | null;
   sourcePaperPublicId: string | null;
   redactionStatus: AdminAiGenerationTaskPersistenceRedactionStatus;
+  generationSnapshotVersion: 1 | null;
+  generationInputSnapshot: unknown | null;
+  generationConstraintSnapshot: unknown | null;
+  generationSnapshotDigest: string | null;
 };
 
 export type AdminAiGenerationTaskPersistenceRow = {
@@ -98,6 +103,10 @@ export type AdminAiGenerationTaskPersistenceRow = {
   source_question_public_id: string | null;
   source_paper_public_id: string | null;
   redaction_status: AdminAiGenerationTaskPersistenceRedactionStatus;
+  generation_snapshot_version: number | null;
+  generation_input_snapshot: unknown | null;
+  generation_constraint_snapshot: unknown | null;
+  generation_snapshot_digest: string | null;
 };
 
 export type FindAdminAiGenerationTaskByIdempotencyKeyQuery = {
@@ -171,6 +180,7 @@ export type AdminAiGenerationTaskPersistenceResult = {
 
 export type CreateOrReuseAdminAiGenerationTaskInput = {
   localContract: import("./admin-ai-generation-local-contract").AdminAiGenerationLocalContractBaseDto;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   requestPublicId: string;
   requestedAt: Date;
 };

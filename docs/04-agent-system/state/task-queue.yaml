@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
+  currentTaskId: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -301,7 +301,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
     - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     - p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
+    - p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
     - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
     - p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
@@ -504,12 +506,84 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22: closed
     p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22: closed
     p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22: closed
-    p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22: in_progress
+    p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22: closed
+    p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22: in_progress
 activeTasks:
+  - id: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
+    title: AI generation pre-provider idempotency claim
+    phase: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: bounded_database_application_logic_provider_adapter_pure_logic_and_low_risk_UI
+    productClosureContribution: closes_F0025
+    branch: fix/ai-generation-provider-idempotency
+    objective: claim a stable canonical generation intent before Provider or paper assembly and return reused task state without side effects
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-07
+    findingIds:
+      - F-0025
+    executionStage: candidate_validated_pending_kernel_commit_ff_only_push_sync_cleanup
+    findingStatus: validated_candidate_pending_closeout
+    findingDisposition: F0025_provider_idempotency_partition_validated_F0148_quota_and_F0149_full_lifecycle_remain_separate
+    riskBoundary:
+      category: bounded_database_application_logic_provider_adapter_pure_logic_and_low_risk_UI
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      approvedBaseSha: 536dffb627838e9974e866e424509645c9f0944b
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      providerOrRealExternalCall: false
+      dependencyChange: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: admin_student_UI_stable_intent_to_authenticated_route_scope_to_canonical_snapshot_to_durable_claim_to_created_only_Provider_and_reused_task_result
+      coreFiles: 18
+      contingencyFiles: 2
+      preflightTestFiles: 9
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: admin_claim_occurs_after_Provider_personal_reuse_still_runs_Provider_and_both_UIs_rotate_unchanged_retry_identifiers
+      residualDisposition: F0148_quota_ledger_separate_F0149_full_lifecycle_separate
+    validationEvidence:
+      focused: 9_files_240_tests_GREEN_plus_post_review_affected_GREEN
+      lint: targeted_GREEN
+      typecheck: tsc_noEmit_GREEN
+      build: next_production_build_GREEN_with_preexisting_NFT_warning
+      adversarialReview: GREEN_no_Provider_on_reuse_snapshot_conflict_fail_closed_no_scope_expansion
+    expectedAcceptance:
+      - unchanged_UI_retry_reuses_one_stable_intent_until_an_accepted_response
+      - admin_claim_and_snapshot_conflict_decision_happen_before_Provider_paper_assembly_and_result_persistence
+      - only_created_admin_claim_executes_Provider_and_reuse_returns_current_task_and_optional_result
+      - personal_reuse_never_executes_Provider_paper_assembly_or_result_materialization
+      - same_key_different_canonical_input_or_authorization_constraint_fails_closed
+      - raw_client_intent_is_scoped_to_owner_and_selected_authorization
+      - no_schema_migration_real_database_quota_permission_real_Provider_dependency_or_mechanism_change
+    closeoutProjection:
+      current: candidate_validated_pending_kernel_commit_ff_only_push_sync_cleanup
+      triggers: TDD_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0025_closed_then_continue_RC07_residual_queue
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_covered_by_bounded_medium_standing_approval
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: JIT_root_cause_TDD_implementation_and_adversarial_validation
+      mechanismOverhead: task_contract_state_updates_and_single_closeout_profile
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
+      findingIds:
+        - F-0178
+      commit: 536dffb627838e9974e866e424509645c9f0944b
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
   - id: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
     title: AI explanation and hint runtime fallback
     phase: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: bounded_provider_adapter_pure_logic
     productClosureContribution: closes_F0178
@@ -519,9 +593,9 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-07
     findingIds:
       - F-0178
-    executionStage: validated_candidate_pending_kernel_commit_and_closeout
-    findingStatus: validated_pending_closeout
-    findingDisposition: F0178_runtime_fallback_validated_pending_closeout
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed
+    findingDisposition: F0178_runtime_fallback_closed
     riskBoundary:
       category: bounded_provider_adapter_pure_logic_and_local_mock_validation
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
@@ -547,7 +621,7 @@ activeTasks:
       - both_attempts_must_fail_before_unavailable_when_fallback_is_permitted
       - scoring_remains_single_model_and_no_real_provider_external_call_is_added
     closeoutProjection:
-      current: validated_candidate_pending_kernel_commit_and_closeout
+      current: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       triggers: TDD_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
       successProjection: F0178_closed_then_continue_RC07_residual_queue
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
@@ -564,7 +638,7 @@ activeTasks:
       lint: targeted_ESLint_passed
       typecheck: tsc_noEmit_passed
       build: Next_production_build_passed_with_pre_existing_NFT_trace_warning_outside_diff
-      formatAndDiff: final_state_format_and_diff_check_pending
+      formatAndDiff: passed
       review: passed_main_thread_adversarial_review_fallback_limited_to_explanation_hint_invalid_fallback_never_executes_logs_persist_before_next_attempt_log_failure_stops_fallback_failed_completion_tokens_zero_snapshots_copied_scoring_single_model_no_real_provider
     previousTaskCloseout:
       taskId: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
@@ -576,6 +650,12 @@ activeTasks:
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
+    closeout:
+      commit: 536dffb627838e9974e866e424509645c9f0944b
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     title: Learning suggestion blocked-gate static closure
     phase: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22

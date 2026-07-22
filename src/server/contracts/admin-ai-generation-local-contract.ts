@@ -189,7 +189,7 @@ export type AdminAiGenerationLocalContractGeneratedResultDto = {
 export type AdminAiGenerationLocalContractDto =
   AdminAiGenerationLocalContractBaseDto & {
     taskPersistence: AdminAiGenerationLocalContractTaskPersistenceDto;
-    generatedResult: AdminAiGenerationLocalContractGeneratedResultDto;
+    generatedResult: AdminAiGenerationLocalContractGeneratedResultDto | null;
   };
 
 export type AdminAiGenerationTaskHistoryGeneratedResultDto = {

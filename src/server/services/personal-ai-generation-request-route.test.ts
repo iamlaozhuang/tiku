@@ -3674,6 +3674,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("uses reused persistent task metadata for idempotent local browser POST responses", async () => {
+    const providerExecutorCalls: unknown[] = [];
     const requestRepository = createRequestRepository([], {
       createResult: {
         persistenceStatus: "reused",
@@ -3695,6 +3696,33 @@ describe("personal AI generation request route handlers", () => {
       async () => userContext,
       {
         requestRepository,
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async (executionInput) => {
+              providerExecutorCalls.push(executionInput);
+
+              return {
+                requestCount: 1,
+                resultStatus: "pass",
+                failureCategory: null,
+                durationMs: 37,
+                usageSummary: null,
+                providerErrorSummary: null,
+                visibleGeneratedContent: null,
+              };
+            },
+          },
+        },
       },
     );
 
@@ -3728,6 +3756,7 @@ describe("personal AI generation request route handlers", () => {
       },
     });
     expect(requestRepository.createCalls).toHaveLength(1);
+    expect(providerExecutorCalls).toHaveLength(0);
     expect(serializedPayload).not.toMatch(/"id":/);
     expect(serializedPayload).not.toContain("provider payload");
     expect(serializedPayload).not.toContain("generated content");
