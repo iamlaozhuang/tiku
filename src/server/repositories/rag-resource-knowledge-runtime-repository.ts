@@ -20,6 +20,7 @@ import {
   knowledgeNodeResource,
   modelConfig,
   resource,
+  resourceCleanupJob,
   resourceChunk,
   resourceIndexGeneration,
   resourceUploadOperation,
@@ -52,6 +53,25 @@ import {
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
 import { listKnowledgeNodeQuestionCounts } from "./knowledge-node-reference-count";
+
+const RESOURCE_OBJECT_LOCK_NAMESPACE = 200114;
+const RESOURCE_CLEANUP_FAILURE_DIGEST = createHash("sha256")
+  .update("resource_cleanup_failed")
+  .digest("hex");
+const resourceCleanupExtensions = new Set([
+  "bin",
+  "csv",
+  "doc",
+  "docx",
+  "md",
+  "markdown",
+  "pdf",
+  "ppt",
+  "pptx",
+  "txt",
+  "xls",
+  "xlsx",
+]);
 
 export type ResourceIndexingSource = {
   publicId: string;
@@ -275,6 +295,19 @@ export type ResourceDownloadIdentity = {
   profession: AdminResourceOpsListDto["resources"][number]["profession"];
 };
 
+export type ResourceCleanupIdentity = ResourceDownloadIdentity;
+
+export type DeleteResourceLocalFile = (
+  identity: ResourceCleanupIdentity,
+) => Promise<"deleted" | "missing">;
+
+export type ResourceDeleteResult =
+  | { status: "completed" }
+  | { status: "cancelled" }
+  | { status: "retryable" }
+  | { status: "not_found" }
+  | { status: "conflict" };
+
 export type RagResourceRuntimeRepository = {
   prepareResourceUpload?(
     input: PrepareResourceUploadInput,
@@ -306,6 +339,11 @@ export type RagResourceRuntimeRepository = {
   findResourceDownload?(
     publicId: string,
   ): Promise<ResourceDownloadIdentity | null>;
+  deleteConversionFailedResource?(
+    publicId: string,
+    mutationContext: ResourceMutationContext,
+    deleteLocalFile: DeleteResourceLocalFile,
+  ): Promise<ResourceDeleteResult>;
   updateResourceMarkdown?(
     input: UpdateResourceMarkdownInput,
   ): Promise<UpdateResourceMarkdownResult>;
@@ -359,7 +397,8 @@ export type ResourceMutationContext = {
       | "resource.publish_markdown"
       | "resource.rebuild_vector"
       | "resource.disable"
-      | "resource.enable";
+      | "resource.enable"
+      | "resource.delete";
     metadataSummary: string;
     requestIp: string | null;
     resultStatus?: "success" | "failed";
@@ -606,6 +645,18 @@ function createPostgresRagResourceRuntimeRepository(
     },
     async recordResourceUploadFailure(input) {
       await recordResourceUploadFailure(getDatabase(), input);
+    },
+    async deleteConversionFailedResource(
+      publicId,
+      mutationContext,
+      deleteLocalFile,
+    ) {
+      return deleteConversionFailedResourceWithCleanup(
+        getDatabase(),
+        publicId,
+        mutationContext,
+        deleteLocalFile,
+      );
     },
     async listResources(queryInput) {
       const database = getDatabase();
@@ -1132,12 +1183,37 @@ function createPostgresRagResourceRuntimeRepository(
   };
 }
 
+async function lockResourceObjectIdentity(
+  database: RuntimeDatabase,
+  objectStoragePath: string,
+): Promise<void> {
+  await database.execute(
+    sql`select pg_advisory_xact_lock(${RESOURCE_OBJECT_LOCK_NAMESPACE}, hashtext(${objectStoragePath})) as resource_object_lock`,
+  );
+}
+
 async function prepareResourceUpload(
   database: RuntimeDatabase,
   input: PrepareResourceUploadInput,
 ): Promise<PrepareResourceUploadResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedOperation] = await scopedDatabase
+      .select({
+        object_storage_path: resourceUploadOperation.object_storage_path,
+      })
+      .from(resourceUploadOperation)
+      .where(
+        eq(
+          resourceUploadOperation.idempotency_key_hash,
+          input.idempotencyKeyHash,
+        ),
+      )
+      .limit(1);
+    const lockedObjectStoragePath =
+      unlockedOperation?.object_storage_path ?? input.objectStoragePath;
+
+    await lockResourceObjectIdentity(scopedDatabase, lockedObjectStoragePath);
     const [insertedOperation] = await scopedDatabase
       .insert(resourceUploadOperation)
       .values({
@@ -1160,6 +1236,8 @@ async function prepareResourceUpload(
         request_fingerprint: resourceUploadOperation.request_fingerprint,
         resource_public_id: resourceUploadOperation.resource_public_id,
         object_storage_path: resourceUploadOperation.object_storage_path,
+        file_hash: resourceUploadOperation.file_hash,
+        file_size_byte: resourceUploadOperation.file_size_byte,
         operation_status: resourceUploadOperation.operation_status,
         resource_id: resourceUploadOperation.resource_id,
       });
@@ -1173,6 +1251,8 @@ async function prepareResourceUpload(
             request_fingerprint: resourceUploadOperation.request_fingerprint,
             resource_public_id: resourceUploadOperation.resource_public_id,
             object_storage_path: resourceUploadOperation.object_storage_path,
+            file_hash: resourceUploadOperation.file_hash,
+            file_size_byte: resourceUploadOperation.file_size_byte,
             operation_status: resourceUploadOperation.operation_status,
             resource_id: resourceUploadOperation.resource_id,
           })
@@ -1190,7 +1270,12 @@ async function prepareResourceUpload(
     if (
       operationRow === undefined ||
       operationRow.actor_public_id !== input.actorPublicId ||
-      operationRow.request_fingerprint !== input.requestFingerprint
+      operationRow.request_fingerprint !== input.requestFingerprint ||
+      operationRow.resource_public_id !== input.resourcePublicId ||
+      operationRow.object_storage_path !== lockedObjectStoragePath ||
+      operationRow.object_storage_path !== input.objectStoragePath ||
+      operationRow.file_hash !== input.fileHash ||
+      operationRow.file_size_byte !== input.fileSizeByte
     ) {
       return { status: "conflict", reason: "request_mismatch" };
     }
@@ -1301,6 +1386,22 @@ async function completeResourceUploadReceipt(
 ): Promise<CompleteResourceUploadReceiptResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedOperation] = await scopedDatabase
+      .select({
+        object_storage_path: resourceUploadOperation.object_storage_path,
+      })
+      .from(resourceUploadOperation)
+      .where(eq(resourceUploadOperation.public_id, input.operationPublicId))
+      .limit(1);
+
+    if (unlockedOperation === undefined) {
+      return { status: "conflict" };
+    }
+
+    await lockResourceObjectIdentity(
+      scopedDatabase,
+      unlockedOperation.object_storage_path,
+    );
     const [operationRow] = await scopedDatabase
       .select({
         id: resourceUploadOperation.id,
@@ -1407,6 +1508,23 @@ async function claimResourceConversion(
 ): Promise<ClaimResourceConversionResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedResource] = await scopedDatabase
+      .select({ object_storage_path: resource.object_storage_path })
+      .from(resource)
+      .where(eq(resource.public_id, input.publicId))
+      .limit(1);
+
+    if (unlockedResource === undefined) {
+      return { status: "not_found" };
+    }
+    if (unlockedResource.object_storage_path === null) {
+      return { status: "conflict", reason: "invalid_identity" };
+    }
+
+    await lockResourceObjectIdentity(
+      scopedDatabase,
+      unlockedResource.object_storage_path,
+    );
     const [resourceRow] = await scopedDatabase
       .select({
         id: resource.id,
@@ -1430,6 +1548,8 @@ async function claimResourceConversion(
 
     if (
       resourceRow.object_storage_path === null ||
+      resourceRow.object_storage_path !==
+        unlockedResource.object_storage_path ||
       resourceRow.original_file_name === null ||
       resourceRow.content_hash === null ||
       resourceRow.file_size_byte === null ||
@@ -1506,6 +1626,24 @@ async function finalizeResourceConversion(
       return { status: "conflict" };
     }
 
+    const [unlockedResource] = await scopedDatabase
+      .select({ object_storage_path: resource.object_storage_path })
+      .from(resource)
+      .where(eq(resource.public_id, input.publicId))
+      .limit(1);
+
+    if (
+      unlockedResource === undefined ||
+      unlockedResource.object_storage_path === null
+    ) {
+      return { status: "conflict" };
+    }
+
+    await lockResourceObjectIdentity(
+      scopedDatabase,
+      unlockedResource.object_storage_path,
+    );
+
     const [resourceRow] = await scopedDatabase
       .select({
         id: resource.id,
@@ -1525,6 +1663,8 @@ async function finalizeResourceConversion(
     if (
       resourceRow === undefined ||
       resourceRow.resource_status !== "converting" ||
+      resourceRow.object_storage_path !==
+        unlockedResource.object_storage_path ||
       resourceRow.updated_at.getTime() !== claimVersion.getTime() ||
       resourceRow.object_storage_path !== input.objectStoragePath ||
       resourceRow.original_file_name !== input.originalFileName ||
@@ -1611,6 +1751,518 @@ async function finalizeResourceConversion(
       resource: mapResourceOpsRow(finalizedRow, knowledgeNodePublicIds),
     };
   });
+}
+
+type ResourceDeleteMetadataResult =
+  | { status: "ready" }
+  | { status: "completed" }
+  | { status: "cancelled" }
+  | { status: "not_found" }
+  | { status: "conflict" };
+
+type ResourceCleanupJobRow = {
+  id: number;
+  source_resource_public_id: string;
+  profession: ResourceCleanupIdentity["profession"];
+  object_storage_path: string;
+  original_file_name: string;
+  file_size_byte: number;
+  content_hash: string;
+  cleanup_status:
+    | "pending"
+    | "processing"
+    | "failed"
+    | "completed"
+    | "cancelled";
+  claimed_at: Date | null;
+};
+
+function resourceCleanupJobSelection() {
+  return {
+    id: resourceCleanupJob.id,
+    source_resource_public_id: resourceCleanupJob.source_resource_public_id,
+    profession: resourceCleanupJob.profession,
+    object_storage_path: resourceCleanupJob.object_storage_path,
+    original_file_name: resourceCleanupJob.original_file_name,
+    file_size_byte: resourceCleanupJob.file_size_byte,
+    content_hash: resourceCleanupJob.content_hash,
+    cleanup_status: resourceCleanupJob.cleanup_status,
+    claimed_at: resourceCleanupJob.claimed_at,
+  };
+}
+
+function mapResourceCleanupIdentity(
+  row: Pick<
+    ResourceCleanupJobRow,
+    | "profession"
+    | "object_storage_path"
+    | "original_file_name"
+    | "file_size_byte"
+    | "content_hash"
+  >,
+): ResourceCleanupIdentity {
+  return {
+    profession: row.profession,
+    objectStoragePath: row.object_storage_path,
+    originalFileName: row.original_file_name,
+    fileSizeByte: row.file_size_byte,
+    contentHash: row.content_hash,
+  };
+}
+
+function hasMatchingResourceCleanupIdentity(
+  expected: ResourceCleanupIdentity,
+  actual: ResourceCleanupIdentity,
+): boolean {
+  return (
+    actual.profession === expected.profession &&
+    actual.objectStoragePath === expected.objectStoragePath &&
+    actual.originalFileName === expected.originalFileName &&
+    actual.fileSizeByte === expected.fileSizeByte &&
+    actual.contentHash === expected.contentHash
+  );
+}
+
+function hasCompleteResourceCleanupIdentity(
+  identity: ResourceCleanupIdentity,
+): boolean {
+  const extensionIndex = identity.originalFileName.lastIndexOf(".");
+  const extension =
+    extensionIndex < 0
+      ? ""
+      : identity.originalFileName.slice(extensionIndex + 1).toLowerCase();
+  return (
+    /^[a-f0-9]{64}$/u.test(identity.contentHash) &&
+    Number.isSafeInteger(identity.fileSizeByte) &&
+    identity.fileSizeByte >= 0 &&
+    resourceCleanupExtensions.has(extension) &&
+    identity.objectStoragePath ===
+      `dev/resource/${identity.profession}/${identity.objectStoragePath.split("/")[3] ?? ""}/${identity.contentHash}.${extension}` &&
+    /^dev\/resource\/(?:marketing|logistics|monopoly)\/\d{4}(?:0[1-9]|1[0-2])\/[a-f0-9]{64}\.[a-z0-9]+$/u.test(
+      identity.objectStoragePath,
+    )
+  );
+}
+
+async function deleteConversionFailedResourceMetadata(
+  database: RuntimeDatabase,
+  publicId: string,
+  mutationContext: ResourceMutationContext,
+): Promise<ResourceDeleteMetadataResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedResource] = await scopedDatabase
+      .select({
+        id: resource.id,
+        public_id: resource.public_id,
+        resource_status: resource.resource_status,
+        profession: resource.profession,
+        object_storage_path: resource.object_storage_path,
+        original_file_name: resource.original_file_name,
+        file_size_byte: resource.file_size_byte,
+        content_hash: resource.content_hash,
+      })
+      .from(resource)
+      .where(eq(resource.public_id, publicId))
+      .limit(1);
+
+    if (unlockedResource === undefined) {
+      const [existingJob] = await scopedDatabase
+        .select({ cleanup_status: resourceCleanupJob.cleanup_status })
+        .from(resourceCleanupJob)
+        .where(eq(resourceCleanupJob.source_resource_public_id, publicId))
+        .limit(1);
+      if (existingJob === undefined) {
+        return { status: "not_found" };
+      }
+      if (existingJob.cleanup_status === "completed") {
+        return { status: "completed" };
+      }
+      if (existingJob.cleanup_status === "cancelled") {
+        return { status: "cancelled" };
+      }
+      return { status: "ready" };
+    }
+
+    if (
+      unlockedResource.object_storage_path === null ||
+      unlockedResource.original_file_name === null ||
+      unlockedResource.file_size_byte === null ||
+      unlockedResource.content_hash === null
+    ) {
+      return { status: "conflict" };
+    }
+    const unlockedIdentity: ResourceCleanupIdentity = {
+      profession: unlockedResource.profession,
+      objectStoragePath: unlockedResource.object_storage_path,
+      originalFileName: unlockedResource.original_file_name,
+      fileSizeByte: unlockedResource.file_size_byte,
+      contentHash: unlockedResource.content_hash,
+    };
+    if (!hasCompleteResourceCleanupIdentity(unlockedIdentity)) {
+      return { status: "conflict" };
+    }
+
+    await lockResourceObjectIdentity(
+      scopedDatabase,
+      unlockedIdentity.objectStoragePath,
+    );
+    const [lockedResource] = await scopedDatabase
+      .select({
+        id: resource.id,
+        public_id: resource.public_id,
+        resource_status: resource.resource_status,
+        profession: resource.profession,
+        object_storage_path: resource.object_storage_path,
+        original_file_name: resource.original_file_name,
+        file_size_byte: resource.file_size_byte,
+        content_hash: resource.content_hash,
+      })
+      .from(resource)
+      .where(eq(resource.id, unlockedResource.id))
+      .limit(1)
+      .for("update");
+
+    if (
+      lockedResource === undefined ||
+      lockedResource.object_storage_path === null ||
+      lockedResource.original_file_name === null ||
+      lockedResource.file_size_byte === null ||
+      lockedResource.content_hash === null ||
+      lockedResource.resource_status !== "conversion_failed" ||
+      !hasMatchingResourceCleanupIdentity(unlockedIdentity, {
+        profession: lockedResource.profession,
+        objectStoragePath: lockedResource.object_storage_path,
+        originalFileName: lockedResource.original_file_name,
+        fileSizeByte: lockedResource.file_size_byte,
+        contentHash: lockedResource.content_hash,
+      })
+    ) {
+      return { status: "conflict" };
+    }
+
+    const [knowledgeNodeRelation] = await scopedDatabase
+      .select({ id: knowledgeNodeResource.id })
+      .from(knowledgeNodeResource)
+      .where(eq(knowledgeNodeResource.resource_id, lockedResource.id))
+      .limit(1);
+    const [indexGenerationRelation] = await scopedDatabase
+      .select({ id: resourceIndexGeneration.id })
+      .from(resourceIndexGeneration)
+      .where(eq(resourceIndexGeneration.resource_id, lockedResource.id))
+      .limit(1);
+    const [chunkRelation] = await scopedDatabase
+      .select({ id: resourceChunk.id })
+      .from(resourceChunk)
+      .where(eq(resourceChunk.resource_id, lockedResource.id))
+      .limit(1);
+    if (
+      knowledgeNodeRelation !== undefined ||
+      indexGenerationRelation !== undefined ||
+      chunkRelation !== undefined
+    ) {
+      return { status: "conflict" };
+    }
+
+    const operationRows = await scopedDatabase
+      .select({
+        id: resourceUploadOperation.id,
+        resource_public_id: resourceUploadOperation.resource_public_id,
+        object_storage_path: resourceUploadOperation.object_storage_path,
+        file_hash: resourceUploadOperation.file_hash,
+        file_size_byte: resourceUploadOperation.file_size_byte,
+        operation_status: resourceUploadOperation.operation_status,
+        resource_id: resourceUploadOperation.resource_id,
+      })
+      .from(resourceUploadOperation)
+      .where(
+        or(
+          eq(resourceUploadOperation.resource_id, lockedResource.id),
+          eq(resourceUploadOperation.resource_public_id, publicId),
+        ),
+      )
+      .for("update");
+    const operationRow = operationRows[0];
+    if (
+      operationRows.length !== 1 ||
+      operationRow === undefined ||
+      operationRow.resource_public_id !== publicId ||
+      operationRow.resource_id !== lockedResource.id ||
+      operationRow.operation_status !== "completed" ||
+      operationRow.object_storage_path !== unlockedIdentity.objectStoragePath ||
+      operationRow.file_hash !== unlockedIdentity.contentHash ||
+      operationRow.file_size_byte !== unlockedIdentity.fileSizeByte
+    ) {
+      return { status: "conflict" };
+    }
+
+    const [tombstonedOperation] = await scopedDatabase
+      .update(resourceUploadOperation)
+      .set({
+        resource_id: null,
+        updated_at: new Date(),
+      })
+      .where(
+        and(
+          eq(resourceUploadOperation.id, operationRow.id),
+          eq(resourceUploadOperation.operation_status, "completed"),
+          eq(resourceUploadOperation.resource_id, lockedResource.id),
+        ),
+      )
+      .returning({ id: resourceUploadOperation.id });
+    if (tombstonedOperation === undefined) {
+      return { status: "conflict" };
+    }
+    const [deletedResource] = await scopedDatabase
+      .delete(resource)
+      .where(
+        and(
+          eq(resource.id, lockedResource.id),
+          eq(resource.resource_status, "conversion_failed"),
+          eq(resource.object_storage_path, unlockedIdentity.objectStoragePath),
+          eq(resource.content_hash, unlockedIdentity.contentHash),
+        ),
+      )
+      .returning({ public_id: resource.public_id });
+    if (deletedResource === undefined) {
+      return { status: "conflict" };
+    }
+
+    await appendResourceMutationAuditLog(
+      scopedDatabase,
+      {
+        ...mutationContext,
+        auditLog: {
+          ...mutationContext.auditLog,
+          actionType: "resource.delete",
+          metadataSummary: "redacted resource delete metadata",
+        },
+      },
+      deletedResource.public_id,
+    );
+    const [insertedJob] = await scopedDatabase
+      .insert(resourceCleanupJob)
+      .values({
+        public_id: `resource-cleanup-job-${randomUUID()}`,
+        source_resource_public_id: deletedResource.public_id,
+        profession: unlockedIdentity.profession,
+        object_storage_path: unlockedIdentity.objectStoragePath,
+        original_file_name: unlockedIdentity.originalFileName,
+        file_size_byte: unlockedIdentity.fileSizeByte,
+        content_hash: unlockedIdentity.contentHash,
+        cleanup_status: "pending",
+      })
+      .returning({ id: resourceCleanupJob.id });
+    if (insertedJob === undefined) {
+      throw new Error("Resource cleanup job was not enqueued.");
+    }
+    return { status: "ready" };
+  });
+}
+
+async function markResourceCleanupFailed(
+  database: RuntimeDatabase,
+  jobId: number,
+): Promise<ResourceDeleteResult> {
+  await database
+    .update(resourceCleanupJob)
+    .set({
+      cleanup_status: "failed",
+      last_failure_message_digest: RESOURCE_CLEANUP_FAILURE_DIGEST,
+      updated_at: new Date(),
+    })
+    .where(eq(resourceCleanupJob.id, jobId));
+  return { status: "retryable" };
+}
+
+async function processResourceCleanupJob(
+  database: RuntimeDatabase,
+  sourceResourcePublicId: string,
+  deleteLocalFile: DeleteResourceLocalFile,
+  staleBefore = new Date(Date.now() - 5 * 60 * 1000),
+): Promise<ResourceDeleteResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedJob] = await scopedDatabase
+      .select(resourceCleanupJobSelection())
+      .from(resourceCleanupJob)
+      .where(
+        eq(
+          resourceCleanupJob.source_resource_public_id,
+          sourceResourcePublicId,
+        ),
+      )
+      .limit(1);
+    if (unlockedJob === undefined) {
+      return { status: "not_found" };
+    }
+
+    await lockResourceObjectIdentity(
+      scopedDatabase,
+      unlockedJob.object_storage_path,
+    );
+    const [job] = await scopedDatabase
+      .select(resourceCleanupJobSelection())
+      .from(resourceCleanupJob)
+      .where(eq(resourceCleanupJob.id, unlockedJob.id))
+      .limit(1)
+      .for("update");
+    const unlockedIdentity = mapResourceCleanupIdentity(unlockedJob);
+    if (job === undefined) {
+      return { status: "not_found" };
+    }
+    if (
+      job.source_resource_public_id !== sourceResourcePublicId ||
+      !hasMatchingResourceCleanupIdentity(
+        unlockedIdentity,
+        mapResourceCleanupIdentity(job),
+      ) ||
+      !hasCompleteResourceCleanupIdentity(unlockedIdentity)
+    ) {
+      return markResourceCleanupFailed(scopedDatabase, job.id);
+    }
+    if (job.cleanup_status === "completed") {
+      return { status: "completed" };
+    }
+    if (job.cleanup_status === "cancelled") {
+      return { status: "cancelled" };
+    }
+    if (
+      job.cleanup_status === "processing" &&
+      job.claimed_at !== null &&
+      job.claimed_at.getTime() >= staleBefore.getTime()
+    ) {
+      return { status: "retryable" };
+    }
+
+    await scopedDatabase
+      .update(resourceCleanupJob)
+      .set({
+        cleanup_status: "processing",
+        attempt_count: sql`${resourceCleanupJob.attempt_count} + 1`,
+        claimed_at: new Date(),
+        last_failure_message_digest: null,
+        updated_at: new Date(),
+      })
+      .where(eq(resourceCleanupJob.id, job.id));
+
+    const resourceReferences = await scopedDatabase
+      .select({
+        profession: resource.profession,
+        object_storage_path: resource.object_storage_path,
+        original_file_name: resource.original_file_name,
+        file_size_byte: resource.file_size_byte,
+        content_hash: resource.content_hash,
+      })
+      .from(resource)
+      .where(eq(resource.object_storage_path, job.object_storage_path));
+    if (
+      resourceReferences.some(
+        (reference) =>
+          reference.object_storage_path === null ||
+          reference.original_file_name === null ||
+          reference.file_size_byte === null ||
+          reference.content_hash === null ||
+          !hasMatchingResourceCleanupIdentity(unlockedIdentity, {
+            profession: reference.profession,
+            objectStoragePath: reference.object_storage_path,
+            originalFileName: reference.original_file_name,
+            fileSizeByte: reference.file_size_byte,
+            contentHash: reference.content_hash,
+          }),
+      )
+    ) {
+      return markResourceCleanupFailed(scopedDatabase, job.id);
+    }
+    if (resourceReferences.length > 0) {
+      await scopedDatabase
+        .update(resourceCleanupJob)
+        .set({
+          cleanup_status: "cancelled",
+          completed_at: new Date(),
+          last_failure_message_digest: null,
+          updated_at: new Date(),
+        })
+        .where(eq(resourceCleanupJob.id, job.id));
+      return { status: "cancelled" };
+    }
+
+    const liveUploadRows = await scopedDatabase
+      .select({
+        object_storage_path: resourceUploadOperation.object_storage_path,
+        file_hash: resourceUploadOperation.file_hash,
+        file_size_byte: resourceUploadOperation.file_size_byte,
+      })
+      .from(resourceUploadOperation)
+      .where(
+        and(
+          eq(
+            resourceUploadOperation.object_storage_path,
+            job.object_storage_path,
+          ),
+          inArray(resourceUploadOperation.operation_status, [
+            "pending",
+            "file_stored",
+          ]),
+        ),
+      );
+    if (
+      liveUploadRows.some(
+        (operation) =>
+          operation.object_storage_path !==
+            unlockedIdentity.objectStoragePath ||
+          operation.file_hash !== unlockedIdentity.contentHash ||
+          operation.file_size_byte !== unlockedIdentity.fileSizeByte,
+      )
+    ) {
+      return markResourceCleanupFailed(scopedDatabase, job.id);
+    }
+    if (liveUploadRows.length > 0) {
+      await scopedDatabase
+        .update(resourceCleanupJob)
+        .set({
+          cleanup_status: "pending",
+          claimed_at: null,
+          last_failure_message_digest: null,
+          updated_at: new Date(),
+        })
+        .where(eq(resourceCleanupJob.id, job.id));
+      return { status: "retryable" };
+    }
+
+    try {
+      await deleteLocalFile(unlockedIdentity);
+    } catch {
+      return markResourceCleanupFailed(scopedDatabase, job.id);
+    }
+    await scopedDatabase
+      .update(resourceCleanupJob)
+      .set({
+        cleanup_status: "completed",
+        completed_at: new Date(),
+        last_failure_message_digest: null,
+        updated_at: new Date(),
+      })
+      .where(eq(resourceCleanupJob.id, job.id));
+    return { status: "completed" };
+  });
+}
+
+async function deleteConversionFailedResourceWithCleanup(
+  database: RuntimeDatabase,
+  publicId: string,
+  mutationContext: ResourceMutationContext,
+  deleteLocalFile: DeleteResourceLocalFile,
+): Promise<ResourceDeleteResult> {
+  const metadataResult = await deleteConversionFailedResourceMetadata(
+    database,
+    publicId,
+    mutationContext,
+  );
+  if (metadataResult.status !== "ready") {
+    return metadataResult;
+  }
+  return processResourceCleanupJob(database, publicId, deleteLocalFile);
 }
 
 async function insertResourceFromUpload(

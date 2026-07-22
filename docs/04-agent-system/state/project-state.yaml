@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
+currentPhase: p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
 updatedAt: "2026-07-22T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
+  currentTaskId: p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -546,6 +546,7 @@ p1RemediationSerialProgram:
     - p1-prerequisite-supply-chain-high-remediation-2026-07-22
     - p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
     - p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
+    - p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
   completedTaskIds:
     - p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
     - p1-prerequisite-supply-chain-high-remediation-2026-07-22
@@ -673,7 +674,8 @@ p1RemediationSerialProgram:
     p1-prerequisite-rc-06-officeparser-dependency-2026-07-22: closed
     p1-prerequisite-supply-chain-high-remediation-2026-07-22: closed
     p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22: closed
-    p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22: in_progress
+    p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22: closed
+    p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -862,79 +864,83 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
-  title: Resource durable conversion state and retry lifecycle
-  phase: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
+  id: p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
+  title: Resource failed metadata and private-file delete recovery
+  phase: p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: database_application_logic_product_partition
-  productClosureContribution: partial_F0082_durable_receipt_claim_finalize_and_retry_only
-  branch: fix/resource-conversion-retry-lifecycle
+  taskKind: schema_source_database_application_logic_and_synthetic_local_file_delete_product_partition
+  productClosureContribution: partial_F0082_failed_resource_delete_recovery_only
+  branch: fix/resource-failed-delete-recovery
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0082
   candidateRootCauseCluster: P1-RC-06
-  objective: persist the resource receipt before conversion, serialize a version-bound conversion claim, finalize only the matching claim, and expose an authenticated retry command without schema storage converter authorization or publish changes
-  executionStage: validated_reviewed_conditional_closeout_ready
+  objective: allow existing content administrators to durably delete only conversion_failed resource metadata and safely retry exact private local-file cleanup under a shared object lock without changing authorization or successful resource lifecycle
+  executionStage: validated_candidate_pending_kernel_commit_and_closeout
   findingStatus: open_partitioned
-  findingDisposition: durable_conversion_receipt_state_claim_finalize_and_retry_partition_validated_pending_closeout
+  findingDisposition: failed_resource_delete_recovery_partition_validated_pending_closeout
   riskBoundary:
-    category: database_application_logic_existing_authorization_and_local_conversion
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-    schemaOrMigrationChange: false
+    category: schema_migration_source_database_application_logic_and_synthetic_private_local_file_delete
+    approvalId: guardian-f0082-resource-failed-delete-recovery-2026-07-22
+    approvedBaseSha: 1d834b87bc6fd49a9b8d90015e332b2adf0308a3
+    approvedFingerprint: a5e1ae03f5810a2a5e874cd818ec18ecbe6bf6e31f573654f44bbd8b3d65a14b
+    schemaOrMigrationChange: true
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
     dependencyChange: false
-    localSyntheticFileAndRepositoryValidation: true
+    localSyntheticFileDeleteValidation: true
     conditionalCloseout: true
   preRedImpactScan:
-    chain: admin_upload_or_retry_UI_to_resource_route_to_runtime_to_repository_receipt_and_claim_transaction_to_existing_bounded_parser_to_version_bound_finalize_transaction
-    coreFiles: 9
-    contingencyFiles: 9
-    preflightTestFiles: 10
+    chain: admin_conversion_failed_row_action_to_public_id_DELETE_route_to_content_admin_session_to_repository_transaction_and_object_lock_to_cleanup_outbox_to_strict_local_delete_and_retry_outcome
+    coreFiles: 14
+    contingencyFiles: 7
+    preflightTestFiles: 9
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: upload_operation_becomes_completed_only_after_synchronous_parse_and_resource_insert_so_uploaded_converting_and_retry_are_not_authoritative_durable_states
-    disposition: separate_retry_lifecycle_partition_before_failed_resource_delete_recovery
-    directChainScopeAmendment: 1_product_source_local_text_parser_plus_its_direct_test_to_consume_verified_bytes_without_path_reopen
-  lifecycleContract:
-    - create_exactly_one_uploaded_resource_receipt_and_complete_the_existing_upload_operation_atomically_after_file_storage
-    - claim_uploaded_conversion_failed_or_explicitly_stale_converting_state_with_authoritative_updated_at_version
-    - finalize_only_the_matching_converting_claim_and_reject_superseded_workers_without_partial_write
-    - authorize_retry_before_resource_or_file_access_and_use_only_public_resource_identity
-    - persist_only_stable_redacted_conversion_failure_and_keep_failure_out_of_publish_and_RAG
+    confirmedRootCause: conversion_failed_resources_retain_completed_upload_identity_and_private_file_but_have_no_authorized_delete_command_durable_cleanup_identity_shared_object_lock_or_response_loss_retry_projection
+    disposition: dedicated_delete_recovery_partition_after_conversion_retry_closeout
+  cleanupContract:
+    - only_conversion_failed_resource_rows_are_deletable_and_all_successful_or_active_states_fail_closed
+    - authorize_before_resource_cleanup_file_or_audit_access_and_accept_only_resource_public_id
+    - metadata_detach_relations_upload_tombstone_redacted_audit_and_cleanup_enqueue_are_one_transaction
+    - upload_receipt_conversion_delete_and_cleanup_share_one_object_identity_advisory_lock_namespace_and_order
+    - exact_reference_and_live_upload_checks_prevent_deleting_shared_or_in_flight_objects_and_identity_mismatch_fails_closed
+    - repeated_DELETE_recovers_pending_or_failed_cleanup_and_response_loss_without_duplicate_success_audit
+    - strict_local_delete_verifies_namespace_realpath_symlink_type_size_and_streaming_hash_before_exact_unlink
   residuals:
-    - failed_resource_metadata_and_private_file_delete_recovery
     - durable_background_conversion_queue_and_automatic_retry_dispatcher
     - cross_process_or_deployment_wide_conversion_concurrency_budget
     - OS_or_container_level_network_and_arbitrary_code_containment
   closeoutProjection:
-    current: validated_reviewed_conditional_closeout_ready
-    triggers: standing_bounded_medium_risk_TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0082_remains_open_partitioned_with_durable_conversion_retry_partition_closed
+    current: validated_candidate_pending_kernel_commit_and_closeout
+    triggers: guardian_schema_source_and_synthetic_delete_approval_then_TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0082_remains_open_partitioned_only_for_background_dispatcher_global_concurrency_and_OS_containment_residuals
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_covered_by_existing_bounded_medium_risk_standing_approval
+    mandatoryFreshApprovals: 1_required_for_schema_source_and_product_file_delete
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: TDD_repository_receipt_claim_finalize_retry_route_and_admin_retry_UI_implemented_and_validated
-    mechanismOverhead: task_contract_state_updates_toolchain_path_diagnosis_and_one_regression_fixture_contract_correction
+    productValueTime: TDD_two_phase_delete_cleanup_outbox_shared_object_lock_strict_local_delete_route_and_admin_action_implemented_and_validated
+    mechanismOverhead: task_contract_schema_generation_state_projection_and_validation_orchestration
     guardSmokeChanges: 0
-    validationRetryCount: 1_regression_fixture_missing_current_optimistic_concurrency_fields
   validationEvidence:
-    focused: 10_files_105_tests_passed
+    red: 1_file_13_tests_failed_for_missing_DELETE_cleanup_schema_shared_lock_and_strict_local_delete
+    focused: 9_files_145_tests_passed
     lint: passed
     typecheck: passed
     build: passed_with_pre_existing_next_NFT_trace_warning
     formatAndDiff: passed
+    schemaMigrationSource: additive_enum_table_indexes_and_check_only_snapshot_parent_and_journal_verified
     realDatabaseExecution: not_performed
-    review: passed_main_thread_adversarial_review_no_schema_permission_converter_storage_or_external_scope_change
+    localFileValidation: synthetic_temp_roots_only
+    review: passed_main_thread_adversarial_review_no_entitlement_real_DB_real_file_dependency_provider_or_envelope_drift
   previousTaskCloseout:
-    taskId: p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
+    taskId: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
     findingIds:
       - F-0082
-    commit: 4ce6a719bfc1683e727cd8c5e908f1cc83c33f65
+    commit: 1d834b87bc6fd49a9b8d90015e332b2adf0308a3
     status: product_partition_closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: open_partitioned
     masterOriginSync: pass
@@ -950,9 +956,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 4dd61a3537141c18e178c7c36f9dfd7fa316a82f
-  lastKnownOriginMasterSha: 4dd61a3537141c18e178c7c36f9dfd7fa316a82f
-  lastKnownRemoteMasterSha: 20f8b97f0f0579fb9df3bbdc665fff95eb5abe18
+  lastKnownMasterSha: 1d834b87bc6fd49a9b8d90015e332b2adf0308a3
+  lastKnownOriginMasterSha: 1d834b87bc6fd49a9b8d90015e332b2adf0308a3
+  lastKnownRemoteMasterSha: 1d834b87bc6fd49a9b8d90015e332b2adf0308a3
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

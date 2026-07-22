@@ -323,6 +323,13 @@
       "when": 1784696859134,
       "tag": "20260722053000_p1_rc_05_personal_ai_generation_input_snapshot",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1784726496129,
+      "tag": "20260722063000_p1_rc_06_resource_failed_delete_recovery",
+      "breakpoints": true
     }
   ]
 }

@@ -12,6 +12,7 @@ import {
   FileText,
   RotateCcw,
   Search,
+  Trash2,
   Upload,
   XCircle,
 } from "lucide-react";
@@ -691,6 +692,22 @@ async function patchLocalResourceMarkdown(
     : null;
 }
 
+async function deleteFailedLocalResource(
+  resourcePublicId: string,
+  sessionToken: string,
+): Promise<"completed" | "retryable" | null> {
+  const response = await fetch(createResourcePath(resourcePublicId), {
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: createAdminAuthHeaders(sessionToken),
+    method: "DELETE",
+  });
+  if (response.ok) {
+    return "completed";
+  }
+  return response.status === 503 ? "retryable" : null;
+}
+
 async function postLocalResourceDisable(
   resourcePublicId: string,
   sessionToken: string,
@@ -1096,6 +1113,49 @@ export function AdminResourceKnowledgeManagement() {
         message: "资料重新解析失败，请稍后重试",
         tone: "error",
       });
+    }
+  }
+
+  async function handleDeleteFailedResource(
+    resource: AdminResourceOpsSummaryDto,
+  ) {
+    const sessionToken = getStoredSessionToken();
+    if (
+      sessionToken === null ||
+      resource.resourceStatus !== "conversion_failed" ||
+      !hasResourcePublicId(resource.publicId)
+    ) {
+      setToastMessage({ message: "仅可删除解析失败的资料", tone: "error" });
+      return;
+    }
+    if (!window.confirm(`确认删除解析失败资料“${resource.title}”？`)) {
+      return;
+    }
+
+    try {
+      const result = await deleteFailedLocalResource(
+        resource.publicId,
+        sessionToken,
+      );
+      if (result === "completed") {
+        setResources((currentResources) =>
+          currentResources.filter(
+            (currentResource) => currentResource.publicId !== resource.publicId,
+          ),
+        );
+        setToastMessage({ message: "解析失败资料已删除", tone: "success" });
+        return;
+      }
+      if (result === "retryable") {
+        setToastMessage({
+          message: "资料删除尚未完成，请重试",
+          tone: "error",
+        });
+        return;
+      }
+      throw new Error("resource delete failed");
+    } catch {
+      setToastMessage({ message: "资料删除失败，请稍后重试", tone: "error" });
     }
   }
 
@@ -1716,6 +1776,9 @@ export function AdminResourceKnowledgeManagement() {
           onRequestDownload={(resource) =>
             void handleDownloadResource(resource)
           }
+          onRequestDelete={(resource) =>
+            void handleDeleteFailedResource(resource)
+          }
           onRequestDetail={(resource) =>
             void handleOpenResourceDetail(resource)
           }
@@ -2215,6 +2278,7 @@ function ResourceLifecycleMetric({
 
 function ResourceList({
   onRequestDetail,
+  onRequestDelete,
   onRequestDownload,
   onRequestDisable,
   onRequestEnable,
@@ -2225,6 +2289,7 @@ function ResourceList({
   rows,
 }: {
   onRequestDetail: (resource: AdminResourceOpsSummaryDto) => void;
+  onRequestDelete: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestDownload: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestDisable: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestEnable: (resource: AdminResourceOpsSummaryDto) => void;
@@ -2299,15 +2364,29 @@ function ResourceList({
                     </Button>
                   ) : null}
                   {resource.resourceStatus === "conversion_failed" ? (
-                    <Button
-                      aria-label={`重新解析资料 ${resource.title}`}
-                      disabled={!hasResourcePublicId(resource.publicId)}
-                      variant="outline"
-                      onClick={() => onRequestRetryConversion(resource)}
-                    >
-                      <RotateCcw aria-hidden="true" data-icon="inline-start" />
-                      重新解析资料
-                    </Button>
+                    <>
+                      <Button
+                        aria-label={`重新解析资料 ${resource.title}`}
+                        disabled={!hasResourcePublicId(resource.publicId)}
+                        variant="outline"
+                        onClick={() => onRequestRetryConversion(resource)}
+                      >
+                        <RotateCcw
+                          aria-hidden="true"
+                          data-icon="inline-start"
+                        />
+                        重新解析资料
+                      </Button>
+                      <Button
+                        aria-label={`删除解析失败资料 ${resource.title}`}
+                        disabled={!hasResourcePublicId(resource.publicId)}
+                        variant="outline"
+                        onClick={() => onRequestDelete(resource)}
+                      >
+                        <Trash2 aria-hidden="true" data-icon="inline-start" />
+                        删除失败资料
+                      </Button>
+                    </>
                   ) : null}
                   <Button
                     aria-label={`查看资料 ${resource.title}`}

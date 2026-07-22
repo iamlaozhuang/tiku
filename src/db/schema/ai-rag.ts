@@ -195,6 +195,19 @@ export const resourceUploadOperationStatusEnum = pgEnum(
   resourceUploadOperationStatusValues,
 );
 
+export const resourceCleanupJobStatusValues = [
+  "pending",
+  "processing",
+  "failed",
+  "completed",
+  "cancelled",
+] as const;
+
+export const resourceCleanupJobStatusEnum = pgEnum(
+  "resource_cleanup_job_status",
+  resourceCleanupJobStatusValues,
+);
+
 export const knStatusValues = ["active", "disabled"] as const;
 
 export const knStatusEnum = pgEnum("kn_status", knStatusValues);
@@ -1068,6 +1081,46 @@ export const resourceUploadOperation = pgTable(
     index("idx_resource_upload_operation_status_updated_at").on(
       table.operation_status,
       table.updated_at,
+    ),
+  ],
+);
+
+export const resourceCleanupJob = pgTable(
+  "resource_cleanup_job",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    source_resource_public_id: text("source_resource_public_id").notNull(),
+    profession: professionEnum("profession").notNull(),
+    object_storage_path: text("object_storage_path").notNull(),
+    original_file_name: text("original_file_name").notNull(),
+    file_size_byte: integer("file_size_byte").notNull(),
+    content_hash: text("content_hash").notNull(),
+    cleanup_status: resourceCleanupJobStatusEnum("cleanup_status")
+      .default("pending")
+      .notNull(),
+    attempt_count: integer("attempt_count").default(0).notNull(),
+    last_failure_message_digest: text("last_failure_message_digest"),
+    claimed_at: nullableTimestampColumn("claimed_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_resource_cleanup_job_public_id").on(table.public_id),
+    uniqueIndex("udx_resource_cleanup_job_source_resource_public_id").on(
+      table.source_resource_public_id,
+    ),
+    index("idx_resource_cleanup_job_object_storage_path").on(
+      table.object_storage_path,
+    ),
+    index("idx_resource_cleanup_job_status_updated_at").on(
+      table.cleanup_status,
+      table.updated_at,
+    ),
+    check(
+      "chk_resource_cleanup_job_attempt_count_nonnegative",
+      sql`${table.attempt_count} >= 0`,
     ),
   ],
 );

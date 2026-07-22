@@ -42,6 +42,7 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import {
   createPostgresRagResourceKnowledgeRuntimeRepositories,
+  type DeleteResourceLocalFile,
   KnowledgeNodeMutationConflictError,
   type KnowledgeNodeMutationContext,
   type RagKnowledgeNodeRuntimeRepository,
@@ -56,6 +57,7 @@ import {
 } from "../validators/rag-resource-knowledge";
 import {
   defaultLocalUploadStorageRoot,
+  deleteLocalResourceFile,
   prepareLocalResourceFile,
   readLocalResourceFile,
   resourceUploadMaxFileSizeByte,
@@ -105,6 +107,7 @@ export type RagResourceKnowledgeRuntimeRepositoriesWithAudit =
 
 export type RagResourceKnowledgeRuntimeOptions = {
   localResourceStorageRoot?: string;
+  deleteResourceFile?: DeleteResourceLocalFile;
   readResourceFile?: typeof readLocalResourceFile;
   useLocalResourceAdapter?: boolean;
   repositories?: RagResourceKnowledgeRuntimeRepositoriesWithAudit;
@@ -248,6 +251,14 @@ const resourceConversionConflictResponse = createErrorResponse(
 const resourceConversionFailedResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
   "Resource conversion failed.",
+);
+const resourceDeleteConflictResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+  "Resource cannot be deleted from its current state.",
+);
+const resourceCleanupRetryableResponse = createErrorResponse(
+  503082,
+  "Resource cleanup is pending; retry the delete command.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -2726,6 +2737,83 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           return createJsonResponse(result.response);
+        },
+        async DELETE(
+          request: Request,
+          context: RouteContext,
+        ): Promise<Response> {
+          const actorOrError = await requireContentAdminActor(request);
+          if ("code" in actorOrError) {
+            return createPrivateNoStoreJsonResponse(
+              actorOrError,
+              actorOrError.code === 401001 ? 401 : 403,
+            );
+          }
+
+          const { publicId } = await context.params;
+          if (
+            !isSafePublicId(publicId) ||
+            allowLocalResourceAdapter ||
+            repositories.resourceRepository.deleteConversionFailedResource ===
+              undefined
+          ) {
+            return createPrivateNoStoreJsonResponse(
+              resourceNotFoundResponse,
+              404,
+            );
+          }
+
+          try {
+            const deleteResourceFile =
+              options.deleteResourceFile ??
+              ((identity) =>
+                deleteLocalResourceFile({
+                  ...identity,
+                  storageRoot: localResourceStorageRoot,
+                }));
+            const result =
+              await repositories.resourceRepository.deleteConversionFailedResource(
+                publicId,
+                createResourceMutationContext(
+                  request,
+                  actorOrError,
+                  "resource.delete",
+                  "redacted resource delete metadata",
+                ),
+                deleteResourceFile,
+              );
+
+            if (
+              result.status === "completed" ||
+              result.status === "cancelled"
+            ) {
+              return createPrivateNoStoreJsonResponse(
+                createSuccessResponse({ deletedResourcePublicId: publicId }),
+                200,
+              );
+            }
+            if (result.status === "not_found") {
+              return createPrivateNoStoreJsonResponse(
+                resourceNotFoundResponse,
+                404,
+              );
+            }
+            if (result.status === "conflict") {
+              return createPrivateNoStoreJsonResponse(
+                resourceDeleteConflictResponse,
+                409,
+              );
+            }
+            return createPrivateNoStoreJsonResponse(
+              resourceCleanupRetryableResponse,
+              503,
+            );
+          } catch {
+            return createPrivateNoStoreJsonResponse(
+              resourceCleanupRetryableResponse,
+              503,
+            );
+          }
         },
       },
       publish: {

@@ -109,6 +109,9 @@ export type ReadLocalResourceFileResult = {
   contentType: string;
 };
 
+export type DeleteLocalResourceFileInput = ReadLocalResourceFileInput;
+export type DeleteLocalResourceFileResult = "deleted" | "missing";
+
 export const resourceUploadMaxFileSizeByte = 50 * 1024 * 1024;
 export const defaultLocalUploadStorageRoot = join(
   process.cwd(),
@@ -454,6 +457,102 @@ export async function readLocalResourceFile({
       contentType:
         resourceContentTypes[extension] ?? "application/octet-stream",
     };
+  } finally {
+    await fileHandle.close();
+  }
+}
+
+export async function deleteLocalResourceFile(
+  input: DeleteLocalResourceFileInput,
+): Promise<DeleteLocalResourceFileResult> {
+  const extension = extname(input.originalFileName)
+    .replace(".", "")
+    .toLowerCase();
+  const objectKeySegments = input.objectStoragePath.split("/");
+  if (
+    !/^[a-f0-9]{64}$/u.test(input.contentHash) ||
+    !Number.isSafeInteger(input.fileSizeByte) ||
+    input.fileSizeByte < 0 ||
+    !resourceFileExtensions.has(extension) ||
+    input.objectStoragePath.includes("\\") ||
+    isAbsolute(input.objectStoragePath) ||
+    objectKeySegments.length !== 5 ||
+    objectKeySegments[0] !== "dev" ||
+    objectKeySegments[1] !== "resource" ||
+    objectKeySegments[2] !== input.profession ||
+    !/^\d{4}(?:0[1-9]|1[0-2])$/u.test(objectKeySegments[3] ?? "") ||
+    objectKeySegments[4] !== `${input.contentHash}.${extension}`
+  ) {
+    throw new Error("Resource storage identity mismatch.");
+  }
+
+  const storageRoot = input.storageRoot ?? defaultLocalUploadStorageRoot;
+  const resolvedRoot = resolve(storageRoot);
+  let canonicalRoot: string;
+  try {
+    canonicalRoot = await realpath(resolvedRoot);
+  } catch {
+    throw new Error("Resource storage root is unavailable.");
+  }
+
+  const targetPath = resolveInsideStorageRoot(
+    resolvedRoot,
+    input.objectStoragePath,
+  );
+  let currentPath = resolvedRoot;
+  for (const segment of objectKeySegments) {
+    currentPath = `${currentPath}${sep}${segment}`;
+    try {
+      const pathStats = await lstat(currentPath);
+      if (pathStats.isSymbolicLink()) {
+        throw new Error("Resource storage path contains a symbolic link.");
+      }
+    } catch (error) {
+      if (isFileNotFoundError(error)) {
+        return "missing";
+      }
+      throw error;
+    }
+  }
+
+  const canonicalTarget = await realpath(targetPath);
+  if (!isInsideResolvedRoot(canonicalRoot, canonicalTarget)) {
+    throw new Error("Resource storage target escaped storage root.");
+  }
+
+  let fileHandle: Awaited<ReturnType<typeof open>>;
+  try {
+    fileHandle = await open(
+      targetPath,
+      constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
+    );
+  } catch (error) {
+    if (isFileNotFoundError(error)) {
+      return "missing";
+    }
+    throw new Error("Resource storage target is unavailable.");
+  }
+
+  try {
+    const openedStats = await fileHandle.stat();
+    if (!openedStats.isFile()) {
+      throw new Error("Resource storage target is not a file.");
+    }
+    const actual = await hashFileHandle(fileHandle);
+    const finalPathStats = await lstat(targetPath);
+    const finalCanonicalTarget = await realpath(targetPath);
+    if (
+      !finalPathStats.isFile() ||
+      finalPathStats.isSymbolicLink() ||
+      finalPathStats.ino !== openedStats.ino ||
+      finalCanonicalTarget !== canonicalTarget ||
+      actual.fileSizeByte !== input.fileSizeByte ||
+      actual.fileHash !== input.contentHash
+    ) {
+      throw new Error("Resource storage integrity mismatch.");
+    }
+    await unlink(targetPath);
+    return "deleted";
   } finally {
     await fileHandle.close();
   }

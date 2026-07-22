@@ -7,3 +7,5 @@ export const GET =
   ragResourceKnowledgeRuntimeRouteHandlers.resources.detail.GET;
 export const PATCH =
   ragResourceKnowledgeRuntimeRouteHandlers.resources.detail.PATCH;
+export const DELETE =
+  ragResourceKnowledgeRuntimeRouteHandlers.resources.detail.DELETE;

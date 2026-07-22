@@ -20,6 +20,8 @@ import {
   modelProvider,
   promptTemplate,
   resource,
+  resourceCleanupJob,
+  resourceCleanupJobStatusValues,
   resourceUploadOperation,
   resourceUploadOperationStatusValues,
   resourceStatusValues,
@@ -480,6 +482,44 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "udx_resource_upload_operation_resource_public_id",
         "idx_resource_upload_operation_status_updated_at",
       ]),
+    );
+  });
+
+  it("persists a durable resource cleanup job without a deleted-resource foreign key", () => {
+    expect(resourceCleanupJobStatusValues).toEqual([
+      "pending",
+      "processing",
+      "failed",
+      "completed",
+      "cancelled",
+    ]);
+    expect(getColumnNames(resourceCleanupJob)).toEqual(
+      expect.arrayContaining([
+        "public_id",
+        "source_resource_public_id",
+        "profession",
+        "object_storage_path",
+        "original_file_name",
+        "file_size_byte",
+        "content_hash",
+        "cleanup_status",
+        "attempt_count",
+        "last_failure_message_digest",
+        "claimed_at",
+        "completed_at",
+      ]),
+    );
+    expect(getForeignKeyNames(resourceCleanupJob)).toEqual([]);
+    expect(getIndexNames(resourceCleanupJob)).toEqual(
+      expect.arrayContaining([
+        "udx_resource_cleanup_job_public_id",
+        "udx_resource_cleanup_job_source_resource_public_id",
+        "idx_resource_cleanup_job_object_storage_path",
+        "idx_resource_cleanup_job_status_updated_at",
+      ]),
+    );
+    expect(getCheckNames(resourceCleanupJob)).toContain(
+      "chk_resource_cleanup_job_attempt_count_nonnegative",
     );
   });
 
