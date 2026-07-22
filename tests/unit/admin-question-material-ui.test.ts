@@ -44,6 +44,7 @@ const questionPayload = {
       profession: "marketing",
       level: 3,
       subject: "theory",
+      difficulty: "medium",
       stemRichText: "市场调研抽样方法的核心目标是什么？",
       analysisRichText: "抽样方法需要确保样本代表目标总体。",
       standardAnswerRichText: "A",
@@ -803,6 +804,9 @@ function fillRequiredQuestionClassification(
   fireEvent.change(questionForm.getByLabelText("科目"), {
     target: { value: "theory" },
   });
+  fireEvent.change(questionForm.getByLabelText("难度"), {
+    target: { value: "medium" },
+  });
 }
 
 function fillNewSingleChoiceStructure(questionForm: ReturnType<typeof within>) {
@@ -856,6 +860,14 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(
       questionForm.getByText(/题型、专业、等级、科目/),
     ).toBeInTheDocument();
+    expect(questionForm.getByLabelText("难度")).toHaveValue("medium");
+    expect(
+      within(questionForm.getByLabelText("难度"))
+        .getAllByRole("option")
+        .map(
+          (questionDifficultyOption) => questionDifficultyOption.textContent,
+        ),
+    ).toEqual(["请选择难度", "简单", "中等", "困难"]);
 
     expect(questionForm.getByLabelText("关联材料")).toHaveValue(
       "material-marketing-001",
@@ -2468,6 +2480,9 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.change(questionForm.getByLabelText("科目"), {
       target: { value: "skill" },
     });
+    fireEvent.change(questionForm.getByLabelText("难度"), {
+      target: { value: "hard" },
+    });
     await questionForm.findByRole("option", { name: "营销案例材料 A" });
     expect(questionForm.getByLabelText("关联材料")).toBeEnabled();
     fireEvent.change(questionForm.getByLabelText("关联材料"), {
@@ -2513,6 +2528,7 @@ describe("AdminQuestionMaterialManagement", () => {
     );
 
     expect(requestBody).toMatchObject({
+      difficulty: "hard",
       level: 2,
       materialPublicId: "material-marketing-001",
       multiChoiceRule: "partial_credit",

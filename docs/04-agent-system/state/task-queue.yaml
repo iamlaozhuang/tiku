@@ -523,86 +523,99 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22: closed
     p1-remediation-rc-07-ai-generation-prompt-provenance-call-log-2026-07-22: closed
     p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22: closed
-    p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22: in_progress
+    p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22: closed
+    p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22: in_progress
 activeTasks:
-  - id: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
-    title: Formal question and AI paper source metadata foundation
-    phase: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
+  - id: p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22
+    title: Formal question manual difficulty editor
+    phase: p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22
     status: in_progress
     priority: p1
-    taskKind: schema_migration_source_and_database_application_logic
-    productClosureContribution: partial_F0154_formal_question_and_source_metadata_foundation
-    branch: fix/formal-question-ai-paper-metadata
-    objective: add legacy-safe formal question difficulty and immutable knowledge hierarchy metadata, preserve them through selected-mode adoption and training snapshots, and remove test-only metadata injection from production AI paper source resolution
+    taskKind: low_risk_ui_contract
+    productClosureContribution: partial_F0154_manual_editor_difficulty_partition
+    branch: fix/formal-question-ai-metadata-confirmation
+    objective: require explicit canonical difficulty in the manual content question editor and round-trip persisted difficulty without guessing legacy null
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-07
     findingIds:
       - F-0154
-    executionStage: validated_candidate_ready_conditional_closeout
+    executionStage: validated_and_adversarially_reviewed_ready_for_conditional_closeout
     findingStatus: open_partitioned
-    findingDisposition: F0154_open_partitioned_current_formal_question_and_source_metadata_foundation_generated_label_confirmation_and_legacy_manual_metadata_residual
+    findingDisposition: F0154_open_partitioned_current_manual_editor_partition_generated_label_confirmation_and_legacy_backfill_residual
     riskBoundary:
-      category: schema_migration_source_and_database_application_logic
-      approvalId: guardian-f0154-formal-question-source-metadata-foundation-2026-07-22
-      approvedBaseSha: fdcc00a3823dbaa2be9e029e9353450722d4931e
-      schemaOrMigrationChange: true
+      category: low_risk_ui_contract
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      approvedBaseSha: 2ecc8e40ca8295f128ea31d1351d3c4e009e2506
+      schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       providerOrRealExternalCall: false
       providerConfigurationChange: false
       dependencyChange: false
-      conditionalCloseout: approved
+      conditionalCloseout: standing_low_risk
     preRedImpactScan:
-      chain: content_AI_strict_draft_to_formal_question_metadata_to_immutable_paper_and_training_snapshot_to_database_backed_AI_paper_source_resolution
-      coreFiles: 25
-      contingencyFiles: 16
-      preflightTestFiles: 14
+      chain: QuestionDto_difficulty_to_form_values_to_explicit_selector_to_createQuestionInput_to_existing_validator_and_repository
+      coreFiles: 4
+      contingencyFiles: 2
+      preflightTestFiles: 2
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedRootCause: formal_question_and_immutable_training_snapshots_omit_difficulty_and_hierarchy_projection_while_production_source_resolution_depends_on_optional_test_only_maps
-      bundleDisposition: F0154_partition_one_additive_formal_question_and_source_metadata_foundation_only
-    taskBoundApproval:
-      fingerprint: 5fdb650fb70e5afd6d6f7f49ca7941815b0456966f1585f9cbf02cf1637d2b99
-      status: approved_guardian_task_bound_conditional_closeout
+      confirmedRootCause: manual_question_editor_omits_persisted_difficulty_and_can_silently_resave_legacy_null
+      bundleDisposition: F0154_manual_editor_partition_only_generated_label_confirmation_separate
     validationEvidence:
-      red: pass_expected_18_failures_120_passes_before_implementation
-      focused: pass_14_files_258_tests
-      lint: pass_targeted
-      typecheck: pass_tsc_no_emit
-      build: pass_next_production_build_with_preexisting_NFT_warning
-      schemaMigrationSource: pass_additive_nullable_enum_and_column_snapshot_parent_and_monotonic_journal
-      formatAndDiff: pass_prettier_write_and_git_diff_check
-      stateContractParse: pass_json_and_yaml
-      adversarialReview: pass_cross_tree_cycle_missing_parent_legacy_metadata_no_override_snapshot_immutability_and_manual_update_preservation
-      prohibitedScope: no_migration_apply_real_DB_real_Provider_permission_dependency_mechanism_balanced_label_confirmation_or_full_F0154_claim
+      red: 2_files_70_tests_3_failed_67_passed_then_order_contract_1_failed_70_passed
+      focused: 2_files_71_tests_passed_exit_0
+      lint: targeted_3_files_exit_0
+      typecheck: tsc_noEmit_exit_0
+      build: next_build_exit_0_with_preexisting_NFT_trace_warning
+      formatAndDiff: prettier_check_and_git_diff_check_exit_0
+      stateContractParse: strict_JSON_and_YAML_parse_exit_0
+      adversarialReview: pass_no_default_guessing_legacy_null_blocks_create_and_edit_exact_three_values_round_trip_no_scope_expansion
+      prohibitedScope: no_schema_migration_real_DB_permission_Provider_dependency_generated_label_confirmation_backfill_or_full_F0154_claim
     expectedAcceptance:
-      - question_difficulty_enum_and_nullable_column_are_additive_and_legacy_safe
-      - selected_mode_content_AI_adoption_persists_exact_difficulty_and_selected_knowledge_public_ids
-      - unconfirmed_generated_labels_never_create_an_unbound_formal_question
-      - paper_and_training_snapshots_preserve_difficulty_and_complete_knowledge_hierarchy
-      - production_source_resolution_has_no_optional_test_only_metadata_override
-      - exact_descendant_nearby_and_same_scope_tiers_are_distinct_and_observable
-      - F0154_remains_open_for_generated_label_confirmation_and_legacy_manual_metadata
+      - form_exposes_exact_easy_medium_hard_contract
+      - create_and_edit_require_explicit_difficulty
+      - persisted_difficulty_round_trips_without_fallback
+      - legacy_null_cannot_be_silently_resaved
+      - existing_question_write_contracts_remain_unchanged
+      - F0154_remains_open_for_generated_label_confirmation_and_legacy_backfill
     closeoutProjection:
-      current: validated_candidate_ready_for_kernel_commit_and_conditional_closeout
-      triggers: unchanged_tree_kernel_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0154_open_partitioned_then_resume_generated_label_confirmation_and_legacy_manual_metadata
+      current: validated_reviewed_exact_six_file_diff_ready_for_kernel_commit_and_closeout
+      triggers: RED_GREEN_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0154_open_partitioned_then_resume_generated_label_confirmation_and_legacy_backfill_runtime_hold
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     executionMetrics:
-      mandatoryFreshApprovals: 1_task_bound_schema_approval_requested
+      mandatoryFreshApprovals: 0_standing_low_risk
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: JIT_formal_question_and_source_metadata_root_cause_analysis
-      mechanismOverhead: task_contract_materialization_and_single_guardian_request
+      productValueTime: JIT_manual_editor_difficulty_chain_analysis
+      mechanismOverhead: task_contract_materialization
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22
+      taskId: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
       findingIds:
-        - F-0151
-        - F-0152
-      commit: fdcc00a3823dbaa2be9e029e9353450722d4931e
+        - F-0154
+      commit: 2ecc8e40ca8295f128ea31d1351d3c4e009e2506
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      findingStatus: closed
+      findingStatus: open_partitioned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+  - id: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
+    title: Formal question and AI paper source metadata foundation
+    phase: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
+    status: closed
+    priority: p1
+    taskKind: schema_migration_source_and_database_application_logic
+    productClosureContribution: partial_F0154_formal_question_and_source_metadata_foundation
+    branch: fix/formal-question-ai-paper-metadata
+    candidateRootCauseCluster: P1-RC-07
+    findingIds:
+      - F-0154
+    findingStatus: open_partitioned
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    closeoutEvidence:
+      commit: 2ecc8e40ca8295f128ea31d1351d3c4e009e2506
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

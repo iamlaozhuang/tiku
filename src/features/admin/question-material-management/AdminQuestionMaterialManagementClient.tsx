@@ -70,6 +70,7 @@ import type {
   MaterialStatus,
   MultiChoiceRule,
   Profession,
+  QuestionDifficulty,
   QuestionStatus,
   QuestionType,
   ScoringMethod,
@@ -284,6 +285,7 @@ export type QuestionFormValues = {
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;
+  difficulty: QuestionDifficulty | "";
   questionType: QuestionType | "";
   profession: Profession | "";
   level: string;
@@ -388,6 +390,12 @@ const questionTypeLabels: Record<QuestionDto["questionType"], string> = {
   true_false: "判断题",
 };
 
+const questionDifficultyLabels: Record<QuestionDifficulty, string> = {
+  easy: "简单",
+  medium: "中等",
+  hard: "困难",
+};
+
 const professionLabels: Record<Profession, string> = {
   logistics: "物流",
   marketing: "营销",
@@ -468,6 +476,7 @@ function createDefaultFillBlankAnswers(): FillBlankAnswerFormValue[] {
 export function createDefaultQuestionFormValues(): QuestionFormValues {
   return {
     analysisRichText: "",
+    difficulty: "",
     fillBlankAnswers: [],
     knowledgeNodePublicIdsText: "",
     level: "",
@@ -508,6 +517,7 @@ export function createQuestionFormValuesFromQuestion(
 
   return {
     analysisRichText: question.analysisRichText,
+    difficulty: question.difficulty ?? "",
     fillBlankAnswers: (question.fillBlankAnswers ?? []).map(
       (fillBlankAnswer) => ({
         score: fillBlankAnswer.score,
@@ -1077,6 +1087,7 @@ export function createQuestionInput(
   );
 
   return {
+    difficulty: values.difficulty === "" ? null : values.difficulty,
     questionType: values.questionType,
     profession: values.profession,
     level: Number(values.level),
@@ -2747,7 +2758,7 @@ export function AdminQuestionEditorForm({
       ref={formRef}
       onSubmit={(event) => {
         event.preventDefault();
-        const integrityIssues = getQuestionIntegrityIssues({
+        const contentIntegrityIssues = getQuestionIntegrityIssues({
           ...formValues,
           fillBlankAnswers:
             formValues.questionType === "fill_blank" &&
@@ -2768,6 +2779,14 @@ export function AdminQuestionEditorForm({
               ? getPersistableScoringPoints(formValues.scoringPoints)
               : [],
         });
+        const difficultyIssues: ContentIntegrityIssue[] =
+          formValues.difficulty === ""
+            ? [{ field: "difficulty", message: "请选择难度。" }]
+            : [];
+        const integrityIssues = [
+          ...contentIntegrityIssues,
+          ...difficultyIssues,
+        ];
         setFormIssues(integrityIssues);
         if (integrityIssues.length > 0) {
           if (formRef.current !== null) {
@@ -2782,10 +2801,10 @@ export function AdminQuestionEditorForm({
         {mode === "create" ? "新建题目" : "编辑题目"}
       </h2>
       <p className="text-text-secondary text-xs leading-5">
-        题型、专业、等级、科目、题干、标准答案和老师解析为必填；请按所选题型补全选项、逐空答案或评分点。
+        题型、专业、等级、科目、难度、题干、标准答案和老师解析为必填；请按所选题型补全选项、逐空答案或评分点。
       </p>
       <FormErrorSummary issues={formIssues} />
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-5">
         <QuestionFormSelect
           error={readFieldError(formIssues, "questionType")}
           fieldName="questionType"
@@ -2872,6 +2891,19 @@ export function AdminQuestionEditorForm({
             setFormValues({
               ...formValues,
               subject: value as Subject,
+            })
+          }
+        />
+        <QuestionFormSelect
+          error={readFieldError(formIssues, "difficulty")}
+          fieldName="difficulty"
+          label="难度"
+          options={Object.entries(questionDifficultyLabels)}
+          value={formValues.difficulty}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              difficulty: value as QuestionDifficulty,
             })
           }
         />

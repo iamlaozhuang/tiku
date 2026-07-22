@@ -56,6 +56,7 @@ const editableQuestion: QuestionDto = {
   profession: "marketing",
   level: 3,
   subject: "theory",
+  difficulty: "hard",
   stemRichText: "待编辑题干",
   analysisRichText: "待编辑老师解析",
   standardAnswerRichText: "A",
@@ -224,7 +225,11 @@ function mockQuestionEditorFetch({
   return fetchMock;
 }
 
-function fillValidSingleChoiceQuestion() {
+function fillValidSingleChoiceQuestion({
+  difficulty = "medium",
+}: {
+  difficulty?: "easy" | "hard" | "medium" | null;
+} = {}) {
   const form = within(screen.getByRole("form", { name: "题目表单" }));
   fireEvent.change(form.getByLabelText("题型"), {
     target: { value: "single_choice" },
@@ -236,6 +241,11 @@ function fillValidSingleChoiceQuestion() {
   fireEvent.change(form.getByLabelText("科目"), {
     target: { value: "theory" },
   });
+  if (difficulty !== null) {
+    fireEvent.change(form.getByLabelText("难度"), {
+      target: { value: difficulty },
+    });
+  }
   fireEvent.change(form.getByLabelText("题干"), {
     target: { value: "独立 editor route 题干" },
   });
@@ -352,6 +362,31 @@ describe("AdminQuestionEditorPage", () => {
         ([requestUrl]) => String(requestUrl) === "/api/v1/questions",
       ),
     ).toHaveLength(1);
+    const createCall = fetchMock.mock.calls.find(
+      ([requestUrl, init]) =>
+        String(requestUrl) === "/api/v1/questions" && init?.method === "POST",
+    );
+    expect(JSON.parse(String(createCall?.[1]?.body))).toMatchObject({
+      difficulty: "medium",
+    });
+  });
+
+  it("fails closed before create when difficulty has not been explicitly selected", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockQuestionEditorFetch();
+
+    render(createElement(AdminQuestionEditorPage));
+    await screen.findByRole("form", { name: "题目表单" });
+    const form = fillValidSingleChoiceQuestion({ difficulty: null });
+    fireEvent.click(form.getByRole("button", { name: "保存题目" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("请选择难度");
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, init]) =>
+          String(requestUrl) === "/api/v1/questions" && init?.method === "POST",
+      ),
+    ).toBe(false);
   });
 
   it("preserves authored input after a recoverable create conflict", async () => {
@@ -649,8 +684,31 @@ describe("AdminQuestionEditorPage", () => {
     );
     expect(patchCalls).toHaveLength(1);
     expect(JSON.parse(String(patchCalls[0]?.[1]?.body))).toMatchObject({
+      difficulty: "hard",
       expectedUpdatedAt: editableQuestion.updatedAt,
       status: "available",
     });
+  });
+
+  it("does not silently resave a legacy question with unavailable difficulty", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockQuestionEditorFetch({
+      detailQuestion: { ...editableQuestion, difficulty: null },
+    });
+
+    render(
+      createElement(AdminQuestionEditorPage, {
+        questionPublicId: "question-edit-001",
+      }),
+    );
+
+    const form = within(await screen.findByRole("form", { name: "题目表单" }));
+    expect(form.getByLabelText("难度")).toHaveValue("");
+    fireEvent.click(form.getByRole("button", { name: "保存题目" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("请选择难度");
+    expect(
+      fetchMock.mock.calls.some(([, init]) => init?.method === "PATCH"),
+    ).toBe(false);
   });
 });
