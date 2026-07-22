@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
+currentPhase: p1-remediation-rc-06-resource-private-download-2026-07-22
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
+  currentTaskId: p1-remediation-rc-06-resource-private-download-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -540,6 +540,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-question-detail-read-model-2026-07-22
     - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
+    - p1-remediation-rc-06-resource-private-download-2026-07-22
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -598,6 +599,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
     - p1-remediation-rc-06-question-detail-read-model-2026-07-22
     - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
+    - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -655,7 +657,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21: closed
     p1-remediation-rc-06-question-detail-read-model-2026-07-22: closed
     p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22: closed
-    p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22: in_progress
+    p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22: closed
+    p1-remediation-rc-06-resource-private-download-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -844,70 +847,69 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
-  title: Resource Markdown lineage and stale-write guard
-  phase: p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
+  id: p1-remediation-rc-06-resource-private-download-2026-07-22
+  title: Private original resource download
+  phase: p1-remediation-rc-06-resource-private-download-2026-07-22
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0086
-  branch: fix/resource-markdown-lineage-guard
+  productClosureContribution: F-0090
+  branch: fix/resource-private-download
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0086
+    - F-0090
   candidateRootCauseCluster: P1-RC-06
-  objective: require eligible converted Markdown state plus source hash, prior Markdown hash, and updatedAt revision for every review save
+  objective: provide an authorized integrity-checked no-store original resource download by publicId and make downloadAvailable truthful
   executionStage: validated_reviewed_conditional_closeout_ready
-  findingStatus: in_progress
+  findingStatus: ready_for_conditional_closeout
   riskBoundary:
-    category: bounded_medium_risk_database_application_logic
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    category: permission_and_private_local_file_read
+    approvalId: guardian-f0090-resource-private-download-2026-07-22
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: content_admin_detail_to_PATCH_service_to_transactional_resource_repository_to_resource_lineage_and_revision_facts
-    coreFiles: 7
-    contingencyFiles: 4
-    preflightTestFiles: 5
+    chain: content_admin_download_action_to_publicId_route_to_authorized_runtime_to_private_metadata_repository_to_strict_local_resource_reader
+    coreFiles: 9
+    contingencyFiles: 3
+    preflightTestFiles: 4
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: Markdown_review_is_an_unconditional_generic_update_instead_of_a_lineage_bound_version_checked_state_command
+    confirmedRootCause: downloadAvailable_has_no_matching_authorized_private_byte_delivery_command
     disposition: separate_from_other_RC06_findings
   expectedAcceptance:
-    - only_draft_or_rag_ready_with_existing_converted_Markdown_can_be_edited
-    - request_binds_source_content_hash_prior_Markdown_hash_and_updatedAt_revision
-    - conversion_failed_unconverted_oversized_or_stale_edits_fail_without_mutation_or_success_audit
-    - UI_propagates_server_detail_lineage_and_revision_without_computing_descendant_or_conversion_facts
-    - content_admin_authorization_publish_index_and_local_test_adapter_boundaries_remain_unchanged
-    - no_schema_real_database_dependency_Provider_permission_mechanism_or_other_finding_change
-  validationEvidence:
-    red: 1_file_7_tests_failed_on_missing_lineage_revision_size_and_status_guards
-    focused: 5_files_36_tests_pass
-    targetedLint: pass
-    typecheck: pass
-    productionBuild: pass_with_preexisting_local_storage_NFT_warning
-    formatDiffAndStrictStateParse: pass
-    adversarialReview: pass_no_promotion_no_stale_overwrite_no_success_audit_on_failure_and_no_scope_expansion
+    - authorization_precedes_metadata_and_file_access_for_super_admin_or_content_admin_only
+    - publicId_only_route_never_exposes_objectKey_path_hash_or_internal_errors
+    - strict_resource_identity_realpath_size_and_hash_checks_fail_closed
+    - success_and_errors_are_no_store_with_safe_attachment_headers
+    - UI_download_action_uses_only_the_protected_publicId_route
+    - no_schema_real_database_dependency_Provider_entitlement_expansion_or_other_finding_change
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
     triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0086_closed_then_next_separate_RC06_finding_JIT
+    successProjection: F0090_closed_then_next_separate_RC06_finding_JIT
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_bounded_medium_risk_standing_closeout
+    mandatoryFreshApprovals: 1_task_bound_guardian_permission_and_private_file_read
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 0
-    productValueTime: TDD_lineage_bound_conditional_Markdown_review_command
-    mechanismOverhead: JIT_contract_state_validation_kernel_and_closeout
+    approvalWaitTurns: 1
+    productValueTime: 9m_TDD_private_download_implementation_and_adversarial_review
+    mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
     guardSmokeChanges: 0
+  validationEvidence:
+    tddRed: expected_6_of_6_failures_before_download_handler_existed
+    focused: pass_4_files_41_tests
+    lint: pass_targeted_6_files
+    typecheck: pass_tsc_noEmit
+    build: pass_next_build_with_expected_existing_NFT_warning
+    review: pass_auth_precedes_metadata_and_file_access_publicId_only_identity_realpath_hash_size_audit_and_no_store_fail_closed_no_entitlement_expansion
   previousTaskCloseout:
-    taskId: p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
+    taskId: p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
     findingIds:
-      - F-0089
-    commit: 505e4a5a6ff5aaf413ac3b3b3e53bee7098c8903
+      - F-0086
+    commit: d9ee8408a9ab0a2a6655629ad5feef99d0df22e9
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     masterOriginSync: pass
     worktreeClean: true

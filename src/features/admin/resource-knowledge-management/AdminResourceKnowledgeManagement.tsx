@@ -7,6 +7,7 @@ import {
   ChevronUp,
   CheckCircle2,
   DatabaseZap,
+  Download,
   Eye,
   FileText,
   RotateCcw,
@@ -392,6 +393,16 @@ function createResourceListQueryString(queryState: ResourceListQueryState) {
 
 function hasResourcePublicId(value: string) {
   return value.length > 0;
+}
+
+function createSafeDownloadFileName(fileName: string | null): string {
+  return (
+    fileName
+      ?.split(/[\\/]/u)
+      .at(-1)
+      ?.replace(/[\u0000-\u001f\u007f]/gu, "")
+      .trim() || "resource-file"
+  );
 }
 
 function createResourcePath(
@@ -979,6 +990,43 @@ export function AdminResourceKnowledgeManagement() {
       });
     } catch {
       setResourceDetail({ status: "error", resource });
+    }
+  }
+
+  async function handleDownloadResource(resource: AdminResourceOpsSummaryDto) {
+    const sessionToken = getStoredSessionToken();
+    if (
+      !resource.downloadAvailable ||
+      !hasResourcePublicId(resource.publicId)
+    ) {
+      setToastMessage({ message: "资料原文件当前不可下载", tone: "error" });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/v1/resources/${encodeURIComponent(resource.publicId)}/download`,
+        {
+          cache: "no-store",
+          credentials: "same-origin",
+          headers: createAdminAuthHeaders(sessionToken),
+        },
+      );
+      if (!response.ok) {
+        throw new Error("private resource download failed");
+      }
+
+      const objectUrl = URL.createObjectURL(await response.blob());
+      try {
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = createSafeDownloadFileName(resource.originalFileName);
+        anchor.click();
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch {
+      setToastMessage({ message: "资料下载失败，请稍后重试", tone: "error" });
     }
   }
 
@@ -1584,6 +1632,9 @@ export function AdminResourceKnowledgeManagement() {
       {resources.length > 0 ? (
         <ResourceList
           rows={resources}
+          onRequestDownload={(resource) =>
+            void handleDownloadResource(resource)
+          }
           onRequestDetail={(resource) =>
             void handleOpenResourceDetail(resource)
           }
@@ -2079,6 +2130,7 @@ function ResourceLifecycleMetric({
 
 function ResourceList({
   onRequestDetail,
+  onRequestDownload,
   onRequestDisable,
   onRequestEnable,
   onRequestMarkdownReview,
@@ -2087,6 +2139,7 @@ function ResourceList({
   rows,
 }: {
   onRequestDetail: (resource: AdminResourceOpsSummaryDto) => void;
+  onRequestDownload: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestDisable: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestEnable: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestMarkdownReview: (resource: AdminResourceOpsSummaryDto) => void;
@@ -2147,6 +2200,17 @@ function ResourceList({
               </td>
               <td className="px-4 py-3">
                 <div className="flex flex-wrap justify-end gap-2">
+                  {resource.downloadAvailable ? (
+                    <Button
+                      aria-label={`下载资料 ${resource.title}`}
+                      disabled={!hasResourcePublicId(resource.publicId)}
+                      variant="outline"
+                      onClick={() => onRequestDownload(resource)}
+                    >
+                      <Download aria-hidden="true" data-icon="inline-start" />
+                      下载原文件
+                    </Button>
+                  ) : null}
                   <Button
                     aria-label={`查看资料 ${resource.title}`}
                     disabled={!hasResourcePublicId(resource.publicId)}

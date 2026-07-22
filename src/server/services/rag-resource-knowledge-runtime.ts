@@ -47,6 +47,7 @@ import {
   type RagKnowledgeNodeRuntimeRepository,
   type RagResourceKnowledgeRuntimeRepositories,
   type RagResourceRuntimeRepository,
+  type ResourceDownloadIdentity,
   type ResourceMutationContext,
 } from "../repositories/rag-resource-knowledge-runtime-repository";
 import {
@@ -56,6 +57,7 @@ import {
 import {
   defaultLocalUploadStorageRoot,
   prepareLocalResourceFile,
+  readLocalResourceFile,
   storePreparedLocalResourceFile,
   type StoredLocalResourceMetadata,
 } from "./local-paper-asset-storage";
@@ -100,6 +102,7 @@ export type RagResourceKnowledgeRuntimeRepositoriesWithAudit =
 
 export type RagResourceKnowledgeRuntimeOptions = {
   localResourceStorageRoot?: string;
+  readResourceFile?: typeof readLocalResourceFile;
   useLocalResourceAdapter?: boolean;
   repositories?: RagResourceKnowledgeRuntimeRepositoriesWithAudit;
   sessionService?: Pick<SessionService, "getCurrentSession">;
@@ -233,6 +236,40 @@ const resourceEnableConflictResponse = createErrorResponse(
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
+}
+
+function createPrivateNoStoreJsonResponse<TData>(
+  response: ApiResponse<TData>,
+  status: number,
+): Response {
+  return Response.json(response, {
+    status,
+    headers: { "Cache-Control": "private, no-store, max-age=0" },
+  });
+}
+
+function isSafePublicId(publicId: string): boolean {
+  return /^[A-Za-z0-9][A-Za-z0-9_-]{0,199}$/u.test(publicId);
+}
+
+function createSafeResourceAttachmentDisposition(fileName: string): string {
+  const leafName =
+    fileName
+      .split(/[\\/]/u)
+      .at(-1)
+      ?.replace(/[\u0000-\u001f\u007f]/gu, "") ?? "";
+  const fallback =
+    leafName
+      .normalize("NFKD")
+      .replace(/[^A-Za-z0-9._-]+/gu, "_")
+      .replace(/^\.+/u, "")
+      .slice(0, 120) || "resource-file";
+  const encoded = encodeURIComponent(leafName || "resource-file").replace(
+    /[!'()*]/gu,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}`;
 }
 
 async function readRequestJson(request: Request): Promise<unknown> {
@@ -2198,6 +2235,114 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           return createJsonResponse(result.response);
+        },
+      },
+      download: {
+        async GET(request: Request, context: RouteContext): Promise<Response> {
+          let actorOrError: ContentAdminActor | ApiResponse<null>;
+
+          try {
+            actorOrError = await requireContentAdminActor(request);
+          } catch {
+            return createPrivateNoStoreJsonResponse(
+              createErrorResponse(503090, "Resource file is unavailable."),
+              503,
+            );
+          }
+
+          if ("code" in actorOrError) {
+            return createPrivateNoStoreJsonResponse(
+              actorOrError,
+              actorOrError.code === 401001 ? 401 : 403,
+            );
+          }
+
+          let publicId: string;
+          try {
+            ({ publicId } = await context.params);
+          } catch {
+            return createPrivateNoStoreJsonResponse(
+              createErrorResponse(404090, "Resource file is unavailable."),
+              404,
+            );
+          }
+          if (!isSafePublicId(publicId)) {
+            return createPrivateNoStoreJsonResponse(
+              createErrorResponse(404090, "Resource file is unavailable."),
+              404,
+            );
+          }
+
+          try {
+            let identity: ResourceDownloadIdentity | null = null;
+            if (repositories.resourceRepository.findResourceDownload) {
+              identity =
+                await repositories.resourceRepository.findResourceDownload(
+                  publicId,
+                );
+            } else if (allowLocalResourceAdapter) {
+              const resource = await findLocalResource({
+                publicId,
+                storageRoot: localResourceStorageRoot,
+              });
+              identity =
+                resource === null
+                  ? null
+                  : {
+                      contentHash: resource.fileHash,
+                      fileSizeByte: resource.fileSizeByte,
+                      objectStoragePath: resource.objectKey,
+                      originalFileName: resource.originalFileName,
+                      profession: resource.profession,
+                    };
+            }
+
+            if (identity === null) {
+              return createPrivateNoStoreJsonResponse(
+                createErrorResponse(404090, "Resource file is unavailable."),
+                404,
+              );
+            }
+
+            const readResourceFile =
+              options.readResourceFile ?? readLocalResourceFile;
+            const result = await readResourceFile({
+              ...identity,
+              ...(options.localResourceStorageRoot === undefined
+                ? {}
+                : { storageRoot: options.localResourceStorageRoot }),
+            });
+
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "resource.download",
+                targetResourceType: "resource",
+                targetPublicId: publicId,
+                resultStatus: "success",
+                metadataSummary: "redacted private resource download metadata",
+              },
+            );
+
+            return new Response(new Uint8Array(result.bytes), {
+              headers: {
+                "Cache-Control": "private, no-store, max-age=0",
+                "Content-Disposition": createSafeResourceAttachmentDisposition(
+                  identity.originalFileName,
+                ),
+                "Content-Length": String(result.bytes.byteLength),
+                "Content-Type": result.contentType,
+                "X-Content-Type-Options": "nosniff",
+              },
+            });
+          } catch {
+            return createPrivateNoStoreJsonResponse(
+              createErrorResponse(404090, "Resource file is unavailable."),
+              404,
+            );
+          }
         },
       },
       detail: {

@@ -10,7 +10,16 @@ import {
   unlink,
   writeFile,
 } from "node:fs/promises";
-import { basename, dirname, extname, join, resolve, sep } from "node:path";
+import {
+  basename,
+  dirname,
+  extname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 
 import type {
   CreatablePaperAttachmentUsage,
@@ -86,12 +95,53 @@ export type StorePreparedLocalResourceFileInput = {
   storageRoot?: string;
 };
 
+export type ReadLocalResourceFileInput = {
+  contentHash: string;
+  fileSizeByte: number;
+  objectStoragePath: string;
+  originalFileName: string;
+  profession: Profession;
+  storageRoot?: string;
+};
+
+export type ReadLocalResourceFileResult = {
+  bytes: Buffer;
+  contentType: string;
+};
+
 export const defaultLocalUploadStorageRoot = join(
   process.cwd(),
   ".runtime",
   "uploads",
 );
 const safeExtensionPattern = /^[a-z0-9]+$/;
+const resourceFileExtensions = new Set([
+  "bin",
+  "csv",
+  "doc",
+  "docx",
+  "md",
+  "markdown",
+  "pdf",
+  "ppt",
+  "pptx",
+  "txt",
+  "xls",
+  "xlsx",
+]);
+const resourceContentTypes: Readonly<Record<string, string>> = {
+  csv: "text/csv",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  md: "text/markdown",
+  markdown: "text/markdown",
+  pdf: "application/pdf",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  txt: "text/plain",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
 
 function formatYearMonth(date: Date): string {
   const year = date.getUTCFullYear();
@@ -307,6 +357,105 @@ export async function readLocalPaperAssetFile({
   }
 
   return bytes;
+}
+
+export async function readLocalResourceFile({
+  contentHash,
+  fileSizeByte,
+  objectStoragePath,
+  originalFileName,
+  profession,
+  storageRoot = defaultLocalUploadStorageRoot,
+}: ReadLocalResourceFileInput): Promise<ReadLocalResourceFileResult> {
+  const extension = normalizeExtension(originalFileName);
+  const objectKeySegments = objectStoragePath.split("/");
+
+  if (
+    !/^[a-f0-9]{64}$/u.test(contentHash) ||
+    !Number.isSafeInteger(fileSizeByte) ||
+    fileSizeByte < 0 ||
+    !resourceFileExtensions.has(extension) ||
+    objectStoragePath.includes("\\") ||
+    isAbsolute(objectStoragePath) ||
+    objectKeySegments.length !== 5 ||
+    objectKeySegments[0] !== "dev" ||
+    objectKeySegments[1] !== "resource" ||
+    objectKeySegments[2] !== profession ||
+    !/^\d{4}(?:0[1-9]|1[0-2])$/u.test(objectKeySegments[3] ?? "") ||
+    objectKeySegments[4] !== `${contentHash}.${extension}`
+  ) {
+    throw new Error("Resource storage identity mismatch.");
+  }
+
+  const resolvedRoot = resolve(storageRoot);
+  let canonicalRoot: string;
+
+  try {
+    canonicalRoot = await realpath(resolvedRoot);
+  } catch {
+    throw new Error("Resource storage root is unavailable.");
+  }
+
+  const targetPath = resolveInsideStorageRoot(resolvedRoot, objectStoragePath);
+  const targetRelativePath = relative(canonicalRoot, targetPath);
+  if (
+    targetRelativePath === "" ||
+    targetRelativePath === ".." ||
+    targetRelativePath.startsWith(`..${sep}`) ||
+    isAbsolute(targetRelativePath)
+  ) {
+    throw new Error("Resource storage target escaped storage root.");
+  }
+
+  let currentPath = resolvedRoot;
+  for (const segment of objectKeySegments) {
+    currentPath = `${currentPath}${sep}${segment}`;
+    const pathStats = await lstat(currentPath);
+    if (pathStats.isSymbolicLink()) {
+      throw new Error("Resource storage path contains a symbolic link.");
+    }
+  }
+
+  const canonicalTarget = await realpath(targetPath);
+  if (!isInsideResolvedRoot(canonicalRoot, canonicalTarget)) {
+    throw new Error("Resource storage target escaped storage root.");
+  }
+
+  const fileHandle = await open(
+    targetPath,
+    constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
+  );
+
+  try {
+    const openedStats = await fileHandle.stat();
+    if (!openedStats.isFile()) {
+      throw new Error("Resource storage target is not a file.");
+    }
+
+    const bytes = await fileHandle.readFile();
+    const finalPathStats = await lstat(targetPath);
+    const finalCanonicalTarget = await realpath(targetPath);
+    const actualHash = createHash("sha256").update(bytes).digest("hex");
+
+    if (
+      !finalPathStats.isFile() ||
+      finalPathStats.isSymbolicLink() ||
+      finalPathStats.ino !== openedStats.ino ||
+      finalCanonicalTarget !== canonicalTarget ||
+      bytes.byteLength !== fileSizeByte ||
+      actualHash !== contentHash
+    ) {
+      throw new Error("Resource storage integrity mismatch.");
+    }
+
+    return {
+      bytes,
+      contentType:
+        resourceContentTypes[extension] ?? "application/octet-stream",
+    };
+  } finally {
+    await fileHandle.close();
+  }
 }
 
 export async function storeLocalPaperAssetFile({

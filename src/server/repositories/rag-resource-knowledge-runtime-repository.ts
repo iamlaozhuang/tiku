@@ -218,6 +218,14 @@ export type UpdateResourceMarkdownResult =
         | "resource_stale_revision";
     };
 
+export type ResourceDownloadIdentity = {
+  contentHash: string;
+  fileSizeByte: number;
+  objectStoragePath: string;
+  originalFileName: string;
+  profession: AdminResourceOpsListDto["resources"][number]["profession"];
+};
+
 export type RagResourceRuntimeRepository = {
   prepareResourceUpload?(
     input: PrepareResourceUploadInput,
@@ -239,6 +247,9 @@ export type RagResourceRuntimeRepository = {
     sourceContentHash: string | null;
     markdownContentHash: string | null;
   } | null>;
+  findResourceDownload?(
+    publicId: string,
+  ): Promise<ResourceDownloadIdentity | null>;
   updateResourceMarkdown?(
     input: UpdateResourceMarkdownInput,
   ): Promise<UpdateResourceMarkdownResult>;
@@ -490,6 +501,8 @@ type ResourceOpsRowForMapping = {
   level_list: number[] | null;
   original_file_name: string | null;
   object_storage_path: string | null;
+  content_hash: string | null;
+  file_size_byte: number | null;
   markdown_content_hash: string | null;
   indexing_error_message: string | null;
   is_vector_stale: boolean;
@@ -544,6 +557,8 @@ function createPostgresRagResourceRuntimeRepository(
           level_list: resource.level_list,
           original_file_name: resource.original_file_name,
           object_storage_path: resource.object_storage_path,
+          content_hash: resource.content_hash,
+          file_size_byte: resource.file_size_byte,
           markdown_content_hash: resource.markdown_content_hash,
           indexing_error_message: resource.indexing_error_message,
           is_vector_stale: resource.is_vector_stale,
@@ -583,7 +598,6 @@ function createPostgresRagResourceRuntimeRepository(
           id: resource.id,
           ...createResourceOpsReturningSelection(),
           markdown_content: resource.markdown_content,
-          content_hash: resource.content_hash,
         })
         .from(resource)
         .where(eq(resource.public_id, publicId))
@@ -604,6 +618,34 @@ function createPostgresRagResourceRuntimeRepository(
         sourceContentHash: row.content_hash,
         markdownContentHash: row.markdown_content_hash,
       };
+    },
+    async findResourceDownload(publicId) {
+      const database = getDatabase();
+      const [row] = await database
+        .select({
+          profession: resource.profession,
+          object_storage_path: resource.object_storage_path,
+          original_file_name: resource.original_file_name,
+          content_hash: resource.content_hash,
+          file_size_byte: resource.file_size_byte,
+        })
+        .from(resource)
+        .where(eq(resource.public_id, publicId))
+        .limit(1);
+
+      return row === undefined ||
+        row.object_storage_path === null ||
+        row.original_file_name === null ||
+        row.content_hash === null ||
+        row.file_size_byte === null
+        ? null
+        : {
+            profession: row.profession,
+            objectStoragePath: row.object_storage_path,
+            originalFileName: row.original_file_name,
+            contentHash: row.content_hash,
+            fileSizeByte: row.file_size_byte,
+          };
     },
     async updateResourceMarkdown(input) {
       const database = getDatabase();
@@ -2714,7 +2756,7 @@ function mapResourceOpsRow(
     levelList: row.level_list === null ? null : [...row.level_list],
     knowledgeNodePublicIds,
     originalFileName: row.original_file_name,
-    downloadAvailable: row.object_storage_path !== null,
+    downloadAvailable: hasValidResourceDownloadIdentity(row),
     markdownPreviewAvailable: row.markdown_content_hash !== null,
     isVectorStale: row.is_vector_stale,
     publishedAt: row.published_at?.toISOString() ?? null,
@@ -2724,6 +2766,51 @@ function mapResourceOpsRow(
     uploadedAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
   };
+}
+
+const downloadableResourceExtensions = new Set([
+  "bin",
+  "csv",
+  "doc",
+  "docx",
+  "md",
+  "markdown",
+  "pdf",
+  "ppt",
+  "pptx",
+  "txt",
+  "xls",
+  "xlsx",
+]);
+
+function hasValidResourceDownloadIdentity(
+  row: ResourceOpsRowForMapping,
+): boolean {
+  if (
+    row.object_storage_path === null ||
+    row.original_file_name === null ||
+    row.content_hash === null ||
+    row.file_size_byte === null ||
+    !/^[a-f0-9]{64}$/u.test(row.content_hash) ||
+    !Number.isSafeInteger(row.file_size_byte) ||
+    row.file_size_byte < 0
+  ) {
+    return false;
+  }
+
+  const lastDotIndex = row.original_file_name.lastIndexOf(".");
+  const extension =
+    lastDotIndex < 0
+      ? ""
+      : row.original_file_name.slice(lastDotIndex + 1).toLowerCase();
+
+  return (
+    downloadableResourceExtensions.has(extension) &&
+    new RegExp(
+      `^dev/resource/${row.profession}/\\d{4}(?:0[1-9]|1[0-2])/${row.content_hash}\\.${extension}$`,
+      "u",
+    ).test(row.object_storage_path)
+  );
 }
 
 function createIndexingErrorSummary(message: string | null): string | null {
@@ -3074,6 +3161,8 @@ function createResourceOpsReturningSelection() {
     level_list: resource.level_list,
     original_file_name: resource.original_file_name,
     object_storage_path: resource.object_storage_path,
+    content_hash: resource.content_hash,
+    file_size_byte: resource.file_size_byte,
     markdown_content_hash: resource.markdown_content_hash,
     indexing_error_message: resource.indexing_error_message,
     is_vector_stale: resource.is_vector_stale,
