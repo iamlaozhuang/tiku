@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-question-detail-read-model-2026-07-22
+  currentTaskId: p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -289,6 +289,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
     - p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
     - p1-remediation-rc-06-question-detail-read-model-2026-07-22
+    - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -361,6 +362,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
     - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
     - p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+    - p1-remediation-rc-06-question-detail-read-model-2026-07-22
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -469,12 +471,81 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21: closed
     p1-remediation-rc-06-covered-resource-foundations-2026-07-21: closed
     p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21: closed
-    p1-remediation-rc-06-question-detail-read-model-2026-07-22: in_progress
+    p1-remediation-rc-06-question-detail-read-model-2026-07-22: closed
+    p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22: in_progress
 activeTasks:
+  - id: p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
+    title: Chinese RAG chunking and local keyword retrieval
+    phase: p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0089
+    branch: fix/chinese-rag-chunk-retrieval
+    objective: enforce bounded Chinese and mixed-language chunks and deterministic Chinese bigram tokens in the isolated keyword fallback
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0089
+    executionStage: validated_reviewed_conditional_closeout_ready
+    findingStatus: in_progress
+    riskBoundary:
+      category: low_risk_local_text_algorithm
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: resource_index_generation_to_Markdown_chunking_and_isolated_keyword_fallback_to_existing_authorization_level_filter_and_citation_result
+      coreFiles: 6
+      contingencyFiles: 7
+      preflightTestFiles: 8
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: whitespace_delimited_algorithms_fail_to_bound_continuous_Chinese_chunks_or_match_partial_Chinese_phrases
+      disposition: separate_from_other_RC06_findings
+    expectedAcceptance:
+      - every_chunk_is_at_most_targetChunkSize_even_for_no_whitespace_Chinese_and_mixed_text
+      - deterministic_sentence_or_character_fallback_preserves_heading_overlap_order_hashes_and_all_source_content
+      - short_piece_merge_never_recreates_an_oversized_chunk
+      - local_keyword_fallback_matches_reordered_or_partial_Chinese_phrases_with_deterministic_bigrams
+      - authorization_level_status_persisted_semantic_rerank_and_evidence_contracts_remain_unchanged
+      - no_dependency_Provider_embedding_index_lifecycle_schema_permission_mechanism_or_other_finding_change
+    validationEvidence:
+      focused: 8_files_37_tests_pass
+      targetedLint: pass
+      typecheck: pass
+      productionBuild: pass_with_preexisting_local_storage_NFT_warning
+      formatDiffAndStrictStateParse: pass
+      adversarialReview: pass_bounded_progressing_Unicode_safe_and_authorization_preserving
+    closeoutProjection:
+      current: validated_reviewed_conditional_closeout_ready
+      triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0089_closed_then_next_separate_RC06_finding_JIT
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_low_risk_standing_closeout
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: TDD_chunking_and_keyword_algorithm
+      mechanismOverhead: JIT_contract_state_validation_kernel_and_closeout
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-06-question-detail-read-model-2026-07-22
+      findingIds:
+        - F-0073
+      commit: 5d49a9222556ed35aa6430aa9c77ecfc31388e2a
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-06-question-detail-read-model-2026-07-22
     title: Content-admin question detail read model
     phase: p1-remediation-rc-06-question-detail-read-model-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0073
@@ -484,61 +555,10 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-06
     findingIds:
       - F-0073
-    executionStage: validated_reviewed_conditional_closeout_ready
-    findingStatus: in_progress
-    riskBoundary:
-      category: low_risk_read_model_and_content_admin_UI
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-      schemaOrMigrationChange: false
-      persistentDatabaseExecution: false
-      authorizationOrEntitlementExpansion: false
-      realExternalCall: false
-      conditionalCloseout: true
-    preRedImpactScan:
-      chain: admin_question_detail_UI_to_GET_handler_to_validator_service_mapper_repository_to_existing_material_knowledge_node_tag_paper_reference_facts
-      coreFiles: 11
-      contingencyFiles: 8
-      preflightTestFiles: 9
-      directCallerCalleeMocksFixturesReviewed: true
-      testOnlyAllowlistExpansion:
-        approvalId: standing-test-only-allowlist-expansion-2026-07-21
-        reason: QuestionService_detail_return_type_direct_route_mock
-        files: 1
-      confirmedRootCause: detail_endpoint_reuses_edit_hydration_and_UI_reduces_technical_relationship_identifiers_to_counts
-      disposition: separate_from_other_RC06_findings
-    expectedAcceptance:
-      - detail_returns_readable_material_knowledge_node_and_tag_public_id_only_relationships
-      - paper_references_are_deduplicated_paginated_counted_and_stably_sorted_in_the_repository
-      - lock_reason_identifies_published_or_archived_paper_references_without_exposing_internal_ids
-      - content_admin_UI_renders_relationships_paper_reference_pagination_loading_empty_and_error_states
-      - existing_content_admin_guard_list_edit_and_mutation_behavior_remain_unchanged
-      - no_schema_real_database_dependency_provider_permission_paper_lifecycle_mechanism_or_other_finding_change
-    validationEvidence:
-      focused: 8_files_92_tests_pass
-      targetedLint: pass
-      typecheck: pass
-      productionBuild: pass_with_preexisting_local_storage_NFT_warning
-      formatDiffAndStrictStateParse: pass
-      adversarialReview: pass_no_internal_id_authorization_schema_mutation_or_in_memory_pagination_regression
-    closeoutProjection:
-      current: validated_reviewed_conditional_closeout_ready
-      triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0073_closed_then_next_separate_RC06_finding_JIT
-      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
-    executionMetrics:
-      mandatoryFreshApprovals: 0_low_risk_standing_closeout
-      preventableScopeMissApprovals: 0
-      candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: TDD_read_model_and_UI
-      mechanismOverhead: JIT_contract_state_validation_kernel_and_closeout
-      guardSmokeChanges: 0
-    previousTaskCloseout:
-      taskId: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
-      findingIds:
-        - F-0069
-      commit: 4edae516d2ab32b1285e45294957d15f8f9ffad5
-      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed
+    closeout:
+      commit: 5d49a9222556ed35aa6430aa9c77ecfc31388e2a
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

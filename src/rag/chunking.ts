@@ -226,31 +226,72 @@ function splitTextToChunkPieces(
 }
 
 function splitLongText(text: string, config: RagChunkingConfig): string[] {
-  const words = text.split(/\s+/).filter((word) => word.length > 0);
-  let currentSegment = "";
-  let segments: string[] = [];
+  let segmentStart = 0;
+  const segments: string[] = [];
 
-  for (const word of words) {
-    const candidateSegment =
-      currentSegment.length === 0 ? word : `${currentSegment} ${word}`;
+  while (segmentStart < text.length) {
+    const maximumEnd = Math.min(
+      segmentStart + config.targetChunkSize,
+      text.length,
+    );
+    const segmentEnd =
+      maximumEnd === text.length
+        ? maximumEnd
+        : findPreferredTextBoundary(
+            text,
+            segmentStart,
+            maximumEnd,
+            config.minChunkSize,
+          );
+    const segment = text.slice(segmentStart, segmentEnd).trim();
 
-    if (
-      candidateSegment.length <= config.targetChunkSize ||
-      currentSegment.length === 0
-    ) {
-      currentSegment = candidateSegment;
-      continue;
+    if (segment.length > 0) {
+      segments.push(segment);
     }
 
-    segments = [...segments, currentSegment];
-    const overlapText = takeTrailingWords(
-      currentSegment,
-      config.chunkOverlapSize,
+    if (segmentEnd >= text.length) {
+      break;
+    }
+
+    const nextStart = Math.max(
+      segmentStart + 1,
+      segmentEnd - config.chunkOverlapSize,
     );
-    currentSegment = overlapText.length === 0 ? word : `${overlapText} ${word}`;
+    segmentStart = moveBeforeLowSurrogate(text, nextStart);
   }
 
-  return currentSegment.length === 0 ? segments : [...segments, currentSegment];
+  return segments;
+}
+
+function findPreferredTextBoundary(
+  text: string,
+  segmentStart: number,
+  maximumEnd: number,
+  minimumChunkSize: number,
+): number {
+  const minimumPreferredEnd = Math.min(
+    maximumEnd,
+    segmentStart +
+      Math.max(minimumChunkSize, Math.floor((maximumEnd - segmentStart) * 0.6)),
+  );
+
+  for (let index = maximumEnd - 1; index >= minimumPreferredEnd; index -= 1) {
+    if (/[\s。！？!?；;，,]/u.test(text[index])) {
+      return moveBeforeLowSurrogate(text, index + 1);
+    }
+  }
+
+  return moveBeforeLowSurrogate(text, maximumEnd);
+}
+
+function moveBeforeLowSurrogate(text: string, index: number): number {
+  if (index <= 0 || index >= text.length) {
+    return index;
+  }
+
+  const codeUnit = text.charCodeAt(index);
+
+  return codeUnit >= 0xdc00 && codeUnit <= 0xdfff ? index - 1 : index;
 }
 
 function mergeShortChunkPieces(
@@ -265,9 +306,7 @@ function mergeShortChunkPieces(
       haveSameHeadingPath(previousPiece.headingPath, currentPiece.headingPath)
     ) {
       const mergedText = `${previousPiece.text}\n\n${currentPiece.text}`;
-      const shouldMerge =
-        previousPiece.text.length < config.minChunkSize ||
-        mergedText.length <= config.targetChunkSize;
+      const shouldMerge = mergedText.length <= config.targetChunkSize;
 
       if (shouldMerge) {
         return [
@@ -325,21 +364,6 @@ function createRagChunk(
     textHash,
     charLength: piece.text.length,
   };
-}
-
-function takeTrailingWords(text: string, overlapSize: number): string {
-  if (overlapSize === 0) {
-    return "";
-  }
-
-  const trailingText = text.slice(-overlapSize);
-  const leadingBoundaryIndex = trailingText.indexOf(" ");
-
-  return normalizeWhitespace(
-    leadingBoundaryIndex === -1
-      ? trailingText
-      : trailingText.slice(leadingBoundaryIndex + 1),
-  );
 }
 
 function haveSameHeadingPath(

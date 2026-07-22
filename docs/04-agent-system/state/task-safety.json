@@ -1,27 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-question-detail-read-model-2026-07-22",
-  "objective": "Close F-0073 with a dedicated content-admin question detail read model that returns readable material, knowledge_node and tag identities, a paginated public-id-only paper reference list with paper status, and an explicit paper-publication lock reason. Preserve the existing content_admin authorization and all question mutation behavior; do not change schema, permissions, dependencies, Provider behavior, paper lifecycle, or other RC-06 findings.",
+  "taskId": "p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22",
+  "objective": "Close F-0089 by making Markdown chunking deterministically enforce the configured maximum for long no-whitespace Chinese and mixed-language text, while improving the existing isolated keyword-only fallback with deterministic Chinese bigram tokenization. Preserve heading metadata, overlap, authorization and level filtering, persisted semantic/rerank behavior, evidence contracts, and all Provider/index lifecycle boundaries; do not add dependencies or claim semantic synonym coverage from keyword fallback.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/question-contract.ts",
-    "src/server/validators/question.ts",
-    "src/server/repositories/question-repository.ts",
-    "src/server/mappers/question-mapper.ts",
-    "src/server/services/question-service.ts",
-    "src/server/services/content-question-material-runtime.ts",
-    "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
-    "tests/unit/p1-question-detail-read-model.test.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/services/question-service.test.ts",
-    "src/server/services/question-route.test.ts",
-    "tests/unit/phase-9-content-question-material-runtime.test.ts",
-    "tests/unit/admin-question-material-ui.test.ts",
-    "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
-    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
+    "src/rag/chunking.ts",
+    "src/server/services/rag-retrieval-service.ts",
+    "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
+    "src/rag/chunking.test.ts",
+    "src/server/services/rag-retrieval-service.test.ts",
+    "src/rag/retrieval.test.ts",
+    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+    "tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -38,43 +32,35 @@
     ".env*",
     "schema/migration or real database/data access",
     "permission, entitlement, Provider, external service, secret/env or deployment",
-    "question mutation or paper lifecycle semantics, other RC-06 findings, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
+    "embedding generation, vector index lifecycle, resource upload/update/download, other RC-06 findings, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/question-contract.ts",
-    "src/server/validators/question.ts",
-    "src/server/repositories/question-repository.ts",
-    "src/server/mappers/question-mapper.ts",
-    "src/server/services/question-service.ts",
-    "src/server/services/content-question-material-runtime.ts",
-    "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
-    "tests/unit/p1-question-detail-read-model.test.ts"
+    "src/rag/chunking.ts",
+    "src/server/services/rag-retrieval-service.ts",
+    "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/services/question-service.test.ts",
-    "src/server/services/question-route.test.ts",
-    "tests/unit/phase-9-content-question-material-runtime.test.ts",
-    "tests/unit/admin-question-material-ui.test.ts",
-    "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
-    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
-    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
+    "src/rag/chunking.test.ts",
+    "src/server/services/rag-retrieval-service.test.ts",
+    "src/rag/retrieval.test.ts",
+    "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+    "tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirements": "US-06-08 requires content administrators to view the papers referencing a question; question detail must provide readable material, knowledge_node and tag evidence plus an identifiable lock source.",
-    "caller": "AdminContentDetailDrawer currently receives QuestionDto and compresses material, knowledge_node and tag relationships to counts while showing no paper references or lock reason.",
-    "route": "GET /api/v1/questions/{publicId} uses the existing content_admin guard and delegates to QuestionService.getQuestion without a paper-reference page contract.",
-    "service": "QuestionService maps the edit-oriented QuestionAccessRow directly to QuestionResultDto.",
-    "repository": "findQuestionByPublicId hydrates edit public IDs only; paper_question/paper reference facts and readable binding names are not queried.",
-    "schema": "Existing material, knowledge_node, tag, question_knowledge_node, question_tag, paper_question and paper facts are sufficient; no schema or migration is required.",
-    "rootCause": "The detail endpoint reuses an edit hydration model instead of a dedicated read model, and the UI hides the remaining technical identifiers as counts."
+    "requirements": "US-05-07 requires overlong Markdown paragraphs to split while preserving headings; RAG retrieval requires keyword recall plus authorization and level filtering before citations.",
+    "caller": "Resource index generation calls createRagChunks; keyword-only local retrieval calls buildRagRetrievalContextFromChunks.",
+    "service": "rag-retrieval-service currently scores local chunks with tokens split only at non-letter/non-number boundaries.",
+    "algorithm": "chunking splitLongText only breaks on whitespace and mergeShortChunkPieces can merge above target; continuous Chinese becomes one oversized chunk and whole Chinese sentences become unmatched single tokens.",
+    "rootCause": "Both local algorithms assume whitespace-delimited language instead of treating Unicode text length and Chinese boundaries as invariants."
   },
   "validationCommands": [
     {
-      "name": "f0073-question-detail-focused-test",
+      "name": "f0089-chinese-rag-focused-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -82,56 +68,46 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-question-detail-read-model.test.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/question-service.test.ts",
-        "src/server/services/question-route.test.ts",
-        "tests/unit/phase-9-content-question-material-runtime.test.ts",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
-        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+        "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
+        "src/rag/chunking.test.ts",
+        "src/server/services/rag-retrieval-service.test.ts",
+        "src/rag/retrieval.test.ts",
+        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
+        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "f0073-question-detail-lint",
+      "name": "f0089-chinese-rag-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/contracts/question-contract.ts",
-        "src/server/validators/question.ts",
-        "src/server/repositories/question-repository.ts",
-        "src/server/mappers/question-mapper.ts",
-        "src/server/services/question-service.ts",
-        "src/server/services/content-question-material-runtime.ts",
-        "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
-        "tests/unit/p1-question-detail-read-model.test.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/question-service.test.ts",
-        "src/server/services/question-route.test.ts",
-        "tests/unit/phase-9-content-question-material-runtime.test.ts",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
-        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts"
+        "src/rag/chunking.ts",
+        "src/server/services/rag-retrieval-service.ts",
+        "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
+        "src/rag/chunking.test.ts",
+        "src/server/services/rag-retrieval-service.test.ts"
       ]
     },
     {
-      "name": "f0073-question-detail-typecheck",
+      "name": "f0089-chinese-rag-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0073-question-detail-build",
+      "name": "f0089-chinese-rag-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
     },
     {
-      "name": "f0073-question-detail-format",
+      "name": "f0089-chinese-rag-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -142,21 +118,11 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/contracts/question-contract.ts",
-        "src/server/validators/question.ts",
-        "src/server/repositories/question-repository.ts",
-        "src/server/mappers/question-mapper.ts",
-        "src/server/services/question-service.ts",
-        "src/server/services/content-question-material-runtime.ts",
-        "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
-        "tests/unit/p1-question-detail-read-model.test.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/services/question-service.test.ts",
-        "src/server/services/question-route.test.ts",
-        "tests/unit/phase-9-content-question-material-runtime.test.ts",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
-        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts"
+        "src/rag/chunking.ts",
+        "src/server/services/rag-retrieval-service.ts",
+        "tests/unit/p1-chinese-rag-chunk-retrieval.test.ts",
+        "src/rag/chunking.test.ts",
+        "src/server/services/rag-retrieval-service.test.ts"
       ]
     }
   ],
@@ -168,7 +134,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_read_model_and_content_admin_ui",
+    "category": "low_risk_local_text_algorithm",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -181,14 +147,14 @@
   ],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingIds": ["F-0073"],
-    "task": "TDD and close the content-admin question detail read-model boundary, then resume the next separate RC-06 finding",
-    "condition": "no schema, real database execution, permission expansion, dependencies, Provider behavior, question mutation, paper lifecycle, mechanism changes, or unrelated RC-06 scope"
+    "findingIds": ["F-0089"],
+    "task": "TDD and close the Chinese chunking and isolated keyword fallback defect, then resume the next separate RC-06 finding",
+    "condition": "no dependency, Provider, embedding, vector index lifecycle, schema, permission, resource lifecycle, mechanism, or unrelated RC-06 scope"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21",
-    "findingIds": ["F-0069"],
-    "commit": "4edae516d2ab32b1285e45294957d15f8f9ffad5",
+    "taskId": "p1-remediation-rc-06-question-detail-read-model-2026-07-22",
+    "findingIds": ["F-0073"],
+    "commit": "5d49a9222556ed35aa6430aa9c77ecfc31388e2a",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,

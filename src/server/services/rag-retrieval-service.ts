@@ -189,13 +189,54 @@ function calculateTokenOverlapScore(query: string, text: string): number {
 }
 
 function tokenizeForLocalRetrieval(value: string): string[] {
-  return [
-    ...new Set(
-      value
-        .toLowerCase()
-        .split(/[^\p{Letter}\p{Number}]+/u)
-        .map((token) => token.trim())
-        .filter((token) => token.length > 0),
-    ),
-  ];
+  const tokens: string[] = [];
+  let currentMode: "han" | "word" | null = null;
+  let currentCharacters: string[] = [];
+
+  const flushCurrentToken = () => {
+    if (currentCharacters.length === 0 || currentMode === null) {
+      return;
+    }
+
+    if (currentMode === "han") {
+      if (currentCharacters.length === 1) {
+        tokens.push(currentCharacters[0]);
+      } else {
+        for (let index = 0; index < currentCharacters.length - 1; index += 1) {
+          tokens.push(
+            `${currentCharacters[index]}${currentCharacters[index + 1]}`,
+          );
+        }
+      }
+    } else {
+      tokens.push(currentCharacters.join(""));
+    }
+
+    currentMode = null;
+    currentCharacters = [];
+  };
+
+  for (const character of value.normalize("NFKC").toLowerCase()) {
+    const nextMode = /\p{Script=Han}/u.test(character)
+      ? "han"
+      : /[\p{Letter}\p{Number}]/u.test(character)
+        ? "word"
+        : null;
+
+    if (nextMode === null) {
+      flushCurrentToken();
+      continue;
+    }
+
+    if (currentMode !== null && currentMode !== nextMode) {
+      flushCurrentToken();
+    }
+
+    currentMode = nextMode;
+    currentCharacters.push(character);
+  }
+
+  flushCurrentToken();
+
+  return [...new Set(tokens)];
 }
