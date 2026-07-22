@@ -91,6 +91,57 @@ function createPaperSnapshot(
   };
 }
 
+function createNestedQuestionGroupPaperSnapshot(): Record<string, unknown> {
+  const createQuestion = (index: number) => ({
+    paperQuestionPublicId: `paper_question_group_${index}`,
+    questionPublicId: `question_group_${index}`,
+    questionType: "short_answer",
+    stemRichText: `<p>材料子题 ${index}</p>`,
+    standardAnswerLabels: [],
+    standardAnswerRichText: "<p>标准答案</p>",
+    analysisRichText: "<p>解析</p>",
+    score: "5.0",
+    multiChoiceRule: "all_correct_only",
+    scoringMethod: "ai_scoring",
+    scoringPoints: [
+      {
+        scoringPointPublicId: `scoring_point_group_${index}`,
+        description: "评分点",
+        score: "5.0",
+        sortOrder: 1,
+      },
+    ],
+  });
+
+  return {
+    snapshotVersion: 2,
+    publicId: "paper_public_123",
+    name: "2024年专卖三级技能材料题",
+    durationMinute: 120,
+    paperSections: [
+      {
+        publicId: "paper_section_public_123",
+        title: "一、案例分析题",
+        sortOrder: 1,
+        paperQuestions: [],
+        questionGroups: [
+          {
+            publicId: "qgroup_public_123",
+            title: "客户异议处理案例",
+            sortOrder: 1,
+            totalScore: "10.0",
+            materialSnapshot: {
+              materialPublicId: "material_public_123",
+              title: "客户异议材料",
+            },
+            paperQuestions: [createQuestion(1), createQuestion(2)],
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createQuestionOptionsOnlyPaperSnapshot(): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
@@ -310,6 +361,38 @@ function createRepository(
 }
 
 describe("mock exam service", () => {
+  it("starts from a versioned snapshot whose questions are nested in one question_group", async () => {
+    const nestedSnapshot = createNestedQuestionGroupPaperSnapshot();
+    const service = createMockExamService(
+      createRepository({
+        async findPublishedPaperByPublicId() {
+          return createPaper({ paper_snapshot: nestedSnapshot });
+        },
+        async createMockExam(input) {
+          return createMockExam({
+            public_id: input.publicId,
+            paper_snapshot: input.paperSnapshot,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          questionCount: 2,
+        },
+      },
+    });
+  });
+
   it("supplements terminal answers through a missing-only transaction and durable scoring task", async () => {
     const supplementInputs: unknown[] = [];
     const rebuildInputs: unknown[] = [];

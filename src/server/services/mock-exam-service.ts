@@ -34,6 +34,7 @@ import {
 import { buildExamReportSnapshot } from "./exam-report-service";
 import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
 import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
+import { listPublishedPaperSnapshotQuestionEntries } from "../../lib/published-paper-snapshot";
 
 export type MockExamUserContext = {
   userPublicId: string;
@@ -369,55 +370,37 @@ function findMockExamQuestion(
   paperSnapshot: Record<string, unknown>,
   paperQuestionPublicId: string,
 ): MockExamQuestionSnapshot | null {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
+  for (const { paperQuestion } of listPublishedPaperSnapshotQuestionEntries(
+    paperSnapshot,
+  )) {
+    const candidatePaperQuestionPublicId = getStringField(
+      paperQuestion,
+      "paperQuestionPublicId",
+    );
 
-  for (const paperSection of paperSections) {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
+    if (candidatePaperQuestionPublicId !== paperQuestionPublicId) {
       continue;
     }
 
-    for (const paperQuestion of paperSection.paperQuestions) {
-      if (!isRecord(paperQuestion)) {
-        continue;
-      }
+    const questionPublicId = getStringField(paperQuestion, "questionPublicId");
 
-      const candidatePaperQuestionPublicId = getStringField(
-        paperQuestion,
-        "paperQuestionPublicId",
-      );
-
-      if (candidatePaperQuestionPublicId !== paperQuestionPublicId) {
-        continue;
-      }
-
-      const questionPublicId = getStringField(
-        paperQuestion,
-        "questionPublicId",
-      );
-
-      if (questionPublicId === null) {
-        return null;
-      }
-
-      return {
-        paperQuestionPublicId,
-        questionPublicId,
-        questionType: getStringField(paperQuestion, "questionType"),
-        scoringMethod: getStringField(paperQuestion, "scoringMethod"),
-        standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
-        standardAnswerRichText: getStringField(
-          paperQuestion,
-          "standardAnswerRichText",
-        ),
-        score: getScore(paperQuestion),
-        snapshot: paperQuestion,
-      };
+    if (questionPublicId === null) {
+      return null;
     }
+
+    return {
+      paperQuestionPublicId,
+      questionPublicId,
+      questionType: getStringField(paperQuestion, "questionType"),
+      scoringMethod: getStringField(paperQuestion, "scoringMethod"),
+      standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
+      standardAnswerRichText: getStringField(
+        paperQuestion,
+        "standardAnswerRichText",
+      ),
+      score: getScore(paperQuestion),
+      snapshot: paperQuestion,
+    };
   }
 
   return null;
@@ -426,23 +409,8 @@ function findMockExamQuestion(
 function listMockExamQuestions(
   paperSnapshot: Record<string, unknown>,
 ): MockExamQuestionSnapshot[] {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.flatMap((paperSection) => {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return [];
-    }
-
-    return paperSection.paperQuestions.flatMap((paperQuestion) => {
-      if (!isRecord(paperQuestion)) {
-        return [];
-      }
-
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).flatMap(
+    ({ paperQuestion }) => {
       const paperQuestionPublicId = getStringField(
         paperQuestion,
         "paperQuestionPublicId",
@@ -471,32 +439,14 @@ function listMockExamQuestions(
           snapshot: paperQuestion,
         },
       ];
-    });
-  });
+    },
+  );
 }
 
 function countPaperSnapshotQuestions(
   paperSnapshot: Record<string, unknown>,
 ): number {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.reduce((questionCount, paperSection) => {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return questionCount;
-    }
-
-    return (
-      questionCount +
-      paperSection.paperQuestions.filter((paperQuestion) =>
-        isRecord(paperQuestion),
-      ).length
-    );
-  }, 0);
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).length;
 }
 
 function shouldReplaceMockExamSnapshot(

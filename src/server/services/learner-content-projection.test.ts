@@ -73,4 +73,65 @@ describe("learner content projection", () => {
       "standardAnswerRichText",
     );
   });
+
+  it("removes teacher-only facts from questions nested inside a versioned question_group", () => {
+    const projected = projectPaperSnapshotForLearner({
+      snapshotVersion: 2,
+      paperSections: [
+        {
+          publicId: "paper_section_public_2",
+          title: "技能模块",
+          sortOrder: 1,
+          paperQuestions: [],
+          questionGroups: [
+            {
+              publicId: "qgroup_public_2",
+              title: "材料题组",
+              sortOrder: 1,
+              totalScore: "5.0",
+              materialSnapshot: {
+                materialPublicId: "material_public_2",
+                contentRichText: "<p>共享材料</p>",
+              },
+              paperQuestions: [
+                {
+                  paperQuestionPublicId: "paper_question_public_2",
+                  questionPublicId: "question_public_2",
+                  stemRichText: "<p>子题</p>",
+                  standardAnswerLabels: ["A"],
+                  analysisRichText: "<p>解析</p>",
+                  scoringPoints: [{ description: "评分点", score: "5.0" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(JSON.stringify(projected)).not.toMatch(
+      /standardAnswerLabels|analysisRichText|scoringPoints/u,
+    );
+    expect(projected).toMatchObject({
+      snapshotVersion: 2,
+      paperSections: [
+        {
+          questionGroups: [
+            {
+              publicId: "qgroup_public_2",
+              materialSnapshot: {
+                materialPublicId: "material_public_2",
+              },
+              paperQuestions: [
+                {
+                  paperQuestionPublicId: "paper_question_public_2",
+                  stemRichText: "<p>子题</p>",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+  });
 });

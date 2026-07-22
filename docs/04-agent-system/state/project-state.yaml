@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
+currentPhase: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,8 +470,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
-  currentCandidateClusterId: P1-RC-04
+  currentTaskId: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+  currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -821,76 +821,75 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
-  title: Paper asset durable physical file lifecycle
-  phase: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
+  id: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+  title: Published paper snapshot question_group hierarchy foundation
+  phase: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0096_physical_file_lifecycle_partial
-  branch: fix/paper-asset-file-lifecycle
+  productClosureContribution: F-0098_versioned_nested_snapshot_and_shared_consumer_foundation_partial
+  branch: fix/published-paper-snapshot-hierarchy-foundation
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0096
+    - F-0098
   candidateRootCauseCluster: P1-RC-05
-  objective: add durable reference-safe local-file cleanup after atomic eligible draft paper_asset metadata deletion without changing upload ingestion, download authorization or paper lifecycle semantics
+  objective: produce a versioned nested paper_section-question_group-paper_question snapshot and make current practice, mock_exam, exam_report and API consumers traverse it through one legacy-compatible contract
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: open_partitioned
   riskBoundary:
-    category: schema_migration_source_database_application_logic_and_local_file_delete
-    approvalId: guardian-f0096-paper-asset-file-lifecycle-2026-07-21
-    schemaOrMigrationChange: true
+    category: low_risk_product_snapshot_read_projection
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
-    localPhysicalDelete: true
     conditionalCloseout: true
-    mandatoryConcurrencyContract: prepare_complete_delete_and_cleanup_share_exact_object_key_advisory_lock_with_advisory_before_for_update_and_cleanup_transaction_spanning_physical_outcome
-    retryContract: repeated_delete_by_source_paper_asset_public_id_retries_pending_or_failed_job_without_duplicate_success_audit
   preRedImpactScan:
-    chain: delete_route_to_runtime_to_service_to_atomic_repository_delete_audit_cleanup_outbox_to_strict_local_storage_delete_and_upload_object_identity_lock
+    chain: published_paper_repository_snapshot_producer_to_shared_snapshot_reader_to_practice_mock_exam_report_services_mappers_and_student_surfaces
     coreFiles: 13
-    contingencyFiles: 6
+    contingencyFiles: 10
     sameTaskAuthoritativeCallChainExpansion: 0
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: module_02_published_attachment_retention_and_validated_F0096_durable_cleanup_boundary
-    confirmedResidualRootCause: draft_metadata_delete_and_content_addressed_local_file_lifecycle_are_not_joined_by_a_durable_reference_safe_cleanup_command
+    requirements: module_02_section_3_7_and_decision_package_D14_question_group_structure
+    confirmedResidualRootCause: paper_snapshot_remains_an_unversioned_flat_section_question_shape_and_each_consumer_reimplements_that_shape_after_question_group_became_authoritative
   expectedAcceptance:
-    - eligible_draft_metadata_delete_audit_and_cleanup_enqueue_are_atomic
-    - shared_object_identity_is_not_deleted_while_any_paper_asset_reference_remains
-    - cleanup_rechecks_zero_references_under_the_same_identity_lock_as_upload_completion
-    - strict_contained_local_delete_records_completed_or_retryable_failure_without_path_or_metadata_disclosure
-    - published_archived_download_upload_idempotency_and_authorization_regressions_remain_green
-    - no_migration_execution_real_database_access_dependency_permission_or_ingestion_policy_change
-    - F0096_remains_open_only_for_authoritative_ingestion_size_type_and_streaming_gate_resolution
+    - new_snapshot_version_explicitly_nests_question_groups_and_standalone_questions
+    - group_public_identity_order_shared_material_and_computed_subtotal_are_preserved_once
+    - shared_reader_consumes_v2_and_legacy_flat_snapshots_without_question_loss_or_duplication
+    - practice_mock_exam_report_services_mappers_and_student_surfaces_remain_compatible
+    - learner_projection_still_removes_teacher_only_answer_fields_inside_nested_questions
+    - no_schema_migration_permission_dependency_organization_training_or_mechanism_change
+    - F0098_remains_open_only_for_grouped_mock_report_presentation_and_independent_acceptance
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    triggers: final_tree_external_token_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0096_ingestion_gate_residual
+    triggers: unchanged_final_tree_kernel_commit_ff_only_canonical_push_sync_and_cleanup
+    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0098_learner_presentation_partition
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   validationEvidence:
-    tddRed: 1_file_5_expected_failures_exit_1
-    focused: 8_files_58_tests_exit_0
-    lintTypecheckBuild: pass_build_100_routes_existing_NFT_trace_warning_only
-    concurrencyProof: static_source_ordering_plus_synthetic_local_file_tests_not_runtime_database_proof
-    adversarialReview: pass_no_real_DB_extra_file_permission_dependency_ingestion_or_mechanism_drift
+    tddRed: shared_reader_producer_practice_mock_report_and_student_UI_failures_reproduced_before_GREEN
+    focused: 11_files_181_tests_exit_0
+    lint: 20_changed_typescript_files_exit_0
+    typecheck: tsc_noEmit_exit_0
+    build: next_build_100_routes_exit_0_existing_NFT_trace_warning_only
+    stateAndDiff: strict_JSON_YAML_parse_and_git_diff_check_exit_0
+    adversarialReview: pass_after_fixing_legacy_progress_gap_noncanonical_score_acceptance_and_null_material_drift
+    proofBoundary: repository_snapshot_assembly_is_static_and_unit_verified_without_runtime_database_execution
   executionMetrics:
-    mandatoryFreshApprovals: 1
+    mandatoryFreshApprovals: 0
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 1
-    productValueTime: 18m
-    mechanismOverhead: 7m_including_contract_state_generation_validation_orchestration_and_repeated_build
+    approvalWaitTurns: 0
+    productValueTime: 46m
+    mechanismOverhead: 11m_including_contract_state_validation_and_closeout_orchestration
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
+    taskId: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
     findingId: F-0096
-    productClosureContribution: F-0096_usage_integrity_partial
-    commit: 17de33b3cee17f35647ba71eb86104e2fb51995e
-    candidateTree: 13bd9bf3dfc661fe00cc2c5f03d6ed4132fb5d7f
+    productClosureContribution: F-0096_physical_file_lifecycle_partial
+    commit: fa84e7c398b5bac954d1a00f93539924ecafeeb2
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: guardian-f0096-paper-asset-usage-contract-2026-07-21
+    approvalId: guardian-f0096-paper-asset-file-lifecycle-2026-07-21
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass

@@ -31,6 +31,7 @@ import type {
   PracticeResultDto,
 } from "@/server/contracts/practice-contract";
 import type { Profession, Subject } from "@/server/models/paper";
+import { listPublishedPaperSnapshotQuestionEntries } from "@/lib/published-paper-snapshot";
 
 type StudentPracticePageState =
   | "ready"
@@ -79,10 +80,6 @@ type PracticePaperQuestion = {
 type PracticeQuestionOption = {
   label: string;
   content: string;
-};
-
-type PracticePaperSection = {
-  paperQuestions?: unknown;
 };
 
 type PracticeQuestionPage = {
@@ -406,6 +403,7 @@ function isSubjectivePracticeQuestion(
 function mapPracticeQuestion(
   value: unknown,
   fallbackPaperSectionTitle: string | null,
+  questionGroup: Record<string, unknown> | null,
 ): PracticePaperQuestion | null {
   if (!isRecord(value)) {
     return null;
@@ -419,9 +417,12 @@ function mapPracticeQuestion(
   const paperSectionTitle =
     getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
-  const materialSnapshot = isRecord(value.materialSnapshot)
-    ? value.materialSnapshot
-    : null;
+  const materialSnapshot =
+    questionGroup !== null && isRecord(questionGroup.materialSnapshot)
+      ? questionGroup.materialSnapshot
+      : isRecord(value.materialSnapshot)
+        ? value.materialSnapshot
+        : null;
 
   if (
     paperQuestionPublicId === null ||
@@ -438,8 +439,14 @@ function mapPracticeQuestion(
     questionPublicId,
     questionType,
     paperSectionTitle,
-    questionGroupPublicId: getStringField(value, "questionGroupPublicId"),
-    questionGroupTitle: getStringField(value, "questionGroupTitle"),
+    questionGroupPublicId:
+      questionGroup === null
+        ? getStringField(value, "questionGroupPublicId")
+        : getStringField(questionGroup, "publicId"),
+    questionGroupTitle:
+      questionGroup === null
+        ? getStringField(value, "questionGroupTitle")
+        : getStringField(questionGroup, "title"),
     materialPublicId:
       materialSnapshot === null
         ? null
@@ -465,45 +472,38 @@ function mapPracticeQuestion(
 function extractPracticeQuestionPages(
   paperSnapshot: Record<string, unknown>,
 ): PracticeQuestionPage[] {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).reduce<
+    PracticeQuestionPage[]
+  >((pages, { paperSection, questionGroup, paperQuestion }) => {
+    const question = mapPracticeQuestion(
+      paperQuestion,
+      getStringField(paperSection, "paperSectionTitle") ??
+        getStringField(paperSection, "title"),
+      questionGroup,
+    );
 
-  const pages: PracticeQuestionPage[] = [];
-  let questionIndex = 0;
-
-  for (const [paperSectionIndex, paperSection] of paperSections.entries()) {
-    if (!isRecord(paperSection)) {
-      continue;
+    if (question === null) {
+      return pages;
     }
 
-    const typedPaperSection = paperSection as PracticePaperSection;
-    const paperSectionTitle =
-      getStringField(paperSection, "paperSectionTitle") ??
-      getStringField(paperSection, "title");
-    const paperQuestions = Array.isArray(typedPaperSection.paperQuestions)
-      ? typedPaperSection.paperQuestions
-      : [];
+    const pageKey =
+      question.questionGroupPublicId === null
+        ? `paper_question:${question.paperQuestionPublicId}`
+        : `question_group:${question.questionGroupPublicId}`;
+    const nextQuestionIndex = pages.reduce(
+      (questionCount, page) => questionCount + page.questions.length,
+      0,
+    );
+    const existingPageIndex = pages.findIndex(
+      (page) => page.pageKey === pageKey,
+    );
 
-    const questions = paperQuestions
-      .map((paperQuestion) =>
-        mapPracticeQuestion(paperQuestion, paperSectionTitle),
-      )
-      .filter(
-        (question): question is PracticePaperQuestion => question !== null,
-      );
-
-    for (const question of questions) {
-      const pageKey =
-        question.questionGroupPublicId === null
-          ? `paper_question:${question.paperQuestionPublicId}`
-          : `question_group:${paperSectionIndex}:${question.questionGroupPublicId}`;
-      const existingPage = pages.find((page) => page.pageKey === pageKey);
-
-      if (existingPage === undefined) {
-        pages.push({
+    if (existingPageIndex === -1) {
+      return [
+        ...pages,
+        {
           pageKey,
-          firstQuestionIndex: questionIndex,
+          firstQuestionIndex: nextQuestionIndex,
           paperSectionTitle: question.paperSectionTitle,
           questionGroupPublicId: question.questionGroupPublicId,
           questionGroupTitle: question.questionGroupTitle,
@@ -511,16 +511,16 @@ function extractPracticeQuestionPages(
           materialTitle: question.materialTitle,
           materialRichText: question.materialRichText,
           questions: [question],
-        });
-      } else {
-        existingPage.questions.push(question);
-      }
-
-      questionIndex += 1;
+        },
+      ];
     }
-  }
 
-  return pages;
+    return pages.map((page, pageIndex) =>
+      pageIndex === existingPageIndex
+        ? { ...page, questions: [...page.questions, question] }
+        : page,
+    );
+  }, []);
 }
 
 function extractPracticeQuestions(

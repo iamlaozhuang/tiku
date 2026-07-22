@@ -32,6 +32,7 @@ import type {
 } from "../validators/practice";
 import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
 import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
+import { listPublishedPaperSnapshotQuestionEntries } from "../../lib/published-paper-snapshot";
 
 export type PracticeUserContext = {
   userPublicId: string;
@@ -247,58 +248,40 @@ function findPracticeQuestion(
   paperSnapshot: Record<string, unknown>,
   paperQuestionPublicId: string,
 ): PracticeQuestionSnapshot | null {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
+  for (const { paperQuestion } of listPublishedPaperSnapshotQuestionEntries(
+    paperSnapshot,
+  )) {
+    const candidatePaperQuestionPublicId = getStringField(
+      paperQuestion,
+      "paperQuestionPublicId",
+    );
 
-  for (const paperSection of paperSections) {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
+    if (candidatePaperQuestionPublicId !== paperQuestionPublicId) {
       continue;
     }
 
-    for (const paperQuestion of paperSection.paperQuestions) {
-      if (!isRecord(paperQuestion)) {
-        continue;
-      }
+    const questionPublicId = getStringField(paperQuestion, "questionPublicId");
 
-      const candidatePaperQuestionPublicId = getStringField(
-        paperQuestion,
-        "paperQuestionPublicId",
-      );
-
-      if (candidatePaperQuestionPublicId !== paperQuestionPublicId) {
-        continue;
-      }
-
-      const questionPublicId = getStringField(
-        paperQuestion,
-        "questionPublicId",
-      );
-
-      if (questionPublicId === null) {
-        return null;
-      }
-
-      return {
-        paperQuestionPublicId,
-        questionPublicId,
-        questionType: getStringField(paperQuestion, "questionType"),
-        multiChoiceRule: getStringField(paperQuestion, "multiChoiceRule"),
-        scoringMethod: getStringField(paperQuestion, "scoringMethod"),
-        standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
-        standardAnswerRichText: getStringField(
-          paperQuestion,
-          "standardAnswerRichText",
-        ),
-        analysisRichText: getStringField(paperQuestion, "analysisRichText"),
-        score: getScore(paperQuestion),
-        fillBlankAnswers: getFillBlankAnswers(paperQuestion),
-        snapshot: paperQuestion,
-      };
+    if (questionPublicId === null) {
+      return null;
     }
+
+    return {
+      paperQuestionPublicId,
+      questionPublicId,
+      questionType: getStringField(paperQuestion, "questionType"),
+      multiChoiceRule: getStringField(paperQuestion, "multiChoiceRule"),
+      scoringMethod: getStringField(paperQuestion, "scoringMethod"),
+      standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
+      standardAnswerRichText: getStringField(
+        paperQuestion,
+        "standardAnswerRichText",
+      ),
+      analysisRichText: getStringField(paperQuestion, "analysisRichText"),
+      score: getScore(paperQuestion),
+      fillBlankAnswers: getFillBlankAnswers(paperQuestion),
+      snapshot: paperQuestion,
+    };
   }
 
   return null;
@@ -307,25 +290,7 @@ function findPracticeQuestion(
 function countPaperSnapshotQuestions(
   paperSnapshot: Record<string, unknown>,
 ): number {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.reduce((questionCount, paperSection) => {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return questionCount;
-    }
-
-    return (
-      questionCount +
-      paperSection.paperQuestions.filter((paperQuestion) =>
-        isRecord(paperQuestion),
-      ).length
-    );
-  }, 0);
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).length;
 }
 
 function shouldReplacePracticeSnapshot(
@@ -406,25 +371,11 @@ function isSubjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
 function isPracticePaperScoringContractValid(
   paperSnapshot: Record<string, unknown>,
 ): boolean {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
   const paperQuestionPublicIds = new Set<string>();
   const questionPublicIds = new Set<string>();
 
-  return paperSections.every((paperSection) => {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return false;
-    }
-
-    return paperSection.paperQuestions.every((paperQuestion) => {
-      if (!isRecord(paperQuestion)) {
-        return false;
-      }
-
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).every(
+    ({ paperQuestion }) => {
       const paperQuestionPublicId = getStringField(
         paperQuestion,
         "paperQuestionPublicId",
@@ -457,8 +408,8 @@ function isPracticePaperScoringContractValid(
         scoringMethod: getStringField(paperQuestion, "scoringMethod"),
         multiChoiceRule: getStringField(paperQuestion, "multiChoiceRule"),
       });
-    });
-  });
+    },
+  );
 }
 
 function isPracticePaperSnapshotValidForResume(

@@ -530,23 +530,40 @@ describe("StudentMockExamPage", () => {
       ...studentMockExamFixture.mockExams[0].mockExam,
       publicId: "mock-exam-runtime-snapshot",
       paperSnapshot: {
+        snapshotVersion: 2,
         name: "Runtime mock exam",
         paperSections: [
           {
+            publicId: "paper-section-runtime-001",
             title: "Runtime section",
-            paperQuestions: [
+            sortOrder: 1,
+            paperQuestions: [],
+            questionGroups: [
               {
-                paperQuestionPublicId: "paper-question-runtime-001",
-                questionPublicId: "question-runtime-001",
-                questionType: "single_choice",
-                stemRichText: "Runtime stem",
-                questionOptions: [
+                publicId: "question-group-runtime-001",
+                title: "Runtime group",
+                sortOrder: 1,
+                totalScore: "1.0",
+                materialSnapshot: {
+                  materialPublicId: "material-runtime-001",
+                  title: "Runtime material",
+                  contentRichText: "<p>Runtime material body</p>",
+                },
+                paperQuestions: [
                   {
-                    label: "A",
-                    contentRichText: "runtime option",
+                    paperQuestionPublicId: "paper-question-runtime-001",
+                    questionPublicId: "question-runtime-001",
+                    questionType: "single_choice",
+                    stemRichText: "Runtime stem",
+                    questionOptions: [
+                      {
+                        label: "A",
+                        contentRichText: "runtime option",
+                      },
+                    ],
+                    score: "1.0",
                   },
                 ],
-                score: "1.0",
               },
             ],
           },
@@ -570,6 +587,8 @@ describe("StudentMockExamPage", () => {
       screen.getByRole("heading", { name: "Runtime mock exam" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Runtime section")).toBeInTheDocument();
+    expect(screen.getByText("Runtime group")).toBeInTheDocument();
+    expect(screen.getByText("Runtime material body")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "A. runtime option" }),
     ).toBeInTheDocument();
@@ -1559,6 +1578,7 @@ describe("StudentExamReportPage", () => {
         scoreSummaryText: "得分 8.0 / 10",
         questionTypeSummaryText: "案例分析题 1 题，计算题 1 题",
         paperSectionSummaryText: "案例模块 得分率 80%",
+        questionGroupSummaryText: "材料题组：客户服务案例 2 题",
         knowledgeNodeSummaryText:
           "knowledge_node analytics: knowledge-node-case 1, knowledge-node-calculation 1",
         questionResults: [
@@ -1566,6 +1586,9 @@ describe("StudentExamReportPage", () => {
             paperQuestionPublicId: "paper-question-case-analysis-001",
             questionPublicId: "question-case-analysis-001",
             questionType: "case_analysis",
+            paperSectionTitle: "案例模块",
+            questionGroupPublicId: "question-group-case-001",
+            questionGroupTitle: "客户服务案例",
             title: "Synthetic case_analysis report item",
             isCorrect: null,
             score: "4.0",
@@ -1578,6 +1601,9 @@ describe("StudentExamReportPage", () => {
             paperQuestionPublicId: "paper-question-calculation-001",
             questionPublicId: "question-calculation-001",
             questionType: "calculation",
+            paperSectionTitle: "案例模块",
+            questionGroupPublicId: "question-group-case-001",
+            questionGroupTitle: "客户服务案例",
             title: "Synthetic calculation report item",
             isCorrect: null,
             score: "4.0",
@@ -1601,6 +1627,8 @@ describe("StudentExamReportPage", () => {
       screen.getByText("案例分析题 1 题，计算题 1 题"),
     ).toBeInTheDocument();
     expect(screen.getByText("案例模块 得分率 80%")).toBeInTheDocument();
+    expect(screen.getByText("材料题组：客户服务案例 2 题")).toBeInTheDocument();
+    expect(screen.getAllByText("案例模块 · 客户服务案例")).toHaveLength(2);
     expect(screen.getByText("案例分析题")).toBeInTheDocument();
     expect(screen.getByText("计算题")).toBeInTheDocument();
     expect(

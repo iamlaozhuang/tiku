@@ -208,4 +208,26 @@ describe("P0 RC-04 immutable student snapshot identity", () => {
       /questionGroupPublicIdById\.get\(questionRow\.question_group_id\) \?\?\s*null/u,
     );
   });
+
+  it("publishes a versioned paper_section hierarchy with explicit question_group containers", () => {
+    const snapshotSource = studentFlowRepositorySource.slice(
+      studentFlowRepositorySource.indexOf("async function buildPaperSnapshot"),
+      studentFlowRepositorySource.indexOf("async function listQuestionCounts"),
+    );
+
+    expect(snapshotSource).toContain("snapshotVersion: 2");
+    expect(snapshotSource).toContain("publicId: sectionRow.public_id");
+    expect(snapshotSource).toContain("questionGroups:");
+    expect(snapshotSource).toContain("publicId: questionGroupRow.public_id");
+    expect(snapshotSource).toContain("sortOrder: questionGroupRow.sort_order");
+    expect(snapshotSource).toContain("totalScore:");
+    expect(snapshotSource).toContain("sortOrder: row.sort_order");
+    expect(snapshotSource).toContain(
+      "questionRow.material_snapshot === null\n                ? null",
+    );
+    expect(snapshotSource).toContain(
+      "questionGroupRow.paper_section_id !== questionRow.paper_section_id",
+    );
+    expect(snapshotSource).toContain("paperQuestions:");
+  });
 });

@@ -66,6 +66,59 @@ function createPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createNestedQuestionGroupPaperSnapshot(): Record<string, unknown> {
+  return {
+    snapshotVersion: 2,
+    publicId: "paper_public_123",
+    name: "2024年专卖三级技能材料题",
+    paperSections: [
+      {
+        publicId: "paper_section_public_123",
+        title: "一、案例分析题",
+        sortOrder: 1,
+        paperQuestions: [],
+        questionGroups: [
+          {
+            publicId: "qgroup_public_123",
+            title: "客户异议处理案例",
+            sortOrder: 1,
+            totalScore: "20.0",
+            materialSnapshot: {
+              materialPublicId: "material_public_123",
+              title: "客户异议材料",
+              contentRichText: "<p>客户连续反馈配送延迟。</p>",
+            },
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper_question_group_1",
+                questionPublicId: "question_group_1",
+                questionType: "short_answer",
+                stemRichText: "<p>说明沟通步骤。</p>",
+                standardAnswerRichText: "<p>确认事实并反馈方案。</p>",
+                analysisRichText: "<p>按事实、方案、跟进作答。</p>",
+                score: "10.0",
+                multiChoiceRule: "all_correct_only",
+                scoringMethod: "ai_scoring",
+              },
+              {
+                paperQuestionPublicId: "paper_question_group_2",
+                questionPublicId: "question_group_2",
+                questionType: "short_answer",
+                stemRichText: "<p>说明复盘步骤。</p>",
+                standardAnswerRichText: "<p>记录原因并形成改进项。</p>",
+                analysisRichText: "<p>按原因、责任、改进作答。</p>",
+                score: "10.0",
+                multiChoiceRule: "all_correct_only",
+                scoringMethod: "ai_scoring",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
@@ -387,6 +440,42 @@ function createRepository(
 }
 
 describe("practice service", () => {
+  it("starts from a versioned snapshot whose questions are nested in one question_group", async () => {
+    const nestedSnapshot = createNestedQuestionGroupPaperSnapshot();
+    const createdSnapshots: Record<string, unknown>[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findPublishedPaperByPublicId() {
+          return createPaper({ paper_snapshot: nestedSnapshot });
+        },
+        async createPractice(input) {
+          createdSnapshots.push(input.paperSnapshot);
+
+          return createPractice({
+            public_id: input.publicId,
+            paper_snapshot: input.paperSnapshot,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        practice: {
+          questionCount: 2,
+        },
+      },
+    });
+    expect(createdSnapshots).toEqual([nestedSnapshot]);
+  });
+
   it("starts a new authorized practice with a 15 day expiry", async () => {
     const createdInputs: unknown[] = [];
     const service = createPracticeService(

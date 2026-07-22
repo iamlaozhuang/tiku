@@ -249,10 +249,18 @@ describe("RC-07 skill practice question_group boundary", () => {
       "utf8",
     );
 
-    expect(repositorySource).toContain("questionGroupPublicId");
-    expect(repositorySource).toContain("questionGroupTitle");
-    expect(repositorySource).toContain("requireQuestionGroupSnapshot");
-    expect(repositorySource).toContain("materialSnapshot");
+    expect(repositorySource).toContain("snapshotVersion: 2");
+    expect(repositorySource).toContain("questionGroups:");
+    expect(repositorySource).toMatch(
+      /materialSnapshot:\s*asRecord\(\s*questionGroupRow\.material_snapshot/,
+    );
+    expect(repositorySource).toContain(
+      "totalScore: formatPaperSnapshotTotalScore(groupQuestionRows)",
+    );
+    expect(repositorySource).toContain("paperQuestions: groupQuestionRows.map");
+    expect(practiceSource).toContain(
+      "listPublishedPaperSnapshotQuestionEntries",
+    );
     expect(practiceSource).toContain("extractPracticeQuestionPages");
     expect(practiceSource).toContain("下一组");
     expect(practiceSource).toContain("完成练习");

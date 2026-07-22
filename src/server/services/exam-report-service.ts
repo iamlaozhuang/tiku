@@ -30,6 +30,7 @@ import {
   normalizeGenerateExamReportInput,
   normalizeRetryLearningSuggestionInput,
 } from "../validators/exam-report";
+import { listPublishedPaperSnapshotQuestionEntries } from "../../lib/published-paper-snapshot";
 
 export type ExamReportUserContext = {
   userPublicId: string;
@@ -103,6 +104,8 @@ type ReportPaperQuestionSnapshot = {
   isObjective: boolean;
   questionType: string | null;
   paperSectionTitle: string | null;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
   knowledgeNodePublicIds: string[];
 };
 
@@ -283,24 +286,11 @@ function calculateDurationSecond(mockExam: ExamReportMockExamRow): number {
 function listReportPaperQuestions(
   paperSnapshot: Record<string, unknown>,
 ): ReportPaperQuestionSnapshot[] {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.flatMap((paperSection) => {
-    if (
-      !isRecord(paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return [];
-    }
-
-    const paperSectionTitle = getStringField(paperSection, "paperSectionTitle");
-
-    return paperSection.paperQuestions.flatMap((paperQuestion) => {
-      if (!isRecord(paperQuestion)) {
-        return [];
-      }
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).flatMap(
+    ({ paperSection, questionGroup, paperQuestion }) => {
+      const paperSectionTitle =
+        getStringField(paperSection, "paperSectionTitle") ??
+        getStringField(paperSection, "title");
 
       const paperQuestionPublicId = getStringField(
         paperQuestion,
@@ -324,14 +314,22 @@ function listReportPaperQuestions(
           isObjective: getStandardAnswerLabels(paperQuestion).length > 0,
           questionType: getStringField(paperQuestion, "questionType"),
           paperSectionTitle,
+          questionGroupPublicId:
+            questionGroup === null
+              ? null
+              : getStringField(questionGroup, "publicId"),
+          questionGroupTitle:
+            questionGroup === null
+              ? null
+              : getStringField(questionGroup, "title"),
           knowledgeNodePublicIds: getStringArrayField(
             paperQuestion,
             "knowledgeNodePublicIds",
           ),
         },
       ];
-    });
-  });
+    },
+  );
 }
 
 function buildSavedQuestionDetail(answerRecord: ExamReportAnswerRecordRow) {
@@ -415,11 +413,13 @@ function incrementCount(counts: Map<string, number>, key: string | null) {
 function buildAnalyticsSummary(questions: ReportPaperQuestionSnapshot[]) {
   const questionTypeCounts = new Map<string, number>();
   const paperSectionCounts = new Map<string, number>();
+  const questionGroupCounts = new Map<string, number>();
   const knowledgeNodeCounts = new Map<string, number>();
 
   questions.forEach((question) => {
     incrementCount(questionTypeCounts, question.questionType);
     incrementCount(paperSectionCounts, question.paperSectionTitle);
+    incrementCount(questionGroupCounts, question.questionGroupTitle);
     question.knowledgeNodePublicIds.forEach((knowledgeNodePublicId) => {
       incrementCount(knowledgeNodeCounts, knowledgeNodePublicId);
     });
@@ -433,6 +433,10 @@ function buildAnalyticsSummary(questions: ReportPaperQuestionSnapshot[]) {
     paperSectionSummaryText: formatCountSummary(
       "paper_section analytics",
       paperSectionCounts,
+    ),
+    questionGroupSummaryText: formatCountSummary(
+      "question_group analytics",
+      questionGroupCounts,
     ),
     knowledgeNodeSummaryText: formatCountSummary(
       "knowledge_node analytics",
@@ -694,6 +698,9 @@ function buildQuestionResults(
       paperQuestionPublicId: question.paperQuestionPublicId,
       questionPublicId: question.questionPublicId,
       questionType: question.questionType,
+      paperSectionTitle: question.paperSectionTitle,
+      questionGroupPublicId: question.questionGroupPublicId,
+      questionGroupTitle: question.questionGroupTitle,
       scoringMethod: getStringField(question.questionSnapshot, "scoringMethod"),
       title:
         getStringField(question.questionSnapshot, "title") ??

@@ -2056,6 +2056,7 @@ async function buildPaperSnapshot(
 
   if (sectionRows.length === 0) {
     return {
+      snapshotVersion: 2,
       publicId: paperRow.public_id,
       name: paperRow.name,
       profession: paperRow.profession,
@@ -2086,33 +2087,54 @@ async function buildPaperSnapshot(
           .from(paperScoringPoint)
           .where(inArray(paperScoringPoint.paper_question_id, questionIds))
           .orderBy(asc(paperScoringPoint.sort_order));
-  const questionGroupIds = questionRows.flatMap((row) =>
-    row.question_group_id === null ? [] : [row.question_group_id],
-  );
-  const questionGroupRows =
-    questionGroupIds.length === 0
-      ? []
-      : await database
-          .select({
-            id: questionGroup.id,
-            public_id: questionGroup.public_id,
-            title: questionGroup.title,
-            material_snapshot: questionGroup.material_snapshot,
-          })
-          .from(questionGroup)
-          .where(inArray(questionGroup.id, questionGroupIds));
-  const questionGroupSnapshotById = new Map(
-    questionGroupRows.map((row) => [
-      row.id,
-      {
-        publicId: row.public_id,
-        title: row.title,
-        materialSnapshot: asRecord(row.material_snapshot),
-      },
+  const scoringPointsByQuestionId = new Map<
+    number,
+    (typeof scoringPointRows)[number][]
+  >();
+  const questionGroupRows = await database
+    .select({
+      id: questionGroup.id,
+      public_id: questionGroup.public_id,
+      paper_section_id: questionGroup.paper_section_id,
+      title: questionGroup.title,
+      sort_order: questionGroup.sort_order,
+      material_snapshot: questionGroup.material_snapshot,
+    })
+    .from(questionGroup)
+    .where(eq(questionGroup.paper_id, paperRow.id))
+    .orderBy(asc(questionGroup.sort_order));
+  const questionGroupById = new Map(
+    questionGroupRows.map((questionGroupRow) => [
+      questionGroupRow.id,
+      questionGroupRow,
     ]),
   );
 
+  for (const scoringPointRow of scoringPointRows) {
+    const rows =
+      scoringPointsByQuestionId.get(scoringPointRow.paper_question_id) ?? [];
+    scoringPointsByQuestionId.set(scoringPointRow.paper_question_id, [
+      ...rows,
+      scoringPointRow,
+    ]);
+  }
+
   for (const questionRow of questionRows) {
+    if (questionRow.question_group_id !== null) {
+      const questionGroupRow = questionGroupById.get(
+        questionRow.question_group_id,
+      );
+
+      if (
+        questionGroupRow === undefined ||
+        questionGroupRow.paper_section_id !== questionRow.paper_section_id
+      ) {
+        throw new PaperSnapshotIntegrityError(
+          "Paper question group is missing canonical public identity.",
+        );
+      }
+    }
+
     const rows = questionsBySectionId.get(questionRow.paper_section_id) ?? [];
     questionsBySectionId.set(questionRow.paper_section_id, [
       ...rows,
@@ -2121,6 +2143,7 @@ async function buildPaperSnapshot(
   }
 
   return {
+    snapshotVersion: 2,
     publicId: paperRow.public_id,
     name: paperRow.name,
     profession: paperRow.profession,
@@ -2129,41 +2152,89 @@ async function buildPaperSnapshot(
     revision: paperRow.revision,
     durationMinute: paperRow.duration_minute,
     totalScore: paperRow.total_score,
-    paperSections: sectionRows.map((sectionRow) => ({
-      title: sectionRow.title,
-      description: sectionRow.description,
-      sortOrder: sectionRow.sort_order,
-      totalScore: sectionRow.total_score,
-      paperQuestions: (questionsBySectionId.get(sectionRow.id) ?? []).map(
-        (questionRow) =>
-          mapPaperQuestionSnapshot(
-            questionRow,
-            scoringPointRows.filter(
-              (scoringPointRow) =>
-                scoringPointRow.paper_question_id === questionRow.id,
-            ),
-            requireQuestionGroupSnapshot(
-              questionRow.question_group_id,
-              questionGroupSnapshotById,
+    paperSections: sectionRows.map((sectionRow) => {
+      const sectionQuestionRows = questionsBySectionId.get(sectionRow.id) ?? [];
+      const sectionQuestionGroupRows = questionGroupRows.filter(
+        (questionGroupRow) =>
+          questionGroupRow.paper_section_id === sectionRow.id,
+      );
+
+      return {
+        publicId: sectionRow.public_id,
+        title: sectionRow.title,
+        description: sectionRow.description,
+        sortOrder: sectionRow.sort_order,
+        totalScore: sectionRow.total_score,
+        paperQuestions: sectionQuestionRows
+          .filter((questionRow) => questionRow.question_group_id === null)
+          .map((questionRow) =>
+            mapPaperQuestionSnapshot(
+              questionRow,
+              scoringPointsByQuestionId.get(questionRow.id) ?? [],
+              questionRow.material_snapshot === null
+                ? null
+                : asRecord(questionRow.material_snapshot),
             ),
           ),
-      ),
-    })),
+        questionGroups: sectionQuestionGroupRows.map((questionGroupRow) => {
+          const groupQuestionRows = sectionQuestionRows.filter(
+            (questionRow) =>
+              questionRow.question_group_id === questionGroupRow.id,
+          );
+
+          if (groupQuestionRows.length === 0) {
+            throw new PaperSnapshotIntegrityError(
+              "Published paper contains an empty question group.",
+            );
+          }
+
+          return {
+            publicId: questionGroupRow.public_id,
+            title: questionGroupRow.title,
+            sortOrder: questionGroupRow.sort_order,
+            totalScore: formatPaperSnapshotTotalScore(groupQuestionRows),
+            materialSnapshot: asRecord(questionGroupRow.material_snapshot),
+            paperQuestions: groupQuestionRows.map((questionRow) =>
+              mapPaperQuestionSnapshot(
+                questionRow,
+                scoringPointsByQuestionId.get(questionRow.id) ?? [],
+                null,
+              ),
+            ),
+          };
+        }),
+      };
+    }),
   };
+}
+
+function formatPaperSnapshotTotalScore(
+  questionRows: (typeof paperQuestion.$inferSelect)[],
+): string {
+  return questionRows
+    .reduce((totalScore, questionRow) => {
+      const score = Number(questionRow.score ?? "");
+
+      if (!Number.isFinite(score) || score <= 0) {
+        throw new PaperSnapshotIntegrityError(
+          "Paper question snapshot is missing a positive score.",
+        );
+      }
+
+      return totalScore + score;
+    }, 0)
+    .toFixed(1);
 }
 
 function mapPaperQuestionSnapshot(
   row: typeof paperQuestion.$inferSelect,
   scoringPointRows: (typeof paperScoringPoint.$inferSelect)[],
-  questionGroupSnapshot: {
-    publicId: string;
-    title: string;
-    materialSnapshot: Record<string, unknown>;
-  } | null,
+  materialSnapshot: Record<string, unknown> | null,
 ): Record<string, unknown> {
   const snapshot = asRecord(row.question_snapshot);
   const questionPublicId = getStringField(snapshot, "questionPublicId");
   const score = row.score;
+  const numericScore = Number(score ?? "");
 
   if (questionPublicId === null) {
     throw new PaperSnapshotIntegrityError(
@@ -2171,11 +2242,7 @@ function mapPaperQuestionSnapshot(
     );
   }
 
-  if (
-    score === null ||
-    !Number.isFinite(Number.parseFloat(score)) ||
-    Number.parseFloat(score) <= 0
-  ) {
+  if (score === null || !Number.isFinite(numericScore) || numericScore <= 0) {
     throw new PaperSnapshotIntegrityError(
       "Paper question snapshot is missing a positive score.",
     );
@@ -2192,9 +2259,8 @@ function mapPaperQuestionSnapshot(
     paperQuestionPublicId: row.public_id,
     questionPublicId,
     questionType: getStringField(snapshot, "questionType"),
+    sortOrder: row.sort_order,
     score,
-    questionGroupPublicId: questionGroupSnapshot?.publicId ?? null,
-    questionGroupTitle: questionGroupSnapshot?.title ?? null,
     scoringPoints: scoringPointRows.map((scoringPointRow) => ({
       scoringPointPublicId: scoringPointRow.public_id,
       description: scoringPointRow.description,
@@ -2210,39 +2276,8 @@ function mapPaperQuestionSnapshot(
     analysisRichText:
       getStringField(snapshot, "analysisRichText") ??
       getStringField(snapshot, "analysis"),
-    materialSnapshot:
-      questionGroupSnapshot?.materialSnapshot ?? row.material_snapshot,
+    materialSnapshot,
   };
-}
-
-function requireQuestionGroupSnapshot(
-  questionGroupId: number | null,
-  questionGroupSnapshotById: ReadonlyMap<
-    number,
-    {
-      publicId: string;
-      title: string;
-      materialSnapshot: Record<string, unknown>;
-    }
-  >,
-): {
-  publicId: string;
-  title: string;
-  materialSnapshot: Record<string, unknown>;
-} | null {
-  if (questionGroupId === null) {
-    return null;
-  }
-
-  const snapshot = questionGroupSnapshotById.get(questionGroupId);
-
-  if (snapshot === undefined) {
-    throw new PaperSnapshotIntegrityError(
-      "Paper question group is missing canonical public identity.",
-    );
-  }
-
-  return snapshot;
 }
 
 async function listQuestionCounts(

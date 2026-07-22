@@ -1,27 +1,31 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21",
-  "objective": "Implement the independently verifiable F-0096 durable physical file lifecycle partition without claiming ingestion-gate closure: when an eligible draft paper_asset is deleted, atomically delete its metadata, write the existing redacted audit, and enqueue a durable local-file cleanup only when the deleted object has no remaining paper_asset reference. Process cleanup under the same object identity lock used by upload completion, recheck zero references before strict contained local deletion, and persist completed or retryable failure state. Generate only offline Drizzle migration source; do not execute migration or access a real database. Preserve published/archived retention, private download, upload idempotency and all authorization boundaries.",
+  "taskId": "p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21",
+  "objective": "Implement the independently reviewable F-0098 snapshot foundation without claiming final learner UI closure: produce a versioned published paper_snapshot whose paper_section contains explicit question_group containers with stable public identity, order, shared material, computed subtotal and nested paper_question children, while standalone questions remain explicit. Add one shared traversal contract so practice, mock_exam, exam_report and API mappers consume both the new canonical shape and immutable legacy flat snapshots without dropping or duplicating questions. Preserve scoring, answer, authorization, projection and existing session behavior; do not modify schema, migration, permissions or organization training.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260722043000_p1_rc_05_paper_asset_file_lifecycle.sql",
-    "drizzle/meta/20260722043000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "tests/unit/p1-paper-asset-file-lifecycle.test.ts",
-    "src/server/services/paper-asset-service.test.ts",
-    "src/server/services/paper-asset-route.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts"
+    "src/lib/published-paper-snapshot.ts",
+    "src/lib/published-paper-snapshot.test.ts",
+    "src/server/repositories/student-flow-runtime-repository.ts",
+    "src/server/services/practice-service.ts",
+    "src/server/services/practice-service.test.ts",
+    "src/server/services/mock-exam-service.ts",
+    "src/server/services/mock-exam-service.test.ts",
+    "src/server/services/exam-report-service.ts",
+    "src/server/services/exam-report-service.test.ts",
+    "src/server/mappers/practice-mapper.ts",
+    "src/server/mappers/practice-mapper.test.ts",
+    "src/server/mappers/mock-exam-mapper.ts",
+    "src/server/mappers/mock-exam-mapper.test.ts",
+    "src/features/student/practice/StudentPracticePage.tsx",
+    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
+    "tests/unit/student-practice-ui.test.ts",
+    "tests/unit/student-mock-exam-report-ui.test.ts",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
+    "src/server/services/learner-content-projection.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -29,52 +33,55 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
+    "src/db/schema/**",
+    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "migration execution, persistent database access or real data",
-    "upload size/type/magic-byte/streaming behavior",
-    "download authorization, response headers or learner visibility",
-    "role, permission, entitlement or paper lifecycle expansion",
+    "organization training source/import implementation",
+    "permission, entitlement, role or learner visibility changes",
     "dependency, Provider, external service, secret/env, deployment, PR or force-push",
-    "F-0097, F-0098 or another independent finding"
+    "F-0096, F-0097, F-0099 or another independent finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260722043000_p1_rc_05_paper_asset_file_lifecycle.sql",
-    "drizzle/meta/20260722043000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "tests/unit/p1-paper-asset-file-lifecycle.test.ts"
+    "src/lib/published-paper-snapshot.ts",
+    "src/lib/published-paper-snapshot.test.ts",
+    "src/server/repositories/student-flow-runtime-repository.ts",
+    "src/server/services/practice-service.ts",
+    "src/server/services/mock-exam-service.ts",
+    "src/server/services/exam-report-service.ts",
+    "src/server/mappers/practice-mapper.ts",
+    "src/server/mappers/mock-exam-mapper.ts",
+    "src/features/student/practice/StudentPracticePage.tsx",
+    "src/features/student/mock-exam/StudentMockExamReportPage.tsx"
   ],
   "contingencyFiles": [
-    "src/server/services/paper-asset-service.test.ts",
-    "src/server/services/paper-asset-route.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-    "tests/unit/p1-paper-asset-upload-saga.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts"
+    "src/server/services/practice-service.test.ts",
+    "src/server/services/mock-exam-service.test.ts",
+    "src/server/services/exam-report-service.test.ts",
+    "src/server/mappers/practice-mapper.test.ts",
+    "src/server/mappers/mock-exam-mapper.test.ts",
+    "tests/unit/student-practice-ui.test.ts",
+    "tests/unit/student-mock-exam-report-ui.test.ts",
+    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+    "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
+    "src/server/services/learner-content-projection.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirement": "Module 02 section 3.9 requires published attachments to remain with the paper record; the validated F-0096 ledger requires durable cleanup, failure recovery and reference-safe physical lifecycle.",
-    "schema": "paper_asset currently stores the content-addressed object identity but has no durable cleanup state; paper_asset_upload_operation already provides upload idempotency and must remain compatible.",
-    "repository": "draft-only metadata delete and redacted success audit are already atomic, but delete returns only boolean and cannot durably schedule or reconcile file cleanup.",
-    "storage": "strict contained private reads exist, while no strict local delete primitive or symlink-safe cleanup command exists.",
-    "serviceRuntime": "the delete command can process a durable cleanup result without changing the external DTO or authorization route; upload completion must share the same object identity lock to prevent create-versus-delete races.",
-    "tests": "schema, upload saga, delete atomicity, local storage, service/route and phase-9 runtime tests are the direct contracts and regressions.",
-    "nonClaims": "The usage contract commit 17de33b3c is closed. This task does not invent a paper attachment size or MIME policy and does not claim F-0096 fully closed until the separate ingestion gate is resolved from authoritative requirements."
+    "requirement": "Module 02 section 3.7 requires paper_section and question_group structural containers with system-computed subtotals; decision package D14 requires skill flows to group by material, question_group and paper_section.",
+    "producer": "student-flow-runtime-repository currently queries question_group only to copy publicId/title/material onto each paper_question; paper_snapshot remains an unversioned section-to-question flat shape and loses group order/subtotal/container identity.",
+    "consumers": "practice partially reconstructs groups from repeated per-question fields, while mock_exam, exam_report and mappers independently traverse paperSections[].paperQuestions and therefore cannot consume an explicit group hierarchy.",
+    "compatibility": "existing practice/mock_exam rows contain immutable legacy flat snapshots, so one shared reader must preserve them while treating snapshotVersion=2 nested groups as authoritative and fail closed on malformed v2 containers.",
+    "tests": "shared snapshot traversal, practice/mock/report services and mappers, student UIs, learner projection and P0 snapshot/scoring baselines are the direct tests and regressions.",
+    "nonClaims": "This foundation makes the canonical snapshot and all current consumers hierarchy-aware but does not yet claim final grouped mock/report presentation or organization-training import closure; F-0098 remains open_partitioned for the learner presentation partition."
   },
   "validationCommands": [
     {
-      "name": "f0096-paper-asset-file-lifecycle-focused",
+      "name": "f0098-published-paper-snapshot-hierarchy-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -82,39 +89,46 @@
         "exec",
         "vitest",
         "run",
-        "src/db/schema/paper.test.ts",
-        "tests/unit/p1-paper-asset-file-lifecycle.test.ts",
-        "src/server/services/paper-asset-service.test.ts",
-        "src/server/services/paper-asset-route.test.ts",
-        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-        "tests/unit/p1-paper-asset-upload-saga.test.ts",
-        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts"
+        "src/lib/published-paper-snapshot.test.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/mock-exam-service.test.ts",
+        "src/server/services/exam-report-service.test.ts",
+        "src/server/mappers/practice-mapper.test.ts",
+        "src/server/mappers/mock-exam-mapper.test.ts",
+        "tests/unit/student-practice-ui.test.ts",
+        "tests/unit/student-mock-exam-report-ui.test.ts",
+        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
+        "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
+        "src/server/services/learner-content-projection.test.ts"
       ]
     },
     {
-      "name": "f0096-paper-asset-file-lifecycle-lint",
+      "name": "f0098-published-paper-snapshot-hierarchy-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/db/schema/paper.ts",
-        "src/server/repositories/paper-asset-repository.ts",
-        "src/server/services/paper-asset-service.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/server/services/paper-composition-lifecycle-runtime.ts"
+        "src/lib/published-paper-snapshot.ts",
+        "src/server/repositories/student-flow-runtime-repository.ts",
+        "src/server/services/practice-service.ts",
+        "src/server/services/mock-exam-service.ts",
+        "src/server/services/exam-report-service.ts",
+        "src/server/mappers/practice-mapper.ts",
+        "src/server/mappers/mock-exam-mapper.ts",
+        "src/features/student/practice/StudentPracticePage.tsx",
+        "src/features/student/mock-exam/StudentMockExamReportPage.tsx"
       ]
     },
     {
-      "name": "f0096-paper-asset-file-lifecycle-typecheck",
+      "name": "f0098-published-paper-snapshot-hierarchy-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0096-paper-asset-file-lifecycle-build",
+      "name": "f0098-published-paper-snapshot-hierarchy-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -122,72 +136,55 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0096-paper-asset-file-lifecycle-2026-07-21",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "schema_migration_source_database_application_logic_and_local_file_delete",
-    "schemaOrMigrationChange": true,
+    "category": "low_risk_product_snapshot_read_projection",
+    "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "realExternalCall": false,
-    "dependencyOrMechanismChange": false,
-    "localPhysicalDelete": true
+    "dependencyOrMechanismChange": false
   },
-  "freshApproval": {
-    "status": "approved_task_bound_pre_red_with_conditional_closeout",
-    "approvalId": "guardian-f0096-paper-asset-file-lifecycle-2026-07-21",
-    "requestFingerprint": "a34e32a8e1db96f53412a876130d8e70dce07d44",
-    "baseSha": "17de33b3cee17f35647ba71eb86104e2fb51995e",
-    "candidateTree": null,
-    "risk": "database",
-    "conditionalCloseout": true
-  },
-  "mandatoryConcurrencyContract": {
-    "lockIdentity": "fixed paper_asset namespace plus exact objectKey PostgreSQL transaction advisory lock",
-    "lockParticipants": [
-      "prepare upload before operation insert, recovery or existing-operation read",
-      "complete upload before operation FOR UPDATE and paper_asset insert",
-      "draft delete before paper_asset FOR UPDATE, delete, reference check and enqueue",
-      "cleanup from job FOR UPDATE recheck through local delete and outcome persistence"
-    ],
-    "lockOrder": "immutable objectKey read, advisory lock, FOR UPDATE identity and status reread",
-    "liveClaims": "pending and file_stored upload operations defer cleanup when no paper_asset reference exists; any paper_asset reference cancels cleanup",
-    "identityFailure": "any exact objectKey identity disagreement fails closed without file deletion",
-    "transactionBoundary": "claim, reference and live-claim recheck, physical action and durable outcome remain in one database transaction",
-    "retryEntrypoint": "the same DELETE command retries pending or failed cleanup by source paper_asset publicId without duplicating success audit",
-    "localDelete": "full validated identity only; canonical containment, no symlink or directory, streaming hash and exact size; exact missing target is idempotent completion while missing storage root is retryable"
-  },
-  "validationEvidence": {
-    "tddRed": "1 test file; 5 expected failures; exit 1",
-    "focused": "8 test files; 58 tests; exit 0 after formatter",
-    "lint": "affected schema, repository, service, runtime, storage and tests; exit 0",
-    "typecheck": "tsc --noEmit; exit 0",
-    "build": "Next.js production build; 100 routes; exit 0; existing NFT trace warning only",
-    "formatAndDiff": "targeted Prettier write completed before freeze; exact check and git diff check pending final state update",
-    "schemaSource": "offline Drizzle generation produced one additive cleanup enum/table/index/check migration with monotonic snapshot/journal and no migration execution",
-    "adversarialReview": "pass: prepare, complete, draft delete and cleanup share advisory-before-row-lock ordering; live upload claims defer, references cancel, physical delete and outcome remain in one transaction; repeated DELETE retries without duplicate success audit; local synthetic deletion rejects identity, integrity, traversal, intermediate/final symlink, directory and missing-root violations; no real database or runtime concurrency proof claimed"
-  },
-  "executionMetrics": {
-    "mandatoryFreshApprovals": 1,
-    "preventableScopeMissApprovals": 0,
-    "candidateReapprovals": 0,
-    "approvalWaitTurns": 1,
-    "productValueTime": "18m_TDD_implementation_local_safety_validation_and_adversarial_corrections",
-    "mechanismOverhead": "7m_contract_state_offline_generation_format_validation_orchestration_and_repeated_build_after_trace_correction",
-    "guardSmokeChanges": 0
-  },
+  "standingApprovals": [
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
   "conditionalCloseout": true,
   "resumeAnchor": {
+    "findingId": "F-0098",
+    "task": "published paper snapshot hierarchy foundation",
+    "condition": "after foundation closeout, continue the same finding with grouped learner mock/report presentation; do not reopen F-0096 or decide F-0097 without requirement authority"
+  },
+  "previousTaskCloseout": {
+    "taskId": "p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21",
     "findingId": "F-0096",
-    "task": "paper asset durable physical file lifecycle",
-    "condition": "guardian task-bound schema/local-delete approval is bound at base 17de33b3c; proceed through TDD and conditional closeout while preserving the separate ingestion-gate residual"
+    "commit": "fa84e7c398b5bac954d1a00f93539924ecafeeb2",
+    "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "masterOriginSync": true,
+    "worktreeClean": true,
+    "shortBranchCleanup": true
+  },
+  "knownHolds": {
+    "F-0096": "authoritative product decision is missing for upload size, MIME and magic-byte policy; no semantics invented",
+    "F-0097": "accepted ADR-002 names exam-papers as stable REST while current runtime is a pseudo 503 alias; retirement versus compatibility requires architecture decision"
+  },
+  "validationEvidence": {
+    "tddRed": "shared reader, producer, practice, mock_exam, exam_report and student UI failures reproduced before GREEN",
+    "focused": "11 files, 181 tests, exit 0",
+    "lint": "20 changed TypeScript source and test files, exit 0",
+    "typecheck": "tsc --noEmit, exit 0",
+    "build": "Next.js build, 100 routes, exit 0; pre-existing NFT trace warning only",
+    "stateAndDiff": "strict JSON/YAML parse and git diff --check, exit 0",
+    "adversarialReview": "pass after correcting legacy progress gaps, noncanonical score parsing and standalone null material preservation",
+    "proofBoundary": "repository snapshot assembly has static and unit evidence only; no runtime database execution was performed"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0096-paper-asset-file-lifecycle-2026-07-21"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

@@ -9,67 +9,26 @@ import type {
   PracticeRow,
 } from "../repositories/practice-repository";
 import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
+import { listPublishedPaperSnapshotQuestionEntries } from "@/lib/published-paper-snapshot";
 
 function formatNullableTimestamp(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
 }
 
 function getQuestionCount(paperSnapshot: Record<string, unknown>): number {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.reduce((total, paperSection) => {
-    if (
-      typeof paperSection !== "object" ||
-      paperSection === null ||
-      !("paperQuestions" in paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return total;
-    }
-
-    return total + paperSection.paperQuestions.length;
-  }, 0);
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot).length;
 }
 
 function getOrderedPaperQuestionPublicIds(
   paperSnapshot: Record<string, unknown>,
 ): string[] {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.flatMap((paperSection) => {
-    if (
-      typeof paperSection !== "object" ||
-      paperSection === null ||
-      !("paperQuestions" in paperSection) ||
-      !Array.isArray(paperSection.paperQuestions)
-    ) {
-      return [];
-    }
-
-    const paperQuestions: unknown[] = paperSection.paperQuestions;
-
-    return paperQuestions
-      .map((paperQuestion: unknown) => {
-        if (
-          typeof paperQuestion !== "object" ||
-          paperQuestion === null ||
-          !("paperQuestionPublicId" in paperQuestion)
-        ) {
-          return null;
-        }
-
-        return typeof paperQuestion.paperQuestionPublicId === "string"
-          ? paperQuestion.paperQuestionPublicId
-          : null;
-      })
-      .filter(
-        (publicId: string | null): publicId is string => publicId !== null,
-      );
-  });
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot)
+    .map(({ paperQuestion }) =>
+      typeof paperQuestion.paperQuestionPublicId === "string"
+        ? paperQuestion.paperQuestionPublicId
+        : null,
+    )
+    .filter((publicId: string | null): publicId is string => publicId !== null);
 }
 
 function getCurrentQuestionIndex(

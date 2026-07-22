@@ -120,6 +120,65 @@ describe("mock exam mapper", () => {
     });
   });
 
+  it("counts nested question_group children without flattening the learner snapshot", () => {
+    const mapped = mapMockExamToApi(
+      createMockExamRow({
+        paper_snapshot: {
+          snapshotVersion: 2,
+          paperSections: [
+            {
+              publicId: "paper_section_public_1",
+              title: "技能模块",
+              sortOrder: 1,
+              paperQuestions: [],
+              questionGroups: [
+                {
+                  publicId: "qgroup_public_1",
+                  title: "材料题组",
+                  sortOrder: 1,
+                  totalScore: "2.0",
+                  materialSnapshot: { title: "共享材料" },
+                  paperQuestions: [
+                    {
+                      paperQuestionPublicId: "paper_question_public_1",
+                      questionPublicId: "question_public_1",
+                      score: "1.0",
+                    },
+                    {
+                      paperQuestionPublicId: "paper_question_public_2",
+                      questionPublicId: "question_public_2",
+                      score: "1.0",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      }),
+      serverNow,
+    );
+
+    expect(mapped.questionCount).toBe(2);
+    expect(mapped.paperSnapshot).toMatchObject({
+      snapshotVersion: 2,
+      paperSections: [
+        {
+          questionGroups: [
+            {
+              publicId: "qgroup_public_1",
+              materialSnapshot: { title: "共享材料" },
+              paperQuestions: [
+                { paperQuestionPublicId: "paper_question_public_1" },
+                { paperQuestionPublicId: "paper_question_public_2" },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+  });
+
   it("maps mock exam answer record without correctness or analysis feedback", () => {
     expect(mapMockExamAnswerRecordToApi(createAnswerRecordRow())).toEqual({
       publicId: "answer_record_public_123",

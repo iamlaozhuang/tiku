@@ -101,6 +101,46 @@ function createPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createNestedQuestionGroupPaperSnapshot(): Record<string, unknown> {
+  const createQuestion = (index: number) => ({
+    paperQuestionPublicId: `paper_question_group_${index}`,
+    questionPublicId: `question_group_${index}`,
+    questionType: "single_choice",
+    title: `材料子题 ${index}`,
+    stemRichText: `<p>材料子题 ${index}</p>`,
+    standardAnswerLabels: ["A"],
+    score: "1.0",
+    knowledgeNodePublicIds: [`knowledge_node_group_${index}`],
+  });
+
+  return {
+    snapshotVersion: 2,
+    publicId: "paper_public_123",
+    name: "2024年专卖三级技能材料题",
+    paperSections: [
+      {
+        publicId: "paper_section_public_123",
+        title: "一、案例分析题",
+        sortOrder: 1,
+        paperQuestions: [],
+        questionGroups: [
+          {
+            publicId: "qgroup_public_123",
+            title: "客户异议处理案例",
+            sortOrder: 1,
+            totalScore: "2.0",
+            materialSnapshot: {
+              materialPublicId: "material_public_123",
+              title: "客户异议材料",
+            },
+            paperQuestions: [createQuestion(1), createQuestion(2)],
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createExamReportRow(
   overrides: Partial<ExamReportRow> = {},
 ): ExamReportRow {
@@ -257,6 +297,56 @@ function createLearningSuggestionOptions(
 }
 
 describe("exam report service", () => {
+  it("builds report questions from a versioned nested question_group snapshot", async () => {
+    const nestedSnapshot = createNestedQuestionGroupPaperSnapshot();
+    const reportSnapshots: Record<string, unknown>[] = [];
+    const service = createExamReportService(
+      createRepository({
+        async findSubmittedMockExamByPublicId() {
+          return createMockExamRow({ paper_snapshot: nestedSnapshot });
+        },
+        async listMockExamAnswerRecords() {
+          return [];
+        },
+        async createExamReport(input) {
+          reportSnapshots.push(input.reportSnapshot);
+
+          return createExamReportRow({
+            public_id: input.publicId,
+            report_snapshot: input.reportSnapshot,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).resolves.toMatchObject({ code: 0 });
+    expect(reportSnapshots).toHaveLength(1);
+    expect(reportSnapshots[0].paperSectionSummaryText).toBe(
+      "paper_section analytics: 一、案例分析题 2",
+    );
+    expect(reportSnapshots[0].questionGroupSummaryText).toBe(
+      "question_group analytics: 客户异议处理案例 2",
+    );
+    expect(reportSnapshots[0].questionResults).toEqual([
+      expect.objectContaining({
+        paperQuestionPublicId: "paper_question_group_1",
+        questionGroupPublicId: "qgroup_public_123",
+        questionGroupTitle: "客户异议处理案例",
+      }),
+      expect.objectContaining({
+        paperQuestionPublicId: "paper_question_group_2",
+        questionGroupPublicId: "qgroup_public_123",
+        questionGroupTitle: "客户异议处理案例",
+      }),
+    ]);
+  });
+
   it("lists authorization-filtered exam_report summaries with pagination", async () => {
     const service = createExamReportService(createRepository(), clock);
 

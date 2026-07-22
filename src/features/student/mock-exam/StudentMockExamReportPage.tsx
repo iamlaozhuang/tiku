@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { StudentRichText } from "@/components/StudentRichText/StudentRichText";
 import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
+import { listPublishedPaperSnapshotQuestionEntries } from "@/lib/published-paper-snapshot";
 import {
   STUDENT_MOCK_EXAM_ANSWER_QUEUE_STORAGE_KEY_PREFIX,
   STUDENT_MOCK_EXAM_CACHE_STORAGE_KEY_PREFIX,
@@ -413,6 +415,10 @@ type MockExamPaperQuestion = {
   questionPublicId: string;
   questionType: MockExamQuestionType;
   paperSectionTitle: string;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
+  materialTitle: string | null;
+  materialRichText: string | null;
   stemRichText: string;
   questionOptions: MockExamQuestionOption[];
   score: string;
@@ -423,15 +429,14 @@ type MockExamQuestionOption = {
   content: string;
 };
 
-type MockExamPaperSection = {
-  paperQuestions?: unknown;
-};
-
 type ReportQuestionResult = {
   paperQuestionPublicId: string;
   questionPublicId: string;
   questionType: MockExamQuestionType | null;
   scoringMethod: string | null;
+  paperSectionTitle: string | null;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
   title: string;
   isCorrect: boolean | null;
   score: string | null;
@@ -468,6 +473,7 @@ type ParsedReportSnapshot = {
   scoreSummaryText: string;
   questionTypeSummaryText: string | null;
   paperSectionSummaryText: string | null;
+  questionGroupSummaryText: string | null;
   knowledgeNodeSummaryText: string | null;
   knowledgeNodeWeaknessSummaryText: string | null;
   knowledgeNodeAnalysis: KnowledgeNodeAnalysisResult[];
@@ -882,6 +888,7 @@ function isTextMockExamQuestion(questionType: MockExamQuestionType): boolean {
 function mapMockExamQuestion(
   value: unknown,
   fallbackPaperSectionTitle: string | null,
+  questionGroup: Record<string, unknown> | null,
 ): MockExamPaperQuestion | null {
   if (!isRecord(value)) {
     return null;
@@ -895,6 +902,12 @@ function mapMockExamQuestion(
   const paperSectionTitle =
     getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
+  const materialSnapshot =
+    questionGroup !== null && isRecord(questionGroup.materialSnapshot)
+      ? questionGroup.materialSnapshot
+      : isRecord(value.materialSnapshot)
+        ? value.materialSnapshot
+        : null;
 
   if (
     paperQuestionPublicId === null ||
@@ -911,6 +924,22 @@ function mapMockExamQuestion(
     questionPublicId,
     questionType,
     paperSectionTitle,
+    questionGroupPublicId:
+      questionGroup === null
+        ? getStringField(value, "questionGroupPublicId")
+        : getStringField(questionGroup, "publicId"),
+    questionGroupTitle:
+      questionGroup === null
+        ? getStringField(value, "questionGroupTitle")
+        : getStringField(questionGroup, "title"),
+    materialTitle:
+      materialSnapshot === null
+        ? null
+        : getStringField(materialSnapshot, "title"),
+    materialRichText:
+      materialSnapshot === null
+        ? null
+        : getStringField(materialSnapshot, "contentRichText"),
     stemRichText,
     questionOptions: getQuestionOptions(getQuestionOptionSource(value)),
     score: getStringField(value, "score") ?? "0.0",
@@ -920,31 +949,16 @@ function mapMockExamQuestion(
 function extractMockExamQuestions(
   paperSnapshot: Record<string, unknown>,
 ): MockExamPaperQuestion[] {
-  const paperSections = Array.isArray(paperSnapshot.paperSections)
-    ? paperSnapshot.paperSections
-    : [];
-
-  return paperSections.flatMap((paperSection): MockExamPaperQuestion[] => {
-    if (!isRecord(paperSection)) {
-      return [];
-    }
-
-    const typedPaperSection = paperSection as MockExamPaperSection;
-    const paperSectionTitle =
-      getStringField(paperSection, "paperSectionTitle") ??
-      getStringField(paperSection, "title");
-    const paperQuestions = Array.isArray(typedPaperSection.paperQuestions)
-      ? typedPaperSection.paperQuestions
-      : [];
-
-    return paperQuestions
-      .map((paperQuestion) =>
-        mapMockExamQuestion(paperQuestion, paperSectionTitle),
-      )
-      .filter(
-        (question): question is MockExamPaperQuestion => question !== null,
-      );
-  });
+  return listPublishedPaperSnapshotQuestionEntries(paperSnapshot)
+    .map(({ paperSection, questionGroup, paperQuestion }) =>
+      mapMockExamQuestion(
+        paperQuestion,
+        getStringField(paperSection, "paperSectionTitle") ??
+          getStringField(paperSection, "title"),
+        questionGroup,
+      ),
+    )
+    .filter((question): question is MockExamPaperQuestion => question !== null);
 }
 
 function getPaperName(mockExam: MockExamDto): string {
@@ -1192,6 +1206,10 @@ function parseReportSnapshot(
       typeof reportSnapshot.paperSectionSummaryText === "string"
         ? reportSnapshot.paperSectionSummaryText
         : null,
+    questionGroupSummaryText:
+      typeof reportSnapshot.questionGroupSummaryText === "string"
+        ? reportSnapshot.questionGroupSummaryText
+        : null,
     knowledgeNodeSummaryText:
       typeof reportSnapshot.knowledgeNodeSummaryText === "string"
         ? reportSnapshot.knowledgeNodeSummaryText
@@ -1243,6 +1261,18 @@ function parseReportSnapshot(
               getStringField(questionResult, "questionType"),
             ),
             scoringMethod: getStringField(questionResult, "scoringMethod"),
+            paperSectionTitle: getStringField(
+              questionResult,
+              "paperSectionTitle",
+            ),
+            questionGroupPublicId: getStringField(
+              questionResult,
+              "questionGroupPublicId",
+            ),
+            questionGroupTitle: getStringField(
+              questionResult,
+              "questionGroupTitle",
+            ),
             title: questionResult.title,
             isCorrect: questionResult.isCorrect,
             score: questionResult.score,
@@ -2805,7 +2835,21 @@ export function StudentMockExamPage({
           <div className="text-text-secondary flex items-center gap-2 text-xs">
             <FileText className="size-3.5" aria-hidden="true" />
             <span>{currentQuestion.paperSectionTitle}</span>
+            {currentQuestion.questionGroupTitle === null ? null : (
+              <span>{currentQuestion.questionGroupTitle}</span>
+            )}
           </div>
+          {currentQuestion.materialRichText === null ? null : (
+            <div className="border-border bg-background space-y-2 rounded-lg border p-3 text-sm leading-6">
+              <p className="text-text-primary font-medium">
+                {currentQuestion.materialTitle ?? "材料"}
+              </p>
+              <StudentRichText
+                value={currentQuestion.materialRichText}
+                className="text-text-secondary"
+              />
+            </div>
+          )}
           <p className="font-heading text-text-primary text-lg leading-7 font-semibold">
             {currentQuestion.stemRichText}
           </p>
@@ -3177,8 +3221,9 @@ export function StudentExamReportPage({
 
       {parsedReportSnapshot.questionTypeSummaryText === null &&
       parsedReportSnapshot.paperSectionSummaryText === null &&
+      parsedReportSnapshot.questionGroupSummaryText === null &&
       parsedReportSnapshot.knowledgeNodeSummaryText === null ? null : (
-        <div className="bg-surface ring-border grid gap-2 rounded-xl p-3 text-sm shadow-sm ring-1 sm:grid-cols-3">
+        <div className="bg-surface ring-border grid gap-2 rounded-xl p-3 text-sm shadow-sm ring-1 sm:grid-cols-2 lg:grid-cols-4">
           {parsedReportSnapshot.questionTypeSummaryText === null ? null : (
             <p className="text-text-secondary">
               {parsedReportSnapshot.questionTypeSummaryText}
@@ -3187,6 +3232,11 @@ export function StudentExamReportPage({
           {parsedReportSnapshot.paperSectionSummaryText === null ? null : (
             <p className="text-text-secondary">
               {parsedReportSnapshot.paperSectionSummaryText}
+            </p>
+          )}
+          {parsedReportSnapshot.questionGroupSummaryText === null ? null : (
+            <p className="text-text-secondary">
+              {parsedReportSnapshot.questionGroupSummaryText}
             </p>
           )}
           {parsedReportSnapshot.knowledgeNodeSummaryText === null ? null : (
@@ -3275,6 +3325,13 @@ export function StudentExamReportPage({
                     {questionResult.questionType === null ? null : (
                       <p className="text-text-muted text-xs">
                         {questionTypeLabels[questionResult.questionType]}
+                      </p>
+                    )}
+                    {questionResult.paperSectionTitle === null ? null : (
+                      <p className="text-text-muted text-xs">
+                        {questionResult.questionGroupTitle === null
+                          ? questionResult.paperSectionTitle
+                          : `${questionResult.paperSectionTitle} · ${questionResult.questionGroupTitle}`}
                       </p>
                     )}
                     <p className="text-text-primary text-sm font-semibold">

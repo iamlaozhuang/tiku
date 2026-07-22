@@ -121,6 +121,73 @@ describe("StudentPracticePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps progress contiguous when a legacy snapshot contains an unusable question entry", () => {
+    const runtimePractice = {
+      ...studentPracticeFixture.practices[0].practice,
+      publicId: "practice-legacy-invalid-entry",
+      paperPublicId: "paper-legacy-invalid-entry",
+      currentQuestionIndex: 0,
+      paperSnapshot: {
+        name: "Legacy invalid entry paper",
+        paperSections: [
+          {
+            title: "Legacy section",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-marketing-001",
+                questionPublicId: "question-valid-1",
+                questionType: "single_choice",
+                stemRichText: "First valid runtime stem",
+                questionOptions: [
+                  { label: "A", contentRichText: "First option" },
+                  { label: "B", contentRichText: "Second option" },
+                ],
+                score: "1.0",
+              },
+              {
+                paperQuestionPublicId: "paper-question-invalid",
+                questionPublicId: "question-invalid",
+                questionType: "single_choice",
+                score: "1.0",
+              },
+              {
+                paperQuestionPublicId: "paper-question-valid-2",
+                questionPublicId: "question-valid-2",
+                questionType: "single_choice",
+                stemRichText: "Second valid runtime stem",
+                questionOptions: [
+                  { label: "A", contentRichText: "Only option" },
+                ],
+                score: "1.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-legacy-invalid-entry",
+        practices: [
+          {
+            practice: runtimePractice,
+            feedbackByPaperQuestionPublicId:
+              studentPracticeFixture.practices[0]
+                .feedbackByPaperQuestionPublicId,
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByText("第 1 / 2 题")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "B. Second option" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+    expect(screen.getByText("第 2 / 2 题")).toBeInTheDocument();
+    expect(screen.getByText("Second valid runtime stem")).toBeInTheDocument();
+  });
+
   it("renders safe rich text for practice stems, options, and feedback without exposing markup", () => {
     const runtimePractice = {
       ...studentPracticeFixture.practices[0].practice,
@@ -381,23 +448,14 @@ describe("StudentPracticePage", () => {
       ];
     const createQuestion = (
       paperQuestionPublicId: string,
-      questionGroupPublicId: string,
       stemRichText: string,
-      materialPublicId: string,
-      materialTitle: string,
     ) => ({
       paperQuestionPublicId,
       questionPublicId: `question-${paperQuestionPublicId}`,
       questionType: "short_answer",
-      questionGroupPublicId,
-      questionGroupTitle: `${materialTitle}题组`,
       stemRichText,
       score: "10.0",
-      materialSnapshot: {
-        materialPublicId,
-        title: materialTitle,
-        contentRichText: `${materialTitle}正文`,
-      },
+      materialSnapshot: null,
     });
     const groupedPractice = {
       ...basePractice,
@@ -406,37 +464,52 @@ describe("StudentPracticePage", () => {
       questionCount: 3,
       paperSnapshot: {
         ...basePractice.paperSnapshot,
+        snapshotVersion: 2,
         name: "技能题组练习",
         paperSections: [
           {
+            publicId: "paper-section-public-1",
             title: "技能大题一",
-            paperQuestions: [
-              createQuestion(
-                "paper-question-group-1-a",
-                "question-group-public-1",
-                "题组一子题 A",
-                "material-public-1",
-                "材料一",
-              ),
-              createQuestion(
-                "paper-question-group-1-b",
-                "question-group-public-1",
-                "题组一子题 B",
-                "material-public-1",
-                "材料一",
-              ),
+            sortOrder: 1,
+            paperQuestions: [],
+            questionGroups: [
+              {
+                publicId: "question-group-public-1",
+                title: "材料一题组",
+                sortOrder: 1,
+                totalScore: "20.0",
+                materialSnapshot: {
+                  materialPublicId: "material-public-1",
+                  title: "材料一",
+                  contentRichText: "材料一正文",
+                },
+                paperQuestions: [
+                  createQuestion("paper-question-group-1-a", "题组一子题 A"),
+                  createQuestion("paper-question-group-1-b", "题组一子题 B"),
+                ],
+              },
             ],
           },
           {
+            publicId: "paper-section-public-2",
             title: "技能大题二",
-            paperQuestions: [
-              createQuestion(
-                "paper-question-group-2-a",
-                "question-group-public-2",
-                "题组二子题 A",
-                "material-public-2",
-                "材料二",
-              ),
+            sortOrder: 2,
+            paperQuestions: [],
+            questionGroups: [
+              {
+                publicId: "question-group-public-2",
+                title: "材料二题组",
+                sortOrder: 1,
+                totalScore: "10.0",
+                materialSnapshot: {
+                  materialPublicId: "material-public-2",
+                  title: "材料二",
+                  contentRichText: "材料二正文",
+                },
+                paperQuestions: [
+                  createQuestion("paper-question-group-2-a", "题组二子题 A"),
+                ],
+              },
             ],
           },
         ],
