@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+  currentTaskId: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -287,6 +287,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
     - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
     - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+    - p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -465,7 +466,71 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21: closed
     p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21: closed
     p1-remediation-rc-06-covered-resource-foundations-2026-07-21: closed
+    p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21: in_progress
 activeTasks:
+  - id: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+    title: Knowledge-node subtree move and rename atomicity
+    phase: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0069
+    branch: fix/knowledge-node-subtree-atomicity
+    objective: serialize knowledge-tree mutations and atomically rewrite a version-checked moved or renamed node with its complete descendant path and depth projection
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0069
+    executionStage: validated_reviewed_conditional_closeout_ready
+    findingStatus: in_progress
+    riskBoundary:
+      category: bounded_database_application_transaction_logic
+      approvalId: guardian-f0069-continue-current-wip-closeout-2026-07-22
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: admin_knowledge_node_UI_to_PATCH_handler_to_validator_to_PostgreSQL_repository_transaction_to_existing_knowledge_node_parent_path_depth_updated_at_and_audit_facts
+      coreFiles: 8
+      contingencyFiles: 4
+      preflightTestFiles: 5
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: subtree_aggregate_command_is_a_single_row_update_without_serialization_full_depth_projection_descendant_rewrite_or_optimistic_version
+      disposition: separate_from_other_RC06_findings
+    expectedAcceptance:
+      - rename_and_move_rewrite_every_descendant_path_and_depth_atomically
+      - final_subtree_depth_above_five_cycle_or_stale_updated_at_fails_closed_without_partial_write_or_success_audit
+      - all_mutations_of_one_knowledge_base_share_one_transaction_advisory_lock_before_row_locks
+      - UI_sends_the_selected_nodes_current_updatedAt_as_the_optimistic_token
+      - existing_content_admin_authorization_public_id_API_and_redacted_transaction_audit_remain_unchanged
+      - no_schema_real_database_dependency_provider_permission_mechanism_or_other_finding_change
+    closeoutProjection:
+      current: validated_reviewed_conditional_closeout_ready
+      triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0069_closed_then_next_separate_RC06_finding_JIT
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_standing_bounded_medium_risk
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 3_stale_cross_task_amendment_resolution
+      productValueTime: TDD_and_product_implementation
+      mechanismOverhead: JIT_contract_state_validation_stale_amendment_resolution_kernel_and_closeout
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+      findingIds:
+        - F-0032
+        - F-0085
+        - F-0087
+      commit: 02f754905f44628bd0d843b766179b3c23a59f83
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
     title: RC-06 covered resource persistence, index generation, and identity closure
     phase: p1-remediation-rc-06-covered-resource-foundations-2026-07-21

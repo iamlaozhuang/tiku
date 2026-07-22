@@ -692,6 +692,7 @@ async function runKnowledgeNodeAction({
       `/api/v1/knowledge-nodes/${action.target.publicId}`,
       {
         body: JSON.stringify({
+          expectedUpdatedAt: action.target.updatedAt,
           levelList: parseLevelList(action.formValues.levelListText),
           name: action.formValues.name.trim(),
           sortOrder: parseSortOrder(action.formValues.sortOrder),
@@ -722,6 +723,7 @@ async function runKnowledgeNodeAction({
       `/api/v1/knowledge-nodes/${action.target.publicId}`,
       {
         body: JSON.stringify({
+          expectedUpdatedAt: action.target.updatedAt,
           parentKnowledgeNodePublicId,
           sortOrder: parseSortOrder(action.values.sortOrder),
         }),

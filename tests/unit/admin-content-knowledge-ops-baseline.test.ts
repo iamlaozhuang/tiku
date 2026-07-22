@@ -1075,6 +1075,7 @@ describe("admin content and knowledge ops baseline", () => {
       "/api/v1/knowledge-nodes/knowledge-node-public-001",
       expect.objectContaining({
         body: JSON.stringify({
+          expectedUpdatedAt: "2026-05-20T12:00:00.000Z",
           levelList: [3, 4],
           name: "市场调研（新版）",
           sortOrder: 15,
@@ -1144,6 +1145,7 @@ describe("admin content and knowledge ops baseline", () => {
       "/api/v1/knowledge-nodes/knowledge-node-public-001",
       expect.objectContaining({
         body: JSON.stringify({
+          expectedUpdatedAt: "2026-05-20T12:00:00.000Z",
           parentKnowledgeNodePublicId: "knowledge-node-public-002",
           sortOrder: 45,
         }),

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import * as knowledgeNodeCollectionRoute from "@/app/api/v1/knowledge-nodes/route";
 import * as knowledgeNodeDetailRoute from "@/app/api/v1/knowledge-nodes/[publicId]/route";
 import * as knowledgeNodeDisableRoute from "@/app/api/v1/knowledge-nodes/[publicId]/disable/route";
+import { KnowledgeNodeMutationConflictError } from "@/server/repositories/rag-resource-knowledge-runtime-repository";
 import { createRagResourceKnowledgeRuntimeRouteHandlers } from "@/server/services/rag-resource-knowledge-runtime";
 import type { RagResourceKnowledgeRuntimeRepositoriesWithAudit } from "@/server/services/rag-resource-knowledge-runtime";
 import type { SessionService } from "@/server/services/session-service";
@@ -52,6 +53,7 @@ function createRuntimeRepositories(input: {
   auditLogEntries: unknown[];
   mutationAuditContexts: unknown[];
   updateInputs: unknown[];
+  updateError?: KnowledgeNodeMutationConflictError;
 }): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   return {
     resourceRepository: {
@@ -98,6 +100,10 @@ function createRuntimeRepositories(input: {
       async updateKnowledgeNode(publicId, updateInput, mutationContext) {
         input.updateInputs.push({ publicId, updateInput });
         input.mutationAuditContexts.push(mutationContext);
+
+        if (input.updateError !== undefined) {
+          throw input.updateError;
+        }
 
         if (
           updateInput.parentKnowledgeNodePublicId ===
@@ -166,6 +172,7 @@ describe("phase 11 knowledge_node tree management loop", () => {
           method: "PATCH",
           headers: { authorization: "Bearer admin-session-token" },
           body: JSON.stringify({
+            expectedUpdatedAt: updatedAt.toISOString(),
             parentKnowledgeNodePublicId: "knowledge-node-public-root",
             sortOrder: 30,
             name: "市场调研",
@@ -198,6 +205,7 @@ describe("phase 11 knowledge_node tree management loop", () => {
       {
         publicId: "knowledge-node-public-child",
         updateInput: {
+          expectedUpdatedAt: updatedAt.toISOString(),
           parentKnowledgeNodePublicId: "knowledge-node-public-root",
           sortOrder: 30,
           name: "市场调研",
@@ -221,6 +229,100 @@ describe("phase 11 knowledge_node tree management loop", () => {
       "admin-session-token",
     );
     expect(JSON.stringify(mutationAuditContexts)).not.toContain("市场调研");
+  });
+
+  it("fails closed on a stale subtree mutation and writes only redacted failure audit", async () => {
+    const auditLogEntries: unknown[] = [];
+    const mutationAuditContexts: unknown[] = [];
+    const updateInputs: unknown[] = [];
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      repositories: createRuntimeRepositories({
+        auditLogEntries,
+        mutationAuditContexts,
+        updateInputs,
+        updateError: new KnowledgeNodeMutationConflictError(
+          "knowledge_node_stale_version",
+        ),
+      }),
+      sessionService: createAdminSessionService(),
+    });
+
+    const response = await handlers.knowledgeNodes.detail.PATCH(
+      new Request(
+        "http://localhost/api/v1/knowledge-nodes/knowledge-node-public-child",
+        {
+          method: "PATCH",
+          headers: { authorization: "Bearer admin-session-token" },
+          body: JSON.stringify({
+            expectedUpdatedAt: updatedAt.toISOString(),
+            name: "不会提交的名称",
+          }),
+        },
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "knowledge-node-public-child",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409621,
+      message: "Knowledge node changed or cannot be moved safely.",
+      data: null,
+    });
+    expect(mutationAuditContexts).toHaveLength(1);
+    expect(auditLogEntries).toEqual([
+      expect.objectContaining({
+        actionType: "knowledge_node.update",
+        resultStatus: "failed",
+        targetPublicId: "knowledge-node-public-child",
+        metadataSummary: "redacted knowledge_node update metadata",
+      }),
+    ]);
+    expect(JSON.stringify(auditLogEntries)).not.toContain("不会提交的名称");
+    expect(JSON.stringify(auditLogEntries)).not.toContain(
+      "admin-session-token",
+    );
+  });
+
+  it("rejects an update without the optimistic version before repository access", async () => {
+    const auditLogEntries: unknown[] = [];
+    const mutationAuditContexts: unknown[] = [];
+    const updateInputs: unknown[] = [];
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      repositories: createRuntimeRepositories({
+        auditLogEntries,
+        mutationAuditContexts,
+        updateInputs,
+      }),
+      sessionService: createAdminSessionService(),
+    });
+
+    const response = await handlers.knowledgeNodes.detail.PATCH(
+      new Request(
+        "http://localhost/api/v1/knowledge-nodes/knowledge-node-public-child",
+        {
+          method: "PATCH",
+          headers: { authorization: "Bearer admin-session-token" },
+          body: JSON.stringify({ name: "缺少版本" }),
+        },
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "knowledge-node-public-child",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 422621,
+      message: "Request validation failed.",
+      data: null,
+    });
+    expect(updateInputs).toEqual([]);
+    expect(mutationAuditContexts).toEqual([]);
+    expect(auditLogEntries).toEqual([]);
   });
 
   it("keeps knowledge_node runtime disable-only and exposes no hard-delete route", () => {

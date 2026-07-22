@@ -1,11 +1,20 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-covered-resource-foundations-2026-07-21",
-  "objective": "Close F-0032, F-0085, and F-0087 without product-code changes by independently proving that current production routes use transactional database-backed resource facts, durable generation-based atomic index switching, and random stable resource public identifiers. Record the remaining RC-06 findings as separate confirmed roots and resume at F-0069. Do not modify product source, tests, schema, dependencies, permissions, Provider behavior, mechanisms, or historical evidence.",
+  "taskId": "p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21",
+  "objective": "Close F-0069 by making knowledge_node rename and move a version-checked transaction over the whole subtree: serialize tree mutations per knowledge_base, lock and revalidate the target subtree and new parent, reject cycles and any resulting depth above five, atomically rewrite every descendant path_name/depth, and preserve the existing content-admin authorization and transaction-owned redacted audit. Do not change schema, permissions, dependencies, Provider behavior, other RC-06 findings, or mechanisms.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/validators/rag-resource-knowledge.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+    "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
+    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -13,8 +22,7 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/**",
-    "tests/**",
+    "src/db/**",
     "drizzle/**",
     "migrations/**",
     "package.json",
@@ -23,37 +31,35 @@
     ".env*",
     "schema/migration or real database/data access",
     "permission, entitlement, Provider, external service, secret/env or deployment",
-    "PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
+    "other RC-06 findings, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/validators/rag-resource-knowledge.ts",
+    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+    "src/server/services/rag-resource-knowledge-runtime.ts",
+    "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+    "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts"
   ],
-  "contingencyFiles": [],
+  "contingencyFiles": [
+    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+  ],
   "authoritativeChainEvidence": {
-    "F-0032": "Production App Router handlers construct the default PostgreSQL repositories; the local JSON adapter is reachable only by explicit test/local dependency injection. Resource metadata, upload operations, knowledge-node links, generations, and chunks are persisted transactionally.",
-    "F-0085": "resource_index_generation owns pending/ready/failed/superseded facts; rebuild requests retain a ready active generation, completion atomically inserts chunks and switches the active generation, failures retain stale citations, and retrieval joins only active ready generation facts.",
-    "F-0087": "Production upload preparation allocates resource-${randomUUID()} independently from the full content hash used for deterministic object storage and replay fingerprinting; the production path does not silently replace resources by a truncated hash identifier.",
-    "residualDisposition": {
-      "covered": ["F-0032", "F-0085", "F-0087"],
-      "separate": [
-        "F-0037",
-        "F-0069",
-        "F-0073",
-        "F-0082",
-        "F-0086",
-        "F-0089",
-        "F-0090"
-      ],
-      "bundle": [],
-      "runtimeHold": [],
-      "next": "F-0069 knowledge-node subtree move and rename atomicity"
-    }
+    "requirements": "Admin operations require content_admin/super_admin knowledge-node create, edit, sort, disable, move and rename, while glossary fixes the tree at levels one through five.",
+    "caller": "AdminKnowledgeNodeManagement PATCHes the selected publicId but currently sends no optimistic concurrency token.",
+    "route": "The knowledge-node PATCH handler validates a partial body and delegates to the PostgreSQL repository under the existing content-admin role boundary.",
+    "repository": "updateKnowledgeNode locks and updates only the selected row; descendants keep stale path_name/depth, and only the new root depth is checked.",
+    "schema": "Existing knowledge_node parent, path_name, depth and updated_at fields are sufficient; no schema or migration is required.",
+    "rootCause": "A subtree aggregate command was implemented as a single-row update without one serialization boundary, full-subtree depth planning, descendant rewrite, or optimistic version check."
   },
   "validationCommands": [
     {
-      "name": "rc06-covered-resource-foundations-focused",
+      "name": "f0069-knowledge-node-subtree-focused-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -61,16 +67,47 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-        "tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts",
+        "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "rc06-covered-resource-foundations-format",
+      "name": "f0069-knowledge-node-subtree-lint",
+      "kind": "lint",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.15.1",
+        "exec",
+        "eslint",
+        "src/server/validators/rag-resource-knowledge.ts",
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "src/server/services/rag-resource-knowledge-runtime.ts",
+        "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+        "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+      ]
+    },
+    {
+      "name": "f0069-knowledge-node-subtree-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "f0069-knowledge-node-subtree-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.15.1", "run", "build"]
+    },
+    {
+      "name": "f0069-knowledge-node-subtree-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -80,19 +117,28 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "docs/04-agent-system/state/task-safety.json",
+        "src/server/validators/rag-resource-knowledge.ts",
+        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
+        "src/server/services/rag-resource-knowledge-runtime.ts",
+        "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
+        "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
+        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
+        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
+        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
+        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
       ]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "guardian-f0069-continue-current-wip-closeout-2026-07-22",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_state_only_independent_static_closure",
+    "category": "bounded_database_application_transaction_logic",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -100,18 +146,25 @@
     "dependencyOrMechanismChange": false
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
+  "guardianDecision": {
+    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
+    "approvalId": "guardian-f0069-continue-current-wip-closeout-2026-07-22",
+    "baseSha": "02f754905f44628bd0d843b766179b3c23a59f83",
+    "scope": "current F-0069 task envelope only"
+  },
   "resumeAnchor": {
     "findingIds": ["F-0069"],
-    "task": "JIT-freeze and TDD the knowledge-node subtree move and rename atomicity boundary",
-    "condition": "do not combine unrelated RC-06 findings or change schema, dependencies, permissions, Provider behavior, mechanisms, or historical evidence"
+    "task": "TDD and close the knowledge_node subtree rename/move atomicity boundary, then resume the next separate RC-06 finding",
+    "condition": "no schema, real database execution, permission expansion, dependencies, Provider behavior, mechanism changes, or unrelated RC-06 scope"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21",
-    "findingIds": ["F-0097"],
-    "commit": "04d8d596927e3ac1e671a6367cc47f69b1406e87",
+    "taskId": "p1-remediation-rc-06-covered-resource-foundations-2026-07-21",
+    "findingIds": ["F-0032", "F-0085", "F-0087"],
+    "commit": "02f754905f44628bd0d843b766179b3c23a59f83",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -120,6 +173,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "guardian-f0069-continue-current-wip-closeout-2026-07-22"
   }
 }

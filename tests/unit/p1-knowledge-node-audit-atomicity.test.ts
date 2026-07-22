@@ -98,6 +98,28 @@ describe("F-0031 knowledge_node audit atomicity partition", () => {
       },
     ]);
     const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn(async () => [
+              {
+                id: 11,
+                public_id: "knowledge-node-public-1",
+                parent_knowledge_node_id: null,
+                knowledge_base_id: 7,
+                profession: "monopoly",
+                level_list: [3],
+                name: "许可证办理",
+                path_name: "许可证办理",
+                depth: 1,
+                sort_order: 10,
+                updated_at: new Date("2026-07-21T00:00:00.000Z"),
+              },
+            ]),
+          })),
+        })),
+      })),
+      execute: vi.fn(async () => undefined),
       update: vi.fn(() => ({
         set: vi.fn(() => ({
           where: vi.fn(() => ({ returning })),

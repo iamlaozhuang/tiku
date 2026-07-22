@@ -8,7 +8,9 @@ export type KnowledgeNodeMutationInput = {
   sortOrder: number;
 };
 
-export type KnowledgeNodeUpdateInput = Partial<KnowledgeNodeMutationInput>;
+export type KnowledgeNodeUpdateInput = Partial<KnowledgeNodeMutationInput> & {
+  expectedUpdatedAt: string;
+};
 
 type ScopedKnowledgeNode = {
   id: number;
@@ -166,7 +168,13 @@ export function parseKnowledgeNodeUpdateInput(
     return null;
   }
 
-  const updateInput: KnowledgeNodeUpdateInput = {};
+  if (!isCanonicalIsoTimestamp(value.expectedUpdatedAt)) {
+    return null;
+  }
+
+  const updateInput: KnowledgeNodeUpdateInput = {
+    expectedUpdatedAt: value.expectedUpdatedAt,
+  };
 
   if ("parentKnowledgeNodePublicId" in value) {
     if (!isNullablePublicId(value.parentKnowledgeNodePublicId)) {
@@ -220,6 +228,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isNullablePublicId(value: unknown): value is string | null {
   return value === null || (typeof value === "string" && value.length > 0);
+}
+
+function isCanonicalIsoTimestamp(value: unknown): value is string {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value;
 }
 
 function isProfession(value: unknown): value is Profession {

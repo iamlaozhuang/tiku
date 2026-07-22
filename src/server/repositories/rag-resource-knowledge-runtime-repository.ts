@@ -318,6 +318,130 @@ function createSha256Digest(value: string): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
 }
 
+export type KnowledgeNodeMutationConflictReason =
+  | "knowledge_node_stale_version"
+  | "knowledge_node_cycle"
+  | "knowledge_node_path_conflict"
+  | "knowledge_node_subtree_depth_exceeded"
+  | "knowledge_node_subtree_identity_mismatch";
+
+export class KnowledgeNodeMutationConflictError extends Error {
+  constructor(public readonly reason: KnowledgeNodeMutationConflictReason) {
+    super(reason);
+    this.name = "KnowledgeNodeMutationConflictError";
+  }
+}
+
+type KnowledgeNodeSubtreePlanRow = {
+  id: number;
+  parentKnowledgeNodeId: number | null;
+  depth: number;
+  pathName: string;
+};
+
+export function buildKnowledgeNodeSubtreeMutationPlan(input: {
+  current: Pick<KnowledgeNodeSubtreePlanRow, "id" | "depth" | "pathName">;
+  nextName: string;
+  nextParent: Pick<
+    KnowledgeNodeSubtreePlanRow,
+    "id" | "depth" | "pathName"
+  > | null;
+  subtree: KnowledgeNodeSubtreePlanRow[];
+}): {
+  depthDelta: number;
+  rootDepth: number;
+  rootPathName: string;
+  rows: Array<{ id: number; depth: number; pathName: string }>;
+} {
+  const subtreeIds = new Set(input.subtree.map((row) => row.id));
+  const subtreeById = new Map(input.subtree.map((row) => [row.id, row]));
+  const rootRow = input.subtree.find((row) => row.id === input.current.id);
+
+  if (
+    rootRow === undefined ||
+    rootRow.depth !== input.current.depth ||
+    rootRow.pathName !== input.current.pathName ||
+    subtreeIds.size !== input.subtree.length
+  ) {
+    throw new KnowledgeNodeMutationConflictError(
+      "knowledge_node_subtree_identity_mismatch",
+    );
+  }
+
+  if (input.nextParent !== null && subtreeIds.has(input.nextParent.id)) {
+    throw new KnowledgeNodeMutationConflictError("knowledge_node_cycle");
+  }
+
+  const rootDepth = (input.nextParent?.depth ?? 0) + 1;
+  const rootPathName =
+    input.nextParent === null
+      ? input.nextName
+      : `${input.nextParent.pathName}/${input.nextName}`;
+  const depthDelta = rootDepth - input.current.depth;
+  const rows = input.subtree.map((row) => {
+    const relativeDepth = row.depth - input.current.depth;
+    const pathSuffix = row.pathName.slice(input.current.pathName.length);
+    const isRoot = row.id === input.current.id;
+
+    if (
+      relativeDepth < 0 ||
+      (isRoot && (relativeDepth !== 0 || pathSuffix !== "")) ||
+      (!isRoot &&
+        (relativeDepth === 0 ||
+          !row.pathName.startsWith(`${input.current.pathName}/`) ||
+          !pathSuffix.startsWith("/")))
+    ) {
+      throw new KnowledgeNodeMutationConflictError(
+        "knowledge_node_subtree_identity_mismatch",
+      );
+    }
+
+    if (!isRoot) {
+      const parent =
+        row.parentKnowledgeNodeId === null
+          ? undefined
+          : subtreeById.get(row.parentKnowledgeNodeId);
+      const directPathSuffix =
+        parent === undefined
+          ? ""
+          : row.pathName.slice(parent.pathName.length + 1);
+
+      if (
+        parent === undefined ||
+        row.depth !== parent.depth + 1 ||
+        !row.pathName.startsWith(`${parent.pathName}/`) ||
+        directPathSuffix.length === 0 ||
+        directPathSuffix.includes("/")
+      ) {
+        throw new KnowledgeNodeMutationConflictError(
+          "knowledge_node_subtree_identity_mismatch",
+        );
+      }
+    }
+
+    const depth = rootDepth + relativeDepth;
+    if (depth > maxKnowledgeNodeDepth) {
+      throw new KnowledgeNodeMutationConflictError(
+        "knowledge_node_subtree_depth_exceeded",
+      );
+    }
+
+    return {
+      id: row.id,
+      depth,
+      pathName: `${rootPathName}${pathSuffix}`,
+    };
+  });
+
+  if (new Set(rows.map((row) => row.pathName)).size !== rows.length) {
+    throw new KnowledgeNodeMutationConflictError(
+      "knowledge_node_path_conflict",
+    );
+  }
+
+  return { depthDelta, rootDepth, rootPathName, rows };
+}
+
 type KnowledgeNodeRowForMapping = {
   id: number;
   public_id: string;
@@ -1956,6 +2080,19 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
+        const knowledgeBaseReference = await findKnowledgeBaseByProfession(
+          scopedDatabase,
+          input.profession,
+        );
+
+        if (knowledgeBaseReference === null) {
+          return null;
+        }
+
+        await lockKnowledgeTreeMutation(
+          scopedDatabase,
+          knowledgeBaseReference.id,
+        );
         const knowledgeBaseRow = await findKnowledgeBaseByProfession(
           scopedDatabase,
           input.profession,
@@ -2043,6 +2180,19 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
+        const currentReference = await findKnowledgeNodeByPublicId(
+          scopedDatabase,
+          publicId,
+        );
+
+        if (currentReference === null) {
+          return null;
+        }
+
+        await lockKnowledgeTreeMutation(
+          scopedDatabase,
+          currentReference.knowledge_base_id,
+        );
         const currentNode = await findKnowledgeNodeByPublicId(
           scopedDatabase,
           publicId,
@@ -2051,6 +2201,12 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
 
         if (currentNode === null) {
           return null;
+        }
+
+        if (currentNode.updated_at.toISOString() !== input.expectedUpdatedAt) {
+          throw new KnowledgeNodeMutationConflictError(
+            "knowledge_node_stale_version",
+          );
         }
 
         if (
@@ -2064,16 +2220,15 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
           input.parentKnowledgeNodePublicId === undefined
             ? currentNode.parent_public_id
             : input.parentKnowledgeNodePublicId;
-        const parentNode =
+        const parentReference =
           nextParentPublicId === null
             ? null
             : await findKnowledgeNodeByPublicId(
                 scopedDatabase,
                 nextParentPublicId,
-                true,
               );
 
-        if (nextParentPublicId !== null && parentNode === null) {
+        if (nextParentPublicId !== null && parentReference === null) {
           return null;
         }
 
@@ -2084,43 +2239,77 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
             profession: currentNode.profession,
           },
           parent:
-            parentNode === null
+            parentReference === null
               ? null
               : {
-                  id: parentNode.id,
-                  knowledgeBaseId: parentNode.knowledge_base_id,
-                  profession: parentNode.profession,
+                  id: parentReference.id,
+                  knowledgeBaseId: parentReference.knowledge_base_id,
+                  profession: parentReference.profession,
                 },
         });
 
-        if (
-          parentScope.status === "invalid" ||
-          (parentNode !== null &&
-            (await isKnowledgeNodeDescendant(
-              scopedDatabase,
-              parentNode.id,
-              currentNode.id,
-            )))
-        ) {
+        if (parentScope.status === "invalid") {
+          return null;
+        }
+
+        const parentNode =
+          parentReference === null
+            ? null
+            : await lockKnowledgeNodeParentChainForUpdate(
+                scopedDatabase,
+                parentReference.public_id,
+                currentNode,
+              );
+
+        if (parentReference !== null && parentNode === null) {
           return null;
         }
 
         const nextName = input.name ?? currentNode.name;
-        const depth = (parentNode?.depth ?? 0) + 1;
-        assertKnowledgeNodeDepth(depth);
+        const subtree = await listKnowledgeNodeSubtreeForUpdate(
+          scopedDatabase,
+          currentNode,
+        );
+        const mutationPlan = buildKnowledgeNodeSubtreeMutationPlan({
+          current: {
+            id: currentNode.id,
+            depth: currentNode.depth,
+            pathName: currentNode.path_name,
+          },
+          nextName,
+          nextParent:
+            parentNode === null
+              ? null
+              : {
+                  id: parentNode.id,
+                  depth: parentNode.depth,
+                  pathName: parentNode.path_name,
+                },
+          subtree: subtree.map((row) => ({
+            id: row.id,
+            parentKnowledgeNodeId: row.parent_knowledge_node_id,
+            depth: row.depth,
+            pathName: row.path_name,
+          })),
+        });
+        await assertKnowledgeNodeDestinationAvailable(
+          scopedDatabase,
+          currentNode,
+          parentNode?.id ?? null,
+          nextName,
+          mutationPlan.rows,
+        );
+        const now = new Date();
         const [row] = await scopedDatabase
           .update(knowledgeNode)
           .set({
             parent_knowledge_node_id: parentNode?.id ?? null,
             level_list: input.levelList ?? currentNode.level_list,
             name: nextName,
-            path_name:
-              parentNode === null
-                ? nextName
-                : `${parentNode.path_name}/${nextName}`,
-            depth,
+            path_name: mutationPlan.rootPathName,
+            depth: mutationPlan.rootDepth,
             sort_order: input.sortOrder ?? currentNode.sort_order,
-            updated_at: new Date(),
+            updated_at: now,
           })
           .where(
             and(
@@ -2130,12 +2319,51 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
                 currentNode.knowledge_base_id,
               ),
               eq(knowledgeNode.profession, currentNode.profession),
+              eq(knowledgeNode.updated_at, new Date(input.expectedUpdatedAt)),
             ),
           )
           .returning(createKnowledgeNodeReturningSelection());
 
         if (row === undefined) {
-          return null;
+          throw new KnowledgeNodeMutationConflictError(
+            "knowledge_node_stale_version",
+          );
+        }
+
+        const subtreeIds = mutationPlan.rows
+          .map((subtreeRow) => subtreeRow.id)
+          .filter((id) => id !== currentNode.id);
+        if (subtreeIds.length > 0) {
+          const updatedDescendants = await scopedDatabase
+            .update(knowledgeNode)
+            .set({
+              path_name: sql`${mutationPlan.rootPathName} || substring(${knowledgeNode.path_name} from ${currentNode.path_name.length + 1})`,
+              depth: sql`${knowledgeNode.depth} + ${mutationPlan.depthDelta}`,
+              updated_at: now,
+            })
+            .where(
+              and(
+                inArray(knowledgeNode.id, subtreeIds),
+                eq(
+                  knowledgeNode.knowledge_base_id,
+                  currentNode.knowledge_base_id,
+                ),
+                eq(knowledgeNode.profession, currentNode.profession),
+              ),
+            )
+            .returning({ id: knowledgeNode.id });
+          const updatedDescendantIds = new Set(
+            updatedDescendants.map((descendant) => descendant.id),
+          );
+
+          if (
+            updatedDescendantIds.size !== subtreeIds.length ||
+            subtreeIds.some((id) => !updatedDescendantIds.has(id))
+          ) {
+            throw new KnowledgeNodeMutationConflictError(
+              "knowledge_node_subtree_identity_mismatch",
+            );
+          }
         }
 
         await appendKnowledgeNodeMutationAuditLog(
@@ -2160,6 +2388,19 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
       const database = getDatabase();
       return database.transaction(async (transaction) => {
         const scopedDatabase = transaction as RuntimeDatabase;
+        const currentReference = await findKnowledgeNodeByPublicId(
+          scopedDatabase,
+          publicId,
+        );
+
+        if (currentReference === null) {
+          return null;
+        }
+
+        await lockKnowledgeTreeMutation(
+          scopedDatabase,
+          currentReference.knowledge_base_id,
+        );
         const [row] = await scopedDatabase
           .update(knowledgeNode)
           .set({
@@ -2485,6 +2726,15 @@ async function findKnowledgeBaseByProfession(
   return row === undefined ? null : { id: row.id, isEnabled: row.is_enabled };
 }
 
+async function lockKnowledgeTreeMutation(
+  database: RuntimeDatabase,
+  knowledgeBaseId: number,
+): Promise<void> {
+  await database.execute(
+    sql`select pg_advisory_xact_lock(hashtextextended(${`knowledge_node_tree:${knowledgeBaseId}`}, 0))`,
+  );
+}
+
 type KnowledgeNodeLookup = {
   id: number;
   public_id: string;
@@ -2497,7 +2747,195 @@ type KnowledgeNodeLookup = {
   path_name: string;
   depth: number;
   sort_order: number;
+  updated_at: Date;
 };
+
+async function listKnowledgeNodeSubtreeForUpdate(
+  database: RuntimeDatabase,
+  current: KnowledgeNodeLookup,
+): Promise<
+  Array<{
+    id: number;
+    parent_knowledge_node_id: number | null;
+    path_name: string;
+    depth: number;
+  }>
+> {
+  const subtree = [
+    {
+      id: current.id,
+      parent_knowledge_node_id: current.parent_knowledge_node_id,
+      path_name: current.path_name,
+      depth: current.depth,
+    },
+  ];
+  const seenIds = new Set([current.id]);
+  let frontier = [current.id];
+
+  while (frontier.length > 0) {
+    const query = database
+      .select({
+        id: knowledgeNode.id,
+        parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
+        path_name: knowledgeNode.path_name,
+        depth: knowledgeNode.depth,
+      })
+      .from(knowledgeNode)
+      .where(inArray(knowledgeNode.parent_knowledge_node_id, frontier))
+      .orderBy(asc(knowledgeNode.id));
+    const children = await query.for("update");
+
+    for (const child of children) {
+      if (seenIds.has(child.id)) {
+        throw new KnowledgeNodeMutationConflictError(
+          "knowledge_node_subtree_identity_mismatch",
+        );
+      }
+
+      seenIds.add(child.id);
+      subtree.push(child);
+    }
+
+    frontier = children.map((child) => child.id);
+  }
+
+  return subtree;
+}
+
+async function lockKnowledgeNodeParentChainForUpdate(
+  database: RuntimeDatabase,
+  parentPublicId: string,
+  current: KnowledgeNodeLookup,
+): Promise<KnowledgeNodeLookup | null> {
+  const parent = await findKnowledgeNodeByPublicId(
+    database,
+    parentPublicId,
+    true,
+  );
+  if (parent === null) {
+    return null;
+  }
+
+  const seenIds = new Set([current.id]);
+  let child: Pick<
+    KnowledgeNodeLookup,
+    | "id"
+    | "parent_knowledge_node_id"
+    | "knowledge_base_id"
+    | "profession"
+    | "path_name"
+    | "depth"
+  > = parent;
+
+  while (true) {
+    if (
+      seenIds.has(child.id) ||
+      child.knowledge_base_id !== current.knowledge_base_id ||
+      child.profession !== current.profession
+    ) {
+      throw new KnowledgeNodeMutationConflictError(
+        "knowledge_node_subtree_identity_mismatch",
+      );
+    }
+    seenIds.add(child.id);
+
+    if (child.parent_knowledge_node_id === null) {
+      if (child.depth !== 1 || child.path_name.includes("/")) {
+        throw new KnowledgeNodeMutationConflictError(
+          "knowledge_node_subtree_identity_mismatch",
+        );
+      }
+      return parent;
+    }
+
+    const ancestor = await findKnowledgeNodeByIdForUpdate(
+      database,
+      child.parent_knowledge_node_id,
+    );
+    const directPathSuffix =
+      ancestor === null
+        ? ""
+        : child.path_name.slice(ancestor.path_name.length + 1);
+    if (
+      ancestor === null ||
+      child.depth !== ancestor.depth + 1 ||
+      !child.path_name.startsWith(`${ancestor.path_name}/`) ||
+      directPathSuffix.length === 0 ||
+      directPathSuffix.includes("/")
+    ) {
+      throw new KnowledgeNodeMutationConflictError(
+        "knowledge_node_subtree_identity_mismatch",
+      );
+    }
+
+    child = ancestor;
+  }
+}
+
+async function assertKnowledgeNodeDestinationAvailable(
+  database: RuntimeDatabase,
+  current: KnowledgeNodeLookup,
+  nextParentKnowledgeNodeId: number | null,
+  nextName: string,
+  projectedRows: Array<{ id: number; pathName: string }>,
+): Promise<void> {
+  const projectedIds = new Set(projectedRows.map((row) => row.id));
+  const conflicts = await database
+    .select({ id: knowledgeNode.id })
+    .from(knowledgeNode)
+    .where(
+      and(
+        eq(knowledgeNode.knowledge_base_id, current.knowledge_base_id),
+        eq(knowledgeNode.profession, current.profession),
+        or(
+          and(
+            sql`${knowledgeNode.parent_knowledge_node_id} is not distinct from ${nextParentKnowledgeNodeId}`,
+            eq(knowledgeNode.name, nextName),
+          ),
+          inArray(
+            knowledgeNode.path_name,
+            projectedRows.map((row) => row.pathName),
+          ),
+        ),
+      ),
+    )
+    .for("update");
+
+  if (conflicts.some((row) => !projectedIds.has(row.id))) {
+    throw new KnowledgeNodeMutationConflictError(
+      "knowledge_node_path_conflict",
+    );
+  }
+}
+
+async function findKnowledgeNodeByIdForUpdate(
+  database: RuntimeDatabase,
+  id: number,
+): Promise<Pick<
+  KnowledgeNodeLookup,
+  | "id"
+  | "parent_knowledge_node_id"
+  | "knowledge_base_id"
+  | "profession"
+  | "path_name"
+  | "depth"
+> | null> {
+  const [row] = await database
+    .select({
+      id: knowledgeNode.id,
+      parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
+      knowledge_base_id: knowledgeNode.knowledge_base_id,
+      profession: knowledgeNode.profession,
+      path_name: knowledgeNode.path_name,
+      depth: knowledgeNode.depth,
+    })
+    .from(knowledgeNode)
+    .where(eq(knowledgeNode.id, id))
+    .limit(1)
+    .for("update");
+
+  return row ?? null;
+}
 
 async function findKnowledgeNodeByPublicId(
   database: RuntimeDatabase,
@@ -2516,6 +2954,7 @@ async function findKnowledgeNodeByPublicId(
       path_name: knowledgeNode.path_name,
       depth: knowledgeNode.depth,
       sort_order: knowledgeNode.sort_order,
+      updated_at: knowledgeNode.updated_at,
     })
     .from(knowledgeNode)
     .where(eq(knowledgeNode.public_id, publicId))
@@ -2549,37 +2988,8 @@ async function findKnowledgeNodeByPublicId(
     path_name: row.path_name,
     depth: row.depth,
     sort_order: row.sort_order,
+    updated_at: row.updated_at,
   };
-}
-
-async function isKnowledgeNodeDescendant(
-  database: RuntimeDatabase,
-  candidateNodeId: number,
-  ancestorNodeId: number,
-): Promise<boolean> {
-  let nextNodeId: number | null = candidateNodeId;
-
-  for (let depth = 0; depth < maxKnowledgeNodeDepth; depth += 1) {
-    if (nextNodeId === ancestorNodeId) {
-      return true;
-    }
-
-    const [row] = await database
-      .select({
-        parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
-      })
-      .from(knowledgeNode)
-      .where(eq(knowledgeNode.id, nextNodeId))
-      .limit(1);
-
-    if (row === undefined || row.parent_knowledge_node_id === null) {
-      return false;
-    }
-
-    nextNodeId = row.parent_knowledge_node_id;
-  }
-
-  return false;
 }
 
 function createResourceOpsReturningSelection() {

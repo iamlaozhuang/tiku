@@ -42,6 +42,7 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import {
   createPostgresRagResourceKnowledgeRuntimeRepositories,
+  KnowledgeNodeMutationConflictError,
   type KnowledgeNodeMutationContext,
   type RagKnowledgeNodeRuntimeRepository,
   type RagResourceKnowledgeRuntimeRepositories,
@@ -209,6 +210,10 @@ const knowledgeNodeNotFoundResponse = createErrorResponse(
 const validationFailedResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
   "Request validation failed.",
+);
+const knowledgeNodeMutationConflictResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+  "Knowledge node changed or cannot be moved safely.",
 );
 const resourcePublishConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
@@ -2502,17 +2507,38 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(validationFailedResponse);
           }
 
-          const knowledgeNode =
-            await repositories.knowledgeNodeRepository.updateKnowledgeNode(
-              publicId,
-              mutationInput,
-              createKnowledgeNodeMutationContext(
-                request,
-                actorOrError,
-                "knowledge_node.update",
-                "redacted knowledge_node update metadata",
-              ),
+          let knowledgeNode;
+          try {
+            knowledgeNode =
+              await repositories.knowledgeNodeRepository.updateKnowledgeNode(
+                publicId,
+                mutationInput,
+                createKnowledgeNodeMutationContext(
+                  request,
+                  actorOrError,
+                  "knowledge_node.update",
+                  "redacted knowledge_node update metadata",
+                ),
+              );
+          } catch (error) {
+            if (!(error instanceof KnowledgeNodeMutationConflictError)) {
+              throw error;
+            }
+
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "knowledge_node.update",
+                targetResourceType: "knowledge_node",
+                targetPublicId: publicId,
+                resultStatus: "failed",
+                metadataSummary: "redacted knowledge_node update metadata",
+              },
             );
+            return createJsonResponse(knowledgeNodeMutationConflictResponse);
+          }
           const response =
             knowledgeNode === null
               ? knowledgeNodeNotFoundResponse
