@@ -337,7 +337,7 @@ function createPaperAssetRepository(
     },
     async deletePaperAsset(_publicId, context) {
       deleteMutationContexts.push(context);
-      return true;
+      return { status: "completed" };
     },
   };
 }

@@ -309,6 +309,13 @@
       "when": 1784691000000,
       "tag": "20260722033000_p1_rc_05_paper_asset_usage_contract",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1784694600000,
+      "tag": "20260722043000_p1_rc_05_paper_asset_file_lifecycle",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
+currentPhase: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -821,81 +821,76 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
-  title: Paper asset six-purpose contract
-  phase: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
+  id: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
+  title: Paper asset durable physical file lifecycle
+  phase: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0096_usage_integrity_partial
-  branch: fix/paper-asset-usage-contract
+  productClosureContribution: F-0096_physical_file_lifecycle_partial
+  branch: fix/paper-asset-file-lifecycle
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0096
   candidateRootCauseCluster: P1-RC-05
-  objective: register and enforce the six required paper_attachment_usage purposes while retaining legacy other rows as read-only compatibility; expose explicit purpose selection in content administration without claiming ingestion or physical lifecycle closure
+  objective: add durable reference-safe local-file cleanup after atomic eligible draft paper_asset metadata deletion without changing upload ingestion, download authorization or paper lifecycle semantics
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: open_partitioned
   riskBoundary:
-    category: schema_migration_source_and_attachment_usage_contract
-    approvalId: guardian-f0096-paper-asset-usage-contract-2026-07-21
+    category: schema_migration_source_database_application_logic_and_local_file_delete
+    approvalId: guardian-f0096-paper-asset-file-lifecycle-2026-07-21
     schemaOrMigrationChange: true
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
+    localPhysicalDelete: true
     conditionalCloseout: true
-    scopeAmendmentId: guardian-f0096-paper-asset-usage-contract-scope-amendment-01-2026-07-21
-  normalizedUsageContract:
-    persistedReadValues:
-      [
-        paper_source,
-        answer_analysis,
-        answer_sheet,
-        other,
-        material_paper,
-        answer_paper,
-        source_material,
-      ]
-    creatableValuesInUiOrder:
-      [
-        paper_source,
-        material_paper,
-        answer_sheet,
-        answer_paper,
-        answer_analysis,
-        source_material,
-      ]
-    legacyReadOnlyValue: other
+    mandatoryConcurrencyContract: prepare_complete_delete_and_cleanup_share_exact_object_key_advisory_lock_with_advisory_before_for_update_and_cleanup_transaction_spanning_physical_outcome
+    retryContract: repeated_delete_by_source_paper_asset_public_id_retries_pending_or_failed_job_without_duplicate_success_audit
   preRedImpactScan:
-    chain: requirements_and_glossary_to_paper_attachment_usage_enum_migration_to_runtime_upload_validator_to_admin_selector_and_detail_labels
-    coreFiles: 16
-    contingencyFiles: 5
-    sameTaskAuthoritativeCallChainExpansion: 2
-    scopeAmendmentId: guardian-f0096-paper-asset-usage-contract-scope-amendment-01-2026-07-21
-    scopeAmendmentBoundary: direct_read_labels_and_creatable_storage_input_type_only
+    chain: delete_route_to_runtime_to_service_to_atomic_repository_delete_audit_cleanup_outbox_to_strict_local_storage_delete_and_upload_object_identity_lock
+    coreFiles: 13
+    contingencyFiles: 6
+    sameTaskAuthoritativeCallChainExpansion: 0
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: module_02_six_paper_asset_purposes_and_glossary_enum_ssot
-    confirmedResidualRootCause: persisted_enum_and_admin_upload_contract_collapse_six_required_purposes_into_three_specific_values_plus_other_and_force_every_new_upload_to_paper_source
+    requirements: module_02_published_attachment_retention_and_validated_F0096_durable_cleanup_boundary
+    confirmedResidualRootCause: draft_metadata_delete_and_content_addressed_local_file_lifecycle_are_not_joined_by_a_durable_reference_safe_cleanup_command
   expectedAcceptance:
-    - six_requirement_purposes_have_explicit_registered_values_and_labels
-    - new_uploads_must_choose_one_of_the_six_supported_purposes_and_cannot_create_legacy_other
-    - legacy_other_rows_remain_readable_filterable_and_downloadable_without_destructive_rewrite
-    - no_migration_execution_real_database_access_permission_or_physical_file_lifecycle_change
-    - F0096_remains_open_for_streaming_size_type_and_durable_physical_lifecycle_followups
+    - eligible_draft_metadata_delete_audit_and_cleanup_enqueue_are_atomic
+    - shared_object_identity_is_not_deleted_while_any_paper_asset_reference_remains
+    - cleanup_rechecks_zero_references_under_the_same_identity_lock_as_upload_completion
+    - strict_contained_local_delete_records_completed_or_retryable_failure_without_path_or_metadata_disclosure
+    - published_archived_download_upload_idempotency_and_authorization_regressions_remain_green
+    - no_migration_execution_real_database_access_dependency_permission_or_ingestion_policy_change
+    - F0096_remains_open_only_for_authoritative_ingestion_size_type_and_streaming_gate_resolution
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    triggers: final_tree_binding_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0096_ingestion_lifecycle_residual
+    triggers: final_tree_external_token_kernel_commit_ff_only_canonical_push_sync_and_cleanup
+    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0096_ingestion_gate_residual
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+  validationEvidence:
+    tddRed: 1_file_5_expected_failures_exit_1
+    focused: 8_files_58_tests_exit_0
+    lintTypecheckBuild: pass_build_100_routes_existing_NFT_trace_warning_only
+    concurrencyProof: static_source_ordering_plus_synthetic_local_file_tests_not_runtime_database_proof
+    adversarialReview: pass_no_real_DB_extra_file_permission_dependency_ingestion_or_mechanism_drift
+  executionMetrics:
+    mandatoryFreshApprovals: 1
+    preventableScopeMissApprovals: 0
+    candidateReapprovals: 0
+    approvalWaitTurns: 1
+    productValueTime: 18m
+    mechanismOverhead: 7m_including_contract_state_generation_validation_orchestration_and_repeated_build
+    guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
+    taskId: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
     findingId: F-0096
-    productClosureContribution: F-0096_secure_read_and_retention_partial
-    commit: b4b21d5272e0820c7eee524d8f1591470c4e2c23
-    candidateTree: d82b02ff1cb2dfdf4bc25c8d8078b4ecd2dd403b
+    productClosureContribution: F-0096_usage_integrity_partial
+    commit: 17de33b3cee17f35647ba71eb86104e2fb51995e
+    candidateTree: 13bd9bf3dfc661fe00cc2c5f03d6ed4132fb5d7f
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: guardian-f0096-private-download-retention-foundation-2026-07-21
+    approvalId: guardian-f0096-paper-asset-usage-contract-2026-07-21
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass

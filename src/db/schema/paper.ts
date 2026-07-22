@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -89,6 +90,12 @@ export const paperAssetUploadOperationStatusValues = [
   "completed",
   "failed",
 ] as const;
+export const paperAssetCleanupJobStatusValues = [
+  "pending",
+  "completed",
+  "failed",
+  "cancelled",
+] as const;
 export const contentImageUploadOperationStatusValues = [
   "pending",
   "file_stored",
@@ -124,6 +131,10 @@ export const paperAttachmentUsageEnum = pgEnum(
 export const paperAssetUploadOperationStatusEnum = pgEnum(
   "paper_asset_upload_operation_status",
   paperAssetUploadOperationStatusValues,
+);
+export const paperAssetCleanupJobStatusEnum = pgEnum(
+  "paper_asset_cleanup_job_status",
+  paperAssetCleanupJobStatusValues,
 );
 export const contentImageUploadOperationStatusEnum = pgEnum(
   "content_image_upload_operation_status",
@@ -582,6 +593,46 @@ export const paperAssetUploadOperation = pgTable(
     index("idx_paper_asset_upload_operation_status_updated_at").on(
       table.operation_status,
       table.updated_at,
+    ),
+  ],
+);
+
+export const paperAssetCleanupJob = pgTable(
+  "paper_asset_cleanup_job",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    source_paper_asset_public_id: text(
+      "source_paper_asset_public_id",
+    ).notNull(),
+    profession: professionEnum("profession").notNull(),
+    object_key: text("object_key").notNull(),
+    file_name: text("file_name").notNull(),
+    file_size_byte: bigint("file_size_byte", { mode: "number" }).notNull(),
+    file_hash: text("file_hash").notNull(),
+    cleanup_status: paperAssetCleanupJobStatusEnum("cleanup_status")
+      .default("pending")
+      .notNull(),
+    attempt_count: integer("attempt_count").default(0).notNull(),
+    last_failure_message_digest: text("last_failure_message_digest"),
+    claimed_at: nullableTimestampColumn("claimed_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_paper_asset_cleanup_job_public_id").on(table.public_id),
+    uniqueIndex("udx_paper_asset_cleanup_job_source_paper_asset_public_id").on(
+      table.source_paper_asset_public_id,
+    ),
+    index("idx_paper_asset_cleanup_job_object_key").on(table.object_key),
+    index("idx_paper_asset_cleanup_job_status_updated_at").on(
+      table.cleanup_status,
+      table.updated_at,
+    ),
+    check(
+      "chk_paper_asset_cleanup_job_attempt_count_nonnegative",
+      sql`${table.attempt_count} >= 0`,
     ),
   ],
 );

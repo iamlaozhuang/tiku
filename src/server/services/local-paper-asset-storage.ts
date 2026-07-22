@@ -1,5 +1,15 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import {
+  lstat,
+  mkdir,
+  open,
+  readFile,
+  realpath,
+  stat,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
 import { basename, dirname, extname, join, resolve, sep } from "node:path";
 
 import type {
@@ -43,6 +53,9 @@ export type ReadLocalPaperAssetFileInput = {
   profession: Profession;
   storageRoot?: string;
 };
+
+export type DeleteLocalPaperAssetFileInput = ReadLocalPaperAssetFileInput;
+export type DeleteLocalPaperAssetFileResult = "deleted" | "missing";
 
 export type StoreLocalResourceFileInput = {
   file: File;
@@ -119,6 +132,132 @@ function isInsideResolvedRoot(resolvedRoot: string, targetPath: string) {
     : `${resolvedRoot}${sep}`;
 
   return targetPath !== resolvedRoot && targetPath.startsWith(rootPrefix);
+}
+
+function isFileNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    "code" in error &&
+    (error as NodeJS.ErrnoException).code === "ENOENT"
+  );
+}
+
+function assertPaperAssetStorageIdentity({
+  fileHash,
+  fileName,
+  fileSizeByte,
+  objectKey,
+  profession,
+}: DeleteLocalPaperAssetFileInput): void {
+  const objectKeySegments = objectKey.split("/");
+  const expectedFileName = `${fileHash}.${normalizeExtension(fileName)}`;
+
+  if (
+    !/^[a-f0-9]{64}$/u.test(fileHash) ||
+    !Number.isSafeInteger(fileSizeByte) ||
+    fileSizeByte < 0 ||
+    objectKeySegments.length !== 5 ||
+    objectKeySegments[0] !== "dev" ||
+    objectKeySegments[1] !== "paper-asset" ||
+    objectKeySegments[2] !== profession ||
+    !/^\d{4}(?:0[1-9]|1[0-2])$/u.test(objectKeySegments[3] ?? "") ||
+    objectKeySegments[4] !== expectedFileName
+  ) {
+    throw new Error("Paper asset storage identity mismatch.");
+  }
+}
+
+async function hashFileHandle(
+  fileHandle: Awaited<ReturnType<typeof open>>,
+): Promise<{ fileHash: string; fileSizeByte: number }> {
+  const hash = createHash("sha256");
+  let fileSizeByte = 0;
+  const stream = fileHandle.createReadStream({ autoClose: false, start: 0 });
+
+  for await (const chunk of stream) {
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    fileSizeByte += bytes.byteLength;
+    hash.update(bytes);
+  }
+
+  return { fileHash: hash.digest("hex"), fileSizeByte };
+}
+
+export async function deleteLocalPaperAssetFile(
+  input: DeleteLocalPaperAssetFileInput,
+): Promise<DeleteLocalPaperAssetFileResult> {
+  assertPaperAssetStorageIdentity(input);
+  const storageRoot = input.storageRoot ?? defaultLocalUploadStorageRoot;
+  const resolvedRoot = resolve(storageRoot);
+  let canonicalRoot: string;
+
+  try {
+    canonicalRoot = await realpath(resolvedRoot);
+  } catch {
+    throw new Error("Paper asset storage root is unavailable.");
+  }
+
+  const targetPath = resolveInsideStorageRoot(resolvedRoot, input.objectKey);
+  let currentPath = resolvedRoot;
+
+  for (const segment of input.objectKey.split("/")) {
+    currentPath = `${currentPath}${sep}${segment}`;
+    try {
+      const pathStats = await lstat(currentPath);
+      if (pathStats.isSymbolicLink()) {
+        throw new Error("Paper asset storage path contains a symbolic link.");
+      }
+    } catch (error) {
+      if (isFileNotFoundError(error)) {
+        return "missing";
+      }
+      throw error;
+    }
+  }
+
+  const canonicalTarget = await realpath(targetPath);
+  if (!isInsideResolvedRoot(canonicalRoot, canonicalTarget)) {
+    throw new Error("Paper asset storage target escaped storage root.");
+  }
+
+  let fileHandle: Awaited<ReturnType<typeof open>>;
+  try {
+    fileHandle = await open(
+      targetPath,
+      constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
+    );
+  } catch (error) {
+    if (isFileNotFoundError(error)) {
+      return "missing";
+    }
+    throw new Error("Paper asset storage target is unavailable.");
+  }
+
+  try {
+    const openedStats = await fileHandle.stat();
+    if (!openedStats.isFile()) {
+      throw new Error("Paper asset storage target is not a file.");
+    }
+
+    const actual = await hashFileHandle(fileHandle);
+    const finalPathStats = await lstat(targetPath);
+    const finalCanonicalTarget = await realpath(targetPath);
+    if (
+      !finalPathStats.isFile() ||
+      finalPathStats.isSymbolicLink() ||
+      finalPathStats.ino !== openedStats.ino ||
+      finalCanonicalTarget !== canonicalTarget ||
+      actual.fileSizeByte !== input.fileSizeByte ||
+      actual.fileHash !== input.fileHash
+    ) {
+      throw new Error("Paper asset storage integrity mismatch.");
+    }
+
+    await unlink(targetPath);
+    return "deleted";
+  } finally {
+    await fileHandle.close();
+  }
 }
 
 export async function readLocalPaperAssetFile({

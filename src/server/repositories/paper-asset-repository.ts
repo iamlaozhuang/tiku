@@ -1,12 +1,13 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
-import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import {
   admin,
   auditLog,
   paper,
   paperAsset,
+  paperAssetCleanupJob,
   paperAssetUploadOperation,
 } from "@/db/schema";
 import type { PaperAttachmentUsage, Profession } from "../models/paper";
@@ -100,6 +101,23 @@ export type CompletePaperAssetUploadResult =
     }
   | { status: "conflict" };
 
+export type PaperAssetCleanupIdentity = {
+  profession: Profession;
+  objectKey: string;
+  fileName: string;
+  fileSizeByte: number;
+  fileHash: string;
+};
+
+export type PaperAssetDeleteResult =
+  | { status: "completed" | "cancelled" }
+  | { status: "retryable" }
+  | { status: "not_found" };
+
+export type DeletePaperAssetLocalFile = (
+  identity: PaperAssetCleanupIdentity,
+) => Promise<"deleted" | "missing">;
+
 export type PaperAssetRepository = {
   preparePaperAssetUpload?(
     input: PreparePaperAssetUploadInput,
@@ -121,8 +139,14 @@ export type PaperAssetRepository = {
   deletePaperAsset(
     publicId: string,
     context: PaperAssetDeleteMutationContext,
-  ): Promise<boolean>;
+    deleteLocalFile: DeletePaperAssetLocalFile,
+  ): Promise<PaperAssetDeleteResult>;
 };
+
+const PAPER_ASSET_OBJECT_LOCK_NAMESPACE = 200113;
+const PAPER_ASSET_CLEANUP_FAILURE_DIGEST = `sha256:${createHash("sha256")
+  .update("paper_asset_cleanup_failed")
+  .digest("hex")}`;
 
 export function createPostgresPaperAssetRepository(
   options: RuntimeDatabaseOptions = {},
@@ -188,39 +212,24 @@ export function createPostgresPaperAssetRepository(
       return findPaperAssetByPublicId(getDatabase(), publicId);
     },
 
-    async deletePaperAsset(publicId, context) {
-      const database = getDatabase();
-      return database.transaction(async (transaction) => {
-        const scopedDatabase = transaction as RuntimeDatabase;
-        const [row] = await scopedDatabase
-          .delete(paperAsset)
-          .where(
-            and(
-              eq(paperAsset.public_id, publicId),
-              inArray(
-                paperAsset.paper_id,
-                scopedDatabase
-                  .select({ id: paper.id })
-                  .from(paper)
-                  .where(eq(paper.paper_status, "draft")),
-              ),
-            ),
-          )
-          .returning({ public_id: paperAsset.public_id });
-
-        if (row === undefined) {
-          return false;
-        }
-
-        await appendPaperAssetDeleteAuditLog(
-          scopedDatabase,
-          context,
-          row.public_id,
-        );
-        return true;
-      });
+    async deletePaperAsset(publicId, context, deleteLocalFile) {
+      return deletePaperAssetWithCleanup(
+        getDatabase(),
+        publicId,
+        context,
+        deleteLocalFile,
+      );
     },
   };
+}
+
+async function lockPaperAssetObjectIdentity(
+  database: RuntimeDatabase,
+  objectKey: string,
+): Promise<void> {
+  await database.execute(
+    sql`select pg_advisory_xact_lock(${PAPER_ASSET_OBJECT_LOCK_NAMESPACE}, hashtext(${objectKey})) as paper_asset_object_lock`,
+  );
 }
 
 async function preparePaperAssetUpload(
@@ -229,6 +238,19 @@ async function preparePaperAssetUpload(
 ): Promise<PreparePaperAssetUploadResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedOperation] = await scopedDatabase
+      .select({ object_key: paperAssetUploadOperation.object_key })
+      .from(paperAssetUploadOperation)
+      .where(
+        eq(
+          paperAssetUploadOperation.idempotency_key_hash,
+          input.idempotencyKeyHash,
+        ),
+      )
+      .limit(1);
+    const lockedObjectKey = unlockedOperation?.object_key ?? input.objectKey;
+
+    await lockPaperAssetObjectIdentity(scopedDatabase, lockedObjectKey);
     const actorAdminId = await resolveActorAdminIdByPublicId(
       scopedDatabase,
       input.actorPublicId,
@@ -306,6 +328,7 @@ async function preparePaperAssetUpload(
       operationRow === undefined ||
       operationRow.actor_admin_id !== actorAdminId ||
       operationRow.paper_id !== paperRow.id ||
+      operationRow.object_key !== lockedObjectKey ||
       operationRow.request_fingerprint !== input.requestFingerprint
     ) {
       return { status: "conflict", reason: "request_mismatch" };
@@ -418,6 +441,20 @@ async function completePaperAssetUpload(
       scopedDatabase,
       input.mutationContext.actorPublicId,
     );
+    const [unlockedOperation] = await scopedDatabase
+      .select({ object_key: paperAssetUploadOperation.object_key })
+      .from(paperAssetUploadOperation)
+      .where(eq(paperAssetUploadOperation.public_id, input.operationPublicId))
+      .limit(1);
+
+    if (unlockedOperation === undefined) {
+      return { status: "conflict" };
+    }
+
+    await lockPaperAssetObjectIdentity(
+      scopedDatabase,
+      unlockedOperation.object_key,
+    );
     const [operationRow] = await scopedDatabase
       .select({
         id: paperAssetUploadOperation.id,
@@ -443,6 +480,7 @@ async function completePaperAssetUpload(
     if (
       operationRow === undefined ||
       operationRow.actor_admin_id !== actorAdminId ||
+      operationRow.object_key !== unlockedOperation.object_key ||
       operationRow.request_fingerprint !== input.requestFingerprint ||
       input.mutationContext.auditLog.actionType !== "paper_asset.create"
     ) {
@@ -529,6 +567,370 @@ async function completePaperAssetUpload(
       paperAsset: completedPaperAsset,
       replayed: false,
     };
+  });
+}
+
+type PaperAssetCleanupJobRow = {
+  id: number;
+  public_id: string;
+  source_paper_asset_public_id: string;
+  profession: Profession;
+  object_key: string;
+  file_name: string;
+  file_size_byte: number;
+  file_hash: string;
+  cleanup_status: "pending" | "completed" | "failed" | "cancelled";
+};
+
+function hasMatchingCleanupIdentity(
+  expected: PaperAssetCleanupIdentity,
+  actual: PaperAssetCleanupIdentity,
+): boolean {
+  return (
+    expected.profession === actual.profession &&
+    expected.objectKey === actual.objectKey &&
+    expected.fileName === actual.fileName &&
+    expected.fileSizeByte === actual.fileSizeByte &&
+    expected.fileHash === actual.fileHash
+  );
+}
+
+function mapCleanupJobIdentity(
+  row: Pick<
+    PaperAssetCleanupJobRow,
+    "profession" | "object_key" | "file_name" | "file_size_byte" | "file_hash"
+  >,
+): PaperAssetCleanupIdentity {
+  return {
+    profession: row.profession,
+    objectKey: row.object_key,
+    fileName: row.file_name,
+    fileSizeByte: row.file_size_byte,
+    fileHash: row.file_hash,
+  };
+}
+
+function cleanupJobSelection() {
+  return {
+    id: paperAssetCleanupJob.id,
+    public_id: paperAssetCleanupJob.public_id,
+    source_paper_asset_public_id:
+      paperAssetCleanupJob.source_paper_asset_public_id,
+    profession: paperAssetCleanupJob.profession,
+    object_key: paperAssetCleanupJob.object_key,
+    file_name: paperAssetCleanupJob.file_name,
+    file_size_byte: paperAssetCleanupJob.file_size_byte,
+    file_hash: paperAssetCleanupJob.file_hash,
+    cleanup_status: paperAssetCleanupJob.cleanup_status,
+  };
+}
+
+async function markPaperAssetCleanupFailed(
+  database: RuntimeDatabase,
+  jobId: number,
+): Promise<PaperAssetDeleteResult> {
+  await database
+    .update(paperAssetCleanupJob)
+    .set({
+      cleanup_status: "failed",
+      last_failure_message_digest: PAPER_ASSET_CLEANUP_FAILURE_DIGEST,
+      updated_at: new Date(),
+    })
+    .where(eq(paperAssetCleanupJob.id, jobId));
+  return { status: "retryable" };
+}
+
+async function processPaperAssetCleanupJob(
+  database: RuntimeDatabase,
+  sourcePaperAssetPublicId: string,
+  deleteLocalFile: DeletePaperAssetLocalFile,
+): Promise<PaperAssetDeleteResult> {
+  const [unlockedJob] = await database
+    .select(cleanupJobSelection())
+    .from(paperAssetCleanupJob)
+    .where(
+      eq(
+        paperAssetCleanupJob.source_paper_asset_public_id,
+        sourcePaperAssetPublicId,
+      ),
+    )
+    .limit(1);
+
+  if (unlockedJob === undefined) {
+    return { status: "not_found" };
+  }
+
+  await lockPaperAssetObjectIdentity(database, unlockedJob.object_key);
+  const [job] = await database
+    .select(cleanupJobSelection())
+    .from(paperAssetCleanupJob)
+    .where(eq(paperAssetCleanupJob.id, unlockedJob.id))
+    .limit(1)
+    .for("update");
+
+  if (
+    job === undefined ||
+    !hasMatchingCleanupIdentity(
+      mapCleanupJobIdentity(unlockedJob),
+      mapCleanupJobIdentity(job),
+    )
+  ) {
+    return { status: "retryable" };
+  }
+
+  if (job.cleanup_status === "completed") {
+    return { status: "completed" };
+  }
+  if (job.cleanup_status === "cancelled") {
+    return { status: "cancelled" };
+  }
+
+  await database
+    .update(paperAssetCleanupJob)
+    .set({
+      attempt_count: sql`${paperAssetCleanupJob.attempt_count} + 1`,
+      claimed_at: new Date(),
+      updated_at: new Date(),
+    })
+    .where(eq(paperAssetCleanupJob.id, job.id));
+
+  const cleanupIdentity = mapCleanupJobIdentity(job);
+  const referenceRows = await database
+    .select({
+      profession: paper.profession,
+      objectKey: paperAsset.object_key,
+      fileName: paperAsset.file_name,
+      fileSizeByte: paperAsset.file_size_byte,
+      fileHash: paperAsset.file_hash,
+    })
+    .from(paperAsset)
+    .innerJoin(paper, eq(paper.id, paperAsset.paper_id))
+    .where(eq(paperAsset.object_key, job.object_key));
+
+  if (
+    referenceRows.some(
+      (reference) => !hasMatchingCleanupIdentity(cleanupIdentity, reference),
+    )
+  ) {
+    return markPaperAssetCleanupFailed(database, job.id);
+  }
+
+  if (referenceRows.length > 0) {
+    await database
+      .update(paperAssetCleanupJob)
+      .set({
+        cleanup_status: "cancelled",
+        completed_at: new Date(),
+        last_failure_message_digest: null,
+        updated_at: new Date(),
+      })
+      .where(eq(paperAssetCleanupJob.id, job.id));
+    return { status: "cancelled" };
+  }
+
+  const liveUploadRows = await database
+    .select({
+      profession: paper.profession,
+      objectKey: paperAssetUploadOperation.object_key,
+      fileName: paperAssetUploadOperation.file_name,
+      fileSizeByte: paperAssetUploadOperation.file_size_byte,
+      fileHash: paperAssetUploadOperation.file_hash,
+    })
+    .from(paperAssetUploadOperation)
+    .innerJoin(paper, eq(paper.id, paperAssetUploadOperation.paper_id))
+    .where(
+      and(
+        eq(paperAssetUploadOperation.object_key, job.object_key),
+        inArray(paperAssetUploadOperation.operation_status, [
+          "pending",
+          "file_stored",
+        ]),
+      ),
+    );
+
+  if (
+    liveUploadRows.some(
+      (operation) => !hasMatchingCleanupIdentity(cleanupIdentity, operation),
+    )
+  ) {
+    return markPaperAssetCleanupFailed(database, job.id);
+  }
+
+  if (liveUploadRows.length > 0) {
+    await database
+      .update(paperAssetCleanupJob)
+      .set({
+        cleanup_status: "pending",
+        last_failure_message_digest: null,
+        updated_at: new Date(),
+      })
+      .where(eq(paperAssetCleanupJob.id, job.id));
+    return { status: "retryable" };
+  }
+
+  try {
+    await deleteLocalFile(cleanupIdentity);
+  } catch {
+    return markPaperAssetCleanupFailed(database, job.id);
+  }
+
+  await database
+    .update(paperAssetCleanupJob)
+    .set({
+      cleanup_status: "completed",
+      completed_at: new Date(),
+      last_failure_message_digest: null,
+      updated_at: new Date(),
+    })
+    .where(eq(paperAssetCleanupJob.id, job.id));
+  return { status: "completed" };
+}
+
+async function deletePaperAssetWithCleanup(
+  database: RuntimeDatabase,
+  publicId: string,
+  context: PaperAssetDeleteMutationContext,
+  deleteLocalFile: DeletePaperAssetLocalFile,
+): Promise<PaperAssetDeleteResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const [unlockedAsset] = await scopedDatabase
+      .select({
+        id: paperAsset.id,
+        public_id: paperAsset.public_id,
+        profession: paper.profession,
+        paper_status: paper.paper_status,
+        object_key: paperAsset.object_key,
+        file_name: paperAsset.file_name,
+        file_size_byte: paperAsset.file_size_byte,
+        file_hash: paperAsset.file_hash,
+      })
+      .from(paperAsset)
+      .innerJoin(paper, eq(paper.id, paperAsset.paper_id))
+      .where(eq(paperAsset.public_id, publicId))
+      .limit(1);
+
+    if (unlockedAsset === undefined) {
+      return processPaperAssetCleanupJob(
+        scopedDatabase,
+        publicId,
+        deleteLocalFile,
+      );
+    }
+
+    await lockPaperAssetObjectIdentity(
+      scopedDatabase,
+      unlockedAsset.object_key,
+    );
+    const [lockedAsset] = await scopedDatabase
+      .select({
+        id: paperAsset.id,
+        public_id: paperAsset.public_id,
+        profession: paper.profession,
+        paper_status: paper.paper_status,
+        object_key: paperAsset.object_key,
+        file_name: paperAsset.file_name,
+        file_size_byte: paperAsset.file_size_byte,
+        file_hash: paperAsset.file_hash,
+      })
+      .from(paperAsset)
+      .innerJoin(paper, eq(paper.id, paperAsset.paper_id))
+      .where(eq(paperAsset.id, unlockedAsset.id))
+      .limit(1)
+      .for("update");
+
+    const unlockedIdentity = {
+      profession: unlockedAsset.profession,
+      objectKey: unlockedAsset.object_key,
+      fileName: unlockedAsset.file_name,
+      fileSizeByte: unlockedAsset.file_size_byte,
+      fileHash: unlockedAsset.file_hash,
+    };
+    if (
+      lockedAsset === undefined ||
+      lockedAsset.paper_status !== "draft" ||
+      !hasMatchingCleanupIdentity(unlockedIdentity, {
+        profession: lockedAsset.profession,
+        objectKey: lockedAsset.object_key,
+        fileName: lockedAsset.file_name,
+        fileSizeByte: lockedAsset.file_size_byte,
+        fileHash: lockedAsset.file_hash,
+      })
+    ) {
+      return { status: "not_found" };
+    }
+
+    const [deletedAsset] = await scopedDatabase
+      .delete(paperAsset)
+      .where(
+        and(
+          eq(paperAsset.id, lockedAsset.id),
+          inArray(
+            paperAsset.paper_id,
+            scopedDatabase
+              .select({ id: paper.id })
+              .from(paper)
+              .where(eq(paper.paper_status, "draft")),
+          ),
+        ),
+      )
+      .returning({ public_id: paperAsset.public_id });
+
+    if (deletedAsset === undefined) {
+      return { status: "not_found" };
+    }
+
+    await appendPaperAssetDeleteAuditLog(
+      scopedDatabase,
+      context,
+      deletedAsset.public_id,
+    );
+
+    const remainingReferences = await scopedDatabase
+      .select({
+        profession: paper.profession,
+        objectKey: paperAsset.object_key,
+        fileName: paperAsset.file_name,
+        fileSizeByte: paperAsset.file_size_byte,
+        fileHash: paperAsset.file_hash,
+      })
+      .from(paperAsset)
+      .innerJoin(paper, eq(paper.id, paperAsset.paper_id))
+      .where(eq(paperAsset.object_key, lockedAsset.object_key));
+
+    if (
+      remainingReferences.some(
+        (reference) => !hasMatchingCleanupIdentity(unlockedIdentity, reference),
+      )
+    ) {
+      throw new Error("Paper asset object identity is inconsistent.");
+    }
+
+    if (remainingReferences.length > 0) {
+      return { status: "completed" };
+    }
+
+    await scopedDatabase
+      .insert(paperAssetCleanupJob)
+      .values({
+        public_id: `paper-asset-cleanup-job-${randomUUID()}`,
+        source_paper_asset_public_id: deletedAsset.public_id,
+        profession: lockedAsset.profession,
+        object_key: lockedAsset.object_key,
+        file_name: lockedAsset.file_name,
+        file_size_byte: lockedAsset.file_size_byte,
+        file_hash: lockedAsset.file_hash,
+        cleanup_status: "pending",
+      })
+      .onConflictDoNothing({
+        target: paperAssetCleanupJob.source_paper_asset_public_id,
+      });
+
+    return processPaperAssetCleanupJob(
+      scopedDatabase,
+      deletedAsset.public_id,
+      deleteLocalFile,
+    );
   });
 }
 

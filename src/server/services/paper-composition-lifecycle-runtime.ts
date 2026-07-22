@@ -466,6 +466,11 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
     request?: Request,
   ) {
     return createPaperAssetService(repositories.paperAssetRepository, {
+      ...(options.localPaperAssetStorageRoot === undefined
+        ? {}
+        : {
+            localPaperAssetStorageRoot: options.localPaperAssetStorageRoot,
+          }),
       ...(request === undefined
         ? {}
         : {

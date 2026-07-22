@@ -102,7 +102,7 @@ function createRepositories(
       return null;
     },
     async deletePaperAsset() {
-      return true;
+      return { status: "completed" };
     },
   };
 

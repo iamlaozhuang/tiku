@@ -93,7 +93,7 @@ function createRepository(
       });
     },
     async deletePaperAsset() {
-      return true;
+      return { status: "completed" };
     },
     ...overrides,
   };
@@ -276,7 +276,9 @@ describe("paper asset service", () => {
               });
         },
         async deletePaperAsset(publicId) {
-          return publicId !== "missing_asset";
+          return publicId === "missing_asset"
+            ? { status: "not_found" }
+            : { status: "completed" };
         },
       }),
       {

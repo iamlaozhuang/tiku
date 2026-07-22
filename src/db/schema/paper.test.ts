@@ -131,16 +131,80 @@ describe("paper_attachment_usage contract", () => {
       "answer_paper",
       "source_material",
     ]);
-    expect(journal.entries.at(-1)).toEqual({
+    const usageEntry = journal.entries.find(
+      (entry) =>
+        entry.tag === "20260722033000_p1_rc_05_paper_asset_usage_contract",
+    );
+    const usageEntryIndex = journal.entries.indexOf(usageEntry as never);
+
+    expect(usageEntry).toEqual({
       idx: 43,
       version: "7",
       when: 1784691000000,
       tag: "20260722033000_p1_rc_05_paper_asset_usage_contract",
       breakpoints: true,
     });
-    expect(journal.entries.at(-2)?.when).toBeLessThan(
-      journal.entries.at(-1)?.when ?? 0,
+    expect(journal.entries[usageEntryIndex - 1]?.when).toBeLessThan(
+      usageEntry?.when ?? 0,
     );
+  });
+
+  it("adds only the durable paper_asset cleanup job schema source", () => {
+    const cleanupJob = paperSchema.paperAssetCleanupJob;
+    const migrationSource = readFileSync(
+      resolve(
+        process.cwd(),
+        "drizzle/20260722043000_p1_rc_05_paper_asset_file_lifecycle.sql",
+      ),
+      "utf8",
+    );
+    const previousSnapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260722033000_snapshot.json"),
+        "utf8",
+      ),
+    ) as { id: string };
+    const snapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260722043000_snapshot.json"),
+        "utf8",
+      ),
+    ) as { prevId: string };
+
+    expect(cleanupJob).toBeDefined();
+    expect(getTableName(cleanupJob as never)).toBe("paper_asset_cleanup_job");
+    expect(getColumnNames(cleanupJob as never)).toEqual(
+      expect.arrayContaining([
+        "public_id",
+        "source_paper_asset_public_id",
+        "profession",
+        "object_key",
+        "file_name",
+        "file_size_byte",
+        "file_hash",
+        "cleanup_status",
+        "attempt_count",
+        "last_failure_message_digest",
+        "claimed_at",
+        "completed_at",
+      ]),
+    );
+    expect(getIndexNames(cleanupJob as never)).toEqual(
+      expect.arrayContaining([
+        "udx_paper_asset_cleanup_job_public_id",
+        "udx_paper_asset_cleanup_job_source_paper_asset_public_id",
+        "idx_paper_asset_cleanup_job_object_key",
+        "idx_paper_asset_cleanup_job_status_updated_at",
+      ]),
+    );
+    expect(migrationSource).toContain(
+      'CREATE TYPE "public"."paper_asset_cleanup_job_status"',
+    );
+    expect(migrationSource).toContain('CREATE TABLE "paper_asset_cleanup_job"');
+    expect(migrationSource).not.toMatch(
+      /(?:^|\n)(?:DROP|TRUNCATE|UPDATE|DELETE|ALTER TABLE)\s/u,
+    );
+    expect(snapshot.prevId).toBe(previousSnapshot.id);
   });
 });
 

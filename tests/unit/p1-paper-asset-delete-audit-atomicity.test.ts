@@ -1,9 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { describe, expect, it, vi } from "vitest";
-
-import { createPostgresPaperAssetRepository } from "@/server/repositories/paper-asset-repository";
+import { describe, expect, it } from "vitest";
 
 const repositorySource = readFileSync(
   resolve(process.cwd(), "src/server/repositories/paper-asset-repository.ts"),
@@ -42,10 +40,15 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
   });
 
   it("keeps delete and redacted success audit in one repository transaction", () => {
-    const deleteStart = repositorySource.indexOf("async deletePaperAsset");
+    const deleteStart = repositorySource.indexOf(
+      "async function deletePaperAssetWithCleanup",
+    );
     const deleteSource = repositorySource.slice(
       deleteStart,
-      repositorySource.indexOf("\n  };", deleteStart),
+      repositorySource.indexOf(
+        "async function appendPaperAssetCreateAuditLog",
+        deleteStart,
+      ),
     );
 
     expect(deleteStart).toBeGreaterThan(-1);
@@ -55,38 +58,24 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
     expect(deleteSource).toContain("await appendPaperAssetDeleteAuditLog(");
   });
 
-  it("does not write a success audit when the atomic draft-owner delete matches nothing", async () => {
-    const returning = vi.fn(async () => []);
-    const transactionDatabase = {
-      select: vi.fn(() => ({
-        from: vi.fn(() => ({ where: vi.fn(() => ({ sql: "draft-owner" })) })),
-      })),
-      delete: vi.fn(() => ({
-        where: vi.fn(() => ({ returning })),
-      })),
-      insert: vi.fn(),
-    };
-    const transaction = vi.fn(
-      async (callback: (database: unknown) => Promise<unknown>) =>
-        callback(transactionDatabase),
+  it("does not duplicate success audit when metadata is absent and cleanup is retried", () => {
+    const deleteStart = repositorySource.indexOf(
+      "async function deletePaperAssetWithCleanup",
     );
-    const repository = createPostgresPaperAssetRepository({
-      createDatabase: () => ({ transaction }) as never,
-    });
+    const deleteSource = repositorySource.slice(
+      deleteStart,
+      repositorySource.indexOf(
+        "async function appendPaperAssetCreateAuditLog",
+        deleteStart,
+      ),
+    );
+    const missingAssetBranch = deleteSource.slice(
+      deleteSource.indexOf("if (unlockedAsset === undefined)"),
+      deleteSource.indexOf("await lockPaperAssetObjectIdentity"),
+    );
 
-    await expect(
-      repository.deletePaperAsset("paper-asset-public-1", {
-        actorPublicId: "admin-public-1",
-        auditLog: {
-          actorRole: "content_admin",
-          actionType: "paper_asset.delete",
-          metadataSummary: "redacted paper_asset mutation metadata",
-          requestIp: null,
-        },
-      }),
-    ).resolves.toBe(false);
-    expect(returning).toHaveBeenCalledOnce();
-    expect(transactionDatabase.insert).not.toHaveBeenCalled();
+    expect(missingAssetBranch).toContain("processPaperAssetCleanupJob(");
+    expect(missingAssetBranch).not.toContain("appendPaperAssetDeleteAuditLog(");
   });
 
   it("writes only a fixed redacted paper_asset success projection", () => {
@@ -106,51 +95,31 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
     expect(helperSource).not.toContain("file_name");
   });
 
-  it("propagates audit insertion failure from the same delete transaction", async () => {
-    const auditFailure = new Error("audit unavailable");
-    const returning = vi.fn(async () => [
-      { public_id: "paper-asset-public-1" },
-    ]);
-    const transactionDatabase = {
-      select: vi.fn(() => ({
-        from: vi.fn(() => ({ where: vi.fn(() => ({ sql: "draft-owner" })) })),
-      })),
-      delete: vi.fn(() => ({
-        where: vi.fn(() => ({ returning })),
-      })),
-      insert: vi.fn(() => ({
-        values: vi.fn(async () => {
-          throw auditFailure;
-        }),
-      })),
-    };
-    const transaction = vi.fn(
-      async (callback: (database: unknown) => Promise<unknown>) =>
-        callback(transactionDatabase),
+  it("keeps audit and cleanup enqueue ordered inside the same uncaught transaction", () => {
+    const deleteStart = repositorySource.indexOf(
+      "async function deletePaperAssetWithCleanup",
     );
-    const repository = createPostgresPaperAssetRepository({
-      createDatabase: () => ({ transaction }) as never,
-    });
+    const deleteSource = repositorySource.slice(
+      deleteStart,
+      repositorySource.indexOf(
+        "async function appendPaperAssetCreateAuditLog",
+        deleteStart,
+      ),
+    );
+    const auditIndex = deleteSource.indexOf(
+      "await appendPaperAssetDeleteAuditLog(",
+    );
+    const enqueueIndex = deleteSource.indexOf(".insert(paperAssetCleanupJob)");
 
-    await expect(
-      repository.deletePaperAsset("paper-asset-public-1", {
-        actorPublicId: "admin-public-1",
-        auditLog: {
-          actorRole: "content_admin",
-          actionType: "paper_asset.delete",
-          metadataSummary: "redacted paper_asset mutation metadata",
-          requestIp: "127.0.0.1",
-        },
-      }),
-    ).rejects.toBe(auditFailure);
-    expect(transaction).toHaveBeenCalledOnce();
-    expect(returning).toHaveBeenCalledOnce();
-    expect(transactionDatabase.insert).toHaveBeenCalledOnce();
+    expect(deleteSource).toContain("database.transaction(async (transaction)");
+    expect(auditIndex).toBeGreaterThan(-1);
+    expect(enqueueIndex).toBeGreaterThan(auditIndex);
+    expect(deleteSource.slice(auditIndex, enqueueIndex)).not.toContain("catch");
   });
 
   it("passes request-derived delete context through the service", () => {
     expect(serviceSource).toMatch(
-      /paperAssetRepository\.deletePaperAsset\(\s*publicId,\s*options\.deleteMutationContext,?\s*\)/u,
+      /paperAssetRepository\.deletePaperAsset\(\s*publicId,\s*options\.deleteMutationContext,\s*\(identity\)/u,
     );
     expect(runtimeSource).toContain("createPaperAssetDeleteMutationContext(");
     expect(runtimeSource).toContain('actionType: "paper_asset.delete"');

@@ -27,6 +27,7 @@ import {
   normalizePaperAssetListInput,
 } from "../validators/paper-asset";
 import {
+  deleteLocalPaperAssetFile,
   storePreparedLocalPaperAssetFile,
   type PreparedLocalPaperAssetFile,
 } from "./local-paper-asset-storage";
@@ -50,6 +51,7 @@ export type PaperAssetService = {
 export type PaperAssetServiceOptions = {
   mutationContext?: PaperAssetCreateMutationContext;
   deleteMutationContext?: PaperAssetDeleteMutationContext;
+  localPaperAssetStorageRoot?: string;
 };
 
 const INVALID_PAPER_ASSET_INPUT_CODE = 422205;
@@ -57,6 +59,7 @@ const PAPER_ASSET_NOT_FOUND_CODE = 404204;
 const PAPER_ASSET_COMMAND_CONFLICT_CODE = 409208;
 const PAPER_ASSET_UPLOAD_FAILED_CODE = 500204;
 const PAPER_ASSET_RUNTIME_UNAVAILABLE_CODE = 503204;
+const PAPER_ASSET_CLEANUP_RETRY_CODE = 503205;
 const PAPER_ASSET_CONTRACT_TERM = "paper_asset";
 const PAPER_ATTACHMENT_USAGE_CONTRACT_TERM = "paper_attachment_usage";
 
@@ -87,6 +90,13 @@ function createPaperAssetUploadFailedResponse(): ApiResponse<null> {
   return createErrorResponse(
     PAPER_ASSET_UPLOAD_FAILED_CODE,
     "Paper asset upload failed.",
+  );
+}
+
+function createPaperAssetCleanupRetryResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_ASSET_CLEANUP_RETRY_CODE,
+    "Paper asset cleanup is pending; retry the delete command.",
   );
 }
 
@@ -333,13 +343,28 @@ export function createPaperAssetService(
         throw new Error("Paper asset delete requires mutation audit context.");
       }
 
-      const deleted = await paperAssetRepository.deletePaperAsset(
-        publicId,
-        options.deleteMutationContext,
-      );
+      let result;
+      try {
+        result = await paperAssetRepository.deletePaperAsset(
+          publicId,
+          options.deleteMutationContext,
+          (identity) =>
+            deleteLocalPaperAssetFile({
+              ...identity,
+              ...(options.localPaperAssetStorageRoot === undefined
+                ? {}
+                : { storageRoot: options.localPaperAssetStorageRoot }),
+            }),
+        );
+      } catch {
+        return createPaperAssetCleanupRetryResponse();
+      }
 
-      if (!deleted) {
+      if (result.status === "not_found") {
         return createPaperAssetNotFoundResponse();
+      }
+      if (result.status === "retryable") {
+        return createPaperAssetCleanupRetryResponse();
       }
 
       return createSuccessResponse({
