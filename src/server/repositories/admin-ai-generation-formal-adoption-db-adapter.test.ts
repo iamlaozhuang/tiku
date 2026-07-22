@@ -91,6 +91,15 @@ function createSourceResultDbRow(
     task_type: "ai_question_generation",
     result_status: "draft",
     is_formal_adoption_blocked: true,
+    content_redacted_snapshot: {
+      formalReviewedDraft: {
+        questionType: "short_answer",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        stemRichText: "server-owned reviewed question",
+      },
+    },
     content_digest: "sha256:admin_ai_generation_result_901",
     content_preview_masked: "masked formal adoption source preview",
     evidence_status: "weak",
@@ -149,6 +158,7 @@ type AdminAiGenerationFormalAdoptionSourceResultDbRowFixture = {
   task_type: string;
   result_status: string;
   is_formal_adoption_blocked: boolean;
+  content_redacted_snapshot: unknown;
   content_digest: string;
   content_preview_masked: string;
   evidence_status: string;
@@ -237,6 +247,13 @@ describe("admin AI generation formal adoption DB adapter", () => {
       taskType: "ai_question_generation",
       resultStatus: "draft",
       isFormalAdoptionBlocked: true,
+      reviewedDraft: {
+        questionType: "short_answer",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        stemRichText: "server-owned reviewed question",
+      },
       contentDigest: "sha256:admin_ai_generation_result_901",
       contentPreviewMasked: "masked formal adoption source preview",
       evidenceStatus: "weak",

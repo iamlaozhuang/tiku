@@ -58,6 +58,7 @@ export type AdminAiGenerationFormalAdoptionSourceResult = {
   taskType: AdminAiGenerationResultTaskType;
   resultStatus: AdminAiGenerationResultStatus;
   isFormalAdoptionBlocked: boolean;
+  reviewedDraft: unknown;
   contentDigest: string;
   contentPreviewMasked: string;
   evidenceStatus: EvidenceStatus;
@@ -69,6 +70,7 @@ export type AdminAiGenerationFormalAdoptionCommandInput = {
   adoptionPublicId: string;
   actor: AdminAiGenerationFormalAdoptionActor;
   resultPublicId: string;
+  expectedContentDigest: string;
   targetType: AdminAiGenerationFormalAdoptionTargetType;
   reviewDecision: AdminAiGenerationFormalAdoptionReviewDecision;
   reviewerConfirmed: boolean;

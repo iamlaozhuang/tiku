@@ -1870,6 +1870,7 @@ function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
     resultPublicId: result.resultPublicId,
     persistedAt: result.persistedAt,
     status: result.status,
+    contentDigest: result.contentReference.contentDigest,
     contentPreviewMasked: result.contentReference.contentPreviewMasked,
     contentVisibility: result.contentReference.contentVisibility,
     evidenceStatus: result.evidenceReference.evidenceStatus,

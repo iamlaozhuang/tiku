@@ -8,6 +8,7 @@ import type {
   AdminAiGenerationFormalAdoptionRow,
   CreateAdminAiGenerationFormalAdoptionInput,
   FindAdminAiGenerationFormalAdoptionQuery,
+  FindTrustedAdminAiGenerationFormalDraftInput,
   InsertAdminAiGenerationFormalAdoptionInput,
   MarkAdminAiGenerationFormalDraftCreatedInput,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
@@ -42,11 +43,13 @@ export function createAdminAiGenerationFormalAdoptionRepository(
       }
 
       assertSourceResultEligibleForPlatformFormalAdoption(sourceResult, input);
+      assertExpectedContentDigest(sourceResult, input.expectedContentDigest);
 
       const query = createAdoptionLookupQuery(input);
       const existingRow = await gateway.findAdoptionBySourceResult(query);
 
       if (existingRow !== null) {
+        assertExistingAdoptionMatchesCommand(existingRow, sourceResult, input);
         return createFormalAdoptionResponse("reused", existingRow);
       }
 
@@ -62,10 +65,24 @@ export function createAdminAiGenerationFormalAdoptionRepository(
         );
       }
 
+      assertExistingAdoptionMatchesCommand(resolvedRow, sourceResult, input);
+
       return createFormalAdoptionResponse(
         insertedRow === null ? "reused" : "created",
         resolvedRow,
       );
+    },
+    async findTrustedReviewedDraftForAdoption(input) {
+      const sourceResult = await gateway.findSourceResultForAdoption(
+        input.resultPublicId,
+      );
+
+      if (sourceResult === null) {
+        throw new Error("admin AI generation result was not found");
+      }
+
+      assertTrustedReviewedDraftSource(sourceResult, input);
+      return sourceResult.reviewedDraft;
     },
     async markFormalDraftCreated(input) {
       assertFormalDraftCreatedInput(input);
@@ -81,6 +98,67 @@ export function createAdminAiGenerationFormalAdoptionRepository(
       return createFormalAdoptionResponse("reused", updatedRow);
     },
   };
+}
+
+function assertExpectedContentDigest(
+  sourceResult: Pick<
+    AdminAiGenerationFormalAdoptionSourceResult,
+    "contentDigest"
+  >,
+  expectedContentDigest: string,
+): void {
+  if (sourceResult.contentDigest !== expectedContentDigest) {
+    throw new Error(
+      "admin AI generation formal adoption content digest conflict",
+    );
+  }
+}
+
+function assertExistingAdoptionMatchesCommand(
+  existingRow: AdminAiGenerationFormalAdoptionRow,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  input: CreateAdminAiGenerationFormalAdoptionInput,
+): void {
+  if (
+    existingRow.content_digest !== sourceResult.contentDigest ||
+    existingRow.content_digest !== input.expectedContentDigest
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption content digest conflict",
+    );
+  }
+
+  if (
+    createFormalAdoptionReviewDecision(existingRow) !== input.reviewDecision
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption review decision conflict",
+    );
+  }
+}
+
+function assertTrustedReviewedDraftSource(
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  input: FindTrustedAdminAiGenerationFormalDraftInput,
+): void {
+  assertExpectedContentDigest(sourceResult, input.expectedContentDigest);
+
+  if (
+    sourceResult.workspace !== "content" ||
+    sourceResult.ownerType !== "platform" ||
+    sourceResult.organizationPublicId !== null ||
+    sourceResult.resultStatus !== "draft" ||
+    sourceResult.isFormalAdoptionBlocked !== true ||
+    sourceResult.generationKind !== input.targetType ||
+    sourceResult.taskType !==
+      resolveAdminAiGenerationTaskTypeForFormalTarget(input.targetType) ||
+    sourceResult.reviewedDraft === null ||
+    sourceResult.reviewedDraft === undefined
+  ) {
+    throw new Error(
+      "admin AI generation result is not eligible for formal adoption",
+    );
+  }
 }
 
 function assertConfirmedAdoptionInput(

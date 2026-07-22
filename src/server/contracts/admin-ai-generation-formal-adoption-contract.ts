@@ -60,6 +60,12 @@ export type MarkAdminAiGenerationFormalDraftCreatedInput = {
   formalPaperPublicId: string | null;
 };
 
+export type FindTrustedAdminAiGenerationFormalDraftInput = {
+  resultPublicId: string;
+  expectedContentDigest: string;
+  targetType: AdminAiGenerationFormalAdoptionTargetType;
+};
+
 export type AdminAiGenerationFormalAdoptionRow = {
   adoption_public_id: string;
   source_result_public_id: string;
@@ -486,6 +492,9 @@ export type AdminAiGenerationFormalAdoptionRepository = {
   createOrReuseFormalAdoption(
     input: CreateAdminAiGenerationFormalAdoptionInput,
   ): Promise<AdminAiGenerationFormalAdoptionResult>;
+  findTrustedReviewedDraftForAdoption(
+    input: FindTrustedAdminAiGenerationFormalDraftInput,
+  ): Promise<unknown>;
   markFormalDraftCreated(
     input: MarkAdminAiGenerationFormalDraftCreatedInput,
   ): Promise<AdminAiGenerationFormalAdoptionResult>;

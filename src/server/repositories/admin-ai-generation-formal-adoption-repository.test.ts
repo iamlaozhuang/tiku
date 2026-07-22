@@ -22,6 +22,10 @@ function createSourceResult(
     taskType: "ai_question_generation",
     resultStatus: "draft",
     isFormalAdoptionBlocked: true,
+    reviewedDraft: {
+      questionType: "short_answer",
+      stemRichText: "trusted server-owned draft",
+    },
     contentDigest: "sha256:admin_ai_generation_result_177",
     contentPreviewMasked: "masked admin AI result preview",
     evidenceStatus: "weak",
@@ -74,8 +78,10 @@ function createGateway(options: {
   const findSourceResultForAdoption = vi.fn(
     async () => options.sourceResult ?? createSourceResult(),
   );
-  const insertAdoptionRecord = vi.fn(
-    async () => options.insertedRow ?? createAdoptionRow(),
+  const insertAdoptionRecord = vi.fn(async () =>
+    Object.hasOwn(options, "insertedRow")
+      ? (options.insertedRow ?? null)
+      : createAdoptionRow(),
   );
   const updateFormalDraftMetadata = vi.fn(
     async () =>
@@ -128,6 +134,7 @@ function createBaseInput() {
       roles: ["content_admin"] as const,
     },
     resultPublicId: "admin_ai_generation_result_public_177",
+    expectedContentDigest: "sha256:admin_ai_generation_result_177",
     targetType: "question" as const,
     reviewDecision: "approved" as const,
     reviewerConfirmed: true as const,
@@ -380,6 +387,50 @@ describe("admin AI generation formal adoption repository", () => {
       "admin_ai_formal_adoption_public_existing",
     );
     expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
+  it("rejects a stale expected content digest before creating an adoption", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult(),
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption({
+        ...createBaseInput(),
+        expectedContentDigest: "sha256:stale_browser_digest",
+      }),
+    ).rejects.toThrow("content digest conflict");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
+  it("rejects an opposite review decision instead of replaying the first persisted decision", async () => {
+    const existingRow = createAdoptionRow({
+      review_status: "rejected",
+    });
+    const { gateway, insertAdoptionRecord, updateFormalDraftMetadata } =
+      createGateway({ existingRow });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption(createBaseInput()),
+    ).rejects.toThrow("review decision conflict");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+    expect(updateFormalDraftMetadata).not.toHaveBeenCalled();
+  });
+
+  it("rejects a concurrently inserted opposite decision after the unique-key loser reloads", async () => {
+    const { gateway, findAdoptionBySourceResult } = createGateway({
+      insertedRow: null,
+    });
+    findAdoptionBySourceResult
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(createAdoptionRow({ review_status: "rejected" }));
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption(createBaseInput()),
+    ).rejects.toThrow("review decision conflict");
   });
 
   it("marks a reviewed content question adoption as a formal draft without exposing full content", async () => {

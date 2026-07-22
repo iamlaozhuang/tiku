@@ -288,6 +288,7 @@ function createTaskHistoryResponse(input: {
   workspace: "content" | "organization";
   generationKind: "question" | "paper";
   generatedResult?: {
+    contentDigest?: string;
     contentPreviewMasked: string;
     contentVisibility?: "redacted_snapshot";
     evidenceStatus?: "none" | "weak" | "sufficient";
@@ -325,6 +326,9 @@ function createTaskHistoryResponse(input: {
           resultPublicId,
           persistedAt: "2026-06-26T20:31:00.000Z",
           status: "draft",
+          contentDigest:
+            input.generatedResult.contentDigest ??
+            "sha256:admin_ai_generation_history_result",
           contentPreviewMasked: input.generatedResult.contentPreviewMasked,
           contentVisibility:
             input.generatedResult.contentVisibility ?? "redacted_snapshot",
@@ -2367,7 +2371,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(historyPanel).not.toHaveTextContent("redacted");
   });
 
-  it("submits content admin current question review adoption with a reviewed draft payload", async () => {
+  it("submits content admin current question review adoption with a content digest", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const resultPublicId =
       "admin_ai_generation_result_content_question_current_review_456";
@@ -2512,37 +2516,9 @@ describe("admin AI generation entry surfaces", () => {
           reviewDecision: "approved",
           reviewerConfirmed: true,
           targetType: "question",
-          reviewedDraft: {
-            questionType: "single_choice",
-            profession: "marketing",
-            level: 3,
-            subject: "theory",
-            stemRichText: "synthetic reviewed question stem",
-            standardAnswerRichText: "A",
-            analysisRichText: "synthetic reviewed analysis",
-            multiChoiceRule: "all_correct_only",
-            scoringMethod: "auto_match",
-            materialPublicId: null,
-            questionOptions: [
-              {
-                label: "A",
-                contentRichText: "synthetic reviewed option A",
-                isCorrect: true,
-                sortOrder: 1,
-              },
-              {
-                label: "B",
-                contentRichText: "synthetic reviewed option B",
-                isCorrect: false,
-                sortOrder: 2,
-              },
-            ],
-            scoringPoints: [],
-            fillBlankAnswers: [],
-            knowledgeNodePublicIds: [],
-            tagPublicIds: [],
-          },
+          expectedContentDigest: "sha256:admin_ai_generation_history_result",
         });
+        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain(
@@ -2555,6 +2531,12 @@ describe("admin AI generation entry surfaces", () => {
           data: {
             persistenceStatus: "created",
             adoption: {
+              review: {
+                reviewDecision: "approved",
+              },
+              targetReference: {
+                formalTargetWriteStatus: "draft_created",
+              },
               redactionStatus: "redacted",
             },
           },
@@ -3015,38 +2997,9 @@ describe("admin AI generation entry surfaces", () => {
           reviewDecision: "approved",
           reviewerConfirmed: true,
           targetType: "paper",
-          reviewedDraft: {
-            name: "待审试卷草稿 2026-06-26 20:30",
-            profession: "marketing",
-            level: 3,
-            subject: "theory",
-            paperType: "mock_paper",
-            source: "content_ai_generation",
-            paperSections: [
-              {
-                title: "单选题",
-                description: null,
-                sortOrder: 1,
-                paperQuestions: [
-                  {
-                    questionPublicId: "platform_formal_question_public_a",
-                    score: "1.0",
-                    sortOrder: 1,
-                    questionGroup: null,
-                    companionQuestionDraft: null,
-                  },
-                  {
-                    questionPublicId: "platform_formal_question_public_b",
-                    score: "1.0",
-                    sortOrder: 2,
-                    questionGroup: null,
-                    companionQuestionDraft: null,
-                  },
-                ],
-              },
-            ],
-          },
+          expectedContentDigest: "sha256:admin_ai_generation_history_result",
         });
+        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain(
           "synthetic reviewed paper question stem",
         );
@@ -3065,6 +3018,12 @@ describe("admin AI generation entry surfaces", () => {
           data: {
             persistenceStatus: "created",
             adoption: {
+              review: {
+                reviewDecision: "approved",
+              },
+              targetReference: {
+                formalTargetWriteStatus: "draft_created",
+              },
               redactionStatus: "redacted",
             },
           },
@@ -3300,12 +3259,14 @@ describe("admin AI generation entry surfaces", () => {
       }
 
       if (path === adoptionUrl && init?.method === "POST") {
-        expect(JSON.parse(String(init.body))).toMatchObject({
+        const requestBody = JSON.parse(String(init.body));
+        expect(requestBody).toMatchObject({
           reviewDecision: "approved",
           reviewerConfirmed: true,
           targetType: "question",
-          reviewedDraft,
+          expectedContentDigest: "sha256:admin_ai_generation_history_result",
         });
+        expect(requestBody).not.toHaveProperty("reviewedDraft");
 
         return Response.json({
           code: 0,
@@ -3313,6 +3274,12 @@ describe("admin AI generation entry surfaces", () => {
           data: {
             persistenceStatus: "created",
             adoption: {
+              review: {
+                reviewDecision: "approved",
+              },
+              targetReference: {
+                formalTargetWriteStatus: "draft_created",
+              },
               redactionStatus: "redacted",
             },
           },
@@ -3560,13 +3527,9 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "question",
           weakEvidenceConfirmed: true,
-          reviewedDraft: {
-            questionType: "single_choice",
-            stemRichText: "synthetic weak reviewed question stem",
-            standardAnswerRichText: "A",
-            analysisRichText: "synthetic weak reviewed analysis",
-          },
+          expectedContentDigest: "sha256:admin_ai_generation_history_result",
         });
+        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
 
         return Response.json({
           code: 0,
@@ -3574,6 +3537,12 @@ describe("admin AI generation entry surfaces", () => {
           data: {
             persistenceStatus: "created",
             adoption: {
+              review: {
+                reviewDecision: "approved",
+              },
+              targetReference: {
+                formalTargetWriteStatus: "draft_created",
+              },
               redactionStatus: "redacted",
             },
           },

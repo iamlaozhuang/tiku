@@ -1,17 +1,28 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21",
-  "objective": "Complete F-0098 by making mock_exam consume the immutable paper_section and question_group hierarchy as grouped navigation pages: render shared group material once, render every ordered child question within the authoritative group, preserve per-question answer identity/autosave/revision/retry semantics, and keep standalone and legacy snapshots compatible. Run the final static acceptance matrix for the already-closed snapshot, practice and report partitions; do not change snapshot production, scoring, persistence, permissions or organization training.",
+  "taskId": "p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21",
+  "objective": "Close F-0155 and F-0156 as one confirmed formal-adoption command-integrity bundle: require the exact expected source content digest, load the immutable reviewed draft only from the server-owned generated-result snapshot, reject any browser draft authority, replay only the same persisted review decision, fail closed on an opposite decision, and drive UI success from the returned persisted state. Keep F-0029 atomic target creation separate and open; do not change schema, permissions, Provider behavior or formal target writers.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "tests/unit/student-mock-exam-report-ui.test.ts",
-    "tests/unit/student-practice-ui.test.ts",
-    "src/lib/published-paper-snapshot.test.ts",
-    "src/server/services/mock-exam-service.test.ts",
-    "src/server/services/exam-report-service.test.ts"
+    "src/server/models/admin-ai-generation-formal-adoption.ts",
+    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
+    "src/server/validators/admin-ai-generation-formal-adoption.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "src/server/contracts/admin-ai-generation-local-contract.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -19,43 +30,54 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
-    "src/server/** except the untouched direct validation tests listed in allowedFiles",
     "src/db/schema/**",
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "exam_report presentation changes",
-    "practice behavior changes",
-    "organization training source/import implementation",
-    "permission, entitlement, role or learner visibility changes",
-    "dependency, Provider, external service, secret/env, deployment, PR or force-push",
-    "F-0096, F-0097, F-0099 or another independent finding"
+    "question or paper writer transaction implementation",
+    "formal target creation atomicity or F-0029 closure",
+    "organization AI copy or personal AI adoption",
+    "permission, role, entitlement or evidence-status policy changes",
+    "Provider, external service, secret/env, deployment, PR or force-push",
+    "another independent finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx"
+    "src/server/models/admin-ai-generation-formal-adoption.ts",
+    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
+    "src/server/validators/admin-ai-generation-formal-adoption.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+    "src/server/contracts/admin-ai-generation-local-contract.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx"
   ],
   "contingencyFiles": [
-    "tests/unit/student-mock-exam-report-ui.test.ts",
-    "tests/unit/student-practice-ui.test.ts",
-    "src/lib/published-paper-snapshot.test.ts",
-    "src/server/services/mock-exam-service.test.ts",
-    "src/server/services/exam-report-service.test.ts"
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirement": "Module 02 section 3.7 and D14 require skill flows to preserve paper_section and question_group, share one material container, keep child scoring independent and expose group navigation.",
-    "producer": "Foundation commit 885558610 emits a versioned nested snapshot and the shared reader preserves ordered section, group and child public identity; report commit 960c88b9e consumes the same immutable identity.",
-    "consumer": "StudentMockExamPage extracts the group fields but flattens them back into one-question pages, repeats shared material and exposes only a flat answer navigator.",
-    "tests": "student-mock-exam-report-ui is the direct implementation regression. Existing snapshot, practice, mock service and report service tests form the final static F-0098 acceptance matrix and remain untouched unless a same-root test correction is required.",
-    "nonClaims": "This task does not modify organization training, AI selection/scoring, persistence, permission or runtime database behavior; those independent findings remain separate."
+    "requirement": "The content AI formal-adoption boundary must adopt only a reviewed server-owned result, preserve digest traceability and return the actual persisted review state; a semantic opposite replay must fail closed.",
+    "caller": "AdminAiGenerationEntryPage currently sends reviewedDraft from browser state and sets adopted/rejected UI state from the requested decision. The direct history DTO/mapper omits contentDigest, so the exact two-file authoritative caller chain supplement is required to propagate the existing immutable digest.",
+    "routeService": "The runtime injects trusted actor/result identity, but the service forwards input.reviewedDraft to the formal-draft adapter and does not require expectedContentDigest.",
+    "repository": "The repository loads the generated result and the first adoption row, but its source projection omits the reviewed draft, it does not bind the request to source contentDigest, and any existing row is reused without comparing review decision.",
+    "database": "The generated result already stores content_redacted_snapshot plus content_digest; no schema or migration is needed to consume that immutable source fact.",
+    "bundleDecision": "F-0155 and F-0156 share the same route/service/repository command, source-result read model and focused matrix. F-0029 has a distinct transaction boundary across adoption, question and paper writers and remains separate."
   },
   "validationCommands": [
     {
-      "name": "f0098-grouped-mock-navigation-and-static-acceptance",
+      "name": "f0155-f0156-formal-adoption-command-integrity",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -63,33 +85,49 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/student-mock-exam-report-ui.test.ts",
-        "tests/unit/student-practice-ui.test.ts",
-        "src/lib/published-paper-snapshot.test.ts",
-        "src/server/services/mock-exam-service.test.ts",
-        "src/server/services/exam-report-service.test.ts"
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts"
       ]
     },
     {
-      "name": "f0098-grouped-mock-navigation-lint",
+      "name": "f0155-f0156-formal-adoption-command-integrity-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-        "tests/unit/student-mock-exam-report-ui.test.ts"
+        "src/server/models/admin-ai-generation-formal-adoption.ts",
+        "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
+        "src/server/validators/admin-ai-generation-formal-adoption.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/contracts/admin-ai-generation-local-contract.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts"
       ]
     },
     {
-      "name": "f0098-grouped-mock-navigation-typecheck",
+      "name": "f0155-f0156-formal-adoption-command-integrity-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0098-grouped-mock-navigation-build",
+      "name": "f0155-f0156-formal-adoption-command-integrity-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -97,13 +135,13 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_learner_mock_exam_navigation_projection",
+    "category": "bounded_database_application_contract_and_low_risk_UI_projection",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -111,45 +149,37 @@
     "dependencyOrMechanismChange": false
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingId": "F-0098",
-    "task": "close F-0098 after grouped mock navigation and the final static acceptance matrix pass, then perform the next RC-05 residual disposition",
-    "condition": "do not claim organization training or runtime database acceptance; preserve their independent finding boundaries"
+    "findingIds": ["F-0155", "F-0156"],
+    "task": "close the server-owned digest-bound review command bundle, then resume the separate F-0029 atomic target-write transaction or the next eligible RC-05 residual",
+    "condition": "do not claim F-0029, organization AI copy, Provider execution or runtime database acceptance"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21",
+    "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21",
     "findingId": "F-0098",
-    "commit": "960c88b9ee8544ff49b58e9a3e35495bb34cd01b",
+    "commit": "2ea0c3de27b4cfc7f97a847fb0916de0cc015f86",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true
   },
-  "validationEvidence": {
-    "tddRed": "flat question progress and repeated material before group page implementation, followed by a missing group subtotal before strict total-score projection",
-    "focused": "pass: 5 files, 129 tests",
-    "lint": "pass: component and direct test",
-    "typecheck": "pass",
-    "build": "pass: 100 static pages; pre-existing NFT trace warning only",
-    "formatAndDiff": "pass",
-    "adversarialReview": "pass: public group identity is authoritative; conflicting, incomplete or noncontiguous groups fail closed without reordering; shared material renders once; every child keeps independent answer revision, autosave, submit and durable retry semantics; no server, permission or persistence scope changed"
-  },
-  "executionMetrics": {
-    "mandatoryFreshApprovals": 0,
-    "preventableScopeMissApprovals": 0,
-    "candidateReapprovals": 0,
-    "approvalWaitTurns": 0,
-    "productValueTime": "13m",
-    "mechanismOverhead": "4m",
-    "guardSmokeChanges": 0
+  "candidateEvidence": {
+    "executionStage": "validated_reviewed_conditional_closeout_ready",
+    "tddRed": "7 expected failures across 104 tests plus a unique-key-loser opposite-decision RED",
+    "focused": "7 files, 118 tests passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "build": "passed with 100 static pages and the pre-existing NFT tracing warning only",
+    "formatAndDiff": "passed",
+    "adversarialReview": "passed: browser draft ignored, exact source digest required, existing and concurrently inserted opposite decisions fail closed, UI consumes persisted review decision, and F-0029 remains open"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

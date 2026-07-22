@@ -137,10 +137,10 @@ type ContentAdminReviewActionState =
   | "rejected"
   | "error";
 type ContentAdminReviewActionInput = {
+  expectedContentDigest: string;
   generationKind: AdminAiGenerationKind;
   resultPublicId: string;
   reviewDecision: ContentAdminReviewDecision;
-  reviewedDraft?: AdminAiGenerationFormalReviewedDraftPayload | null;
   weakEvidenceConfirmed?: boolean;
 };
 type OrganizationAiTrainingDraftCopyState =
@@ -3049,10 +3049,10 @@ function ContentAdminReviewTraceabilityPanel({
           type="button"
           onClick={() =>
             onReviewContentDraft({
+              expectedContentDigest: generatedResult.contentDigest,
               generationKind,
               resultPublicId,
               reviewDecision: "approved",
-              reviewedDraft,
               weakEvidenceConfirmed:
                 reviewReadiness === "weak_confirmation_required"
                   ? true
@@ -3069,6 +3069,7 @@ function ContentAdminReviewTraceabilityPanel({
           type="button"
           onClick={() =>
             onReviewContentDraft({
+              expectedContentDigest: generatedResult.contentDigest,
               generationKind,
               resultPublicId,
               reviewDecision: "rejected",
@@ -3720,14 +3721,6 @@ export function AdminAiGenerationEntryPage({
     const pendingState =
       input.reviewDecision === "approved" ? "adopting" : "rejecting";
 
-    if (input.reviewDecision === "approved" && input.reviewedDraft == null) {
-      setReviewActionStateByResultPublicId((currentState) => ({
-        ...currentState,
-        [input.resultPublicId]: "error",
-      }));
-      return;
-    }
-
     setReviewActionStateByResultPublicId((currentState) => ({
       ...currentState,
       [input.resultPublicId]: pendingState,
@@ -3743,9 +3736,7 @@ export function AdminAiGenerationEntryPage({
               reviewDecision: input.reviewDecision,
               reviewerConfirmed: true,
               targetType: input.generationKind,
-              ...(input.reviewDecision === "approved"
-                ? { reviewedDraft: input.reviewedDraft }
-                : {}),
+              expectedContentDigest: input.expectedContentDigest,
               weakEvidenceConfirmed: input.weakEvidenceConfirmed,
             }),
             headers: {
@@ -3768,10 +3759,12 @@ export function AdminAiGenerationEntryPage({
         return;
       }
 
+      const persistedReviewDecision =
+        reviewResponse.data.adoption.review.reviewDecision;
       setReviewActionStateByResultPublicId((currentState) => ({
         ...currentState,
         [input.resultPublicId]:
-          input.reviewDecision === "approved" ? "adopted" : "rejected",
+          persistedReviewDecision === "approved" ? "adopted" : "rejected",
       }));
       await refreshTaskHistory(sessionToken, ADMIN_AI_GENERATION_HISTORY_PAGE);
     } catch {

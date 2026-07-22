@@ -196,6 +196,7 @@ export type AdminAiGenerationTaskHistoryGeneratedResultDto = {
   resultPublicId: string;
   persistedAt: string;
   status: AdminAiGenerationResultStatus;
+  contentDigest: string;
   contentPreviewMasked: string;
   contentVisibility: AdminAiGenerationResultContentVisibility;
   evidenceStatus: EvidenceStatus;

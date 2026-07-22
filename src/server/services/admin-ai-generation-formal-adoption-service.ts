@@ -87,10 +87,19 @@ export function createAdminAiGenerationFormalAdoptionService(
           return createSuccessResponse(adoptionResult);
         }
 
+        const trustedReviewedDraft =
+          await repositories.adoptionRepository.findTrustedReviewedDraftForAdoption(
+            {
+              expectedContentDigest:
+                normalizedInput.value.expectedContentDigest,
+              resultPublicId: normalizedInput.value.resultPublicId,
+              targetType: normalizedInput.value.targetType,
+            },
+          );
         const draftResponse =
           await repositories.formalDraftAdapter.createFormalDraft({
             adoption: adoptionResult.adoption,
-            reviewedDraft: isRecord(input) ? input.reviewedDraft : undefined,
+            reviewedDraft: trustedReviewedDraft,
             targetType: normalizedInput.value.targetType,
             writerContext: {
               actorPublicId: normalizedInput.value.actor.publicId,
@@ -116,10 +125,6 @@ export function createAdminAiGenerationFormalAdoptionService(
   };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function mapFormalAdoptionRepositoryError(error: unknown): ApiResponse<null> {
   const message = error instanceof Error ? error.message : "";
 
@@ -142,7 +147,9 @@ function mapFormalAdoptionRepositoryError(error: unknown): ApiResponse<null> {
 
   if (
     message.includes("not eligible") ||
-    message.includes("target type mismatch")
+    message.includes("target type mismatch") ||
+    message.includes("content digest conflict") ||
+    message.includes("review decision conflict")
   ) {
     return createErrorResponse(
       ADMIN_AI_GENERATION_FORMAL_ADOPTION_ERROR_CODES.resultNotEligible,

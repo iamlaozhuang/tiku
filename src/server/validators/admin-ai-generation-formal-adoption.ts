@@ -116,6 +116,9 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
   const adoptionPublicId = normalizeRequiredText(input.adoptionPublicId);
   const actor = normalizeActor(input.actor);
   const resultPublicId = normalizeRequiredText(input.resultPublicId);
+  const expectedContentDigest = normalizeRequiredText(
+    input.expectedContentDigest,
+  );
   const targetType = normalizeTargetType(input.targetType);
   const reviewDecision = normalizeReviewDecision(input.reviewDecision);
   const reviewedAt = normalizeReviewedAt(input.reviewedAt);
@@ -124,6 +127,7 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
     adoptionPublicId === null ||
     actor === null ||
     resultPublicId === null ||
+    expectedContentDigest === null ||
     targetType === null ||
     reviewDecision === null ||
     input.reviewerConfirmed !== true ||
@@ -141,6 +145,7 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
       adoptionPublicId,
       actor,
       resultPublicId,
+      expectedContentDigest,
       targetType,
       reviewDecision,
       reviewerConfirmed: true,

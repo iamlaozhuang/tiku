@@ -214,6 +214,11 @@ function createAdoptionRepository(
 
   return {
     createOrReuseFormalAdoption: vi.fn(async () => adoptionResult),
+    findTrustedReviewedDraftForAdoption: vi.fn(async () =>
+      overrides.generationKind === "paper" || overrides.targetType === "paper"
+        ? createReviewedPaperDraft()
+        : createReviewedQuestionDraft(),
+    ),
     markFormalDraftCreated: vi.fn(async () =>
       createAdoptionResult({
         formalQuestionPublicId: "question_formal_draft_route_177",
@@ -246,6 +251,7 @@ function createRejectedAdoptionRepository(): AdoptionRepositoryWithDraftUpdate {
     createOrReuseFormalAdoption: vi.fn(async () =>
       createRejectedAdoptionResult(),
     ),
+    findTrustedReviewedDraftForAdoption: vi.fn(),
     markFormalDraftCreated: vi.fn(),
   };
 }
@@ -258,6 +264,9 @@ function createPaperAdoptionRepository(): AdoptionRepositoryWithDraftUpdate {
         resultPublicId: "admin_ai_generation_result_content_paper_177",
         targetType: "paper",
       }),
+    ),
+    findTrustedReviewedDraftForAdoption: vi.fn(async () =>
+      createReviewedPaperDraft(),
     ),
     markFormalDraftCreated: vi.fn(async () =>
       createAdoptionResult({
@@ -341,7 +350,10 @@ function createPostRequest(body: Record<string, unknown>): Request {
   return new Request(
     "http://localhost/api/v1/content-ai-generation-results/admin_ai_generation_result_content_question_177/formal-adoptions",
     {
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        expectedContentDigest: "sha256:admin_ai_generation_result_177",
+        ...body,
+      }),
       headers: {
         authorization: "Bearer synthetic-admin-session",
         "content-type": "application/json",
@@ -447,6 +459,7 @@ describe("admin AI generation formal adoption runtime route", () => {
           publicId: "admin_content_public_177",
           roles: ["content_admin"],
         },
+        expectedContentDigest: "sha256:admin_ai_generation_result_177",
         resultPublicId: "admin_ai_generation_result_content_question_177",
         targetType: "question",
         reviewDecision: "approved",
@@ -463,6 +476,13 @@ describe("admin AI generation formal adoption runtime route", () => {
       writerContext: {
         actorPublicId: "admin_content_public_177",
       },
+    });
+    expect(
+      adoptionRepository.findTrustedReviewedDraftForAdoption,
+    ).toHaveBeenCalledWith({
+      expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      resultPublicId: "admin_ai_generation_result_content_question_177",
+      targetType: "question",
     });
     expect(adoptionRepository.markFormalDraftCreated).toHaveBeenCalledWith({
       adoptionPublicId: "admin_ai_formal_adoption_public_route_177",
@@ -545,6 +565,13 @@ describe("admin AI generation formal adoption runtime route", () => {
       writerContext: {
         actorPublicId: "admin_content_public_177",
       },
+    });
+    expect(
+      adoptionRepository.findTrustedReviewedDraftForAdoption,
+    ).toHaveBeenCalledWith({
+      expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      resultPublicId: "admin_ai_generation_result_content_paper_177",
+      targetType: "paper",
     });
     expect(adoptionRepository.markFormalDraftCreated).toHaveBeenCalledWith({
       adoptionPublicId: "admin_ai_formal_adoption_public_route_177",
@@ -644,6 +671,7 @@ describe("admin AI generation formal adoption runtime route", () => {
           publicId: "admin_content_public_177",
           roles: ["content_admin"],
         },
+        expectedContentDigest: "sha256:admin_ai_generation_result_177",
         resultPublicId: "admin_ai_generation_result_content_question_177",
         targetType: "question",
         reviewDecision: "rejected",

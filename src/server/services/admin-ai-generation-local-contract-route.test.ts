@@ -3157,6 +3157,7 @@ describe("admin AI generation local contract route handlers", () => {
             resultPublicId,
             persistedAt: "2026-06-26T20:41:00.000Z",
             status: "draft",
+            contentDigest: "sha256:omitted-from-history-response",
             contentPreviewMasked:
               "redacted generated result summary for content question",
             contentVisibility: "redacted_snapshot",
@@ -3179,7 +3180,9 @@ describe("admin AI generation local contract route handlers", () => {
         ],
       },
     });
-    expect(serializedPayload).not.toContain("contentDigest");
+    expect(serializedPayload).toContain(
+      '"contentDigest":"sha256:omitted-from-history-response"',
+    );
     expect(serializedPayload).not.toContain("contentRedactedSnapshot");
     expect(serializedPayload).not.toContain("aiCallLogPublicId");
     expect(serializedPayload).not.toContain("rawPrompt");
@@ -3253,7 +3256,9 @@ describe("admin AI generation local contract route handlers", () => {
         },
       },
     });
-    expect(serializedPayload).not.toContain("contentDigest");
+    expect(serializedPayload).toContain(
+      '"contentDigest":"sha256:omitted-from-history-response"',
+    );
     expect(serializedPayload).not.toContain("aiCallLogPublicId");
     expect(serializedPayload).not.toContain("rawPrompt");
     expect(serializedPayload).not.toContain("rawOutput");
@@ -3343,7 +3348,9 @@ describe("admin AI generation local contract route handlers", () => {
         },
       },
     });
-    expect(serializedPayload).not.toContain("contentDigest");
+    expect(serializedPayload).toContain(
+      '"contentDigest":"sha256:omitted-from-history-response"',
+    );
     expect(serializedPayload).not.toContain("ai_call_log_public_omitted");
     expect(serializedPayload).not.toContain("providerPayload");
   });

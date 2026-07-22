@@ -78,6 +78,7 @@ export type AdminAiGenerationFormalAdoptionSourceResultDbRow = {
   task_type: string;
   result_status: string;
   is_formal_adoption_blocked: boolean;
+  content_redacted_snapshot: unknown;
   content_digest: string;
   content_preview_masked: string;
   evidence_status: string;
@@ -133,6 +134,7 @@ const adminAiGenerationFormalAdoptionSourceSelection = {
   result_status: adminAiGenerationResult.result_status,
   is_formal_adoption_blocked:
     adminAiGenerationResult.is_formal_adoption_blocked,
+  content_redacted_snapshot: adminAiGenerationResult.content_redacted_snapshot,
   content_digest: adminAiGenerationResult.content_digest,
   content_preview_masked: adminAiGenerationResult.content_preview_masked,
   evidence_status: adminAiGenerationResult.evidence_status,
@@ -333,12 +335,25 @@ export function mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResul
     taskType: toAdminAiGenerationResultTaskType(row.task_type),
     resultStatus: toAdminAiGenerationResultStatus(row.result_status),
     isFormalAdoptionBlocked: true,
+    reviewedDraft: resolveTrustedReviewedDraft(row.content_redacted_snapshot),
     contentDigest: row.content_digest,
     contentPreviewMasked: row.content_preview_masked,
     evidenceStatus: toEvidenceStatus(row.evidence_status),
     citationCount: row.citation_count,
     aiCallLogPublicId: row.ai_call_log_public_id,
   };
+}
+
+function resolveTrustedReviewedDraft(snapshot: unknown): unknown {
+  if (
+    typeof snapshot !== "object" ||
+    snapshot === null ||
+    Array.isArray(snapshot)
+  ) {
+    return null;
+  }
+
+  return (snapshot as Record<string, unknown>).formalReviewedDraft ?? null;
 }
 
 function createAdminAiGenerationFormalAdoptionLookupCondition(
