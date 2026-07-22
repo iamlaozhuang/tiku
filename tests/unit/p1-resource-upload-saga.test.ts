@@ -47,12 +47,12 @@ function createAdminSessionService(): Pick<
   };
 }
 
-function createResourceSummary() {
+function createResourceSummary(resourceStatus: "draft" | "uploaded" = "draft") {
   return {
     publicId: "resource-upload-public-1",
     title: "受控上传资料",
     resourceType: "knowledge_doc" as const,
-    resourceStatus: "draft" as const,
+    resourceStatus,
     profession: "marketing" as const,
     level: 3,
     levelList: [3],
@@ -97,11 +97,16 @@ function createUploadRequest(includeIdempotencyKey = true) {
 
 function createRepositories(input?: {
   prepareResult?: unknown;
-  completeResult?: unknown;
+  receiptResult?: unknown;
+  finalizeResult?: unknown;
 }) {
   const resource = createResourceSummary();
-  const prepareResourceUpload = vi.fn(async (prepareInput?: unknown) =>
-    input?.prepareResult === undefined
+  let preparedIdentity:
+    | { objectStoragePath: string; fileHash: string; fileSizeByte: number }
+    | undefined;
+  const prepareResourceUpload = vi.fn(async (prepareInput?: unknown) => {
+    preparedIdentity = prepareInput as typeof preparedIdentity;
+    return input?.prepareResult === undefined
       ? {
           status: "prepared",
           operation: {
@@ -111,13 +116,34 @@ function createRepositories(input?: {
               .objectStoragePath,
           },
         }
-      : input.prepareResult,
-  );
+      : input.prepareResult;
+  });
   const markResourceUploadFileStored = vi.fn(async () => true);
-  const completeResourceUpload = vi.fn(async () =>
-    input?.completeResult === undefined
-      ? { status: "completed", resource, replayed: false }
-      : input.completeResult,
+  const completeResourceUploadReceipt = vi.fn(async () =>
+    input?.receiptResult === undefined
+      ? {
+          status: "completed",
+          resource: createResourceSummary("uploaded"),
+          replayed: false,
+        }
+      : input.receiptResult,
+  );
+  const claimResourceConversion = vi.fn(async () => ({
+    status: "claimed",
+    claim: {
+      publicId: resource.publicId,
+      claimVersion: "2026-07-21T08:00:01.000Z",
+      objectStoragePath: preparedIdentity?.objectStoragePath ?? "",
+      originalFileName: "controlled-upload.md",
+      contentHash: preparedIdentity?.fileHash ?? "",
+      fileSizeByte: preparedIdentity?.fileSizeByte ?? 0,
+      profession: "marketing",
+    },
+  }));
+  const finalizeResourceConversion = vi.fn(async () =>
+    input?.finalizeResult === undefined
+      ? { status: "completed", resource }
+      : input.finalizeResult,
   );
   const recordResourceUploadFailure = vi.fn(async () => undefined);
   const appendAuditLog = vi.fn(async () => undefined);
@@ -125,7 +151,9 @@ function createRepositories(input?: {
   return {
     calls: {
       appendAuditLog,
-      completeResourceUpload,
+      claimResourceConversion,
+      completeResourceUploadReceipt,
+      finalizeResourceConversion,
       markResourceUploadFileStored,
       prepareResourceUpload,
       recordResourceUploadFailure,
@@ -134,7 +162,9 @@ function createRepositories(input?: {
       resourceRepository: {
         prepareResourceUpload,
         markResourceUploadFileStored,
-        completeResourceUpload,
+        claimResourceConversion,
+        completeResourceUploadReceipt,
+        finalizeResourceConversion,
         recordResourceUploadFailure,
         async listResources() {
           return {
@@ -203,7 +233,7 @@ describe("F-0031 database-backed resource upload saga", () => {
       data: null,
     });
     expect(calls.prepareResourceUpload).not.toHaveBeenCalled();
-    expect(calls.completeResourceUpload).not.toHaveBeenCalled();
+    expect(calls.completeResourceUploadReceipt).not.toHaveBeenCalled();
   });
 
   it("rejects a non-UUID upload idempotency key before claiming an operation", async () => {
@@ -259,7 +289,7 @@ describe("F-0031 database-backed resource upload saga", () => {
       JSON.stringify(calls.prepareResourceUpload.mock.calls),
     ).not.toContain(uploadIdempotencyKey);
     expect(calls.markResourceUploadFileStored).toHaveBeenCalledOnce();
-    expect(calls.completeResourceUpload).toHaveBeenCalledWith(
+    expect(calls.completeResourceUploadReceipt).toHaveBeenCalledWith(
       expect.objectContaining({
         operationPublicId: "resource-upload-operation-public-1",
         mutationContext: expect.objectContaining({
@@ -268,6 +298,16 @@ describe("F-0031 database-backed resource upload saga", () => {
             actionType: "resource.upload",
             metadataSummary: "redacted resource upload metadata",
           }),
+        }),
+      }),
+    );
+    expect(calls.claimResourceConversion).toHaveBeenCalledOnce();
+    expect(calls.finalizeResourceConversion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publicId: "resource-upload-public-1",
+        resourceStatus: "draft",
+        mutationContext: expect.objectContaining({
+          auditLog: expect.objectContaining({ actionType: "resource.convert" }),
         }),
       }),
     );
@@ -298,7 +338,8 @@ describe("F-0031 database-backed resource upload saga", () => {
       data: { resource: { publicId: resource.publicId } },
     });
     expect(calls.markResourceUploadFileStored).not.toHaveBeenCalled();
-    expect(calls.completeResourceUpload).not.toHaveBeenCalled();
+    expect(calls.completeResourceUploadReceipt).not.toHaveBeenCalled();
+    expect(calls.claimResourceConversion).not.toHaveBeenCalled();
     expect(calls.appendAuditLog).not.toHaveBeenCalled();
     await expect(readdir(storageRoot, { recursive: true })).resolves.toEqual(
       [],
@@ -326,7 +367,7 @@ describe("F-0031 database-backed resource upload saga", () => {
 
     expect(payload.code).not.toBe(0);
     expect(payload.data).toBeNull();
-    expect(calls.completeResourceUpload).not.toHaveBeenCalled();
+    expect(calls.completeResourceUploadReceipt).not.toHaveBeenCalled();
     expect(calls.appendAuditLog).toHaveBeenCalledOnce();
     expect(calls.appendAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -367,7 +408,7 @@ describe("F-0031 database-backed resource upload saga", () => {
         failureMessageDigest: expect.stringMatching(/^sha256:[a-f0-9]{64}$/u),
       }),
     );
-    expect(calls.completeResourceUpload).not.toHaveBeenCalled();
+    expect(calls.completeResourceUploadReceipt).not.toHaveBeenCalled();
     expect(calls.appendAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         actionType: "resource.upload",
@@ -420,12 +461,12 @@ describe("F-0031 database-backed resource upload saga", () => {
 
   it("binds completion to the operation identity before one transaction commits audit and state", () => {
     const completeStart = repositorySource.indexOf(
-      "async function completeResourceUpload",
+      "async function completeResourceUploadReceipt",
     );
     const completeSource = repositorySource.slice(
       completeStart,
       repositorySource.indexOf(
-        "\nasync function insertResourceFromUpload",
+        "\nasync function claimResourceConversion",
         completeStart,
       ),
     );
@@ -450,6 +491,7 @@ describe("F-0031 database-backed resource upload saga", () => {
       "operationRow.file_hash !== input.contentHash",
     );
     expect(completeSource).toContain("await appendResourceMutationAuditLog(");
+    expect(completeSource).toContain('resourceStatus: "uploaded"');
     expect(completeSource).toContain('operation_status: "completed"');
     expect(
       completeSource.indexOf("await appendResourceMutationAuditLog("),
@@ -473,7 +515,7 @@ describe("F-0031 database-backed resource upload saga", () => {
     const failureSource = repositorySource.slice(
       failureStart,
       repositorySource.indexOf(
-        "\nasync function completeResourceUpload",
+        "\nasync function completeResourceUploadReceipt",
         failureStart,
       ),
     );

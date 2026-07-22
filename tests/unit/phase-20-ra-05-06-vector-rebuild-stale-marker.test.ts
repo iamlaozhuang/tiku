@@ -179,11 +179,23 @@ describe("phase 20 RA-05-06 local vector rebuild stale marker", () => {
     });
     const initialChunkPublicId = initialRetrieval.citations[0]?.chunkPublicId;
 
-    await handlers.resources.detail.PATCH(
+    const detailResponse = await handlers.resources.detail.GET(
+      new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    const detailPayload = await detailResponse.json();
+    const detail = detailPayload.data;
+
+    const updateResponse = await handlers.resources.detail.PATCH(
       new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
         body: JSON.stringify({
           markdownContent:
             "# Fresh vector\n\nfresh compliance beta phrase should wait for rebuild.",
+          expectedSourceContentHash: detail.sourceContentHash,
+          expectedMarkdownContentHash: detail.markdownContentHash,
+          expectedUpdatedAt: detail.resource.updatedAt,
         }),
         headers: {
           authorization: "Bearer admin-session-token",
@@ -193,6 +205,7 @@ describe("phase 20 RA-05-06 local vector rebuild stale marker", () => {
       }),
       { params: Promise.resolve({ publicId: resourcePublicId }) },
     );
+    await expect(updateResponse.json()).resolves.toMatchObject({ code: 0 });
 
     const staleRetrieval = await buildLocalResourceRagRetrievalResult({
       storageRoot,

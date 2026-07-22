@@ -457,6 +457,25 @@ function mockResourceFetch(
       }
 
       if (
+        path === "/api/v1/resources/resource-public-001/retry-conversion" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            resource: {
+              ...(payload as typeof resourcePayload).data.resources[0],
+              resourceStatus: "draft",
+              markdownPreviewAvailable: true,
+              indexingErrorSummary: null,
+              updatedAt: "2026-05-20T14:30:00.000Z",
+            },
+          },
+        });
+      }
+
+      if (
         path === "/api/v1/resources/resource-public-001/disable" &&
         init?.method === "POST"
       ) {
@@ -1297,6 +1316,56 @@ describe("admin content and knowledge ops baseline", () => {
         ),
       ).toBe(true),
     );
+  });
+
+  it("offers an authenticated retry only for conversion_failed resources", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const failedPayload = {
+      ...resourcePayload,
+      data: {
+        resources: [
+          {
+            ...resourcePayload.data.resources[0],
+            resourceStatus: "conversion_failed" as const,
+            markdownPreviewAvailable: false,
+            indexingErrorSummary: "Document conversion failed.",
+          },
+          resourcePayload.data.resources[1],
+        ],
+      },
+    };
+    const fetchMock = mockResourceFetch(failedPayload);
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    const failedResource = await screen.findByTestId(
+      "resource-row-resource-public-001",
+    );
+    const retryButton = within(failedResource).getByRole("button", {
+      name: "重新解析资料 营销知识库讲义",
+    });
+
+    fireEvent.click(retryButton);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "资料已重新解析",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources/resource-public-001/retry-conversion",
+      expect.objectContaining({
+        cache: "no-store",
+        credentials: "same-origin",
+        headers: expect.objectContaining({
+          authorization: "Bearer unit-test-admin-token",
+        }),
+        method: "POST",
+      }),
+    );
+    expect(
+      within(failedResource).queryByRole("button", {
+        name: "重新解析资料 营销知识库讲义",
+      }),
+    ).toBeNull();
   });
 
   it("publishes a draft resource through the protected runtime", async () => {

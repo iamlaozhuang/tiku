@@ -82,7 +82,10 @@ export type ResourceIndexChunkFactInput = {
 export type CreateResourceFromUploadInput = {
   publicId: string;
   resourceType: AdminResourceOpsListDto["resources"][number]["resourceType"];
-  resourceStatus: Extract<ResourceStatus, "draft" | "conversion_failed">;
+  resourceStatus: Extract<
+    ResourceStatus,
+    "uploaded" | "draft" | "conversion_failed"
+  >;
   title: string;
   originalFileName: string;
   objectStoragePath: string;
@@ -122,19 +125,65 @@ export type PrepareResourceUploadResult =
     }
   | { status: "conflict"; reason: "request_mismatch" | "invalid_state" };
 
-export type CompleteResourceUploadInput = CreateResourceFromUploadInput & {
+export type CompleteResourceUploadReceiptInput = Omit<
+  CreateResourceFromUploadInput,
+  | "resourceStatus"
+  | "markdownContent"
+  | "markdownContentHash"
+  | "conversionErrorMessage"
+> & {
   operationPublicId: string;
   requestFingerprint: string;
   mutationContext: ResourceMutationContext;
 };
 
-export type CompleteResourceUploadResult =
+export type CompleteResourceUploadReceiptResult =
   | {
       status: "completed";
       resource: AdminResourceOpsListDto["resources"][number];
       replayed: boolean;
     }
   | { status: "invalid_scope" }
+  | { status: "conflict" };
+
+export type ResourceConversionClaim = {
+  publicId: string;
+  claimVersion: string;
+  objectStoragePath: string;
+  originalFileName: string;
+  contentHash: string;
+  fileSizeByte: number;
+  profession: AdminResourceOpsListDto["resources"][number]["profession"];
+};
+
+export type ClaimResourceConversionResult =
+  | { status: "claimed"; claim: ResourceConversionClaim }
+  | { status: "not_found" }
+  | {
+      status: "conflict";
+      reason: "conversion_active" | "invalid_identity" | "invalid_state";
+    };
+
+export type FinalizeResourceConversionInput = {
+  publicId: string;
+  claimVersion: string;
+  objectStoragePath: string;
+  originalFileName: string;
+  contentHash: string;
+  fileSizeByte: number;
+  profession: AdminResourceOpsListDto["resources"][number]["profession"];
+  resourceStatus: Extract<ResourceStatus, "draft" | "conversion_failed">;
+  markdownContent: string | null;
+  markdownContentHash: string | null;
+  conversionErrorMessage: string | null;
+  mutationContext: ResourceMutationContext;
+};
+
+export type FinalizeResourceConversionResult =
+  | {
+      status: "completed";
+      resource: AdminResourceOpsListDto["resources"][number];
+    }
   | { status: "conflict" };
 
 export type ResourceIndexGenerationRequestResult =
@@ -231,9 +280,16 @@ export type RagResourceRuntimeRepository = {
     input: PrepareResourceUploadInput,
   ): Promise<PrepareResourceUploadResult>;
   markResourceUploadFileStored?(operationPublicId: string): Promise<boolean>;
-  completeResourceUpload?(
-    input: CompleteResourceUploadInput,
-  ): Promise<CompleteResourceUploadResult>;
+  completeResourceUploadReceipt?(
+    input: CompleteResourceUploadReceiptInput,
+  ): Promise<CompleteResourceUploadReceiptResult>;
+  claimResourceConversion?(input: {
+    publicId: string;
+    staleBefore: Date;
+  }): Promise<ClaimResourceConversionResult>;
+  finalizeResourceConversion?(
+    input: FinalizeResourceConversionInput,
+  ): Promise<FinalizeResourceConversionResult>;
   recordResourceUploadFailure?(input: {
     operationPublicId: string;
     failureMessageDigest: string;
@@ -298,12 +354,15 @@ export type ResourceMutationContext = {
     actionType:
       | "resource.update_markdown"
       | "resource.upload"
+      | "resource.convert"
+      | "resource.retry_conversion"
       | "resource.publish_markdown"
       | "resource.rebuild_vector"
       | "resource.disable"
       | "resource.enable";
     metadataSummary: string;
     requestIp: string | null;
+    resultStatus?: "success" | "failed";
   };
 };
 
@@ -536,8 +595,14 @@ function createPostgresRagResourceRuntimeRepository(
     async markResourceUploadFileStored(operationPublicId) {
       return markResourceUploadFileStored(getDatabase(), operationPublicId);
     },
-    async completeResourceUpload(input) {
-      return completeResourceUpload(getDatabase(), input);
+    async completeResourceUploadReceipt(input) {
+      return completeResourceUploadReceipt(getDatabase(), input);
+    },
+    async claimResourceConversion(input) {
+      return claimResourceConversion(getDatabase(), input);
+    },
+    async finalizeResourceConversion(input) {
+      return finalizeResourceConversion(getDatabase(), input);
     },
     async recordResourceUploadFailure(input) {
       await recordResourceUploadFailure(getDatabase(), input);
@@ -1230,10 +1295,10 @@ async function recordResourceUploadFailure(
     );
 }
 
-async function completeResourceUpload(
+async function completeResourceUploadReceipt(
   database: RuntimeDatabase,
-  input: CompleteResourceUploadInput,
-): Promise<CompleteResourceUploadResult> {
+  input: CompleteResourceUploadReceiptInput,
+): Promise<CompleteResourceUploadReceiptResult> {
   return database.transaction(async (transaction) => {
     const scopedDatabase = transaction as RuntimeDatabase;
     const [operationRow] = await scopedDatabase
@@ -1284,10 +1349,13 @@ async function completeResourceUpload(
       return { status: "conflict" };
     }
 
-    const insertedResource = await insertResourceFromUpload(
-      scopedDatabase,
-      input,
-    );
+    const insertedResource = await insertResourceFromUpload(scopedDatabase, {
+      ...input,
+      resourceStatus: "uploaded",
+      markdownContent: null,
+      markdownContentHash: null,
+      conversionErrorMessage: null,
+    });
 
     if (insertedResource === null) {
       await scopedDatabase
@@ -1329,6 +1397,218 @@ async function completeResourceUpload(
       status: "completed",
       resource: insertedResource.resource,
       replayed: false,
+    };
+  });
+}
+
+async function claimResourceConversion(
+  database: RuntimeDatabase,
+  input: { publicId: string; staleBefore: Date },
+): Promise<ClaimResourceConversionResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const [resourceRow] = await scopedDatabase
+      .select({
+        id: resource.id,
+        public_id: resource.public_id,
+        resource_status: resource.resource_status,
+        object_storage_path: resource.object_storage_path,
+        original_file_name: resource.original_file_name,
+        content_hash: resource.content_hash,
+        file_size_byte: resource.file_size_byte,
+        profession: resource.profession,
+        updated_at: resource.updated_at,
+      })
+      .from(resource)
+      .where(eq(resource.public_id, input.publicId))
+      .limit(1)
+      .for("update");
+
+    if (resourceRow === undefined) {
+      return { status: "not_found" };
+    }
+
+    if (
+      resourceRow.object_storage_path === null ||
+      resourceRow.original_file_name === null ||
+      resourceRow.content_hash === null ||
+      resourceRow.file_size_byte === null ||
+      !/^[a-f0-9]{64}$/u.test(resourceRow.content_hash) ||
+      !Number.isSafeInteger(resourceRow.file_size_byte) ||
+      resourceRow.file_size_byte < 0
+    ) {
+      return { status: "conflict", reason: "invalid_identity" };
+    }
+
+    if (
+      resourceRow.resource_status === "converting" &&
+      resourceRow.updated_at.getTime() >= input.staleBefore.getTime()
+    ) {
+      return { status: "conflict", reason: "conversion_active" };
+    }
+
+    if (
+      resourceRow.resource_status !== "uploaded" &&
+      resourceRow.resource_status !== "conversion_failed" &&
+      resourceRow.resource_status !== "converting"
+    ) {
+      return { status: "conflict", reason: "invalid_state" };
+    }
+
+    const claimedAt = new Date(
+      Math.max(Date.now(), resourceRow.updated_at.getTime() + 1),
+    );
+    const [claimedRow] = await scopedDatabase
+      .update(resource)
+      .set({
+        resource_status: "converting",
+        conversion_error_message: null,
+        indexing_error_message: null,
+        updated_at: claimedAt,
+      })
+      .where(
+        and(
+          eq(resource.id, resourceRow.id),
+          eq(resource.resource_status, resourceRow.resource_status),
+          eq(resource.updated_at, resourceRow.updated_at),
+        ),
+      )
+      .returning({ updated_at: resource.updated_at });
+
+    if (claimedRow === undefined) {
+      return { status: "conflict", reason: "conversion_active" };
+    }
+
+    return {
+      status: "claimed",
+      claim: {
+        publicId: resourceRow.public_id,
+        claimVersion: claimedRow.updated_at.toISOString(),
+        objectStoragePath: resourceRow.object_storage_path,
+        originalFileName: resourceRow.original_file_name,
+        contentHash: resourceRow.content_hash,
+        fileSizeByte: resourceRow.file_size_byte,
+        profession: resourceRow.profession,
+      },
+    };
+  });
+}
+
+async function finalizeResourceConversion(
+  database: RuntimeDatabase,
+  input: FinalizeResourceConversionInput,
+): Promise<FinalizeResourceConversionResult> {
+  return database.transaction(async (transaction) => {
+    const scopedDatabase = transaction as RuntimeDatabase;
+    const claimVersion = new Date(input.claimVersion);
+
+    if (Number.isNaN(claimVersion.getTime())) {
+      return { status: "conflict" };
+    }
+
+    const [resourceRow] = await scopedDatabase
+      .select({
+        id: resource.id,
+        resource_status: resource.resource_status,
+        object_storage_path: resource.object_storage_path,
+        original_file_name: resource.original_file_name,
+        content_hash: resource.content_hash,
+        file_size_byte: resource.file_size_byte,
+        profession: resource.profession,
+        updated_at: resource.updated_at,
+      })
+      .from(resource)
+      .where(eq(resource.public_id, input.publicId))
+      .limit(1)
+      .for("update");
+
+    if (
+      resourceRow === undefined ||
+      resourceRow.resource_status !== "converting" ||
+      resourceRow.updated_at.getTime() !== claimVersion.getTime() ||
+      resourceRow.object_storage_path !== input.objectStoragePath ||
+      resourceRow.original_file_name !== input.originalFileName ||
+      resourceRow.content_hash !== input.contentHash ||
+      resourceRow.file_size_byte !== input.fileSizeByte ||
+      resourceRow.profession !== input.profession
+    ) {
+      return { status: "conflict" };
+    }
+
+    const succeeded = input.resourceStatus === "draft";
+    if (
+      (succeeded &&
+        (input.markdownContent === null ||
+          input.markdownContentHash === null ||
+          input.conversionErrorMessage !== null)) ||
+      (!succeeded &&
+        (input.markdownContent !== null ||
+          input.markdownContentHash !== null ||
+          input.conversionErrorMessage === null))
+    ) {
+      return { status: "conflict" };
+    }
+
+    const finalizedAt = new Date(
+      Math.max(Date.now(), resourceRow.updated_at.getTime() + 1),
+    );
+    const [finalizedRow] = await scopedDatabase
+      .update(resource)
+      .set({
+        resource_status: input.resourceStatus,
+        markdown_content: input.markdownContent,
+        markdown_content_hash: input.markdownContentHash,
+        conversion_error_message: input.conversionErrorMessage,
+        indexing_error_message:
+          input.resourceStatus === "conversion_failed"
+            ? input.conversionErrorMessage
+            : null,
+        is_vector_stale: false,
+        updated_at: finalizedAt,
+      })
+      .where(
+        and(
+          eq(resource.id, resourceRow.id),
+          eq(resource.resource_status, "converting"),
+          eq(resource.updated_at, claimVersion),
+          eq(resource.object_storage_path, input.objectStoragePath),
+          eq(resource.original_file_name, input.originalFileName),
+          eq(resource.content_hash, input.contentHash),
+          eq(resource.file_size_byte, input.fileSizeByte),
+          eq(resource.profession, input.profession),
+        ),
+      )
+      .returning({
+        id: resource.id,
+        ...createResourceOpsReturningSelection(),
+      });
+
+    if (finalizedRow === undefined) {
+      return { status: "conflict" };
+    }
+
+    await appendResourceMutationAuditLog(
+      scopedDatabase,
+      {
+        ...input.mutationContext,
+        auditLog: {
+          ...input.mutationContext.auditLog,
+          metadataSummary: "redacted resource conversion metadata",
+          resultStatus: succeeded ? "success" : "failed",
+        },
+      },
+      input.publicId,
+    );
+    const knowledgeNodePublicIds =
+      (
+        await listResourceKnowledgeNodePublicIds(scopedDatabase, [
+          finalizedRow.id,
+        ])
+      ).get(finalizedRow.id) ?? [];
+
+    return {
+      status: "completed",
+      resource: mapResourceOpsRow(finalizedRow, knowledgeNodePublicIds),
     };
   });
 }
@@ -1589,7 +1869,7 @@ async function appendResourceMutationAuditLog(
     action_type: mutationContext.auditLog.actionType,
     target_resource_type: "resource",
     target_public_id: targetPublicId,
-    result_status: "success",
+    result_status: mutationContext.auditLog.resultStatus ?? "success",
     metadata_summary: mutationContext.auditLog.metadataSummary,
     request_ip: mutationContext.auditLog.requestIp,
   });

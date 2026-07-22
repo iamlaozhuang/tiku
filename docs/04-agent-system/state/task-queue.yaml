@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
+  currentTaskId: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -296,7 +296,9 @@ p1RemediationSerialProgram:
     - p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
     - p1-prerequisite-supply-chain-high-remediation-2026-07-22
     - p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
+    - p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
     - p1-prerequisite-supply-chain-high-remediation-2026-07-22
     - p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
     - p1-remediation-program-bootstrap-2026-07-16
@@ -490,12 +492,95 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: closed
     p1-prerequisite-rc-06-officeparser-dependency-2026-07-22: closed
     p1-prerequisite-supply-chain-high-remediation-2026-07-22: closed
-    p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22: in_progress
+    p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22: closed
+    p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22: in_progress
 activeTasks:
+  - id: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
+    title: Resource durable conversion state and retry lifecycle
+    phase: p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: database_application_logic_product_partition
+    productClosureContribution: partial_F0082_durable_receipt_claim_finalize_and_retry_only
+    branch: fix/resource-conversion-retry-lifecycle
+    objective: persist the resource receipt before conversion, serialize a version-bound conversion claim, finalize only the matching claim, and expose an authenticated retry command without schema storage converter authorization or publish changes
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0082
+    executionStage: validated_reviewed_conditional_closeout_ready
+    findingStatus: open_partitioned
+    findingDisposition: durable_conversion_receipt_state_claim_finalize_and_retry_partition_validated_pending_closeout
+    riskBoundary:
+      category: database_application_logic_existing_authorization_and_local_conversion
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      providerOrRealExternalCall: false
+      dependencyChange: false
+      localSyntheticFileAndRepositoryValidation: true
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: admin_upload_or_retry_UI_to_resource_route_to_runtime_to_repository_receipt_and_claim_transaction_to_existing_bounded_parser_to_version_bound_finalize_transaction
+      coreFiles: 9
+      contingencyFiles: 9
+      preflightTestFiles: 10
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: upload_operation_becomes_completed_only_after_synchronous_parse_and_resource_insert_so_uploaded_converting_and_retry_are_not_authoritative_durable_states
+      disposition: separate_retry_lifecycle_partition_before_failed_resource_delete_recovery
+      directChainScopeAmendment: 1_product_source_local_text_parser_plus_its_direct_test_to_consume_verified_bytes_without_path_reopen
+    expectedAcceptance:
+      - stored_file_receipt_creates_exactly_one_uploaded_resource_and_completes_the_existing_idempotent_upload_operation_with_redacted_audit_atomically
+      - claim_serializes_uploaded_conversion_failed_or_stale_converting_to_converting_and_returns_an_authoritative_version
+      - success_or_failure_finalize_requires_the_exact_claim_version_and_source_identity_so_superseded_workers_cannot_overwrite
+      - retry_authorizes_before_resource_or_file_access_and_only_accepts_the_resource_public_id
+      - conversion_failure_is_non_success_for_the_command_persists_only_a_stable_redacted_reason_and_remains_nonpublishable_and_outside_RAG
+      - upload_replay_reuses_the_same_resource_and_never_creates_a_second_resource_or_duplicate_success_audit
+      - existing_office_process_bounds_upload_size_private_download_publish_and_index_regressions_remain_green
+      - F0082_remains_open_partitioned_for_delete_background_queue_global_concurrency_and_OS_containment
+    residuals:
+      - failed_resource_metadata_and_private_file_delete_recovery
+      - durable_background_conversion_queue_and_automatic_retry_dispatcher
+      - cross_process_or_deployment_wide_conversion_concurrency_budget
+      - OS_or_container_level_network_and_arbitrary_code_containment
+    closeoutProjection:
+      current: validated_reviewed_conditional_closeout_ready
+      triggers: standing_bounded_medium_risk_TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: durable_conversion_retry_partition_closed_F0082_stays_open_partitioned
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_covered_by_existing_bounded_medium_risk_standing_approval
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: TDD_repository_receipt_claim_finalize_retry_route_and_admin_retry_UI_implemented_and_validated
+      mechanismOverhead: task_contract_state_updates_toolchain_path_diagnosis_and_one_regression_fixture_contract_correction
+      guardSmokeChanges: 0
+      validationRetryCount: 1_regression_fixture_missing_current_optimistic_concurrency_fields
+    validationEvidence:
+      focused: 10_files_105_tests_passed
+      lint: passed
+      typecheck: passed
+      build: passed_with_pre_existing_next_NFT_trace_warning
+      formatAndDiff: passed
+      realDatabaseExecution: not_performed
+      review: passed_main_thread_adversarial_review_no_schema_permission_converter_storage_or_external_scope_change
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
+      findingIds:
+        - F-0082
+      commit: 4ce6a719bfc1683e727cd8c5e908f1cc83c33f65
+      status: product_partition_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: open_partitioned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
     title: Resource office conversion and format-authenticity boundary
     phase: p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: bounded_product_security_foundation
     productClosureContribution: partial_F0082_office_conversion_and_format_authenticity_only
@@ -505,7 +590,7 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-06
     findingIds:
       - F-0082
-    executionStage: validated_reviewed_conditional_closeout_ready
+    executionStage: product_partition_closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: open_partitioned
     findingDisposition: office_conversion_and_format_authenticity_partition_closed_in_validated_candidate_with_lifecycle_retry_delete_residual
     riskBoundary:
@@ -580,6 +665,12 @@ activeTasks:
       commit: 4dd61a3537141c18e178c7c36f9dfd7fa316a82f
       status: prerequisite_closed_committed_ff_only_merged_pushed_synced_and_cleaned
       findingStatus: open_partitioned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
+    closeout:
+      commit: 4ce6a719bfc1683e727cd8c5e908f1cc83c33f65
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

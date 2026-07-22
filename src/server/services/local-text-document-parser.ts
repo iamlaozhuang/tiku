@@ -63,6 +63,13 @@ export type ParseLocalTextDocumentAssetInput = {
   maxFileSizeByte?: number;
 };
 
+export type ParseLocalTextDocumentBytesInput = {
+  bytes: Buffer;
+  objectKey: string;
+  fileName: string;
+  maxFileSizeByte?: number;
+};
+
 type HeadingCursor = {
   level: number;
   title: string;
@@ -279,11 +286,49 @@ export async function parseLocalTextDocumentAsset({
     };
   }
 
+  return parseLocalTextDocumentBytes({
+    bytes: fileContent,
+    objectKey,
+    fileName,
+    maxFileSizeByte,
+  });
+}
+
+export async function parseLocalTextDocumentBytes({
+  bytes,
+  fileName,
+  maxFileSizeByte = defaultMaxFileSizeByte,
+  objectKey,
+}: ParseLocalTextDocumentBytesInput): Promise<LocalTextDocumentParseResult> {
+  const extension = readExtension(fileName);
+  const skippedSource = { objectKey, fileName, extension };
+
+  if (
+    !supportedTextExtensions.has(extension) &&
+    !supportedOfficeExtensions.has(extension)
+  ) {
+    return {
+      status: "skipped",
+      parserMode: "local_only",
+      skippedReason: "unsupported_extension",
+      source: skippedSource,
+    };
+  }
+
+  if (bytes.length > maxFileSizeByte) {
+    return {
+      status: "skipped",
+      parserMode: "local_only",
+      skippedReason: "file_too_large",
+      source: skippedSource,
+    };
+  }
+
   let markdownContent: string;
 
   if (supportedOfficeExtensions.has(extension)) {
     const conversionResult = await convertLocalOfficeDocumentBytes({
-      bytes: fileContent,
+      bytes,
       expectedExtension: extension as "docx" | "pdf" | "pptx",
     });
 
@@ -300,7 +345,7 @@ export async function parseLocalTextDocumentAsset({
 
     markdownContent = normalizeTextContent(conversionResult.markdownContent);
   } else {
-    const decodedContent = decodeStrictTextContent(fileContent);
+    const decodedContent = decodeStrictTextContent(bytes);
 
     if (decodedContent === null) {
       return {

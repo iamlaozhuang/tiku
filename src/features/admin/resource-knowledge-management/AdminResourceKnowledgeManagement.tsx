@@ -409,7 +409,12 @@ function createSafeDownloadFileName(fileName: string | null): string {
 
 function createResourcePath(
   resourcePublicId: string,
-  action?: "disable" | "enable" | "publish" | "rebuild-vector",
+  action?:
+    | "disable"
+    | "enable"
+    | "publish"
+    | "rebuild-vector"
+    | "retry-conversion",
 ) {
   const resourcePath = `/api/v1/resources/${encodeURIComponent(resourcePublicId)}`;
 
@@ -557,6 +562,28 @@ async function postResourceMarkdownPublish(
   }
 
   return payload.data.resource;
+}
+
+async function postResourceConversionRetry(
+  resourcePublicId: string,
+  sessionToken: string,
+): Promise<AdminResourceOpsSummaryDto | null> {
+  const response = await fetch(
+    createResourcePath(resourcePublicId, "retry-conversion"),
+    {
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: createAdminAuthHeaders(sessionToken),
+      method: "POST",
+    },
+  );
+  const payload = (await response.json()) as ApiResponse<{
+    resource: AdminResourceOpsSummaryDto;
+  } | null>;
+
+  return response.ok && payload.code === 0 && payload.data !== null
+    ? payload.data.resource
+    : null;
 }
 
 async function postLocalResourceUpload(
@@ -1029,6 +1056,46 @@ export function AdminResourceKnowledgeManagement() {
       }
     } catch {
       setToastMessage({ message: "资料下载失败，请稍后重试", tone: "error" });
+    }
+  }
+
+  async function handleRetryResourceConversion(
+    resource: AdminResourceOpsSummaryDto,
+  ) {
+    const sessionToken = getStoredSessionToken();
+
+    if (
+      sessionToken === null ||
+      resource.resourceStatus !== "conversion_failed" ||
+      !hasResourcePublicId(resource.publicId)
+    ) {
+      setToastMessage({ message: "资料当前不可重新解析", tone: "error" });
+      return;
+    }
+
+    try {
+      const convertedResource = await postResourceConversionRetry(
+        resource.publicId,
+        sessionToken,
+      );
+
+      if (convertedResource === null) {
+        throw new Error("resource conversion retry failed");
+      }
+
+      setResources((currentResources) =>
+        currentResources.map((currentResource) =>
+          currentResource.publicId === convertedResource.publicId
+            ? convertedResource
+            : currentResource,
+        ),
+      );
+      setToastMessage({ message: "资料已重新解析", tone: "success" });
+    } catch {
+      setToastMessage({
+        message: "资料重新解析失败，请稍后重试",
+        tone: "error",
+      });
     }
   }
 
@@ -1676,6 +1743,9 @@ export function AdminResourceKnowledgeManagement() {
             setToastMessage(null);
             void handleOpenMarkdownReview(resource);
           }}
+          onRequestRetryConversion={(resource) =>
+            void handleRetryResourceConversion(resource)
+          }
         />
       ) : loadState === "empty" ? (
         <AdminEmptyState
@@ -2120,7 +2190,7 @@ function ResourceUploadPanel({
       <p className="text-text-muted mt-3 text-xs">
         支持 DOCX、Markdown、文本、PPTX 和可抽取文本 PDF
         生成解析草稿，单个文件上限 50MB。扫描型 PDF 不支持
-        OCR；解析失败时请处理原文件后重新上传。
+        OCR；解析失败时可在列表中重新解析，仍失败时请检查原文件。
       </p>
     </section>
   );
@@ -2151,6 +2221,7 @@ function ResourceList({
   onRequestMarkdownReview,
   onRequestPublish,
   onRequestRebuild,
+  onRequestRetryConversion,
   rows,
 }: {
   onRequestDetail: (resource: AdminResourceOpsSummaryDto) => void;
@@ -2160,6 +2231,7 @@ function ResourceList({
   onRequestMarkdownReview: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestPublish: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestRebuild: (resource: AdminResourceOpsSummaryDto) => void;
+  onRequestRetryConversion: (resource: AdminResourceOpsSummaryDto) => void;
   rows: AdminResourceOpsSummaryDto[];
 }) {
   return (
@@ -2224,6 +2296,17 @@ function ResourceList({
                     >
                       <Download aria-hidden="true" data-icon="inline-start" />
                       下载原文件
+                    </Button>
+                  ) : null}
+                  {resource.resourceStatus === "conversion_failed" ? (
+                    <Button
+                      aria-label={`重新解析资料 ${resource.title}`}
+                      disabled={!hasResourcePublicId(resource.publicId)}
+                      variant="outline"
+                      onClick={() => onRequestRetryConversion(resource)}
+                    >
+                      <RotateCcw aria-hidden="true" data-icon="inline-start" />
+                      重新解析资料
                     </Button>
                   ) : null}
                   <Button

@@ -64,7 +64,9 @@ import {
 } from "./local-paper-asset-storage";
 import {
   parseLocalTextDocumentAsset,
+  parseLocalTextDocumentBytes,
   type LocalTextDocumentEvidenceSummary,
+  type LocalTextDocumentParseResult,
 } from "./local-text-document-parser";
 import { buildResourceChunks } from "./rag-chunking-service";
 import {
@@ -238,6 +240,14 @@ const resourceMarkdownUpdateConflictResponse = createErrorResponse(
 const resourceEnableConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
   "Resource cannot be enabled from its current state.",
+);
+const resourceConversionConflictResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+  "Resource conversion is active or cannot start from its current state.",
+);
+const resourceConversionFailedResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
+  "Resource conversion failed.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -1388,6 +1398,167 @@ function createResourceUploadEntry(input: {
   };
 }
 
+const resourceConversionClaimLeaseMs = 5 * 60 * 1000;
+
+type DurableResourceConversionResult =
+  | {
+      status: "converted";
+      resource: AdminResourceOpsSummaryDto;
+      parseResult: Extract<LocalTextDocumentParseResult, { status: "parsed" }>;
+    }
+  | {
+      status: "conversion_failed";
+      resource: AdminResourceOpsSummaryDto;
+      parseResult: Extract<LocalTextDocumentParseResult, { status: "skipped" }>;
+    }
+  | { status: "not_found" }
+  | { status: "conflict" }
+  | { status: "unavailable" };
+
+async function executeDurableResourceConversion(input: {
+  publicId: string;
+  resourceRepository: RagResourceRuntimeRepository;
+  storageRoot: string;
+  mutationContext: ResourceMutationContext;
+}): Promise<DurableResourceConversionResult> {
+  if (
+    input.resourceRepository.claimResourceConversion === undefined ||
+    input.resourceRepository.finalizeResourceConversion === undefined
+  ) {
+    return { status: "unavailable" };
+  }
+
+  const claimResult = await input.resourceRepository.claimResourceConversion({
+    publicId: input.publicId,
+    staleBefore: new Date(Date.now() - resourceConversionClaimLeaseMs),
+  });
+
+  if (claimResult.status !== "claimed") {
+    return claimResult.status === "not_found"
+      ? { status: "not_found" }
+      : { status: "conflict" };
+  }
+
+  const claim = claimResult.claim;
+  let parseResult: LocalTextDocumentParseResult;
+
+  try {
+    const verifiedFile = await readLocalResourceFile({
+      contentHash: claim.contentHash,
+      fileSizeByte: claim.fileSizeByte,
+      objectStoragePath: claim.objectStoragePath,
+      originalFileName: claim.originalFileName,
+      profession: claim.profession,
+      storageRoot: input.storageRoot,
+    });
+    parseResult = await parseLocalTextDocumentBytes({
+      bytes: verifiedFile.bytes,
+      fileName: claim.originalFileName,
+      maxFileSizeByte: localResourceMaxFileSizeByte,
+      objectKey: claim.objectStoragePath,
+    });
+  } catch {
+    parseResult = {
+      status: "skipped",
+      parserMode: "local_only",
+      skippedReason: "conversion_failed",
+      source: {
+        extension:
+          claim.originalFileName.split(".").at(-1)?.toLowerCase() ?? "",
+        fileName: claim.originalFileName,
+        objectKey: claim.objectStoragePath,
+      },
+    };
+  }
+
+  const parsed = parseResult.status === "parsed" ? parseResult : null;
+  const finalizeResult =
+    await input.resourceRepository.finalizeResourceConversion({
+      publicId: claim.publicId,
+      claimVersion: claim.claimVersion,
+      objectStoragePath: claim.objectStoragePath,
+      originalFileName: claim.originalFileName,
+      contentHash: claim.contentHash,
+      fileSizeByte: claim.fileSizeByte,
+      profession: claim.profession,
+      resourceStatus: parsed === null ? "conversion_failed" : "draft",
+      markdownContent: parsed?.markdownContent ?? null,
+      markdownContentHash: parsed?.markdownContentHash ?? null,
+      conversionErrorMessage:
+        parseResult.status === "skipped" ? parseResult.skippedReason : null,
+      mutationContext: {
+        ...input.mutationContext,
+        auditLog: {
+          ...input.mutationContext.auditLog,
+          resultStatus: parsed === null ? "failed" : "success",
+        },
+      },
+    });
+
+  if (finalizeResult.status !== "completed") {
+    return { status: "conflict" };
+  }
+
+  if (parseResult.status === "skipped") {
+    return {
+      status: "conversion_failed",
+      resource: finalizeResult.resource,
+      parseResult,
+    };
+  }
+
+  return {
+    status: "converted",
+    resource: finalizeResult.resource,
+    parseResult,
+  };
+}
+
+function mapDurableConversionToUploadExecution(
+  result: DurableResourceConversionResult,
+): ResourceMutationExecution<{
+  resource: AdminResourceOpsSummaryDto;
+  localResource: LocalResourceUploadSummary;
+} | null> {
+  if (result.status === "converted") {
+    return {
+      response: createSuccessResponse({
+        resource: result.resource,
+        localResource: createLocalUploadSummary(
+          result.parseResult.evidenceSummary,
+          null,
+        ),
+      }),
+      successAuditLocation: "database",
+    };
+  }
+
+  if (result.status === "conversion_failed") {
+    return {
+      response: resourceConversionFailedResponse,
+      successAuditLocation: "database",
+    };
+  }
+
+  if (result.status === "not_found") {
+    return {
+      response: resourceNotFoundResponse,
+      successAuditLocation: "external",
+    };
+  }
+
+  return {
+    response:
+      result.status === "conflict"
+        ? resourceConversionConflictResponse
+        : createErrorResponse(
+            UNEXPECTED_RUNTIME_ERROR_CODE,
+            UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+          ),
+    successAuditLocation: "external",
+  };
+}
+
 async function uploadLocalResource(input: {
   allowLocalResourceAdapter: boolean;
   request: Request;
@@ -1427,6 +1598,7 @@ async function uploadLocalResource(input: {
     uploadFiles[0] !== fileValue ||
     !isProfession(professionValue) ||
     !isResourceType(resourceTypeValue) ||
+    title === null ||
     levelList === null
   ) {
     return {
@@ -1517,7 +1689,9 @@ async function uploadLocalResource(input: {
   if (
     input.resourceRepository.prepareResourceUpload === undefined ||
     input.resourceRepository.markResourceUploadFileStored === undefined ||
-    input.resourceRepository.completeResourceUpload === undefined ||
+    input.resourceRepository.completeResourceUploadReceipt === undefined ||
+    input.resourceRepository.claimResourceConversion === undefined ||
+    input.resourceRepository.finalizeResourceConversion === undefined ||
     input.resourceRepository.recordResourceUploadFailure === undefined
   ) {
     return {
@@ -1581,13 +1755,30 @@ async function uploadLocalResource(input: {
   }
 
   if (preparation.status === "completed") {
-    return {
-      response: createSuccessResponse({
-        resource: preparation.resource,
-        localResource: createLocalUploadSummary(null, null),
+    if (preparation.resource.resourceStatus === "draft") {
+      return {
+        response: createSuccessResponse({
+          resource: preparation.resource,
+          localResource: createLocalUploadSummary(null, null),
+        }),
+        successAuditLocation: "database",
+      };
+    }
+
+    return mapDurableConversionToUploadExecution(
+      await executeDurableResourceConversion({
+        publicId: preparation.resource.publicId,
+        resourceRepository: input.resourceRepository,
+        storageRoot: input.storageRoot,
+        mutationContext: {
+          ...input.mutationContext,
+          auditLog: {
+            ...input.mutationContext.auditLog,
+            actionType: "resource.convert",
+          },
+        },
       }),
-      successAuditLocation: "database",
-    };
+    );
   }
 
   const operation = preparation.operation;
@@ -1607,45 +1798,23 @@ async function uploadLocalResource(input: {
       throw new Error("Resource upload operation state changed.");
     }
 
-    const persistedParseResult = await parseLocalTextDocumentAsset({
-      fileName: persistedFile.fileName,
-      objectKey: persistedFile.objectKey,
-      storageRoot: input.storageRoot,
-      maxFileSizeByte: localResourceMaxFileSizeByte,
-    });
-    const persistedParsedResource =
-      persistedParseResult.status === "parsed" ? persistedParseResult : null;
-    const entry = createResourceUploadEntry({
-      publicId: operation.resourcePublicId,
-      title,
-      levelList,
-      storedResource: persistedFile,
-      parseResult: persistedParseResult,
-      knowledgeNodePublicIds,
-      uploadedAt,
-    });
-
-    const completion = await input.resourceRepository.completeResourceUpload({
-      operationPublicId: operation.publicId,
-      requestFingerprint,
-      mutationContext: input.mutationContext,
-      publicId: entry.publicId,
-      resourceType: entry.resourceType,
-      resourceStatus:
-        entry.resourceStatus === "draft" ? "draft" : "conversion_failed",
-      title: entry.title,
-      originalFileName: entry.originalFileName,
-      objectStoragePath: entry.objectKey,
-      contentHash: entry.fileHash,
-      fileSizeByte: entry.fileSizeByte,
-      profession: entry.profession,
-      level: entry.level,
-      levelList: entry.levelList,
-      markdownContent: entry.markdownContent,
-      markdownContentHash: entry.markdownContentHash,
-      conversionErrorMessage: entry.indexingErrorMessage,
-      knowledgeNodePublicIds: entry.knowledgeNodePublicIds,
-    });
+    const completion =
+      await input.resourceRepository.completeResourceUploadReceipt({
+        operationPublicId: operation.publicId,
+        requestFingerprint,
+        mutationContext: input.mutationContext,
+        publicId: operation.resourcePublicId,
+        resourceType: resourceTypeValue,
+        title,
+        originalFileName: persistedFile.fileName ?? fileValue.name,
+        objectStoragePath: persistedFile.objectKey,
+        contentHash: persistedFile.fileHash,
+        fileSizeByte: persistedFile.fileSizeByte,
+        profession: professionValue,
+        level: levelList?.length === 1 ? levelList[0] : null,
+        levelList,
+        knowledgeNodePublicIds,
+      });
 
     if (completion.status === "invalid_scope") {
       return {
@@ -1667,18 +1836,20 @@ async function uploadLocalResource(input: {
       };
     }
 
-    return {
-      response: createSuccessResponse({
-        resource: completion.resource,
-        localResource: createLocalUploadSummary(
-          persistedParsedResource?.evidenceSummary ?? null,
-          persistedParseResult.status === "skipped"
-            ? persistedParseResult.skippedReason
-            : null,
-        ),
+    return mapDurableConversionToUploadExecution(
+      await executeDurableResourceConversion({
+        publicId: completion.resource.publicId,
+        resourceRepository: input.resourceRepository,
+        storageRoot: input.storageRoot,
+        mutationContext: {
+          ...input.mutationContext,
+          auditLog: {
+            ...input.mutationContext.auditLog,
+            actionType: "resource.convert",
+          },
+        },
       }),
-      successAuditLocation: "database",
-    };
+    );
   } catch (error) {
     try {
       await input.resourceRepository.recordResourceUploadFailure({
@@ -2263,10 +2434,7 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             ),
           });
 
-          if (
-            result.response.code !== 0 ||
-            result.successAuditLocation === "external"
-          ) {
+          if (result.successAuditLocation === "external") {
             await appendAuditLog(
               repositories.auditLogRepository,
               request,
@@ -2398,6 +2566,96 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
               404,
             );
           }
+        },
+      },
+      retryConversion: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "resource.retry_conversion",
+            targetResourceType: "resource",
+            targetPublicId: null,
+          });
+
+          if ("code" in actorOrError) {
+            return createPrivateNoStoreJsonResponse(
+              actorOrError,
+              actorOrError.code === 401001 ? 401 : 403,
+            );
+          }
+
+          const { publicId } = await context.params;
+          if (!isSafePublicId(publicId) || allowLocalResourceAdapter) {
+            return createPrivateNoStoreJsonResponse(
+              resourceNotFoundResponse,
+              404,
+            );
+          }
+
+          let result: DurableResourceConversionResult;
+          try {
+            result = await executeDurableResourceConversion({
+              publicId,
+              resourceRepository: repositories.resourceRepository,
+              storageRoot: localResourceStorageRoot,
+              mutationContext: createResourceMutationContext(
+                request,
+                actorOrError,
+                "resource.retry_conversion",
+                "redacted resource conversion retry metadata",
+              ),
+            });
+          } catch {
+            result = { status: "unavailable" };
+          }
+
+          if (result.status === "converted") {
+            return createPrivateNoStoreJsonResponse(
+              createSuccessResponse({ resource: result.resource }),
+              200,
+            );
+          }
+
+          if (result.status === "conversion_failed") {
+            return createPrivateNoStoreJsonResponse(
+              resourceConversionFailedResponse,
+              422,
+            );
+          }
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "resource.retry_conversion",
+              targetResourceType: "resource",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted resource conversion retry metadata",
+            },
+          );
+
+          if (result.status === "not_found") {
+            return createPrivateNoStoreJsonResponse(
+              resourceNotFoundResponse,
+              404,
+            );
+          }
+
+          if (result.status === "conflict") {
+            return createPrivateNoStoreJsonResponse(
+              resourceConversionConflictResponse,
+              409,
+            );
+          }
+
+          return createPrivateNoStoreJsonResponse(
+            createErrorResponse(
+              UNEXPECTED_RUNTIME_ERROR_CODE,
+              UNEXPECTED_RUNTIME_ERROR_MESSAGE,
+            ),
+            503,
+          );
         },
       },
       detail: {
