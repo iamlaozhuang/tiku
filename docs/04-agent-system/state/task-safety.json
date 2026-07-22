@@ -1,21 +1,13 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22",
-  "objective": "Close F-0039 and F-0104 by removing optional-runtime fail-open behavior from the authoritative AI governance repository and service so model_provider, model_config, prompt_template, ai_call_log, and audit_log database failures are observable, INSERT...SELECT writes must prove persistence, and authenticated governance routes return a stable error instead of fabricated success or an empty 200 page.",
+  "taskId": "p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22",
+  "objective": "Close F-0175 without product-code changes by proving the production retry-learning-suggestion route does not assemble the local mock provider runtime, returns the existing unavailable response when no governed runtime is injected, and therefore cannot persist the mock suggestion or a false-success AI call log.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "tests/unit/p1-ai-governance-fail-closed.test.ts",
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
-    "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
+    "src/server/services/exam-report-service.test.ts",
+    "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -26,65 +18,39 @@
     ".env*",
     "package.json",
     "pnpm-lock.yaml",
-    "next.config.ts",
-    "src/db/schema/**",
-    "drizzle/**",
-    "all product and test files outside the exact allowedFiles list",
-    "historical evidence audit task-plan and archive files",
-    "real database Provider external service secret deployment PR force-push and non-canonical remote"
+    "all product source and test files outside the exact allowedFiles list",
+    "schema migration real database Provider external service permission secret deployment PR force-push and non-canonical remote"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "tests/unit/p1-ai-governance-fail-closed.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "contingencyFiles": [
-    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-    "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
-    "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
-    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
+    "src/server/services/exam-report-service.test.ts",
+    "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts"
   ],
-  "branch": "fix/ai-governance-fail-closed-read-write",
+  "branch": "fix/learning-suggestion-blocked-gate-static-closure",
   "preRedImpactScan": {
-    "authoritativeChain": "authenticated governance route -> admin-ai-audit-log runtime -> PostgreSQL governance repository -> exact persisted model/provider/prompt/log facts -> standard error envelope",
+    "authoritativeChain": "retry-learning-suggestion API -> student-experience route -> default student-flow runtime -> exam-report service without learningSuggestionOptions -> stable unavailable response",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 6,
-    "contingencyFileCount": 7,
+    "coreFileCount": 3,
+    "contingencyFileCount": 2,
     "validationReferencedTestsPreallowed": true,
-    "testOnlyExpansionApprovalId": "standing-test-only-allowlist-expansion-2026-07-21",
-    "testOnlyExpansionReason": "direct repository callers that exercise AI call log persistence and governance list compatibility",
-    "confirmedRootCause": "the same optional-runtime compatibility policy converts missing or failed governance reads to empty success pages and missing or unmatched governance log writes to fabricated success DTOs"
+    "confirmedDisposition": "covered_by_current_master_no_code_change",
+    "staticEvidence": "Production source has definitions but no non-test call to createMockAiProvider or createAiMockProviderRuntime; default route construction supplies no learningSuggestionOptions and the service returns unavailable before provider, AI log, or snapshot update."
   },
-  "rc07ResidualDisposition": {
-    "covered": ["F-0035", "F-0159"],
-    "bundle": [
-      ["F-0025", "F-0148", "F-0149"],
-      ["F-0039", "F-0104"],
-      ["F-0036", "F-0103"],
-      ["F-0151", "F-0152"],
-      ["F-0154", "F-0169"]
-    ],
-    "separate": ["F-0091", "F-0158", "F-0168", "F-0175", "F-0178"],
-    "runtimeHold": [],
-    "coveredEvidence": "The governed model connection executor performs a real injected adapter call and fails when unavailable; the learner AI form binds visible difficulty, objective, distribution, structure, source, and knowledge scope into the request. Two focused files and 42 tests passed on d107768e8.",
-    "nextBundle": ["F-0039", "F-0104"]
-  },
-  "failClosedContract": {
-    "reads": "Database errors and missing governance tables or columns must propagate to the standard route error envelope; no model/provider/prompt/log list may return an empty 200 page for an unknown persistence state.",
-    "writes": "ai_call_log and audit_log append operations must prove that exactly one row was inserted; missing tables or unmatched INSERT SELECT foreign facts fail closed and no unpersisted publicId may be returned.",
-    "compatibility": "Authenticated successful reads and writes preserve the existing DTO, pagination, redaction, authorization, connection-test, pricing, and fallback aggregate semantics.",
-    "scope": "No schema, migration, real database execution, Provider call, permission change, dependency, secret, deployment, or mechanism change."
-  },
+  "acceptance": [
+    "default production composition does not instantiate the mock provider runtime",
+    "direct retry returns the existing unavailable response when no governed runtime is injected",
+    "blocked mock output cannot be written as a generated report snapshot or successful AI call log",
+    "explicit test-only runtime injection remains available for isolated contract tests and is not production assembly",
+    "no product source schema dependency permission Provider mechanism or remote change"
+  ],
   "validationCommands": [
     {
-      "name": "ai-governance-fail-closed-focused-tests",
+      "name": "learning-suggestion-blocked-gate-static-closure-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -92,51 +58,13 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-ai-governance-fail-closed.test.ts",
-        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
-        "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
+        "src/server/services/exam-report-service.test.ts",
+        "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "ai-governance-fail-closed-targeted-lint",
-      "kind": "lint",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.34.4",
-        "exec",
-        "eslint",
-        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-        "src/server/services/admin-ai-audit-log-runtime.ts",
-        "tests/unit/p1-ai-governance-fail-closed.test.ts",
-        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
-        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
-        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
-        "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
-        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
-        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
-      ]
-    },
-    {
-      "name": "ai-governance-fail-closed-typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "ai-governance-fail-closed-build",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.34.4", "run", "build"]
-    },
-    {
-      "name": "ai-governance-fail-closed-format",
+      "name": "learning-suggestion-blocked-gate-static-closure-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -146,16 +74,11 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json",
-        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
-        "src/server/services/admin-ai-audit-log-runtime.ts",
-        "tests/unit/p1-ai-governance-fail-closed.test.ts",
-        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
-        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
+        "docs/04-agent-system/state/task-safety.json"
       ]
     },
     {
-      "name": "ai-governance-fail-closed-diff-check",
+      "name": "learning-suggestion-blocked-gate-static-closure-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -163,13 +86,13 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "database_application_logic",
+    "category": "low_risk_state_only_static_product_closure",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -177,34 +100,35 @@
     "dependencyOrMechanismChange": false
   },
   "validationEvidence": {
-    "red": "1 file and 10 tests failed for empty-read fabrication, unproved log writes, and 200 error masking",
-    "focused": "8 files and 54 tests passed",
-    "targetedLint": "passed",
-    "typecheck": "passed",
-    "build": "passed with pre-existing Next NFT trace warning",
+    "focused": "2 files and 19 tests passed",
+    "productionCallSiteScan": "definitions only; no non-test mock provider runtime assembly",
     "formatAndDiff": "passed",
-    "realDatabaseExecution": "not performed",
-    "mainThreadAdversarialReview": "passed; no schema, permission, Provider, dependency, mechanism, or envelope drift"
+    "productCodeChanged": false,
+    "mainThreadAdversarialReview": "passed; no Provider call, AI log, snapshot, schema, permission, dependency, or mechanism change"
   },
   "conditionalCloseout": true,
   "closeoutConditions": [
-    "actual diff remains within the exact envelope and no schema migration or real database execution occurs",
-    "TDD and adversarial review prove missing-table query failure unmatched INSERT SELECT and audit append failures remain observable",
-    "successful DTO pagination redaction authorization pricing fallback and connection-test behavior remains green",
-    "one reviewable commit ff-only canonical push sync and cleanup under the bounded medium-risk standing approval"
+    "actual diff remains the three state files only",
+    "focused tests and static production call-site review remain green",
+    "one state-only commit ff-only canonical push sync and cleanup under the low-risk standing approval"
   ],
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22",
-    "commit": "d107768e824386e03e812f56578b3efbfe826ff7",
+    "taskId": "p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22",
+    "findingIds": ["F-0039", "F-0104"],
+    "commit": "7e876373107ac31a7c5f388c86d72c29209e0930",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "findingStatus": "open_partitioned",
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true
   },
+  "resumeAnchor": {
+    "candidateRootCauseCluster": "P1-RC-07",
+    "nextFinding": "F-0178",
+    "disposition": "separate JIT revalidation after F-0175 static closeout"
+  },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

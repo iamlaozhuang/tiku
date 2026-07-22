@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
+  currentTaskId: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -299,7 +299,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22
     - p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
     - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
+    - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
     - p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
     - p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
     - p1-prerequisite-supply-chain-high-remediation-2026-07-22
@@ -498,29 +500,29 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22: closed
     p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22: closed
     p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22: closed
-    p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22: in_progress
+    p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22: closed
+    p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22: in_progress
 activeTasks:
-  - id: p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
-    title: AI governance fail-closed reads and writes
-    phase: p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
+  - id: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
+    title: Learning suggestion blocked-gate static closure
+    phase: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     status: in_progress
     priority: p1
-    taskKind: database_application_logic_product_bundle
-    productClosureContribution: closes_F0039_and_F0104
-    branch: fix/ai-governance-fail-closed-read-write
-    objective: make authoritative AI governance reads and log writes fail closed instead of returning empty success pages or fabricated persistence
+    taskKind: state_only_static_product_closure
+    productClosureContribution: closes_F0175_without_product_code_change
+    branch: fix/learning-suggestion-blocked-gate-static-closure
+    objective: prove the production retry-learning-suggestion route cannot assemble or persist the blocked local mock provider result
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-07
     findingIds:
-      - F-0039
-      - F-0104
-    executionStage: validated_candidate_pending_kernel_commit_and_closeout
+      - F-0175
+    executionStage: validated_state_only_candidate_pending_kernel_commit_and_closeout
     findingStatus: validated_pending_closeout
-    findingDisposition: F0039_F0104_static_closure_validated_pending_closeout
+    findingDisposition: F0175_static_closure_validated_pending_closeout
     riskBoundary:
-      category: database_application_logic
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      approvedBaseSha: d107768e824386e03e812f56578b3efbfe826ff7
+      category: low_risk_state_only_static_product_closure
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      approvedBaseSha: 7e876373107ac31a7c5f388c86d72c29209e0930
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
@@ -528,48 +530,45 @@ activeTasks:
       dependencyChange: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: authenticated_governance_route_to_admin_AI_runtime_to_PostgreSQL_governance_repository_to_persisted_provider_model_prompt_and_log_facts
-      coreFiles: 6
-      contingencyFiles: 7
-      preflightTestFiles: 8
+      chain: retry_learning_suggestion_API_to_student_experience_route_to_default_student_flow_runtime_to_exam_report_service_without_learningSuggestionOptions_to_stable_unavailable_response
+      coreFiles: 3
+      contingencyFiles: 2
+      preflightTestFiles: 2
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedRootCause: optional_runtime_compatibility_converts_database_unknowns_to_empty_reads_and_unproved_writes_to_fabricated_success
-      disposition: bundle_F0039_F0104_same_authoritative_repository_and_failure_policy
+      confirmedRootCause: original_mock_runtime_false_success_is_no_longer_reachable_from_production_assembly
+      disposition: F0175_covered_by_current_master_no_code_change
     expectedAcceptance:
-      - governance_database_errors_and_missing_schema_are_observable_not_empty_200_pages
-      - ai_call_log_and_audit_log_writes_must_prove_exactly_one_inserted_row
-      - unmatched_INSERT_SELECT_and_missing_tables_fail_without_returning_fabricated_public_ids
-      - successful_DTO_pagination_redaction_authorization_pricing_and_fallback_semantics_remain_unchanged
-      - no_schema_migration_real_database_permission_provider_dependency_or_mechanism_change
+      - production_source_has_no_non_test_call_to_createMockAiProvider_or_createAiMockProviderRuntime
+      - default_route_supplies_no_learningSuggestionOptions_and_returns_unavailable_before_provider_log_or_snapshot_update
+      - explicit_runtime_injection_remains_test_only_and_does_not_establish_production_reachability
+      - no_product_schema_dependency_permission_provider_or_mechanism_change
     closeoutProjection:
-      current: validated_candidate_pending_kernel_commit_and_closeout
-      triggers: standing_bounded_medium_risk_TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0039_and_F0104_closed_then_continue_RC07_next_confirmed_bundle
+      current: validated_state_only_candidate_pending_kernel_commit_and_closeout
+      triggers: focused_validation_review_kernel_state_only_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0175_closed_then_continue_F0178_JIT_revalidation
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     executionMetrics:
-      mandatoryFreshApprovals: 0_covered_by_bounded_medium_risk_standing_approval
+      mandatoryFreshApprovals: 0_covered_by_low_risk_standing_approval
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: TDD_fail_closed_repository_reads_exact_log_write_persistence_and_route_error_envelope
-      mechanismOverhead: contract_state_materialization_and_validation_orchestration
+      productValueTime: JIT_static_revalidation_of_production_composition_and_direct_retry_behavior
+      mechanismOverhead: state_only_closure_materialization_and_validation
       guardSmokeChanges: 0
     validationEvidence:
-      red: 1_file_10_tests_failed_for_empty_read_fabrication_unproved_log_writes_and_200_error_masking
-      focused: 8_files_54_tests_passed
-      targetedLint: passed
-      typecheck: passed
-      build: passed_with_pre_existing_next_NFT_trace_warning
+      focused: 2_files_19_tests_passed
+      productionCallSiteScan: definitions_only_no_non_test_mock_provider_runtime_assembly
       formatAndDiff: passed
-      realDatabaseExecution: not_performed
-      review: passed_main_thread_adversarial_review_no_schema_permission_provider_dependency_mechanism_or_envelope_drift
+      productCodeChanged: false
+      review: passed_main_thread_adversarial_review_no_provider_log_snapshot_schema_permission_dependency_or_mechanism_change
     previousTaskCloseout:
-      taskId: p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
+      taskId: p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
       findingIds:
-        - F-0082
-      commit: d107768e824386e03e812f56578b3efbfe826ff7
-      status: product_partition_closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      findingStatus: open_partitioned
+        - F-0039
+        - F-0104
+      commit: 7e876373107ac31a7c5f388c86d72c29209e0930
+      status: product_bundle_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
