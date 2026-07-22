@@ -54,6 +54,9 @@ function createDatabaseCapture(capturedQueries: CapturedSql[]) {
     ({
       async execute(query: CapturedSql) {
         capturedQueries.push(query);
+        if (flattenSqlQuery(query).includes("insert into ai_call_log")) {
+          return [{ public_id: "ai-call-log-persisted" }];
+        }
         return [];
       },
     }) as unknown as ReturnType<

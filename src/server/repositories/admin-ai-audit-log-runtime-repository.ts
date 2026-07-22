@@ -298,10 +298,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               or display_name ilike ${`%${query.keyword}%`}
             )`;
 
-      try {
-        const rows = await executeSql<ModelProviderDatabaseRow>(
-          database,
-          sql`
+      const rows = await executeSql<ModelProviderDatabaseRow>(
+        database,
+        sql`
             select
               public_id,
               provider_key,
@@ -318,30 +317,20 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
           `,
-        );
-        const [totalRow] = await executeSql<CountDatabaseRow>(
-          database,
-          sql`
+      );
+      const [totalRow] = await executeSql<CountDatabaseRow>(
+        database,
+        sql`
             select count(*)::int as value
             from model_provider
             where ${keywordCondition}
           `,
-        );
+      );
 
-        return {
-          modelProviders: rows.map(mapModelProviderRow),
-          pagination: createPagination(query, totalRow?.value ?? 0),
-        };
-      } catch (error) {
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
-
-        return {
-          modelProviders: [],
-          pagination: createPagination(query, 0),
-        };
-      }
+      return {
+        modelProviders: rows.map(mapModelProviderRow),
+        pagination: createPagination(query, totalRow?.value ?? 0),
+      };
     },
 
     async createModelProvider(input) {
@@ -482,10 +471,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               or mp.provider_key ilike ${`%${query.keyword}%`}
             )`;
 
-      try {
-        const rows = await executeSql<ModelConfigDatabaseRow>(
-          database,
-          sql`
+      const rows = await executeSql<ModelConfigDatabaseRow>(
+        database,
+        sql`
             select
               mc.public_id,
               mp.public_id as provider_public_id,
@@ -517,35 +505,21 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
           `,
-        );
-        const [totalRow] = await executeSql<CountDatabaseRow>(
-          database,
-          sql`
+      );
+      const [totalRow] = await executeSql<CountDatabaseRow>(
+        database,
+        sql`
             select count(*)::int as value
             from model_config mc
             inner join model_provider mp on mp.id = mc.model_provider_id
             where ${keywordCondition}
           `,
-        );
+      );
 
-        return {
-          modelConfigs: rows.map(mapModelConfigRow),
-          pagination: createPagination(query, totalRow?.value ?? 0),
-        };
-      } catch (error) {
-        if (isUndefinedColumnError(error)) {
-          return listLegacyModelConfigs(database, query, keywordCondition);
-        }
-
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
-
-        return {
-          modelConfigs: [],
-          pagination: createPagination(query, 0),
-        };
-      }
+      return {
+        modelConfigs: rows.map(mapModelConfigRow),
+        pagination: createPagination(query, totalRow?.value ?? 0),
+      };
     },
 
     async createModelConfig(input) {
@@ -837,10 +811,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               or title ilike ${`%${query.keyword}%`}
             )`;
 
-      try {
-        const rows = await executeSql<PromptTemplateDatabaseRow>(
-          database,
-          sql`
+      const rows = await executeSql<PromptTemplateDatabaseRow>(
+        database,
+        sql`
             select
               public_id,
               prompt_template_key,
@@ -860,30 +833,20 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
           `,
-        );
-        const [totalRow] = await executeSql<CountDatabaseRow>(
-          database,
-          sql`
+      );
+      const [totalRow] = await executeSql<CountDatabaseRow>(
+        database,
+        sql`
             select count(*)::int as value
             from prompt_template
             where ${keywordCondition}
           `,
-        );
+      );
 
-        return {
-          promptTemplates: rows.map(mapPromptTemplateRow),
-          pagination: createPagination(query, totalRow?.value ?? 0),
-        };
-      } catch (error) {
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
-
-        return {
-          promptTemplates: [],
-          pagination: createPagination(query, 0),
-        };
-      }
+      return {
+        promptTemplates: rows.map(mapPromptTemplateRow),
+        pagination: createPagination(query, totalRow?.value ?? 0),
+      };
     },
 
     async createPromptTemplate(input) {
@@ -1000,10 +963,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         completionTokenCount: input.completionTokenCount,
       });
 
-      try {
-        await executeSql(
-          database,
-          sql`
+      const insertedRows = await executeSql<{ public_id: string }>(
+        database,
+        sql`
             insert into ai_call_log (
               public_id,
               user_public_id,
@@ -1066,15 +1028,21 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               on pt.prompt_template_key = ${input.promptTemplateKey}
               and pt.version = ${input.promptTemplateVersion}
             where mc.public_id = ${input.modelConfigSnapshot.modelConfigPublicId}
+            returning public_id
           `,
+      );
+
+      if (insertedRows.length !== 1) {
+        throw new Error(
+          "Expected exactly one ai_call_log row to be persisted.",
         );
-      } catch (error) {
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
       }
 
-      return mapAppendInputToSummary(publicId, input, estimatedCostCny);
+      return mapAppendInputToSummary(
+        insertedRows[0].public_id,
+        input,
+        estimatedCostCny,
+      );
     },
 
     async enableModelConfig(publicId) {
@@ -1089,10 +1057,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
       const database = getDatabase();
       const publicId = `audit-log-${randomUUID()}`;
 
-      try {
-        await executeSql(
-          database,
-          sql`
+      const insertedRows = await executeSql<{ public_id: string }>(
+        database,
+        sql`
             insert into audit_log (
               public_id,
               actor_public_id,
@@ -1117,12 +1084,12 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               ${input.requestIp},
               now()
             )
+            returning public_id
           `,
-        );
-      } catch (error) {
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
+      );
+
+      if (insertedRows.length !== 1) {
+        throw new Error("Expected exactly one audit_log row to be persisted.");
       }
     },
 
@@ -1178,10 +1145,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           ? sql`${orderColumn} asc`
           : sql`${orderColumn} desc`;
 
-      try {
-        const rows = await executeSql<AiCallLogDatabaseRow>(
-          database,
-          sql`
+      const rows = await executeSql<AiCallLogDatabaseRow>(
+        database,
+        sql`
             select
               public_id,
               user_public_id,
@@ -1219,10 +1185,10 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
           `,
-        );
-        const [totalRow] = await executeSql<CountDatabaseRow>(
-          database,
-          sql`
+      );
+      const [totalRow] = await executeSql<CountDatabaseRow>(
+        database,
+        sql`
             select count(*)::int as value
             from ai_call_log
             where ${keywordCondition}
@@ -1235,22 +1201,12 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               and ${fromStartedAtCondition}
               and ${toStartedAtCondition}
           `,
-        );
+      );
 
-        return {
-          aiCallLogs: rows.map(mapAiCallLogRow),
-          pagination: createPagination(query, totalRow?.value ?? 0),
-        };
-      } catch (error) {
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
-
-        return {
-          aiCallLogs: [],
-          pagination: createPagination(query, 0),
-        };
-      }
+      return {
+        aiCallLogs: rows.map(mapAiCallLogRow),
+        pagination: createPagination(query, totalRow?.value ?? 0),
+      };
     },
 
     async summarizeAiCallLogs(query) {
@@ -1304,10 +1260,9 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           ? sql`date_trunc('month', started_at)`
           : sql`date_trunc('day', started_at)`;
 
-      try {
-        const rows = await executeSql<AiCallLogSummaryDatabaseRow>(
-          database,
-          sql`
+      const rows = await executeSql<AiCallLogSummaryDatabaseRow>(
+        database,
+        sql`
             select
               to_char(${bucketExpression}, 'YYYY-MM-DD') as bucket,
               ai_func_type,
@@ -1337,10 +1292,10 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
           `,
-        );
-        const [totalRow] = await executeSql<CountDatabaseRow>(
-          database,
-          sql`
+      );
+      const [totalRow] = await executeSql<CountDatabaseRow>(
+        database,
+        sql`
             select count(*)::int as value
             from (
               select 1
@@ -1361,33 +1316,23 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
                 model_config_snapshot ->> 'modelName'
             ) as grouped_ai_call_log
           `,
-        );
+      );
 
-        return {
-          dailySummaries: rows.map((row) => ({
-            bucket: row.bucket,
-            bucketType,
-            aiFuncType: toAdminAiFuncType(row.ai_func_type),
-            providerDisplayName: row.provider_display_name,
-            modelAlias: row.model_alias,
-            callCount: row.call_count,
-            successCount: row.success_count,
-            failedCount: row.failed_count,
-            totalTokenCount: row.total_token_count,
-            estimatedCostCny: row.estimated_cost_cny,
-          })),
-          pagination: createPagination(query, totalRow?.value ?? 0),
-        };
-      } catch (error) {
-        if (!isUndefinedTableError(error)) {
-          throw error;
-        }
-
-        return {
-          dailySummaries: [],
-          pagination: createPagination(query, 0),
-        };
-      }
+      return {
+        dailySummaries: rows.map((row) => ({
+          bucket: row.bucket,
+          bucketType,
+          aiFuncType: toAdminAiFuncType(row.ai_func_type),
+          providerDisplayName: row.provider_display_name,
+          modelAlias: row.model_alias,
+          callCount: row.call_count,
+          successCount: row.success_count,
+          failedCount: row.failed_count,
+          totalTokenCount: row.total_token_count,
+          estimatedCostCny: row.estimated_cost_cny,
+        })),
+        pagination: createPagination(query, totalRow?.value ?? 0),
+      };
     },
   };
 }
@@ -1434,62 +1379,6 @@ async function updateModelConfigEnabled(
 
     return false;
   }
-}
-
-async function listLegacyModelConfigs(
-  database: AdminAiAuditLogRuntimeDatabase,
-  query: AdminAiAuditLogListQuery,
-  keywordCondition: SQL,
-): Promise<AdminAiAuditLogRuntimePage<ModelConfigListDto>> {
-  const rows = await executeSql<ModelConfigDatabaseRow>(
-    database,
-    sql`
-      select
-        mc.public_id,
-        mp.public_id as provider_public_id,
-        mp.display_name as provider_display_name,
-        mp.provider_key,
-        mp.api_key_last_four,
-        null::text as secret_status,
-        mc.model_name,
-        null::text as model_alias,
-        mc.display_name,
-        mc.ai_func_type,
-        mc.config_version,
-        mc.is_enabled,
-        null::text as status,
-        null::int as fallback_priority,
-        null::text as snapshot_policy,
-        null::text as pricing_version,
-        null::numeric as input_token_price_cny_per_million,
-        null::numeric as output_token_price_cny_per_million,
-        mc.timeout_second,
-        mc.max_retry_count,
-        fallback.public_id as fallback_model_config_public_id,
-        mc.updated_at
-      from model_config mc
-      inner join model_provider mp on mp.id = mc.model_provider_id
-      left join model_config fallback on fallback.id = mc.fallback_model_config_id
-      where ${keywordCondition}
-      order by mc.updated_at desc
-      limit ${query.pageSize}
-      offset ${(query.page - 1) * query.pageSize}
-    `,
-  );
-  const [totalRow] = await executeSql<CountDatabaseRow>(
-    database,
-    sql`
-      select count(*)::int as value
-      from model_config mc
-      inner join model_provider mp on mp.id = mc.model_provider_id
-      where ${keywordCondition}
-    `,
-  );
-
-  return {
-    modelConfigs: rows.map(mapModelConfigRow),
-    pagination: createPagination(query, totalRow?.value ?? 0),
-  };
 }
 
 async function updateBooleanStatus(
@@ -1804,20 +1693,6 @@ function isUndefinedTableError(error: unknown): boolean {
   }
 
   return isUndefinedTableError((error as { cause?: unknown }).cause);
-}
-
-function isUndefinedColumnError(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) {
-    return false;
-  }
-
-  const errorCode = (error as { code?: unknown }).code;
-
-  if (errorCode === "42703") {
-    return true;
-  }
-
-  return isUndefinedColumnError((error as { cause?: unknown }).cause);
 }
 
 function createLocalRuntimeDatabase(): AdminAiAuditLogRuntimeDatabase {

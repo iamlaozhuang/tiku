@@ -1,29 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22",
-  "objective": "Allow existing super_admin and content_admin to durably delete only conversion_failed resources through a public-id command, atomically detach metadata and enqueue a redacted cleanup job, safely retry exact local object deletion under the same object lock used by upload receipt and conversion, and preserve idempotent response-loss recovery without changing resource authorization, successful resource lifecycle, upload formats, or external storage.",
+  "taskId": "p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22",
+  "objective": "Close F-0039 and F-0104 by removing optional-runtime fail-open behavior from the authoritative AI governance repository and service so model_provider, model_config, prompt_template, ai_call_log, and audit_log database failures are observable, INSERT...SELECT writes must prove persistence, and authenticated governance routes return a stable error instead of fabricated success or an empty 200 page.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260722063000_p1_rc_06_resource_failed_delete_recovery.sql",
-    "drizzle/meta/20260722063000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/app/api/v1/resources/[publicId]/route.ts",
-    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-    "tests/unit/p1-resource-failed-delete-recovery.test.ts",
-    "tests/unit/p1-resource-conversion-retry-lifecycle.test.ts",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-resource-private-download.test.ts",
-    "tests/unit/p1-paper-asset-file-lifecycle.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "src/server/models/ai-rag.test.ts"
+    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+    "src/server/services/admin-ai-audit-log-runtime.ts",
+    "tests/unit/p1-ai-governance-fail-closed.test.ts",
+    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+    "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
+    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
+    "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -35,75 +27,64 @@
     "package.json",
     "pnpm-lock.yaml",
     "next.config.ts",
-    "all schema migration product and test files outside the exact allowedFiles list",
+    "src/db/schema/**",
+    "drizzle/**",
+    "all product and test files outside the exact allowedFiles list",
     "historical evidence audit task-plan and archive files",
-    "migration apply real database real data external storage Provider deployment PR force-push and non-canonical remote"
+    "real database Provider external service secret deployment PR force-push and non-canonical remote"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260722063000_p1_rc_06_resource_failed_delete_recovery.sql",
-    "drizzle/meta/20260722063000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/app/api/v1/resources/[publicId]/route.ts",
-    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-    "tests/unit/p1-resource-failed-delete-recovery.test.ts"
+    "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+    "src/server/services/admin-ai-audit-log-runtime.ts",
+    "tests/unit/p1-ai-governance-fail-closed.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p1-resource-conversion-retry-lifecycle.test.ts",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-resource-private-download.test.ts",
-    "tests/unit/p1-paper-asset-file-lifecycle.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "src/server/models/ai-rag.test.ts"
+    "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+    "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+    "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
+    "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
+    "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+    "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
   ],
-  "branch": "fix/resource-failed-delete-recovery",
+  "branch": "fix/ai-governance-fail-closed-read-write",
   "preRedImpactScan": {
-    "authoritativeChain": "admin conversion_failed row action -> resource public-id DELETE route -> existing content-admin session boundary -> resource repository transaction and deterministic object advisory lock -> resource cleanup outbox -> strict local resource delete primitive -> retry outcome and redacted audit",
+    "authoritativeChain": "authenticated governance route -> admin-ai-audit-log runtime -> PostgreSQL governance repository -> exact persisted model/provider/prompt/log facts -> standard error envelope",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 14,
+    "coreFileCount": 6,
     "contingencyFileCount": 7,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "conversion_failed resources retain a completed upload operation and private content-addressed file but have no authorized delete command, durable cleanup identity, shared object lock, or response-loss retry projection"
+    "testOnlyExpansionApprovalId": "standing-test-only-allowlist-expansion-2026-07-21",
+    "testOnlyExpansionReason": "direct repository callers that exercise AI call log persistence and governance list compatibility",
+    "confirmedRootCause": "the same optional-runtime compatibility policy converts missing or failed governance reads to empty success pages and missing or unmatched governance log writes to fabricated success DTOs"
   },
-  "cleanupContract": {
-    "scope": "Only conversion_failed resource rows may be deleted; uploaded converting draft published indexing index_failed rag_ready and disabled fail closed.",
-    "authorization": "Existing super_admin or content_admin authorization must complete before resource lookup, cleanup lookup, local file access, or audit detail access; no role or entitlement expansion.",
-    "durability": "Resource metadata detach, relation cleanup, completed upload-operation tombstone, redacted delete audit, and cleanup job enqueue occur atomically in one transaction.",
-    "concurrency": "Upload receipt, conversion claim/finalize, delete, and cleanup for an exact objectStoragePath share one deterministic PostgreSQL transaction advisory-lock namespace and consistent lock order.",
-    "references": "Any resource row or pending/file_stored upload operation with the exact object identity prevents deletion; inconsistent identity for the same object path fails closed.",
-    "retry": "The same public-id DELETE command resumes pending or failed cleanup, treats an exact missing target idempotently, never duplicates success audit, and converges after response loss or crash windows.",
-    "localDelete": "Only the full repository-provided dev/resource/{profession}/{YYYYMM}/{sha256}.{extension} identity may be deleted after canonical-root, realpath, symlink, type, size, and streaming SHA-256 verification; no recursive or broad deletion.",
-    "residual": "No background dispatcher, deployment-wide cleanup worker, migration apply, real database proof, or external object storage is claimed."
+  "rc07ResidualDisposition": {
+    "covered": ["F-0035", "F-0159"],
+    "bundle": [
+      ["F-0025", "F-0148", "F-0149"],
+      ["F-0039", "F-0104"],
+      ["F-0036", "F-0103"],
+      ["F-0151", "F-0152"],
+      ["F-0154", "F-0169"]
+    ],
+    "separate": ["F-0091", "F-0158", "F-0168", "F-0175", "F-0178"],
+    "runtimeHold": [],
+    "coveredEvidence": "The governed model connection executor performs a real injected adapter call and fails when unavailable; the learner AI form binds visible difficulty, objective, distribution, structure, source, and knowledge scope into the request. Two focused files and 42 tests passed on d107768e8.",
+    "nextBundle": ["F-0039", "F-0104"]
   },
-  "pendingApproval": {
-    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
-    "approvalId": "guardian-f0082-resource-failed-delete-recovery-2026-07-22",
-    "approvedBaseSha": "1d834b87bc6fd49a9b8d90015e332b2adf0308a3",
-    "approvedFingerprint": "a5e1ae03f5810a2a5e874cd818ec18ecbe6bf6e31f573654f44bbd8b3d65a14b",
-    "riskCategory": "schema_migration_source_database_application_logic_and_synthetic_private_local_file_delete",
-    "conditionalCloseoutRequested": true,
-    "status": "approved_with_hard_conditions_before_RED",
-    "hardConditions": [
-      "T1 commits conversion_failed metadata deletion upload tombstone redacted success audit and cleanup enqueue before any physical unlink",
-      "T2 independently claims the cleanup job acquires the exact object advisory lock rechecks references live uploads and identity then unlinks and finalizes while the lock remains held",
-      "prepare upload conversion claim and finalize delete and cleanup use one deterministic resource object lock namespace and lock order",
-      "cleanup is durable stale-claim recoverable idempotent and never revives a deleted resource for the same upload idempotency key",
-      "authorization precedes resource cleanup file and audit access and unexpected graph relations fail closed",
-      "strict local delete consumes only repository-owned identity and synthetic isolated files"
-    ]
+  "failClosedContract": {
+    "reads": "Database errors and missing governance tables or columns must propagate to the standard route error envelope; no model/provider/prompt/log list may return an empty 200 page for an unknown persistence state.",
+    "writes": "ai_call_log and audit_log append operations must prove that exactly one row was inserted; missing tables or unmatched INSERT SELECT foreign facts fail closed and no unpersisted publicId may be returned.",
+    "compatibility": "Authenticated successful reads and writes preserve the existing DTO, pagination, redaction, authorization, connection-test, pricing, and fallback aggregate semantics.",
+    "scope": "No schema, migration, real database execution, Provider call, permission change, dependency, secret, deployment, or mechanism change."
   },
   "validationCommands": [
     {
-      "name": "resource-failed-delete-focused-tests",
+      "name": "ai-governance-fail-closed-focused-tests",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -111,57 +92,51 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-resource-failed-delete-recovery.test.ts",
-        "tests/unit/p1-resource-conversion-retry-lifecycle.test.ts",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/p1-resource-private-download.test.ts",
-        "tests/unit/p1-paper-asset-file-lifecycle.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/models/ai-rag.test.ts",
+        "tests/unit/p1-ai-governance-fail-closed.test.ts",
+        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
+        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
+        "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "resource-failed-delete-targeted-lint",
+      "name": "ai-governance-fail-closed-targeted-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/app/api/v1/resources/[publicId]/route.ts",
-        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-failed-delete-recovery.test.ts",
-        "tests/unit/p1-resource-conversion-retry-lifecycle.test.ts",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/p1-resource-private-download.test.ts",
-        "tests/unit/p1-paper-asset-file-lifecycle.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "src/server/models/ai-rag.test.ts"
+        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+        "src/server/services/admin-ai-audit-log-runtime.ts",
+        "tests/unit/p1-ai-governance-fail-closed.test.ts",
+        "tests/unit/admin-ai-audit-log-ops-baseline.test.ts",
+        "tests/unit/p1-model-config-fallback-aggregate.test.ts",
+        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
+        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts",
+        "tests/unit/phase-11-ai-call-log-visibility-fix.test.ts",
+        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
+        "tests/unit/phase-11-audit-log-coverage-hardening.test.ts"
       ]
     },
     {
-      "name": "resource-failed-delete-typecheck",
+      "name": "ai-governance-fail-closed-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "resource-failed-delete-build",
+      "name": "ai-governance-fail-closed-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "resource-failed-delete-format",
+      "name": "ai-governance-fail-closed-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -172,65 +147,55 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "drizzle/meta/_journal.json",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/app/api/v1/resources/[publicId]/route.ts",
-        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-failed-delete-recovery.test.ts"
+        "src/server/repositories/admin-ai-audit-log-runtime-repository.ts",
+        "src/server/services/admin-ai-audit-log-runtime.ts",
+        "tests/unit/p1-ai-governance-fail-closed.test.ts",
+        "tests/unit/p1-ai-call-log-fact-query-foundation.test.ts",
+        "tests/unit/p1-ai-call-log-versioned-pricing.test.ts"
       ]
     },
     {
-      "name": "resource-failed-delete-diff-check",
+      "name": "ai-governance-fail-closed-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
     }
   ],
-  "migrationFormatPolicy": "Drizzle-generated SQL is excluded from Prettier because no SQL parser is configured; the focused migration-source test validates exact additive structure and git diff --check validates whitespace.",
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0082-resource-failed-delete-recovery-2026-07-22",
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "schema_migration_source_database_application_logic_and_synthetic_private_local_file_delete",
-    "schemaOrMigrationChange": true,
+    "category": "database_application_logic",
+    "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "providerOrRealExternalCall": false,
-    "dependencyOrMechanismChange": false,
-    "syntheticLocalFileDeleteValidation": true
+    "dependencyOrMechanismChange": false
+  },
+  "validationEvidence": {
+    "red": "1 file and 10 tests failed for empty-read fabrication, unproved log writes, and 200 error masking",
+    "focused": "8 files and 54 tests passed",
+    "targetedLint": "passed",
+    "typecheck": "passed",
+    "build": "passed with pre-existing Next NFT trace warning",
+    "formatAndDiff": "passed",
+    "realDatabaseExecution": "not performed",
+    "mainThreadAdversarialReview": "passed; no schema, permission, Provider, dependency, mechanism, or envelope drift"
   },
   "conditionalCloseout": true,
   "closeoutConditions": [
-    "guardian task-bound approval binds this exact base envelope risk and conditional closeout before RED",
-    "actual diff remains within the exact envelope and no migration or real database execution occurs",
-    "TDD and adversarial review prove authorization object lock reference checks durable retry strict deletion redaction and no successful-resource deletion",
-    "focused tests lint typecheck build format diff schema-source state and main-thread review pass",
-    "one reviewable product-partition commit ff-only canonical push sync and cleanup",
-    "F-0082 remains open_partitioned only for durable background dispatcher deployment-wide budgets and OS containment unless independent acceptance proves otherwise"
+    "actual diff remains within the exact envelope and no schema migration or real database execution occurs",
+    "TDD and adversarial review prove missing-table query failure unmatched INSERT SELECT and audit append failures remain observable",
+    "successful DTO pagination redaction authorization pricing fallback and connection-test behavior remains green",
+    "one reviewable commit ff-only canonical push sync and cleanup under the bounded medium-risk standing approval"
   ],
-  "validationEvidence": {
-    "red": "1 file and 13 tests failed before implementation for the missing DELETE route cleanup schema shared lock and strict local delete",
-    "focused": "9 files and 145 tests passed",
-    "lint": "passed",
-    "typecheck": "passed",
-    "build": "passed with the pre-existing Next NFT trace warning",
-    "formatAndDiff": "passed",
-    "schemaMigrationSource": "additive enum table indexes and check only; snapshot parent and journal verified",
-    "realDatabaseExecution": "not performed",
-    "localFileValidation": "synthetic system-temp roots only",
-    "adversarialReview": "passed with authorization-first, T1-before-unlink, shared object-lock, relation/live-upload fail-closed, tombstone replay, exact-once audit, strict identity and no envelope drift"
-  },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22",
-    "commit": "1d834b87bc6fd49a9b8d90015e332b2adf0308a3",
+    "taskId": "p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22",
+    "commit": "d107768e824386e03e812f56578b3efbfe826ff7",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "open_partitioned",
     "masterOriginSync": true,
@@ -240,6 +205,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0082-resource-failed-delete-recovery-2026-07-22"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

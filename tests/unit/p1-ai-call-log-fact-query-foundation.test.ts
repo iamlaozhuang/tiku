@@ -54,6 +54,10 @@ function createDatabaseCapture(capturedQueries: CapturedSql[]) {
         capturedQueries.push(query);
         const queryText = flattenSqlQuery(query);
 
+        if (queryText.includes("insert into ai_call_log")) {
+          return [{ public_id: "ai-call-log-persisted" }];
+        }
+
         if (queryText.includes("as bucket")) {
           return [
             {

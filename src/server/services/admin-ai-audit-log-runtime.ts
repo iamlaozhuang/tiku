@@ -565,11 +565,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     loadPage: () => Promise<AdminRuntimePage<TData>>;
     query: AdminAiAuditLogListQuery;
   }) {
-    try {
-      return await input.loadPage();
-    } catch {
-      return emptyPage(input.fallbackData, input.query);
-    }
+    return input.loadPage();
   }
 
   async function listRuntimePromptTemplates(input: {
