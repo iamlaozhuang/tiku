@@ -5,6 +5,7 @@ import {
   GET as adminLifecycleRouteGet,
   POST as manualDraftRoutePost,
 } from "@/app/api/v1/organization-trainings/route";
+import { POST as aiResultCopyRoutePost } from "@/app/api/v1/organization-trainings/ai-result-copies/route";
 import { POST as copyToNewDraftRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/copy-to-new-draft/route";
 import { POST as sourceContextRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/source-contexts/route";
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
@@ -58,6 +59,11 @@ import {
 } from "./organization-training-route";
 
 const runtimeRepositoryMock = vi.hoisted(() => ({
+  copyAiResultToTrainingDraft: vi.fn(async () => ({
+    persistenceStatus: "created" as const,
+    draft: createManualDraftDto(),
+    context: createSourceContextAttachment(),
+  })),
   lookupVisibleOrganizationScope: vi.fn(async () => [
     "organization_route_public_401",
   ]),
@@ -999,6 +1005,12 @@ describe("organization training draft source-context route handlers", () => {
     runtimeRepositoryMock.createManualDraft.mockResolvedValue(
       createManualDraftDto(),
     );
+    runtimeRepositoryMock.copyAiResultToTrainingDraft.mockClear();
+    runtimeRepositoryMock.copyAiResultToTrainingDraft.mockResolvedValue({
+      persistenceStatus: "created",
+      draft: createManualDraftDto(),
+      context: createSourceContextAttachment(),
+    });
     runtimeRepositoryMock.copyVersionToNewDraft.mockClear();
     runtimeRepositoryMock.copyVersionToNewDraft.mockResolvedValue(
       createManualDraftDto({
@@ -1024,8 +1036,58 @@ describe("organization training draft source-context route handlers", () => {
     expect(adminLifecycleRouteGet).toEqual(expect.any(Function));
     expect(adminDetailRouteGet).toEqual(expect.any(Function));
     expect(manualDraftRoutePost).toEqual(expect.any(Function));
+    expect(aiResultCopyRoutePost).toEqual(expect.any(Function));
     expect(copyToNewDraftRoutePost).toEqual(expect.any(Function));
     expect(sourceContextRoutePost).toEqual(expect.any(Function));
+  });
+
+  it("copies an organization AI result through one runtime command without client scope metadata", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+    const response = await handlers.aiResultCopy.POST(
+      new Request(
+        "http://localhost/api/v1/organization-trainings/ai-result-copies",
+        {
+          method: "POST",
+          headers: {
+            authorization: "Bearer organization_training_route_session_401",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            organizationPublicId: "organization_route_public_401",
+            sourceTaskPublicId: "admin_ai_generation_task_route_401",
+            sourceResultPublicId: "admin_ai_generation_result_route_401",
+            weakEvidenceConfirmed: false,
+          }),
+        },
+      ),
+    );
+
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    await expect(resolveJsonPayload(response)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        persistenceStatus: "created",
+        draft: { organizationPublicId: "organization_route_public_401" },
+        context: { organizationPublicId: "organization_route_public_401" },
+      },
+    });
+    expect(
+      runtimeRepositoryMock.copyAiResultToTrainingDraft,
+    ).toHaveBeenCalledWith({
+      organizationPublicId: "organization_route_public_401",
+      sourceTaskPublicId: "admin_ai_generation_task_route_401",
+      sourceResultPublicId: "admin_ai_generation_result_route_401",
+      weakEvidenceConfirmed: false,
+      copiedAt: expect.any(String),
+    });
   });
 
   it("lists organization training draft and version lifecycle items through the runtime route", async () => {

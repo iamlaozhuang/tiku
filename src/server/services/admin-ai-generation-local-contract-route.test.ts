@@ -1556,6 +1556,13 @@ describe("admin AI generation local contract route handlers", () => {
     expect(
       generatedResultPersistenceRecorder.calls[0]?.contentRedactedSnapshot,
     ).toMatchObject({
+      generationParameters: {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        questionCount: 1,
+        questionType: "single_choice",
+      },
       organizationTrainingQuestionDraft: {
         questions: [
           {

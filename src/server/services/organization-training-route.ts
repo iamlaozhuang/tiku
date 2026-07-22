@@ -46,6 +46,7 @@ import {
   invalidOrganizationTrainingCopyToNewDraftInputMessage,
   invalidOrganizationTrainingDraftSaveInputMessage,
   invalidOrganizationTrainingManualDraftInputMessage,
+  invalidOrganizationTrainingAiResultCopyInputMessage,
   invalidOrganizationTrainingPublishInputMessage,
   invalidOrganizationTrainingSourceContextInputMessage,
   invalidOrganizationTrainingTakedownInputMessage,
@@ -54,11 +55,13 @@ import {
   normalizeOrganizationTrainingEmployeeAnswerDraftInput,
   normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
   normalizeOrganizationTrainingManualDraftInput,
+  normalizeOrganizationTrainingAiResultCopyInput,
   normalizeOrganizationTrainingPublishInput,
   normalizeOrganizationTrainingSourceContextInput,
   normalizeOrganizationTrainingTakedownInput,
   type OrganizationTrainingCopyToNewDraftRouteInput,
   type OrganizationTrainingManualDraftRouteInput,
+  type OrganizationTrainingAiResultCopyRouteInput,
   type OrganizationTrainingSourceContextRouteInput,
 } from "../validators/organization-training";
 import {
@@ -69,6 +72,7 @@ import {
   organizationTrainingEmployeeAnswerBlockedMessage,
   organizationTrainingCopyToNewDraftBlockedMessage,
   organizationTrainingManualDraftCreationBlockedMessage,
+  organizationTrainingAiResultCopyBlockedMessage,
   organizationTrainingPublishBlockedMessage,
   organizationTrainingSourceContextBlockedMessage,
   organizationTrainingTakedownBlockedMessage,
@@ -126,6 +130,7 @@ export type OrganizationTrainingAdminContextResolverInput = {
   request: Request;
   pathPublicId: string;
   manualDraftInput?: OrganizationTrainingManualDraftRouteInput;
+  aiResultCopyInput?: OrganizationTrainingAiResultCopyRouteInput;
   publishInput?: OrganizationTrainingPublishInput;
   takedownInput?: OrganizationTrainingTakedownInput;
   copyToNewDraftInput?: OrganizationTrainingCopyToNewDraftRouteInput;
@@ -140,6 +145,7 @@ export type OrganizationTrainingVisibleOrganizationScopeResolverInput = {
   request: Request;
   pathPublicId: string;
   manualDraftInput?: OrganizationTrainingManualDraftRouteInput;
+  aiResultCopyInput?: OrganizationTrainingAiResultCopyRouteInput;
   publishInput?: OrganizationTrainingPublishInput;
   takedownInput?: OrganizationTrainingTakedownInput;
   copyToNewDraftInput?: OrganizationTrainingCopyToNewDraftRouteInput;
@@ -372,6 +378,7 @@ type OrganizationTrainingRouteService = Pick<
     Pick<
       OrganizationTrainingService,
       | "createManualDraft"
+      | "copyAiResultToTrainingDraft"
       | "saveDraft"
       | "copyVersionToNewDraft"
       | "attachSourceContext"
@@ -400,6 +407,9 @@ const employeeAnswerContextUnavailableCode = 403074;
 const employeeAnswerVersionUnavailableCode = 404075;
 const employeeAnswerBlockedCode = 409076;
 const invalidManualDraftInputCode = 400077;
+const invalidAiResultCopyInputCode = 400099;
+const aiResultCopyAdminContextUnavailableCode = 403100;
+const aiResultCopyBlockedCode = 409101;
 const manualDraftAdminContextUnavailableCode = 403078;
 const manualDraftLineageUnavailableCode = 403079;
 const manualDraftBlockedCode = 409080;
@@ -701,6 +711,14 @@ async function defaultManualDraftServiceResult() {
   };
 }
 
+async function defaultAiResultCopyServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_ai_result_copy_input" as const,
+    message: organizationTrainingAiResultCopyBlockedMessage,
+  };
+}
+
 async function defaultDraftSaveServiceResult() {
   return {
     success: false as const,
@@ -793,6 +811,7 @@ function createSessionBackedOrganizationAdminContextResolver(
   return async ({
     request,
     pathPublicId,
+    aiResultCopyInput,
     manualDraftInput,
     publishInput,
     takedownInput,
@@ -832,6 +851,7 @@ function createSessionBackedOrganizationAdminContextResolver(
       await resolveVisibleOrganizationScope({
         request,
         pathPublicId,
+        aiResultCopyInput,
         manualDraftInput,
         publishInput,
         takedownInput,
@@ -1060,6 +1080,7 @@ function createRuntimeOrganizationTrainingStore(
   repository: Pick<
     OrganizationTrainingStore,
     | "createManualDraft"
+    | "copyAiResultToTrainingDraft"
     | "saveDraft"
     | "publishVersion"
     | "takeDownVersion"
@@ -1070,6 +1091,7 @@ function createRuntimeOrganizationTrainingStore(
   >,
 ): OrganizationTrainingStore {
   return {
+    copyAiResultToTrainingDraft: repository.copyAiResultToTrainingDraft,
     createManualDraft: repository.createManualDraft,
     saveDraft: repository.saveDraft,
     publishVersion: repository.publishVersion,
@@ -1505,6 +1527,27 @@ function createInvalidManualDraftInputResponse(): ApiResponse<null> {
   );
 }
 
+function createInvalidAiResultCopyInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidAiResultCopyInputCode,
+    invalidOrganizationTrainingAiResultCopyInputMessage,
+  );
+}
+
+function createAiResultCopyAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    aiResultCopyAdminContextUnavailableCode,
+    "Organization AI result copy admin context is unavailable.",
+  );
+}
+
+function createAiResultCopyBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    aiResultCopyBlockedCode,
+    organizationTrainingAiResultCopyBlockedMessage,
+  );
+}
+
 function createInvalidTakedownInputResponse(): ApiResponse<null> {
   return createErrorResponse(
     invalidTakedownInputCode,
@@ -1824,6 +1867,9 @@ export function createOrganizationTrainingRouteHandlers(
   const createManualDraftService =
     organizationTrainingService.createManualDraft ??
     defaultManualDraftServiceResult;
+  const copyAiResultToTrainingDraftService =
+    organizationTrainingService.copyAiResultToTrainingDraft ??
+    defaultAiResultCopyServiceResult;
   const saveDraftService =
     organizationTrainingService.saveDraft ?? defaultDraftSaveServiceResult;
   const copyVersionToNewDraftService =
@@ -1893,6 +1939,42 @@ export function createOrganizationTrainingRouteHandlers(
     options.resolveOrganizationAuthorizationContext;
 
   return createRouteHandlersWithErrorEnvelope({
+    aiResultCopy: {
+      async POST(request: Request): Promise<Response> {
+        const input = normalizeOrganizationTrainingAiResultCopyInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createNoStoreJsonResponse(
+            createInvalidAiResultCopyInputResponse(),
+          );
+        }
+
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId: input.value.organizationPublicId,
+          aiResultCopyInput: input.value,
+        });
+
+        if (adminContext === null) {
+          return createNoStoreJsonResponse(
+            createAiResultCopyAdminContextUnavailableResponse(),
+          );
+        }
+
+        const result = await copyAiResultToTrainingDraftService({
+          adminContext,
+          copyInput: input.value,
+        });
+
+        return createNoStoreJsonResponse(
+          result.success
+            ? createSuccessResponse(result.copy)
+            : createAiResultCopyBlockedResponse(),
+        );
+      },
+    },
     adminDetail: {
       async GET(
         request: Request,

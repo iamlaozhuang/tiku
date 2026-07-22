@@ -23,6 +23,7 @@ import type {
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
+  OrganizationTrainingAiResultCopyDto,
   OrganizationTrainingAuditLogRedactedReferencePolicyDto,
   OrganizationTrainingEmployeeAnswerLifecycleFlowDto,
   OrganizationTrainingEmployeeAnswerLifecycleItemDto,
@@ -78,6 +79,9 @@ export const organizationTrainingEmployeeAnswerBlockedMessage =
 
 export const organizationTrainingSourceContextBlockedMessage =
   "Organization training source context is blocked.";
+
+export const organizationTrainingAiResultCopyBlockedMessage =
+  "Organization AI result training draft copy is blocked.";
 
 const INVALID_ORGANIZATION_TRAINING_AUDIT_LOG_REFERENCE_INPUT_CODE = 400184;
 const ORGANIZATION_TRAINING_ADMIN_DETAIL_SCOPE_DENIED_CODE = 403092;
@@ -205,6 +209,11 @@ export type OrganizationTrainingSourceContextBlockedReason =
   | "organization_scope_denied"
   | "source_context_scope_mismatch";
 
+export type OrganizationTrainingAiResultCopyBlockedReason =
+  | "invalid_ai_result_copy_input"
+  | "organization_scope_denied"
+  | "source_lineage_unavailable";
+
 export type OrganizationTrainingAdminContext = {
   adminPublicId: string;
   visibleOrganizationPublicIds: readonly string[];
@@ -228,6 +237,23 @@ export type OrganizationTrainingManualDraftInput = {
   title: string;
   description: string | null;
 };
+
+export type OrganizationTrainingAiResultCopyInput = {
+  organizationPublicId: string;
+  sourceTaskPublicId: string;
+  sourceResultPublicId: string;
+  weakEvidenceConfirmed: boolean;
+};
+
+export type OrganizationTrainingAiResultCopyCommand = {
+  adminContext: OrganizationTrainingAdminContext;
+  copyInput: OrganizationTrainingAiResultCopyInput;
+};
+
+export type OrganizationTrainingAiResultCopyWrite =
+  OrganizationTrainingAiResultCopyInput & {
+    copiedAt: string;
+  };
 
 export type OrganizationTrainingCreateManualDraftCommand = {
   adminContext: OrganizationTrainingAdminContext;
@@ -506,6 +532,12 @@ export type OrganizationTrainingSourceContextStore = {
   ): Promise<OrganizationTrainingSourceContextAttachmentDto>;
 };
 
+export type OrganizationTrainingAiResultCopyStore = {
+  copyAiResultToTrainingDraft?(
+    copyWrite: OrganizationTrainingAiResultCopyWrite,
+  ): Promise<OrganizationTrainingAiResultCopyDto | null>;
+};
+
 export type OrganizationTrainingVersionStore = {
   publishVersion(
     versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite,
@@ -521,7 +553,8 @@ export type OrganizationTrainingVersionStore = {
 export type OrganizationTrainingStore = OrganizationTrainingDraftStore &
   OrganizationTrainingVersionStore &
   OrganizationTrainingSourceContextStore &
-  OrganizationTrainingEmployeeAnswerStore;
+  OrganizationTrainingEmployeeAnswerStore &
+  OrganizationTrainingAiResultCopyStore;
 
 export type OrganizationTrainingClock = {
   now(): Date;
@@ -716,7 +749,21 @@ export type OrganizationTrainingSourceContextResult =
       message: typeof organizationTrainingSourceContextBlockedMessage;
     };
 
+export type OrganizationTrainingAiResultCopyResult =
+  | {
+      success: true;
+      copy: OrganizationTrainingAiResultCopyDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingAiResultCopyBlockedReason;
+      message: typeof organizationTrainingAiResultCopyBlockedMessage;
+    };
+
 export type OrganizationTrainingService = {
+  copyAiResultToTrainingDraft(
+    command: OrganizationTrainingAiResultCopyCommand,
+  ): Promise<OrganizationTrainingAiResultCopyResult>;
   createManualDraft(
     command: OrganizationTrainingCreateManualDraftCommand,
   ): Promise<OrganizationTrainingCreateManualDraftResult>;
@@ -765,6 +812,16 @@ function createBlockedResult(
     success: false,
     reason,
     message: organizationTrainingManualDraftCreationBlockedMessage,
+  };
+}
+
+function createAiResultCopyBlockedResult(
+  reason: OrganizationTrainingAiResultCopyBlockedReason,
+): OrganizationTrainingAiResultCopyResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingAiResultCopyBlockedMessage,
   };
 }
 
@@ -2614,6 +2671,47 @@ export function createOrganizationTrainingService(
   clock: OrganizationTrainingClock = systemClock,
 ): OrganizationTrainingService {
   return {
+    async copyAiResultToTrainingDraft(command) {
+      const organizationPublicId = normalizeRequiredText(
+        command.copyInput.organizationPublicId,
+      );
+      const sourceTaskPublicId = normalizeRequiredText(
+        command.copyInput.sourceTaskPublicId,
+      );
+      const sourceResultPublicId = normalizeRequiredText(
+        command.copyInput.sourceResultPublicId,
+      );
+
+      if (
+        organizationPublicId === null ||
+        sourceTaskPublicId === null ||
+        sourceResultPublicId === null ||
+        typeof command.copyInput.weakEvidenceConfirmed !== "boolean"
+      ) {
+        return createAiResultCopyBlockedResult("invalid_ai_result_copy_input");
+      }
+
+      if (
+        !isOrganizationVisibleToAdmin(
+          organizationPublicId,
+          command.adminContext,
+        )
+      ) {
+        return createAiResultCopyBlockedResult("organization_scope_denied");
+      }
+
+      const copy = await trainingStore.copyAiResultToTrainingDraft?.({
+        organizationPublicId,
+        sourceTaskPublicId,
+        sourceResultPublicId,
+        weakEvidenceConfirmed: command.copyInput.weakEvidenceConfirmed,
+        copiedAt: clock.now().toISOString(),
+      });
+
+      return copy === undefined || copy === null
+        ? createAiResultCopyBlockedResult("source_lineage_unavailable")
+        : { success: true, copy };
+    },
     async createManualDraft(command) {
       const organizationPublicId = normalizeRequiredText(
         command.draftInput.organizationPublicId,

@@ -31,6 +31,9 @@ export const invalidOrganizationTrainingTakedownInputMessage =
 export const invalidOrganizationTrainingManualDraftInputMessage =
   "Invalid organization training manual draft input.";
 
+export const invalidOrganizationTrainingAiResultCopyInputMessage =
+  "Invalid organization training AI result copy input.";
+
 export const invalidOrganizationTrainingCopyToNewDraftInputMessage =
   "Invalid organization training copy-to-new-draft input.";
 
@@ -67,6 +70,23 @@ export type OrganizationTrainingManualDraftRouteInput = {
   description: string | null;
   capabilityContext: OrganizationTrainingCapabilityContext;
 };
+
+export type OrganizationTrainingAiResultCopyRouteInput = {
+  organizationPublicId: string;
+  sourceTaskPublicId: string;
+  sourceResultPublicId: string;
+  weakEvidenceConfirmed: boolean;
+};
+
+export type OrganizationTrainingAiResultCopyValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingAiResultCopyRouteInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingAiResultCopyInputMessage;
+    };
 
 export type OrganizationTrainingCopyToNewDraftRouteInput =
   OrganizationTrainingCopyToNewDraftInput & {
@@ -852,6 +872,57 @@ export function normalizeOrganizationTrainingManualDraftInput(
       title,
       description,
       capabilityContext,
+    },
+  };
+}
+
+export function normalizeOrganizationTrainingAiResultCopyInput(
+  input: unknown,
+): OrganizationTrainingAiResultCopyValidationResult {
+  const allowedKeys = new Set([
+    "organizationPublicId",
+    "sourceTaskPublicId",
+    "sourceResultPublicId",
+    "weakEvidenceConfirmed",
+  ]);
+
+  if (
+    !isRecord(input) ||
+    Object.keys(input).some((key) => !allowedKeys.has(key))
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingAiResultCopyInputMessage,
+    };
+  }
+
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const sourceTaskPublicId = normalizeRequiredText(input.sourceTaskPublicId);
+  const sourceResultPublicId = normalizeRequiredText(
+    input.sourceResultPublicId,
+  );
+
+  if (
+    organizationPublicId === null ||
+    sourceTaskPublicId === null ||
+    sourceResultPublicId === null ||
+    typeof input.weakEvidenceConfirmed !== "boolean"
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingAiResultCopyInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      organizationPublicId,
+      sourceTaskPublicId,
+      sourceResultPublicId,
+      weakEvidenceConfirmed: input.weakEvidenceConfirmed,
     },
   };
 }

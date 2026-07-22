@@ -383,6 +383,12 @@ export type OrganizationTrainingSourceContextAttachmentDto = {
   redactionStatus: "metadata_only";
 };
 
+export type OrganizationTrainingAiResultCopyDto = {
+  persistenceStatus: "created" | "reused";
+  draft: OrganizationTrainingDraftDto;
+  context: OrganizationTrainingSourceContextAttachmentDto;
+};
+
 export type OrganizationTrainingSourceContextUsagePolicyDto = {
   createFormalPaper: false;
   createMockExam: false;

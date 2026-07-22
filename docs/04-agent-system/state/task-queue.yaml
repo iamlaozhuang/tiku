@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+  currentTaskId: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -284,6 +284,8 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
     - p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
     - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+    - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+    - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -455,7 +457,77 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21: closed
     p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21: closed
     p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21: closed
+    p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21: closed
 activeTasks:
+  - id: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+    title: Atomic organization AI result training draft copy command
+    phase: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+    status: closed
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0166_and_F-0167
+    branch: fix/organization-ai-training-copy-command
+    objective: replace the browser-coordinated two-write copy flow with one server-owned atomic and deterministic organization AI result-to-training-draft command
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-05
+    findingIds:
+      - F-0166
+      - F-0167
+    executionStage: validated_reviewed_conditional_closeout_ready
+    findingStatus: closed_static_product_verified
+    riskBoundary:
+      category: bounded_database_application_transaction_and_existing_permission_semantics
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: immutable_admin_AI_result_snapshot_to_atomic_copy_route_service_repository_transaction_to_training_draft_source_context_and_UI
+      coreFiles: 14
+      contingencyFiles: 8
+      preflightTestFiles: 8
+      directCallerCalleeMocksFixturesReviewed: true
+      testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
+      confirmedResidualRootCause: browser_combines_historical_result_with_current_form_scope_then_performs_two_independent_generic_writes
+      bundleDecision: F0166_and_F0167_share_one_server_owned_copy_command_transaction_and_validation_matrix
+    expectedAcceptance:
+      - client_submits_only_organization_source_task_source_result_and_weak_evidence_confirmation
+      - server_derives_scope_content_original_authorization_and_evidence_from_one_immutable_source_result_snapshot
+      - task_result_organization_scope_authorization_and_evidence_mismatch_fail_closed_without_writes
+      - draft_and_source_context_are_created_in_one_transaction_and_same_result_replay_returns_one_deterministic_draft
+      - response_loss_concurrency_and_second_insert_failure_do_not_create_duplicates_or_orphans
+      - no_schema_real_database_permission_provider_dependency_mechanism_or_other_finding_change
+    closeoutProjection:
+      current: validated_reviewed_conditional_closeout_ready
+      triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0166_and_F0167_closed_then_JIT_next_remaining_P1_finding
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_standing_bounded_medium_risk
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: includes_TDD_snapshot_truth_atomic_copy_command_UI_replacement_and_adversarial_hardening
+      mechanismOverhead: includes_JIT_contract_state_validation_kernel_and_closeout
+      guardSmokeChanges: 0
+    validationEvidence:
+      red: 3_expected_failures_missing_generation_snapshot_mapper_and_copy_validator
+      focused: 8_files_254_tests_passed
+      lint: targeted_changed_and_direct_contract_files_passed
+      typecheck: tsc_noEmit_passed
+      build: next_build_passed_with_preexisting_NFT_warning
+      review: one_main_thread_adversarial_review_passed_no_scope_or_entitlement_expansion
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+      findingIds:
+        - F-0160
+      commit: ca1636e1d95f9045aa12ca1d38990f3070f55e96
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
   - id: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
     title: Learner AI generation input and constraint snapshot
     phase: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21

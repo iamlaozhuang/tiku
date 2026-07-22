@@ -59,10 +59,7 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
-import {
-  createOrganizationTrainingCapabilityContext,
-  resolveOrganizationWorkspacePageAccess,
-} from "../organization-workspace/admin-organization-workspace-access";
+import { resolveOrganizationWorkspacePageAccess } from "../organization-workspace/admin-organization-workspace-access";
 import {
   createContentAdminFormalReviewedDraftPayload,
   type AdminAiGenerationFormalReviewedDraftPayload,
@@ -495,37 +492,6 @@ function getContentAdminReviewReadiness(
   }
 
   return "ready";
-}
-
-function createOrganizationAiTrainingDraftTitle(input: {
-  generationKind: AdminAiGenerationKind;
-  requestedAt: string;
-}): string {
-  return `${getGenerationKindLabel(input.generationKind)}训练草稿 ${formatRequestedAt(input.requestedAt)}`;
-}
-
-function createOrganizationAiResultSourceStatus(
-  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto,
-): string {
-  return `ai_generated_${generatedResult.evidenceStatus}_evidence`;
-}
-
-function normalizeOptionalPublicId(value: unknown): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const normalizedValue = value.trim();
-
-  return normalizedValue === "" ? null : normalizedValue;
-}
-
-function resolveOrganizationTrainingAuthorizationPublicId(
-  capabilitySummary: AdminWorkspaceCapabilitySummary,
-): string | null {
-  return normalizeOptionalPublicId(
-    capabilitySummary.organizationAuthorizationPublicId,
-  );
 }
 
 function formatRequestedAt(requestedAt: string): string {
@@ -3801,18 +3767,10 @@ export function AdminAiGenerationEntryPage({
     const organizationPublicId =
       input.taskItem.organizationPublicId ??
       input.taskItem.organizationOwnedDraftBoundary.organizationPublicId;
-    const organizationAuthorizationPublicId =
-      adminWorkspaceCapabilitySummary === null
-        ? null
-        : resolveOrganizationTrainingAuthorizationPublicId(
-            adminWorkspaceCapabilitySummary,
-          );
-
     if (
       workspace !== "organization" ||
       adminWorkspaceCapabilitySummary === null ||
       organizationPublicId === null ||
-      organizationAuthorizationPublicId === null ||
       copyReadiness === "blocked" ||
       (copyReadiness === "weak_confirmation_required" &&
         input.confirmation !== "weak_confirmed")
@@ -3832,27 +3790,16 @@ export function AdminAiGenerationEntryPage({
     setOrganizationTrainingFeedback(null);
 
     try {
-      const draftTitle = createOrganizationAiTrainingDraftTitle({
-        generationKind: input.taskItem.generationKind,
-        requestedAt: input.taskItem.requestedAt,
-      });
-      const capabilityContext = createOrganizationTrainingCapabilityContext(
-        adminWorkspaceCapabilitySummary,
-      );
-      const draftResponse = await fetchAdminApi<{
+      const copyResponse = await fetchAdminApi<{
+        persistenceStatus: "created" | "reused";
         draft: OrganizationTrainingDraftDto;
-      }>("/api/v1/organization-trainings", sessionToken, {
+        context: OrganizationTrainingSourceContextAttachmentDto;
+      }>("/api/v1/organization-trainings/ai-result-copies", sessionToken, {
         body: JSON.stringify({
           organizationPublicId,
-          authorizationPublicId: organizationAuthorizationPublicId,
           sourceTaskPublicId: input.taskItem.taskPublicId,
-          profession: generationParameters.profession,
-          level: generationParameters.level,
-          subject: generationParameters.subject,
-          title: draftTitle,
-          description:
-            "由组织 AI 结果关联创建；发布前需编辑题目、标准答案、解析和资料依据。",
-          capabilityContext,
+          sourceResultPublicId: resultPublicId,
+          weakEvidenceConfirmed: input.confirmation === "weak_confirmed",
         }),
         headers: {
           "content-type": "application/json",
@@ -3860,89 +3807,25 @@ export function AdminAiGenerationEntryPage({
         method: "POST",
       });
 
-      if (isUnauthorizedResponse(draftResponse)) {
+      if (isUnauthorizedResponse(copyResponse)) {
         setLoadState("unauthorized");
         return;
       }
 
-      const draft = draftResponse.data?.draft ?? null;
+      const copy = copyResponse.data ?? null;
 
       if (
-        draftResponse.code !== 0 ||
-        draft === null ||
-        draft.organizationPublicId !== organizationPublicId
+        copyResponse.code !== 0 ||
+        copy === null ||
+        copy.draft.organizationPublicId !== organizationPublicId ||
+        copy.draft.sourceTaskPublicId !== input.taskItem.taskPublicId ||
+        copy.context.draftPublicId !== copy.draft.publicId ||
+        copy.context.organizationPublicId !== organizationPublicId
       ) {
         setCopyActionError(
-          draftResponse.code === 0
-            ? "创建企业训练草稿失败：接口返回的草稿不属于当前组织。"
-            : formatAdminApiBusinessError(
-                draftResponse,
-                "创建企业训练草稿失败",
-              ),
-        );
-        return;
-      }
-
-      if (draft.sourceTaskPublicId !== input.taskItem.taskPublicId) {
-        setCopyActionError(
-          "创建企业训练草稿失败：接口返回的草稿未关联当前 AI 任务。",
-        );
-        return;
-      }
-
-      const sourceContextResponse = await fetchAdminApi<{
-        context: OrganizationTrainingSourceContextAttachmentDto;
-      }>(
-        `/api/v1/organization-trainings/${draft.publicId}/source-contexts`,
-        sessionToken,
-        {
-          body: JSON.stringify({
-            draftPublicId: draft.publicId,
-            organizationPublicId,
-            authorizationPublicId: organizationAuthorizationPublicId,
-            profession: generationParameters.profession,
-            level: generationParameters.level,
-            capabilityContext,
-            sourceContexts: [
-              {
-                sourceType: "organization_ai_result",
-                sourcePublicId: resultPublicId,
-                title: draftTitle,
-                profession: generationParameters.profession,
-                level: generationParameters.level,
-                subject: generationParameters.subject,
-                questionCount: generationParameters.questionCount,
-                totalScore: generationParameters.questionCount,
-                sourceStatus:
-                  createOrganizationAiResultSourceStatus(generatedResult),
-              },
-            ],
-          }),
-          headers: {
-            "content-type": "application/json",
-          },
-          method: "POST",
-        },
-      );
-
-      if (isUnauthorizedResponse(sourceContextResponse)) {
-        setLoadState("unauthorized");
-        return;
-      }
-
-      const sourceContext = sourceContextResponse.data?.context ?? null;
-
-      if (
-        sourceContextResponse.code !== 0 ||
-        sourceContext === null ||
-        sourceContext.draftPublicId !== draft.publicId ||
-        sourceContext.organizationPublicId !== organizationPublicId
-      ) {
-        setCopyActionError(
-          formatAdminApiBusinessError(
-            sourceContextResponse,
-            "关联企业训练 AI 来源失败",
-          ),
+          copyResponse.code === 0
+            ? "创建企业训练草稿失败：接口返回的来源链路不一致。"
+            : formatAdminApiBusinessError(copyResponse, "创建企业训练草稿失败"),
         );
         return;
       }

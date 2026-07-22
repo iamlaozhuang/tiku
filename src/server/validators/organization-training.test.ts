@@ -18,12 +18,52 @@ import {
   normalizeOrganizationTrainingCopyToNewDraftInput,
   normalizeOrganizationTrainingCopyToNewDraftRouteInput,
   normalizeOrganizationTrainingManualDraftInput,
+  normalizeOrganizationTrainingAiResultCopyInput,
   normalizeOrganizationTrainingPublishInput,
   normalizeOrganizationTrainingSourceContextInput,
   normalizeOrganizationTrainingTakedownInput,
 } from "./organization-training";
 
 describe("organization training contract and validator scaffold", () => {
+  it("accepts only the server-owned organization AI result copy identity", () => {
+    expect(
+      normalizeOrganizationTrainingAiResultCopyInput({
+        organizationPublicId: " organization_public_123 ",
+        sourceTaskPublicId: " admin_ai_generation_task_123 ",
+        sourceResultPublicId: " admin_ai_generation_result_123 ",
+        weakEvidenceConfirmed: false,
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        organizationPublicId: "organization_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_123",
+        sourceResultPublicId: "admin_ai_generation_result_123",
+        weakEvidenceConfirmed: false,
+      },
+    });
+
+    for (const forbiddenField of [
+      "authorizationPublicId",
+      "profession",
+      "level",
+      "subject",
+      "questionCount",
+      "title",
+      "sourceContexts",
+    ]) {
+      expect(
+        normalizeOrganizationTrainingAiResultCopyInput({
+          organizationPublicId: "organization_public_123",
+          sourceTaskPublicId: "admin_ai_generation_task_123",
+          sourceResultPublicId: "admin_ai_generation_result_123",
+          weakEvidenceConfirmed: false,
+          [forbiddenField]: "client-owned-value",
+        }).success,
+      ).toBe(false);
+    }
+  });
+
   it("keeps employee answer statuses aligned with the organization training plan", () => {
     expect(organizationTrainingAnswerStatusValues).toEqual([
       "in_progress",

@@ -9,6 +9,7 @@ import {
   createAdminAiGenerationResultHistoryCondition,
   createAdminAiGenerationResultPersistenceRepository,
   createAdminAiGenerationResultsByTaskPublicIdsCondition,
+  resolveGenerationParametersSnapshot,
 } from "./admin-ai-generation-result-persistence-repository";
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
@@ -421,6 +422,23 @@ describe("admin AI generation result persistence repository", () => {
           citation_count: 2,
           content_redacted_snapshot: {
             redactionStatus: "redacted",
+            generationParameters: {
+              profession: "monopoly",
+              level: 3,
+              subject: "theory",
+              questionType: "single_choice",
+              questionCount: 1,
+              difficulty: "medium",
+              learningObjective: null,
+              knowledgeNode: null,
+              knowledgeNodeMode: "balanced",
+              knowledgeNodePublicIds: [],
+              includeDescendants: false,
+              knowledgeNodeSupplement: null,
+              sourcePreference: "balanced",
+              questionTypeDistribution: null,
+              paperStructure: null,
+            },
             organizationTrainingQuestionDraft: {
               questions: [
                 {
@@ -488,6 +506,48 @@ describe("admin AI generation result persistence repository", () => {
           },
         },
       ],
+    });
+    expect(draftResults[0]?.contentReference).not.toHaveProperty(
+      "generationParameters",
+    );
+    expect(
+      resolveGenerationParametersSnapshot({
+        content_redacted_snapshot: {
+          generationParameters: {
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionType: "single_choice",
+            questionCount: 1,
+            difficulty: "medium",
+            learningObjective: null,
+            knowledgeNode: null,
+            knowledgeNodeMode: "balanced",
+            knowledgeNodePublicIds: [],
+            includeDescendants: false,
+            knowledgeNodeSupplement: null,
+            sourcePreference: "balanced",
+            questionTypeDistribution: null,
+            paperStructure: null,
+          },
+        },
+      }),
+    ).toEqual({
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      questionType: "single_choice",
+      questionCount: 1,
+      difficulty: "medium",
+      learningObjective: null,
+      knowledgeNode: null,
+      knowledgeNodeMode: "balanced",
+      knowledgeNodePublicIds: [],
+      includeDescendants: false,
+      knowledgeNodeSupplement: null,
+      sourcePreference: "balanced",
+      questionTypeDistribution: null,
+      paperStructure: null,
     });
     expect(JSON.stringify(draftResults)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput|"id":/u,

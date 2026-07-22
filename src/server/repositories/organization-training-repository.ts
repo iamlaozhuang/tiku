@@ -1,8 +1,10 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import {
   admin,
+  adminAiGenerationResult,
   adminAiGenerationTaskMetadata,
+  aiGenerationTask,
   adminOrganization,
   authUpgrade,
   employee,
@@ -46,6 +48,7 @@ import type {
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
+  OrganizationTrainingAiResultCopyDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingQuestionOptionSnapshotDto,
   OrganizationTrainingQuestionSnapshotDto,
@@ -63,9 +66,15 @@ import type {
   OrganizationTrainingManualDraftWrite,
   OrganizationTrainingPublishedVersionPersistenceWrite,
   OrganizationTrainingSourceContextWrite,
+  OrganizationTrainingAiResultCopyWrite,
   OrganizationTrainingVersionCopyToNewDraftWrite,
   OrganizationTrainingVersionTakedownWrite,
 } from "../services/organization-training-service";
+import {
+  resolveGenerationParametersSnapshot,
+  resolveOrganizationTrainingPaperDraftSnapshot,
+  resolveOrganizationTrainingQuestionDraftSnapshot,
+} from "./admin-ai-generation-result-persistence-repository";
 import { evidenceStatusValues } from "../models/ai-rag";
 import {
   mapOrganizationTrainingAnswerRowToDto,
@@ -105,6 +114,15 @@ export type OrganizationTrainingVersionCopyToNewDraftPersistenceInput =
 
 export type OrganizationTrainingSourceContextPersistenceInput =
   OrganizationTrainingSourceContextWrite;
+
+export type OrganizationTrainingAiResultCopyPersistenceInput =
+  OrganizationTrainingAiResultCopyWrite;
+
+export type OrganizationTrainingAiResultCopyPersistenceResult = {
+  persistenceStatus: "created" | "reused";
+  draftRow: OrganizationTrainingDraftRow;
+  sourceContextRows: OrganizationTrainingSourceContextRow[];
+};
 
 export type OrganizationTrainingEmployeeAnswerDraftPersistenceInput =
   OrganizationTrainingEmployeeAnswerDraftWrite;
@@ -354,6 +372,9 @@ type NormalizedOrganizationTrainingEmployeeAnswerSubmissionInput = {
 };
 
 export type OrganizationTrainingVersionGateway = {
+  copyAiResultToTrainingDraftTransaction?(
+    input: OrganizationTrainingAiResultCopyPersistenceInput,
+  ): Promise<OrganizationTrainingAiResultCopyPersistenceResult | null>;
   findLatestVersionNumberByDraftPublicId(
     draftPublicId: string,
   ): Promise<number | null>;
@@ -435,6 +456,9 @@ export type OrganizationTrainingVersionGateway = {
 };
 
 export type OrganizationTrainingRepository = {
+  copyAiResultToTrainingDraft(
+    input: OrganizationTrainingAiResultCopyPersistenceInput,
+  ): Promise<OrganizationTrainingAiResultCopyDto | null>;
   lookupVisibleOrganizationScope(
     input: OrganizationTrainingVisibleOrganizationScopeLookupInput,
   ): Promise<readonly string[] | null>;
@@ -723,6 +747,33 @@ export function createOrganizationTrainingRepository(
   }
 
   return {
+    async copyAiResultToTrainingDraft(input) {
+      if (gateway.copyAiResultToTrainingDraftTransaction === undefined) {
+        return null;
+      }
+
+      const result =
+        await gateway.copyAiResultToTrainingDraftTransaction(input);
+
+      if (result === null || result.sourceContextRows.length !== 1) {
+        return null;
+      }
+
+      const draft = mapOrganizationTrainingDraftRowToDto(result.draftRow);
+
+      return {
+        persistenceStatus: result.persistenceStatus,
+        draft,
+        context: {
+          draftPublicId: draft.publicId,
+          organizationPublicId: draft.organizationPublicId,
+          sourceContexts: result.sourceContextRows.map(
+            mapOrganizationTrainingSourceContextRowToDto,
+          ),
+          redactionStatus: "metadata_only",
+        },
+      };
+    },
     async lookupVisibleOrganizationScope(input) {
       const adminPublicId = normalizeRequiredText(input.adminPublicId);
 
@@ -1255,6 +1306,111 @@ function tryMapEmployeeVisibleOrganizationTrainingVersionRowToDto(
   };
 }
 
+function createOrganizationAiCopyHash(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function createOrganizationAiCopyDraftPublicId(
+  sourceResultPublicId: string,
+): string {
+  return `organization_training_draft_ai_result_${createOrganizationAiCopyHash(sourceResultPublicId).slice(0, 32)}`;
+}
+
+function createOrganizationAiCopySourceContextPublicId(
+  sourceResultPublicId: string,
+): string {
+  return `organization_training_source_context_ai_result_${createOrganizationAiCopyHash(sourceResultPublicId).slice(0, 32)}`;
+}
+
+function createOrganizationAiCopyPayloadDigest(input: {
+  sourceTaskPublicId: string;
+  sourceResultPublicId: string;
+  organizationPublicId: string;
+  contentDigest: string;
+}): string {
+  return `sha256:${createOrganizationAiCopyHash(
+    JSON.stringify({
+      contentDigest: input.contentDigest,
+      organizationPublicId: input.organizationPublicId,
+      sourceResultPublicId: input.sourceResultPublicId,
+      sourceTaskPublicId: input.sourceTaskPublicId,
+    }),
+  )}`;
+}
+
+function createOrganizationAiCopyQuestions(row: {
+  workspace: string;
+  generation_kind: string;
+  content_redacted_snapshot: unknown;
+}): OrganizationTrainingManualDraftWrite["questions"] | null {
+  type CopyQuestion = OrganizationTrainingAdminQuestionDetailDto & {
+    paperSectionKey?: string;
+    paperSectionTitle?: string;
+    paperSectionSortOrder?: number;
+    questionSortOrder?: number;
+  };
+  const questionDraft = resolveOrganizationTrainingQuestionDraftSnapshot(row);
+  const paperDraft = resolveOrganizationTrainingPaperDraftSnapshot(row);
+  const sourceQuestions: CopyQuestion[] | undefined =
+    row.generation_kind === "question"
+      ? questionDraft?.questions
+      : (paperDraft?.paperSections?.flatMap((section) =>
+          section.questions.map((question, questionIndex) => ({
+            ...question,
+            paperSectionKey: section.sectionKey,
+            paperSectionTitle: section.title,
+            paperSectionSortOrder:
+              (paperDraft.paperSections?.indexOf(section) ?? 0) + 1,
+            questionSortOrder: questionIndex + 1,
+          })),
+        ) ?? paperDraft?.questions);
+
+  if (sourceQuestions === undefined || sourceQuestions.length === 0) {
+    return null;
+  }
+
+  return sourceQuestions.map((question) => ({
+    publicId: question.publicId,
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    ...(question.paperSectionKey !== undefined &&
+    question.paperSectionTitle !== undefined &&
+    question.paperSectionSortOrder !== undefined &&
+    question.questionSortOrder !== undefined
+      ? {
+          paperSectionKey: question.paperSectionKey,
+          paperSectionTitle: question.paperSectionTitle,
+          paperSectionSortOrder: question.paperSectionSortOrder,
+          questionSortOrder: question.questionSortOrder,
+        }
+      : {}),
+    materialTitle: question.materialTitle,
+    materialContent: question.materialContent,
+    stem: question.stem,
+    options: question.options,
+    score: question.score,
+    standardAnswer: question.answerAndAnalysis.standardAnswer ?? "",
+    analysisSummary: question.answerAndAnalysis.analysis ?? "",
+    evidenceStatus: question.evidenceSummary.evidenceStatus,
+    citationCount: question.evidenceSummary.citationCount,
+  }));
+}
+
+function createOrganizationAiCopyQuestionTypeSummary(
+  questions: OrganizationTrainingManualDraftWrite["questions"],
+): OrganizationTrainingManualDraftWrite["questionTypeSummary"] {
+  return questions.reduce(
+    (summary, question) => {
+      if (question.questionType === "single_choice") summary.singleChoice += 1;
+      if (question.questionType === "multi_choice") summary.multiChoice += 1;
+      if (question.questionType === "true_false") summary.trueFalse += 1;
+      if (question.questionType === "short_answer") summary.shortAnswer += 1;
+      return summary;
+    },
+    { singleChoice: 0, multiChoice: 0, trueFalse: 0, shortAnswer: 0 },
+  );
+}
+
 export function createPostgresOrganizationTrainingRepository(
   options: RuntimeDatabaseOptions = {},
 ): OrganizationTrainingRepository {
@@ -1264,6 +1420,336 @@ export function createPostgresOrganizationTrainingRepository(
   );
 
   return createOrganizationTrainingRepository({
+    async copyAiResultToTrainingDraftTransaction(input) {
+      return getDatabase().transaction(async (transaction) => {
+        await transaction.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended(${`organization_ai_result_copy:${input.sourceResultPublicId}`}, 0))`,
+        );
+
+        const [result] = await transaction
+          .select({
+            id: adminAiGenerationResult.id,
+            public_id: adminAiGenerationResult.public_id,
+            ai_generation_task_id:
+              adminAiGenerationResult.ai_generation_task_id,
+            task_public_id: adminAiGenerationResult.task_public_id,
+            request_public_id: adminAiGenerationResult.request_public_id,
+            workspace: adminAiGenerationResult.workspace,
+            generation_kind: adminAiGenerationResult.generation_kind,
+            owner_type: adminAiGenerationResult.owner_type,
+            owner_public_id: adminAiGenerationResult.owner_public_id,
+            organization_public_id:
+              adminAiGenerationResult.organization_public_id,
+            task_type: adminAiGenerationResult.task_type,
+            result_status: adminAiGenerationResult.result_status,
+            content_redacted_snapshot:
+              adminAiGenerationResult.content_redacted_snapshot,
+            content_digest: adminAiGenerationResult.content_digest,
+            content_preview_masked:
+              adminAiGenerationResult.content_preview_masked,
+            citation_redacted_snapshot:
+              adminAiGenerationResult.citation_redacted_snapshot,
+            evidence_status: adminAiGenerationResult.evidence_status,
+            citation_count: adminAiGenerationResult.citation_count,
+            ai_call_log_public_id:
+              adminAiGenerationResult.ai_call_log_public_id,
+            source_question_public_id:
+              adminAiGenerationResult.source_question_public_id,
+            source_paper_public_id:
+              adminAiGenerationResult.source_paper_public_id,
+            is_formal_adoption_blocked:
+              adminAiGenerationResult.is_formal_adoption_blocked,
+            created_at: adminAiGenerationResult.created_at,
+            updated_at: adminAiGenerationResult.updated_at,
+          })
+          .from(adminAiGenerationResult)
+          .where(
+            eq(adminAiGenerationResult.public_id, input.sourceResultPublicId),
+          )
+          .limit(1)
+          .for("update");
+
+        if (
+          result === undefined ||
+          result.task_public_id !== input.sourceTaskPublicId ||
+          result.workspace !== "organization" ||
+          result.owner_type !== "organization" ||
+          result.owner_public_id !== input.organizationPublicId ||
+          result.organization_public_id !== input.organizationPublicId ||
+          result.result_status !== "draft" ||
+          result.is_formal_adoption_blocked !== true ||
+          (result.generation_kind !== "question" &&
+            result.generation_kind !== "paper") ||
+          !/^sha256:[0-9a-f]{64}$/u.test(result.content_digest)
+        ) {
+          return null;
+        }
+
+        const [task] = await transaction
+          .select({
+            id: aiGenerationTask.id,
+            public_id: aiGenerationTask.public_id,
+            task_type: aiGenerationTask.task_type,
+            authorization_public_id: aiGenerationTask.authorization_public_id,
+            owner_type: aiGenerationTask.owner_type,
+            owner_public_id: aiGenerationTask.owner_public_id,
+            organization_public_id: aiGenerationTask.organization_public_id,
+            effective_edition: aiGenerationTask.effective_edition,
+            task_status: aiGenerationTask.task_status,
+            result_public_id: aiGenerationTask.result_public_id,
+            is_authorization_active: aiGenerationTask.is_authorization_active,
+            is_scope_allowed: aiGenerationTask.is_scope_allowed,
+          })
+          .from(aiGenerationTask)
+          .where(eq(aiGenerationTask.id, result.ai_generation_task_id))
+          .limit(1)
+          .for("update");
+        const [metadata] = await transaction
+          .select({
+            task_public_id: adminAiGenerationTaskMetadata.task_public_id,
+            workspace: adminAiGenerationTaskMetadata.workspace,
+            generation_kind: adminAiGenerationTaskMetadata.generation_kind,
+            runtime_bridge_status:
+              adminAiGenerationTaskMetadata.runtime_bridge_status,
+          })
+          .from(adminAiGenerationTaskMetadata)
+          .where(
+            eq(
+              adminAiGenerationTaskMetadata.ai_generation_task_id,
+              result.ai_generation_task_id,
+            ),
+          )
+          .limit(1);
+
+        if (
+          task === undefined ||
+          metadata === undefined ||
+          task.public_id !== input.sourceTaskPublicId ||
+          task.task_type !== result.task_type ||
+          task.owner_type !== "organization" ||
+          task.owner_public_id !== input.organizationPublicId ||
+          task.organization_public_id !== input.organizationPublicId ||
+          task.effective_edition !== "advanced" ||
+          task.task_status !== "succeeded" ||
+          task.result_public_id !== input.sourceResultPublicId ||
+          task.is_authorization_active !== true ||
+          task.is_scope_allowed !== true ||
+          metadata.task_public_id !== input.sourceTaskPublicId ||
+          metadata.workspace !== "organization" ||
+          metadata.generation_kind !== result.generation_kind ||
+          metadata.runtime_bridge_status !== "provider_call_succeeded" ||
+          (result.generation_kind === "question" &&
+            result.task_type !== "ai_question_generation") ||
+          (result.generation_kind === "paper" &&
+            result.task_type !== "ai_paper_generation") ||
+          result.evidence_status === "none" ||
+          (result.evidence_status === "weak" &&
+            input.weakEvidenceConfirmed !== true)
+        ) {
+          return null;
+        }
+
+        const snapshotRow = result;
+        const generationParameters =
+          resolveGenerationParametersSnapshot(snapshotRow);
+        const questions = createOrganizationAiCopyQuestions(snapshotRow);
+
+        if (
+          generationParameters === null ||
+          questions === null ||
+          questions.length !== generationParameters.questionCount
+        ) {
+          return null;
+        }
+
+        const authorizationContext =
+          await findOrganizationAuthorizationContextByPublicIds(transaction, {
+            organizationPublicId: input.organizationPublicId,
+            authorizationPublicId: task.authorization_public_id,
+            now: new Date(input.copiedAt),
+          });
+        const lineage = await findTrustedPersistenceLineageByPublicIds(
+          transaction,
+          {
+            organizationPublicId: input.organizationPublicId,
+            authorizationPublicId: task.authorization_public_id,
+          },
+        );
+
+        if (
+          authorizationContext === null ||
+          lineage === null ||
+          authorizationContext.effectiveEdition !== "advanced" ||
+          authorizationContext.capabilities.canCreateOrganizationTraining !==
+            true ||
+          authorizationContext.profession !== generationParameters.profession ||
+          authorizationContext.level !== generationParameters.level
+        ) {
+          return null;
+        }
+
+        const draftPublicId = createOrganizationAiCopyDraftPublicId(
+          input.sourceResultPublicId,
+        );
+        const operationId = `organization_ai_result_copy:${input.sourceResultPublicId}`;
+        const payloadDigest = createOrganizationAiCopyPayloadDigest({
+          sourceTaskPublicId: input.sourceTaskPublicId,
+          sourceResultPublicId: input.sourceResultPublicId,
+          organizationPublicId: input.organizationPublicId,
+          contentDigest: result.content_digest,
+        });
+        const [existingDraft] = await transaction
+          .select(organizationTrainingDraftSelection)
+          .from(organizationTrainingDraft)
+          .where(eq(organizationTrainingDraft.public_id, draftPublicId))
+          .limit(1)
+          .for("update");
+
+        if (existingDraft !== undefined) {
+          if (
+            existingDraft.organization_public_id !==
+              input.organizationPublicId ||
+            existingDraft.source_task_public_id !== input.sourceTaskPublicId ||
+            existingDraft.authorization_public_id !==
+              task.authorization_public_id ||
+            existingDraft.last_operation_id !== operationId ||
+            existingDraft.last_payload_digest !== payloadDigest
+          ) {
+            return null;
+          }
+
+          const sourceContextRows = await transaction
+            .select(organizationTrainingSourceContextSelection)
+            .from(organizationTrainingSourceContext)
+            .where(
+              and(
+                eq(
+                  organizationTrainingSourceContext.organization_training_draft_id,
+                  existingDraft.id,
+                ),
+                eq(
+                  organizationTrainingSourceContext.source_public_id,
+                  input.sourceResultPublicId,
+                ),
+                eq(
+                  organizationTrainingSourceContext.source_type,
+                  "organization_ai_result",
+                ),
+              ),
+            );
+
+          return sourceContextRows.length === 1
+            ? {
+                persistenceStatus: "reused" as const,
+                draftRow: existingDraft as OrganizationTrainingDraftRow,
+                sourceContextRows:
+                  sourceContextRows as OrganizationTrainingSourceContextRow[],
+              }
+            : null;
+        }
+
+        const copiedAt = new Date(input.copiedAt);
+        const paperDraft =
+          resolveOrganizationTrainingPaperDraftSnapshot(snapshotRow);
+        const title =
+          paperDraft?.paperTitle ??
+          `AI 生成${result.generation_kind === "question" ? "题目" : "试卷"}训练草稿`;
+        const totalScore = questions.reduce(
+          (sum, question) => sum + question.score,
+          0,
+        );
+        const [createdDraft] = await transaction
+          .insert(organizationTrainingDraft)
+          .values({
+            public_id: draftPublicId,
+            draft_status: "draft",
+            revision: 1,
+            source_task_public_id: input.sourceTaskPublicId,
+            source_version_public_id: null,
+            organization_id: lineage.organizationId,
+            organization_public_id: input.organizationPublicId,
+            org_auth_id: lineage.orgAuthId,
+            authorization_source: "org_auth",
+            authorization_public_id: task.authorization_public_id,
+            owner_type: "organization",
+            owner_public_id: input.organizationPublicId,
+            quota_owner_type: "organization",
+            quota_owner_public_id: input.organizationPublicId,
+            profession: generationParameters.profession,
+            level: generationParameters.level,
+            subject: generationParameters.subject,
+            title,
+            description:
+              "由组织 AI 结果原子复制创建；发布前需编辑、预览和校验。",
+            question_count: questions.length,
+            total_score: String(totalScore),
+            question_type_summary:
+              createOrganizationAiCopyQuestionTypeSummary(questions),
+            question_snapshot: questions,
+            last_operation_id: operationId,
+            last_payload_digest: payloadDigest,
+            evidence_status: result.evidence_status,
+            validation_status: "needs_review",
+            retention_status: "active",
+            created_at: copiedAt,
+            updated_at: copiedAt,
+            expires_at: null,
+          })
+          .returning(organizationTrainingDraftSelection);
+
+        if (createdDraft === undefined) {
+          throw new Error("organization AI result draft copy failed.");
+        }
+
+        const [createdContext] = await transaction
+          .insert(organizationTrainingSourceContext)
+          .values({
+            public_id: createOrganizationAiCopySourceContextPublicId(
+              input.sourceResultPublicId,
+            ),
+            organization_training_draft_id: createdDraft.id,
+            organization_training_draft_public_id: createdDraft.public_id,
+            organization_id: lineage.organizationId,
+            organization_public_id: input.organizationPublicId,
+            org_auth_id: lineage.orgAuthId,
+            authorization_source: "org_auth",
+            authorization_public_id: task.authorization_public_id,
+            source_type: "organization_ai_result",
+            source_public_id: input.sourceResultPublicId,
+            title,
+            profession: generationParameters.profession,
+            level: generationParameters.level,
+            subject: generationParameters.subject,
+            question_count: questions.length,
+            total_score: String(totalScore),
+            source_status: `ai_generated_${result.evidence_status}_evidence`,
+            redaction_status: "metadata_only",
+            formal_usage_policy: {
+              createFormalPaper: false,
+              createMockExam: false,
+              exposeQuestionBody: false,
+              exposeStandardAnswer: false,
+              exposeAnalysis: false,
+              exposeProviderPayload: false,
+            },
+            created_at: copiedAt,
+            updated_at: copiedAt,
+          })
+          .returning(organizationTrainingSourceContextSelection);
+
+        if (createdContext === undefined) {
+          throw new Error("organization AI result source context copy failed.");
+        }
+
+        return {
+          persistenceStatus: "created" as const,
+          draftRow: createdDraft as OrganizationTrainingDraftRow,
+          sourceContextRows: [
+            createdContext as OrganizationTrainingSourceContextRow,
+          ],
+        };
+      });
+    },
     async findLatestVersionNumberByDraftPublicId(draftPublicId) {
       return findLatestVersionNumberByDraftPublicId(
         getDatabase(),
@@ -3544,7 +4030,7 @@ async function findLatestVersionNumberByDraftPublicId(
 }
 
 async function findTrustedPersistenceLineageByPublicIds(
-  database: RuntimeDatabase,
+  database: Pick<RuntimeDatabase, "select">,
   input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
 ): Promise<OrganizationTrainingTrustedPersistenceLineage | null> {
   const now = new Date();
@@ -3588,7 +4074,7 @@ async function findTrustedPersistenceLineageByPublicIds(
 }
 
 async function findOrganizationAuthorizationContextByPublicIds(
-  database: RuntimeDatabase,
+  database: Pick<RuntimeDatabase, "select">,
   input: OrganizationAuthorizationContextLookupInput,
 ): Promise<EffectiveAuthorizationContextDto | null> {
   const activeUpgradeExists = createActiveAdvancedOrgAuthUpgradeExistsSql(

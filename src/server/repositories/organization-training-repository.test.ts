@@ -1361,6 +1361,99 @@ describe("organization training repository", () => {
     expect(serializedInsert).not.toContain("rawAnswer");
   });
 
+  it("maps one atomic AI-result copy gateway outcome and rejects incomplete source-context outcomes", async () => {
+    const { gateway } = createGateway();
+    const draftWrite = createManualDraftWrite({
+      sourceTaskPublicId: "admin_ai_generation_task_123",
+      evidenceStatus: "sufficient",
+    });
+    const draftRow = await gateway.insertManualDraft({
+      ...draftWrite,
+      publicId: "organization_training_draft_ai_copy_123",
+      sourceVersionPublicId: null,
+      organizationId: 501,
+      orgAuthId: 601,
+    });
+    expect(draftRow).not.toBeNull();
+    const sourceContextRows = await gateway.insertSourceContexts([
+      {
+        publicId: "organization_training_source_context_ai_copy_123",
+        organizationTrainingDraftId: draftRow?.id ?? 0,
+        draftPublicId: draftRow?.public_id ?? "",
+        organizationId: 501,
+        organizationPublicId: "organization_public_123",
+        orgAuthId: 601,
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        sourceType: "organization_ai_result",
+        sourcePublicId: "admin_ai_generation_result_123",
+        title: "AI training draft",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 1,
+        totalScore: 1,
+        sourceStatus: "ai_generated_sufficient_evidence",
+        redactionStatus: "metadata_only",
+        formalUsagePolicy: {
+          createFormalPaper: false,
+          createMockExam: false,
+          exposeQuestionBody: false,
+          exposeStandardAnswer: false,
+          exposeAnalysis: false,
+          exposeProviderPayload: false,
+        },
+      },
+    ]);
+    gateway.copyAiResultToTrainingDraftTransaction = vi.fn(async () => ({
+      persistenceStatus: "reused" as const,
+      draftRow: draftRow!,
+      sourceContextRows,
+    }));
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    await expect(
+      repository.copyAiResultToTrainingDraft({
+        organizationPublicId: "organization_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_123",
+        sourceResultPublicId: "admin_ai_generation_result_123",
+        weakEvidenceConfirmed: false,
+        copiedAt: "2026-07-21T23:00:00.000Z",
+      }),
+    ).resolves.toMatchObject({
+      persistenceStatus: "reused",
+      draft: {
+        publicId: "organization_training_draft_ai_copy_123",
+        sourceTaskPublicId: "admin_ai_generation_task_123",
+      },
+      context: {
+        sourceContexts: [
+          {
+            sourceType: "organization_ai_result",
+            sourcePublicId: "admin_ai_generation_result_123",
+          },
+        ],
+      },
+    });
+
+    gateway.copyAiResultToTrainingDraftTransaction = vi.fn(async () => ({
+      persistenceStatus: "created" as const,
+      draftRow: draftRow!,
+      sourceContextRows: [],
+    }));
+    await expect(
+      createOrganizationTrainingRepository(gateway).copyAiResultToTrainingDraft(
+        {
+          organizationPublicId: "organization_public_123",
+          sourceTaskPublicId: "admin_ai_generation_task_123",
+          sourceResultPublicId: "admin_ai_generation_result_123",
+          weakEvidenceConfirmed: false,
+          copiedAt: "2026-07-21T23:00:00.000Z",
+        },
+      ),
+    ).resolves.toBeNull();
+  });
+
   it("copies a published version snapshot into a fresh draft without mutating the source version", async () => {
     const { gateway, insertManualDraft, getManualDraftInsertInputs } =
       createGateway({

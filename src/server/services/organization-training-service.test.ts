@@ -658,6 +658,88 @@ function createSubmittedEmployeeAnswer(
 }
 
 describe("organization training service", () => {
+  it("delegates one server-owned AI result copy command and blocks out-of-scope organizations", async () => {
+    const { draftStore } = createDraftStore();
+    const writes: unknown[] = [];
+    const service = createOrganizationTrainingService(
+      {
+        ...draftStore,
+        async copyAiResultToTrainingDraft(copyWrite) {
+          writes.push(copyWrite);
+          return {
+            persistenceStatus: "created",
+            draft: {
+              publicId: "training_draft_ai_copy_123",
+              sourceTaskPublicId: copyWrite.sourceTaskPublicId,
+              organizationPublicId: copyWrite.organizationPublicId,
+              authorizationSource: "org_auth",
+              authorizationPublicId: "org_auth_public_123",
+              profession: "monopoly",
+              level: 3,
+              subject: "theory",
+              title: "AI training draft",
+              description: null,
+              questionCount: 1,
+              totalScore: 1,
+              questionTypeSummary: {
+                singleChoice: 1,
+                multiChoice: 0,
+                trueFalse: 0,
+                shortAnswer: 0,
+              },
+              evidenceStatus: "sufficient",
+              validationStatus: "needs_review",
+              retentionStatus: "active",
+              createdAt: fixedNow.toISOString(),
+              expiresAt: null,
+            },
+            context: {
+              draftPublicId: "training_draft_ai_copy_123",
+              organizationPublicId: copyWrite.organizationPublicId,
+              sourceContexts: [],
+              redactionStatus: "metadata_only",
+            },
+          };
+        },
+      },
+      { now: () => fixedNow },
+    );
+    const copyInput = {
+      organizationPublicId: "organization_public_123",
+      sourceTaskPublicId: "admin_ai_generation_task_123",
+      sourceResultPublicId: "admin_ai_generation_result_123",
+      weakEvidenceConfirmed: false,
+    };
+
+    await expect(
+      service.copyAiResultToTrainingDraft({
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: ["organization_public_123"],
+        },
+        copyInput,
+      }),
+    ).resolves.toMatchObject({ success: true });
+    expect(writes).toEqual([
+      { ...copyInput, copiedAt: fixedNow.toISOString() },
+    ]);
+
+    await expect(
+      service.copyAiResultToTrainingDraft({
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: ["organization_public_other"],
+        },
+        copyInput,
+      }),
+    ).resolves.toEqual({
+      success: false,
+      reason: "organization_scope_denied",
+      message: "Organization AI result training draft copy is blocked.",
+    });
+    expect(writes).toHaveLength(1);
+  });
+
   it("builds a redacted audit_log reference for organization training without raw content", () => {
     const rawQuestionBody = ["RAW", "QUESTION", "BODY"].join("-");
     const rawAnswerBody = ["RAW", "ANSWER", "BODY"].join("-");

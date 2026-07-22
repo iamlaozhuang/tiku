@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+currentPhase: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -465,12 +465,12 @@ p0RemediationSerialProgram:
       shortBranchCleanup: pass
 p1RemediationSerialProgram:
   programId: p1-remediation-2026-07-16
-  status: closed
+  status: in_progress
   activityStatePolicy: wip_one_dynamic_task_materialization
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+  currentTaskId: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -532,6 +532,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
     - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
     - p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
+    - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+    - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+    - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -583,6 +586,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
     - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
+    - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -633,6 +637,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-learner-history-pagination-2026-07-20: closed
     p1-remediation-rc-04-student-home-pagination-2026-07-20: closed
     p1-execution-policy-capsule-v1-1-2026-07-21: closed
+    p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21: closed
+    p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -821,87 +827,71 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
-  title: Learner AI generation input and constraint snapshot
-  phase: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+  id: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+  title: Atomic organization AI result training draft copy command
+  phase: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
   status: closed
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0160
-  branch: fix/personal-ai-generation-input-snapshot
+  productClosureContribution: F-0166_and_F-0167
+  branch: fix/organization-ai-training-copy-command
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0160
+    - F-0166
+    - F-0167
   candidateRootCauseCluster: P1-RC-05
-  objective: remove learner generation demo lineage and persist truthful versioned input and authorization-bound constraint snapshots with fail-closed idempotent replay and redacted reconstructable history
+  objective: replace the browser-coordinated two-write copy flow with one server-owned atomic and deterministic organization AI result-to-training-draft command
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: closed_static_product_verified
   riskBoundary:
-    category: schema_migration_source_and_database_application_logic
-    approvalId: guardian-f0160-personal-ai-generation-input-snapshot-2026-07-21
-    schemaOrMigrationChange: true
+    category: bounded_database_application_transaction_and_existing_permission_semantics
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: learner_UI_to_personal_generation_route_and_validator_to_task_repository_and_ai_generation_task_schema_to_history_mapper_and_UI
-    coreFiles: 19
-    contingencyFiles: 9
-    preflightTestFiles: 10
+    chain: immutable_admin_AI_result_snapshot_to_atomic_copy_route_service_repository_transaction_to_training_draft_source_context_and_UI
+    coreFiles: 14
+    contingencyFiles: 8
+    preflightTestFiles: 8
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    confirmedResidualRootCause: real_question_and_paper_generation_is_encoded_as_demo_question_explanation_lineage_and_normalized_generation_parameters_are_not_persisted
-    scopeAmendment: guardian-f0160-direct-provider-context-null-lineage-amendment-01-2026-07-21_two_direct_nullable_provider_context_files
+    confirmedResidualRootCause: browser_combines_historical_result_with_current_form_scope_then_performs_two_independent_generic_writes
+    bundleDecision: F0166_and_F0167_share_one_server_owned_copy_command_transaction_and_validation_matrix
   expectedAcceptance:
-    - new_learner_question_and_paper_tasks_persist_versioned_normalized_input_and_authorization_bound_constraint_snapshots
-    - demo_ai_function_question_answer_record_and_paper_references_are_absent_from_real_requests_and_new_rows
-    - same_idempotency_key_with_different_snapshot_fails_closed
-    - history_exposes_redacted_reconstructable_snapshots_and_marks_legacy_rows_unavailable_without_fabrication
-    - additive_migration_source_only_with_no_real_database_execution
-    - no_permission_provider_dependency_mechanism_or_other_finding_change
-  snapshotIntegrityContract:
-    serverOwned: version_input_constraint_and_digest_from_validated_parameters_and_authoritative_authorization_context
-    canonicalization: deterministic_allowlisted_explicit_null_array_and_set_semantics
-    digestBinding: task_type_input_constraints_and_schema_version
-    idempotency: same_key_same_snapshot_reuse_different_snapshot_fail_closed_without_side_effect
-    legacy: all_snapshot_fields_null_and_history_explicitly_unavailable
-    redaction: no_secret_internal_id_raw_authorization_provider_payload_answer_or_unnecessary_PII
-    migration: additive_nullable_legacy_compatible_no_backfill_or_existing_semantic_change
+    - client_submits_only_organization_source_task_source_result_and_weak_evidence_confirmation
+    - server_derives_scope_content_original_authorization_and_evidence_from_one_immutable_source_result_snapshot
+    - task_result_organization_scope_authorization_and_evidence_mismatch_fail_closed_without_writes
+    - draft_and_source_context_are_created_in_one_transaction_and_same_result_replay_returns_one_deterministic_draft
+    - response_loss_concurrency_and_second_insert_failure_do_not_create_duplicates_or_orphans
+    - no_schema_real_database_permission_provider_dependency_mechanism_or_other_finding_change
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    triggers: guardian_approval_then_TDD_migration_source_generation_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0160_closed_then_JIT_F0166_F0167_bundle
+    triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0166_and_F0167_closed_then_JIT_next_remaining_P1_finding
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 1
-    preventableScopeMissApprovals: 1
+    mandatoryFreshApprovals: 0_standing_bounded_medium_risk
+    preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    conditionalCandidateBindingRetries: 1_generated_snapshot_prettier_applied_by_lint_staged_before_kernel
-    approvalWaitTurns: 1
-    productValueTime: terminal_clock_not_reconstructable_includes_TDD_schema_snapshot_idempotency_history_and_adversarial_hardening
-    mechanismOverhead: terminal_clock_not_reconstructable_includes_parent_approval_scope_amendment_state_contract_validation_and_closeout
+    approvalWaitTurns: 0
+    productValueTime: includes_TDD_snapshot_truth_atomic_copy_command_UI_replacement_and_adversarial_hardening
+    mechanismOverhead: includes_JIT_contract_state_validation_kernel_and_closeout
     guardSmokeChanges: 0
   validationEvidence:
-    tddRed: pass_7_expected_failures_across_5_files_before_implementation
-    focused: pass_10_files_204_tests
-    amendmentFocused: pass_4_files_87_tests_then_final_suite
-    lint: pass_all_17_changed_TypeScript_and_test_files
-    typecheck: pass
-    build: pass_100_static_pages_with_preexisting_NFT_warning_only
-    schemaMigrationSource: pass_4_additive_nullable_columns_2_checks_no_data_or_destructive_SQL_snapshot_parent_exact_and_no_unrelated_schema_drift
-    formatAndDiff: pass_including_generated_snapshot_prettier_applied_by_lint_staged
-    stateContractParse: pass_JSON_and_YAML_23_changed_files_all_within_28_allowed_files
-    adversarialReview: pass_server_owned_null_lineage_exact_allowlisted_canonicalization_same_key_snapshot_conflict_malformed_history_fail_closed_redaction_no_provider_permission_dependency_or_real_DB_change
-    runtimeDatabaseProof: not_claimed_static_and_synthetic_only
-  closureEvidence:
-    F-0160: learner_question_and_paper_generation_now_persists_truthful_versioned_input_and_authorization_constraint_snapshots_without_demo_lineage_and_history_marks_legacy_or_malformed_snapshots_unavailable
-    residual: F0166_F0167_organization_AI_command_bundle_remains_separate_and_unstarted
+    red: 3_expected_failures_missing_generation_snapshot_mapper_and_copy_validator
+    focused: 8_files_254_tests_passed
+    lint: targeted_changed_and_direct_contract_files_passed
+    typecheck: tsc_noEmit_passed
+    build: next_build_passed_with_preexisting_NFT_warning
+    review: one_main_thread_adversarial_review_passed_no_scope_or_entitlement_expansion
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
+    taskId: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
     findingIds:
-      - F-0029
-    commit: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
+      - F-0160
+    commit: ca1636e1d95f9045aa12ca1d38990f3070f55e96
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     masterOriginSync: pass
     worktreeClean: true
@@ -916,9 +906,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
-  lastKnownOriginMasterSha: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
-  lastKnownRemoteMasterSha: 1b71c6da8cbf1ac09fdf5eb7ffc825835ec616fc
+  lastKnownMasterSha: ca1636e1d95f9045aa12ca1d38990f3070f55e96
+  lastKnownOriginMasterSha: ca1636e1d95f9045aa12ca1d38990f3070f55e96
+  lastKnownRemoteMasterSha: ca1636e1d95f9045aa12ca1d38990f3070f55e96
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

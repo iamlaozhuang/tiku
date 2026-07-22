@@ -1326,6 +1326,7 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
       input.localContract.organizationOwnedDraftBoundary.publishStatus,
     studentVisibleStatus:
       input.localContract.organizationOwnedDraftBoundary.studentVisibleStatus,
+    generationParameters: input.generationParameters,
     ...(input.localContract.paperAssembly === null
       ? {}
       : {

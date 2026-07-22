@@ -23,6 +23,10 @@ import type {
   OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
 } from "../contracts/organization-training-contract";
+import {
+  normalizeAiGenerationRouteIntegratedKnowledgeScope,
+  type AiGenerationRouteIntegratedGenerationParameters,
+} from "../contracts/route-integrated-provider-execution-contract";
 
 const DEFAULT_RESULT_HISTORY_LIMIT = 20;
 const MAX_RESULT_HISTORY_LIMIT = 50;
@@ -286,8 +290,95 @@ const paperSourceKinds = [
   "enterprise_training_snapshot",
 ] as const;
 
+const generationProfessions = ["monopoly", "marketing", "logistics"] as const;
+const generationSubjects = ["theory", "skill"] as const;
+const questionTypeDistributions = [
+  "balanced_40_30_30",
+  "single_50_multi_25_true_false_25",
+  "weak_point_priority",
+] as const;
+const paperStructures = ["by_question_type", "by_knowledge_node"] as const;
+
 function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === "string";
+}
+
+type AdminAiGenerationTrainingSnapshotRow = {
+  workspace: string;
+  generation_kind: string;
+  content_redacted_snapshot: unknown;
+};
+
+export function resolveGenerationParametersSnapshot(row: {
+  content_redacted_snapshot: unknown;
+}): AiGenerationRouteIntegratedGenerationParameters | null {
+  const snapshot = row.content_redacted_snapshot;
+
+  if (!isRecord(snapshot) || !isRecord(snapshot.generationParameters)) {
+    return null;
+  }
+
+  const value = snapshot.generationParameters;
+  const scope = normalizeAiGenerationRouteIntegratedKnowledgeScope({
+    includeDescendants: value.includeDescendants,
+    knowledgeNode: value.knowledgeNode,
+    knowledgeNodeMode: value.knowledgeNodeMode,
+    knowledgeNodePublicIds: value.knowledgeNodePublicIds,
+    knowledgeNodeSupplement: value.knowledgeNodeSupplement,
+    sourcePreference: value.sourcePreference,
+  });
+  const level = value.level;
+  const questionCount = value.questionCount;
+  const questionTypeDistribution = value.questionTypeDistribution;
+  const paperStructure = value.paperStructure;
+
+  if (
+    !generationProfessions.includes(
+      value.profession as (typeof generationProfessions)[number],
+    ) ||
+    !generationSubjects.includes(
+      value.subject as (typeof generationSubjects)[number],
+    ) ||
+    (level !== 1 && level !== 2 && level !== 3 && level !== 4 && level !== 5) ||
+    typeof questionCount !== "number" ||
+    !Number.isInteger(questionCount) ||
+    questionCount < 1 ||
+    !isNullableString(value.questionType) ||
+    !isNullableString(value.difficulty) ||
+    !isNullableString(value.learningObjective) ||
+    scope === null ||
+    !(
+      questionTypeDistribution === null ||
+      questionTypeDistributions.includes(
+        questionTypeDistribution as (typeof questionTypeDistributions)[number],
+      )
+    ) ||
+    !(
+      paperStructure === null ||
+      paperStructures.includes(
+        paperStructure as (typeof paperStructures)[number],
+      )
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    profession:
+      value.profession as AiGenerationRouteIntegratedGenerationParameters["profession"],
+    level,
+    subject:
+      value.subject as AiGenerationRouteIntegratedGenerationParameters["subject"],
+    questionType: value.questionType,
+    questionCount,
+    difficulty: value.difficulty,
+    learningObjective: value.learningObjective,
+    ...scope,
+    questionTypeDistribution:
+      questionTypeDistribution as AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"],
+    paperStructure:
+      paperStructure as AiGenerationRouteIntegratedGenerationParameters["paperStructure"],
+  };
 }
 
 function isOrganizationTrainingQuestionType(
@@ -405,8 +496,8 @@ function normalizeOrganizationTrainingQuestionDetail(
   };
 }
 
-function resolveOrganizationTrainingQuestionDraftSnapshot(
-  row: AdminAiGenerationResultPersistenceRow,
+export function resolveOrganizationTrainingQuestionDraftSnapshot(
+  row: AdminAiGenerationTrainingSnapshotRow,
 ): AdminAiGenerationOrganizationTrainingQuestionDraftPayload | null {
   if (row.workspace !== "organization" || row.generation_kind !== "question") {
     return null;
@@ -556,8 +647,8 @@ function normalizeOrganizationTrainingPaperSectionDetail(
   };
 }
 
-function resolveOrganizationTrainingPaperDraftSnapshot(
-  row: AdminAiGenerationResultPersistenceRow,
+export function resolveOrganizationTrainingPaperDraftSnapshot(
+  row: AdminAiGenerationTrainingSnapshotRow,
 ): AdminAiGenerationOrganizationTrainingPaperDraftPayload | null {
   if (row.workspace !== "organization" || row.generation_kind !== "paper") {
     return null;
