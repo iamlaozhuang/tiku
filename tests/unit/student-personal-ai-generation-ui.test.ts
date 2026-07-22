@@ -3233,7 +3233,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByTestId("student-visible-generated-content"),
     ).not.toHaveTextContent("synthetic visible learner analysis");
-    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
+    const startLearningButton = screen.getByRole("button", {
+      name: "开始作答",
+    });
+    expect(startLearningButton).not.toBeDisabled();
+    fireEvent.click(startLearningButton);
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
     );
@@ -3300,9 +3304,9 @@ describe("StudentPersonalAiGenerationPage", () => {
             structuredPreview: {
               kind: "question_set",
               parseStatus: "parsed",
-              requestedQuestionCount: 10,
-              actualQuestionCount: 10,
-              draftCount: 10,
+              requestedQuestionCount: 1,
+              actualQuestionCount: 1,
+              draftCount: 1,
               draftSummaries: [
                 {
                   draftNumber: 1,
@@ -3410,6 +3414,10 @@ describe("StudentPersonalAiGenerationPage", () => {
             ownerPublicId: "organization-public-123",
             ownerType: "organization",
             path,
+            persistedSourceTaskPublicId:
+              readMockExperienceSourceTaskPublicId(visibleResponse),
+            persistedVisibleGeneratedContent:
+              readMockExperienceVisibleGeneratedContent(visibleResponse),
             state: learningSessionMockState,
           });
 
@@ -3441,7 +3449,14 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee analysis",
     );
-    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
+    const organizationStartLearningButton = screen.getByRole("button", {
+      name: "开始作答",
+    });
+    expect(organizationStartLearningButton).not.toBeDisabled();
+    fireEvent.click(organizationStartLearningButton);
+    await waitFor(() =>
+      expect(learningSessionMockState.sessionsByPublicId.size).toBe(1),
+    );
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
     );
@@ -4754,13 +4769,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       "synthetic persisted personal learner stem",
     );
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
-    expect(sessionCreateBodies[0]).toMatchObject({
+    expect(sessionCreateBodies[0]).toEqual({
       authorizationPublicId: "authorization-context-ui-001",
-      sessionPublicId,
       sourceResultPublicId,
-      sourceTaskPublicId,
-      ownerType: "personal",
-      ownerPublicId: "student-public-001",
     });
 
     fireEvent.click(
@@ -4795,7 +4806,6 @@ describe("StudentPersonalAiGenerationPage", () => {
       "ai-generation-result-visible-employee-personal-api-001";
     const sourceTaskPublicId =
       "ai-generation-task-visible-employee-personal-api-001";
-    const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
     const visibleResponse = {
       ...localExperienceResponse,
       data: {
@@ -4972,12 +4982,9 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
-    expect(sessionCreateBodies[0]).toMatchObject({
-      sessionPublicId,
+    expect(sessionCreateBodies[0]).toEqual({
+      authorizationPublicId: "personal-auth-context-dual-001",
       sourceResultPublicId,
-      sourceTaskPublicId,
-      ownerType: "personal",
-      ownerPublicId: "employee-session-user-public-123",
     });
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("raw prompt");

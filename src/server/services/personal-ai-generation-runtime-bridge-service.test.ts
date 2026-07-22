@@ -13,6 +13,40 @@ import type {
 } from "../contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
 import { createModelConfigSnapshot } from "../models/ai-rag";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+
+function createPrivateQuestionDraftSnapshot() {
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId: "ai_generation_task_public_bridge_121",
+    ownerPublicId: "student_public_bridge_121",
+    requestedQuestionCount: 1,
+    questions: [
+      {
+        draftPublicId: "ai_question_draft_public_bridge_121",
+        draftNumber: 1,
+        questionType: "short_answer",
+        difficulty: "medium",
+        knowledgeNodeCount: 1,
+        knowledgeNodeLabels: ["测试知识点"],
+        questionStem: "测试题干",
+        questionOptions: [],
+        standardAnswer: "测试答案",
+        analysis: "测试解析",
+        scoringPoints: [
+          { description: "测试评分点", score: "1", sortOrder: 1 },
+        ],
+        fillBlankAnswers: [],
+        reviewStatus: "draft_review_required",
+      },
+    ],
+  });
+
+  if (snapshot === null) {
+    throw new Error("test snapshot must be valid");
+  }
+
+  return snapshot;
+}
 
 const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
   {
@@ -218,6 +252,7 @@ describe("personal AI generation runtime bridge service", () => {
         resultPublicId: "ai_generation_result_public_bridge_121",
         contentDigest: "sha256:bridge_materialized_digest_121",
         contentPreviewMasked: "masked local result preview",
+        privateQuestionDraftSnapshot: createPrivateQuestionDraftSnapshot(),
         evidenceStatus: "none",
         citationCount: 0,
         aiCallLogPublicId: "ai-call-log-personal-bridge-test",
@@ -357,13 +392,14 @@ describe("personal AI generation runtime bridge service", () => {
       bridgeStatus: "provider_call_succeeded",
       providerCallExecuted: true,
       visibleGeneratedContent: {
-        content: "学生端本次 AI 生成预览",
+        content: "AI 题目草稿已生成，答案与解析仅在受保护的学习会话中处理。",
         contentVisibility: "transient_response_only",
         persistenceStatus: "not_persisted",
         safetyStatus: "checked",
       },
     });
     expect(serializedSummary).not.toContain("学生端本次 AI 生成预览");
+    expect(JSON.stringify(bridge)).not.toContain("学生端本次 AI 生成预览");
     expect(JSON.stringify(bridge)).not.toContain("synthetic-bridge-credential");
     expect(JSON.stringify(bridge)).not.toContain("provider payload");
   });
@@ -411,6 +447,8 @@ describe("personal AI generation runtime bridge service", () => {
               resultPublicId: "ai_generation_result_public_bridge_122",
               contentDigest: "sha256:bridge_materialized_digest_122",
               contentPreviewMasked: "masked local result preview",
+              privateQuestionDraftSnapshot:
+                createPrivateQuestionDraftSnapshot(),
               evidenceStatus: "none",
               citationCount: 0,
               aiCallLogPublicId: "ai-call-log-personal-bridge-test",
@@ -471,7 +509,7 @@ describe("personal AI generation runtime bridge service", () => {
         formalAdoptionStatus: "blocked",
       },
       visibleGeneratedContent: {
-        content: "学生端本次 AI 生成预览",
+        content: "AI 题目草稿已生成，答案与解析仅在受保护的学习会话中处理。",
         contentVisibility: "transient_response_only",
         persistenceStatus: "not_persisted",
         safetyStatus: "checked",
@@ -493,5 +531,6 @@ describe("personal AI generation runtime bridge service", () => {
     expect(serializedBridge).not.toContain("provider payload");
     expect(serializedBridge).not.toContain("raw prompt");
     expect(serializedBridge).not.toContain("raw response");
+    expect(serializedBridge).not.toContain("学生端本次 AI 生成预览");
   });
 });

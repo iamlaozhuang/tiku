@@ -10,7 +10,10 @@ export const personalAiGenerationLearningSessionQuestionTypeValues = [
   "single_choice",
   "multi_choice",
   "true_false",
+  "fill_blank",
   "short_answer",
+  "case_analysis",
+  "calculation",
 ] as const;
 
 export type PersonalAiGenerationLearningSessionQuestionType =

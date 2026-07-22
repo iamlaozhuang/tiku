@@ -15,9 +15,10 @@ const questionTypeAliases: Record<
   string,
   PersonalAiGenerationLearningSessionQuestionType
 > = {
-  judge: "true_false",
+  calculation: "calculation",
+  case_analysis: "case_analysis",
+  fill_blank: "fill_blank",
   multi_choice: "multi_choice",
-  multiple_choice: "multi_choice",
   short_answer: "short_answer",
   single_choice: "single_choice",
   true_false: "true_false",
@@ -91,6 +92,10 @@ export function createPersonalAiLearningSessionQuestion(input: {
   );
   const standardAnswerText = normalizeNullableText(input.draft.standardAnswer);
 
+  if (questionOptions.length !== (input.draft.questionOptions?.length ?? 0)) {
+    return null;
+  }
+
   return {
     sessionQuestionPublicId: `${input.sessionPublicId}_q_${input.usableQuestionIndex}`,
     sourceDraftNumber: input.draft.draftNumber,
@@ -102,6 +107,7 @@ export function createPersonalAiLearningSessionQuestion(input: {
     questionStem,
     questionOptions,
     standardAnswerLabels: resolveStandardAnswerLabels({
+      questionType,
       questionOptions,
       standardAnswerText,
     }),
@@ -151,6 +157,7 @@ export function createPersonalAiLearningSessionQuestionFromPaperSource(input: {
       normalizedStandardAnswerLabels.length > 0
         ? normalizedStandardAnswerLabels
         : resolveStandardAnswerLabels({
+            questionType,
             questionOptions,
             standardAnswerText,
           }),
@@ -202,6 +209,7 @@ function formatSelectedPaperScore(score: number): string {
 }
 
 function resolveStandardAnswerLabels(input: {
+  questionType: PersonalAiGenerationLearningSessionQuestionType;
   questionOptions: PersonalAiGenerationLearningSessionQuestionOptionDto[];
   standardAnswerText: string | null;
 }): string[] {
@@ -215,6 +223,14 @@ function resolveStandardAnswerLabels(input: {
 
   if (input.standardAnswerText === null) {
     return [];
+  }
+
+  if (input.questionType === "true_false") {
+    const normalizedAnswer = input.standardAnswerText.trim().toUpperCase();
+
+    return normalizedAnswer === "TRUE" || normalizedAnswer === "FALSE"
+      ? [normalizedAnswer]
+      : [];
   }
 
   const separatedLabels = input.standardAnswerText.match(/[A-H](?![a-z])/gi);

@@ -1,4 +1,5 @@
 import type { EvidenceStatus } from "../models/ai-rag";
+import type { PersonalAiGenerationPrivateQuestionDraftSnapshotDto } from "./personal-ai-generation-result-persistence-contract";
 import type {
   AiPaperPlanAndSelectContainerDto,
   AiPaperQuestionSourceKind,
@@ -16,7 +17,6 @@ import type {
   PersonalAiGenerationLearningSessionProgressStatus,
   PersonalAiGenerationLearningSessionQuestionType,
 } from "../models/personal-ai-generation-learning-session";
-import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-contract";
 
 export type PersonalAiGenerationLearningPaperQuestionSourceKind = Exclude<
   AiPaperQuestionSourceKind,
@@ -82,6 +82,23 @@ export type PersonalAiGenerationLearningSessionDto = {
   createdAt: string;
 };
 
+export type PersonalAiGenerationLearningSessionPublicQuestionDto = Omit<
+  PersonalAiGenerationLearningSessionQuestionDto,
+  "questionOptions" | "standardAnswerLabels" | "standardAnswerText" | "analysis"
+> & {
+  questionOptions: Omit<
+    PersonalAiGenerationLearningSessionQuestionOptionDto,
+    "isCorrect"
+  >[];
+};
+
+export type PersonalAiGenerationLearningSessionPublicDto = Omit<
+  PersonalAiGenerationLearningSessionDto,
+  "questions"
+> & {
+  questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
+};
+
 export type PersonalAiGenerationLearningSessionCreationInputDto = {
   sessionPublicId: string;
   sourceResultPublicId: string | null;
@@ -89,7 +106,9 @@ export type PersonalAiGenerationLearningSessionCreationInputDto = {
   ownerType: PersonalAiGenerationLearningSessionOwnerType;
   ownerPublicId: string;
   actorPublicId: string;
-  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent;
+  questionDraftSnapshot: PersonalAiGenerationPrivateQuestionDraftSnapshotDto;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
   createdAt: Date;
 };
 
@@ -121,6 +140,18 @@ export type PersonalAiGenerationLearningSessionCreationResultDto =
         PersonalAiGenerationLearningSessionCreationStatus,
         "blocked"
       >;
+      blockReason: PersonalAiGenerationLearningSessionCreationBlockReason;
+      session: null;
+    };
+
+export type PersonalAiGenerationLearningSessionPublicCreationResultDto =
+  | {
+      status: "created";
+      blockReason: null;
+      session: PersonalAiGenerationLearningSessionPublicDto;
+    }
+  | {
+      status: "blocked";
       blockReason: PersonalAiGenerationLearningSessionCreationBlockReason;
       session: null;
     };

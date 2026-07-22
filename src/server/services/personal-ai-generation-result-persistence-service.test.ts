@@ -2,6 +2,40 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import { createPersonalAiGenerationResultPersistenceService } from "./personal-ai-generation-result-persistence-service";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+
+function createPrivateQuestionDraftSnapshot() {
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId: "ai_generation_task_public_180",
+    ownerPublicId: "student_public_180",
+    requestedQuestionCount: 1,
+    questions: [
+      {
+        draftPublicId: "ai_question_draft_public_180",
+        draftNumber: 1,
+        questionType: "short_answer",
+        difficulty: "medium",
+        knowledgeNodeCount: 1,
+        knowledgeNodeLabels: ["测试知识点"],
+        questionStem: "测试题干",
+        questionOptions: [],
+        standardAnswer: "测试答案",
+        analysis: "测试解析",
+        scoringPoints: [
+          { description: "测试评分点", score: "1", sortOrder: 1 },
+        ],
+        fillBlankAnswers: [],
+        reviewStatus: "draft_review_required",
+      },
+    ],
+  });
+
+  if (snapshot === null) {
+    throw new Error("test snapshot must be valid");
+  }
+
+  return snapshot;
+}
 
 function createBaseInput() {
   const omittedDraftText = ["OMITTED", "DRAFT", "TEXT"].join("-");
@@ -20,6 +54,7 @@ function createBaseInput() {
     },
     contentDigest: "sha256:content_180",
     contentPreviewMasked: "masked preview 180",
+    privateQuestionDraftSnapshot: createPrivateQuestionDraftSnapshot(),
     citationRedactedSnapshot: null,
     evidenceStatus: "weak",
     citationCount: 1,

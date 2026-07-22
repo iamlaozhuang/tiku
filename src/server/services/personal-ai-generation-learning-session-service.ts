@@ -13,7 +13,6 @@ import type {
   PersonalAiGenerationLearningSessionStatisticsDto,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import {
-  collectPersonalAiLearningQuestionDrafts,
   createBlockedPersonalAiLearningFormalWriteBoundary,
   createPersonalAiLearningSessionQuestion,
   createPersonalAiLearningSessionQuestionFromPaperSource,
@@ -40,18 +39,7 @@ async function createLearningSession(
   repository: PersonalAiGenerationLearningSessionRepository,
   input: PersonalAiGenerationLearningSessionCreationInputDto,
 ): Promise<PersonalAiGenerationLearningSessionCreationResultDto> {
-  const existingResult = await reuseExistingLearningSession(repository, input);
-
-  if (existingResult !== null) {
-    return existingResult;
-  }
-
-  const groundingSummary = input.visibleGeneratedContent.groundingSummary;
-
-  if (
-    groundingSummary === undefined ||
-    groundingSummary.evidenceStatus !== "sufficient"
-  ) {
+  if (input.evidenceStatus !== "sufficient" || input.citationCount <= 0) {
     return blockCreation("insufficient_grounding_evidence");
   }
 
@@ -59,36 +47,37 @@ async function createLearningSession(
     return blockCreation("source_result_required");
   }
 
-  const structuredPreview = input.visibleGeneratedContent.structuredPreview;
+  const drafts = input.questionDraftSnapshot.snapshot.questions;
+  const questions: PersonalAiGenerationLearningSessionQuestionDto[] = [];
 
-  if (structuredPreview === undefined) {
-    return blockCreation("structured_preview_unavailable");
-  }
-
-  const drafts = collectPersonalAiLearningQuestionDrafts(structuredPreview);
-
-  if (drafts === null) {
-    return blockCreation("structured_preview_not_parsed");
-  }
-
-  const questions = drafts.reduce<
-    PersonalAiGenerationLearningSessionQuestionDto[]
-  >((usableQuestions, draft) => {
+  for (const [index, draft] of drafts.entries()) {
     const question = createPersonalAiLearningSessionQuestion({
       sessionPublicId: input.sessionPublicId,
-      usableQuestionIndex: usableQuestions.length + 1,
+      usableQuestionIndex: index + 1,
       draft,
     });
 
-    if (question !== null) {
-      usableQuestions.push(question);
+    if (question === null) {
+      return blockCreation("no_usable_generated_questions");
     }
 
-    return usableQuestions;
-  }, []);
+    questions.push(question);
+  }
 
-  if (questions.length === 0) {
+  if (
+    questions.length !==
+    input.questionDraftSnapshot.snapshot.requestedQuestionCount
+  ) {
     return blockCreation("no_usable_generated_questions");
+  }
+  const existingResult = await reuseExistingLearningSession(
+    repository,
+    input,
+    questions,
+  );
+
+  if (existingResult !== null) {
+    return existingResult;
   }
 
   const session: PersonalAiGenerationLearningSessionDto = {
@@ -99,8 +88,8 @@ async function createLearningSession(
     ownerType: input.ownerType,
     ownerPublicId: input.ownerPublicId,
     actorPublicId: input.actorPublicId,
-    evidenceStatus: groundingSummary.evidenceStatus,
-    citationCount: groundingSummary.citationCount,
+    evidenceStatus: input.evidenceStatus,
+    citationCount: input.citationCount,
     questionCount: questions.length,
     questions,
     formalWriteBoundary: createBlockedPersonalAiLearningFormalWriteBoundary(),
@@ -113,11 +102,10 @@ async function createLearningSession(
     return blockCreation(saveResult.blockReason);
   }
 
-  return {
-    status: "created",
-    blockReason: null,
-    session: projectPersonalAiLearningSessionForLearner(session),
-  };
+  return (
+    (await reuseExistingLearningSession(repository, input, questions)) ??
+    blockCreation("session_context_mismatch")
+  );
 }
 
 async function createLearningSessionFromPaperAssembly(
@@ -170,11 +158,10 @@ async function createLearningSessionFromPaperAssembly(
     return blockCreation(saveResult.blockReason);
   }
 
-  return {
-    status: "created",
-    blockReason: null,
-    session: projectPersonalAiLearningSessionForLearner(session),
-  };
+  return (
+    (await reuseExistingLearningSession(repository, input, questions)) ??
+    blockCreation("session_context_mismatch")
+  );
 }
 
 async function reuseExistingLearningSession(
@@ -188,6 +175,7 @@ async function reuseExistingLearningSession(
     | "ownerPublicId"
     | "actorPublicId"
   >,
+  expectedQuestions?: PersonalAiGenerationLearningSessionQuestionDto[],
 ): Promise<PersonalAiGenerationLearningSessionCreationResultDto | null> {
   const existingSession = await repository.findSessionByPublicId(
     input.sessionPublicId,
@@ -202,7 +190,10 @@ async function reuseExistingLearningSession(
     existingSession.sourceTaskPublicId !== input.sourceTaskPublicId ||
     existingSession.ownerType !== input.ownerType ||
     existingSession.ownerPublicId !== input.ownerPublicId ||
-    existingSession.actorPublicId !== input.actorPublicId
+    existingSession.actorPublicId !== input.actorPublicId ||
+    (expectedQuestions !== undefined &&
+      JSON.stringify(existingSession.questions) !==
+        JSON.stringify(expectedQuestions))
   ) {
     return blockCreation("session_context_mismatch");
   }
@@ -303,6 +294,9 @@ async function submitLearningSessionAnswer(
 
   if (
     question.questionType === "short_answer" ||
+    question.questionType === "fill_blank" ||
+    question.questionType === "case_analysis" ||
+    question.questionType === "calculation" ||
     question.standardAnswerLabels.length === 0
   ) {
     const answerFeedback = createAnswerFeedback({

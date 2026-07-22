@@ -69,13 +69,17 @@ export function createContentAdminFormalReviewedDraftPayload({
     localContractSummary.generationKind === "question" &&
     structuredPreview.kind === "question_set"
   ) {
-    const questionDraft = structuredPreview.draftSummaries
-      .map((draftSummary) =>
-        createFormalQuestionDraftPayload(draftSummary, generationParameters),
-      )
-      .find((payload) => payload !== null);
+    if (
+      structuredPreview.requestedQuestionCount !== 1 ||
+      structuredPreview.draftSummaries.length !== 1
+    ) {
+      return null;
+    }
 
-    return questionDraft ?? null;
+    return createFormalQuestionDraftPayload(
+      structuredPreview.draftSummaries[0],
+      generationParameters,
+    );
   }
 
   if (

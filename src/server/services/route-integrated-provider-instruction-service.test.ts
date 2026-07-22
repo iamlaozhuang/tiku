@@ -107,24 +107,26 @@ describe("route-integrated Provider instruction service", () => {
       expect(readOutputContractLine(instructions.systemInstruction)).toContain(
         "仅输出一个 JSON 对象",
       );
-      expect(readOutputContractLine(instructions.systemInstruction)).toContain(
-        "顶层必须只使用 questions 字段",
+      expect(instructions.systemInstruction).toContain(
+        "schemaVersion=question_draft_v1",
       );
+      expect(instructions.systemInstruction).toContain("kind=question_set");
+      expect(
+        readOutputContractLine(instructions.systemInstruction),
+      ).not.toContain("schemaVersion");
+      expect(
+        readOutputContractLine(instructions.systemInstruction),
+      ).not.toContain("questionOptions 每项");
+      expect(
+        readOutputContractLine(instructions.systemInstruction),
+      ).not.toContain("顶层必须只使用 questions 字段");
       expect(readOutputContractLine(instructions.systemInstruction)).toContain(
         "不要输出 Markdown",
       );
-      expect(readOutputContractLine(instructions.systemInstruction)).toContain(
-        "questionStem",
-      );
-      expect(readOutputContractLine(instructions.systemInstruction)).toContain(
-        "questionOptions",
-      );
-      expect(readOutputContractLine(instructions.systemInstruction)).toContain(
-        "standardAnswer",
-      );
-      expect(readOutputContractLine(instructions.systemInstruction)).toContain(
-        "analysis",
-      );
+      expect(instructions.systemInstruction).toContain("questionStem");
+      expect(instructions.systemInstruction).toContain("questionOptions");
+      expect(instructions.systemInstruction).toContain("standardAnswer");
+      expect(instructions.systemInstruction).toContain("analysis");
       expect(readOutputContractLine(instructions.systemInstruction)).toContain(
         "single_choice",
       );

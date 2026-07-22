@@ -17,6 +17,42 @@ import {
   persistPersonalAiGenerationDraftResultAndCompleteTask,
 } from "./personal-ai-generation-result-repository";
 import type { RuntimeDatabase } from "./runtime-database";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+
+function createPrivateQuestionDraftSnapshot(
+  taskPublicId: string,
+  ownerPublicId: string,
+  standardAnswer = "测试答案",
+) {
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId,
+    ownerPublicId,
+    requestedQuestionCount: 1,
+    questions: [
+      {
+        draftPublicId: "ai_question_draft_test_1",
+        draftNumber: 1,
+        questionType: "short_answer",
+        difficulty: "medium",
+        knowledgeNodeCount: 1,
+        knowledgeNodeLabels: ["测试知识点"],
+        questionStem: "测试题干",
+        questionOptions: [],
+        standardAnswer,
+        analysis: "测试解析",
+        scoringPoints: [{ description: "要点", score: "1", sortOrder: 1 }],
+        fillBlankAnswers: [],
+        reviewStatus: "draft_review_required",
+      },
+    ],
+  });
+
+  if (snapshot === null) {
+    throw new Error("test question snapshot must be valid");
+  }
+
+  return snapshot;
+}
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
   if (typeof value === "string") {
@@ -39,7 +75,7 @@ function containsText(value: unknown, text: string, seen = new Set()): boolean {
 function createPersistenceRow(
   overrides: Partial<PersonalAiGenerationResultPersistenceRow> = {},
 ): PersonalAiGenerationResultPersistenceRow {
-  return {
+  const row: PersonalAiGenerationResultPersistenceRow = {
     id: 901,
     public_id: "personal_ai_result_public_170",
     ai_generation_task_id: 701,
@@ -64,6 +100,21 @@ function createPersistenceRow(
     updated_at: new Date("2026-06-13T12:00:00.000Z"),
     ...overrides,
   };
+
+  if (
+    row.task_type === "ai_question_generation" &&
+    row.question_draft_schema_version === undefined
+  ) {
+    const privateSnapshot = createPrivateQuestionDraftSnapshot(
+      row.task_public_id,
+      row.owner_public_id,
+    );
+    row.question_draft_schema_version = privateSnapshot.schemaVersion;
+    row.question_draft_snapshot = privateSnapshot.snapshot;
+    row.question_draft_digest = privateSnapshot.digest;
+  }
+
+  return row;
 }
 
 function createAtomicPersistenceInput(
@@ -83,6 +134,13 @@ function createAtomicPersistenceInput(
       contentRedactedSnapshot: row.content_redacted_snapshot,
       contentDigest: row.content_digest,
       contentPreviewMasked: row.content_preview_masked,
+      privateQuestionDraftSnapshot:
+        row.task_type === "ai_question_generation"
+          ? createPrivateQuestionDraftSnapshot(
+              row.task_public_id,
+              row.owner_public_id,
+            )
+          : null,
       citationRedactedSnapshot: row.citation_redacted_snapshot,
       evidenceStatus: row.evidence_status,
       citationCount: row.citation_count,
@@ -711,7 +769,7 @@ describe("personal AI generation result repository", () => {
     const repository = createPersonalAiGenerationResultRepository(gateway);
 
     const result = await repository.createOrReuseDraftResult({
-      resultPublicId: "personal_ai_result_public_new",
+      resultPublicId: "personal_ai_result_public_existing",
       taskPublicId: "ai_generation_task_public_existing",
       ownerType: "personal",
       ownerPublicId: "student_public_173",
@@ -720,6 +778,10 @@ describe("personal AI generation result repository", () => {
       contentRedactedSnapshot: { redactionStatus: "redacted" },
       contentDigest: "sha256:new",
       contentPreviewMasked: "masked preview new",
+      privateQuestionDraftSnapshot: createPrivateQuestionDraftSnapshot(
+        "ai_generation_task_public_existing",
+        "student_public_173",
+      ),
       citationRedactedSnapshot: null,
       evidenceStatus: "weak",
       citationCount: 1,
@@ -736,6 +798,48 @@ describe("personal AI generation result repository", () => {
     expect(result.result.resultPublicId).toBe(
       "personal_ai_result_public_existing",
     );
+    expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
+  });
+
+  it("rejects an idempotent replay whose private question snapshot changed", async () => {
+    const existingRow = createPersistenceRow({
+      public_id: "personal_ai_result_public_snapshot_conflict",
+      task_public_id: "ai_generation_task_public_snapshot_conflict",
+      owner_public_id: "student_public_snapshot_conflict",
+    });
+    const { gateway, insertDraftResultAndCompleteTask } = createGateway({
+      existingRow,
+    });
+    const repository = createPersonalAiGenerationResultRepository(gateway);
+
+    await expect(
+      repository.createOrReuseDraftResult({
+        resultPublicId: existingRow.public_id,
+        taskPublicId: existingRow.task_public_id,
+        ownerType: "personal",
+        ownerPublicId: existingRow.owner_public_id,
+        actorPublicId: existingRow.owner_public_id,
+        taskType: "ai_question_generation",
+        contentRedactedSnapshot: { redactionStatus: "redacted" },
+        contentDigest: "sha256:conflict",
+        contentPreviewMasked: "masked conflict",
+        privateQuestionDraftSnapshot: createPrivateQuestionDraftSnapshot(
+          existingRow.task_public_id,
+          existingRow.owner_public_id,
+          "冲突答案",
+        ),
+        citationRedactedSnapshot: null,
+        evidenceStatus: "weak",
+        citationCount: 1,
+        aiCallLogPublicId: null,
+        createdAt: new Date("2026-06-13T13:30:00.000Z"),
+        attempt: {
+          taskPublicId: existingRow.task_public_id,
+          retryCount: 0,
+          startedAt: new Date("2026-06-13T13:29:00.123Z"),
+        },
+      }),
+    ).rejects.toThrow("snapshot conflicted");
     expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
   });
 
@@ -775,6 +879,10 @@ describe("personal AI generation result repository", () => {
       },
       contentDigest: "sha256:created",
       contentPreviewMasked: "masked preview created",
+      privateQuestionDraftSnapshot: createPrivateQuestionDraftSnapshot(
+        "ai_generation_task_public_created",
+        "student_public_174",
+      ),
       citationRedactedSnapshot: null,
       evidenceStatus: "sufficient",
       citationCount: 2,

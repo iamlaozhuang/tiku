@@ -1663,26 +1663,38 @@ function createOrganizationTrainingQuestionDraftSnapshot(input: {
     return null;
   }
 
-  const questions = structuredPreview.draftSummaries
-    .map((questionDraft) =>
-      createOrganizationTrainingQuestionDetailFromDraft({
-        citationCount:
-          visibleGeneratedContent?.groundingSummary?.citationCount ??
-          input.localContractSummary.resultState.citationCount,
-        evidenceStatus:
-          visibleGeneratedContent?.groundingSummary?.evidenceStatus ??
-          input.localContractSummary.resultState.evidenceStatus,
-        generationParameters: input.generationParameters,
-        questionDraft,
-        taskPublicId: input.localContractSummary.taskRequest.taskPublicId,
-      }),
-    )
-    .filter(
-      (question): question is OrganizationTrainingAdminQuestionDetailDto =>
-        question !== null,
-    );
+  if (
+    structuredPreview.draftSummaries.length !==
+    structuredPreview.requestedQuestionCount
+  ) {
+    return null;
+  }
 
-  return questions.length === 0 ? null : { questions };
+  const questions: OrganizationTrainingAdminQuestionDetailDto[] = [];
+
+  for (const questionDraft of structuredPreview.draftSummaries) {
+    const question = createOrganizationTrainingQuestionDetailFromDraft({
+      citationCount:
+        visibleGeneratedContent?.groundingSummary?.citationCount ??
+        input.localContractSummary.resultState.citationCount,
+      evidenceStatus:
+        visibleGeneratedContent?.groundingSummary?.evidenceStatus ??
+        input.localContractSummary.resultState.evidenceStatus,
+      generationParameters: input.generationParameters,
+      questionDraft,
+      taskPublicId: input.localContractSummary.taskRequest.taskPublicId,
+    });
+
+    if (question === null) {
+      return null;
+    }
+
+    questions.push(question);
+  }
+
+  return questions.length === structuredPreview.requestedQuestionCount
+    ? { questions }
+    : null;
 }
 
 function createOrganizationTrainingQuestionDetailFromDraft(input: {

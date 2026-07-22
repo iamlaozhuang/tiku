@@ -1,6 +1,7 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
 import type {
+  PersonalAiGenerationPrivateQuestionDraftSnapshotDto,
   PersonalAiGenerationResultPaperAssemblySnapshotDto,
   PersonalAiGenerationResultPersistenceDto,
 } from "../contracts/personal-ai-generation-result-persistence-contract";
@@ -17,6 +18,7 @@ export type PersonalAiGenerationRouteIntegratedResultMaterializationControl = {
   resultPublicId: string;
   contentDigest: string;
   contentPreviewMasked: string;
+  privateQuestionDraftSnapshot?: PersonalAiGenerationPrivateQuestionDraftSnapshotDto | null;
   paperAssemblyRedactedSnapshot?: PersonalAiGenerationResultPaperAssemblySnapshotDto | null;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
@@ -84,6 +86,15 @@ export async function materializeRouteIntegratedRedactedResult(
     return createBlockedMaterializationSummary("persistence_unavailable");
   }
 
+  if (
+    (requestFlow.resultReference.taskType === "ai_question_generation" &&
+      control.privateQuestionDraftSnapshot == null) ||
+    (requestFlow.resultReference.taskType === "ai_paper_generation" &&
+      control.privateQuestionDraftSnapshot != null)
+  ) {
+    return createBlockedMaterializationSummary("persistence_unavailable");
+  }
+
   const persistenceInput: PersonalAiGenerationResultPersistenceInput = {
     resultPublicId: control.resultPublicId,
     taskPublicId: requestFlow.resultReference.taskPublicId,
@@ -97,6 +108,7 @@ export async function materializeRouteIntegratedRedactedResult(
     ),
     contentDigest: control.contentDigest,
     contentPreviewMasked: control.contentPreviewMasked,
+    privateQuestionDraftSnapshot: control.privateQuestionDraftSnapshot ?? null,
     paperAssemblyRedactedSnapshot:
       control.paperAssemblyRedactedSnapshot ?? null,
     citationRedactedSnapshot:

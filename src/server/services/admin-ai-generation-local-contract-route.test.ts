@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { promptTemplateDefinitions } from "@/ai/prompts/templates";
+import {
+  aiQuestionDraftSchemaVersion,
+  promptTemplateDefinitions,
+} from "@/ai/prompts/templates";
 
 import {
   createAdminAiGenerationTaskCancelRouteHandler,
@@ -160,14 +163,58 @@ function createStructuredAdminProviderContent(
 
   if (generationKind === "question") {
     return JSON.stringify({
+      schemaVersion: aiQuestionDraftSchemaVersion,
+      kind: "question_set",
       questions: Array.from(
         { length: resolvedGenerationParameters.questionCount },
-        () => ({
-          questionType:
-            resolvedGenerationParameters.questionType ?? "single_choice",
-          difficulty: resolvedGenerationParameters.difficulty ?? "medium",
-          knowledgeNodeLabels: ["redacted_knowledge_node"],
-        }),
+        (_, index) => {
+          const questionType =
+            resolvedGenerationParameters.questionType ?? "single_choice";
+          const isChoice =
+            questionType === "single_choice" || questionType === "multi_choice";
+          const isFillBlank = questionType === "fill_blank";
+          const requiresScoringPoints =
+            questionType === "short_answer" ||
+            questionType === "case_analysis" ||
+            questionType === "calculation";
+
+          return {
+            questionType,
+            difficulty: resolvedGenerationParameters.difficulty ?? "medium",
+            knowledgeNodeLabels: ["redacted_knowledge_node"],
+            questionStem: `脱敏题干 ${index + 1}`,
+            questionOptions: isChoice
+              ? [
+                  { optionLabel: "A", optionText: "脱敏正确选项" },
+                  { optionLabel: "B", optionText: "脱敏干扰选项" },
+                ]
+              : [],
+            standardAnswer:
+              questionType === "multi_choice"
+                ? "A,B"
+                : questionType === "true_false"
+                  ? "true"
+                  : isFillBlank
+                    ? "脱敏填空答案"
+                    : isChoice
+                      ? "A"
+                      : "脱敏标准答案",
+            analysis: "脱敏解析",
+            scoringPoints: requiresScoringPoints
+              ? [{ description: "脱敏评分点", score: "1", sortOrder: 1 }]
+              : [],
+            fillBlankAnswers: isFillBlank
+              ? [
+                  {
+                    blankKey: "blank_1",
+                    standardAnswers: ["脱敏填空答案"],
+                    score: "1",
+                    sortOrder: 1,
+                  },
+                ]
+              : [],
+          };
+        },
       ),
     });
   }
@@ -2104,6 +2151,8 @@ describe("admin AI generation local contract route handlers", () => {
         providerInputs,
         {
           content: JSON.stringify({
+            schemaVersion: aiQuestionDraftSchemaVersion,
+            kind: "question_set",
             questions: [
               {
                 questionType: "single_choice",
@@ -2114,16 +2163,16 @@ describe("admin AI generation local contract route handlers", () => {
                   {
                     optionLabel: "A",
                     optionText: "Synthetic option A",
-                    isCorrect: true,
                   },
                   {
                     optionLabel: "B",
                     optionText: "Synthetic option B",
-                    isCorrect: false,
                   },
                 ],
                 standardAnswer: "A",
                 analysis: "Synthetic analysis",
+                scoringPoints: [],
+                fillBlankAnswers: [],
               },
             ],
           }),

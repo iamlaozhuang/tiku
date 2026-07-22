@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
-import type {
-  AiGenerationRouteIntegratedStructuredPreview,
-  AiGenerationRouteIntegratedVisibleGeneratedContent,
-} from "../contracts/route-integrated-provider-execution-contract";
+import type { AiGenerationRouteIntegratedStructuredPreview } from "../contracts/route-integrated-provider-execution-contract";
 import type {
   PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
   PersonalAiGenerationLearningPaperSourceQuestionDto,
@@ -14,6 +11,8 @@ import type {
   PersonalAiGenerationLearningSessionService,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import { createPersonalAiGenerationLearningSessionService } from "./personal-ai-generation-learning-session-service";
+import { personalAiGenerationLearningSessionQuestionTypeValues } from "../models/personal-ai-generation-learning-session";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
 
 type PaperAssemblyLearningSessionService =
   PersonalAiGenerationLearningSessionService & {
@@ -23,6 +22,18 @@ type PaperAssemblyLearningSessionService =
       PersonalAiGenerationLearningSessionService["createLearningSession"]
     >;
   };
+
+it("preserves all seven glossary question types in the learning model", () => {
+  expect(personalAiGenerationLearningSessionQuestionTypeValues).toEqual([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ]);
+});
 
 function createInMemoryRepository(): PersonalAiGenerationLearningSessionRepository {
   const sessions = new Map<string, PersonalAiGenerationLearningSessionDto>();
@@ -67,6 +78,7 @@ function createQuestionSetPreview(): AiGenerationRouteIntegratedStructuredPrevie
     draftCount: 2,
     draftSummaries: [
       {
+        draftPublicId: "ai_question_draft_test_1",
         draftNumber: 1,
         questionType: "single_choice",
         difficulty: "medium",
@@ -77,59 +89,127 @@ function createQuestionSetPreview(): AiGenerationRouteIntegratedStructuredPrevie
           {
             optionLabel: "A",
             optionText: "synthetic option a",
-            isCorrect: true,
           },
           {
             optionLabel: "B",
             optionText: "synthetic option b",
-            isCorrect: false,
           },
         ],
         standardAnswer: "A",
         analysis: "synthetic analysis one",
+        scoringPoints: [],
+        fillBlankAnswers: [],
         reviewStatus: "draft_review_required",
       },
       {
+        draftPublicId: "ai_question_draft_test_2",
         draftNumber: 2,
-        questionType: "judge",
+        questionType: "true_false",
         difficulty: "easy",
         knowledgeNodeCount: 1,
         knowledgeNodeLabels: ["knowledge_node_b"],
         questionStem: "synthetic stem two",
-        questionOptions: [
-          {
-            optionLabel: "A",
-            optionText: "synthetic true option",
-            isCorrect: false,
-          },
-          {
-            optionLabel: "B",
-            optionText: "synthetic false option",
-            isCorrect: true,
-          },
-        ],
-        standardAnswer: "B",
+        questionOptions: [],
+        standardAnswer: "false",
         analysis: "synthetic analysis two",
+        scoringPoints: [],
+        fillBlankAnswers: [],
         reviewStatus: "draft_review_required",
       },
     ],
   };
 }
 
-function createVisibleGeneratedContent(
+function createQuestionSnapshot(
   structuredPreview: AiGenerationRouteIntegratedStructuredPreview,
-): AiGenerationRouteIntegratedVisibleGeneratedContent {
-  return {
-    content: "synthetic redacted test content",
-    contentVisibility: "transient_response_only",
-    persistenceStatus: "not_persisted",
-    safetyStatus: "checked",
-    groundingSummary: {
-      evidenceStatus: "sufficient",
-      citationCount: 2,
-    },
-    structuredPreview,
-  };
+  taskPublicId: string,
+  ownerPublicId: string,
+) {
+  if (
+    structuredPreview.kind !== "question_set" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    throw new Error("test question preview must be parsed");
+  }
+
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId,
+    ownerPublicId,
+    requestedQuestionCount: structuredPreview.requestedQuestionCount,
+    questions: structuredPreview.draftSummaries,
+  });
+
+  if (snapshot === null) {
+    throw new Error("test question snapshot must be valid");
+  }
+
+  return snapshot;
+}
+
+function createSevenTypeQuestionSnapshot() {
+  const questionTypes = [
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const;
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId: "ai_generation_task_public_seven_types",
+    ownerPublicId: "student_public_seven_types",
+    requestedQuestionCount: questionTypes.length,
+    questions: questionTypes.map((questionType, index) => ({
+      draftPublicId: `ai_question_draft_seven_${index + 1}`,
+      draftNumber: index + 1,
+      questionType,
+      difficulty: "medium",
+      knowledgeNodeCount: 1,
+      knowledgeNodeLabels: ["knowledge_node_seven"],
+      questionStem: `synthetic ${questionType} stem`,
+      questionOptions:
+        questionType === "single_choice" || questionType === "multi_choice"
+          ? [
+              { optionLabel: "A", optionText: "option a" },
+              { optionLabel: "B", optionText: "option b" },
+            ]
+          : [],
+      standardAnswer:
+        questionType === "multi_choice"
+          ? "A B"
+          : questionType === "true_false"
+            ? "true"
+            : questionType === "single_choice"
+              ? "A"
+              : "synthetic answer",
+      analysis: `synthetic ${questionType} analysis`,
+      scoringPoints:
+        questionType === "short_answer" ||
+        questionType === "case_analysis" ||
+        questionType === "calculation"
+          ? [{ description: "scoring point", score: "1", sortOrder: 1 }]
+          : [],
+      fillBlankAnswers:
+        questionType === "fill_blank"
+          ? [
+              {
+                blankKey: "blank_1",
+                standardAnswers: ["synthetic answer"],
+                score: "1",
+                sortOrder: 1,
+              },
+            ]
+          : [],
+      reviewStatus: "draft_review_required" as const,
+    })),
+  });
+
+  if (snapshot === null) {
+    throw new Error("seven-type test snapshot must be valid");
+  }
+
+  return snapshot;
 }
 
 function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
@@ -271,6 +351,41 @@ function createPaperAssemblySourceQuestions(): PersonalAiGenerationLearningPaper
 }
 
 describe("personal AI generation learning session service", () => {
+  it("preserves all seven types and keeps fill, case, and calculation under review", async () => {
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    });
+    const creation = await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_public_seven_types",
+      sourceResultPublicId: "ai_generation_result_public_seven_types",
+      sourceTaskPublicId: "ai_generation_task_public_seven_types",
+      ownerType: "personal",
+      ownerPublicId: "student_public_seven_types",
+      actorPublicId: "student_public_seven_types",
+      questionDraftSnapshot: createSevenTypeQuestionSnapshot(),
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+      createdAt: new Date("2026-07-22T12:00:00.000Z"),
+    });
+
+    expect(
+      creation.session?.questions.map((question) => question.questionType),
+    ).toEqual(personalAiGenerationLearningSessionQuestionTypeValues);
+
+    for (const questionNumber of [4, 6, 7]) {
+      const feedback = await service.submitLearningSessionAnswer({
+        sessionPublicId: "ai_learning_session_public_seven_types",
+        sessionQuestionPublicId: `ai_learning_session_public_seven_types_q_${questionNumber}`,
+        actorPublicId: "student_public_seven_types",
+        selectedOptionLabels: [],
+        textAnswer: "synthetic learner answer",
+        submittedAt: new Date("2026-07-22T12:01:00.000Z"),
+      });
+
+      expect(feedback.status).toBe("submitted_review_required");
+      expect(feedback.isCorrect).toBeNull();
+    }
+  });
   it("reuses the first persisted paper session snapshot for repeated starts", async () => {
     const repository = createInMemoryRepository();
     const service = createPersonalAiGenerationLearningSessionService({
@@ -493,9 +608,13 @@ describe("personal AI generation learning session service", () => {
       ownerType: "personal",
       ownerPublicId: "student_public_001",
       actorPublicId: "student_public_001",
-      visibleGeneratedContent: createVisibleGeneratedContent(
+      questionDraftSnapshot: createQuestionSnapshot(
         createQuestionSetPreview(),
+        "ai_generation_task_public_001",
+        "student_public_001",
       ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 
@@ -540,6 +659,88 @@ describe("personal AI generation learning session service", () => {
     ]);
   });
 
+  it("fails closed when a concurrent session winner has different snapshot questions", async () => {
+    let saveAttempted = false;
+    const repository: PersonalAiGenerationLearningSessionRepository = {
+      async saveSession() {
+        saveAttempted = true;
+        return { status: "saved", blockReason: null };
+      },
+      async findSessionByPublicId(sessionPublicId) {
+        if (!saveAttempted) {
+          return null;
+        }
+
+        return {
+          sessionPublicId,
+          contentDomain: "personal_ai_learning",
+          sourceResultPublicId: "ai_generation_result_concurrent_001",
+          sourceTaskPublicId: "ai_generation_task_concurrent_001",
+          ownerType: "personal",
+          ownerPublicId: "student_concurrent_001",
+          actorPublicId: "student_concurrent_001",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+          questionCount: 1,
+          questions: [
+            {
+              sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+              sourceDraftNumber: 1,
+              questionType: "short_answer",
+              difficulty: "medium",
+              knowledgeNodeLabels: [],
+              questionStem: "conflicting concurrent question",
+              questionOptions: [],
+              standardAnswerLabels: [],
+              standardAnswerText: "conflicting answer",
+              analysis: "conflicting analysis",
+              maxScore: "1.0",
+              reviewStatus: "draft_review_required",
+            },
+          ],
+          formalWriteBoundary: {
+            questionWriteStatus: "blocked",
+            paperWriteStatus: "blocked",
+            practiceWriteStatus: "blocked",
+            answerRecordWriteStatus: "blocked",
+            examReportWriteStatus: "blocked",
+            mistakeBookWriteStatus: "blocked",
+          },
+          createdAt: "2026-07-05T12:00:00.000Z",
+        };
+      },
+      async saveAnswerFeedback() {},
+      async listAnswerFeedbackBySessionPublicId() {
+        return [];
+      },
+    };
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    });
+    const result = await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_concurrent_001",
+      sourceResultPublicId: "ai_generation_result_concurrent_001",
+      sourceTaskPublicId: "ai_generation_task_concurrent_001",
+      ownerType: "personal",
+      ownerPublicId: "student_concurrent_001",
+      actorPublicId: "student_concurrent_001",
+      questionDraftSnapshot: createQuestionSnapshot(
+        createQuestionSetPreview(),
+        "ai_generation_task_concurrent_001",
+        "student_concurrent_001",
+      ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      createdAt: new Date("2026-07-05T12:00:00.000Z"),
+    });
+
+    expect(result).toEqual({
+      status: "blocked",
+      blockReason: "session_context_mismatch",
+      session: null,
+    });
+  });
+
   it("scores objective answers inside the isolated learning session and keeps mistake_book blocked", async () => {
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),
@@ -551,9 +752,13 @@ describe("personal AI generation learning session service", () => {
       ownerType: "organization",
       ownerPublicId: "org_public_001",
       actorPublicId: "employee_public_001",
-      visibleGeneratedContent: createVisibleGeneratedContent(
+      questionDraftSnapshot: createQuestionSnapshot(
         createQuestionSetPreview(),
+        "ai_generation_task_public_002",
+        "org_public_001",
       ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 
@@ -612,9 +817,13 @@ describe("personal AI generation learning session service", () => {
       ownerType: "personal",
       ownerPublicId: "student_public_progress_001",
       actorPublicId: "student_public_progress_001",
-      visibleGeneratedContent: createVisibleGeneratedContent(
+      questionDraftSnapshot: createQuestionSnapshot(
         createQuestionSetPreview(),
+        "ai_generation_task_public_progress_001",
+        "student_public_progress_001",
       ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 
@@ -640,7 +849,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_public_progress_001",
       sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
       actorPublicId: "student_public_progress_001",
-      selectedOptionLabels: ["B"],
+      selectedOptionLabels: ["FALSE"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:03:00.000Z"),
     });
@@ -685,7 +894,7 @@ describe("personal AI generation learning session service", () => {
     expect(progressResult.progress?.answerFeedbacks).toHaveLength(2);
     expect(progressResult.progress?.answerFeedbacks[1]).toMatchObject({
       sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
-      selectedOptionLabels: ["B"],
+      selectedOptionLabels: ["FALSE"],
       isCorrect: true,
       submittedAt: "2026-07-05T12:03:00.000Z",
     });
@@ -702,9 +911,13 @@ describe("personal AI generation learning session service", () => {
       ownerType: "organization",
       ownerPublicId: "organization_public_progress_001",
       actorPublicId: "employee_public_progress_001",
-      visibleGeneratedContent: createVisibleGeneratedContent(
+      questionDraftSnapshot: createQuestionSnapshot(
         createQuestionSetPreview(),
+        "ai_generation_task_public_org_progress_001",
+        "organization_public_progress_001",
       ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 
@@ -760,10 +973,6 @@ describe("personal AI generation learning session service", () => {
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),
     });
-    const visibleGeneratedContent = createVisibleGeneratedContent(
-      createQuestionSetPreview(),
-    );
-
     const result = await service.createLearningSession({
       sessionPublicId: "ai_learning_session_public_003",
       sourceResultPublicId: "ai_generation_result_public_003",
@@ -771,13 +980,13 @@ describe("personal AI generation learning session service", () => {
       ownerType: "personal",
       ownerPublicId: "student_public_003",
       actorPublicId: "student_public_003",
-      visibleGeneratedContent: {
-        ...visibleGeneratedContent,
-        groundingSummary: {
-          evidenceStatus: "weak",
-          citationCount: 1,
-        },
-      },
+      questionDraftSnapshot: createQuestionSnapshot(
+        createQuestionSetPreview(),
+        "ai_generation_task_public_003",
+        "student_public_003",
+      ),
+      evidenceStatus: "weak",
+      citationCount: 1,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 
@@ -800,9 +1009,13 @@ describe("personal AI generation learning session service", () => {
       ownerType: "personal",
       ownerPublicId: "student_public_missing_source_result_001",
       actorPublicId: "student_public_missing_source_result_001",
-      visibleGeneratedContent: createVisibleGeneratedContent(
+      questionDraftSnapshot: createQuestionSnapshot(
         createQuestionSetPreview(),
+        "ai_generation_task_public_missing_source_result_001",
+        "student_public_missing_source_result_001",
       ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 
@@ -813,10 +1026,15 @@ describe("personal AI generation learning session service", () => {
     });
   });
 
-  it("rejects paper draft summaries that do not contain usable generated questions", async () => {
+  it("rejects a snapshot whose question array silently shrinks below the requested count", async () => {
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),
     });
+    const validSnapshot = createQuestionSnapshot(
+      createQuestionSetPreview(),
+      "ai_generation_task_public_004",
+      "student_public_004",
+    );
 
     const result = await service.createLearningSession({
       sessionPublicId: "ai_learning_session_public_004",
@@ -825,24 +1043,15 @@ describe("personal AI generation learning session service", () => {
       ownerType: "personal",
       ownerPublicId: "student_public_004",
       actorPublicId: "student_public_004",
-      visibleGeneratedContent: createVisibleGeneratedContent({
-        kind: "paper_draft",
-        parseStatus: "parsed",
-        paperSectionCount: 1,
-        questionCount: 20,
-        questionTypeDistributionCount: 1,
-        knowledgeCoverageCount: 1,
-        reviewStatus: "draft_review_required",
-        paperSectionSummaries: [
-          {
-            sectionNumber: 1,
-            paperSectionType: "single_choice",
-            title: "synthetic paper section",
-            questionCount: 20,
-            questionDrafts: [],
-          },
-        ],
-      }),
+      questionDraftSnapshot: {
+        ...validSnapshot,
+        snapshot: {
+          ...validSnapshot.snapshot,
+          questions: [],
+        },
+      },
+      evidenceStatus: "sufficient",
+      citationCount: 2,
       createdAt: new Date("2026-07-05T12:00:00.000Z"),
     });
 

@@ -53,6 +53,7 @@ import {
   type PersonalAiGenerationAuthorizationOwnershipRepository,
 } from "./personal-ai-generation-authorization-context";
 import { normalizePersonalAiGenerationRequestInput } from "../validators/personal-ai-generation-request";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -865,6 +866,25 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
           taskPublicId: requestFlow.resultReference.taskPublicId,
         });
       const groundingSummary = visibleGeneratedContent.groundingSummary;
+      const structuredPreview = visibleGeneratedContent.structuredPreview;
+      const privateQuestionDraftSnapshot =
+        requestFlow.resultReference.taskType === "ai_question_generation" &&
+        structuredPreview?.kind === "question_set" &&
+        structuredPreview.parseStatus === "parsed"
+          ? createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+              taskPublicId: requestFlow.resultReference.taskPublicId,
+              ownerPublicId: requestFlow.taskRequest.ownerPublicId,
+              requestedQuestionCount: structuredPreview.requestedQuestionCount,
+              questions: structuredPreview.draftSummaries,
+            })
+          : null;
+
+      if (
+        requestFlow.resultReference.taskType === "ai_question_generation" &&
+        privateQuestionDraftSnapshot === null
+      ) {
+        return null;
+      }
 
       return {
         materializationMode: "fake_sanitized_in_memory_output",
@@ -876,6 +896,7 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
         contentPreviewMasked: createVisibleContentPreviewMasked(
           visibleGeneratedContent,
         ),
+        privateQuestionDraftSnapshot,
         paperAssemblyRedactedSnapshot:
           createPersonalAiGenerationPaperAssemblyRedactedSnapshot(
             paperAssembly,

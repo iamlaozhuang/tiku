@@ -8,10 +8,11 @@ import type {
   PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerInputDto,
   PersonalAiGenerationLearningSessionCreationInputDto,
+  PersonalAiGenerationLearningSessionCreationResultDto,
+  PersonalAiGenerationLearningSessionPublicCreationResultDto,
   PersonalAiGenerationLearningSessionRepository,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
-import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { PersonalAiGenerationResultSelectedAuthorizationLookupRepository } from "../repositories/personal-ai-generation-result-repository";
 import type {
@@ -82,7 +83,39 @@ const emptyLearningSessionRepository: PersonalAiGenerationLearningSessionReposit
   };
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
-  return Response.json(response);
+  return Response.json(response, {
+    headers: { "cache-control": "no-store" },
+  });
+}
+
+function projectLearningSessionCreationForApi(
+  result: PersonalAiGenerationLearningSessionCreationResultDto,
+): PersonalAiGenerationLearningSessionPublicCreationResultDto {
+  if (result.status === "blocked") {
+    return result;
+  }
+
+  return {
+    status: "created",
+    blockReason: null,
+    session: {
+      ...result.session,
+      questions: result.session.questions.map((question) => ({
+        sessionQuestionPublicId: question.sessionQuestionPublicId,
+        sourceDraftNumber: question.sourceDraftNumber,
+        questionType: question.questionType,
+        difficulty: question.difficulty,
+        knowledgeNodeLabels: [...question.knowledgeNodeLabels],
+        questionStem: question.questionStem,
+        questionOptions: question.questionOptions.map((questionOption) => ({
+          optionLabel: questionOption.optionLabel,
+          optionText: questionOption.optionText,
+        })),
+        maxScore: question.maxScore,
+        reviewStatus: question.reviewStatus,
+      })),
+    },
+  };
 }
 
 async function resolveRequiredUserContext(
@@ -153,16 +186,6 @@ function readSelectedOptionLabels(
   }
 
   return value;
-}
-
-function readVisibleGeneratedContent(
-  body: Record<string, unknown>,
-): AiGenerationRouteIntegratedVisibleGeneratedContent | null {
-  const value = body.visibleGeneratedContent;
-
-  return isRecord(value)
-    ? (value as AiGenerationRouteIntegratedVisibleGeneratedContent)
-    : null;
 }
 
 type LearningSessionCreationRouteInput =
@@ -275,9 +298,28 @@ async function createPersistedLearningSessionInput(input: {
   const sessionPublicId = createLearningSessionPublicId(result.resultPublicId);
 
   if (result.taskType === "ai_question_generation") {
-    const visibleGeneratedContent = readVisibleGeneratedContent(input.body);
+    if (
+      input.resultRepository.findPrivateQuestionDraftSnapshotByPublicId ===
+      undefined
+    ) {
+      return null;
+    }
 
-    if (visibleGeneratedContent === null) {
+    const questionDraftSnapshot =
+      await input.resultRepository.findPrivateQuestionDraftSnapshotByPublicId({
+        ...ownerScope,
+        authorizationPublicId: input.authorizationPublicId,
+        resultPublicId: result.resultPublicId,
+      });
+
+    if (
+      questionDraftSnapshot === null ||
+      questionDraftSnapshot.snapshot.taskPublicId !== result.taskPublicId ||
+      questionDraftSnapshot.snapshot.ownerPublicId !==
+        ownerScope.ownerPublicId ||
+      result.evidenceReference.evidenceStatus !== "sufficient" ||
+      result.evidenceReference.citationCount <= 0
+    ) {
       return null;
     }
 
@@ -287,7 +329,9 @@ async function createPersistedLearningSessionInput(input: {
         sessionPublicId,
         sourceResultPublicId: result.resultPublicId,
         sourceTaskPublicId: result.taskPublicId,
-        visibleGeneratedContent,
+        questionDraftSnapshot,
+        evidenceStatus: result.evidenceReference.evidenceStatus,
+        citationCount: result.evidenceReference.citationCount,
         createdAt: input.now(),
         ...ownerScope,
       },
@@ -371,7 +415,13 @@ async function createLearningSessionInput(input: {
     "authorizationPublicId",
   );
 
-  if (sourceResultPublicId === null || authorizationPublicId === null) {
+  if (
+    sourceResultPublicId === null ||
+    authorizationPublicId === null ||
+    Object.keys(body).length !== 2 ||
+    !Object.hasOwn(body, "sourceResultPublicId") ||
+    !Object.hasOwn(body, "authorizationPublicId")
+  ) {
     return null;
   }
 
@@ -556,15 +606,18 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
             return createJsonResponse(createAuthorizationUnavailableResponse());
           }
 
+          const creationResult =
+            creationInput.kind === "paper_assembly"
+              ? await learningSessionService.createLearningSessionFromPaperAssembly(
+                  creationInput.input,
+                )
+              : await learningSessionService.createLearningSession(
+                  creationInput.input,
+                );
+
           return createJsonResponse(
             createSuccessResponse(
-              creationInput.kind === "paper_assembly"
-                ? await learningSessionService.createLearningSessionFromPaperAssembly(
-                    creationInput.input,
-                  )
-                : await learningSessionService.createLearningSession(
-                    creationInput.input,
-                  ),
+              projectLearningSessionCreationForApi(creationResult),
             ),
           );
         },

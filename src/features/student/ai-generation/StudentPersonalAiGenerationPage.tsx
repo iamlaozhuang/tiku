@@ -36,9 +36,9 @@ import type {
 } from "@/server/contracts/personal-ai-generation-result-history-contract";
 import type {
   PersonalAiGenerationLearningSessionAnswerFeedbackDto,
-  PersonalAiGenerationLearningSessionCreationResultDto,
+  PersonalAiGenerationLearningSessionPublicCreationResultDto,
   PersonalAiGenerationLearningSessionProgressResultDto,
-  PersonalAiGenerationLearningSessionQuestionDto,
+  PersonalAiGenerationLearningSessionPublicQuestionDto,
 } from "@/server/contracts/personal-ai-generation-learning-session-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AiGenerationAvailabilityDto } from "@/server/contracts/ai-generation-availability-contract";
@@ -1046,19 +1046,7 @@ async function fetchPersonalAiGenerationRequestHistoryForSession(
   );
 }
 
-type PersonalAiLearningSessionRequestBody =
-  | { sourceResultPublicId: string }
-  | {
-      sessionPublicId: string;
-      sourceResultPublicId: string;
-      sourceTaskPublicId: string;
-      ownerType?: "personal" | "organization";
-      ownerPublicId?: string;
-      visibleGeneratedContent: NonNullable<
-        PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["visibleGeneratedContent"]
-      >;
-      paperAssemblyContainer?: StudentAiPaperAssemblyContainer;
-    };
+type PersonalAiLearningSessionRequestBody = { sourceResultPublicId: string };
 
 async function fetchCreatePersonalAiLearningSession(
   studentSessionValue: StudentSessionRequestToken,
@@ -1068,9 +1056,9 @@ async function fetchCreatePersonalAiLearningSession(
 ): Promise<{
   code: number;
   message: string;
-  data: PersonalAiGenerationLearningSessionCreationResultDto | null;
+  data: PersonalAiGenerationLearningSessionPublicCreationResultDto | null;
 }> {
-  return fetchStudentApi<PersonalAiGenerationLearningSessionCreationResultDto>(
+  return fetchStudentApi<PersonalAiGenerationLearningSessionPublicCreationResultDto>(
     "/api/v1/personal-ai-generation-learning-sessions",
     studentSessionValue,
     {
@@ -2546,10 +2534,10 @@ function StudentAiLearningSessionPanel({
 }: {
   answerFeedbackByQuestion: StudentAiLearningAnswerFeedbackByQuestion;
   onSelectOptionLabel: (
-    question: PersonalAiGenerationLearningSessionQuestionDto,
+    question: PersonalAiGenerationLearningSessionPublicQuestionDto,
     optionLabel: string,
   ) => void;
-  questions: PersonalAiGenerationLearningSessionQuestionDto[];
+  questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
   selectedOptionLabelsByQuestion: StudentAiLearningSelectedLabelsByQuestion;
 }) {
   const summary = createStudentAiLearningSessionSummary({
@@ -2706,7 +2694,7 @@ function StudentAiLearningSessionPanel({
 
 function createStudentAiLearningSessionSummary(input: {
   answerFeedbackByQuestion: StudentAiLearningAnswerFeedbackByQuestion;
-  questions: PersonalAiGenerationLearningSessionQuestionDto[];
+  questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
 }) {
   const submittedFeedback = input.questions
     .map(
@@ -2759,55 +2747,10 @@ function createStudentAiLearningSessionPublicId(
   return `ai_learning_session_${resultPublicId}`;
 }
 
-function resolveStudentAiLearningSessionOwnerScope(input: {
-  authorizationContexts: EffectiveAuthorizationContextDto[];
-  experience: PersonalAiGenerationLocalBrowserExperienceDto;
-  selectedAuthorizationPublicId: string | null;
-  taskType: StudentPersonalAiGenerationTaskType;
-}): { ownerType: "personal" | "organization"; ownerPublicId: string } | null {
-  const authorizationBoundary =
-    input.experience.requestFlow.contextSelection.authorizationBoundary;
-  const boundaryOwnerType = authorizationBoundary.ownerType;
-  const boundaryOwnerPublicId = authorizationBoundary.ownerPublicId;
-
-  if (
-    (boundaryOwnerType === "personal" ||
-      boundaryOwnerType === "organization") &&
-    typeof boundaryOwnerPublicId === "string" &&
-    boundaryOwnerPublicId.trim().length > 0
-  ) {
-    return {
-      ownerType: boundaryOwnerType,
-      ownerPublicId: boundaryOwnerPublicId.trim(),
-    };
-  }
-
-  const fallbackAuthorizationContext =
-    selectPersonalAiGenerationAuthorizationContext(
-      input.authorizationContexts,
-      input.taskType,
-      input.selectedAuthorizationPublicId,
-    );
-
-  if (fallbackAuthorizationContext === null) {
-    return null;
-  }
-
-  const fallbackOwnerType =
-    fallbackAuthorizationContext.ownerType === "organization"
-      ? "organization"
-      : "personal";
-
-  return {
-    ownerType: fallbackOwnerType,
-    ownerPublicId: fallbackAuthorizationContext.ownerPublicId,
-  };
-}
-
 function getStudentAiLearningSessionQuestions(
   experience: PersonalAiGenerationLocalBrowserExperienceDto,
   sessionPublicId: string,
-): PersonalAiGenerationLearningSessionQuestionDto[] {
+): PersonalAiGenerationLearningSessionPublicQuestionDto[] {
   const visibleGeneratedContent =
     experience.runtimeBridge.visibleGeneratedContent;
   const structuredPreview = visibleGeneratedContent?.structuredPreview;
@@ -2824,7 +2767,7 @@ function getStudentAiLearningSessionQuestions(
         );
 
   return questionDrafts.reduce<
-    PersonalAiGenerationLearningSessionQuestionDto[]
+    PersonalAiGenerationLearningSessionPublicQuestionDto[]
   >((questions, questionDraft) => {
     const question = createPersonalAiLearningSessionQuestion({
       sessionPublicId,
@@ -3499,7 +3442,7 @@ export function StudentPersonalAiGenerationPage() {
   const [
     serverAiLearningSessionQuestions,
     setServerAiLearningSessionQuestions,
-  ] = useState<PersonalAiGenerationLearningSessionQuestionDto[]>([]);
+  ] = useState<PersonalAiGenerationLearningSessionPublicQuestionDto[]>([]);
   const [
     selectedAiLearningAnswerLabelsByQuestion,
     setSelectedAiLearningAnswerLabelsByQuestion,
@@ -4599,14 +4542,6 @@ export function StudentPersonalAiGenerationPage() {
       )
     : [];
   const activeAiLearningSessionQuestions = serverAiLearningSessionQuestions;
-  const aiLearningSessionOwnerScope = hasLocalAiGenerationExperience
-    ? resolveStudentAiLearningSessionOwnerScope({
-        authorizationContexts,
-        experience,
-        selectedAuthorizationPublicId,
-        taskType: experience.requestFlow.resultReference.taskType,
-      })
-    : null;
   const canUseGeneratedPractice =
     hasLocalAiGenerationExperience &&
     canUseCurrentGeneratedPractice(experience);
@@ -4753,10 +4688,8 @@ export function StudentPersonalAiGenerationPage() {
     !canRetryCurrentGeneratedPractice(experience);
 
   async function ensureAiLearningSessionStarted(): Promise<
-    PersonalAiGenerationLearningSessionQuestionDto[] | null
+    PersonalAiGenerationLearningSessionPublicQuestionDto[] | null
   > {
-    const visibleGeneratedContent =
-      experience?.runtimeBridge.visibleGeneratedContent ?? null;
     const paperAssemblyContainer =
       experience === null
         ? null
@@ -4769,8 +4702,7 @@ export function StudentPersonalAiGenerationPage() {
       currentAiLearningSessionPublicId === null ||
       selectedAuthorizationPublicId === null ||
       experience === null ||
-      experience.resultState.resultPublicId === null ||
-      visibleGeneratedContent === null
+      experience.resultState.resultPublicId === null
     ) {
       return null;
     }
@@ -4784,18 +4716,8 @@ export function StudentPersonalAiGenerationPage() {
         : null;
     }
 
-    const taskType = experience.requestFlow.resultReference.taskType;
-
     return startOrResumeAiLearningSession(
-      taskType === "ai_paper_generation"
-        ? { sourceResultPublicId: experience.resultState.resultPublicId }
-        : {
-            sessionPublicId: currentAiLearningSessionPublicId,
-            sourceResultPublicId: experience.resultState.resultPublicId,
-            sourceTaskPublicId: experience.resultState.taskPublicId,
-            ...(aiLearningSessionOwnerScope ?? {}),
-            visibleGeneratedContent,
-          },
+      { sourceResultPublicId: experience.resultState.resultPublicId },
       experience.resultState.resultPublicId,
     );
   }
@@ -4803,7 +4725,7 @@ export function StudentPersonalAiGenerationPage() {
   async function startOrResumeAiLearningSession(
     requestBody: PersonalAiLearningSessionRequestBody,
     resultPublicId: string,
-  ): Promise<PersonalAiGenerationLearningSessionQuestionDto[] | null> {
+  ): Promise<PersonalAiGenerationLearningSessionPublicQuestionDto[] | null> {
     if (selectedAuthorizationPublicId === null) {
       return null;
     }

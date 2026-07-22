@@ -428,6 +428,7 @@ export type AiGenerationRouteIntegratedStructuredPreviewOptions =
     };
 
 export type AiGenerationRouteIntegratedQuestionDraftSummary = {
+  draftPublicId?: string;
   draftNumber: number;
   questionType: string | null;
   difficulty: string | null;
@@ -437,6 +438,17 @@ export type AiGenerationRouteIntegratedQuestionDraftSummary = {
   questionOptions?: AiGenerationRouteIntegratedQuestionOptionDraft[];
   standardAnswer?: string;
   analysis?: string;
+  scoringPoints?: {
+    description: string;
+    score: string;
+    sortOrder: number;
+  }[];
+  fillBlankAnswers?: {
+    blankKey: string;
+    standardAnswers: string[];
+    score: string;
+    sortOrder: number;
+  }[];
   reviewStatus: "draft_review_required";
 };
 
@@ -474,7 +486,9 @@ export type AiGenerationRouteIntegratedStructuredPreview =
         | "missing_questions"
         | "question_count_mismatch"
         | "question_type_mismatch"
-        | "difficulty_mismatch";
+        | "difficulty_mismatch"
+        | "schema_mismatch"
+        | "question_contract_invalid";
       draftCount: 0;
       draftSummaries: [];
     }

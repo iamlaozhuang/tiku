@@ -3,7 +3,10 @@ import type {
   PersonalAiGenerationRuntimeBridgePaperAssemblyDto,
 } from "../contracts/personal-ai-generation-runtime-bridge-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
-import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
+import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedVisibleGeneratedContent,
+} from "../contracts/route-integrated-provider-execution-contract";
 import type { AiPaperAssemblyRole } from "../contracts/ai-paper-plan-and-select-contract";
 import { createAiCallLogRedactedSnapshots } from "../models/ai-rag";
 import {
@@ -269,7 +272,10 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     providerExecutionSummary: executionOutcome.executionSummary,
     aiCallLogPublicId: executionOutcome.aiCallLogPublicId,
     resultMaterializationSummary,
-    visibleGeneratedContent: executionOutcome.visibleGeneratedContent,
+    visibleGeneratedContent: createLearnerVisibleGeneratedContent(
+      requestFlow,
+      executionOutcome.visibleGeneratedContent,
+    ),
     paperAssembly: paperAssemblyResult.paperAssembly,
     blockedReasons: executionOutcome.providerCallExecuted
       ? []
@@ -284,6 +290,63 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
                 ? "provider_error"
                 : executionOutcome.executionSummary.failureCategory,
           ],
+  };
+}
+
+function createLearnerVisibleGeneratedContent(
+  requestFlow: PersonalAiGenerationRequestFlowDto,
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null,
+): AiGenerationRouteIntegratedVisibleGeneratedContent | null {
+  if (
+    visibleGeneratedContent === null ||
+    requestFlow.resultReference.taskType !== "ai_question_generation"
+  ) {
+    return visibleGeneratedContent;
+  }
+
+  const structuredPreview = visibleGeneratedContent.structuredPreview;
+
+  return {
+    ...visibleGeneratedContent,
+    content: "AI 题目草稿已生成，答案与解析仅在受保护的学习会话中处理。",
+    ...(structuredPreview?.kind === "question_set" &&
+    structuredPreview.parseStatus === "parsed"
+      ? {
+          structuredPreview: {
+            ...structuredPreview,
+            draftSummaries: structuredPreview.draftSummaries.map(
+              (questionDraft) => ({
+                draftPublicId: questionDraft.draftPublicId,
+                draftNumber: questionDraft.draftNumber,
+                questionType: questionDraft.questionType,
+                difficulty: questionDraft.difficulty,
+                knowledgeNodeCount: questionDraft.knowledgeNodeCount,
+                ...(questionDraft.knowledgeNodeLabels === undefined
+                  ? {}
+                  : {
+                      knowledgeNodeLabels: [
+                        ...questionDraft.knowledgeNodeLabels,
+                      ],
+                    }),
+                ...(questionDraft.questionStem === undefined
+                  ? {}
+                  : { questionStem: questionDraft.questionStem }),
+                ...(questionDraft.questionOptions === undefined
+                  ? {}
+                  : {
+                      questionOptions: questionDraft.questionOptions.map(
+                        (questionOption) => ({
+                          optionLabel: questionOption.optionLabel,
+                          optionText: questionOption.optionText,
+                        }),
+                      ),
+                    }),
+                reviewStatus: questionDraft.reviewStatus,
+              }),
+            ),
+          },
+        }
+      : {}),
   };
 }
 

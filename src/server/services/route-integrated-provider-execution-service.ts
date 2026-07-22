@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+
+import { aiQuestionDraftSchemaVersion } from "@/ai/prompts/templates";
+
 import type {
   AiGenerationRouteIntegratedProviderErrorSummary,
   AiGenerationRouteIntegratedProviderExecutionOutcome,
@@ -50,25 +54,6 @@ const forbiddenProviderExecutionEvidenceKeys = [
 ] as const;
 
 const visibleGeneratedContentMaxLength = 2000;
-const questionDraftArrayKeys = [
-  "questions",
-  "questionDrafts",
-  "question_drafts",
-  "questionItems",
-  "question_items",
-  "questionList",
-  "question_list",
-  "drafts",
-  "items",
-] as const;
-const questionDraftContainerKeys = [
-  "questionSet",
-  "question_set",
-  "result",
-  "data",
-  "output",
-  "payload",
-] as const;
 const forbiddenPaperPlanGeneratedQuestionKeys = new Set([
   "questions",
   "questionDrafts",
@@ -89,17 +74,10 @@ const forbiddenPaperPlanGeneratedQuestionKeys = new Set([
   "scoringPoints",
   "scoring_points",
 ]);
-const plainTextQuestionDraftMarkerPattern =
-  /^(?:\s*>?\s*)?(?:[-*]\s*)?(?:#{1,6}\s*)?(?:(\d{1,3})[.)、）]\s*|题目\s*(\d{1,3})\s*[:：]|第\s*(\d{1,3})\s*题\s*[:：]?)/gim;
-
 type ParsedRouteIntegratedProviderContent =
   | Record<string, unknown>
   | unknown[]
   | null;
-type PlainTextQuestionDraftMarkerSummary = {
-  actualQuestionCount: number;
-  isExactRequestedCount: boolean;
-};
 
 export function createBlockedRouteIntegratedProviderExecutionSummary(
   failureCategory: Exclude<
@@ -336,6 +314,36 @@ function createQuestionSetStructuredPreview(
   >,
   content: string,
 ): AiGenerationRouteIntegratedStructuredPreview {
+  const normalizedContent = content.trim();
+
+  if (
+    !normalizedContent.startsWith("{") ||
+    !normalizedContent.endsWith("}") ||
+    normalizedContent.length > 1_000_000
+  ) {
+    return {
+      kind: "question_set",
+      parseStatus: "failed",
+      requestedQuestionCount: options.requestedQuestionCount,
+      actualQuestionCount: null,
+      failureCategory: "invalid_json",
+      draftCount: 0,
+      draftSummaries: [],
+    };
+  }
+
+  if (hasDuplicateJsonObjectKeys(normalizedContent)) {
+    return {
+      kind: "question_set",
+      parseStatus: "failed",
+      requestedQuestionCount: options.requestedQuestionCount,
+      actualQuestionCount: null,
+      failureCategory: "question_contract_invalid",
+      draftCount: 0,
+      draftSummaries: [],
+    };
+  }
+
   if (parsedContent === null) {
     const plainTextStructuredPreview =
       createPlainTextQuestionSetStructuredPreview(content, options);
@@ -355,7 +363,26 @@ function createQuestionSetStructuredPreview(
     };
   }
 
-  const questions = readQuestionDraftArray(parsedContent);
+  if (
+    !isRecord(parsedContent) ||
+    !hasExactKeys(parsedContent, ["schemaVersion", "kind", "questions"]) ||
+    parsedContent.schemaVersion !== aiQuestionDraftSchemaVersion ||
+    parsedContent.kind !== "question_set"
+  ) {
+    return {
+      kind: "question_set",
+      parseStatus: "failed",
+      requestedQuestionCount: options.requestedQuestionCount,
+      actualQuestionCount: null,
+      failureCategory: "schema_mismatch",
+      draftCount: 0,
+      draftSummaries: [],
+    };
+  }
+
+  const questions = Array.isArray(parsedContent.questions)
+    ? parsedContent.questions
+    : null;
 
   if (questions === null) {
     return {
@@ -398,6 +425,21 @@ function createQuestionSetStructuredPreview(
     };
   }
 
+  if (
+    !questions.every(isCompleteQuestionDraft) ||
+    hasDuplicateQuestions(questions)
+  ) {
+    return {
+      kind: "question_set",
+      parseStatus: "failed",
+      requestedQuestionCount: options.requestedQuestionCount,
+      actualQuestionCount: questions.length,
+      failureCategory: "question_contract_invalid",
+      draftCount: 0,
+      draftSummaries: [],
+    };
+  }
+
   return {
     kind: "question_set",
     parseStatus: "parsed",
@@ -408,6 +450,133 @@ function createQuestionSetStructuredPreview(
       createQuestionDraftSummary(questionDraft, index),
     ),
   };
+}
+
+function hasDuplicateJsonObjectKeys(content: string): boolean {
+  let index = 0;
+  let duplicateFound = false;
+
+  function skipWhitespace(): void {
+    while (/\s/u.test(content[index] ?? "")) {
+      index += 1;
+    }
+  }
+
+  function readString(): string | null {
+    if (content[index] !== '"') {
+      return null;
+    }
+
+    const start = index;
+    index += 1;
+    let escaped = false;
+
+    while (index < content.length) {
+      const character = content[index];
+
+      if (!escaped && character === '"') {
+        index += 1;
+        try {
+          return JSON.parse(content.slice(start, index)) as string;
+        } catch {
+          return null;
+        }
+      }
+
+      escaped = !escaped && character === "\\";
+      if (character !== "\\") {
+        escaped = false;
+      }
+      index += 1;
+    }
+
+    return null;
+  }
+
+  function scanValue(): boolean {
+    skipWhitespace();
+    const character = content[index];
+
+    if (character === '"') {
+      return readString() !== null;
+    }
+
+    if (character === "{") {
+      index += 1;
+      skipWhitespace();
+      const keys = new Set<string>();
+
+      if (content[index] === "}") {
+        index += 1;
+        return true;
+      }
+
+      while (index < content.length) {
+        skipWhitespace();
+        const key = readString();
+
+        if (key === null) {
+          return false;
+        }
+        if (keys.has(key)) {
+          duplicateFound = true;
+        }
+        keys.add(key);
+        skipWhitespace();
+        if (content[index] !== ":") {
+          return false;
+        }
+        index += 1;
+        if (!scanValue()) {
+          return false;
+        }
+        skipWhitespace();
+        if (content[index] === "}") {
+          index += 1;
+          return true;
+        }
+        if (content[index] !== ",") {
+          return false;
+        }
+        index += 1;
+      }
+
+      return false;
+    }
+
+    if (character === "[") {
+      index += 1;
+      skipWhitespace();
+      if (content[index] === "]") {
+        index += 1;
+        return true;
+      }
+      while (index < content.length) {
+        if (!scanValue()) {
+          return false;
+        }
+        skipWhitespace();
+        if (content[index] === "]") {
+          index += 1;
+          return true;
+        }
+        if (content[index] !== ",") {
+          return false;
+        }
+        index += 1;
+      }
+      return false;
+    }
+
+    const primitiveStart = index;
+    while (index < content.length && !/[\s,\]}]/u.test(content[index] ?? "")) {
+      index += 1;
+    }
+
+    return index > primitiveStart;
+  }
+
+  return scanValue() && duplicateFound;
 }
 
 function findQuestionSetContractFailure(
@@ -456,67 +625,64 @@ function createQuestionDraftSummary(
   index: number,
 ): AiGenerationRouteIntegratedQuestionDraftSummary {
   const questionDraftObject = isRecord(questionDraft) ? questionDraft : {};
+  const knowledgeNodeLabels = Array.isArray(
+    questionDraftObject.knowledgeNodeLabels,
+  )
+    ? questionDraftObject.knowledgeNodeLabels
+        .map((label) => String(label).trim())
+        .sort((first, second) => first.localeCompare(second))
+    : [];
+  const questionType = String(questionDraftObject.questionType ?? "").trim();
+  const normalizedQuestion = {
+    draftNumber: index + 1,
+    questionType,
+    difficulty: String(questionDraftObject.difficulty ?? "").trim(),
+    knowledgeNodeCount: knowledgeNodeLabels.length,
+    knowledgeNodeLabels,
+    questionStem: String(questionDraftObject.questionStem ?? "").trim(),
+    questionOptions:
+      readStrictQuestionOptionDrafts(questionDraftObject.questionOptions)?.sort(
+        (first, second) =>
+          String(first.optionLabel).localeCompare(String(second.optionLabel)),
+      ) ?? [],
+    standardAnswer: normalizeQuestionDraftStandardAnswer(
+      questionType,
+      questionDraftObject.standardAnswer,
+    ),
+    analysis: String(questionDraftObject.analysis ?? "").trim(),
+    scoringPoints: readScoringPoints(questionDraftObject.scoringPoints),
+    fillBlankAnswers: readFillBlankAnswers(
+      questionDraftObject.fillBlankAnswers,
+    ),
+    reviewStatus: "draft_review_required" as const,
+  };
 
   return {
-    draftNumber: index + 1,
-    questionType: readSafeLabel(questionDraftObject, [
-      "questionType",
-      "question_type",
-      "type",
-    ]),
-    difficulty: readSafeLabel(questionDraftObject, ["difficulty"]),
-    knowledgeNodeCount: readCollectionCount(questionDraftObject, [
-      "knowledgeNodeLabels",
-      "knowledgeNodes",
-      "knowledge_node",
-      "knowledge_node_ids",
-    ]),
-    ...readProductVisibleQuestionDraftFields(questionDraftObject),
-    reviewStatus: "draft_review_required",
+    draftPublicId: `ai_question_draft_${createHash("sha256")
+      .update(JSON.stringify(normalizedQuestion))
+      .digest("hex")}`,
+    ...normalizedQuestion,
   };
 }
 
-function readProductVisibleQuestionDraftFields(
-  questionDraftObject: Record<string, unknown>,
-): Partial<AiGenerationRouteIntegratedQuestionDraftSummary> {
-  const knowledgeNodeLabels = readStringArray(questionDraftObject, [
-    "knowledgeNodeLabels",
-    "knowledgeNodes",
-    "knowledge_node_labels",
-    "knowledge_node",
-  ]);
-  const questionStem = readVisibleDraftText(questionDraftObject, [
-    "questionStem",
-    "question_stem",
-    "stem",
-    "title",
-  ]);
-  const questionOptions = readQuestionOptionDrafts(questionDraftObject, [
-    "questionOptions",
-    "question_options",
-    "options",
-    "choices",
-  ]);
-  const standardAnswer = readVisibleDraftText(questionDraftObject, [
-    "standardAnswer",
-    "standard_answer",
-    "answer",
-    "correctAnswer",
-    "correct_answer",
-  ]);
-  const analysis = readVisibleDraftText(questionDraftObject, [
-    "analysis",
-    "explanation",
-    "解析",
-  ]);
+function normalizeQuestionDraftStandardAnswer(
+  questionType: string,
+  value: unknown,
+): string {
+  const normalizedValue = String(value ?? "").trim();
 
-  return {
-    ...(knowledgeNodeLabels.length > 0 ? { knowledgeNodeLabels } : {}),
-    ...(questionStem !== null ? { questionStem } : {}),
-    ...(questionOptions.length > 0 ? { questionOptions } : {}),
-    ...(standardAnswer !== null ? { standardAnswer } : {}),
-    ...(analysis !== null ? { analysis } : {}),
-  };
+  if (questionType === "single_choice" || questionType === "multi_choice") {
+    return normalizedValue
+      .toUpperCase()
+      .split(/[,，;；、\s]+/u)
+      .filter(Boolean)
+      .sort((first, second) => first.localeCompare(second))
+      .join(",");
+  }
+
+  return questionType === "true_false"
+    ? normalizedValue.toLowerCase()
+    : normalizedValue;
 }
 
 function createPlainTextQuestionSetStructuredPreview(
@@ -526,44 +692,261 @@ function createPlainTextQuestionSetStructuredPreview(
     { kind: "question_set" }
   >,
 ): AiGenerationRouteIntegratedStructuredPreview | null {
-  const markerSummary = readPlainTextQuestionDraftMarkerSummary(
-    content,
-    options.requestedQuestionCount,
-  );
+  void content;
+  void options;
+  return null;
+}
 
-  if (markerSummary === null) {
+const questionDraftKeys = [
+  "questionType",
+  "difficulty",
+  "knowledgeNodeLabels",
+  "questionStem",
+  "questionOptions",
+  "standardAnswer",
+  "analysis",
+  "scoringPoints",
+  "fillBlankAnswers",
+] as const;
+const questionTypes = new Set([
+  "single_choice",
+  "multi_choice",
+  "true_false",
+  "fill_blank",
+  "short_answer",
+  "case_analysis",
+  "calculation",
+]);
+
+function hasExactKeys(
+  value: Record<string, unknown>,
+  keys: readonly string[],
+): boolean {
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  return (
+    actual.length === expected.length &&
+    actual.every((key, i) => key === expected[i])
+  );
+}
+
+function isBoundedText(value: unknown, max = 4000): value is string {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    value.length <= max &&
+    !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(value)
+  );
+}
+
+function isCompleteQuestionDraft(
+  value: unknown,
+): value is Record<string, unknown> {
+  if (!isRecord(value) || !hasExactKeys(value, questionDraftKeys)) return false;
+  if (
+    !questionTypes.has(String(value.questionType)) ||
+    !isBoundedText(value.difficulty, 32) ||
+    !isBoundedText(value.questionStem) ||
+    !isBoundedText(value.standardAnswer) ||
+    !isBoundedText(value.analysis)
+  )
+    return false;
+  if (
+    !Array.isArray(value.knowledgeNodeLabels) ||
+    value.knowledgeNodeLabels.length > 20 ||
+    !value.knowledgeNodeLabels.every((label) => isBoundedText(label, 200)) ||
+    new Set(value.knowledgeNodeLabels.map((label) => label.trim())).size !==
+      value.knowledgeNodeLabels.length
+  )
+    return false;
+  if (
+    !Array.isArray(value.questionOptions) ||
+    value.questionOptions.length > 20 ||
+    !Array.isArray(value.scoringPoints) ||
+    value.scoringPoints.length > 20 ||
+    !Array.isArray(value.fillBlankAnswers) ||
+    value.fillBlankAnswers.length > 20
+  )
+    return false;
+  const type = String(value.questionType);
+  const normalizedOptions = readStrictQuestionOptionDrafts(
+    value.questionOptions,
+  );
+  if (normalizedOptions === null) return false;
+  const options = normalizedOptions;
+  const labels = normalizedOptions.map(
+    (option) => option.optionLabel?.toUpperCase() ?? "",
+  );
+  if (new Set(labels).size !== labels.length || labels.some((label) => !label))
+    return false;
+  const answers = String(value.standardAnswer)
+    .toUpperCase()
+    .split(/[,，;；、\s]+/u)
+    .filter(Boolean);
+  if (new Set(answers).size !== answers.length) return false;
+  if (type === "single_choice" || type === "multi_choice") {
+    if (
+      options.length < 2 ||
+      answers.some((answer) => !labels.includes(answer))
+    )
+      return false;
+    if (type === "single_choice" ? answers.length !== 1 : answers.length < 2)
+      return false;
+    return (
+      value.scoringPoints.length === 0 && value.fillBlankAnswers.length === 0
+    );
+  }
+  if (type === "true_false")
+    return (
+      options.length === 0 &&
+      /^(true|false)$/iu.test(String(value.standardAnswer)) &&
+      value.scoringPoints.length === 0 &&
+      value.fillBlankAnswers.length === 0
+    );
+  if (type === "fill_blank")
+    return options.length === 0 && value.scoringPoints.length === 0
+      ? hasUniqueFillBlankAnswers(value.fillBlankAnswers)
+      : false;
+  return options.length === 0 && value.fillBlankAnswers.length === 0
+    ? hasUniqueScoringPoints(value.scoringPoints)
+    : false;
+}
+
+function isPositiveHalfPointScore(value: string): boolean {
+  const score = Number(value);
+
+  return (
+    Number.isFinite(score) && score > 0 && score * 2 === Math.round(score * 2)
+  );
+}
+
+function hasUniqueScoringPoints(value: unknown): boolean {
+  const scoringPoints = readScoringPoints(value);
+
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    scoringPoints.length === value.length &&
+    new Set(scoringPoints.map((scoringPoint) => scoringPoint.sortOrder))
+      .size === scoringPoints.length
+  );
+}
+
+function hasUniqueFillBlankAnswers(value: unknown): boolean {
+  const fillBlankAnswers = readFillBlankAnswers(value);
+
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    fillBlankAnswers.length === value.length &&
+    new Set(fillBlankAnswers.map((answer) => answer.blankKey.trim())).size ===
+      fillBlankAnswers.length &&
+    new Set(fillBlankAnswers.map((answer) => answer.sortOrder)).size ===
+      fillBlankAnswers.length
+  );
+}
+
+function readStrictQuestionOptionDrafts(
+  value: unknown,
+): AiGenerationRouteIntegratedQuestionOptionDraft[] | null {
+  if (!Array.isArray(value) || value.length > 20) {
     return null;
   }
 
-  if (!markerSummary.isExactRequestedCount) {
-    return {
-      kind: "question_set",
-      parseStatus: "failed",
-      requestedQuestionCount: options.requestedQuestionCount,
-      actualQuestionCount: markerSummary.actualQuestionCount,
-      failureCategory: "question_count_mismatch",
-      draftCount: 0,
-      draftSummaries: [],
-    };
-  }
+  const questionOptions = value.map((questionOption) => {
+    if (
+      !isRecord(questionOption) ||
+      !hasExactKeys(questionOption, ["optionLabel", "optionText"]) ||
+      !isBoundedText(questionOption.optionLabel, 32) ||
+      !isBoundedText(questionOption.optionText, 2_000)
+    ) {
+      return null;
+    }
 
-  return {
-    kind: "question_set",
-    parseStatus: "parsed",
-    requestedQuestionCount: options.requestedQuestionCount,
-    actualQuestionCount: markerSummary.actualQuestionCount,
-    draftCount: markerSummary.actualQuestionCount,
-    draftSummaries: Array.from(
-      { length: markerSummary.actualQuestionCount },
-      (_, index) => ({
-        draftNumber: index + 1,
-        questionType: null,
-        difficulty: null,
-        knowledgeNodeCount: null,
-        reviewStatus: "draft_review_required",
-      }),
+    return {
+      optionLabel: questionOption.optionLabel.trim().toUpperCase(),
+      optionText: questionOption.optionText.trim(),
+    };
+  });
+
+  return questionOptions.some((questionOption) => questionOption === null)
+    ? null
+    : (questionOptions as AiGenerationRouteIntegratedQuestionOptionDraft[]);
+}
+
+function readScoringPoints(
+  value: unknown,
+): { description: string; score: string; sortOrder: number }[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .flatMap((item) =>
+      isRecord(item) &&
+      hasExactKeys(item, ["description", "score", "sortOrder"]) &&
+      isBoundedText(item.description, 1000) &&
+      isBoundedText(item.score, 32) &&
+      isPositiveHalfPointScore(item.score) &&
+      Number.isInteger(item.sortOrder) &&
+      Number(item.sortOrder) > 0
+        ? [
+            {
+              description: item.description.trim(),
+              score: item.score.trim(),
+              sortOrder: Number(item.sortOrder),
+            },
+          ]
+        : [],
+    )
+    .sort((first, second) => first.sortOrder - second.sortOrder);
+}
+
+function readFillBlankAnswers(value: unknown): {
+  blankKey: string;
+  standardAnswers: string[];
+  score: string;
+  sortOrder: number;
+}[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .flatMap((item) =>
+      isRecord(item) &&
+      hasExactKeys(item, [
+        "blankKey",
+        "standardAnswers",
+        "score",
+        "sortOrder",
+      ]) &&
+      isBoundedText(item.blankKey, 100) &&
+      Array.isArray(item.standardAnswers) &&
+      item.standardAnswers.length > 0 &&
+      item.standardAnswers.every((answer) => isBoundedText(answer, 1000)) &&
+      new Set(item.standardAnswers.map((answer) => answer.trim())).size ===
+        item.standardAnswers.length &&
+      isBoundedText(item.score, 32) &&
+      isPositiveHalfPointScore(item.score) &&
+      Number.isInteger(item.sortOrder) &&
+      Number(item.sortOrder) > 0
+        ? [
+            {
+              blankKey: item.blankKey.trim(),
+              standardAnswers: (item.standardAnswers as string[])
+                .map((answer) => answer.trim())
+                .sort((first, second) => first.localeCompare(second)),
+              score: item.score.trim(),
+              sortOrder: Number(item.sortOrder),
+            },
+          ]
+        : [],
+    )
+    .sort((first, second) => first.sortOrder - second.sortOrder);
+}
+
+function hasDuplicateQuestions(questions: unknown[]): boolean {
+  const identities = questions.map((question) =>
+    JSON.stringify(createQuestionDraftSummary(question, 0), (key, value) =>
+      key === "draftPublicId" ? undefined : value,
     ),
-  };
+  );
+  return new Set(identities).size !== identities.length;
 }
 
 function createPaperDraftStructuredPreview(
@@ -1121,79 +1504,6 @@ function extractJsonSlice(
     : null;
 }
 
-function readQuestionDraftArray(source: unknown, depth = 0): unknown[] | null {
-  if (Array.isArray(source)) {
-    return source;
-  }
-
-  if (!isRecord(source) || depth > 2) {
-    return null;
-  }
-
-  const directQuestions = readArrayProperty(source, questionDraftArrayKeys);
-
-  if (directQuestions !== null) {
-    return directQuestions;
-  }
-
-  for (const key of questionDraftContainerKeys) {
-    const nestedQuestions = readQuestionDraftArray(source[key], depth + 1);
-
-    if (nestedQuestions !== null) {
-      return nestedQuestions;
-    }
-  }
-
-  return null;
-}
-
-function readPlainTextQuestionDraftMarkerSummary(
-  content: string,
-  requestedQuestionCount: number,
-): PlainTextQuestionDraftMarkerSummary | null {
-  const markerNumbers: number[] = [];
-
-  for (const match of content.matchAll(plainTextQuestionDraftMarkerPattern)) {
-    const markerNumber = Number.parseInt(
-      match[1] ?? match[2] ?? match[3] ?? "",
-      10,
-    );
-
-    if (!Number.isInteger(markerNumber) || markerNumber <= 0) {
-      continue;
-    }
-
-    markerNumbers.push(markerNumber);
-  }
-
-  if (markerNumbers.length === 0) {
-    return null;
-  }
-
-  const seenMarkerNumbers = new Set<number>();
-  let hasDuplicateMarker = false;
-
-  for (const markerNumber of markerNumbers) {
-    if (seenMarkerNumbers.has(markerNumber)) {
-      hasDuplicateMarker = true;
-    }
-
-    seenMarkerNumbers.add(markerNumber);
-  }
-
-  const isExactRequestedCount =
-    !hasDuplicateMarker &&
-    markerNumbers.length === requestedQuestionCount &&
-    Array.from({ length: requestedQuestionCount }, (_, index) =>
-      seenMarkerNumbers.has(index + 1),
-    ).every(Boolean);
-
-  return {
-    actualQuestionCount: markerNumbers.length,
-    isExactRequestedCount,
-  };
-}
-
 function readArrayProperty(
   source: Record<string, unknown>,
   keys: readonly string[],
@@ -1325,79 +1635,6 @@ function readStringArray(
   }
 
   return [];
-}
-
-function readQuestionOptionDrafts(
-  source: Record<string, unknown>,
-  keys: readonly string[],
-): AiGenerationRouteIntegratedQuestionOptionDraft[] {
-  for (const key of keys) {
-    const value = source[key];
-
-    if (!Array.isArray(value)) {
-      continue;
-    }
-
-    const questionOptions = value
-      .map((option, index) => normalizeQuestionOptionDraft(option, index))
-      .filter(
-        (option): option is AiGenerationRouteIntegratedQuestionOptionDraft =>
-          option !== null,
-      );
-
-    if (questionOptions.length > 0) {
-      return questionOptions.slice(0, 8);
-    }
-  }
-
-  return [];
-}
-
-function normalizeQuestionOptionDraft(
-  option: unknown,
-  index: number,
-): AiGenerationRouteIntegratedQuestionOptionDraft | null {
-  if (typeof option === "string") {
-    const optionText = option.trim();
-
-    return optionText.length > 0 && optionText.length <= 600
-      ? {
-          optionLabel: String.fromCharCode(65 + index),
-          optionText,
-        }
-      : null;
-  }
-
-  if (!isRecord(option)) {
-    return null;
-  }
-
-  const optionText = readVisibleDraftText(option, [
-    "optionText",
-    "option_text",
-    "text",
-    "content",
-    "value",
-  ]);
-
-  if (optionText === null) {
-    return null;
-  }
-
-  return {
-    optionLabel: readSafeLabel(option, [
-      "optionLabel",
-      "option_label",
-      "label",
-      "key",
-    ]),
-    optionText,
-    ...(typeof option.isCorrect === "boolean"
-      ? { isCorrect: option.isCorrect }
-      : typeof option.is_correct === "boolean"
-        ? { isCorrect: option.is_correct }
-        : {}),
-  };
 }
 
 function readCollectionCount(

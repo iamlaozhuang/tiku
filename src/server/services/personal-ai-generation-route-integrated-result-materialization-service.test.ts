@@ -6,6 +6,38 @@ import {
   type PersonalAiGenerationRouteIntegratedResultMaterializationControl,
 } from "./personal-ai-generation-route-integrated-result-materialization-service";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+
+function createPrivateQuestionDraftSnapshot() {
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId: "ai_generation_task_public_materialization_121",
+    ownerPublicId: "student_public_materialization_121",
+    requestedQuestionCount: 1,
+    questions: [
+      {
+        draftPublicId: "ai_question_draft_materialization_1",
+        draftNumber: 1,
+        questionType: "short_answer",
+        difficulty: "medium",
+        knowledgeNodeCount: 1,
+        knowledgeNodeLabels: ["测试知识点"],
+        questionStem: "测试题干",
+        questionOptions: [],
+        standardAnswer: "测试答案",
+        analysis: "测试解析",
+        scoringPoints: [{ description: "要点", score: "1", sortOrder: 1 }],
+        fillBlankAnswers: [],
+        reviewStatus: "draft_review_required",
+      },
+    ],
+  });
+
+  if (snapshot === null) {
+    throw new Error("test snapshot must be valid");
+  }
+
+  return snapshot;
+}
 
 function createRequestFlow(): PersonalAiGenerationRequestFlowDto {
   const requestFlowResponse = buildPersonalAiGenerationRequestFlowReadModel({
@@ -55,6 +87,7 @@ function createControl(
     resultPublicId: "ai_generation_result_public_materialization_121",
     contentDigest: "sha256:materialization_digest_121",
     contentPreviewMasked: "masked materialized preview",
+    privateQuestionDraftSnapshot: createPrivateQuestionDraftSnapshot(),
     evidenceStatus: "none",
     citationCount: 0,
     aiCallLogPublicId: "ai-call-log-materialization-121",

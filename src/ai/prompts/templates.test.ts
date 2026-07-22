@@ -15,7 +15,7 @@ describe("Phase 5 prompt template definitions", () => {
       ai_hint: "ai_hint_v1",
       kn_recommendation: "kn_recommendation_v1",
       learning_suggestion: "learning_suggestion_v1",
-      ai_question_generation: "ai_question_generation_v1",
+      ai_question_generation: "ai_question_generation_v2",
       ai_paper_generation: "ai_paper_generation_v1",
     });
     expect(promptTemplateDefinitions).toHaveLength(7);
@@ -61,9 +61,9 @@ describe("Phase 5 prompt template definitions", () => {
         isActive: true,
       },
       {
-        key: "ai_question_generation_v1",
+        key: "ai_question_generation_v2",
         aiFuncType: "ai_question_generation",
-        version: 1,
+        version: 2,
         isActive: true,
       },
       {
@@ -81,7 +81,7 @@ describe("Phase 5 prompt template definitions", () => {
     ]);
     expect(promptTemplateDefinitions.slice(-2)).toEqual([
       expect.objectContaining({
-        promptTemplateKey: "ai_question_generation_v1",
+        promptTemplateKey: "ai_question_generation_v2",
         requiredVariables: ["sceneLabel", "outputContract", "draftInstruction"],
       }),
       expect.objectContaining({
@@ -89,6 +89,34 @@ describe("Phase 5 prompt template definitions", () => {
         requiredVariables: ["sceneLabel", "outputContract", "draftInstruction"],
       }),
     ]);
+  });
+
+  it("binds question generation v2 to the strict versioned draft schema while leaving paper v1 unchanged", () => {
+    const question = promptTemplateDefinitions.find(
+      (definition) => definition.aiFuncType === "ai_question_generation",
+    );
+    const paper = promptTemplateDefinitions.find(
+      (definition) => definition.aiFuncType === "ai_paper_generation",
+    );
+
+    expect(question).toMatchObject({
+      promptTemplateKey: "ai_question_generation_v2",
+      version: 2,
+    });
+    expect(question?.templateContent).toContain("question_draft_v1");
+    expect(question?.templateContent).toContain("schemaVersion");
+    expect(question?.templateContent).toContain("kind");
+    expect(question?.templateContent).toContain("questionOptions 每项只能包含");
+    expect(question?.templateContent).toContain("single_choice");
+    expect(question?.templateContent).toContain("fill_blank");
+    expect(question?.templateContent).toContain("case_analysis");
+    expect(question?.templateContent).toContain("不适用的数组必须为空数组");
+    expect(paper).toMatchObject({
+      promptTemplateKey: "ai_paper_generation_v1",
+      version: 1,
+      templateHash:
+        "15c72c7c0267c4720038d797909a4bfe2aae95a3d8662bbf95dfaa3e8a3a8148",
+    });
   });
 
   it("binds executable generation templates to SHA-256 content digests", () => {

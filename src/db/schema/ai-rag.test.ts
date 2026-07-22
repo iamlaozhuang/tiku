@@ -842,6 +842,9 @@ describe("personal learning AI generated content result schema", () => {
         "content_redacted_snapshot",
         "content_digest",
         "content_preview_masked",
+        "question_draft_schema_version",
+        "question_draft_snapshot",
+        "question_draft_digest",
         "citation_redacted_snapshot",
         "evidence_status",
         "citation_count",
@@ -849,6 +852,12 @@ describe("personal learning AI generated content result schema", () => {
         "is_formal_adoption_blocked",
         "created_at",
         "updated_at",
+      ]),
+    );
+    expect(getCheckNames(personalAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "personal_ai_generation_result_question_draft_snapshot_coherence_check",
+        "personal_ai_generation_result_question_draft_task_type_check",
       ]),
     );
   });

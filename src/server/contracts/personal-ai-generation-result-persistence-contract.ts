@@ -10,6 +10,23 @@ import type {
   PersonalAiGenerationResultTaskType,
 } from "../models/personal-ai-generation-result";
 import type { EvidenceStatus } from "../models/ai-rag";
+import type { AiGenerationRouteIntegratedQuestionDraftSummary } from "./route-integrated-provider-execution-contract";
+
+export type PersonalAiGenerationQuestionDraftSnapshotDto = {
+  schemaVersion: "question_draft_v1";
+  kind: "question_set";
+  taskPublicId: string;
+  ownerPublicId: string;
+  taskType: "ai_question_generation";
+  requestedQuestionCount: number;
+  questions: AiGenerationRouteIntegratedQuestionDraftSummary[];
+};
+
+export type PersonalAiGenerationPrivateQuestionDraftSnapshotDto = {
+  schemaVersion: "question_draft_v1";
+  snapshot: PersonalAiGenerationQuestionDraftSnapshotDto;
+  digest: string;
+};
 
 export type PersonalAiGenerationResultPaperAssemblySnapshotDto = {
   status: "assembled" | "insufficient";

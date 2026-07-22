@@ -5,7 +5,10 @@ import {
 } from "@/db/schema";
 import { and, asc, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
-import type { PersonalAiGenerationResultPersistenceDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type {
+  PersonalAiGenerationPrivateQuestionDraftSnapshotDto,
+  PersonalAiGenerationResultPersistenceDto,
+} from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { EvidenceStatus } from "../models/ai-rag";
 import type {
   PersonalAiGenerationResultPersistenceInput,
@@ -24,6 +27,10 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import {
+  normalizePersonalAiGenerationPrivateQuestionDraftSnapshot,
+  serializePersonalAiGenerationQuestionDraftSnapshot,
+} from "../validators/personal-ai-generation-result-persistence";
 
 export type { PersonalAiGenerationResultPersistenceRow };
 
@@ -119,6 +126,9 @@ export type PersonalAiGenerationResultSelectedAuthorizationLookupRepository = {
   findDraftResultByPublicId(
     query: GetPersonalAiGenerationResultQuery,
   ): Promise<PersonalAiGenerationResultPersistenceResult["result"] | null>;
+  findPrivateQuestionDraftSnapshotByPublicId?(
+    query: GetPersonalAiGenerationResultQuery,
+  ): Promise<PersonalAiGenerationPrivateQuestionDraftSnapshotDto | null>;
 };
 
 export type PersonalAiGenerationResultTaskGateway = {
@@ -180,6 +190,10 @@ const personalAiGenerationResultSelection = {
     personalAiGenerationResult.content_redacted_snapshot,
   content_digest: personalAiGenerationResult.content_digest,
   content_preview_masked: personalAiGenerationResult.content_preview_masked,
+  question_draft_schema_version:
+    personalAiGenerationResult.question_draft_schema_version,
+  question_draft_snapshot: personalAiGenerationResult.question_draft_snapshot,
+  question_draft_digest: personalAiGenerationResult.question_draft_digest,
   citation_redacted_snapshot:
     personalAiGenerationResult.citation_redacted_snapshot,
   evidence_status: personalAiGenerationResult.evidence_status,
@@ -287,6 +301,11 @@ export function createPersonalAiGenerationResultRepository(
 
   return {
     findDraftResultByPublicId,
+    async findPrivateQuestionDraftSnapshotByPublicId(query) {
+      const row = await gateway.findResultByPublicId(query);
+
+      return row === null ? null : readPrivateQuestionDraftSnapshot(row);
+    },
     async listDraftResults(query) {
       const page = resolveResultHistoryPage(query.page);
       const pageSize = resolveResultHistoryLimit(query.pageSize ?? query.limit);
@@ -317,6 +336,7 @@ export function createPersonalAiGenerationResultRepository(
       });
 
       if (existingRow !== null) {
+        assertReusablePrivateQuestionDraftSnapshot(existingRow, input);
         return {
           persistenceStatus: "reused",
           result: mapPersonalAiGenerationResultRowToDto(existingRow),
@@ -368,6 +388,7 @@ export function createPersonalAiGenerationResultRepository(
       if (resolvedRow === null) {
         throw new Error("personal AI generation result persistence failed.");
       }
+      assertReusablePrivateQuestionDraftSnapshot(resolvedRow, input);
 
       return {
         persistenceStatus: insertedRow === null ? "reused" : "created",
@@ -575,6 +596,12 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
         content_redacted_snapshot: input.result.contentRedactedSnapshot,
         content_digest: input.result.contentDigest,
         content_preview_masked: input.result.contentPreviewMasked,
+        question_draft_schema_version:
+          input.result.privateQuestionDraftSnapshot?.schemaVersion ?? null,
+        question_draft_snapshot:
+          input.result.privateQuestionDraftSnapshot?.snapshot ?? null,
+        question_draft_digest:
+          input.result.privateQuestionDraftSnapshot?.digest ?? null,
         citation_redacted_snapshot: input.result.citationRedactedSnapshot,
         evidence_status: input.result.evidenceStatus,
         citation_count: input.result.citationCount,
@@ -631,6 +658,51 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
 
     return row as PersonalAiGenerationResultPersistenceRow;
   });
+}
+
+function readPrivateQuestionDraftSnapshot(
+  row: PersonalAiGenerationResultPersistenceRow,
+): PersonalAiGenerationPrivateQuestionDraftSnapshotDto | null {
+  if (
+    row.question_draft_schema_version == null &&
+    row.question_draft_snapshot == null &&
+    row.question_draft_digest == null
+  ) {
+    return null;
+  }
+
+  return normalizePersonalAiGenerationPrivateQuestionDraftSnapshot({
+    schemaVersion: row.question_draft_schema_version,
+    snapshot: row.question_draft_snapshot,
+    digest: row.question_draft_digest,
+  });
+}
+
+function assertReusablePrivateQuestionDraftSnapshot(
+  row: PersonalAiGenerationResultPersistenceRow,
+  input: CreatePersonalAiGenerationResultInput,
+): void {
+  const existingSnapshot = readPrivateQuestionDraftSnapshot(row);
+  const requestedSnapshot = input.privateQuestionDraftSnapshot;
+
+  if (
+    row.public_id !== input.resultPublicId ||
+    row.task_public_id !== input.taskPublicId ||
+    row.owner_public_id !== input.ownerPublicId ||
+    row.task_type !== input.taskType ||
+    (requestedSnapshot === null
+      ? existingSnapshot !== null
+      : existingSnapshot === null ||
+        existingSnapshot.digest !== requestedSnapshot.digest ||
+        serializePersonalAiGenerationQuestionDraftSnapshot(
+          existingSnapshot.snapshot,
+        ) !==
+          serializePersonalAiGenerationQuestionDraftSnapshot(
+            requestedSnapshot.snapshot,
+          ))
+  ) {
+    throw new Error("personal AI generation result snapshot conflicted.");
+  }
 }
 
 function createServerOwnedDraftResultInput(

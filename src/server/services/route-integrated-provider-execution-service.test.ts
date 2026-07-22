@@ -12,7 +12,219 @@ import {
   qwenRouteIntegratedProviderMetadata,
 } from "./route-integrated-provider-execution-service";
 
+function createStrictQuestionSetContent(
+  questionCount: number,
+  overrides: Record<string, unknown> = {},
+): string {
+  return JSON.stringify({
+    schemaVersion: "question_draft_v1",
+    kind: "question_set",
+    questions: Array.from({ length: questionCount }, (_, index) => ({
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["redacted_knowledge_node"],
+      questionStem: `synthetic question stem ${index + 1}`,
+      questionOptions: [
+        { optionLabel: "A", optionText: "synthetic option A" },
+        { optionLabel: "B", optionText: "synthetic option B" },
+      ],
+      standardAnswer: "A",
+      analysis: "synthetic analysis",
+      scoringPoints: [],
+      fillBlankAnswers: [],
+      ...overrides,
+    })),
+  });
+}
+
 describe("shared route-integrated Provider execution primitives", () => {
+  it("rejects legacy questions-only and plaintext question drafts", () => {
+    const legacyJson = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        questions: [{ questionType: "single_choice" }],
+      }),
+      {
+        structuredPreview: { kind: "question_set", requestedQuestionCount: 1 },
+      },
+    );
+    const plainText = createRouteIntegratedVisibleGeneratedContent(
+      "1. synthetic plaintext draft",
+      {
+        structuredPreview: { kind: "question_set", requestedQuestionCount: 1 },
+      },
+    );
+
+    expect(legacyJson?.structuredPreview).toMatchObject({
+      parseStatus: "failed",
+    });
+    expect(plainText?.structuredPreview).toMatchObject({
+      parseStatus: "failed",
+    });
+  });
+
+  it("accepts only the explicit strict question_draft_v1 envelope", () => {
+    const visible = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        schemaVersion: "question_draft_v1",
+        kind: "question_set",
+        questions: [
+          {
+            questionType: "single_choice",
+            difficulty: "medium",
+            knowledgeNodeLabels: ["synthetic"],
+            questionStem: "synthetic stem",
+            questionOptions: [
+              { optionLabel: "A", optionText: "a" },
+              { optionLabel: "B", optionText: "b" },
+            ],
+            standardAnswer: "A",
+            analysis: "synthetic analysis",
+            scoringPoints: [],
+            fillBlankAnswers: [],
+          },
+        ],
+      }),
+      {
+        structuredPreview: { kind: "question_set", requestedQuestionCount: 1 },
+      },
+    );
+
+    expect(visible?.structuredPreview).toMatchObject({
+      parseStatus: "parsed",
+      requestedQuestionCount: 1,
+      actualQuestionCount: 1,
+      draftCount: 1,
+    });
+  });
+
+  it.each([
+    [
+      "unknown option field",
+      { optionLabel: "A", optionText: "a", isCorrect: true },
+    ],
+    ["legacy option aliases", { label: "A", text: "a" }],
+  ])("rejects %s instead of normalizing it", (_label, firstOption) => {
+    const visible = createRouteIntegratedVisibleGeneratedContent(
+      createStrictQuestionSetContent(1, {
+        questionOptions: [firstOption, { optionLabel: "B", optionText: "b" }],
+      }),
+      {
+        structuredPreview: { kind: "question_set", requestedQuestionCount: 1 },
+      },
+    );
+
+    expect(visible?.structuredPreview).toMatchObject({
+      parseStatus: "failed",
+      failureCategory: "question_contract_invalid",
+    });
+  });
+
+  it.each([
+    {
+      questionType: "single_choice",
+      fields: {
+        questionOptions: [
+          { optionLabel: "A", optionText: "a" },
+          { optionLabel: "B", optionText: "b" },
+        ],
+        standardAnswer: "A",
+        scoringPoints: [],
+        fillBlankAnswers: [],
+      },
+    },
+    {
+      questionType: "multi_choice",
+      fields: {
+        questionOptions: [
+          { optionLabel: "A", optionText: "a" },
+          { optionLabel: "B", optionText: "b" },
+          { optionLabel: "C", optionText: "c" },
+        ],
+        standardAnswer: "B, A",
+        scoringPoints: [],
+        fillBlankAnswers: [],
+      },
+    },
+    {
+      questionType: "true_false",
+      fields: {
+        questionOptions: [],
+        standardAnswer: "false",
+        scoringPoints: [],
+        fillBlankAnswers: [],
+      },
+    },
+    {
+      questionType: "fill_blank",
+      fields: {
+        questionOptions: [],
+        standardAnswer: "synthetic fill answer",
+        scoringPoints: [],
+        fillBlankAnswers: [
+          {
+            blankKey: "blank_1",
+            standardAnswers: ["synthetic fill answer"],
+            score: "1.0",
+            sortOrder: 1,
+          },
+        ],
+      },
+    },
+    ...["short_answer", "case_analysis", "calculation"].map((questionType) => ({
+      questionType,
+      fields: {
+        questionOptions: [],
+        standardAnswer: `synthetic ${questionType} answer`,
+        scoringPoints: [
+          { description: "synthetic point", score: "1.0", sortOrder: 1 },
+        ],
+        fillBlankAnswers: [],
+      },
+    })),
+  ])(
+    "accepts the exact $questionType question contract",
+    ({ questionType, fields }) => {
+      const visible = createRouteIntegratedVisibleGeneratedContent(
+        createStrictQuestionSetContent(1, { questionType, ...fields }),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 1,
+          },
+        },
+      );
+
+      expect(visible?.structuredPreview).toMatchObject({
+        parseStatus: "parsed",
+        actualQuestionCount: 1,
+        draftSummaries: [
+          expect.objectContaining({ questionType, draftNumber: 1 }),
+        ],
+      });
+    },
+  );
+
+  it("rejects duplicate JSON keys and Markdown-fenced question drafts", () => {
+    const strictContent = createStrictQuestionSetContent(1);
+    const duplicateKeyContent = strictContent.replace(
+      '"schemaVersion":"question_draft_v1"',
+      '"schemaVersion":"question_draft_v1","schemaVersion":"question_draft_v1"',
+    );
+
+    for (const content of [
+      duplicateKeyContent,
+      `\`\`\`json\n${strictContent}\n\`\`\``,
+    ]) {
+      expect(
+        createRouteIntegratedVisibleGeneratedContent(content, {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 1,
+          },
+        })?.structuredPreview,
+      ).toMatchObject({ parseStatus: "failed" });
+    }
+  });
   it("creates a provider-disabled outcome without Provider, env, or configuration access", () => {
     expect(
       createDefaultBlockedRouteIntegratedProviderExecutionOutcome(),
@@ -102,20 +314,7 @@ describe("shared route-integrated Provider execution primitives", () => {
   });
 
   it("builds a parsed question-set structured preview with product-visible draft fields", () => {
-    const content = JSON.stringify({
-      questions: Array.from({ length: 10 }, (_, index) => ({
-        questionType: index % 2 === 0 ? "single_choice" : "judge",
-        difficulty: "medium",
-        knowledgeNodeLabels: ["redacted_knowledge_node"],
-        questionStem: `synthetic question stem ${index + 1}`,
-        questionOptions: [
-          { optionLabel: "A", optionText: "synthetic option A" },
-          { optionLabel: "B", optionText: "synthetic option B" },
-        ],
-        standardAnswer: "synthetic standard answer",
-        analysis: "synthetic analysis",
-      })),
-    });
+    const content = createStrictQuestionSetContent(10);
 
     const visibleGeneratedContent =
       createRouteIntegratedVisibleGeneratedContent(content, {
@@ -150,20 +349,17 @@ describe("shared route-integrated Provider execution primitives", () => {
         { optionLabel: "A", optionText: "synthetic option A" },
         { optionLabel: "B", optionText: "synthetic option B" },
       ],
-      standardAnswer: "synthetic standard answer",
+      standardAnswer: "A",
       analysis: "synthetic analysis",
+      scoringPoints: [],
+      fillBlankAnswers: [],
       reviewStatus: "draft_review_required",
     });
   });
 
   it("parses structured preview from the full provider text before truncating visible content", () => {
-    const content = JSON.stringify({
-      questions: Array.from({ length: 10 }, (_, index) => ({
-        questionType: index % 2 === 0 ? "single_choice" : "judge",
-        difficulty: "medium",
-        knowledgeNodeLabels: ["redacted_knowledge_node"],
-        redactedDraftSummary: "redacted draft summary ".repeat(30),
-      })),
+    const content = createStrictQuestionSetContent(10, {
+      analysis: "redacted draft summary ".repeat(30),
     });
 
     expect(content.length).toBeGreaterThan(2000);
@@ -187,11 +383,7 @@ describe("shared route-integrated Provider execution primitives", () => {
   });
 
   it("reports a structured parse failure when question count mismatches the requested quantity", () => {
-    const content = JSON.stringify({
-      questions: Array.from({ length: 2 }, () => ({
-        questionType: "single_choice",
-      })),
-    });
+    const content = createStrictQuestionSetContent(2);
 
     expect(
       createRouteIntegratedVisibleGeneratedContent(content, {
@@ -217,14 +409,10 @@ describe("shared route-integrated Provider execution primitives", () => {
     ["questionDrafts", "questionDrafts"],
     ["question_drafts", "question_drafts"],
   ] as const)(
-    "builds a parsed question-set structured preview from %s",
+    "rejects legacy question-set root %s",
     (_label, questionArrayKey) => {
       const content = JSON.stringify({
-        [questionArrayKey]: Array.from({ length: 3 }, () => ({
-          questionType: "single_choice",
-          difficulty: "medium",
-          knowledgeNodeLabels: ["redacted_knowledge_node"],
-        })),
+        [questionArrayKey]: [],
       });
 
       expect(
@@ -237,10 +425,10 @@ describe("shared route-integrated Provider execution primitives", () => {
       ).toMatchObject({
         structuredPreview: {
           kind: "question_set",
-          parseStatus: "parsed",
+          parseStatus: "failed",
           requestedQuestionCount: 3,
-          actualQuestionCount: 3,
-          draftCount: 3,
+          actualQuestionCount: null,
+          draftCount: 0,
         },
       });
     },
@@ -282,7 +470,7 @@ describe("shared route-integrated Provider execution primitives", () => {
       },
     ],
   ] as const)(
-    "builds a parsed question-set structured preview from compatible %s",
+    "rejects compatible legacy question root %s",
     (_label, contentObject) => {
       expect(
         createRouteIntegratedVisibleGeneratedContent(
@@ -297,10 +485,10 @@ describe("shared route-integrated Provider execution primitives", () => {
       ).toMatchObject({
         structuredPreview: {
           kind: "question_set",
-          parseStatus: "parsed",
+          parseStatus: "failed",
           requestedQuestionCount: 3,
-          actualQuestionCount: 3,
-          draftCount: 3,
+          actualQuestionCount: null,
+          draftCount: 0,
         },
       });
     },
@@ -309,13 +497,7 @@ describe("shared route-integrated Provider execution primitives", () => {
   it("keeps exact-count enforcement for compatible question roots", () => {
     expect(
       createRouteIntegratedVisibleGeneratedContent(
-        JSON.stringify({
-          data: {
-            items: Array.from({ length: 2 }, () => ({
-              questionType: "single_choice",
-            })),
-          },
-        }),
+        createStrictQuestionSetContent(2),
         {
           structuredPreview: {
             kind: "question_set",
@@ -337,13 +519,9 @@ describe("shared route-integrated Provider execution primitives", () => {
   it("rejects question-set previews when generated question parameters mismatch the request", () => {
     expect(
       createRouteIntegratedVisibleGeneratedContent(
-        JSON.stringify({
-          questions: [
-            {
-              questionType: "multi_choice",
-              difficulty: "medium",
-            },
-          ],
+        createStrictQuestionSetContent(1, {
+          questionType: "multi_choice",
+          standardAnswer: "A B",
         }),
         {
           structuredPreview: {
@@ -366,13 +544,8 @@ describe("shared route-integrated Provider execution primitives", () => {
 
     expect(
       createRouteIntegratedVisibleGeneratedContent(
-        JSON.stringify({
-          questions: [
-            {
-              questionType: "单选题",
-              difficulty: "基础",
-            },
-          ],
+        createStrictQuestionSetContent(1, {
+          difficulty: "easy",
         }),
         {
           structuredPreview: {
@@ -394,7 +567,7 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
-  it("builds a parsed question-set structured preview from exact numbered plaintext drafts", () => {
+  it("rejects exact numbered plaintext drafts", () => {
     const visibleGeneratedContent =
       createRouteIntegratedVisibleGeneratedContent(
         [
@@ -412,48 +585,19 @@ describe("shared route-integrated Provider execution primitives", () => {
 
     expect(visibleGeneratedContent?.structuredPreview).toMatchObject({
       kind: "question_set",
-      parseStatus: "parsed",
+      parseStatus: "failed",
       requestedQuestionCount: 3,
-      actualQuestionCount: 3,
-      draftCount: 3,
+      actualQuestionCount: null,
+      failureCategory: "invalid_json",
+      draftCount: 0,
     });
 
-    if (
-      visibleGeneratedContent?.structuredPreview?.kind === "question_set" &&
-      visibleGeneratedContent.structuredPreview.parseStatus === "parsed"
-    ) {
-      expect(visibleGeneratedContent.structuredPreview.draftSummaries).toEqual([
-        {
-          draftNumber: 1,
-          questionType: null,
-          difficulty: null,
-          knowledgeNodeCount: null,
-          reviewStatus: "draft_review_required",
-        },
-        {
-          draftNumber: 2,
-          questionType: null,
-          difficulty: null,
-          knowledgeNodeCount: null,
-          reviewStatus: "draft_review_required",
-        },
-        {
-          draftNumber: 3,
-          questionType: null,
-          difficulty: null,
-          knowledgeNodeCount: null,
-          reviewStatus: "draft_review_required",
-        },
-      ]);
-      expect(
-        visibleGeneratedContent.structuredPreview.draftSummaries.some(
-          (summary) => Object.values(summary).includes("redacted draft marker"),
-        ),
-      ).toBe(false);
-    }
+    expect(visibleGeneratedContent?.structuredPreview).toMatchObject({
+      draftSummaries: [],
+    });
   });
 
-  it("builds a parsed question-set structured preview from common Chinese numbered draft markers", () => {
+  it("rejects common Chinese numbered draft markers", () => {
     expect(
       createRouteIntegratedVisibleGeneratedContent(
         ["第1题：redacted", "题目2：redacted", "3、redacted"].join("\n"),
@@ -467,10 +611,11 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toMatchObject({
       structuredPreview: {
         kind: "question_set",
-        parseStatus: "parsed",
+        parseStatus: "failed",
         requestedQuestionCount: 3,
-        actualQuestionCount: 3,
-        draftCount: 3,
+        actualQuestionCount: null,
+        failureCategory: "invalid_json",
+        draftCount: 0,
       },
     });
   });
@@ -491,8 +636,8 @@ describe("shared route-integrated Provider execution primitives", () => {
         kind: "question_set",
         parseStatus: "failed",
         requestedQuestionCount: 3,
-        actualQuestionCount: 2,
-        failureCategory: "question_count_mismatch",
+        actualQuestionCount: null,
+        failureCategory: "invalid_json",
         draftCount: 0,
         draftSummaries: [],
       },
@@ -543,7 +688,7 @@ describe("shared route-integrated Provider execution primitives", () => {
         parseStatus: "failed",
         requestedQuestionCount: 3,
         actualQuestionCount: null,
-        failureCategory: "missing_questions",
+        failureCategory: "schema_mismatch",
         draftCount: 0,
         draftSummaries: [],
       },
@@ -1039,13 +1184,7 @@ describe("shared route-integrated Provider execution primitives", () => {
 
   it("accepts persisted drafts only when grounding and structured preview both pass", () => {
     const groundedQuestionSet = createRouteIntegratedVisibleGeneratedContent(
-      JSON.stringify({
-        questions: Array.from({ length: 10 }, () => ({
-          questionType: "single_choice",
-          difficulty: "medium",
-          knowledgeNodeLabels: ["redacted_knowledge_node"],
-        })),
-      }),
+      createStrictQuestionSetContent(10),
       {
         groundingSummary: {
           evidenceStatus: "sufficient",
@@ -1058,11 +1197,7 @@ describe("shared route-integrated Provider execution primitives", () => {
       },
     );
     const weakQuestionSet = createRouteIntegratedVisibleGeneratedContent(
-      JSON.stringify({
-        questions: Array.from({ length: 10 }, () => ({
-          questionType: "single_choice",
-        })),
-      }),
+      createStrictQuestionSetContent(10),
       {
         groundingSummary: {
           evidenceStatus: "weak",
@@ -1076,9 +1211,7 @@ describe("shared route-integrated Provider execution primitives", () => {
     );
     const failedStructuredPreview =
       createRouteIntegratedVisibleGeneratedContent(
-        JSON.stringify({
-          questions: [{ questionType: "single_choice" }],
-        }),
+        createStrictQuestionSetContent(1),
         {
           groundingSummary: {
             evidenceStatus: "sufficient",

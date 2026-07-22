@@ -37,6 +37,7 @@ import type {
   EffectiveOrgAuthRow,
   EffectivePersonalAuthRow,
 } from "../repositories/effective-authorization-repository";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
@@ -674,16 +675,57 @@ function createPaperPlanProviderContent(questionCount: number) {
 
 function createQuestionSetProviderContent(questionCount: number) {
   return JSON.stringify({
+    schemaVersion: "question_draft_v1",
+    kind: "question_set",
     questions: Array.from({ length: questionCount }, (_, index) => ({
       questionType: "single_choice",
       difficulty: "medium",
       knowledgeNodeLabels: ["redacted knowledge node"],
-      stem: `redacted stem ${index + 1}`,
-      options: ["A", "B", "C", "D"],
-      answer: "A",
+      questionStem: `redacted stem ${index + 1}`,
+      questionOptions: [
+        { optionLabel: "A", optionText: "redacted option A" },
+        { optionLabel: "B", optionText: "redacted option B" },
+      ],
+      standardAnswer: "A",
       analysis: "redacted analysis",
+      scoringPoints: [],
+      fillBlankAnswers: [],
     })),
   });
+}
+
+function createTestPrivateQuestionDraftSnapshot(input: {
+  taskPublicId: string;
+  ownerPublicId: string;
+}) {
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId: input.taskPublicId,
+    ownerPublicId: input.ownerPublicId,
+    requestedQuestionCount: 1,
+    questions: [
+      {
+        draftPublicId: "ai_question_draft_route_test_1",
+        draftNumber: 1,
+        questionType: "short_answer",
+        difficulty: "medium",
+        knowledgeNodeCount: 1,
+        knowledgeNodeLabels: ["测试知识点"],
+        questionStem: "测试题干",
+        questionOptions: [],
+        standardAnswer: "测试答案",
+        analysis: "测试解析",
+        scoringPoints: [{ description: "要点", score: "1", sortOrder: 1 }],
+        fillBlankAnswers: [],
+        reviewStatus: "draft_review_required",
+      },
+    ],
+  });
+
+  if (snapshot === null) {
+    throw new Error("test snapshot must be valid");
+  }
+
+  return snapshot;
 }
 
 function createAssembledPaperRouteResult(
@@ -2655,7 +2697,8 @@ describe("personal AI generation request route handlers", () => {
           },
           blockedReasons: [],
           visibleGeneratedContent: {
-            content: "学生端本次可见 AI 预览内容",
+            content:
+              "AI 题目草稿已生成，答案与解析仅在受保护的学习会话中处理。",
             contentVisibility: "transient_response_only",
             persistenceStatus: "not_persisted",
             safetyStatus: "checked",
@@ -3681,6 +3724,11 @@ describe("personal AI generation request route handlers", () => {
             resultPublicId: "ai_generation_result_public_route_123",
             contentDigest: "sha256:route_materialized_digest_123",
             contentPreviewMasked: "masked route result preview",
+            privateQuestionDraftSnapshot:
+              createTestPrivateQuestionDraftSnapshot({
+                taskPublicId: "ai_generation_task_public_route_123",
+                ownerPublicId: userContext.userPublicId,
+              }),
             evidenceStatus: "none",
             citationCount: 0,
             aiCallLogPublicId: "ai-call-log-personal-route-test",

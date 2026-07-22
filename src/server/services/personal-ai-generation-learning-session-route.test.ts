@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type {
@@ -16,6 +16,7 @@ import type {
 } from "../repositories/effective-authorization-repository";
 import { createPersonalAiGenerationLearningSessionRouteHandlers as createBasePersonalAiGenerationLearningSessionRouteHandlers } from "./personal-ai-generation-learning-session-route";
 import type { PersonalAiGenerationLearningSessionRouteDependencies } from "./personal-ai-generation-learning-session-route";
+import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
 
 const personalUserContext = {
   userPublicId: "learner_route_student_public_001",
@@ -52,6 +53,7 @@ function createVisibleGeneratedContent(): AiGenerationRouteIntegratedVisibleGene
       draftCount: 1,
       draftSummaries: [
         {
+          draftPublicId: "ai_question_draft_route_1",
           draftNumber: 1,
           questionType: "single_choice",
           difficulty: "medium",
@@ -62,16 +64,16 @@ function createVisibleGeneratedContent(): AiGenerationRouteIntegratedVisibleGene
             {
               optionLabel: "A",
               optionText: "synthetic correct option",
-              isCorrect: true,
             },
             {
               optionLabel: "B",
               optionText: "synthetic wrong option",
-              isCorrect: false,
             },
           ],
           standardAnswer: "A",
           analysis: "synthetic learning route analysis",
+          scoringPoints: [],
+          fillBlankAnswers: [],
           reviewStatus: "draft_review_required",
         },
       ],
@@ -216,6 +218,11 @@ function createPersistedPaperResult(
 }
 
 function createPostRequest(body: Record<string, unknown>): Request {
+  const authorizationPublicId =
+    typeof body.authorizationPublicId === "string"
+      ? body.authorizationPublicId
+      : personalAuthorizationPublicId;
+
   return new Request(
     "http://localhost/api/v1/personal-ai-generation-learning-sessions",
     {
@@ -224,8 +231,8 @@ function createPostRequest(body: Record<string, unknown>): Request {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        authorizationPublicId: personalAuthorizationPublicId,
-        ...body,
+        authorizationPublicId,
+        sourceResultPublicId: body.sourceResultPublicId,
       }),
     },
   );
@@ -307,6 +314,33 @@ function createDefaultLearningResult(
   };
 }
 
+function createDefaultPrivateQuestionSnapshot(
+  result: PersonalAiGenerationResultDto,
+  ownerPublicId: string,
+) {
+  const structuredPreview = createVisibleGeneratedContent().structuredPreview;
+
+  if (
+    structuredPreview?.kind !== "question_set" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    throw new Error("test question preview must be parsed");
+  }
+
+  const snapshot = createPersonalAiGenerationPrivateQuestionDraftSnapshot({
+    taskPublicId: result.taskPublicId,
+    ownerPublicId,
+    requestedQuestionCount: structuredPreview.requestedQuestionCount,
+    questions: structuredPreview.draftSummaries,
+  });
+
+  if (snapshot === null) {
+    throw new Error("test private question snapshot must be valid");
+  }
+
+  return snapshot;
+}
+
 function createEffectiveAuthorizationContext(input: {
   authorizationPublicId: string;
   authorizationSource: "personal_auth" | "org_auth";
@@ -368,25 +402,32 @@ function createPersonalAiGenerationLearningSessionRouteHandlers(
     expires_at: new Date("2026-08-01T00:00:00.000Z"),
     status: "active",
   };
+  const defaultResultRepository: NonNullable<
+    PersonalAiGenerationLearningSessionRouteDependencies["resultRepository"]
+  > = {
+    async findDraftResultByPublicId(query) {
+      if (
+        (query.authorizationPublicId === personalAuthorizationPublicId &&
+          query.ownerType !== "personal") ||
+        (query.authorizationPublicId === organizationAuthorizationPublicId &&
+          query.ownerType !== "organization")
+      ) {
+        return null;
+      }
+
+      return createDefaultLearningResult(query.resultPublicId);
+    },
+    async findPrivateQuestionDraftSnapshotByPublicId(query) {
+      return createDefaultPrivateQuestionSnapshot(
+        createDefaultLearningResult(query.resultPublicId),
+        query.ownerPublicId,
+      );
+    },
+  };
 
   return createBasePersonalAiGenerationLearningSessionRouteHandlers(
     resolveUserContext,
     {
-      resultRepository: {
-        async findDraftResultByPublicId(query) {
-          if (
-            (query.authorizationPublicId === personalAuthorizationPublicId &&
-              query.ownerType !== "personal") ||
-            (query.authorizationPublicId ===
-              organizationAuthorizationPublicId &&
-              query.ownerType !== "organization")
-          ) {
-            return null;
-          }
-
-          return createDefaultLearningResult(query.resultPublicId);
-        },
-      },
       authorizationRepository: {
         async listPersonalAuthsByUserPublicId() {
           return [personalAuth];
@@ -430,6 +471,10 @@ function createPersonalAiGenerationLearningSessionRouteHandlers(
         },
       },
       ...dependencies,
+      resultRepository: {
+        ...defaultResultRepository,
+        ...dependencies.resultRepository,
+      },
     },
   );
 }
@@ -483,6 +528,45 @@ function getLearningSessionAnswerPostHandler(answers: unknown) {
 }
 
 describe("personal AI generation learning session route handlers", () => {
+  it("rejects client-supplied question and evidence facts before result lookup", async () => {
+    const resultLookup = vi.fn();
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        {
+          resultRepository: {
+            findDraftResultByPublicId: resultLookup,
+            findPrivateQuestionDraftSnapshotByPublicId: resultLookup,
+          },
+        },
+      );
+    const response = await getLearningSessionCollectionPostHandler(collection)(
+      new Request(
+        "http://localhost/api/v1/personal-ai-generation-learning-sessions",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            authorizationPublicId: personalAuthorizationPublicId,
+            sourceResultPublicId: "ai_generation_result_client_forgery_001",
+            questions: [{ standardAnswer: "forged" }],
+            visibleGeneratedContent: createVisibleGeneratedContent(),
+            evidenceStatus: "sufficient",
+            citationCount: 99,
+          }),
+        },
+      ),
+    );
+
+    await expect(response.clone().json()).resolves.toEqual({
+      code: 400056,
+      message: "Invalid personal AI learning session input.",
+      data: null,
+    });
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(resultLookup).not.toHaveBeenCalled();
+  });
+
   it("rejects an ineffective selected authorization before creating a learning session", async () => {
     const repository = createLearningSessionRepository();
     const dependencies = {
@@ -1083,6 +1167,31 @@ describe("personal AI generation learning session route handlers", () => {
       },
     });
     expect(repository.savedSessions).toHaveLength(1);
+    expect(repository.savedSessions[0]?.questions[0]).toMatchObject({
+      standardAnswerLabels: ["A"],
+      standardAnswerText: "A",
+      analysis: "synthetic learning route analysis",
+    });
+    expect(payload.data.session.questions[0]).toEqual({
+      sessionQuestionPublicId:
+        "ai_learning_session_ai_generation_result_route_001_q_1",
+      sourceDraftNumber: 1,
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["synthetic node"],
+      questionStem: "synthetic learning route stem",
+      questionOptions: [
+        { optionLabel: "A", optionText: "synthetic correct option" },
+        { optionLabel: "B", optionText: "synthetic wrong option" },
+      ],
+      maxScore: "1.0",
+      reviewStatus: "draft_review_required",
+    });
+    expect(JSON.stringify(payload)).not.toContain(
+      "synthetic learning route analysis",
+    );
+    expect(JSON.stringify(payload)).not.toContain("standardAnswer");
+    expect(JSON.stringify(payload)).not.toContain("isCorrect");
     expect(JSON.stringify(payload)).not.toContain("raw prompt");
     expect(JSON.stringify(payload)).not.toContain("provider payload");
   });
