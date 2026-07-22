@@ -1,8 +1,13 @@
 import type {
+  QuestionDetailResultDto,
   QuestionDto,
   QuestionResultDto,
 } from "../contracts/question-contract";
-import type { QuestionAccessRow } from "../repositories/question-repository";
+import type {
+  QuestionAccessRow,
+  QuestionDetailAccessRow,
+} from "../repositories/question-repository";
+import type { NormalizedQuestionDetailInput } from "../validators/question";
 
 function formatNullableTimestamp(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
@@ -48,5 +53,56 @@ export function mapQuestionResultToApi(
 ): QuestionResultDto {
   return {
     question: mapQuestionToApi(question),
+  };
+}
+
+export function mapQuestionDetailResultToApi(
+  question: QuestionDetailAccessRow,
+  query: NormalizedQuestionDetailInput,
+): QuestionDetailResultDto {
+  return {
+    question: {
+      ...mapQuestionToApi(question),
+      material:
+        question.material_detail === null
+          ? null
+          : {
+              publicId: question.material_detail.public_id,
+              title: question.material_detail.title,
+              status: question.material_detail.status,
+            },
+      knowledgeNodes: question.knowledge_nodes.map((knowledgeNodeRow) => ({
+        publicId: knowledgeNodeRow.public_id,
+        name: knowledgeNodeRow.name,
+        pathName: knowledgeNodeRow.path_name,
+        knStatus: knowledgeNodeRow.kn_status,
+      })),
+      tags: question.tags.map((tagRow) => ({
+        publicId: tagRow.public_id,
+        name: tagRow.name,
+      })),
+      lockReason:
+        question.locking_paper_count === 0
+          ? null
+          : {
+              code: "paper_published",
+              paperCount: question.locking_paper_count,
+            },
+      paperReferences: {
+        items: question.paper_references.map((paperReference) => ({
+          paperPublicId: paperReference.paper_public_id,
+          name: paperReference.name,
+          paperStatus: paperReference.paper_status,
+          updatedAt: paperReference.updated_at.toISOString(),
+        })),
+        pagination: {
+          page: query.page,
+          pageSize: query.pageSize,
+          total: question.paper_reference_total,
+          sortBy: query.sortBy,
+          sortOrder: query.sortOrder,
+        },
+      },
+    },
   };
 }

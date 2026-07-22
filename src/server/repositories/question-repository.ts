@@ -4,6 +4,7 @@ import {
   and,
   asc,
   count,
+  countDistinct,
   desc,
   eq,
   ilike,
@@ -17,6 +18,8 @@ import {
   admin,
   knowledgeNode,
   material,
+  paper,
+  paperQuestion,
   question,
   questionKnowledgeNode,
   questionOption,
@@ -35,6 +38,7 @@ import type {
 } from "../models/paper";
 import type {
   NormalizedCreateQuestionInput,
+  NormalizedQuestionDetailInput,
   NormalizedQuestionListInput,
   NormalizedUpdateQuestionInput,
 } from "../validators/question";
@@ -104,6 +108,32 @@ export type QuestionAccessRow = {
 export type QuestionListResult = {
   rows: QuestionAccessRow[];
   total: number;
+};
+
+export type QuestionDetailAccessRow = QuestionAccessRow & {
+  material_detail: {
+    public_id: string;
+    title: string;
+    status: "available" | "disabled";
+  } | null;
+  knowledge_nodes: Array<{
+    public_id: string;
+    name: string;
+    path_name: string;
+    kn_status: "active" | "disabled";
+  }>;
+  tags: Array<{
+    public_id: string;
+    name: string;
+  }>;
+  paper_references: Array<{
+    paper_public_id: string;
+    name: string;
+    paper_status: "draft" | "published" | "archived";
+    updated_at: Date;
+  }>;
+  paper_reference_total: number;
+  locking_paper_count: number;
 };
 
 export type AiPaperSourceQuestionListInput = {
@@ -206,6 +236,10 @@ export type QuestionRepository = {
     options?: QuestionCreateOptions,
   ): Promise<QuestionAccessRow>;
   findQuestionByPublicId(publicId: string): Promise<QuestionAccessRow | null>;
+  findQuestionDetailByPublicId(
+    publicId: string,
+    query: NormalizedQuestionDetailInput,
+  ): Promise<QuestionDetailAccessRow | null>;
   updateQuestion(
     input: UpdateQuestionInput,
     context?: ContentMutationContext,
@@ -350,6 +384,9 @@ export function createPostgresQuestionRepository(
 
     async findQuestionByPublicId(publicId) {
       return findQuestionByPublicId(getDatabase(), publicId);
+    },
+    async findQuestionDetailByPublicId(publicId, queryInput) {
+      return findQuestionDetailByPublicId(getDatabase(), publicId, queryInput);
     },
 
     async updateQuestion(input, context) {
@@ -846,6 +883,100 @@ async function findQuestionByPublicId(
   const [hydratedQuestion] = await hydrateQuestions(database, [row]);
 
   return hydratedQuestion ?? null;
+}
+
+async function findQuestionDetailByPublicId(
+  database: RuntimeDatabase,
+  publicId: string,
+  queryInput: NormalizedQuestionDetailInput,
+): Promise<QuestionDetailAccessRow | null> {
+  const questionRow = await findQuestionByPublicId(database, publicId);
+
+  if (questionRow === null) {
+    return null;
+  }
+
+  const [
+    materialDetail,
+    knowledgeNodes,
+    tags,
+    paperReferenceTotals,
+    paperReferences,
+  ] = await Promise.all([
+    questionRow.material_id === null
+      ? Promise.resolve([])
+      : database
+          .select({
+            public_id: material.public_id,
+            title: material.title,
+            status: material.status,
+          })
+          .from(material)
+          .where(eq(material.id, questionRow.material_id))
+          .limit(1),
+    database
+      .select({
+        public_id: knowledgeNode.public_id,
+        name: knowledgeNode.name,
+        path_name: knowledgeNode.path_name,
+        kn_status: knowledgeNode.kn_status,
+      })
+      .from(questionKnowledgeNode)
+      .innerJoin(
+        knowledgeNode,
+        eq(knowledgeNode.id, questionKnowledgeNode.knowledge_node_id),
+      )
+      .where(eq(questionKnowledgeNode.question_id, questionRow.id))
+      .orderBy(asc(knowledgeNode.path_name), asc(knowledgeNode.public_id)),
+    database
+      .select({ public_id: tag.public_id, name: tag.name })
+      .from(questionTag)
+      .innerJoin(tag, eq(tag.id, questionTag.tag_id))
+      .where(eq(questionTag.question_id, questionRow.id))
+      .orderBy(asc(tag.name), asc(tag.public_id)),
+    database
+      .select({
+        total: countDistinct(paper.id),
+        locking_count: countDistinct(
+          sql`case when ${paper.paper_status} in ('published', 'archived') then ${paper.id} end`,
+        ),
+      })
+      .from(paperQuestion)
+      .innerJoin(paper, eq(paper.id, paperQuestion.paper_id))
+      .where(eq(paperQuestion.question_id, questionRow.id)),
+    database
+      .select({
+        paper_public_id: paper.public_id,
+        name: paper.name,
+        paper_status: paper.paper_status,
+        updated_at: paper.updated_at,
+      })
+      .from(paperQuestion)
+      .innerJoin(paper, eq(paper.id, paperQuestion.paper_id))
+      .where(eq(paperQuestion.question_id, questionRow.id))
+      .groupBy(
+        paper.id,
+        paper.public_id,
+        paper.name,
+        paper.paper_status,
+        paper.updated_at,
+      )
+      .orderBy(desc(paper.updated_at), asc(paper.public_id))
+      .limit(queryInput.pageSize)
+      .offset((queryInput.page - 1) * queryInput.pageSize),
+  ]);
+
+  const totals = paperReferenceTotals[0];
+
+  return {
+    ...questionRow,
+    material_detail: materialDetail[0] ?? null,
+    knowledge_nodes: knowledgeNodes,
+    tags,
+    paper_references: paperReferences,
+    paper_reference_total: Number(totals?.total ?? 0),
+    locking_paper_count: Number(totals?.locking_count ?? 0),
+  };
 }
 
 async function hydrateQuestions(

@@ -91,6 +91,9 @@ function createQuestionRecommendationRepositories(input: {
       async findQuestionByPublicId(publicId) {
         return createQuestionRow({ public_id: publicId });
       },
+      async findQuestionDetailByPublicId() {
+        return null;
+      },
       async updateQuestion(updateInput) {
         return createQuestionRow({ public_id: updateInput.publicId });
       },

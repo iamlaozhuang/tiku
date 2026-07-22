@@ -7,6 +7,7 @@ import type {
   ScoringMethod,
   Subject,
 } from "../models/paper";
+import type { ApiPagination } from "./api-response";
 
 export type QuestionOptionDto = {
   label: string;
@@ -49,6 +50,49 @@ export type QuestionDto = {
 
 export type QuestionResultDto = {
   question: QuestionDto;
+};
+
+export type QuestionDetailMaterialDto = {
+  publicId: string;
+  title: string;
+  status: "available" | "disabled";
+};
+
+export type QuestionDetailKnowledgeNodeDto = {
+  publicId: string;
+  name: string;
+  pathName: string;
+  knStatus: "active" | "disabled";
+};
+
+export type QuestionDetailTagDto = {
+  publicId: string;
+  name: string;
+};
+
+export type QuestionPaperReferenceDto = {
+  paperPublicId: string;
+  name: string;
+  paperStatus: "draft" | "published" | "archived";
+  updatedAt: string;
+};
+
+export type QuestionDetailDto = QuestionDto & {
+  material: QuestionDetailMaterialDto | null;
+  knowledgeNodes: QuestionDetailKnowledgeNodeDto[];
+  tags: QuestionDetailTagDto[];
+  lockReason: {
+    code: "paper_published";
+    paperCount: number;
+  } | null;
+  paperReferences: {
+    items: QuestionPaperReferenceDto[];
+    pagination: ApiPagination;
+  };
+};
+
+export type QuestionDetailResultDto = {
+  question: QuestionDetailDto;
 };
 
 export type QuestionKnowledgeRecommendationItemDto = {

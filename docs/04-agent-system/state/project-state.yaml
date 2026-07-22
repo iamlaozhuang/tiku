@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+currentPhase: p1-remediation-rc-06-question-detail-read-model-2026-07-22
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+  currentTaskId: p1-remediation-rc-06-question-detail-read-model-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -537,6 +537,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
     - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
     - p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+    - p1-remediation-rc-06-question-detail-read-model-2026-07-22
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -592,6 +593,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
     - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
     - p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+    - p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -646,7 +648,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21: closed
     p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21: closed
     p1-remediation-rc-06-covered-resource-foundations-2026-07-21: closed
-    p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21: in_progress
+    p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21: closed
+    p1-remediation-rc-06-question-detail-read-model-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -835,64 +838,73 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
-  title: Knowledge-node subtree move and rename atomicity
-  phase: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
+  id: p1-remediation-rc-06-question-detail-read-model-2026-07-22
+  title: Content-admin question detail read model
+  phase: p1-remediation-rc-06-question-detail-read-model-2026-07-22
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0069
-  branch: fix/knowledge-node-subtree-atomicity
+  productClosureContribution: F-0073
+  branch: fix/question-detail-read-model
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0069
+    - F-0073
   candidateRootCauseCluster: P1-RC-06
-  objective: serialize knowledge-tree mutations and atomically rewrite a version-checked moved or renamed node with its complete descendant path and depth projection
+  objective: expose a dedicated content-admin question detail read model with readable bindings, paginated paper references, and an explicit paper-publication lock reason
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: in_progress
   riskBoundary:
-    category: bounded_database_application_transaction_logic
-    approvalId: guardian-f0069-continue-current-wip-closeout-2026-07-22
+    category: low_risk_read_model_and_content_admin_UI
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: admin_knowledge_node_UI_to_PATCH_handler_to_validator_to_PostgreSQL_repository_transaction_to_existing_knowledge_node_parent_path_depth_updated_at_and_audit_facts
-    coreFiles: 8
-    contingencyFiles: 4
-    preflightTestFiles: 5
+    chain: admin_question_detail_UI_to_GET_handler_to_validator_service_mapper_repository_to_existing_material_knowledge_node_tag_paper_reference_facts
+    coreFiles: 11
+    contingencyFiles: 8
+    preflightTestFiles: 9
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: subtree_aggregate_command_is_a_single_row_update_without_serialization_full_depth_projection_descendant_rewrite_or_optimistic_version
+    testOnlyAllowlistExpansion:
+      approvalId: standing-test-only-allowlist-expansion-2026-07-21
+      reason: QuestionService_detail_return_type_direct_route_mock
+      files: 1
+    confirmedRootCause: detail_endpoint_reuses_edit_hydration_and_UI_reduces_technical_relationship_identifiers_to_counts
     disposition: separate_from_other_RC06_findings
   expectedAcceptance:
-    - rename_and_move_rewrite_every_descendant_path_and_depth_atomically
-    - final_subtree_depth_above_five_cycle_or_stale_updated_at_fails_closed_without_partial_write_or_success_audit
-    - all_mutations_of_one_knowledge_base_share_one_transaction_advisory_lock_before_row_locks
-    - UI_sends_the_selected_nodes_current_updatedAt_as_the_optimistic_token
-    - existing_content_admin_authorization_public_id_API_and_redacted_transaction_audit_remain_unchanged
-    - no_schema_real_database_dependency_provider_permission_mechanism_or_other_finding_change
+    - detail_returns_readable_material_knowledge_node_and_tag_public_id_only_relationships
+    - paper_references_are_deduplicated_paginated_counted_and_stably_sorted_in_the_repository
+    - lock_reason_identifies_published_or_archived_paper_references_without_exposing_internal_ids
+    - content_admin_UI_renders_relationships_paper_reference_pagination_loading_empty_and_error_states
+    - existing_content_admin_guard_list_edit_and_mutation_behavior_remain_unchanged
+    - no_schema_real_database_dependency_provider_permission_paper_lifecycle_mechanism_or_other_finding_change
+  validationEvidence:
+    focused: 8_files_92_tests_pass
+    targetedLint: pass
+    typecheck: pass
+    productionBuild: pass_with_preexisting_local_storage_NFT_warning
+    formatDiffAndStrictStateParse: pass
+    adversarialReview: pass_no_internal_id_authorization_schema_mutation_or_in_memory_pagination_regression
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
     triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0069_closed_then_next_separate_RC06_finding_JIT
+    successProjection: F0073_closed_then_next_separate_RC06_finding_JIT
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_standing_bounded_medium_risk
+    mandatoryFreshApprovals: 0_low_risk_standing_closeout
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 3_stale_cross_task_amendment_resolution
-    productValueTime: TDD_and_product_implementation
-    mechanismOverhead: JIT_contract_state_validation_stale_amendment_resolution_kernel_and_closeout
+    approvalWaitTurns: 0
+    productValueTime: TDD_read_model_and_UI
+    mechanismOverhead: JIT_contract_state_validation_kernel_and_closeout
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-06-covered-resource-foundations-2026-07-21
+    taskId: p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21
     findingIds:
-      - F-0032
-      - F-0085
-      - F-0087
-    commit: 02f754905f44628bd0d843b766179b3c23a59f83
+      - F-0069
+    commit: 4edae516d2ab32b1285e45294957d15f8f9ffad5
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     masterOriginSync: pass
     worktreeClean: true
@@ -907,9 +919,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 02f754905f44628bd0d843b766179b3c23a59f83
-  lastKnownOriginMasterSha: 02f754905f44628bd0d843b766179b3c23a59f83
-  lastKnownRemoteMasterSha: 02f754905f44628bd0d843b766179b3c23a59f83
+  lastKnownMasterSha: 4edae516d2ab32b1285e45294957d15f8f9ffad5
+  lastKnownOriginMasterSha: 4edae516d2ab32b1285e45294957d15f8f9ffad5
+  lastKnownRemoteMasterSha: 4edae516d2ab32b1285e45294957d15f8f9ffad5
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

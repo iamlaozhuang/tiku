@@ -1,20 +1,27 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21",
-  "objective": "Close F-0069 by making knowledge_node rename and move a version-checked transaction over the whole subtree: serialize tree mutations per knowledge_base, lock and revalidate the target subtree and new parent, reject cycles and any resulting depth above five, atomically rewrite every descendant path_name/depth, and preserve the existing content-admin authorization and transaction-owned redacted audit. Do not change schema, permissions, dependencies, Provider behavior, other RC-06 findings, or mechanisms.",
+  "taskId": "p1-remediation-rc-06-question-detail-read-model-2026-07-22",
+  "objective": "Close F-0073 with a dedicated content-admin question detail read model that returns readable material, knowledge_node and tag identities, a paginated public-id-only paper reference list with paper status, and an explicit paper-publication lock reason. Preserve the existing content_admin authorization and all question mutation behavior; do not change schema, permissions, dependencies, Provider behavior, paper lifecycle, or other RC-06 findings.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/validators/rag-resource-knowledge.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
-    "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
-    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+    "src/server/contracts/question-contract.ts",
+    "src/server/validators/question.ts",
+    "src/server/repositories/question-repository.ts",
+    "src/server/mappers/question-mapper.ts",
+    "src/server/services/question-service.ts",
+    "src/server/services/content-question-material-runtime.ts",
+    "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
+    "tests/unit/p1-question-detail-read-model.test.ts",
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/services/question-service.test.ts",
+    "src/server/services/question-route.test.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "tests/unit/admin-question-material-ui.test.ts",
+    "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -31,35 +38,43 @@
     ".env*",
     "schema/migration or real database/data access",
     "permission, entitlement, Provider, external service, secret/env or deployment",
-    "other RC-06 findings, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
+    "question mutation or paper lifecycle semantics, other RC-06 findings, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/validators/rag-resource-knowledge.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
-    "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts"
+    "src/server/contracts/question-contract.ts",
+    "src/server/validators/question.ts",
+    "src/server/repositories/question-repository.ts",
+    "src/server/mappers/question-mapper.ts",
+    "src/server/services/question-service.ts",
+    "src/server/services/content-question-material-runtime.ts",
+    "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
+    "tests/unit/p1-question-detail-read-model.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
-    "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-    "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-    "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/services/question-service.test.ts",
+    "src/server/services/question-route.test.ts",
+    "tests/unit/phase-9-content-question-material-runtime.test.ts",
+    "tests/unit/admin-question-material-ui.test.ts",
+    "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+    "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
+    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirements": "Admin operations require content_admin/super_admin knowledge-node create, edit, sort, disable, move and rename, while glossary fixes the tree at levels one through five.",
-    "caller": "AdminKnowledgeNodeManagement PATCHes the selected publicId but currently sends no optimistic concurrency token.",
-    "route": "The knowledge-node PATCH handler validates a partial body and delegates to the PostgreSQL repository under the existing content-admin role boundary.",
-    "repository": "updateKnowledgeNode locks and updates only the selected row; descendants keep stale path_name/depth, and only the new root depth is checked.",
-    "schema": "Existing knowledge_node parent, path_name, depth and updated_at fields are sufficient; no schema or migration is required.",
-    "rootCause": "A subtree aggregate command was implemented as a single-row update without one serialization boundary, full-subtree depth planning, descendant rewrite, or optimistic version check."
+    "requirements": "US-06-08 requires content administrators to view the papers referencing a question; question detail must provide readable material, knowledge_node and tag evidence plus an identifiable lock source.",
+    "caller": "AdminContentDetailDrawer currently receives QuestionDto and compresses material, knowledge_node and tag relationships to counts while showing no paper references or lock reason.",
+    "route": "GET /api/v1/questions/{publicId} uses the existing content_admin guard and delegates to QuestionService.getQuestion without a paper-reference page contract.",
+    "service": "QuestionService maps the edit-oriented QuestionAccessRow directly to QuestionResultDto.",
+    "repository": "findQuestionByPublicId hydrates edit public IDs only; paper_question/paper reference facts and readable binding names are not queried.",
+    "schema": "Existing material, knowledge_node, tag, question_knowledge_node, question_tag, paper_question and paper facts are sufficient; no schema or migration is required.",
+    "rootCause": "The detail endpoint reuses an edit hydration model instead of a dedicated read model, and the UI hides the remaining technical identifiers as counts."
   },
   "validationCommands": [
     {
-      "name": "f0069-knowledge-node-subtree-focused-test",
+      "name": "f0073-question-detail-focused-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -67,47 +82,56 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
-        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts",
+        "tests/unit/p1-question-detail-read-model.test.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/services/question-service.test.ts",
+        "src/server/services/question-route.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts",
+        "tests/unit/admin-question-material-ui.test.ts",
+        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "f0069-knowledge-node-subtree-lint",
+      "name": "f0073-question-detail-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/validators/rag-resource-knowledge.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
-        "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
-        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+        "src/server/contracts/question-contract.ts",
+        "src/server/validators/question.ts",
+        "src/server/repositories/question-repository.ts",
+        "src/server/mappers/question-mapper.ts",
+        "src/server/services/question-service.ts",
+        "src/server/services/content-question-material-runtime.ts",
+        "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
+        "tests/unit/p1-question-detail-read-model.test.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/services/question-service.test.ts",
+        "src/server/services/question-route.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts",
+        "tests/unit/admin-question-material-ui.test.ts",
+        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts"
       ]
     },
     {
-      "name": "f0069-knowledge-node-subtree-typecheck",
+      "name": "f0073-question-detail-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0069-knowledge-node-subtree-build",
+      "name": "f0073-question-detail-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
     },
     {
-      "name": "f0069-knowledge-node-subtree-format",
+      "name": "f0073-question-detail-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -118,27 +142,33 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/validators/rag-resource-knowledge.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx",
-        "tests/unit/p1-knowledge-node-subtree-atomicity.test.ts",
-        "tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts",
-        "tests/unit/admin-content-knowledge-ops-baseline.test.ts",
-        "tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts",
-        "tests/unit/p1-knowledge-node-audit-atomicity.test.ts"
+        "src/server/contracts/question-contract.ts",
+        "src/server/validators/question.ts",
+        "src/server/repositories/question-repository.ts",
+        "src/server/mappers/question-mapper.ts",
+        "src/server/services/question-service.ts",
+        "src/server/services/content-question-material-runtime.ts",
+        "src/features/admin/question-material-management/AdminContentDetailDrawer.tsx",
+        "tests/unit/p1-question-detail-read-model.test.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/services/question-service.test.ts",
+        "src/server/services/question-route.test.ts",
+        "tests/unit/phase-9-content-question-material-runtime.test.ts",
+        "tests/unit/admin-question-material-ui.test.ts",
+        "tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts",
+        "tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts"
       ]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0069-continue-current-wip-closeout-2026-07-22",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_transaction_logic",
+    "category": "low_risk_read_model_and_content_admin_ui",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -146,25 +176,19 @@
     "dependencyOrMechanismChange": false
   },
   "standingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
-  "guardianDecision": {
-    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
-    "approvalId": "guardian-f0069-continue-current-wip-closeout-2026-07-22",
-    "baseSha": "02f754905f44628bd0d843b766179b3c23a59f83",
-    "scope": "current F-0069 task envelope only"
-  },
   "resumeAnchor": {
-    "findingIds": ["F-0069"],
-    "task": "TDD and close the knowledge_node subtree rename/move atomicity boundary, then resume the next separate RC-06 finding",
-    "condition": "no schema, real database execution, permission expansion, dependencies, Provider behavior, mechanism changes, or unrelated RC-06 scope"
+    "findingIds": ["F-0073"],
+    "task": "TDD and close the content-admin question detail read-model boundary, then resume the next separate RC-06 finding",
+    "condition": "no schema, real database execution, permission expansion, dependencies, Provider behavior, question mutation, paper lifecycle, mechanism changes, or unrelated RC-06 scope"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-covered-resource-foundations-2026-07-21",
-    "findingIds": ["F-0032", "F-0085", "F-0087"],
-    "commit": "02f754905f44628bd0d843b766179b3c23a59f83",
+    "taskId": "p1-remediation-rc-06-knowledge-node-subtree-atomicity-2026-07-21",
+    "findingIds": ["F-0069"],
+    "commit": "4edae516d2ab32b1285e45294957d15f8f9ffad5",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -173,6 +197,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0069-continue-current-wip-closeout-2026-07-22"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

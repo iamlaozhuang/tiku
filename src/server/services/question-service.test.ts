@@ -110,6 +110,33 @@ function createRepository(
         public_id: publicId,
       });
     },
+    async findQuestionDetailByPublicId(publicId) {
+      const row = createQuestion({ public_id: publicId });
+      return {
+        ...row,
+        material_detail:
+          row.material_public_id === null
+            ? null
+            : {
+                public_id: row.material_public_id,
+                title: "仓储作业材料",
+                status: "available",
+              },
+        knowledge_nodes: row.knowledge_node_public_ids.map((nodePublicId) => ({
+          public_id: nodePublicId,
+          name: "仓储检查",
+          path_name: "物流 / 仓储检查",
+          kn_status: "active",
+        })),
+        tags: row.tag_public_ids.map((tagPublicId) => ({
+          public_id: tagPublicId,
+          name: "高频",
+        })),
+        paper_references: [],
+        paper_reference_total: 0,
+        locking_paper_count: 0,
+      };
+    },
     async updateQuestion(input) {
       return createQuestion({
         public_id: input.publicId,
@@ -749,6 +776,9 @@ describe("question service", () => {
             is_locked: publicId === "locked_question",
             locked_at: publicId === "locked_question" ? lockedAt : null,
           });
+        },
+        async findQuestionDetailByPublicId() {
+          return null;
         },
         async disableQuestion(publicId) {
           return publicId === "missing_question" ? null : createQuestion();

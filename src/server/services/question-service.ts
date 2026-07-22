@@ -5,10 +5,12 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type {
+  QuestionDetailResultDto,
   QuestionDto,
   QuestionResultDto,
 } from "../contracts/question-contract";
 import {
+  mapQuestionDetailResultToApi,
   mapQuestionResultToApi,
   mapQuestionToApi,
 } from "../mappers/question-mapper";
@@ -21,6 +23,7 @@ import {
 import type { QuestionStatus } from "../models/paper";
 import {
   normalizeCreateQuestionInput,
+  normalizeQuestionDetailInput,
   normalizeQuestionListInput,
   normalizeUpdateQuestionInput,
 } from "../validators/question";
@@ -35,7 +38,10 @@ export type QuestionService = {
     input: unknown,
     options?: QuestionCreationOptions,
   ): Promise<ApiResponse<QuestionResultDto | null>>;
-  getQuestion(publicId: string): Promise<ApiResponse<QuestionResultDto | null>>;
+  getQuestion(
+    publicId: string,
+    input?: Record<string, unknown>,
+  ): Promise<ApiResponse<QuestionDetailResultDto | null>>;
   updateQuestion(
     publicId: string,
     input: unknown,
@@ -164,15 +170,20 @@ export function createQuestionService(
       return createSuccessResponse(mapQuestionResultToApi(question));
     },
 
-    async getQuestion(publicId) {
-      const question =
-        await questionRepository.findQuestionByPublicId(publicId);
+    async getQuestion(publicId, input = {}) {
+      const questionQuery = normalizeQuestionDetailInput(input);
+      const question = await questionRepository.findQuestionDetailByPublicId(
+        publicId,
+        questionQuery,
+      );
 
       if (question === null) {
         return createQuestionNotFoundResponse();
       }
 
-      return createSuccessResponse(mapQuestionResultToApi(question));
+      return createSuccessResponse(
+        mapQuestionDetailResultToApi(question, questionQuery),
+      );
     },
 
     async updateQuestion(publicId, input) {

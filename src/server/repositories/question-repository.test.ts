@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   QuestionBindingEligibilityError,
+  createPostgresQuestionRepository,
   createQuestionKnowledgeNodePublicIdCondition,
   createQuestionKnowledgeNodePublicIdsCondition,
   createQuestionMaterialPublicIdCondition,
@@ -9,6 +10,68 @@ import {
   requireEligibleQuestionKnowledgeNodeIds,
   requireEligibleQuestionMaterialId,
 } from "./question-repository";
+
+type CapturedSelect = {
+  calls: string[];
+  selection: Record<string, unknown> | undefined;
+};
+
+function createSelectQueue(
+  resultQueue: unknown[][],
+  capturedSelects: CapturedSelect[],
+) {
+  return (selection?: Record<string, unknown>) => {
+    const rows = resultQueue.shift() ?? [];
+    const captured: CapturedSelect = { calls: [], selection };
+    capturedSelects.push(captured);
+    const query = {
+      from() {
+        captured.calls.push("from");
+        return query;
+      },
+      leftJoin() {
+        captured.calls.push("leftJoin");
+        return query;
+      },
+      innerJoin() {
+        captured.calls.push("innerJoin");
+        return query;
+      },
+      where() {
+        captured.calls.push("where");
+        return query;
+      },
+      groupBy() {
+        captured.calls.push("groupBy");
+        return query;
+      },
+      orderBy() {
+        captured.calls.push("orderBy");
+        return query;
+      },
+      limit() {
+        captured.calls.push("limit");
+        return query;
+      },
+      offset() {
+        captured.calls.push("offset");
+        return query;
+      },
+      then<TResult1 = unknown[], TResult2 = never>(
+        onfulfilled?:
+          | ((value: unknown[]) => TResult1 | PromiseLike<TResult1>)
+          | null,
+        onrejected?:
+          | ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+          | null,
+      ) {
+        return Promise.resolve(rows).then(onfulfilled, onrejected);
+      },
+    };
+
+    return query;
+  };
+}
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
   if (typeof value === "string") {
@@ -175,5 +238,102 @@ describe("question binding eligibility", () => {
         rows,
       }),
     ).toThrow(QuestionBindingEligibilityError);
+  });
+});
+
+describe("question detail repository read model", () => {
+  it("deduplicates, counts, stably sorts, and paginates paper references in database queries", async () => {
+    const timestamp = new Date("2026-07-22T08:00:00.000Z");
+    const capturedSelects: CapturedSelect[] = [];
+    const select = createSelectQueue(
+      [
+        [
+          {
+            id: 1,
+            public_id: "question-public-001",
+            question_type: "single_choice",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            stem_rich_text: "<p>题干</p>",
+            analysis_rich_text: "<p>解析</p>",
+            standard_answer_rich_text: "<p>A</p>",
+            status: "available",
+            is_locked: true,
+            locked_at: timestamp,
+            multi_choice_rule: "all_correct_only",
+            scoring_method: "auto_match",
+            fill_blank_answers: [],
+            material_id: 2,
+            material_public_id: "material-public-001",
+            created_at: timestamp,
+            updated_at: timestamp,
+          },
+        ],
+        [],
+        [],
+        [{ question_id: 1, public_id: "knowledge-node-public-001" }],
+        [{ question_id: 1, public_id: "tag-public-001" }],
+        [
+          {
+            public_id: "material-public-001",
+            title: "消费者调研材料",
+            status: "available",
+          },
+        ],
+        [
+          {
+            public_id: "knowledge-node-public-001",
+            name: "抽样方法",
+            path_name: "营销 / 调研 / 抽样方法",
+            kn_status: "active",
+          },
+        ],
+        [{ public_id: "tag-public-001", name: "高频" }],
+        [{ total: 21, locking_count: 2 }],
+        [
+          {
+            paper_public_id: "paper-public-002",
+            name: "2026 营销理论卷",
+            paper_status: "published",
+            updated_at: timestamp,
+          },
+        ],
+      ],
+      capturedSelects,
+    );
+    const repository = createPostgresQuestionRepository({
+      createDatabase: () => ({ select }) as never,
+    });
+
+    const detail = await repository.findQuestionDetailByPublicId(
+      "question-public-001",
+      { page: 2, pageSize: 20, sortBy: "updatedAt", sortOrder: "desc" },
+    );
+
+    expect(detail).toMatchObject({
+      paper_reference_total: 21,
+      locking_paper_count: 2,
+      paper_references: [
+        {
+          paper_public_id: "paper-public-002",
+          paper_status: "published",
+        },
+      ],
+    });
+    const totalQuery = capturedSelects.find((captured) =>
+      Object.hasOwn(captured.selection ?? {}, "locking_count"),
+    );
+    const referenceQuery = capturedSelects.find((captured) =>
+      Object.hasOwn(captured.selection ?? {}, "paper_public_id"),
+    );
+    expect(totalQuery).toBeDefined();
+    expect(containsText(totalQuery?.selection, "distinct")).toBe(true);
+    expect(containsText(totalQuery?.selection, "published")).toBe(true);
+    expect(containsText(totalQuery?.selection, "archived")).toBe(true);
+    expect(referenceQuery?.calls).toEqual(
+      expect.arrayContaining(["groupBy", "orderBy", "limit", "offset"]),
+    );
+    expect(capturedSelects).toHaveLength(10);
   });
 });

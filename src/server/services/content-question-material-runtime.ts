@@ -614,8 +614,8 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
         },
       },
       detail: {
-        async GET(_request: Request, context: RouteContext): Promise<Response> {
-          const actorOrError = await requireContentAdminActor(_request);
+        async GET(request: Request, context: RouteContext): Promise<Response> {
+          const actorOrError = await requireContentAdminActor(request);
 
           if ("code" in actorOrError) {
             return createJsonResponse(actorOrError);
@@ -623,8 +623,14 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
 
           const { publicId } = await context.params;
           const service = createQuestionServiceForActor(actorOrError);
+          const searchParams = new URL(request.url).searchParams;
 
-          return createJsonResponse(await service.getQuestion(publicId));
+          return createJsonResponse(
+            await service.getQuestion(publicId, {
+              page: searchParams.get("page") ?? undefined,
+              pageSize: searchParams.get("pageSize") ?? undefined,
+            }),
+          );
         },
         async PATCH(
           request: Request,

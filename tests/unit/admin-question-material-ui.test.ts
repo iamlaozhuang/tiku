@@ -398,11 +398,50 @@ function mockContentFetch(
       return createJsonResponse(tagOptionPayload);
     }
 
-    if (path === "/api/v1/questions/question-marketing-001") {
+    if (path.startsWith("/api/v1/questions/question-marketing-001?")) {
+      const page = Number(
+        new URL(path, "http://localhost").searchParams.get("page"),
+      );
       return createJsonResponse({
         code: 0,
         message: "ok",
-        data: { question: questionPayload.data[0] },
+        data: {
+          question: {
+            ...questionPayload.data[0],
+            material: {
+              publicId: "material-marketing-001",
+              title: "营销案例材料 A",
+              status: "available",
+            },
+            knowledgeNodes: [
+              {
+                publicId: "knowledge-node-sampling",
+                name: "抽样方法",
+                pathName: "营销 / 市场调研 / 抽样方法",
+                knStatus: "active",
+              },
+            ],
+            tags: [{ publicId: "tag-research", name: "调研高频" }],
+            lockReason: { code: "paper_published", paperCount: 2 },
+            paperReferences: {
+              items: [
+                {
+                  paperPublicId: `paper-question-reference-${page}`,
+                  name: `营销理论引用卷 ${page}`,
+                  paperStatus: "published",
+                  updatedAt: "2026-05-19T08:00:00.000Z",
+                },
+              ],
+              pagination: {
+                page,
+                pageSize: 20,
+                total: 21,
+                sortBy: "updatedAt",
+                sortOrder: "desc",
+              },
+            },
+          },
+        },
       });
     }
 
@@ -1088,9 +1127,21 @@ describe("AdminQuestionMaterialManagement", () => {
         name: `查看题目 ${marketingQuestionReadableName}`,
       }),
     );
-    expect(
-      await screen.findByRole("dialog", { name: "题目详情" }),
-    ).toBeInTheDocument();
+    const questionDetailDialog = await screen.findByRole("dialog", {
+      name: "题目详情",
+    });
+    expect(questionDetailDialog).toHaveTextContent("营销案例材料 A");
+    expect(questionDetailDialog).toHaveTextContent(
+      "营销 / 市场调研 / 抽样方法",
+    );
+    expect(questionDetailDialog).toHaveTextContent("调研高频");
+    expect(questionDetailDialog).toHaveTextContent(
+      "由 2 套已发布或已下架试卷锁定",
+    );
+    expect(questionDetailDialog).toHaveTextContent("营销理论引用卷 1");
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页引用试卷" }));
+    expect(await screen.findByText("营销理论引用卷 2")).toBeInTheDocument();
     expect(window.location.search).toContain("profession=marketing");
     expect(window.location.search).toContain(
       "questionDetail=question-marketing-001",

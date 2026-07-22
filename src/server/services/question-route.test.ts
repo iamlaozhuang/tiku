@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { createQuestionRouteHandlers } from "./question-route";
 import type { QuestionService } from "./question-service";
-import type { QuestionDto } from "../contracts/question-contract";
+import type {
+  QuestionDetailDto,
+  QuestionDto,
+} from "../contracts/question-contract";
 
 const questionDto: QuestionDto = {
   publicId: "question_public_123",
@@ -40,6 +43,28 @@ const questionDto: QuestionDto = {
   updatedAt: "2026-05-19T04:00:00.000Z",
 };
 
+const questionDetailDto: QuestionDetailDto = {
+  ...questionDto,
+  material: {
+    publicId: "material_public_123",
+    title: "仓储作业材料",
+    status: "available",
+  },
+  knowledgeNodes: [],
+  tags: [],
+  lockReason: null,
+  paperReferences: {
+    items: [],
+    pagination: {
+      page: 1,
+      pageSize: 20,
+      total: 0,
+      sortBy: "updatedAt",
+      sortOrder: "desc",
+    },
+  },
+};
+
 function createService(): QuestionService {
   return {
     async listQuestions() {
@@ -71,7 +96,7 @@ function createService(): QuestionService {
         message: "ok",
         data: {
           question: {
-            ...questionDto,
+            ...questionDetailDto,
             publicId,
           },
         },

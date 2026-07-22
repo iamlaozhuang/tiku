@@ -69,6 +69,8 @@ export type NormalizedQuestionListInput = NormalizedPagination & {
   tagPublicId: string | null;
 };
 
+export type NormalizedQuestionDetailInput = NormalizedPagination;
+
 type ValidationResult<TValue> =
   | {
       success: true;
@@ -544,5 +546,29 @@ export function normalizeQuestionListInput(
     knowledgeNodePublicId: normalizeQueryPublicId(input.knowledgeNodePublicId),
     materialPublicId: normalizeQueryPublicId(input.materialPublicId),
     tagPublicId: normalizeQueryPublicId(input.tagPublicId),
+  };
+}
+
+export function normalizeQuestionDetailInput(
+  input: Record<string, unknown> = {},
+): NormalizedQuestionDetailInput {
+  const requestedPage = normalizeQueryInteger(input.page);
+  const requestedPageSize = normalizeQueryInteger(input.pageSize);
+  const pagination = normalizePagination({
+    page:
+      requestedPage !== undefined &&
+      Number.isSafeInteger(requestedPage) &&
+      requestedPage >= 1
+        ? requestedPage
+        : 1,
+    pageSize: [20, 50, 100].includes(requestedPageSize ?? 20)
+      ? (requestedPageSize ?? 20)
+      : 20,
+  });
+
+  return {
+    ...pagination,
+    sortBy: "updatedAt",
+    sortOrder: "desc",
   };
 }

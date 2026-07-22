@@ -5,13 +5,14 @@ import { AlertCircle, LoaderCircle } from "lucide-react";
 
 import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
 import { StudentRichText } from "@/components/StudentRichText";
+import { Button } from "@/components/ui/button";
 import type {
   MaterialDto,
   MaterialResultDto,
 } from "@/server/contracts/material-contract";
 import type {
-  QuestionDto,
-  QuestionResultDto,
+  QuestionDetailDto,
+  QuestionDetailResultDto,
 } from "@/server/contracts/question-contract";
 
 import {
@@ -27,11 +28,11 @@ export type AdminContentDetailTarget = {
 
 type DetailState =
   | { status: "loading" }
-  | { status: "question"; question: QuestionDto }
+  | { status: "question"; question: QuestionDetailDto }
   | { status: "material"; material: MaterialDto }
   | { status: "not_found" | "forbidden" | "unauthorized" | "error" };
 
-const questionTypeLabels: Record<QuestionDto["questionType"], string> = {
+const questionTypeLabels: Record<QuestionDetailDto["questionType"], string> = {
   calculation: "计算题",
   case_analysis: "案例分析题",
   fill_blank: "填空题",
@@ -46,10 +47,11 @@ const contentStatusLabels = {
   disabled: "已停用",
 } as const;
 
-const scoringMethodLabels: Record<QuestionDto["scoringMethod"], string> = {
-  ai_scoring: "AI 评分",
-  auto_match: "自动匹配",
-};
+const scoringMethodLabels: Record<QuestionDetailDto["scoringMethod"], string> =
+  {
+    ai_scoring: "AI 评分",
+    auto_match: "自动匹配",
+  };
 
 function formatDateTime(value: string | null): string {
   if (value === null) return "无";
@@ -137,7 +139,19 @@ function RichTextSection({
   );
 }
 
-function QuestionDetail({ question }: { question: QuestionDto }) {
+function QuestionDetail({
+  onPaperReferencePageChange,
+  question,
+}: {
+  onPaperReferencePageChange: (page: number) => void;
+  question: QuestionDetailDto;
+}) {
+  const { pagination } = question.paperReferences;
+  const pageCount = Math.max(
+    1,
+    Math.ceil(pagination.total / pagination.pageSize),
+  );
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-2 text-xs">
@@ -156,9 +170,12 @@ function QuestionDetail({ question }: { question: QuestionDto }) {
         items={[
           {
             label: "编辑状态",
-            value: question.isLocked
-              ? "已锁定，只能查看或复制"
-              : "未锁定，可返回列表编辑",
+            value:
+              question.lockReason === null
+                ? question.isLocked
+                  ? "已锁定，只能查看或复制"
+                  : "未锁定，可返回列表编辑"
+                : `由 ${question.lockReason.paperCount} 套已发布或已下架试卷锁定`,
           },
           {
             label: "评分方式",
@@ -166,16 +183,58 @@ function QuestionDetail({ question }: { question: QuestionDto }) {
           },
           {
             label: "关联材料",
-            value: question.materialPublicId === null ? "无" : "已关联 1 份",
+            value: question.material?.title ?? "无",
           },
           {
             label: "知识点与标签",
-            value: `${question.knowledgeNodePublicIds.length} 个知识点 / ${question.tagPublicIds.length} 个标签`,
+            value: `${question.knowledgeNodes.length} 个知识点 / ${question.tags.length} 个标签`,
           },
           { label: "锁定时间", value: formatDateTime(question.lockedAt) },
           { label: "更新时间", value: formatDateTime(question.updatedAt) },
         ]}
       />
+
+      <section className="border-border border-t pt-4">
+        <h3 className="text-text-primary text-sm font-semibold">知识点</h3>
+        {question.knowledgeNodes.length === 0 ? (
+          <p className="text-text-secondary mt-3 text-sm">暂无关联知识点。</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {question.knowledgeNodes.map((knowledgeNode) => (
+              <li
+                className="border-border rounded-md border px-3 py-2"
+                key={knowledgeNode.publicId}
+              >
+                <p className="text-text-primary text-sm font-medium">
+                  {knowledgeNode.name}
+                </p>
+                <p className="text-text-muted mt-1 text-xs">
+                  {knowledgeNode.pathName} ·{" "}
+                  {knowledgeNode.knStatus === "active" ? "启用" : "已停用"}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="border-border border-t pt-4">
+        <h3 className="text-text-primary text-sm font-semibold">标签</h3>
+        {question.tags.length === 0 ? (
+          <p className="text-text-secondary mt-3 text-sm">暂无标签。</p>
+        ) : (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {question.tags.map((tag) => (
+              <li
+                className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs"
+                key={tag.publicId}
+              >
+                {tag.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <RichTextSection
         fallback="题干内容为空"
@@ -244,6 +303,62 @@ function QuestionDetail({ question }: { question: QuestionDto }) {
             ))}
           </ol>
         )}
+      </section>
+
+      <section className="border-border border-t pt-4">
+        <div className="flex items-center justify-between gap-4">
+          <h3 className="text-text-primary text-sm font-semibold">引用试卷</h3>
+          <span className="text-text-muted text-xs">
+            共 {pagination.total} 套
+          </span>
+        </div>
+        {question.paperReferences.items.length === 0 ? (
+          <p className="text-text-secondary mt-3 text-sm">暂无引用试卷。</p>
+        ) : (
+          <ul className="mt-3 divide-y">
+            {question.paperReferences.items.map((reference) => (
+              <li className="py-2" key={reference.paperPublicId}>
+                <p className="text-text-primary text-sm font-medium">
+                  {reference.name}
+                </p>
+                <p className="text-text-muted mt-1 text-xs">
+                  {reference.paperStatus === "published"
+                    ? "已发布"
+                    : reference.paperStatus === "archived"
+                      ? "已下架"
+                      : "草稿"}
+                  {" · "}
+                  {formatDateTime(reference.updatedAt)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <Button
+            aria-label="上一页引用试卷"
+            disabled={pagination.page <= 1}
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={() => onPaperReferencePageChange(pagination.page - 1)}
+          >
+            上一页
+          </Button>
+          <span className="text-text-muted text-xs">
+            第 {pagination.page} / {pageCount} 页
+          </span>
+          <Button
+            aria-label="下一页引用试卷"
+            disabled={pagination.page >= pageCount}
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={() => onPaperReferencePageChange(pagination.page + 1)}
+          >
+            下一页
+          </Button>
+        </div>
       </section>
     </div>
   );
@@ -338,6 +453,13 @@ export function AdminContentDetailDrawer({
   target: AdminContentDetailTarget;
 }) {
   const [state, setState] = useState<DetailState>({ status: "loading" });
+  const targetKey = `${target.kind}:${target.publicId}`;
+  const [questionPaperReferenceState, setQuestionPaperReferenceState] =
+    useState({ page: 1, targetKey });
+  const questionPaperReferencePage =
+    questionPaperReferenceState.targetKey === targetKey
+      ? questionPaperReferenceState.page
+      : 1;
   const ariaLabel = target.kind === "question" ? "题目详情" : "材料详情";
 
   useEffect(() => {
@@ -348,9 +470,12 @@ export function AdminContentDetailDrawer({
 
       try {
         const sessionToken = getStoredSessionToken();
-        const path = `/api/v1/${target.kind === "question" ? "questions" : "materials"}/${target.publicId}`;
+        const path =
+          target.kind === "question"
+            ? `/api/v1/questions/${target.publicId}?page=${questionPaperReferencePage}&pageSize=20`
+            : `/api/v1/materials/${target.publicId}`;
         const response = await fetchAdminApi<
-          QuestionResultDto | MaterialResultDto
+          QuestionDetailResultDto | MaterialResultDto
         >(path, sessionToken);
 
         if (!isActive) return;
@@ -396,7 +521,7 @@ export function AdminContentDetailDrawer({
     return () => {
       isActive = false;
     };
-  }, [target]);
+  }, [questionPaperReferencePage, target]);
 
   return (
     <AdminDetailDrawer
@@ -443,7 +568,12 @@ export function AdminContentDetailDrawer({
         />
       ) : null}
       {state.status === "question" ? (
-        <QuestionDetail question={state.question} />
+        <QuestionDetail
+          onPaperReferencePageChange={(page) =>
+            setQuestionPaperReferenceState({ page, targetKey })
+          }
+          question={state.question}
+        />
       ) : null}
       {state.status === "material" ? (
         <MaterialDetail material={state.material} />

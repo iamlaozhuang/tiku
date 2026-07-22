@@ -152,6 +152,36 @@ function createQuestionRepository(
     async findQuestionByPublicId(publicId) {
       return createQuestionRow({ public_id: publicId });
     },
+    async findQuestionDetailByPublicId(publicId, query) {
+      const row = createQuestionRow({ public_id: publicId, is_locked: true });
+      return {
+        ...row,
+        material_detail: {
+          public_id: "material-public-001",
+          title: "证件管理案例",
+          status: "available",
+        },
+        knowledge_nodes: [
+          {
+            public_id: "knowledge-node-public-001",
+            name: "证件核验",
+            path_name: "专卖 / 证件管理 / 证件核验",
+            kn_status: "active",
+          },
+        ],
+        tags: [{ public_id: "tag-public-001", name: "高频" }],
+        paper_references: [
+          {
+            paper_public_id: `paper-public-${query.page}`,
+            name: `证件管理试卷 ${query.page}`,
+            paper_status: "published",
+            updated_at: createdAt,
+          },
+        ],
+        paper_reference_total: 21,
+        locking_paper_count: 2,
+      };
+    },
     async updateQuestion(input, context) {
       const row = createQuestionRow({
         public_id: input.publicId,
@@ -562,9 +592,17 @@ describe("phase 9 content question material runtime", () => {
         { headers },
       ),
     );
+    const questionDetailResponse = await handlers.questions.detail.GET(
+      new Request(
+        "http://localhost/api/v1/questions/question-public-001?page=2&pageSize=20",
+        { headers },
+      ),
+      { params: Promise.resolve({ publicId: "question-public-001" }) },
+    );
 
     const payload = {
       questions: await questionsResponse.json(),
+      questionDetail: await questionDetailResponse.json(),
       materials: await materialsResponse.json(),
       knowledgeNodes: await knowledgeNodesResponse.json(),
     };
@@ -583,6 +621,36 @@ describe("phase 9 content question material runtime", () => {
         page: 2,
         pageSize: 50,
         total: 1,
+      },
+    });
+    expect(payload.questionDetail).toMatchObject({
+      code: 0,
+      data: {
+        question: {
+          publicId: "question-public-001",
+          material: {
+            publicId: "material-public-001",
+            title: "证件管理案例",
+          },
+          knowledgeNodes: [
+            {
+              publicId: "knowledge-node-public-001",
+              name: "证件核验",
+            },
+          ],
+          tags: [{ publicId: "tag-public-001", name: "高频" }],
+          lockReason: { code: "paper_published", paperCount: 2 },
+          paperReferences: {
+            items: [
+              {
+                paperPublicId: "paper-public-2",
+                name: "证件管理试卷 2",
+                paperStatus: "published",
+              },
+            ],
+            pagination: { page: 2, pageSize: 20, total: 21 },
+          },
+        },
       },
     });
     expect(payload.materials).toMatchObject({
