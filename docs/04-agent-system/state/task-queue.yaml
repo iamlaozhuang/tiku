@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+  currentTaskId: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -293,6 +293,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
     - p1-remediation-rc-06-resource-private-download-2026-07-22
     - p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+    - p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -369,6 +370,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
     - p1-remediation-rc-06-resource-private-download-2026-07-22
+    - p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -481,12 +483,118 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22: closed
     p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22: closed
     p1-remediation-rc-06-resource-private-download-2026-07-22: closed
-    p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: in_progress
+    p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: closed
+    p1-prerequisite-rc-06-officeparser-dependency-2026-07-22: in_progress
 activeTasks:
+  - id: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
+    title: Office document parser dependency prerequisite
+    phase: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: dependency_prerequisite
+    productClosureContribution: none_prerequisite_for_F0082
+    branch: codex/officeparser-dependency
+    objective: introduce exact officeparser 7.4.0 in an isolated dependency-only commit before F-0082 product integration
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0082
+    executionStage: validated_ready_for_kernel_commit
+    findingStatus: open_partitioned
+    riskBoundary:
+      category: dependency
+      approvalId: user-f0082-officeparser-baseline-delta-amendment-2026-07-22
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: F0082_requirements_to_local_text_document_parser_to_missing_runtime_dependency_to_future_project_owned_converter_adapter
+      coreFiles: 5
+      contingencyFiles: 0
+      preflightTestFiles: 0
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: installed_runtime_has_no_maintained_DOCX_PPTX_extractable_PDF_parser
+      disposition: dependency_commit_isolated_before_F0082_product_task
+    expectedAcceptance:
+      - exact_officeparser_7_4_0_and_lockfile_only
+      - effective_runtime_floor_Node_gte_22_13_and_local_build_on_Node_22_14
+      - integrity_provenance_lifecycle_and_production_license_tree_acceptable
+      - MIT_metadata_import_smoke_prod_audit_typecheck_build_and_format_green
+      - no_product_import_runtime_behavior_OCR_external_call_or_F0082_closure
+      - future_product_use_remains_behind_project_owned_adapter_with_strict_limits
+    dependencyIntroduction:
+      humanApproval: user-f0082-officeparser-dependency-2026-07-22
+      package: officeparser
+      versionRange: 7.4.0
+      license: MIT
+      futureImportBoundary: project_owned_resource_document_converter_adapter_only
+      risk: single_maintainer_large_untrusted_parser_surface_and_heavy_transitive_runtime
+      alternative: separate_mammoth_pdfjs_and_PPTX_parser_rejected_due_larger_multi_adapter_surface
+    closeoutProjection:
+      current: validated_ready_for_kernel_commit
+      triggers: approved_exact_install_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: dependency_prerequisite_closed_then_F0082_conversion_product_RED
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 1_user_dependency_approval_received
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: JIT_F0082_root_cause_split_and_dependency_research
+      mechanismOverhead: dependency_gate_contract_and_single_guardian_request
+      guardSmokeChanges: 0
+    approvalEnvelope:
+      delegationId: current-user-delegated-p1-guardian-v1-2026-07-21
+      approvalId: user-f0082-officeparser-dependency-2026-07-22
+      amendmentApprovalId: user-f0082-officeparser-baseline-delta-amendment-2026-07-22
+      approvalFingerprint: 9d99413532f2790b3989c083d4bd062fa157c1368b60586ae952730838a2b2fd
+      baseSha: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+      effectiveRuntimeFloor: Node.js >=22.13.0
+      approvedLocalRuntime: Node.js 22.14.0
+      conditionalCloseout: true
+    baselineDeltaAuditGate:
+      command: corepack.cmd pnpm@10.34.4 audit --prod --audit-level high
+      baseSha: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+      allowedExistingAdvisoryCount: 5
+      candidateRequirement: no_new_high_or_critical_and_officeparser_closure_clean
+      followUpTask: p1-prerequisite-supply-chain-high-remediation-2026-07-22
+      result: pass_exact_five_high_critical_match_and_officeparser_zero
+      baselineExitCode: 1
+      candidateExitCode: 1
+      baselineReportSha256: 53a15b9049e71477528d3ca01d286882dae9ace376e8e554ae320a27c20a7938
+      candidateReportSha256: 7f3281ab440b756b4fe3a89137b21e8d10ed8f71e49d33ad6e4b26e6b9f41d75
+    validationEvidence:
+      exactVersionImportLicense: pass
+      registrySignaturesProvenanceIntegrity: pass
+      lockClosure: pass_37_added_0_modified_0_removed
+      productionClosureLicenses: pass_permissive_only
+      lifecycleScripts: identified_and_not_executed
+      baselineDeltaAudit: pass_same_five_high_officeparser_zero
+      typecheck: pass
+      build: pass_with_pre_existing_NFT_warning
+      formatDiffState: pass
+      productBundleImportScan: pass_zero_matches
+    adversarialReview:
+      status: pass
+      conclusion: exact_dependency_only_envelope_no_runtime_or_finding_closure
+      residualTask: p1-prerequisite-supply-chain-high-remediation-2026-07-22
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+      findingIds:
+        - F-0037
+      commit: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+      status: foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: open_partitioned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
     title: Resource upload 50 MiB application boundary
     phase: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0037_application_amplification_foundation_partial
@@ -496,7 +604,7 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-06
     findingIds:
       - F-0037
-    executionStage: validated_reviewed_conditional_closeout_ready
+    executionStage: foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: open_partitioned
     riskBoundary:
       category: private_local_file_upload_resource_exhaustion_boundary
@@ -521,10 +629,10 @@ activeTasks:
       - UI_blocks_oversized_selection_and_server_remains_authoritative
       - no_dependency_schema_real_database_permission_Provider_conversion_lifecycle_mechanism_or_other_finding_change
     closeoutProjection:
-      current: validated_reviewed_conditional_closeout_ready
-      triggers: TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: foundation_task_closed_while_F0037_remains_open_partitioned
-      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+      current: actual_foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      triggers: satisfied
+      successProjection: realized_without_closing_F0037
+      terminalEvidence: commit_c9cb89d80_master_origin_synced_clean_single_worktree_branch_removed_and_closeout_kernel_passed
     executionMetrics:
       mandatoryFreshApprovals: 1_guardian_task_bound_foundation_approved
       preventableScopeMissApprovals: 0
@@ -548,6 +656,15 @@ activeTasks:
         - no_trusted_streaming_cap_before_framework_formData_when_Content_Length_is_missing_or_understated
         - no_process_or_platform_aggregate_budget_for_concurrent_valid_uploads
         - full_closure_requires_separately_approved_deployment_cap_streaming_protocol_or_maintained_parser
+    closeout:
+      commit: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+      candidateTree: d5447674b03f22d3a10f2ca4ff63c5488969eb81
+      status: foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: open_partitioned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
     previousTaskCloseout:
       taskId: p1-remediation-rc-06-resource-private-download-2026-07-22
       findingIds:

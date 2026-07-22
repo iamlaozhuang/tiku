@@ -1,201 +1,205 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22",
-  "objective": "Complete the F-0037 application-amplification foundation by rejecting resource uploads larger than 50 MiB before application-owned full-buffer duplication, content-addressed file persistence, upload-operation creation, parsing, catalog mutation, or success audit; use Content-Length only as an early fast-fail hint and authoritative File.size as the fail-closed post-multipart boundary, preserve exact-limit success, return a stable business error, add a matching content-admin client gate, and leave F-0037 open_partitioned for ingress streaming and concurrency residuals without changing format conversion, schema, authorization, dependencies, or other findings.",
+  "taskId": "p1-prerequisite-rc-06-officeparser-dependency-2026-07-22",
+  "objective": "Introduce the exact officeparser 7.4.0 runtime dependency as an isolated prerequisite for the F-0082 DOCX, PPTX, and extractable-PDF conversion partition, without importing it into product code, changing runtime behavior, or claiming any F-0082 product closure.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-    "tests/unit/p1-resource-upload-size-boundary.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-resource-private-download.test.ts",
-    "src/app/api/v1/resources/route.ts",
-    "src/server/services/local-text-document-parser.ts",
-    "tests/unit/phase-11-local-text-document-parser-boundary.test.ts"
+    "package.json",
+    "pnpm-lock.yaml"
   ],
   "blockedFiles": [
     "AGENTS.md",
     "docs/04-agent-system/sop/**",
     "scripts/**",
-    ".git/hooks/**",
-    "docs/05-execution-logs/**",
-    "src/db/**",
-    "drizzle/**",
-    "migrations/**",
-    "package.json",
-    "pnpm-lock.yaml",
+    ".husky/**",
     ".github/workflows/**",
     ".env*",
-    "dependency, custom multipart package, schema/migration, real database/data, permission expansion, Provider, external service, secret/env, deployment, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke",
-    "DOCX/PPTX/PDF conversion, conversion queue/retry/delete lifecycle, total storage quota, public download, paper_asset/content_image upload, or other finding"
+    "drizzle/**",
+    "src/**",
+    "tests/**",
+    "schema/migration or real database/data",
+    "Provider/external service/secret/env/deployment/PR/force-push/non-canonical remote/Subagent/kernel/guard/smoke",
+    "any product implementation, converter invocation, OCR, network fetch, background worker, F-0082 closure, or other finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-    "tests/unit/p1-resource-upload-size-boundary.test.ts",
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
-    "tests/unit/p1-resource-upload-saga.test.ts",
-    "tests/unit/p1-resource-private-download.test.ts"
+    "package.json",
+    "pnpm-lock.yaml"
   ],
-  "contingencyFiles": [
-    "src/app/api/v1/resources/route.ts",
-    "src/server/services/local-text-document-parser.ts",
-    "tests/unit/phase-11-local-text-document-parser-boundary.test.ts"
-  ],
+  "contingencyFiles": [],
   "authoritativeChainEvidence": {
-    "requirements": "RAG module 6.3 and US-05-03 require a 50 MiB single-resource limit and a stable too-large error.",
-    "caller": "AdminResourceKnowledgeManagement currently advertises the limit but submits any selected File.",
-    "route": "The resources route delegates directly to the runtime collection POST without an ingress size gate.",
-    "service": "uploadLocalResource calls request.formData and then prepareLocalResourceFile before any size decision.",
-    "storage": "prepareLocalResourceFile calls file.arrayBuffer and computes the content identity; storePreparedLocalResourceFile then persists it.",
-    "parser": "parseLocalTextDocumentAsset checks size only after persistence and classifies oversized content as conversion_failed success.",
-    "rootCause": "The 50 MiB invariant is owned by the downstream parser rather than the upload command and storage-preparation boundary."
+    "requirement": "US-05-03 and RAG module 6.3 require DOCX, Markdown, PPTX, and extractable-text PDF conversion; OCR is excluded.",
+    "currentRuntime": "local-text-document-parser returns converter_unavailable for DOCX, PPTX, and PDF, while package.json contains no document conversion library.",
+    "dependencyDecision": "officeparser 7.4.0 provides one project-wrappable Node API for DOCX, PPTX, and PDF parsing plus Markdown generation, AbortSignal cancellation, magic-based binary type detection, and explicit ZIP decompression limits.",
+    "securityBoundary": "The package documents an inherently large untrusted-file attack surface and requires caller-owned validation, limits, and isolation; this prerequisite does not invoke the package and the later product task must keep OCR, remote workers, external fetches, and raw third-party output outside the boundary.",
+    "rootCause": "F-0082 cannot implement its format-conversion partition from the current installed baseline without an approved maintained parser dependency; the dependency gate requires an isolated commit before product integration."
+  },
+  "dependencyIntroduction": {
+    "humanApproval": "user-f0082-officeparser-dependency-2026-07-22",
+    "package": "officeparser",
+    "versionRange": "7.4.0",
+    "changeType": "add_runtime_dependency_exact_version",
+    "purpose": "DOCX, PPTX, and extractable-text PDF to controlled Markdown conversion for F-0082",
+    "futureImportBoundary": "src/server/services/local-text-document-parser.ts_or_a_project_owned_resource_document_converter_adapter_only",
+    "licenseCompatibility": "MIT_compatible_with_repository_use",
+    "alternativeConsidered": "separate mammoth plus pdfjs-dist plus a PPTX parser",
+    "alternativeRejected": "multiple parser APIs and transitive boundaries increase integration and review surface while still leaving PPTX on a less coherent implementation path",
+    "abandonmentRisk": "single_maintainer_and_large_parser_surface_require_exact_pin_wrapper_contract_and_future_replacement_isolation",
+    "securityMaintenanceRisk": "untrusted_archive_and_PDF_parsing_can_exhaust_CPU_or_memory; later use must set strict decompression limits, disable OCR and external access, enforce timeout and magic match, reject empty or unsafe output, and keep F-0082 open if process isolation is not proven",
+    "compatibilityImpact": "Effective runtime floor is Node_gte_22_13_0 because officeparser transitive file-type_22_0_1 and pdfjs-dist_6_1_200 require it; repository package-manager metadata already requires Node_gte_22_13, the approved local build runtime is Node_22_14_0, and this task makes no unverified deployment target claim; server-only dependency must not enter the browser bundle",
+    "bundleRuntimeImpact": "server_dependency_with_approximately_12MB_unpacked_package_plus_five_transitive_dependencies_including_pdfjs_dist_and_tesseract_js; OCR_and_remote_worker_paths_must_remain_disabled",
+    "fallbackPolicy": "fail_closed_to_conversion_failed_without_fabricated_Markdown; no alternate external converter or OCR",
+    "validation": "exact_version_integrity_provenance_lifecycle_and_production_license_review_import_smoke_prod_high_audit_Node_22_14_typecheck_build_format_and_diff"
   },
   "validationCommands": [
     {
-      "name": "f0037-resource-upload-size-focused-test",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-resource-upload-size-boundary.test.ts",
-        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-        "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-        "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
-        "tests/unit/p1-resource-upload-saga.test.ts",
-        "tests/unit/p1-resource-private-download.test.ts",
-        "--maxWorkers=1"
-      ]
-    },
-    {
-      "name": "f0037-resource-upload-size-lint",
-      "kind": "lint",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "eslint",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-upload-size-boundary.test.ts"
-      ]
-    },
-    {
-      "name": "f0037-resource-upload-size-typecheck",
+      "name": "officeparser-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
+      "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0037-resource-upload-size-build",
+      "name": "officeparser-build",
       "kind": "other",
       "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
+      "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "f0037-resource-upload-size-format",
+      "name": "officeparser-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
-        "pnpm@10.15.1",
+        "pnpm@10.34.4",
         "exec",
         "prettier",
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-upload-size-boundary.test.ts"
+        "package.json"
       ]
+    },
+    {
+      "name": "officeparser-diff-check",
+      "kind": "other",
+      "executable": "git",
+      "arguments": ["diff", "--check"]
     }
   ],
   "approvalSources": {
-    "dependency": null,
+    "dependency": "user-f0082-officeparser-baseline-delta-amendment-2026-07-22",
     "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "private_local_file_upload_resource_exhaustion_boundary",
+    "category": "dependency",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "realExternalCall": false,
-    "dependencyOrMechanismChange": false,
-    "requiresGuardianDecision": false
-  },
-  "standingApprovals": ["standing-test-only-allowlist-expansion-2026-07-21"],
-  "testOnlyExpansion": {
-    "approvalId": "standing-test-only-allowlist-expansion-2026-07-21",
-    "files": [
-      "tests/unit/p1-resource-upload-saga.test.ts",
-      "tests/unit/p1-resource-private-download.test.ts"
-    ],
-    "reason": "Guardian-mandated affected regressions for the unchanged upload saga/idempotency and F-0090 private download paths."
+    "dependencyOrMechanismChange": true
   },
   "conditionalCloseout": true,
-  "guardianApproval": {
+  "approvalEnvelope": {
     "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
-    "approvalId": "guardian-f0037-application-upload-boundary-foundation-2026-07-22",
-    "baseSha": "69f96d855e175dab7e72263b98c47e1ad5e3b982",
-    "approvalFingerprint": "9e0cc567a8d6ff6ce033a7d45d9d7ca3a1573a3fc972aa2fe25b87b785a26390",
-    "approvalMode": "application_amplification_foundation_only_with_conditional_task_closeout",
-    "findingDisposition": "open_partitioned/application_amplification_closed_ingress_streaming_and_concurrency_residual",
-    "residuals": [
-      "missing or understated Content-Length can allow an oversized multipart body to reach framework formData parsing without a trusted streaming cap",
-      "concurrent individually valid uploads have no process or platform aggregate inbound memory and traffic budget",
-      "full closure requires a separately approved trusted deployment body cap, streaming upload protocol, or maintained streaming multipart parser"
+    "approvalId": "user-f0082-officeparser-dependency-2026-07-22",
+    "amendmentApprovalId": "user-f0082-officeparser-baseline-delta-amendment-2026-07-22",
+    "approvalFingerprint": "9d99413532f2790b3989c083d4bd062fa157c1368b60586ae952730838a2b2fd",
+    "baseSha": "c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1",
+    "requestedOperations": [
+      "add_exact_officeparser_7_4_0_dependency",
+      "refresh_pnpm_lockfile",
+      "validate",
+      "one_reviewable_dependency_only_commit",
+      "ff_only_master",
+      "canonical_origin_master_push",
+      "sync_and_cleanup"
     ],
-    "invalidatedBy": [
-      "dependency, deployment, upload protocol, file envelope, base, remote, or risk drift",
-      "oversized upload reaches arrayBuffer, file stream, persistence, repository, parser, catalog, or success audit",
-      "multipart overhead fast-fail rejects an exact-limit file"
+    "conditionalCloseout": true,
+    "effectiveRuntimeFloor": "Node.js >=22.13.0",
+    "approvedLocalRuntime": "Node.js 22.14.0",
+    "failureConditions": [
+      "base_or_origin_drift",
+      "file_outside_five_file_envelope",
+      "officeparser_not_exactly_7_4_0",
+      "effective_Node_floor_not_proven",
+      "high_or_critical_production_advisory",
+      "unacceptable_production_license",
+      "unexpected_lifecycle_script_or_source",
+      "product_import_or_bundle_entry",
+      "risk_expansion"
     ]
   },
+  "baselineDeltaAuditGate": {
+    "status": "passed",
+    "command": "corepack.cmd pnpm@10.34.4 audit --prod --audit-level high",
+    "baseSha": "c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1",
+    "allowedExistingAdvisories": [
+      "GHSA-86j7-9j95-vpqj",
+      "GHSA-3jxr-9vmj-r5cp",
+      "GHSA-4c8g-83qw-93j6",
+      "GHSA-v2hh-gcrm-f6hx",
+      "GHSA-f88m-g3jw-g9cj"
+    ],
+    "candidateRequirement": "no new high or critical advisory, affected package, dependency path, or severity increase; officeparser 27-package closure has zero high or critical",
+    "forbiddenResponse": "no ignore, override, audit configuration exclusion, threshold downgrade, report editing, or claim that repository supply chain is clean",
+    "followUpTask": "p1-prerequisite-supply-chain-high-remediation-2026-07-22",
+    "evidence": {
+      "baselineExitCode": 1,
+      "candidateExitCode": 1,
+      "normalizedHighCriticalExactMatch": true,
+      "baselineReportSha256": "53a15b9049e71477528d3ca01d286882dae9ace376e8e554ae320a27c20a7938",
+      "candidateReportSha256": "7f3281ab440b756b4fe3a89137b21e8d10ed8f71e49d33ad6e4b26e6b9f41d75",
+      "reportDirectory": "C:/Users/jzzhu/AppData/Local/Temp/tiku-f0082-officeparser-audit-fd250a5986e8426e9f6092f6d9687d87",
+      "baselineProductionDependencyCount": 574,
+      "candidateProductionDependencyCount": 611,
+      "officeparserHighCriticalCount": 0
+    }
+  },
   "validationEvidence": {
-    "tddRed": "1_pass_7_fail_before_implementation",
-    "focused": "pass_6_files_63_tests",
-    "lint": "pass_targeted_4_files",
-    "typecheck": "pass_tsc_noEmit",
-    "build": "pass_next_build_with_existing_NFT_warning",
-    "review": "pass_application_buffer_persistence_operation_parser_catalog_and_success_audit_fail_closed_while_raw_ingress_and_concurrency_residuals_remain_explicit"
+    "exactVersionList": "pass_officeparser_7_4_0_registry_npmjs",
+    "importLicenseSmoke": "pass_MIT_and_OfficeParser_parseOffice_function",
+    "registrySupplyChain": "pass_1766_registry_signatures_and_340_attestations_verified; officeparser_SLSA_provenance_and_lock_integrity_match",
+    "dependencyClosure": "pass_37_new_lock_entries_all_reachable_from_officeparser; 2_shared_existing_entries; 0_modified_or_removed_existing_entries",
+    "productionLicenses": "pass_27_installed_logical_closure_only_MIT_Apache_2_0_BSD_2_Clause_BSD_3_Clause",
+    "lifecycle": "pass_install_used_ignore_scripts; tesseract_opencollective_postinstall_identified_and_not_executed; no_product_runtime_invocation",
+    "runtimeCompatibility": "pass_Node_22_14_0_satisfies_effective_Node_gte_22_13_0_floor",
+    "baselineDeltaAudit": "pass_same_five_pre_existing_high_zero_critical_and_no_officeparser_path",
+    "typecheck": "pass_exit_0",
+    "build": "pass_exit_0_with_pre_existing_next_NFT_dynamic_path_warning_not_related_to_officeparser",
+    "formatDiffState": "pass",
+    "productAndBundleImportScan": "pass_zero_officeparser_matches_in_src_tests_or_next_build_output"
+  },
+  "adversarialReview": {
+    "status": "pass",
+    "conclusion": "dependency-only five-file envelope; exact pin; lock changes are only the complete officeparser closure; no product import, OCR, network, runtime behavior, new advisory, existing resolution mutation, or F-0082 closure claim",
+    "residual": "five pre-existing high advisories remain and are reserved for p1-prerequisite-supply-chain-high-remediation-2026-07-22"
   },
   "resumeAnchor": {
-    "findingIds": ["F-0037"],
-    "task": "Close only the application-amplification foundation, preserve F-0037 open_partitioned with ingress streaming and concurrency residuals, then continue the P1 queue.",
-    "condition": "no dependency, schema, real database, permission, Provider, mechanism, conversion lifecycle, or other finding expansion"
+    "findingIds": ["F-0082"],
+    "task": "After the isolated dependency prerequisite closes, materialize the separate F-0082 format-authenticity and office-conversion product task; keep durable uploaded/converting/retry/delete and parser process-isolation residuals explicit unless independently implemented and validated.",
+    "condition": "no product implementation in this dependency commit and no OCR, external call, schema, real database, permission, deployment, mechanism, or other finding change"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-resource-private-download-2026-07-22",
-    "findingIds": ["F-0090"],
-    "commit": "69f96d855e175dab7e72263b98c47e1ad5e3b982",
-    "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "taskId": "p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22",
+    "findingIds": ["F-0037"],
+    "commit": "c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1",
+    "status": "foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "findingStatus": "open_partitioned",
     "masterOriginSync": true,
     "worktreeClean": true,
-    "shortBranchCleanup": true
+    "shortBranchCleanup": true,
+    "worktreeCleanup": true
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0037-application-upload-boundary-foundation-2026-07-22"
+    "approvalId": "user-f0082-officeparser-baseline-delta-amendment-2026-07-22"
   }
 }

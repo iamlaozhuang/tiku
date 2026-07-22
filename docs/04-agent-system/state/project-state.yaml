@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+currentPhase: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+  currentTaskId: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -542,6 +542,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
     - p1-remediation-rc-06-resource-private-download-2026-07-22
     - p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+    - p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -602,6 +603,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
     - p1-remediation-rc-06-resource-private-download-2026-07-22
+    - p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -661,7 +663,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22: closed
     p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22: closed
     p1-remediation-rc-06-resource-private-download-2026-07-22: closed
-    p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: in_progress
+    p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: closed
+    p1-prerequisite-rc-06-officeparser-dependency-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -850,77 +853,99 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
-  title: Resource upload 50 MiB application boundary
-  phase: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+  id: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
+  title: Office document parser dependency prerequisite
+  phase: p1-prerequisite-rc-06-officeparser-dependency-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: product_remediation
-  productClosureContribution: F-0037_application_amplification_foundation_partial
-  branch: fix/resource-upload-size-boundary
+  taskKind: dependency_prerequisite
+  productClosureContribution: none_prerequisite_for_F0082
+  branch: codex/officeparser-dependency
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0037
+    - F-0082
   candidateRootCauseCluster: P1-RC-06
-  objective: reject resource uploads above 50 MiB before application buffer duplication persistence operations parsing catalog mutation or success audit
-  executionStage: validated_reviewed_conditional_closeout_ready
+  objective: introduce exact officeparser 7.4.0 in an isolated dependency-only commit before F-0082 product integration
+  executionStage: validated_ready_for_kernel_commit
   findingStatus: open_partitioned
   riskBoundary:
-    category: private_local_file_upload_resource_exhaustion_boundary
-    approvalId: guardian-f0037-application-upload-boundary-foundation-2026-07-22
+    category: dependency
+    approvalId: user-f0082-officeparser-baseline-delta-amendment-2026-07-22
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: content_admin_upload_to_resources_POST_to_uploadLocalResource_to_prepareLocalResourceFile_to_persistence_parser_repository_and_catalog
-    coreFiles: 12
-    contingencyFiles: 3
-    preflightTestFiles: 6
+    chain: F0082_requirements_to_local_text_document_parser_to_missing_runtime_dependency_to_future_project_owned_converter_adapter
+    coreFiles: 5
+    contingencyFiles: 0
+    preflightTestFiles: 0
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: size_limit_is_owned_by_the_post_persistence_parser_instead_of_the_upload_command_and_storage_preparation_boundary
-    disposition: separate_from_other_RC06_findings
+    confirmedRootCause: installed_runtime_has_no_maintained_DOCX_PPTX_extractable_PDF_parser
+    disposition: dependency_commit_isolated_before_F0082_product_task
   expectedAcceptance:
-    - oversized_Content_Length_fast_fails_before_formData
-    - authoritative_File_size_fails_before_arrayBuffer_persistence_operation_parser_catalog_or_audit
-    - exact_limit_upload_remains_allowed_and_spoofed_or_missing_Content_Length_cannot_bypass_File_size
-    - UI_blocks_oversized_selection_and_server_remains_authoritative
-    - no_dependency_schema_real_database_permission_Provider_conversion_lifecycle_mechanism_or_other_finding_change
+    - exact_officeparser_7_4_0_and_lockfile_only
+    - effective_runtime_floor_Node_gte_22_13_and_local_build_on_Node_22_14
+    - integrity_provenance_lifecycle_and_production_license_tree_acceptable
+    - MIT_metadata_import_smoke_prod_audit_typecheck_build_and_format_green
+    - no_product_import_runtime_behavior_OCR_external_call_or_F0082_closure
+    - future_product_use_remains_behind_project_owned_adapter_with_strict_limits
   closeoutProjection:
-    current: validated_reviewed_conditional_closeout_ready
-    triggers: TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: foundation_task_closed_while_F0037_remains_open_partitioned
+    current: validated_ready_for_kernel_commit
+    triggers: approved_exact_install_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: dependency_prerequisite_closed_then_F0082_conversion_product_RED
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 1_guardian_task_bound_foundation_approved
+    mandatoryFreshApprovals: 1_user_dependency_approval_received
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 1
-    productValueTime: 7m_TDD_implementation_focused_regression_and_adversarial_review
-    mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
+    approvalWaitTurns: 0
+    productValueTime: JIT_F0082_root_cause_split_and_dependency_research
+    mechanismOverhead: dependency_gate_contract_and_single_guardian_request
     guardSmokeChanges: 0
-    testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    testOnlyExpansionFiles: 2_guardian_mandated_resource_upload_saga_and_private_download_regressions
+  approvalEnvelope:
+    delegationId: current-user-delegated-p1-guardian-v1-2026-07-21
+    approvalId: user-f0082-officeparser-dependency-2026-07-22
+    amendmentApprovalId: user-f0082-officeparser-baseline-delta-amendment-2026-07-22
+    approvalFingerprint: 9d99413532f2790b3989c083d4bd062fa157c1368b60586ae952730838a2b2fd
+    baseSha: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+    effectiveRuntimeFloor: Node.js >=22.13.0
+    approvedLocalRuntime: Node.js 22.14.0
+    conditionalCloseout: true
+  baselineDeltaAuditGate:
+    command: corepack.cmd pnpm@10.34.4 audit --prod --audit-level high
+    baseSha: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+    allowedExistingAdvisoryCount: 5
+    candidateRequirement: no_new_high_or_critical_and_officeparser_closure_clean
+    followUpTask: p1-prerequisite-supply-chain-high-remediation-2026-07-22
+    result: pass_exact_five_high_critical_match_and_officeparser_zero
+    baselineExitCode: 1
+    candidateExitCode: 1
+    baselineReportSha256: 53a15b9049e71477528d3ca01d286882dae9ace376e8e554ae320a27c20a7938
+    candidateReportSha256: 7f3281ab440b756b4fe3a89137b21e8d10ed8f71e49d33ad6e4b26e6b9f41d75
   validationEvidence:
-    tddRed: 1_pass_7_fail_before_implementation
-    focused: pass_6_files_63_tests
-    lint: pass_targeted_4_files
-    typecheck: pass_tsc_noEmit
-    build: pass_next_build_with_existing_NFT_warning
-    review: pass_application_buffer_persistence_operation_parser_catalog_and_success_audit_fail_closed_while_raw_ingress_and_concurrency_residuals_remain_explicit
-  residualBoundary:
-    findingDisposition: open_partitioned/application_amplification_closed_ingress_streaming_and_concurrency_residual
-    unresolved:
-      - no_trusted_streaming_cap_before_framework_formData_when_Content_Length_is_missing_or_understated
-      - no_process_or_platform_aggregate_budget_for_concurrent_valid_uploads
-      - full_closure_requires_separately_approved_deployment_cap_streaming_protocol_or_maintained_parser
+    exactVersionImportLicense: pass
+    registrySignaturesProvenanceIntegrity: pass
+    lockClosure: pass_37_added_0_modified_0_removed
+    productionClosureLicenses: pass_permissive_only
+    lifecycleScripts: identified_and_not_executed
+    baselineDeltaAudit: pass_same_five_high_officeparser_zero
+    typecheck: pass
+    build: pass_with_pre_existing_NFT_warning
+    formatDiffState: pass
+    productBundleImportScan: pass_zero_matches
+  adversarialReview:
+    status: pass
+    conclusion: exact_dependency_only_envelope_no_runtime_or_finding_closure
+    residualTask: p1-prerequisite-supply-chain-high-remediation-2026-07-22
   previousTaskCloseout:
-    taskId: p1-remediation-rc-06-resource-private-download-2026-07-22
+    taskId: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
     findingIds:
-      - F-0090
-    commit: 69f96d855e175dab7e72263b98c47e1ad5e3b982
-    status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      - F-0037
+    commit: c9cb89d80fca31319edcb8aa82d2a4d7cd8e11a1
+    status: foundation_task_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: open_partitioned
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
