@@ -29,6 +29,7 @@ import {
   ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
   createAdminAiGenerationTaskPersistenceInput,
   createAdminAiGenerationTaskPersistenceRepository,
+  mapAdminAiGenerationTaskPersistenceRowToDto,
 } from "./admin-ai-generation-task-persistence-repository";
 import {
   createAdminAiGenerationLocalContractRouteHandlers,
@@ -378,6 +379,12 @@ function createLocalContractRouteTaskPersistenceResult(
       workspace: input.localContract.workspace,
       generationKind: input.localContract.generationKind,
       status: "pending",
+      retryCount: 0,
+      failureCategory: null,
+      startedAt: null,
+      finishedAt: null,
+      canRetry: false,
+      canCancel: true,
       requestedAt: input.requestedAt.toISOString(),
       authorizationSource: taskRequest.authorizationSource,
       authorizationPublicId: taskRequest.authorizationPublicId,
@@ -537,6 +544,10 @@ function createPersistenceRow(
     generation_constraint_snapshot: null,
     generation_snapshot_digest: null,
     ...overrides,
+    retry_count: overrides.retry_count ?? 0,
+    failure_category: overrides.failure_category ?? null,
+    started_at: overrides.started_at ?? null,
+    finished_at: overrides.finished_at ?? null,
   };
 }
 
@@ -645,6 +656,27 @@ function createGateway(
 }
 
 describe("admin AI generation task persistence repository", () => {
+  it("projects retry and cancellation authority from the shared lifecycle state", () => {
+    const dto = mapAdminAiGenerationTaskPersistenceRowToDto(
+      createPersistenceRow({
+        task_status: "failed",
+        retry_count: 1,
+        failure_category: "network_error",
+        started_at: new Date("2026-07-22T13:10:00.123Z"),
+        finished_at: new Date("2026-07-22T13:10:30.456Z"),
+      }),
+    );
+
+    expect(dto).toMatchObject({
+      retryCount: 1,
+      failureCategory: "network_error",
+      startedAt: "2026-07-22T13:10:00.123Z",
+      finishedAt: "2026-07-22T13:10:30.456Z",
+      canRetry: true,
+      canCancel: false,
+    });
+  });
+
   it("creates a platform-owned pending task input for content admin AI question local contracts", async () => {
     const localContract = await createAcceptedLocalContract({
       workspace: "content",

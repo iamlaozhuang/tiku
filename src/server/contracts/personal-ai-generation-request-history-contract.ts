@@ -1,4 +1,5 @@
 import type {
+  AiGenerationTaskFailureCategory,
   AiGenerationTaskStatus,
   AiGenerationTaskType,
 } from "../models/ai-generation-task";
@@ -33,6 +34,12 @@ export type PersonalAiGenerationRequestHistoryItemDto = {
   taskPublicId: string;
   taskType: Exclude<AiGenerationTaskType, "organization_training_generation">;
   status: AiGenerationTaskStatus;
+  retryCount?: number;
+  failureCategory?: AiGenerationTaskFailureCategory | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  canRetry?: boolean;
+  canCancel?: boolean;
   requestedAt: string;
   resultPublicId: string | null;
   evidenceStatus: EvidenceStatus;

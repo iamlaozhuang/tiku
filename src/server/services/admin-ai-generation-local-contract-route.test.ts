@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createAdminAiGenerationTaskCancelRouteHandler,
   createAdminAiGenerationLocalContractRouteHandlers,
   type AdminAiGenerationRuntimeBridgeControl,
   type AdminAiGenerationWorkspace,
@@ -39,6 +40,7 @@ import type {
   QuestionAccessRow,
 } from "../repositories/question-repository";
 import type { SessionService } from "./session-service";
+import type { AiGenerationTaskLifecycleRepository } from "../repositories/ai-generation-task-lifecycle-repository";
 
 const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto =
   {
@@ -369,6 +371,7 @@ async function postLocalContractRequest(input: {
   >;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
+  lifecycleRepository?: AiGenerationTaskLifecycleRepository;
 }) {
   const taskPersistence =
     input.taskPersistenceRepository ??
@@ -413,6 +416,8 @@ async function postLocalContractRequest(input: {
       organizationPublicId: input.organizationPublicId,
     }),
     taskPersistenceRepository: taskPersistence,
+    lifecycleRepository:
+      input.lifecycleRepository ?? createClaimingLifecycleRepository(),
     resultPersistenceRepository: resultPersistence,
     requestClock: () =>
       input.requestedAt ?? new Date("2026-06-26T20:00:00.000Z"),
@@ -735,6 +740,12 @@ function createTaskPersistenceResult(
       workspace: input.localContract.workspace,
       generationKind: input.localContract.generationKind,
       status: "pending",
+      retryCount: 0,
+      failureCategory: null,
+      startedAt: null,
+      finishedAt: null,
+      canRetry: false,
+      canCancel: true,
       requestedAt: input.requestedAt.toISOString(),
       authorizationSource: taskRequest.authorizationSource,
       authorizationPublicId: taskRequest.authorizationPublicId,
@@ -789,6 +800,14 @@ function createTaskHistoryItem(input: {
     workspace: input.workspace,
     generationKind: input.generationKind,
     status: input.status ?? "pending",
+    retryCount: 0,
+    failureCategory: null,
+    startedAt: null,
+    finishedAt: null,
+    canRetry: false,
+    canCancel:
+      (input.status ?? "pending") === "pending" ||
+      (input.status ?? "pending") === "running",
     requestedAt: input.requestedAt,
     authorizationSource: isContent ? "admin_role" : "org_auth",
     authorizationPublicId: isContent
@@ -921,6 +940,87 @@ function createTaskPersistenceRecorder(
 
         return input.taskHistoryItems ?? [];
       },
+    },
+  };
+}
+
+function createClaimingLifecycleRepository(): AiGenerationTaskLifecycleRepository {
+  const claimedTaskPublicIds = new Set<string>();
+
+  return {
+    async claimTask(input) {
+      const taskType = input.taskTypes[0] ?? "ai_question_generation";
+
+      if (claimedTaskPublicIds.has(input.taskPublicId)) {
+        return {
+          disposition: "not_claimed",
+          attempt: null,
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType,
+            ownerType: input.ownerType,
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: input.organizationPublicId,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: input.claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      }
+
+      claimedTaskPublicIds.add(input.taskPublicId);
+
+      return {
+        disposition: "claimed",
+        attempt: {
+          taskPublicId: input.taskPublicId,
+          retryCount: 0,
+          startedAt: input.claimedAt,
+        },
+        task: {
+          taskPublicId: input.taskPublicId,
+          taskType,
+          ownerType: input.ownerType,
+          ownerPublicId: input.ownerPublicId,
+          organizationPublicId: input.organizationPublicId,
+          taskStatus: "running",
+          retryCount: 0,
+          failureCategory: null,
+          startedAt: input.claimedAt,
+          finishedAt: null,
+          resultPublicId: null,
+          canCancel: true,
+          canRetry: false,
+        },
+      };
+    },
+    async failTask(input) {
+      return {
+        disposition: "failed",
+        task: {
+          taskPublicId: input.taskPublicId,
+          taskType: input.taskTypes[0] ?? "ai_question_generation",
+          ownerType: input.ownerType,
+          ownerPublicId: input.ownerPublicId,
+          organizationPublicId: input.organizationPublicId,
+          taskStatus: "failed",
+          retryCount: input.attempt.retryCount,
+          failureCategory: input.failureCategory,
+          startedAt: input.attempt.startedAt,
+          finishedAt: input.finishedAt,
+          resultPublicId: null,
+          canCancel: false,
+          canRetry: true,
+        },
+      };
+    },
+    async cancelTask() {
+      throw new Error("unexpected lifecycle cancellation transition");
     },
   };
 }
@@ -1122,6 +1222,102 @@ function createRejectedPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
 }
 
 describe("admin AI generation local contract route handlers", () => {
+  it("rejects unauthorized content cancellation before lifecycle lookup", async () => {
+    const cancelCalls: unknown[] = [];
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask() {
+        throw new Error("not expected");
+      },
+      async failTask() {
+        throw new Error("not expected");
+      },
+      async cancelTask(input) {
+        cancelCalls.push(input);
+        return { disposition: "cancelled", task: null };
+      },
+    };
+    const handler = createAdminAiGenerationTaskCancelRouteHandler("content", {
+      sessionService: createAdminSessionService({ adminRoles: ["ops_admin"] }),
+      lifecycleRepository,
+    });
+
+    const response = await handler(
+      new Request(
+        "http://localhost/api/v1/content-ai-generation-requests/task/cancel",
+        {
+          method: "POST",
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "admin_task_public_unauthorized" }),
+      },
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(cancelCalls).toHaveLength(0);
+  });
+
+  it("cancels only a content-owned pending task with the shared lifecycle repository", async () => {
+    const cancelCalls: unknown[] = [];
+    const handler = createAdminAiGenerationTaskCancelRouteHandler("content", {
+      sessionService: createAdminSessionService({
+        adminRoles: ["content_admin"],
+      }),
+      requestClock: () => new Date("2026-07-22T13:00:00.123Z"),
+      lifecycleRepository: {
+        async claimTask() {
+          throw new Error("not expected");
+        },
+        async failTask() {
+          throw new Error("not expected");
+        },
+        async cancelTask(input) {
+          cancelCalls.push(input);
+          return {
+            disposition: "cancelled",
+            task: {
+              taskPublicId: input.taskPublicId,
+              taskType: "ai_question_generation",
+              ownerType: input.ownerType,
+              ownerPublicId: input.ownerPublicId,
+              organizationPublicId: input.organizationPublicId,
+              taskStatus: "cancelled",
+              retryCount: 0,
+              failureCategory: null,
+              startedAt: null,
+              finishedAt: input.finishedAt,
+              resultPublicId: null,
+              canCancel: false,
+              canRetry: false,
+            },
+          };
+        },
+      },
+    });
+
+    const response = await handler(
+      new Request("http://localhost/cancel", { method: "POST" }),
+      { params: Promise.resolve({ publicId: "admin_task_public_pending" }) },
+    );
+    const payload = await response.json();
+
+    expect(cancelCalls).toEqual([
+      expect.objectContaining({
+        taskPublicId: "admin_task_public_pending",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        organizationPublicId: null,
+      }),
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: { status: "cancelled", canCancel: false },
+    });
+    expect(JSON.stringify(payload)).toContain("remote Provider cost");
+    expect(response.headers.get("cache-control")).toContain("no-store");
+  });
+
   it("accepts content admin AI question requests as platform-owned local contracts", async () => {
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
@@ -1282,6 +1478,7 @@ describe("admin AI generation local contract route handlers", () => {
     const taskPersistenceRecorder = createTaskPersistenceRecorder({
       persistenceStatuses: ["created", "reused"],
     });
+    const lifecycleRepository = createClaimingLifecycleRepository();
     const body = {
       generationKind: "question",
       idempotencyKey: "018f47ac-7c2e-4f4d-8f5a-9d6c2c1e4901",
@@ -1292,6 +1489,7 @@ describe("admin AI generation local contract route handlers", () => {
       adminRoles: ["content_admin"],
       useDefaultRequestPublicId: true,
       taskPersistenceRepository: taskPersistenceRecorder.repository,
+      lifecycleRepository,
       runtimeBridgeControl:
         createFakeProviderRuntimeBridgeControl(providerInputs),
       body,
@@ -1301,6 +1499,7 @@ describe("admin AI generation local contract route handlers", () => {
       adminRoles: ["content_admin"],
       useDefaultRequestPublicId: true,
       taskPersistenceRepository: taskPersistenceRecorder.repository,
+      lifecycleRepository,
       runtimeBridgeControl:
         createFakeProviderRuntimeBridgeControl(providerInputs),
       body,
@@ -1328,6 +1527,264 @@ describe("admin AI generation local contract route handlers", () => {
         generatedResult: null,
       },
     });
+  });
+
+  it("persists a running attempt before admin Provider execution", async () => {
+    const events: string[] = [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask(input) {
+        events.push("claim");
+        return {
+          disposition: "claimed",
+          attempt: {
+            taskPublicId: input.taskPublicId,
+            retryCount: 0,
+            startedAt: input.claimedAt,
+          },
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: "ai_question_generation",
+            ownerType: "platform",
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: null,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: input.claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      },
+      async failTask() {
+        throw new Error("not expected");
+      },
+      async cancelTask() {
+        throw new Error("not expected");
+      },
+    };
+    const providerControl = createFakeProviderRuntimeBridgeControl([]);
+    const executeProviderRequest =
+      providerControl.providerExecution?.executeProviderRequest;
+
+    if (
+      providerControl.providerExecution === undefined ||
+      executeProviderRequest === undefined
+    ) {
+      throw new Error("test Provider control is unavailable");
+    }
+
+    providerControl.providerExecution.executeProviderRequest = async (
+      input,
+    ) => {
+      events.push("provider");
+      return executeProviderRequest(input);
+    };
+
+    await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      lifecycleRepository,
+      runtimeBridgeControl: providerControl,
+      body: { generationKind: "question" },
+    });
+
+    expect(events.slice(0, 2)).toEqual(["claim", "provider"]);
+  });
+
+  it("persists a redacted admin failure for the current running attempt", async () => {
+    const failCalls: unknown[] = [];
+    const claimedAt = new Date("2026-07-22T12:05:00.123Z");
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask(input) {
+        return {
+          disposition: "claimed",
+          attempt: {
+            taskPublicId: input.taskPublicId,
+            retryCount: 0,
+            startedAt: claimedAt,
+          },
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: "ai_question_generation",
+            ownerType: "platform",
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: null,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      },
+      async failTask(input) {
+        failCalls.push(input);
+        return { disposition: "failed", task: null };
+      },
+      async cancelTask() {
+        throw new Error("not expected");
+      },
+    };
+    const runtimeBridgeControl = createFakeProviderRuntimeBridgeControl([]);
+
+    if (runtimeBridgeControl.providerExecution === undefined) {
+      throw new Error("test Provider control is unavailable");
+    }
+
+    runtimeBridgeControl.providerExecution.executeProviderRequest =
+      async () => ({
+        requestCount: 1,
+        resultStatus: "fail",
+        failureCategory: "timeout",
+        durationMs: 30000,
+        usageSummary: null,
+        providerErrorSummary: {
+          httpStatus: null,
+          providerErrorCode: null,
+        },
+        visibleGeneratedContent: null,
+      });
+
+    await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestedAt: claimedAt,
+      lifecycleRepository,
+      runtimeBridgeControl,
+      body: { generationKind: "question" },
+    });
+
+    expect(failCalls).toEqual([
+      expect.objectContaining({
+        attempt: expect.objectContaining({
+          retryCount: 0,
+          startedAt: claimedAt,
+        }),
+        failureCategory: "network_error",
+      }),
+    ]);
+    expect(JSON.stringify(failCalls)).not.toContain("providerErrorSummary");
+  });
+
+  it("fails the claimed attempt when atomic result persistence rejects", async () => {
+    const failCalls: unknown[] = [];
+    const claimedAt = new Date("2026-07-22T12:05:00.123Z");
+    const baseResultRepository =
+      createGeneratedResultPersistenceRecorder().repository;
+    const baseLifecycleRepository = createClaimingLifecycleRepository();
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      ...baseLifecycleRepository,
+      failTask: async (input) => {
+        failCalls.push(input);
+        return { disposition: "failed", task: null };
+      },
+    };
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestedAt: claimedAt,
+      lifecycleRepository,
+      resultPersistenceRepository: {
+        ...baseResultRepository,
+        async createOrReuseDraftResult() {
+          throw new Error("SENSITIVE_PROVIDER_RESULT_MARKER");
+        },
+      },
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl([]),
+      body: { generationKind: "question" },
+    });
+    const serializedResponse = JSON.stringify(await response.json());
+
+    expect(failCalls).toEqual([
+      expect.objectContaining({
+        attempt: expect.objectContaining({ startedAt: claimedAt }),
+        failureCategory: "system_error",
+      }),
+    ]);
+    expect(serializedResponse).not.toContain(
+      "SENSITIVE_PROVIDER_RESULT_MARKER",
+    );
+  });
+
+  it("fails the claimed attempt when Provider execution throws", async () => {
+    const failCalls: unknown[] = [];
+    const claimedAt = new Date("2026-07-22T12:05:00.123Z");
+    const baseLifecycleRepository = createClaimingLifecycleRepository();
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      ...baseLifecycleRepository,
+      failTask: async (input) => {
+        failCalls.push(input);
+        return { disposition: "failed", task: null };
+      },
+    };
+    const runtimeBridgeControl = createFakeProviderRuntimeBridgeControl([]);
+
+    if (runtimeBridgeControl.providerExecution === undefined) {
+      throw new Error("test Provider control is unavailable");
+    }
+    runtimeBridgeControl.providerExecution.executeProviderRequest =
+      async () => {
+        throw new Error("SENSITIVE_PROVIDER_THROW_MARKER");
+      };
+
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestedAt: claimedAt,
+      lifecycleRepository,
+      runtimeBridgeControl,
+      body: { generationKind: "question" },
+    });
+    const serializedResponse = JSON.stringify(await response.json());
+
+    expect(failCalls).toEqual([
+      expect.objectContaining({
+        attempt: expect.objectContaining({ startedAt: claimedAt }),
+        failureCategory: "system_error",
+      }),
+    ]);
+    expect(serializedResponse).not.toContain("SENSITIVE_PROVIDER_THROW_MARKER");
+  });
+
+  it("fails the claimed attempt when paper assembly throws", async () => {
+    const failCalls: unknown[] = [];
+    const claimedAt = new Date("2026-07-22T12:05:00.123Z");
+    const baseLifecycleRepository = createClaimingLifecycleRepository();
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      ...baseLifecycleRepository,
+      failTask: async (input) => {
+        failCalls.push(input);
+        return { disposition: "failed", task: null };
+      },
+    };
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestedAt: claimedAt,
+      lifecycleRepository,
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl([]),
+      paperAssemblyResolver: async () => {
+        throw new Error("SENSITIVE_PAPER_ASSEMBLY_MARKER");
+      },
+      body: { generationKind: "paper" },
+    });
+    const serializedResponse = JSON.stringify(await response.json());
+
+    expect(failCalls).toEqual([
+      expect.objectContaining({
+        attempt: expect.objectContaining({ startedAt: claimedAt }),
+        failureCategory: "system_error",
+      }),
+    ]);
+    expect(serializedResponse).not.toContain("SENSITIVE_PAPER_ASSEMBLY_MARKER");
   });
 
   it("persists content admin local contracts through the injected task persistence repository", async () => {
@@ -1438,7 +1895,7 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toMatch(/"id":/);
   });
 
-  it("returns reused persistence summaries for organization advanced admin requests", async () => {
+  it("claims a reused pending organization task before Provider execution", async () => {
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder({
@@ -1483,14 +1940,14 @@ describe("admin AI generation local contract route handlers", () => {
           taskPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_task_organization_paper_admin_public_123",
           ),
-          status: "pending",
-          resultPublicId: null,
+          status: "succeeded",
+          resultPublicId: expect.any(String),
           redactionStatus: "redacted",
         },
       },
     });
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_G");
-    expect(providerInputs).toHaveLength(0);
+    expect(providerInputs).toHaveLength(1);
   });
 
   it("persists organization advanced admin grounded generated result summaries", async () => {

@@ -75,9 +75,15 @@ import type {
   AdminAiGenerationTaskPersistenceResult,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
+import type { AiGenerationTaskFailureCategory } from "../models/ai-generation-task";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { AdminAiGenerationSnapshotConflictError } from "../repositories/admin-ai-generation-task-persistence-repository";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
+import {
+  createPostgresAiGenerationTaskLifecycleRepository,
+  type AiGenerationTaskAttemptIdentity,
+  type AiGenerationTaskLifecycleRepository,
+} from "../repositories/ai-generation-task-lifecycle-repository";
 import {
   createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingRepository,
@@ -114,6 +120,7 @@ export type AdminAiGenerationLocalContractRouteOptions = {
   organizationTrainingRepository?: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
+  lifecycleRepository?: AiGenerationTaskLifecycleRepository;
 };
 
 type AdminAiGenerationActor = {
@@ -965,6 +972,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   paperAssemblyResolver: AdminAiGenerationPaperAssemblyResolver | undefined;
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
   resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
+  lifecycleRepository: AiGenerationTaskLifecycleRepository;
   workspace: AdminAiGenerationWorkspace;
 }): Promise<ApiResponse<AdminAiGenerationLocalContractRouteResponseData>> {
   const requestedAt = input.requestClock();
@@ -1054,18 +1062,44 @@ async function buildAdminAiGenerationLocalContract(input: {
     throw error;
   }
 
-  if (taskPersistence.persistenceStatus === "reused") {
+  const claimResult = await input.lifecycleRepository.claimTask({
+    taskPublicId: taskPersistence.task.taskPublicId,
+    ownerType: taskPersistence.task.ownerType,
+    ownerPublicId: taskPersistence.task.ownerPublicId,
+    organizationPublicId: taskPersistence.task.organizationPublicId,
+    taskTypes: [taskPersistence.task.taskType],
+    claimedAt: requestedAt,
+  });
+
+  if (claimResult.disposition !== "claimed" || claimResult.attempt === null) {
     return createReusedAdminAiGenerationLocalContractResponse({
       localContract: claimLocalContract,
       resultPersistenceRepository: input.resultPersistenceRepository,
       taskPersistence,
     });
   }
+  const attempt = claimResult.attempt;
 
-  const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
-    runtimeBridgeControl: input.runtimeBridgeControl,
-    runtimeBridgeInput,
-  });
+  let runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
+
+  try {
+    runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
+      runtimeBridgeControl: input.runtimeBridgeControl,
+      runtimeBridgeInput,
+    });
+  } catch {
+    await input.lifecycleRepository.failTask({
+      taskPublicId: taskPersistence.task.taskPublicId,
+      ownerType: taskPersistence.task.ownerType,
+      ownerPublicId: taskPersistence.task.ownerPublicId,
+      organizationPublicId: taskPersistence.task.organizationPublicId,
+      taskTypes: [taskPersistence.task.taskType],
+      attempt,
+      failureCategory: "system_error",
+      finishedAt: input.requestClock(),
+    });
+    throw new Error("admin AI generation Provider execution unavailable");
+  }
   const expectedStructuredPreviewKind =
     createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
       input.generationKind,
@@ -1080,22 +1114,60 @@ async function buildAdminAiGenerationLocalContract(input: {
       expectedStructuredPreviewKind,
     )
   ) {
+    await input.lifecycleRepository.failTask({
+      taskPublicId: taskPersistence.task.taskPublicId,
+      ownerType: taskPersistence.task.ownerType,
+      ownerPublicId: taskPersistence.task.ownerPublicId,
+      organizationPublicId: taskPersistence.task.organizationPublicId,
+      taskTypes: [taskPersistence.task.taskType],
+      attempt,
+      failureCategory: resolveAdminAiGenerationLifecycleFailureCategory(
+        runtimeBridge.executionSummary.failureCategory,
+      ),
+      finishedAt: input.requestClock(),
+    });
     return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
   }
 
-  const paperAssemblyResult = await resolveAdminAiGenerationPaperAssembly({
-    actor: input.actor,
-    generationKind: input.generationKind,
-    generationParameters: input.generationParameters,
-    paperAssemblyResolver: input.paperAssemblyResolver,
-    requestPublicId,
-    resultPublicId,
-    runtimeBridge,
-    taskRequest,
-    workspace: input.workspace,
-  });
+  let paperAssemblyResult: AdminAiGenerationPaperAssemblyResolveResult;
+
+  try {
+    paperAssemblyResult = await resolveAdminAiGenerationPaperAssembly({
+      actor: input.actor,
+      generationKind: input.generationKind,
+      generationParameters: input.generationParameters,
+      paperAssemblyResolver: input.paperAssemblyResolver,
+      requestPublicId,
+      resultPublicId,
+      runtimeBridge,
+      taskRequest,
+      workspace: input.workspace,
+    });
+  } catch {
+    await input.lifecycleRepository.failTask({
+      taskPublicId: taskPersistence.task.taskPublicId,
+      ownerType: taskPersistence.task.ownerType,
+      ownerPublicId: taskPersistence.task.ownerPublicId,
+      organizationPublicId: taskPersistence.task.organizationPublicId,
+      taskTypes: [taskPersistence.task.taskType],
+      attempt,
+      failureCategory: "system_error",
+      finishedAt: input.requestClock(),
+    });
+    throw new Error("admin AI generation paper assembly unavailable");
+  }
 
   if (paperAssemblyResult.status === "rejected") {
+    await input.lifecycleRepository.failTask({
+      taskPublicId: taskPersistence.task.taskPublicId,
+      ownerType: taskPersistence.task.ownerType,
+      ownerPublicId: taskPersistence.task.ownerPublicId,
+      organizationPublicId: taskPersistence.task.organizationPublicId,
+      taskTypes: [taskPersistence.task.taskType],
+      attempt,
+      failureCategory: "system_error",
+      finishedAt: input.requestClock(),
+    });
     return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
   }
 
@@ -1129,22 +1201,39 @@ async function buildAdminAiGenerationLocalContract(input: {
     paperAssembly: paperAssemblyResult.paperAssembly,
   } satisfies AdminAiGenerationLocalContractBaseDto;
 
-  const organizationTrainingPaperDraftDetail =
-    await resolveOrganizationTrainingPaperDraftDetailSnapshot({
-      localContractSummary: localContract,
-      organizationTrainingRepository: input.organizationTrainingRepository,
-      questionRepository: input.questionRepository,
+  let generatedResult: AdminAiGenerationResultPersistenceResult;
+
+  try {
+    const organizationTrainingPaperDraftDetail =
+      await resolveOrganizationTrainingPaperDraftDetailSnapshot({
+        localContractSummary: localContract,
+        organizationTrainingRepository: input.organizationTrainingRepository,
+        questionRepository: input.questionRepository,
+      });
+    generatedResult =
+      await input.resultPersistenceRepository.createOrReuseDraftResult(
+        createAdminAiGenerationLocalContractResultInput({
+          attempt,
+          localContract,
+          taskPersistence,
+          createdAt: requestedAt,
+          generationParameters: input.generationParameters,
+          organizationTrainingPaperDraftDetail,
+        }),
+      );
+  } catch {
+    await input.lifecycleRepository.failTask({
+      taskPublicId: taskPersistence.task.taskPublicId,
+      ownerType: taskPersistence.task.ownerType,
+      ownerPublicId: taskPersistence.task.ownerPublicId,
+      organizationPublicId: taskPersistence.task.organizationPublicId,
+      taskTypes: [taskPersistence.task.taskType],
+      attempt,
+      failureCategory: "system_error",
+      finishedAt: input.requestClock(),
     });
-  const generatedResult =
-    await input.resultPersistenceRepository.createOrReuseDraftResult(
-      createAdminAiGenerationLocalContractResultInput({
-        localContract,
-        taskPersistence,
-        createdAt: requestedAt,
-        generationParameters: input.generationParameters,
-        organizationTrainingPaperDraftDetail,
-      }),
-    );
+    throw new Error("admin AI generation result persistence unavailable");
+  }
 
   return createSuccessResponse({
     ...createAdminAiGenerationResolvedLocalContract({
@@ -1161,6 +1250,32 @@ async function buildAdminAiGenerationLocalContract(input: {
         generatedResult,
       ),
   });
+}
+
+function resolveAdminAiGenerationLifecycleFailureCategory(
+  failureCategory: string | null,
+): AiGenerationTaskFailureCategory {
+  if (failureCategory === "timeout") {
+    return "network_error";
+  }
+
+  if (failureCategory === "provider_error") {
+    return "provider_temporary_error";
+  }
+
+  if (failureCategory === "missing_provider_credential") {
+    return "configuration_missing";
+  }
+
+  if (failureCategory === "insufficient_grounding_evidence") {
+    return "rag_temporary_error";
+  }
+
+  if (failureCategory === "provider_call_blocked") {
+    return "production_enablement_blocked";
+  }
+
+  return "system_error";
 }
 
 type AdminAiGenerationPaperAssemblyResolveResult =
@@ -1358,6 +1473,7 @@ function createAdminAiGenerationResolvedLocalContract(input: {
 }
 
 function createAdminAiGenerationLocalContractResultInput(input: {
+  attempt: AiGenerationTaskAttemptIdentity;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   localContract: AdminAiGenerationLocalContractBaseDto;
   organizationTrainingPaperDraftDetail: OrganizationTrainingPaperDraftDetailSnapshot | null;
@@ -1399,6 +1515,7 @@ function createAdminAiGenerationLocalContractResultInput(input: {
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
     createdAt: input.createdAt,
+    attempt: input.attempt,
   };
 }
 
@@ -2032,13 +2149,28 @@ function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
 function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
   task: AdminAiGenerationTaskPersistenceDto,
   generatedResult: AdminAiGenerationResultDto | null,
-): AdminAiGenerationTaskHistoryItemDto {
+): AdminAiGenerationTaskHistoryItemDto &
+  Pick<
+    AdminAiGenerationTaskPersistenceDto,
+    | "retryCount"
+    | "failureCategory"
+    | "startedAt"
+    | "finishedAt"
+    | "canRetry"
+    | "canCancel"
+  > {
   return {
     requestPublicId: task.requestPublicId,
     taskPublicId: task.taskPublicId,
     taskType: task.taskType,
     generationKind: task.generationKind,
     status: task.status,
+    retryCount: task.retryCount,
+    failureCategory: task.failureCategory,
+    startedAt: task.startedAt,
+    finishedAt: task.finishedAt,
+    canRetry: task.canRetry,
+    canCancel: task.canCancel,
     requestedAt: task.requestedAt,
     resultPublicId: task.resultPublicId,
     contentVisibility: task.contentVisibility,
@@ -2183,6 +2315,9 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
   const resultPersistenceRepository =
     options.resultPersistenceRepository ??
     createPostgresAdminAiGenerationResultPersistenceRepository();
+  const lifecycleRepository =
+    options.lifecycleRepository ??
+    createPostgresAiGenerationTaskLifecycleRepository();
   const questionRepository =
     options.questionRepository ?? createPostgresQuestionRepository();
   const organizationTrainingRepository =
@@ -2301,6 +2436,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             questionRepository,
             requestClock: () => requestedAt,
             resultPersistenceRepository,
+            lifecycleRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,
             taskPersistenceRepository,
             workspace,
@@ -2309,4 +2445,110 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
       },
     },
   });
+}
+
+type AiGenerationCancelRouteContext = {
+  params: Promise<{ publicId: string }>;
+};
+
+function createNoStoreAdminAiGenerationResponse(
+  response: ApiResponse<unknown>,
+  status: number,
+): Response {
+  return Response.json(response, {
+    status,
+    headers: { "cache-control": "no-store" },
+  });
+}
+
+export function createAdminAiGenerationTaskCancelRouteHandler(
+  workspace: AdminAiGenerationWorkspace,
+  options: Pick<
+    AdminAiGenerationLocalContractRouteOptions,
+    "sessionService" | "lifecycleRepository" | "requestClock"
+  > = {},
+) {
+  const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const lifecycleRepository =
+    options.lifecycleRepository ??
+    createPostgresAiGenerationTaskLifecycleRepository();
+  const requestClock = options.requestClock ?? (() => new Date());
+
+  return async (
+    request: Request,
+    context: AiGenerationCancelRouteContext,
+  ): Promise<Response> => {
+    const actor = await resolveAdminAiGenerationActor(request, sessionService);
+
+    if (actor === null) {
+      return createNoStoreAdminAiGenerationResponse(
+        adminSessionRequiredResponse,
+        401,
+      );
+    }
+
+    if (!canUseAdminAiGeneration(workspace, actor)) {
+      return createNoStoreAdminAiGenerationResponse(
+        adminAiGenerationPermissionDeniedResponse,
+        403,
+      );
+    }
+
+    const { publicId } = await context.params;
+    const taskPublicId = normalizeRequiredText(publicId);
+    const organizationCapability =
+      workspace === "organization"
+        ? resolveServiceComputedOrganizationAiGenerationCapability(actor)
+        : null;
+    const cancellationScope =
+      workspace === "content"
+        ? {
+            ownerType: "platform" as const,
+            ownerPublicId: "platform_content_review_pool",
+            organizationPublicId: null,
+          }
+        : organizationCapability === null
+          ? null
+          : {
+              ownerType: "organization" as const,
+              ownerPublicId: organizationCapability.organizationPublicId,
+              organizationPublicId: organizationCapability.organizationPublicId,
+            };
+
+    if (taskPublicId === null || cancellationScope === null) {
+      return createNoStoreAdminAiGenerationResponse(
+        invalidAdminAiGenerationRequestResponse,
+        400,
+      );
+    }
+
+    const cancellation = await lifecycleRepository.cancelTask({
+      taskPublicId,
+      ...cancellationScope,
+      taskTypes: ["ai_question_generation", "ai_paper_generation"],
+      finishedAt: requestClock(),
+    });
+
+    if (cancellation.task === null) {
+      return createNoStoreAdminAiGenerationResponse(
+        createErrorResponse(404001, "AI generation task was not found."),
+        404,
+      );
+    }
+
+    return createNoStoreAdminAiGenerationResponse(
+      createSuccessResponse({
+        taskPublicId: cancellation.task.taskPublicId,
+        status: cancellation.task.taskStatus,
+        failureCategory: cancellation.task.failureCategory,
+        retryCount: cancellation.task.retryCount,
+        canRetry: cancellation.task.canRetry,
+        canCancel: cancellation.task.canCancel,
+        cancellationEffect:
+          "Prevents result persistence or continued adoption; remote Provider cost or transmission may already have occurred.",
+        redactionStatus: "redacted",
+      }),
+      200,
+    );
+  };
 }

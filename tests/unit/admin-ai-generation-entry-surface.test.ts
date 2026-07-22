@@ -567,6 +567,22 @@ function readExpectedSource(sourcePath: string) {
 }
 
 describe("admin AI generation entry surfaces", () => {
+  it("uses server-authoritative cancellation projection and the scoped cancel route", () => {
+    const source = readFileSync(
+      join(
+        workspaceRoot,
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("lifecycle?.canCancel === true");
+    expect(source).toContain(
+      "/${encodeURIComponent(task.taskPublicId)}/cancel",
+    );
+    expect(source).not.toContain("Date.now() - task");
+  });
+
   it("wires content AI question and paper generation routes to the shared draft review surface", () => {
     const questionRouteSource = readExpectedSource(
       "src/app/(admin)/content/ai-question-generation/page.tsx",

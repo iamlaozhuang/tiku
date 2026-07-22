@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createPersonalAiGenerationTaskCancelRouteHandler,
   createPersonalAiGenerationRequestRouteHandlers as createPersonalAiGenerationRequestRouteHandlersWithoutAuthorizationDefaults,
   createPersonalAiGenerationRequestUserResolver,
   type PersonalAiGenerationRequestRouteDependencies,
@@ -14,6 +15,7 @@ import type {
 } from "../repositories/personal-ai-generation-request-repository";
 import { PersonalAiGenerationSnapshotConflictError } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type { AiGenerationTaskLifecycleRepository } from "../repositories/ai-generation-task-lifecycle-repository";
 import type {
   AiPaperQuestionSourceRepository,
   QuestionAccessRow,
@@ -492,9 +494,90 @@ function createPersonalAiGenerationRequestRouteHandlers(
         createPersonalEffectiveAuthorizationContext(),
         createOrganizationEffectiveAuthorizationContext(),
       ]),
+      lifecycleRepository:
+        dependencies.lifecycleRepository ??
+        createClaimingPersonalAiGenerationLifecycleRepository(),
       ...dependencies,
     },
   );
+}
+
+function createClaimingPersonalAiGenerationLifecycleRepository(): AiGenerationTaskLifecycleRepository {
+  const claimedTaskPublicIds = new Set<string>();
+
+  return {
+    async claimTask(input) {
+      if (claimedTaskPublicIds.has(input.taskPublicId)) {
+        return {
+          disposition: "not_claimed",
+          attempt: null,
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: input.taskTypes[0] ?? "ai_question_generation",
+            ownerType: input.ownerType,
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: input.organizationPublicId,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: input.claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      }
+
+      claimedTaskPublicIds.add(input.taskPublicId);
+      return {
+        disposition: "claimed",
+        attempt: {
+          taskPublicId: input.taskPublicId,
+          retryCount: 0,
+          startedAt: input.claimedAt,
+        },
+        task: {
+          taskPublicId: input.taskPublicId,
+          taskType: input.taskTypes[0] ?? "ai_question_generation",
+          ownerType: input.ownerType,
+          ownerPublicId: input.ownerPublicId,
+          organizationPublicId: input.organizationPublicId,
+          taskStatus: "running",
+          retryCount: 0,
+          failureCategory: null,
+          startedAt: input.claimedAt,
+          finishedAt: null,
+          resultPublicId: null,
+          canCancel: true,
+          canRetry: false,
+        },
+      };
+    },
+    async failTask(input) {
+      return {
+        disposition: "failed",
+        task: {
+          taskPublicId: input.taskPublicId,
+          taskType: input.taskTypes[0] ?? "ai_question_generation",
+          ownerType: input.ownerType,
+          ownerPublicId: input.ownerPublicId,
+          organizationPublicId: input.organizationPublicId,
+          taskStatus: "failed",
+          retryCount: input.attempt.retryCount,
+          failureCategory: input.failureCategory,
+          startedAt: input.attempt.startedAt,
+          finishedAt: input.finishedAt,
+          resultPublicId: null,
+          canCancel: false,
+          canRetry: true,
+        },
+      };
+    },
+    async cancelTask() {
+      throw new Error("unexpected lifecycle cancellation transition");
+    },
+  };
 }
 
 function createPaperPlanProviderContent(questionCount: number) {
@@ -713,6 +796,115 @@ function createTrainingQuestion(publicId: string) {
 }
 
 describe("personal AI generation request route handlers", () => {
+  it("rejects cross-owner personal cancellation before lifecycle lookup", async () => {
+    const cancelCalls: unknown[] = [];
+    const handler = createPersonalAiGenerationTaskCancelRouteHandler(
+      async () => null,
+      {
+        lifecycleRepository: {
+          async claimTask() {
+            throw new Error("not expected");
+          },
+          async failTask() {
+            throw new Error("not expected");
+          },
+          async cancelTask(input) {
+            cancelCalls.push(input);
+            return { disposition: "cancelled", task: null };
+          },
+        },
+      },
+    );
+
+    const response = await handler(
+      new Request(
+        "http://localhost/api/v1/personal-ai-generation-requests/task/cancel",
+        {
+          method: "POST",
+        },
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "personal_task_public_cross_owner",
+        }),
+      },
+    );
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(cancelCalls).toHaveLength(0);
+  });
+
+  it("revalidates current personal authorization before owner-scoped cancellation", async () => {
+    const cancelCalls: unknown[] = [];
+    const authorizationRepository = createAuthorizationRepository({
+      personalAuths: [createPersonalAuthorizationRow()],
+    });
+    const handler = createPersonalAiGenerationTaskCancelRouteHandler(
+      async () => userContext,
+      {
+        authorizationRepository,
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          createPersonalEffectiveAuthorizationContext({
+            ownerPublicId: userContext.userPublicId,
+            quotaOwnerPublicId: userContext.userPublicId,
+          }),
+        ]),
+        now: () => new Date("2026-07-22T13:05:00.456Z"),
+        lifecycleRepository: {
+          async claimTask() {
+            throw new Error("not expected");
+          },
+          async failTask() {
+            throw new Error("not expected");
+          },
+          async cancelTask(input) {
+            cancelCalls.push(input);
+            return {
+              disposition: "cancelled",
+              task: {
+                taskPublicId: input.taskPublicId,
+                taskType: "ai_question_generation",
+                ownerType: input.ownerType,
+                ownerPublicId: input.ownerPublicId,
+                organizationPublicId: input.organizationPublicId,
+                taskStatus: "cancelled",
+                retryCount: 0,
+                failureCategory: null,
+                startedAt: null,
+                finishedAt: input.finishedAt,
+                resultPublicId: null,
+                canCancel: false,
+                canRetry: false,
+              },
+            };
+          },
+        },
+      },
+    );
+    const body = createBaseFlowBody();
+
+    const response = await handler(createPostRequest(body), {
+      params: Promise.resolve({ publicId: "personal_task_public_pending" }),
+    });
+    const payload = await response.json();
+
+    expect(cancelCalls).toEqual([
+      expect.objectContaining({
+        taskPublicId: "personal_task_public_pending",
+        ownerType: "personal",
+        ownerPublicId: userContext.userPublicId,
+        organizationPublicId: null,
+        taskTypes: ["ai_question_generation"],
+      }),
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: { status: "cancelled", canCancel: false },
+    });
+    expect(response.headers.get("cache-control")).toContain("no-store");
+  });
+
   it("resolves user public id from the local session runtime without exposing session material", async () => {
     const observedAuthorizationValues: Array<string | null | undefined> = [];
     const sessionService: Pick<SessionService, "getCurrentSession"> = {
@@ -3673,6 +3865,248 @@ describe("personal AI generation request route handlers", () => {
     expect(serializedPayload).not.toContain(staleClientAuditLogPublicId);
   });
 
+  it("persists a running attempt before personal Provider execution", async () => {
+    const events: string[] = [];
+    const requestRepository = createRequestRepository();
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask(input) {
+        events.push("claim");
+        return {
+          disposition: "claimed",
+          attempt: {
+            taskPublicId: input.taskPublicId,
+            retryCount: 0,
+            startedAt: input.claimedAt,
+          },
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: "ai_question_generation",
+            ownerType: "personal",
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: null,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: input.claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      },
+      async failTask() {
+        throw new Error("not expected");
+      },
+      async cancelTask() {
+        throw new Error("not expected");
+      },
+    };
+    const dependencies = {
+      requestRepository,
+      lifecycleRepository,
+      runtimeBridgeControl: {
+        bridgeMode: "controlled_runner" as const,
+        explicitLocalSwitchPresent: true as const,
+        providerExecution: {
+          executionMode: "route_integrated_provider" as const,
+          realProviderExecutionApproved: true as const,
+          maxRequests: 1 as const,
+          maxRetries: 0 as const,
+          maxOutputTokens: 220,
+          timeoutMs: 30000,
+          resolveGroundingContext: () => sufficientGroundingContext,
+          readProviderCredential: async () => "synthetic-test-credential",
+          executeProviderRequest: async () => {
+            events.push("provider");
+            return {
+              requestCount: 1 as const,
+              resultStatus: "pass" as const,
+              failureCategory: null,
+              durationMs: 37,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: null,
+            };
+          },
+        },
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      dependencies,
+    );
+
+    await collection.POST(createPostRequest(createBaseFlowBody()));
+
+    expect(events.slice(0, 2)).toEqual(["claim", "provider"]);
+  });
+
+  it("persists a redacted personal failure for the current running attempt", async () => {
+    const failCalls: unknown[] = [];
+    const claimedAt = new Date("2026-07-22T12:05:00.123Z");
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask(input) {
+        return {
+          disposition: "claimed",
+          attempt: {
+            taskPublicId: input.taskPublicId,
+            retryCount: 1,
+            startedAt: claimedAt,
+          },
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: "ai_question_generation",
+            ownerType: "personal",
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: null,
+            taskStatus: "running",
+            retryCount: 1,
+            failureCategory: null,
+            startedAt: claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      },
+      async failTask(input) {
+        failCalls.push(input);
+        return { disposition: "failed", task: null };
+      },
+      async cancelTask() {
+        throw new Error("not expected");
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository: createRequestRepository(),
+        lifecycleRepository,
+        now: () => claimedAt,
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "fail",
+              failureCategory: "timeout",
+              durationMs: 30000,
+              usageSummary: null,
+              providerErrorSummary: {
+                httpStatus: null,
+                providerErrorCode: null,
+              },
+              visibleGeneratedContent: null,
+            }),
+          },
+        },
+      },
+    );
+
+    await collection.POST(createPostRequest(createBaseFlowBody()));
+
+    expect(failCalls).toEqual([
+      expect.objectContaining({
+        attempt: expect.objectContaining({
+          retryCount: 1,
+          startedAt: claimedAt,
+        }),
+        failureCategory: "network_error",
+      }),
+    ]);
+    expect(JSON.stringify(failCalls)).not.toContain("providerErrorSummary");
+  });
+
+  it("fails the claimed personal attempt when Provider execution throws", async () => {
+    const failCalls: unknown[] = [];
+    const claimedAt = new Date("2026-07-22T12:05:00.123Z");
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask(input) {
+        return {
+          disposition: "claimed",
+          attempt: {
+            taskPublicId: input.taskPublicId,
+            retryCount: 0,
+            startedAt: claimedAt,
+          },
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: "ai_question_generation",
+            ownerType: "personal",
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: null,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: claimedAt,
+            finishedAt: null,
+            resultPublicId: null,
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      },
+      async failTask(input) {
+        failCalls.push(input);
+        return { disposition: "failed", task: null };
+      },
+      async cancelTask() {
+        throw new Error("not expected");
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository: createRequestRepository(),
+        lifecycleRepository,
+        now: () => claimedAt,
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => {
+              throw new Error("SENSITIVE_PERSONAL_PROVIDER_THROW_MARKER");
+            },
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+    const serializedResponse = JSON.stringify(await response.json());
+
+    expect(failCalls).toEqual([
+      expect.objectContaining({
+        attempt: expect.objectContaining({ startedAt: claimedAt }),
+        failureCategory: "system_error",
+      }),
+    ]);
+    expect(serializedResponse).not.toContain(
+      "SENSITIVE_PERSONAL_PROVIDER_THROW_MARKER",
+    );
+  });
+
   it("uses reused persistent task metadata for idempotent local browser POST responses", async () => {
     const providerExecutorCalls: unknown[] = [];
     const requestRepository = createRequestRepository([], {
@@ -3692,10 +4126,40 @@ describe("personal AI generation request route handlers", () => {
         },
       },
     });
+    const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
+      async claimTask(input) {
+        return {
+          disposition: "not_claimed",
+          attempt: null,
+          task: {
+            taskPublicId: input.taskPublicId,
+            taskType: input.taskTypes[0] ?? "ai_question_generation",
+            ownerType: input.ownerType,
+            ownerPublicId: input.ownerPublicId,
+            organizationPublicId: input.organizationPublicId,
+            taskStatus: "running",
+            retryCount: 0,
+            failureCategory: null,
+            startedAt: new Date("2026-06-12T17:00:00.000Z"),
+            finishedAt: null,
+            resultPublicId: "ai_generation_result_public_existing_route",
+            canCancel: true,
+            canRetry: false,
+          },
+        };
+      },
+      async failTask() {
+        throw new Error("unexpected lifecycle failure transition");
+      },
+      async cancelTask() {
+        throw new Error("unexpected lifecycle cancellation transition");
+      },
+    };
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
       {
         requestRepository,
+        lifecycleRepository,
         runtimeBridgeControl: {
           bridgeMode: "controlled_runner",
           explicitLocalSwitchPresent: true,

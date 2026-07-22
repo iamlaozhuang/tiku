@@ -2254,6 +2254,28 @@ function ContentAdminGenerationTraceabilitySummaryPanel({
   );
 }
 
+function readAdminTaskLifecycle(task: AdminAiGenerationTaskHistoryItemDto) {
+  if (
+    !("retryCount" in task) ||
+    !("failureCategory" in task) ||
+    !("canCancel" in task) ||
+    typeof task.retryCount !== "number" ||
+    !Number.isInteger(task.retryCount) ||
+    task.retryCount < 0 ||
+    (task.failureCategory !== null &&
+      typeof task.failureCategory !== "string") ||
+    typeof task.canCancel !== "boolean"
+  ) {
+    return null;
+  }
+
+  return {
+    retryCount: task.retryCount,
+    failureCategory: task.failureCategory,
+    canCancel: task.canCancel,
+  };
+}
+
 function AdminAiGenerationTaskHistoryPanel({
   adminWorkspaceCapabilitySummary,
   copyActionStateByResultPublicId,
@@ -2261,6 +2283,7 @@ function AdminAiGenerationTaskHistoryPanel({
   generationParameters,
   generationKind,
   onCopyToTrainingDraft,
+  onCancelTask,
   onChangePage,
   onReviewContentDraft,
   pagination,
@@ -2278,6 +2301,7 @@ function AdminAiGenerationTaskHistoryPanel({
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   generationKind: AdminAiGenerationKind;
   onCopyToTrainingDraft: (input: OrganizationAiTrainingDraftCopyInput) => void;
+  onCancelTask: (task: AdminAiGenerationTaskHistoryItemDto) => void;
   onChangePage: (page: number) => void;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
   pagination: ApiPagination | null;
@@ -2394,6 +2418,7 @@ function AdminAiGenerationTaskHistoryPanel({
       {state === "ready" ? (
         <div className="mt-4 space-y-3">
           {items.map((taskItem) => {
+            const lifecycle = readAdminTaskLifecycle(taskItem);
             const currentContentAdminReviewedDraft =
               workspace === "content" &&
               taskItem.generatedResult !== null &&
@@ -2473,6 +2498,22 @@ function AdminAiGenerationTaskHistoryPanel({
                     </dd>
                   </div>
                 </dl>
+
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <span className="text-text-secondary text-xs">
+                    重试次数：{lifecycle?.retryCount ?? 0}；失败类别：
+                    {lifecycle?.failureCategory ?? "无"}
+                  </span>
+                  {lifecycle?.canCancel === true ? (
+                    <button
+                      className="border-border text-text-primary hover:bg-muted rounded-md border px-3 py-1.5 text-sm font-medium"
+                      type="button"
+                      onClick={() => onCancelTask(taskItem)}
+                    >
+                      取消任务
+                    </button>
+                  ) : null}
+                </div>
 
                 {taskItem.generatedResult !== null ? (
                   <div className="border-border bg-muted/40 mt-3 rounded-md border p-3">
@@ -3701,6 +3742,22 @@ export function AdminAiGenerationEntryPage({
     await refreshTaskHistory(sessionToken, page);
   }
 
+  async function handleCancelTask(task: AdminAiGenerationTaskHistoryItemDto) {
+    const sessionToken = getStoredSessionToken();
+    const response = await fetchAdminApi(
+      `/api/v1/${workspace}-ai-generation-requests/${encodeURIComponent(task.taskPublicId)}/cancel`,
+      sessionToken,
+      { method: "POST" },
+    );
+
+    if (response.code === 0) {
+      await refreshTaskHistory(
+        sessionToken,
+        taskHistoryPagination?.page ?? ADMIN_AI_GENERATION_HISTORY_PAGE,
+      );
+    }
+  }
+
   async function handleReviewContentDraft(
     input: ContentAdminReviewActionInput,
   ) {
@@ -4176,6 +4233,7 @@ export function AdminAiGenerationEntryPage({
             onCopyToTrainingDraft={(input) =>
               void handleCopyOrganizationAiResultToTrainingDraft(input)
             }
+            onCancelTask={(task) => void handleCancelTask(task)}
             onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
             pagination={taskHistoryPagination}
             reviewActionStateByResultPublicId={

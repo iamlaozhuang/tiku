@@ -12,6 +12,7 @@ import type {
 import type { AdminAiGenerationLocalContractBaseDto } from "../contracts/admin-ai-generation-local-contract";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
+import { createAiGenerationTaskLifecycleProjection } from "./ai-generation-task-lifecycle-repository";
 import type { AiGenerationTaskResultKind } from "../models/ai-generation-task-request";
 
 export const ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES = [
@@ -265,6 +266,23 @@ function assertMatchingAdminAiGenerationSnapshot(
 export function mapAdminAiGenerationTaskPersistenceRowToDto(
   row: AdminAiGenerationTaskPersistenceRow,
 ): AdminAiGenerationTaskPersistenceDto {
+  const lifecycle = createAiGenerationTaskLifecycleProjection(
+    {
+      taskPublicId: row.public_id,
+      taskType: row.task_type,
+      ownerType: row.owner_type,
+      ownerPublicId: row.owner_public_id,
+      organizationPublicId: row.organization_public_id,
+      taskStatus: row.task_status,
+      retryCount: row.retry_count,
+      failureCategory: row.failure_category,
+      startedAt: row.started_at,
+      finishedAt: row.finished_at,
+      resultPublicId: row.result_public_id,
+    },
+    new Date(),
+  );
+
   return {
     requestPublicId: row.request_public_id,
     taskPublicId: row.public_id,
@@ -272,6 +290,12 @@ export function mapAdminAiGenerationTaskPersistenceRowToDto(
     workspace: row.workspace,
     generationKind: row.generation_kind,
     status: row.task_status,
+    retryCount: lifecycle.retryCount,
+    failureCategory: lifecycle.failureCategory,
+    startedAt: lifecycle.startedAt?.toISOString() ?? null,
+    finishedAt: lifecycle.finishedAt?.toISOString() ?? null,
+    canRetry: lifecycle.canRetry,
+    canCancel: lifecycle.canCancel,
     requestedAt: row.requested_at.toISOString(),
     authorizationSource: row.authorization_source,
     authorizationPublicId: row.authorization_public_id,

@@ -131,6 +131,12 @@ export function createAdminAiGenerationResultPersistenceRepository(
         return createResultPersistenceResponse("reused", existingRow);
       }
 
+      if (input.attempt === undefined) {
+        throw new Error(
+          "admin AI generation result requires a claimed task attempt.",
+        );
+      }
+
       const taskRow = await gateway.findTaskByPublicId(lookupQuery);
 
       if (taskRow === null) {
@@ -139,24 +145,14 @@ export function createAdminAiGenerationResultPersistenceRepository(
 
       assertTaskMatchesInput(input, taskRow);
 
-      const insertedRow = await gateway.insertDraftResult(
-        createServerOwnedDraftResultInput(input, taskRow),
+      const insertedRow = await gateway.insertDraftResultAndCompleteTask(
+        createServerOwnedDraftResultInput(input, taskRow, input.attempt),
       );
       const resolvedRow =
         insertedRow ?? (await gateway.findResultByTaskPublicId(lookupQuery));
 
       if (resolvedRow === null) {
         throw new Error("admin AI generation result persistence failed.");
-      }
-
-      if (insertedRow !== null) {
-        await gateway.attachResultToTask({
-          ...lookupQuery,
-          resultPublicId: input.resultPublicId,
-          evidenceStatus: input.evidenceStatus,
-          citationCount: input.citationCount,
-          aiCallLogPublicId: input.aiCallLogPublicId,
-        });
       }
 
       return createResultPersistenceResponse(
@@ -170,9 +166,11 @@ export function createAdminAiGenerationResultPersistenceRepository(
 function createServerOwnedDraftResultInput(
   input: CreateAdminAiGenerationResultInput,
   taskRow: AdminAiGenerationResultTaskRow,
+  attempt: NonNullable<CreateAdminAiGenerationResultInput["attempt"]>,
 ): InsertAdminAiGenerationDraftResultInput {
   return {
     ...input,
+    attempt,
     aiGenerationTaskId: taskRow.id,
     requestPublicId: taskRow.request_public_id,
     resultStatus: "draft",

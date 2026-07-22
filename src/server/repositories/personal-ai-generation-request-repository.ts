@@ -4,7 +4,10 @@ import { createHash } from "node:crypto";
 
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
-import type { AiGenerationTaskType } from "../models/ai-generation-task";
+import type {
+  AiGenerationTaskFailureCategory,
+  AiGenerationTaskType,
+} from "../models/ai-generation-task";
 import type {
   AiGenerationTaskRequestAuthorizationSource,
   AiGenerationTaskRequestOwnerType,
@@ -12,15 +15,24 @@ import type {
 import type { AiFuncType, EvidenceStatus } from "../models/ai-rag";
 import {
   mapPersonalAiGenerationRequestRowToHistoryDto,
-  type PersonalAiGenerationRequestPersistenceRow,
+  type PersonalAiGenerationRequestPersistenceRow as MappedPersonalAiGenerationRequestPersistenceRow,
 } from "../mappers/personal-ai-generation-request-mapper";
+import { createAiGenerationTaskLifecycleProjection } from "./ai-generation-task-lifecycle-repository";
 import {
   createLazyRuntimeDatabaseGetter,
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
 
-export type { PersonalAiGenerationRequestPersistenceRow };
+export type PersonalAiGenerationRequestPersistenceRow =
+  MappedPersonalAiGenerationRequestPersistenceRow & {
+    retry_count: number;
+    failure_category: AiGenerationTaskFailureCategory | null;
+    started_at: Date | null;
+    finished_at: Date | null;
+    owner_type: PersonalAiGenerationRequestOwnerType;
+    organization_public_id: string | null;
+  };
 
 export type PersonalAiGenerationTaskType = Exclude<
   AiGenerationTaskType,
@@ -173,11 +185,18 @@ const personalAiGenerationRequestSelection = {
   request_public_id: aiGenerationTask.request_public_id,
   task_type: aiGenerationTask.task_type,
   task_status: aiGenerationTask.task_status,
+  retry_count: aiGenerationTask.retry_count,
+  failure_category: aiGenerationTask.failure_category,
+  started_at: aiGenerationTask.started_at,
+  finished_at: aiGenerationTask.finished_at,
   requested_at: aiGenerationTask.requested_at,
   result_public_id: aiGenerationTask.result_public_id,
   evidence_status: aiGenerationTask.evidence_status,
   citation_count: aiGenerationTask.citation_count,
   ai_call_log_public_id: aiGenerationTask.ai_call_log_public_id,
+  owner_type: aiGenerationTask.owner_type,
+  owner_public_id: aiGenerationTask.owner_public_id,
+  organization_public_id: aiGenerationTask.organization_public_id,
   generation_snapshot_version: aiGenerationTask.generation_snapshot_version,
   generation_input_snapshot: aiGenerationTask.generation_input_snapshot,
   generation_constraint_snapshot:
@@ -304,6 +323,44 @@ function assertMatchingPersonalAiGenerationSnapshot(
   }
 }
 
+function mapPersonalAiGenerationRequestRowWithLifecycleToHistoryDto(
+  row: PersonalAiGenerationRequestPersistenceRow,
+): PersonalAiGenerationRequestHistoryDto[number] {
+  const historyItem = mapPersonalAiGenerationRequestRowToHistoryDto(row);
+  const ownerPublicId = row.owner_public_id;
+
+  if (ownerPublicId === undefined) {
+    throw new Error("personal AI generation history owner is unavailable.");
+  }
+
+  const lifecycle = createAiGenerationTaskLifecycleProjection(
+    {
+      taskPublicId: row.public_id,
+      taskType: row.task_type,
+      ownerType: row.owner_type,
+      ownerPublicId,
+      organizationPublicId: row.organization_public_id,
+      taskStatus: row.task_status,
+      retryCount: row.retry_count,
+      failureCategory: row.failure_category,
+      startedAt: row.started_at,
+      finishedAt: row.finished_at,
+      resultPublicId: row.result_public_id,
+    },
+    new Date(),
+  );
+
+  return {
+    ...historyItem,
+    retryCount: lifecycle.retryCount,
+    failureCategory: lifecycle.failureCategory,
+    startedAt: lifecycle.startedAt?.toISOString() ?? null,
+    finishedAt: lifecycle.finishedAt?.toISOString() ?? null,
+    canRetry: lifecycle.canRetry,
+    canCancel: lifecycle.canCancel,
+  };
+}
+
 export function createPersonalAiGenerationRequestHistoryCondition(query: {
   authorizationPublicId: string;
   ownerType?: PersonalAiGenerationRequestOwnerType;
@@ -372,7 +429,7 @@ export function createPersonalAiGenerationRequestRepository(
 
       return [...rows]
         .sort(comparePersonalAiGenerationRequestPersistenceRows)
-        .map(mapPersonalAiGenerationRequestRowToHistoryDto);
+        .map(mapPersonalAiGenerationRequestRowWithLifecycleToHistoryDto);
     },
     async createOrReuseRequest(input) {
       const snapshotEnvelope =
@@ -392,7 +449,9 @@ export function createPersonalAiGenerationRequestRepository(
         return {
           persistenceStatus: "reused",
           historyItem:
-            mapPersonalAiGenerationRequestRowToHistoryDto(existingRow),
+            mapPersonalAiGenerationRequestRowWithLifecycleToHistoryDto(
+              existingRow,
+            ),
         };
       }
 
@@ -416,7 +475,10 @@ export function createPersonalAiGenerationRequestRepository(
 
       return {
         persistenceStatus: insertedRow === null ? "reused" : "created",
-        historyItem: mapPersonalAiGenerationRequestRowToHistoryDto(resolvedRow),
+        historyItem:
+          mapPersonalAiGenerationRequestRowWithLifecycleToHistoryDto(
+            resolvedRow,
+          ),
       };
     },
     countRequestHistory:

@@ -9,7 +9,9 @@ import {
   createAdminAiGenerationResultInsertValue,
   createAdminAiGenerationResultTaskUpdateValue,
   mapAdminAiGenerationResultDbRowToRow,
+  persistAdminAiGenerationDraftResultAndCompleteTask,
 } from "./admin-ai-generation-result-persistence-db-adapter";
+import type { RuntimeDatabase } from "./runtime-database";
 
 function createDraftResultInput(
   overrides: Partial<InsertAdminAiGenerationDraftResultInput> = {},
@@ -41,6 +43,11 @@ function createDraftResultInput(
     isFormalAdoptionBlocked: true,
     createdAt: new Date("2026-06-26T22:30:00.000Z"),
     ...overrides,
+    attempt: overrides.attempt ?? {
+      taskPublicId: "admin_ai_generation_task_public_901",
+      retryCount: 0,
+      startedAt: new Date("2026-06-26T22:29:30.000Z"),
+    },
   };
 }
 
@@ -67,6 +74,11 @@ function createPersistenceInput(
     sourcePaperPublicId: null,
     createdAt: new Date("2026-06-26T22:35:00.000Z"),
     ...overrides,
+    attempt: overrides.attempt ?? {
+      taskPublicId: "admin_ai_generation_task_public_902",
+      retryCount: 1,
+      startedAt: new Date("2026-06-26T22:34:30.123Z"),
+    },
   };
 }
 
@@ -80,6 +92,37 @@ function protectedAiTerms(): string[] {
 }
 
 describe("admin AI generation result persistence DB adapter", () => {
+  it("rolls back the inserted result when the exact running attempt loses the success CAS", async () => {
+    const input = createDraftResultInput();
+    const insertedRow = {
+      id: 901,
+      ...createAdminAiGenerationResultInsertValue(input),
+    };
+    const transactionDatabase = {
+      insert: () => ({
+        values: () => ({
+          onConflictDoNothing: () => ({
+            returning: async () => [insertedRow],
+          }),
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({ returning: async () => [] }),
+        }),
+      }),
+    };
+    const transaction = async (callback: (database: unknown) => unknown) =>
+      callback(transactionDatabase);
+
+    await expect(
+      persistAdminAiGenerationDraftResultAndCompleteTask(
+        { transaction } as unknown as RuntimeDatabase,
+        input,
+      ),
+    ).rejects.toThrow("completion attempt was lost");
+  });
+
   it("builds a backend admin draft result insert value without raw provider or formal columns", () => {
     const input = createDraftResultInput();
     const values = createAdminAiGenerationResultInsertValue(input);

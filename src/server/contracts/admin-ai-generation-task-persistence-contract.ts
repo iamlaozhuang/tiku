@@ -5,6 +5,7 @@ import type {
   AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract";
 import type {
+  AiGenerationTaskFailureCategory,
   AiGenerationTaskStatus,
   AiGenerationTaskType,
 } from "../models/ai-generation-task";
@@ -77,6 +78,10 @@ export type AdminAiGenerationTaskPersistenceRow = {
   workspace: AdminAiGenerationWorkspace;
   generation_kind: AdminAiGenerationKind;
   task_status: AiGenerationTaskStatus;
+  retry_count: number;
+  failure_category: AiGenerationTaskFailureCategory | null;
+  started_at: Date | null;
+  finished_at: Date | null;
   requested_at: Date;
   authorization_source: AiGenerationTaskRequestAuthorizationSource;
   authorization_public_id: string;
@@ -147,6 +152,12 @@ export type AdminAiGenerationTaskPersistenceDto = {
   workspace: AdminAiGenerationWorkspace;
   generationKind: AdminAiGenerationKind;
   status: AiGenerationTaskStatus;
+  retryCount: number;
+  failureCategory: AiGenerationTaskFailureCategory | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  canRetry: boolean;
+  canCancel: boolean;
   requestedAt: string;
   authorizationSource: AiGenerationTaskRequestAuthorizationSource;
   authorizationPublicId: string;

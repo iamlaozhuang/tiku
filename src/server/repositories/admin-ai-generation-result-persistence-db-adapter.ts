@@ -41,6 +41,7 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import { createRunningAttemptCondition } from "./ai-generation-task-lifecycle-repository";
 
 type AdminAiGenerationResultInsertValue =
   typeof adminAiGenerationResult.$inferInsert;
@@ -52,6 +53,8 @@ type AdminAiGenerationTaskUpdateValue = Pick<
   | "evidence_status"
   | "citation_count"
   | "ai_call_log_public_id"
+  | "failure_category"
+  | "finished_at"
   | "updated_at"
 >;
 
@@ -205,6 +208,8 @@ export function createAdminAiGenerationResultTaskUpdateValue(
     evidence_status: input.evidenceStatus,
     citation_count: input.citationCount,
     ai_call_log_public_id: input.aiCallLogPublicId,
+    failure_category: null,
+    finished_at: input.createdAt,
     updated_at: input.createdAt,
   };
 }
@@ -297,6 +302,12 @@ export function createPostgresAdminAiGenerationResultPersistenceGateway(
             ),
           );
     },
+    async insertDraftResultAndCompleteTask(input) {
+      return persistAdminAiGenerationDraftResultAndCompleteTask(
+        getDatabase(),
+        input,
+      );
+    },
     async attachResultToTask(input) {
       await getDatabase()
         .update(aiGenerationTask)
@@ -304,6 +315,46 @@ export function createPostgresAdminAiGenerationResultPersistenceGateway(
         .where(createAdminAiGenerationTaskUpdateCondition(input));
     },
   };
+}
+
+export async function persistAdminAiGenerationDraftResultAndCompleteTask(
+  database: RuntimeDatabase,
+  input: InsertAdminAiGenerationDraftResultInput,
+): Promise<AdminAiGenerationResultPersistenceRow | null> {
+  return database.transaction(async (transaction) => {
+    const [insertedRow] = await transaction
+      .insert(adminAiGenerationResult)
+      .values(createAdminAiGenerationResultInsertValue(input))
+      .onConflictDoNothing({
+        target: adminAiGenerationResult.ai_generation_task_id,
+      })
+      .returning(adminAiGenerationResultSelection);
+
+    if (insertedRow === undefined) {
+      return null;
+    }
+
+    const [updatedTaskRow] = await transaction
+      .update(aiGenerationTask)
+      .set(createAdminAiGenerationResultTaskUpdateValue(input))
+      .where(
+        and(
+          createAdminAiGenerationTaskUpdateCondition(input),
+          createRunningAttemptCondition(input.attempt),
+        ),
+      )
+      .returning({ public_id: aiGenerationTask.public_id });
+
+    if (updatedTaskRow === undefined) {
+      throw new Error("admin AI generation task completion attempt was lost.");
+    }
+
+    return mapAdminAiGenerationResultDbRowToRow(
+      normalizeAdminAiGenerationResultDbRow(
+        createAdminAiGenerationResultDbRowWithoutFormalAdoption(insertedRow),
+      ),
+    );
+  });
 }
 
 export function createPostgresAdminAiGenerationResultPersistenceRepository(

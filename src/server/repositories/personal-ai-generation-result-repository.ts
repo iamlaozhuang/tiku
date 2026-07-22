@@ -9,6 +9,8 @@ import type {
   PersonalAiGenerationResultStatus,
   PersonalAiGenerationResultTaskType,
 } from "../models/personal-ai-generation-result";
+import type { AiGenerationTaskAttemptIdentity } from "./ai-generation-task-lifecycle-repository";
+import { createRunningAttemptCondition } from "./ai-generation-task-lifecycle-repository";
 import {
   mapPersonalAiGenerationResultRowToDto,
   type PersonalAiGenerationResultPersistenceRow,
@@ -41,7 +43,9 @@ export type ListPersonalAiGenerationResultQuery = {
 };
 
 export type CreatePersonalAiGenerationResultInput =
-  PersonalAiGenerationResultPersistenceInput;
+  PersonalAiGenerationResultPersistenceInput & {
+    attempt?: AiGenerationTaskAttemptIdentity;
+  };
 
 export type GetPersonalAiGenerationResultQuery = {
   authorizationPublicId: string;
@@ -61,7 +65,7 @@ type PersonalAiGenerationResultLookupQuery =
   | GetPersonalAiGenerationResultOwnerQuery;
 
 export type InsertPersonalAiGenerationDraftResultInput =
-  CreatePersonalAiGenerationResultInput & {
+  PersonalAiGenerationResultPersistenceInput & {
     aiGenerationTaskId: number;
     requestPublicId: string;
     resultStatus: Extract<PersonalAiGenerationResultStatus, "draft">;
@@ -78,6 +82,7 @@ export type AttachPersonalAiGenerationResultToTaskInput = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   aiCallLogPublicId: string | null;
+  attempt: AiGenerationTaskAttemptIdentity;
 };
 
 export type InsertPersonalAiGenerationDraftResultAndCompleteTaskInput = {
@@ -314,6 +319,12 @@ export function createPersonalAiGenerationResultRepository(
         };
       }
 
+      if (input.attempt === undefined) {
+        throw new Error(
+          "personal AI generation result requires a claimed task attempt.",
+        );
+      }
+
       const taskRow = await gateway.findTaskByPublicId({
         ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
@@ -338,6 +349,7 @@ export function createPersonalAiGenerationResultRepository(
           evidenceStatus: input.evidenceStatus,
           citationCount: input.citationCount,
           aiCallLogPublicId: input.aiCallLogPublicId,
+          attempt: input.attempt,
         },
       });
       const resolvedRow =
@@ -520,19 +532,24 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
       .update(aiGenerationTask)
       .set({
         task_status: input.task.taskStatus,
+        failure_category: null,
         result_public_id: input.task.resultPublicId,
         evidence_status: input.task.evidenceStatus,
         citation_count: input.task.citationCount,
         ai_call_log_public_id: input.task.aiCallLogPublicId,
+        finished_at: input.result.createdAt,
         updated_at: input.result.createdAt,
       })
       .where(
-        createPersonalAiGenerationTaskLookupCondition({
-          ownerType: input.task.ownerType,
-          ownerPublicId: input.task.ownerPublicId,
-          actorPublicId: input.task.actorPublicId,
-          taskPublicId: input.task.taskPublicId,
-        }),
+        and(
+          createPersonalAiGenerationTaskLookupCondition({
+            ownerType: input.task.ownerType,
+            ownerPublicId: input.task.ownerPublicId,
+            actorPublicId: input.task.actorPublicId,
+            taskPublicId: input.task.taskPublicId,
+          }),
+          createRunningAttemptCondition(input.task.attempt),
+        ),
       )
       .returning({ public_id: aiGenerationTask.public_id });
 

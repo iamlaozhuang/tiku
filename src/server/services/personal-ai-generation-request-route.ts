@@ -19,6 +19,11 @@ import type {
 } from "../repositories/personal-ai-generation-request-repository";
 import { PersonalAiGenerationSnapshotConflictError } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import {
+  createPostgresAiGenerationTaskLifecycleRepository,
+  type AiGenerationTaskAttemptIdentity,
+  type AiGenerationTaskLifecycleRepository,
+} from "../repositories/ai-generation-task-lifecycle-repository";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type { AiPaperQuestionSourceRepository } from "../repositories/question-repository";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
@@ -28,6 +33,7 @@ import {
 } from "../contracts/ai-generation-task-spec-contract";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import { professionValues, type Profession } from "../models/auth";
+import type { AiGenerationTaskFailureCategory } from "../models/ai-generation-task";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
 import {
   createRouteHandlerWithErrorEnvelope,
@@ -103,6 +109,7 @@ export type PersonalAiGenerationRequestRouteDependencies = {
   >;
   authorizationRepository?: PersonalAiGenerationAuthorizationOwnershipRepository;
   now?: () => Date;
+  lifecycleRepository?: AiGenerationTaskLifecycleRepository;
 };
 
 const REQUEST_HISTORY_UNAVAILABLE_CODE = 500017;
@@ -794,15 +801,19 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
     | Pick<PersonalAiGenerationResultRepository, "createOrReuseDraftResult">
     | undefined;
   runtimeBridgeControl: PersonalAiGenerationRuntimeBridgeControl | undefined;
+  attempt: AiGenerationTaskAttemptIdentity | null;
 }): PersonalAiGenerationRuntimeBridgeControl | undefined {
   const resultRepository = input.resultRepository;
 
   if (
     input.runtimeBridgeControl === undefined ||
-    resultRepository === undefined
+    resultRepository === undefined ||
+    input.attempt === null
   ) {
     return input.runtimeBridgeControl;
   }
+
+  const attempt = input.attempt;
 
   return {
     ...input.runtimeBridgeControl,
@@ -865,7 +876,10 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
         persistDraftResult: async (resultInput) => {
           try {
             return createSuccessResponse(
-              await resultRepository.createOrReuseDraftResult(resultInput),
+              await resultRepository.createOrReuseDraftResult({
+                ...resultInput,
+                attempt,
+              }),
             );
           } catch {
             return createErrorResponse(
@@ -1024,6 +1038,9 @@ export function createPersonalAiGenerationRequestRouteHandlers(
     dependencies.effectiveAuthorizationService;
   const authorizationRepository = dependencies.authorizationRepository;
   const now = dependencies.now ?? (() => new Date());
+  const lifecycleRepository =
+    dependencies.lifecycleRepository ??
+    createPostgresAiGenerationTaskLifecycleRepository();
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
@@ -1191,11 +1208,12 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               );
             const serverOwnedRequestInput =
               createServerOwnedLocalBrowserRequestInput(authorizedRequestInput);
+            const requestedAt = now();
             const localBrowserRequestInput =
               await createRequestInputWithPersistentRequestMetadata(
                 serverOwnedRequestInput,
                 requestRepository,
-                now(),
+                requestedAt,
               );
 
             if (localBrowserRequestInput === "snapshot_conflict") {
@@ -1216,6 +1234,67 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               );
             }
 
+            const persistentInput = createPersistentRequestInput(
+              serverOwnedRequestInput,
+              requestedAt,
+            );
+            const persistedTaskPublicId =
+              typeof localBrowserRequestInput.taskPublicId === "string"
+                ? localBrowserRequestInput.taskPublicId
+                : null;
+
+            const requiresLifecycleClaim =
+              dependencies.runtimeBridgeControl !== undefined &&
+              (dependencies.runtimeBridgeControl.providerExecution !==
+                undefined ||
+                dependencies.runtimeBridgeControl.resultMaterialization !==
+                  undefined ||
+                dependencies.runtimeBridgeControl
+                  .createResultMaterialization !== undefined);
+
+            const lifecycleScope =
+              persistentInput === null || persistedTaskPublicId === null
+                ? null
+                : {
+                    taskPublicId: persistedTaskPublicId,
+                    ownerType: persistentInput.ownerType,
+                    ownerPublicId: persistentInput.ownerPublicId,
+                    organizationPublicId: persistentInput.organizationPublicId,
+                    taskTypes: [persistentInput.taskType],
+                  };
+
+            if (requiresLifecycleClaim && lifecycleScope === null) {
+              return createJsonResponse(
+                createErrorResponse(
+                  REQUEST_PERSISTENCE_UNAVAILABLE_CODE,
+                  REQUEST_PERSISTENCE_UNAVAILABLE_MESSAGE,
+                ),
+              );
+            }
+
+            const claimResult =
+              !requiresLifecycleClaim || lifecycleScope === null
+                ? null
+                : await lifecycleRepository.claimTask({
+                    ...lifecycleScope,
+                    claimedAt: requestedAt,
+                  });
+            const claimedRequestInput =
+              claimResult?.disposition === "claimed"
+                ? {
+                    ...localBrowserRequestInput,
+                    existingTaskPublicId: null,
+                    existingTaskStatus: null,
+                  }
+                : requiresLifecycleClaim && persistedTaskPublicId !== null
+                  ? {
+                      ...localBrowserRequestInput,
+                      existingTaskPublicId: persistedTaskPublicId,
+                      existingTaskStatus:
+                        claimResult?.task?.taskStatus ?? "running",
+                    }
+                  : localBrowserRequestInput;
+
             const runtimeBridgeControl =
               createRuntimeBridgeControlWithResultMaterialization({
                 createResultPublicId:
@@ -1228,14 +1307,49 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                   ),
                 resultRepository: dependencies.resultRepository,
                 runtimeBridgeControl: dependencies.runtimeBridgeControl,
+                attempt: claimResult?.attempt ?? null,
               });
 
-            return createJsonResponse(
+            const experienceResponse =
               await buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute(
-                localBrowserRequestInput,
+                claimedRequestInput,
                 { runtimeBridgeControl },
-              ),
-            );
+              ).catch(async () => {
+                if (
+                  claimResult?.disposition === "claimed" &&
+                  claimResult.attempt !== null &&
+                  lifecycleScope !== null
+                ) {
+                  await lifecycleRepository.failTask({
+                    ...lifecycleScope,
+                    attempt: claimResult.attempt,
+                    failureCategory: "system_error",
+                    finishedAt: now(),
+                  });
+                }
+
+                throw new Error("personal AI generation execution unavailable");
+              });
+
+            if (
+              claimResult?.disposition === "claimed" &&
+              claimResult.attempt !== null &&
+              lifecycleScope !== null &&
+              experienceResponse.data?.resultState.status === "failed"
+            ) {
+              await lifecycleRepository.failTask({
+                ...lifecycleScope,
+                attempt: claimResult.attempt,
+                failureCategory:
+                  resolvePersonalAiGenerationLifecycleFailureCategory(
+                    experienceResponse.data.runtimeBridge
+                      .providerExecutionSummary.failureCategory,
+                  ),
+                finishedAt: now(),
+              });
+            }
+
+            return createJsonResponse(experienceResponse);
           }
 
           return createJsonResponse(
@@ -1245,6 +1359,138 @@ export function createPersonalAiGenerationRequestRouteHandlers(
       ),
     },
   });
+}
+
+type PersonalAiGenerationCancelRouteContext = {
+  params: Promise<{ publicId: string }>;
+};
+
+function createNoStorePersonalAiGenerationResponse(
+  response: ApiResponse<unknown>,
+  status: number,
+): Response {
+  return Response.json(response, {
+    status,
+    headers: { "cache-control": "no-store" },
+  });
+}
+
+export function createPersonalAiGenerationTaskCancelRouteHandler(
+  resolveUserContext: PersonalAiGenerationRequestUserResolver,
+  dependencies: Pick<
+    PersonalAiGenerationRequestRouteDependencies,
+    | "authorizationRepository"
+    | "effectiveAuthorizationService"
+    | "lifecycleRepository"
+    | "now"
+  > = {},
+) {
+  const lifecycleRepository =
+    dependencies.lifecycleRepository ??
+    createPostgresAiGenerationTaskLifecycleRepository();
+  const now = dependencies.now ?? (() => new Date());
+
+  return async (
+    request: Request,
+    context: PersonalAiGenerationCancelRouteContext,
+  ): Promise<Response> => {
+    const userContext = await resolveRequiredUserContext(
+      request,
+      resolveUserContext,
+    );
+
+    if (!isPersonalAiGenerationRequestUserContext(userContext)) {
+      return createNoStorePersonalAiGenerationResponse(userContext, 401);
+    }
+
+    const body = await readRequestJson(request);
+    const requestInput = isRecord(body) ? body : {};
+    const taskType = normalizePersonalAiGenerationTaskType(
+      normalizeOptionalText(requestInput.taskType),
+    );
+    const currentAuthorization =
+      await resolvePersonalAiGenerationAuthorizationContext({
+        requestInput,
+        userContext,
+        effectiveAuthorizationService:
+          dependencies.effectiveAuthorizationService,
+        authorizationRepository: dependencies.authorizationRepository,
+      });
+    const { publicId } = await context.params;
+    const taskPublicId = normalizeRequiredText(publicId);
+
+    if (
+      currentAuthorization === null ||
+      taskPublicId === null ||
+      taskType === null ||
+      taskType === undefined
+    ) {
+      return createNoStorePersonalAiGenerationResponse(
+        createErrorResponse(
+          PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_CODE,
+          PERSONAL_AI_GENERATION_AUTHORIZATION_UNAVAILABLE_MESSAGE,
+        ),
+        403,
+      );
+    }
+
+    const cancellation = await lifecycleRepository.cancelTask({
+      taskPublicId,
+      ownerType: currentAuthorization.ownerType,
+      ownerPublicId: currentAuthorization.ownerPublicId,
+      organizationPublicId: currentAuthorization.organizationPublicId,
+      taskTypes: [taskType],
+      finishedAt: now(),
+    });
+
+    if (cancellation.task === null) {
+      return createNoStorePersonalAiGenerationResponse(
+        createErrorResponse(404001, "AI generation task was not found."),
+        404,
+      );
+    }
+
+    return createNoStorePersonalAiGenerationResponse(
+      createSuccessResponse({
+        taskPublicId: cancellation.task.taskPublicId,
+        status: cancellation.task.taskStatus,
+        failureCategory: cancellation.task.failureCategory,
+        retryCount: cancellation.task.retryCount,
+        canRetry: cancellation.task.canRetry,
+        canCancel: cancellation.task.canCancel,
+        cancellationEffect:
+          "Prevents result persistence or continued adoption; remote Provider cost or transmission may already have occurred.",
+        redactionStatus: "redacted",
+      }),
+      200,
+    );
+  };
+}
+
+function resolvePersonalAiGenerationLifecycleFailureCategory(
+  failureCategory: string | null,
+): AiGenerationTaskFailureCategory {
+  if (failureCategory === "timeout") {
+    return "network_error";
+  }
+
+  if (failureCategory === "provider_error") {
+    return "provider_temporary_error";
+  }
+
+  if (failureCategory === "missing_provider_credential") {
+    return "configuration_missing";
+  }
+
+  if (failureCategory === "insufficient_grounding_evidence") {
+    return "rag_temporary_error";
+  }
+
+  if (failureCategory === "provider_call_blocked") {
+    return "production_enablement_blocked";
+  }
+
+  return "system_error";
 }
 
 export function createUnavailablePersonalAiGenerationRequestUserResolver(): PersonalAiGenerationRequestUserResolver {

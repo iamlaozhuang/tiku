@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
+  currentTaskId: p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -302,7 +302,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     - p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
     - p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
+    - p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
     - p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
     - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
@@ -507,12 +509,88 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22: closed
     p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22: closed
     p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22: closed
-    p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22: in_progress
+    p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22: closed
+    p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22: verified_ready_for_conditional_closeout
 activeTasks:
+  - id: p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
+    title: AI generation task lifecycle recovery
+    phase: p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: database_application_logic_and_bounded_task_cancellation_recovery
+    productClosureContribution: closes_F0149_if_full_contract_GREEN
+    branch: fix/ai-generation-task-lifecycle-recovery
+    objective: persist one CAS-protected running failed cancelled retried timed-out and atomically-succeeded lifecycle for admin and personal AI generation
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-07
+    findingIds:
+      - F-0149
+    executionStage: verified_ready_for_conditional_closeout
+    findingStatus: verified_static_product_closure_pending_atomic_closeout
+    findingDisposition: F0149_verified_closed_by_shared_CAS_lifecycle_owner_scoped_cancel_and_atomic_result_completion_F0148_remains_separate_blocked
+    riskBoundary:
+      category: database_application_logic_and_bounded_task_cancellation_recovery
+      approvalId: guardian-f0149-ai-generation-task-lifecycle-recovery-2026-07-22
+      approvedBaseSha: 3c7c1b2568d7658a9adb5e6bdc82978b31136e1f
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      providerOrRealExternalCall: false
+      dependencyChange: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: UI_to_authenticated_route_to_canonical_task_to_CAS_attempt_to_Provider_to_failure_or_atomic_result_terminal_state_to_history
+      coreFiles: 32
+      contingencyFiles: 4
+      preflightTestFiles: 15
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: production_routes_do_not_consume_the_existing_lifecycle_fields_and_admin_success_is_still_a_double_write
+      residualDisposition: F0148_requires_fresh_user_Cost_Calibration_and_quota_SSOT_decision
+    pendingApproval:
+      fingerprint: 119f13cbbf10da21bd6687c3743612826e11c44b128c7476b890cc58beb71b9b
+      status: satisfied_for_conditional_closeout
+    validationEvidence:
+      focused: 15_files_317_tests_GREEN_plus_repository_route_UI_and_lifecycle_regressions
+      lint: targeted_GREEN_zero_warnings
+      typecheck: tsc_noEmit_GREEN
+      build: next_production_build_GREEN_with_preexisting_NFT_warning
+      adversarialReview: GREEN_single_shared_CAS_state_machine_exact_attempt_identity_two_retry_limit_five_minute_stale_boundary_60_second_provider_timeout_atomic_result_completion_owner_surface_cancel_no_sensitive_failure
+      prohibitedScope: no_schema_migration_real_database_quota_entitlement_Provider_dependency_or_mechanism_change
+    expectedAcceptance:
+      - created_tasks_persist_running_before_Provider_or_paper_assembly
+      - failures_persist_redacted_category_retry_count_and_finished_time
+      - admin_and_personal_result_plus_succeeded_state_are_atomic_and_attempt_CAS_protected
+      - same_canonical_intent_retries_only_retryable_failed_or_five_minute_stale_running_work_at_most_twice
+      - only_the_authorized_owner_surface_can_cancel_and_late_success_is_rejected
+      - history_and_UI_expose_safe_lifecycle_and_retry_state_without_sensitive_content
+      - no_schema_migration_real_database_quota_entitlement_Provider_dependency_or_mechanism_change
+    closeoutProjection:
+      current: verified_ready_for_kernel_commit_ff_only_canonical_push_sync_and_cleanup
+      triggers: approval_then_TDD_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0149_closed_then_resume_RC07_with_F0148_still_product_decision_blocked
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 1_guardian_task_bound_request
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 1
+      productValueTime: JIT_revalidation_and_authoritative_chain_freeze
+      mechanismOverhead: task_contract_state_update_and_single_guardian_request
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
+      findingIds:
+        - F-0025
+      commit: 3c7c1b2568d7658a9adb5e6bdc82978b31136e1f
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
   - id: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
     title: AI generation pre-provider idempotency claim
     phase: p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: bounded_database_application_logic_provider_adapter_pure_logic_and_low_risk_UI
     productClosureContribution: closes_F0025
@@ -522,9 +600,9 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-07
     findingIds:
       - F-0025
-    executionStage: candidate_validated_pending_kernel_commit_ff_only_push_sync_cleanup
-    findingStatus: validated_candidate_pending_closeout
-    findingDisposition: F0025_provider_idempotency_partition_validated_F0148_quota_and_F0149_full_lifecycle_remain_separate
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed
+    findingDisposition: F0025_closed_F0148_quota_and_F0149_full_lifecycle_remain_separate
     riskBoundary:
       category: bounded_database_application_logic_provider_adapter_pure_logic_and_low_risk_UI
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
@@ -558,10 +636,10 @@ activeTasks:
       - raw_client_intent_is_scoped_to_owner_and_selected_authorization
       - no_schema_migration_real_database_quota_permission_real_Provider_dependency_or_mechanism_change
     closeoutProjection:
-      current: candidate_validated_pending_kernel_commit_ff_only_push_sync_cleanup
+      current: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       triggers: TDD_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
       successProjection: F0025_closed_then_continue_RC07_residual_queue
-      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+      terminalEvidence: commit_3c7c1b2568d7658a9adb5e6bdc82978b31136e1f_master_origin_synced_clean_branch_removed
     executionMetrics:
       mandatoryFreshApprovals: 0_covered_by_bounded_medium_standing_approval
       preventableScopeMissApprovals: 0

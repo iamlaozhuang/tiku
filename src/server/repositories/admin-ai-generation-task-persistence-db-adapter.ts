@@ -18,7 +18,11 @@ import type {
   AdminAiGenerationLocalContractRuntimeStatus,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
-import type { AiGenerationTaskStatus } from "../models/ai-generation-task";
+import {
+  aiGenerationTaskFailureCategoryValues,
+  type AiGenerationTaskFailureCategory,
+  type AiGenerationTaskStatus,
+} from "../models/ai-generation-task";
 import type {
   AiGenerationTaskRequestAuthorizationSource,
   AiGenerationTaskRequestOwnerType,
@@ -49,6 +53,10 @@ export type AdminAiGenerationTaskPersistenceDbRow = {
   workspace: string;
   generation_kind: string;
   task_status: string;
+  retry_count: number;
+  failure_category: string | null;
+  started_at: Date | null;
+  finished_at: Date | null;
   requested_at: Date;
   authorization_source: string;
   authorization_public_id: string;
@@ -90,6 +98,10 @@ const adminAiGenerationTaskPersistenceDbSelection = {
   workspace: adminAiGenerationTaskMetadata.workspace,
   generation_kind: adminAiGenerationTaskMetadata.generation_kind,
   task_status: aiGenerationTask.task_status,
+  retry_count: aiGenerationTask.retry_count,
+  failure_category: aiGenerationTask.failure_category,
+  started_at: aiGenerationTask.started_at,
+  finished_at: aiGenerationTask.finished_at,
   requested_at: aiGenerationTask.requested_at,
   authorization_source: adminAiGenerationTaskMetadata.authorization_source,
   authorization_public_id: aiGenerationTask.authorization_public_id,
@@ -378,6 +390,10 @@ export function mapAdminAiGenerationTaskPersistenceDbRowToRow(
     workspace: toAdminAiGenerationWorkspace(row.workspace),
     generation_kind: toAdminAiGenerationKind(row.generation_kind),
     task_status: toAiGenerationTaskStatus(row.task_status),
+    retry_count: row.retry_count,
+    failure_category: toFailureCategory(row.failure_category),
+    started_at: row.started_at,
+    finished_at: row.finished_at,
     requested_at: row.requested_at,
     authorization_source: toAuthorizationSource(row.authorization_source),
     authorization_public_id: row.authorization_public_id,
@@ -459,6 +475,24 @@ function toAiGenerationTaskStatus(value: string): AiGenerationTaskStatus {
   }
 
   throw new Error("invalid AI generation task status.");
+}
+
+function toFailureCategory(
+  value: string | null,
+): AiGenerationTaskFailureCategory | null {
+  if (value === null) {
+    return null;
+  }
+
+  const category = aiGenerationTaskFailureCategoryValues.find(
+    (candidate) => candidate === value,
+  );
+
+  if (category === undefined) {
+    throw new Error("invalid AI generation task failure category.");
+  }
+
+  return category;
 }
 
 function toAuthorizationSource(

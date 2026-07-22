@@ -119,10 +119,22 @@ function createGateway(options: {
     async () => options.existingRow ?? null,
   );
   const findTaskByPublicId = vi.fn(async () => options.taskRow ?? null);
-  const insertDraftResult = vi.fn(
-    async () => options.insertedRow ?? createResultRow(),
-  );
-  const attachResultToTask = vi.fn(async () => undefined);
+  const insertDraftResult = vi.fn(async (...args: unknown[]) => {
+    void args;
+    return options.insertedRow ?? createResultRow();
+  });
+  const attachResultToTask = vi.fn(async (...args: unknown[]) => {
+    void args;
+  });
+  const insertDraftResultAndCompleteTask = vi.fn(async (input) => {
+    const row = await insertDraftResult(input);
+
+    if (row !== null) {
+      await attachResultToTask(input);
+    }
+
+    return row;
+  });
 
   const gateway: AdminAiGenerationResultPersistenceGateway = {
     listResultRows,
@@ -130,6 +142,7 @@ function createGateway(options: {
     findResultByTaskPublicId,
     findTaskByPublicId,
     insertDraftResult,
+    insertDraftResultAndCompleteTask,
     attachResultToTask,
   };
 
@@ -140,11 +153,69 @@ function createGateway(options: {
     findResultByTaskPublicId,
     findTaskByPublicId,
     insertDraftResult,
+    insertDraftResultAndCompleteTask,
     attachResultToTask,
   };
 }
 
 describe("admin AI generation result persistence repository", () => {
+  it("persists result and succeeded attempt through one atomic gateway call", async () => {
+    const insertedRow = createResultRow();
+    const atomicComplete = vi.fn(async () => insertedRow);
+    const { gateway, insertDraftResult, attachResultToTask } = createGateway({
+      insertedRow,
+      taskRow: {
+        id: 701,
+        public_id: insertedRow.task_public_id,
+        request_public_id: insertedRow.request_public_id,
+        workspace: insertedRow.workspace,
+        owner_type: insertedRow.owner_type,
+        owner_public_id: insertedRow.owner_public_id,
+        organization_public_id: insertedRow.organization_public_id,
+        task_type: insertedRow.task_type,
+      },
+    });
+    const repository = createAdminAiGenerationResultPersistenceRepository({
+      ...gateway,
+      insertDraftResultAndCompleteTask: atomicComplete,
+    } as AdminAiGenerationResultPersistenceGateway & {
+      insertDraftResultAndCompleteTask: typeof atomicComplete;
+    });
+    const attempt = {
+      taskPublicId: insertedRow.task_public_id,
+      retryCount: 1,
+      startedAt: new Date("2026-07-22T12:05:00.123Z"),
+    };
+
+    await repository.createOrReuseDraftResult({
+      resultPublicId: insertedRow.public_id,
+      taskPublicId: insertedRow.task_public_id,
+      workspace: insertedRow.workspace,
+      generationKind: insertedRow.generation_kind,
+      ownerType: insertedRow.owner_type,
+      ownerPublicId: insertedRow.owner_public_id,
+      organizationPublicId: insertedRow.organization_public_id,
+      taskType: insertedRow.task_type,
+      contentRedactedSnapshot: insertedRow.content_redacted_snapshot,
+      contentDigest: insertedRow.content_digest,
+      contentPreviewMasked: insertedRow.content_preview_masked,
+      citationRedactedSnapshot: insertedRow.citation_redacted_snapshot,
+      evidenceStatus: insertedRow.evidence_status,
+      citationCount: insertedRow.citation_count,
+      aiCallLogPublicId: insertedRow.ai_call_log_public_id,
+      sourceQuestionPublicId: insertedRow.source_question_public_id,
+      sourcePaperPublicId: insertedRow.source_paper_public_id,
+      createdAt: insertedRow.created_at,
+      attempt,
+    });
+
+    expect(atomicComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ attempt }),
+    );
+    expect(insertDraftResult).not.toHaveBeenCalled();
+    expect(attachResultToTask).not.toHaveBeenCalled();
+  });
+
   it("builds workspace and owner scoped result history conditions", () => {
     const condition = createAdminAiGenerationResultHistoryCondition({
       workspace: "organization",
@@ -752,7 +823,7 @@ describe("admin AI generation result persistence repository", () => {
       gateway,
       findTaskByPublicId,
       insertDraftResult,
-      attachResultToTask,
+      insertDraftResultAndCompleteTask,
     } = createGateway({
       insertedRow,
       taskRow: {
@@ -791,6 +862,11 @@ describe("admin AI generation result persistence repository", () => {
       sourceQuestionPublicId: null,
       sourcePaperPublicId: null,
       createdAt: new Date("2026-06-26T21:30:00.000Z"),
+      attempt: {
+        taskPublicId: "admin_ai_generation_task_public_created",
+        retryCount: 0,
+        startedAt: new Date("2026-06-26T21:29:30.000Z"),
+      },
     });
 
     expect(findTaskByPublicId).toHaveBeenCalledWith({
@@ -807,16 +883,20 @@ describe("admin AI generation result persistence repository", () => {
         isFormalAdoptionBlocked: true,
       }),
     );
-    expect(attachResultToTask).toHaveBeenCalledWith({
-      workspace: "organization",
-      ownerType: "organization",
-      ownerPublicId: "organization_public_901",
-      taskPublicId: "admin_ai_generation_task_public_created",
-      resultPublicId: "admin_ai_generation_result_public_created",
-      evidenceStatus: "sufficient",
-      citationCount: 2,
-      aiCallLogPublicId: null,
-    });
+    expect(insertDraftResultAndCompleteTask).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workspace: "organization",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_901",
+        taskPublicId: "admin_ai_generation_task_public_created",
+        resultPublicId: "admin_ai_generation_result_public_created",
+        attempt: {
+          taskPublicId: "admin_ai_generation_task_public_created",
+          retryCount: 0,
+          startedAt: new Date("2026-06-26T21:29:30.000Z"),
+        },
+      }),
+    );
     expect(result).toMatchObject({
       persistenceStatus: "created",
       result: {

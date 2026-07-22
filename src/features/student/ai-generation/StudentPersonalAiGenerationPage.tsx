@@ -2922,12 +2922,14 @@ function StudentPersonalAiGenerationHistorySummary({
   historyState,
   historyRows,
   onChangePage,
+  onCancelTask,
   pagination,
   taskType,
 }: {
   historyState: StudentPersonalAiGenerationHistoryState;
   historyRows: PersonalAiGenerationRequestHistoryDto;
   onChangePage: (page: number) => void;
+  onCancelTask: (taskPublicId: string) => void;
   pagination: ApiPagination | null;
   taskType: StudentPersonalAiGenerationTaskType;
 }) {
@@ -2987,6 +2989,14 @@ function StudentPersonalAiGenerationHistorySummary({
             <dl>
               <ContractField label="状态" value={historyRow.status} />
               <ContractField
+                label="重试次数"
+                value={String(historyRow.retryCount ?? 0)}
+              />
+              <ContractField
+                label="失败类别"
+                value={historyRow.failureCategory ?? "无"}
+              />
+              <ContractField
                 label="请求时间"
                 value={formatLearnerDateTime(historyRow.requestedAt)}
               />
@@ -2999,6 +3009,21 @@ function StudentPersonalAiGenerationHistorySummary({
                 value={String(historyRow.citationCount)}
               />
             </dl>
+            {historyRow.canCancel === true ? (
+              <div className="border-border mt-2 flex flex-wrap items-center justify-between gap-2 border-t py-3">
+                <p className="text-text-secondary text-xs">
+                  取消只阻止结果落库或继续采用，不保证停止远端 Provider
+                  计费或传输。
+                </p>
+                <button
+                  className="border-border text-text-primary hover:bg-muted rounded-md border px-3 py-1.5 text-sm font-medium"
+                  type="button"
+                  onClick={() => onCancelTask(historyRow.taskPublicId)}
+                >
+                  取消任务
+                </button>
+              </div>
+            ) : null}
           </article>
         ))}
       </div>
@@ -4442,6 +4467,37 @@ export function StudentPersonalAiGenerationPage() {
     }
   }
 
+  async function handleCancelRequestTask(taskPublicId: string) {
+    if (
+      selectedAuthorizationContext === null ||
+      selectedAuthorizationPublicId === null
+    ) {
+      return;
+    }
+
+    const sessionRequestToken = readStudentSessionRequestToken();
+    const response = await fetchStudentApi(
+      `/api/v1/personal-ai-generation-requests/${encodeURIComponent(taskPublicId)}/cancel`,
+      sessionRequestToken,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          authorizationPublicId: selectedAuthorizationPublicId,
+          taskType: activeTaskType,
+          profession: selectedAuthorizationContext.profession,
+          level: selectedAuthorizationContext.level,
+        }),
+      },
+    );
+
+    if (response.code === 0) {
+      await handleChangeRequestHistoryPage(
+        requestHistoryPagination?.page ?? PERSONAL_AI_GENERATION_HISTORY_PAGE,
+      );
+    }
+  }
+
   async function handleChangeResultHistoryPage(page: number) {
     if (selectedAuthorizationPublicId === null) {
       return;
@@ -5071,6 +5127,9 @@ export function StudentPersonalAiGenerationPage() {
           historyState={historyState}
           historyRows={requestHistory}
           onChangePage={(page) => void handleChangeRequestHistoryPage(page)}
+          onCancelTask={(taskPublicId) =>
+            void handleCancelRequestTask(taskPublicId)
+          }
           pagination={requestHistoryPagination}
           taskType={activeTaskType}
         />

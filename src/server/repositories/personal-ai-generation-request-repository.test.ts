@@ -16,6 +16,7 @@ import {
 type RequestHistoryPersistenceRow =
   PersonalAiGenerationRequestPersistenceRow & {
     authorization_public_id: string;
+    owner_public_id: string;
   };
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
@@ -54,9 +55,15 @@ function createPersistenceRow(
     generation_constraint_snapshot: null,
     generation_snapshot_digest: null,
     owner_public_id: "student_public_301",
+    owner_type: "personal",
+    organization_public_id: null,
     actor_public_id: "student_public_301",
     authorization_public_id: "personal_auth_public_301",
     ...overrides,
+    retry_count: overrides.retry_count ?? 0,
+    failure_category: overrides.failure_category ?? null,
+    started_at: overrides.started_at ?? null,
+    finished_at: overrides.finished_at ?? null,
   };
 }
 
@@ -201,6 +208,42 @@ function createGateway(
 }
 
 describe("personal AI generation request repository", () => {
+  it("returns server-authoritative retry and cancellation projections", async () => {
+    const row = createPersistenceRow({
+      task_status: "failed",
+      retry_count: 2,
+      failure_category: "network_error",
+      started_at: new Date("2026-07-22T13:15:00.123Z"),
+      finished_at: new Date("2026-07-22T13:15:30.456Z"),
+    });
+    const repository = createPersonalAiGenerationRequestRepository({
+      async listRequestRows() {
+        return [row];
+      },
+      async findRequestByIdempotencyKey() {
+        return null;
+      },
+      async insertPendingRequest() {
+        return null;
+      },
+    });
+
+    const [historyItem] = await repository.listRequestHistory({
+      authorizationPublicId: row.authorization_public_id,
+      ownerType: "personal",
+      ownerPublicId: row.owner_public_id,
+    });
+
+    expect(historyItem).toMatchObject({
+      retryCount: 2,
+      failureCategory: "network_error",
+      startedAt: "2026-07-22T13:15:00.123Z",
+      finishedAt: "2026-07-22T13:15:30.456Z",
+      canRetry: false,
+      canCancel: false,
+    });
+  });
+
   it("canonicalizes equivalent generation input and binds task and authorization constraints into the digest", () => {
     const createEnvelope = (overrides: Record<string, unknown> = {}) =>
       createPersonalAiGenerationSnapshotEnvelope({

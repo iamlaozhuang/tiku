@@ -25,6 +25,7 @@ import type {
   AiPaperMatchQuality,
   AiPaperSelectedQuestionDto,
 } from "./ai-paper-plan-and-select-contract";
+import type { AiGenerationTaskAttemptIdentity } from "../repositories/ai-generation-task-lifecycle-repository";
 
 export type AdminAiGenerationOrganizationTrainingQuestionDraftPayload = {
   questions: OrganizationTrainingAdminQuestionDetailDto[];
@@ -55,7 +56,9 @@ export type AdminAiGenerationOrganizationTrainingPaperDraftPayload = {
 };
 
 export type CreateAdminAiGenerationResultInput =
-  AdminAiGenerationResultPersistenceInput;
+  AdminAiGenerationResultPersistenceInput & {
+    attempt?: AiGenerationTaskAttemptIdentity;
+  };
 
 export type AdminAiGenerationResultPersistenceRow = {
   id?: number;
@@ -126,7 +129,8 @@ export type FindAdminAiGenerationResultByTaskQuery = {
 };
 
 export type InsertAdminAiGenerationDraftResultInput =
-  CreateAdminAiGenerationResultInput & {
+  AdminAiGenerationResultPersistenceInput & {
+    attempt: AiGenerationTaskAttemptIdentity;
     aiGenerationTaskId: number;
     requestPublicId: string;
     resultStatus: Extract<AdminAiGenerationResultStatus, "draft">;
@@ -202,6 +206,9 @@ export type AdminAiGenerationResultPersistenceGateway = {
     query: FindAdminAiGenerationResultByTaskQuery,
   ): Promise<AdminAiGenerationResultTaskRow | null>;
   insertDraftResult(
+    input: InsertAdminAiGenerationDraftResultInput,
+  ): Promise<AdminAiGenerationResultPersistenceRow | null>;
+  insertDraftResultAndCompleteTask(
     input: InsertAdminAiGenerationDraftResultInput,
   ): Promise<AdminAiGenerationResultPersistenceRow | null>;
   attachResultToTask(

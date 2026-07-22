@@ -1,4 +1,6 @@
 import { createElement } from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   cleanup,
   fireEvent,
@@ -70,6 +72,7 @@ const resultHistoryTitle = "\u8bad\u7ec3\u7ed3\u679c\u5386\u53f2\u8bb0\u5f55";
 const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
 const localSessionUserPublicId = "user-dev-student";
+const workspaceRoot = process.cwd();
 
 const serverHistoryResponse = {
   code: 0,
@@ -1244,6 +1247,21 @@ beforeEach(() => {
 });
 
 describe("StudentPersonalAiGenerationPage", () => {
+  it("uses server-authoritative cancellation and states the Provider boundary accurately", () => {
+    const source = readFileSync(
+      join(
+        workspaceRoot,
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("historyRow.canCancel === true");
+    expect(source).toContain("/${encodeURIComponent(taskPublicId)}/cancel");
+    expect(source).toContain("不保证停止远端 Provider");
+    expect(source).not.toContain("Date.now() - historyRow");
+  });
+
   it.each([
     {
       roleName: "standard personal learner",

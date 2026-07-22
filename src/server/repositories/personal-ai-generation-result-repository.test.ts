@@ -100,6 +100,11 @@ function createAtomicPersistenceInput(
       evidenceStatus: row.evidence_status,
       citationCount: row.citation_count,
       aiCallLogPublicId: row.ai_call_log_public_id,
+      attempt: {
+        taskPublicId: row.task_public_id,
+        retryCount: 1,
+        startedAt: new Date("2026-07-22T12:05:00.123Z"),
+      },
     },
   };
 }
@@ -604,6 +609,11 @@ describe("personal AI generation result repository", () => {
       citationCount: 1,
       aiCallLogPublicId: null,
       createdAt: new Date("2026-06-13T13:30:00.000Z"),
+      attempt: {
+        taskPublicId: "ai_generation_task_public_existing",
+        retryCount: 0,
+        startedAt: new Date("2026-06-13T13:29:00.123Z"),
+      },
     });
 
     expect(result.persistenceStatus).toBe("reused");
@@ -654,6 +664,11 @@ describe("personal AI generation result repository", () => {
       citationCount: 2,
       aiCallLogPublicId: null,
       createdAt: new Date("2026-06-13T14:00:00.000Z"),
+      attempt: {
+        taskPublicId: "ai_generation_task_public_created",
+        retryCount: 1,
+        startedAt: new Date("2026-06-13T13:59:00.123Z"),
+      },
     });
 
     expect(findTaskByPublicId).toHaveBeenCalledWith({
@@ -680,6 +695,11 @@ describe("personal AI generation result repository", () => {
           evidenceStatus: "sufficient",
           citationCount: 2,
           aiCallLogPublicId: null,
+          attempt: {
+            taskPublicId: "ai_generation_task_public_created",
+            retryCount: 1,
+            startedAt: new Date("2026-06-13T13:59:00.123Z"),
+          },
         },
       }),
     );
