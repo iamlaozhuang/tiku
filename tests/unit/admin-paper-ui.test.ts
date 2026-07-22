@@ -16,6 +16,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { AdminPaperManagement } from "@/features/admin/paper-management/AdminPaperManagement";
+import { AdminPaperDetailPage } from "@/features/admin/paper-management/AdminPaperDetailPage";
 
 const adminSessionPayload = {
   code: 0,
@@ -934,5 +935,105 @@ describe("AdminPaperManagement", () => {
     );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("dev/paper-asset");
+  });
+
+  it("downloads a paper_asset only from its protected public-id endpoint on explicit click", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const asset = {
+      publicId: "paper-asset-public-001",
+      paperPublicId: "paper-public-001",
+      paperAttachmentUsage: "paper_source",
+      fileName: "controlled-source.pdf",
+      contentType: "application/pdf",
+      fileSizeByte: 19,
+      fileHash: "a".repeat(64),
+      createdAt: "2026-05-24T04:20:00.000Z",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/papers/paper-public-001") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              paper: {
+                publicId: "paper-public-001",
+                name: "受控附件试卷",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                paperStatus: "draft",
+                paperType: "mock_paper",
+                year: 2026,
+                month: 5,
+                sourceDescription: null,
+                sourceRegion: null,
+                sourceOrganization: null,
+                questionBasis: null,
+                generationMethod: "manual",
+                durationMinute: 90,
+                totalScore: "0.0",
+                questionCount: 0,
+                revision: 1,
+                paperSections: [],
+                questionGroups: [],
+                publishedAt: null,
+                archivedAt: null,
+                createdAt: "2026-05-24T04:20:00.000Z",
+                updatedAt: "2026-05-24T04:20:00.000Z",
+              },
+            },
+          });
+        }
+
+        if (path.startsWith("/api/v1/paper-assets?")) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: [asset],
+          });
+        }
+
+        if (path === "/api/v1/paper-assets/paper-asset-public-001/download") {
+          return new Response(new Blob(["private paper bytes"]), {
+            status: 200,
+            headers: { "content-type": "application/pdf" },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminPaperDetailPage, { publicId: "paper-public-001" }),
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "下载" }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/paper-assets/paper-asset-public-001/download",
+        expect.objectContaining({
+          cache: "no-store",
+          credentials: "same-origin",
+        }),
+      ),
+    );
+    const downloadCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).endsWith("/download"),
+    );
+    expect(new Headers(downloadCall?.[1]?.headers).get("authorization")).toBe(
+      "Bearer unit-test-admin-token",
+    );
+    expect(JSON.stringify(downloadCall)).not.toContain("object_key");
+    expect(JSON.stringify(downloadCall)).not.toContain("fileHash");
   });
 });

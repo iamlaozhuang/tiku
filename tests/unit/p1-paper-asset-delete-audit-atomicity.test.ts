@@ -50,7 +50,43 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
 
     expect(deleteStart).toBeGreaterThan(-1);
     expect(deleteSource).toContain("database.transaction(async (transaction)");
+    expect(deleteSource).toContain("inArray(");
+    expect(deleteSource).toContain('eq(paper.paper_status, "draft")');
     expect(deleteSource).toContain("await appendPaperAssetDeleteAuditLog(");
+  });
+
+  it("does not write a success audit when the atomic draft-owner delete matches nothing", async () => {
+    const returning = vi.fn(async () => []);
+    const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({ where: vi.fn(() => ({ sql: "draft-owner" })) })),
+      })),
+      delete: vi.fn(() => ({
+        where: vi.fn(() => ({ returning })),
+      })),
+      insert: vi.fn(),
+    };
+    const transaction = vi.fn(
+      async (callback: (database: unknown) => Promise<unknown>) =>
+        callback(transactionDatabase),
+    );
+    const repository = createPostgresPaperAssetRepository({
+      createDatabase: () => ({ transaction }) as never,
+    });
+
+    await expect(
+      repository.deletePaperAsset("paper-asset-public-1", {
+        actorPublicId: "admin-public-1",
+        auditLog: {
+          actorRole: "content_admin",
+          actionType: "paper_asset.delete",
+          metadataSummary: "redacted paper_asset mutation metadata",
+          requestIp: null,
+        },
+      }),
+    ).resolves.toBe(false);
+    expect(returning).toHaveBeenCalledOnce();
+    expect(transactionDatabase.insert).not.toHaveBeenCalled();
   });
 
   it("writes only a fixed redacted paper_asset success projection", () => {
@@ -76,6 +112,9 @@ describe("F-0031 paper_asset delete database audit atomicity partition", () => {
       { public_id: "paper-asset-public-1" },
     ]);
     const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({ where: vi.fn(() => ({ sql: "draft-owner" })) })),
+      })),
       delete: vi.fn(() => ({
         where: vi.fn(() => ({ returning })),
       })),

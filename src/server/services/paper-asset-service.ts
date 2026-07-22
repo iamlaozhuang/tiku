@@ -18,6 +18,7 @@ import {
 import {
   type PaperAssetCreateMutationContext,
   type PaperAssetDeleteMutationContext,
+  type PaperAssetAccessRow,
   type PaperAssetRepository,
 } from "../repositories/paper-asset-repository";
 import { professionValues, type Profession } from "../models/paper";
@@ -40,6 +41,7 @@ export type PaperAssetService = {
   getPaperAsset(
     publicId: string,
   ): Promise<ApiResponse<PaperAssetResultDto | null>>;
+  getPaperAssetDownload(publicId: string): Promise<PaperAssetAccessRow | null>;
   deletePaperAsset(
     publicId: string,
   ): Promise<ApiResponse<PaperAssetDeleteResultDto | null>>;
@@ -322,6 +324,10 @@ export function createPaperAssetService(
       return createSuccessResponse(mapPaperAssetResultToApi(paperAsset));
     },
 
+    async getPaperAssetDownload(publicId) {
+      return paperAssetRepository.findPaperAssetByPublicId(publicId);
+    },
+
     async deletePaperAsset(publicId) {
       if (options.deleteMutationContext === undefined) {
         throw new Error("Paper asset delete requires mutation audit context.");
@@ -362,6 +368,9 @@ export function createUnavailablePaperAssetService(): PaperAssetService {
         PAPER_ASSET_RUNTIME_UNAVAILABLE_CODE,
         "Paper asset runtime is not configured.",
       );
+    },
+    async getPaperAssetDownload() {
+      return null;
     },
     async deletePaperAsset() {
       return createErrorResponse(

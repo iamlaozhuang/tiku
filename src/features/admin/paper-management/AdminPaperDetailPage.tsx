@@ -17,6 +17,7 @@ import {
   AdminLoadingState,
   AdminSurfaceStatus,
   AdminUnauthorizedState,
+  createAdminAuthHeaders,
   fetchAdminApi,
   formatScope,
   getStoredSessionToken,
@@ -335,9 +336,11 @@ function PaperStructure({ paper }: { paper: PaperDraftDto }) {
 
 function PaperAttachments({
   assets,
+  onDownload,
   status,
 }: {
   assets: PaperAssetDto[];
+  onDownload: (asset: PaperAssetDto) => void;
   status: "ready" | "error";
 }) {
   return (
@@ -373,10 +376,19 @@ function PaperAttachments({
                   </p>
                 </div>
               </div>
-              <p className="text-text-muted text-xs sm:text-right">
-                {formatFileSize(asset.fileSizeByte)} ·{" "}
-                {formatDateTime(asset.createdAt)}
-              </p>
+              <div className="flex items-center gap-3 sm:justify-end">
+                <p className="text-text-muted text-xs sm:text-right">
+                  {formatFileSize(asset.fileSizeByte)} ·{" "}
+                  {formatDateTime(asset.createdAt)}
+                </p>
+                <button
+                  className="border-border text-text-primary hover:bg-muted rounded-md border px-3 py-1.5 text-xs font-medium"
+                  onClick={() => onDownload(asset)}
+                  type="button"
+                >
+                  下载
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -387,6 +399,37 @@ function PaperAttachments({
 
 export function AdminPaperDetailPage({ publicId }: { publicId: string }) {
   const [state, setState] = useState<PaperDetailState>({ status: "loading" });
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  async function handleDownload(asset: PaperAssetDto) {
+    setDownloadError(null);
+
+    try {
+      const response = await fetch(
+        `/api/v1/paper-assets/${encodeURIComponent(asset.publicId)}/download`,
+        {
+          cache: "no-store",
+          credentials: "same-origin",
+          headers: createAdminAuthHeaders(getStoredSessionToken()),
+        },
+      );
+
+      if (!response.ok) {
+        setDownloadError("原始文件暂不可下载，请稍后重试。");
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const downloadLink = document.createElement("a");
+
+      downloadLink.href = objectUrl;
+      downloadLink.download = asset.fileName;
+      downloadLink.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      setDownloadError("原始文件暂不可下载，请稍后重试。");
+    }
+  }
 
   useEffect(() => {
     let isActive = true;
@@ -576,7 +619,16 @@ export function AdminPaperDetailPage({ publicId }: { publicId: string }) {
       </section>
 
       <PaperStructure paper={paper} />
-      <PaperAttachments assets={assets} status={assetStatus} />
+      {downloadError === null ? null : (
+        <p className="text-destructive text-sm" role="alert">
+          {downloadError}
+        </p>
+      )}
+      <PaperAttachments
+        assets={assets}
+        onDownload={(asset) => void handleDownload(asset)}
+        status={assetStatus}
+      />
     </main>
   );
 }

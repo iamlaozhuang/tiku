@@ -52,6 +52,9 @@ function createService(): PaperAssetService {
         },
       };
     },
+    async getPaperAssetDownload() {
+      return null;
+    },
     async deletePaperAsset(publicId) {
       return {
         code: 0,

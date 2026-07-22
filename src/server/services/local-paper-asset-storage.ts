@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve, sep } from "node:path";
 
 import type { PaperAttachmentUsage, Profession } from "../models/paper";
@@ -29,6 +29,15 @@ export type PreparedLocalPaperAssetFile = StoredLocalPaperAssetMetadata & {
 export type StorePreparedLocalPaperAssetFileInput = {
   preparedFile: PreparedLocalPaperAssetFile;
   objectKey?: string;
+  storageRoot?: string;
+};
+
+export type ReadLocalPaperAssetFileInput = {
+  fileHash: string;
+  fileName: string;
+  fileSizeByte: number;
+  objectKey: string;
+  profession: Profession;
   storageRoot?: string;
 };
 
@@ -99,6 +108,63 @@ function resolveInsideStorageRoot(storageRoot: string, objectKey: string) {
   }
 
   return targetPath;
+}
+
+function isInsideResolvedRoot(resolvedRoot: string, targetPath: string) {
+  const rootPrefix = resolvedRoot.endsWith(sep)
+    ? resolvedRoot
+    : `${resolvedRoot}${sep}`;
+
+  return targetPath !== resolvedRoot && targetPath.startsWith(rootPrefix);
+}
+
+export async function readLocalPaperAssetFile({
+  fileHash,
+  fileName,
+  fileSizeByte,
+  objectKey,
+  profession,
+  storageRoot = defaultLocalUploadStorageRoot,
+}: ReadLocalPaperAssetFileInput): Promise<Buffer> {
+  const objectKeySegments = objectKey.split("/");
+  const expectedFileName = `${fileHash}.${normalizeExtension(fileName)}`;
+
+  if (
+    !/^[a-f0-9]{64}$/u.test(fileHash) ||
+    !Number.isSafeInteger(fileSizeByte) ||
+    fileSizeByte < 0 ||
+    objectKeySegments.length !== 5 ||
+    objectKeySegments[0] !== "dev" ||
+    objectKeySegments[1] !== "paper-asset" ||
+    objectKeySegments[2] !== profession ||
+    !/^\d{4}(?:0[1-9]|1[0-2])$/u.test(objectKeySegments[3] ?? "") ||
+    objectKeySegments[4] !== expectedFileName
+  ) {
+    throw new Error("Paper asset storage identity mismatch.");
+  }
+
+  const targetPath = resolveInsideStorageRoot(storageRoot, objectKey);
+  const canonicalRoot = await realpath(resolve(storageRoot));
+  const canonicalTarget = await realpath(targetPath);
+
+  if (!isInsideResolvedRoot(canonicalRoot, canonicalTarget)) {
+    throw new Error("Paper asset storage target escaped storage root.");
+  }
+
+  const targetStats = await stat(canonicalTarget);
+
+  if (!targetStats.isFile()) {
+    throw new Error("Paper asset storage target is not a file.");
+  }
+
+  const bytes = await readFile(canonicalTarget);
+  const actualHash = createHash("sha256").update(bytes).digest("hex");
+
+  if (bytes.byteLength !== fileSizeByte || actualHash !== fileHash) {
+    throw new Error("Paper asset storage integrity mismatch.");
+  }
+
+  return bytes;
 }
 
 export async function storeLocalPaperAssetFile({

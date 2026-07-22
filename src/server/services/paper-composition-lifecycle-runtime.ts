@@ -24,7 +24,10 @@ import {
   type PaperAttachmentUsage,
   type Profession,
 } from "../models/paper";
-import { prepareLocalPaperAssetFile } from "./local-paper-asset-storage";
+import {
+  prepareLocalPaperAssetFile,
+  readLocalPaperAssetFile,
+} from "./local-paper-asset-storage";
 import { createPaperAssetService } from "./paper-asset-service";
 import { createPaperDraftService } from "./paper-draft-service";
 import {
@@ -65,6 +68,7 @@ export type PaperCompositionLifecycleRuntimeRepositories = {
 
 export type PaperCompositionLifecycleRuntimeOptions = {
   localPaperAssetStorageRoot?: string;
+  readPaperAssetFile?: typeof readLocalPaperAssetFile;
   repositories?: PaperCompositionLifecycleRuntimeRepositories;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
@@ -80,6 +84,38 @@ const adminPermissionDeniedResponse = createErrorResponse(
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
+}
+
+function createNoStoreJsonResponse<TData>(
+  response: ApiResponse<TData>,
+): Response {
+  return Response.json(response, {
+    headers: { "Cache-Control": "no-store" },
+  });
+}
+
+function isSafePaperAssetPublicId(publicId: string): boolean {
+  return /^[A-Za-z0-9][A-Za-z0-9_-]{0,199}$/u.test(publicId);
+}
+
+function createSafeAttachmentDisposition(fileName: string): string {
+  const leafName =
+    fileName
+      .split(/[\\/]/u)
+      .at(-1)
+      ?.replace(/[\u0000-\u001f\u007f]/gu, "") ?? "";
+  const fallback =
+    leafName
+      .normalize("NFKD")
+      .replace(/[^A-Za-z0-9._-]+/gu, "_")
+      .replace(/^\.+/u, "")
+      .slice(0, 120) || "paper-asset";
+  const encoded = encodeURIComponent(leafName || "paper-asset").replace(
+    /[!'()*]/gu,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}`;
 }
 
 function isContentAdminRole(role: string): role is ContentAdminRole {
@@ -922,6 +958,69 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
       },
     },
     paperAssets: {
+      download: {
+        async GET(request: Request, context: RouteContext): Promise<Response> {
+          const actorOrError = await requireContentAdminActor(request);
+
+          if ("code" in actorOrError) {
+            return createNoStoreJsonResponse(actorOrError);
+          }
+
+          const { publicId } = await context.params;
+
+          if (!isSafePaperAssetPublicId(publicId)) {
+            return createNoStoreJsonResponse(
+              createErrorResponse(404204, "Paper asset does not exist."),
+            );
+          }
+
+          const service = createPaperAssetServiceForActor(actorOrError);
+          let paperAsset;
+
+          try {
+            paperAsset = await service.getPaperAssetDownload(publicId);
+          } catch {
+            return createNoStoreJsonResponse(
+              createErrorResponse(503204, "Paper asset is unavailable."),
+            );
+          }
+
+          if (paperAsset === null) {
+            return createNoStoreJsonResponse(
+              createErrorResponse(404204, "Paper asset does not exist."),
+            );
+          }
+
+          try {
+            const readPaperAssetFile =
+              options.readPaperAssetFile ?? readLocalPaperAssetFile;
+            const bytes = await readPaperAssetFile({
+              fileHash: paperAsset.file_hash,
+              fileName: paperAsset.file_name,
+              fileSizeByte: paperAsset.file_size_byte,
+              objectKey: paperAsset.object_key,
+              profession: paperAsset.profession,
+              storageRoot: options.localPaperAssetStorageRoot,
+            });
+
+            return new Response(new Uint8Array(bytes), {
+              headers: {
+                "Cache-Control": "no-store",
+                "Content-Disposition": createSafeAttachmentDisposition(
+                  paperAsset.file_name,
+                ),
+                "Content-Length": String(bytes.byteLength),
+                "Content-Type": paperAsset.content_type,
+                "X-Content-Type-Options": "nosniff",
+              },
+            });
+          } catch {
+            return createNoStoreJsonResponse(
+              createErrorResponse(503204, "Paper asset is unavailable."),
+            );
+          }
+        },
+      },
       collection: {
         async GET(request: Request): Promise<Response> {
           const actorOrError = await requireContentAdminActor(request);

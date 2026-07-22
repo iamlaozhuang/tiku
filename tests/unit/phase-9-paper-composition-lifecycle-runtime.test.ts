@@ -2,7 +2,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createPaperCompositionLifecycleRuntimeRouteHandlers,
@@ -151,6 +151,7 @@ function createPaperAsset(
     id: 401,
     public_id: "paper-asset-public-001",
     paper_public_id: "paper-public-001",
+    profession: "monopoly",
     paper_attachment_usage: "paper_source",
     file_name: "monopoly-theory.pdf",
     object_key:
@@ -901,5 +902,168 @@ describe("phase 9 paper composition lifecycle runtime", () => {
         }),
       }),
     ]);
+  });
+
+  it.each(["super_admin", "content_admin"] as const)(
+    "downloads private paper_asset bytes for the existing %s boundary",
+    async (role) => {
+      const bytes = Buffer.from("private paper bytes");
+      const repositories = createRepositories();
+      repositories.paperAssetRepository.findPaperAssetByPublicId = vi.fn(
+        async () =>
+          createPaperAsset({
+            file_hash: "a".repeat(64),
+            file_name: '../危险"\r\nname.pdf',
+            file_size_byte: bytes.byteLength,
+            object_key: `dev/paper-asset/monopoly/202605/${"a".repeat(64)}.pdf`,
+          }),
+      );
+      const readPaperAssetFile = vi.fn(async () => bytes);
+      const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+        readPaperAssetFile,
+        repositories,
+        sessionService: createSessionService(role),
+      });
+
+      const response = await handlers.paperAssets.download.GET(
+        new Request(
+          "http://localhost/api/v1/paper-assets/paper-asset-public-001/download",
+          { headers: { authorization: "Bearer admin-session-token" } },
+        ),
+        { params: Promise.resolve({ publicId: "paper-asset-public-001" }) },
+      );
+
+      expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(response.headers.get("content-type")).toBe("application/pdf");
+      expect(response.headers.get("content-length")).toBe(String(bytes.length));
+      expect(response.headers.get("content-disposition")).toMatch(
+        /^attachment; filename="[^"\r\n\\/]+"; filename\*=UTF-8''/u,
+      );
+      expect(response.headers.get("content-disposition")).not.toContain("危险");
+      expect(readPaperAssetFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fileHash: "a".repeat(64),
+          objectKey: `dev/paper-asset/monopoly/202605/${"a".repeat(64)}.pdf`,
+          profession: "monopoly",
+        }),
+      );
+    },
+  );
+
+  it.each([
+    ["anonymous", createSessionService("content_admin"), {}],
+    [
+      "ops_admin-only",
+      createSessionService("ops_admin"),
+      { authorization: "Bearer admin-session-token" },
+    ],
+    [
+      "student",
+      {
+        async getCurrentSession() {
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              session: { expiresAt: "2026-05-23T10:00:00.000Z" },
+              user: {
+                publicId: "student-public-001",
+                phone: "13800000001",
+                name: "Student",
+                userType: null,
+                status: "active" as const,
+                lockedUntilAt: null,
+                employeePublicId: null,
+                organizationPublicId: null,
+                adminPublicId: null,
+                adminRoles: [],
+              },
+            },
+          };
+        },
+      },
+      { authorization: "Bearer admin-session-token" },
+    ],
+  ] as const)(
+    "rejects %s before paper_asset metadata or storage access",
+    async (_label, sessionService, headers) => {
+      const repositories = createRepositories();
+      const findPaperAsset = vi.fn(async () => createPaperAsset());
+      const readPaperAssetFile = vi.fn(async () => Buffer.from("secret"));
+      repositories.paperAssetRepository.findPaperAssetByPublicId =
+        findPaperAsset;
+      const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+        readPaperAssetFile,
+        repositories,
+        sessionService,
+      });
+
+      const response = await handlers.paperAssets.download.GET(
+        new Request(
+          "http://localhost/api/v1/paper-assets/paper-asset-public-001/download",
+          { headers },
+        ),
+        { params: Promise.resolve({ publicId: "paper-asset-public-001" }) },
+      );
+
+      expect([401, 403]).toContain(((await response.json()).code / 1000) | 0);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(findPaperAsset).not.toHaveBeenCalled();
+      expect(readPaperAssetFile).not.toHaveBeenCalled();
+    },
+  );
+
+  it("fails closed for malformed IDs, missing metadata, and unavailable bytes", async () => {
+    const repositories = createRepositories();
+    const findPaperAsset = vi
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(createPaperAsset())
+      .mockRejectedValueOnce(new Error("database connection details"));
+    const readPaperAssetFile = vi.fn(async () => {
+      throw new Error("C:\\private\\absolute\\path");
+    });
+    repositories.paperAssetRepository.findPaperAssetByPublicId = findPaperAsset;
+    const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+      readPaperAssetFile,
+      repositories,
+      sessionService: createSessionService("content_admin"),
+    });
+    const request = () =>
+      new Request("http://localhost/api/v1/paper-assets/x/download", {
+        headers: { authorization: "Bearer admin-session-token" },
+      });
+
+    const malformed = await handlers.paperAssets.download.GET(request(), {
+      params: Promise.resolve({ publicId: "../escape" }),
+    });
+    const missing = await handlers.paperAssets.download.GET(request(), {
+      params: Promise.resolve({ publicId: "paper-asset-missing" }),
+    });
+    const unavailable = await handlers.paperAssets.download.GET(request(), {
+      params: Promise.resolve({ publicId: "paper-asset-corrupt" }),
+    });
+    const metadataUnavailable = await handlers.paperAssets.download.GET(
+      request(),
+      { params: Promise.resolve({ publicId: "paper-asset-db-error" }) },
+    );
+
+    expect(await malformed.json()).toMatchObject({ code: 404204, data: null });
+    expect(await missing.json()).toMatchObject({ code: 404204, data: null });
+    const unavailablePayload = await unavailable.json();
+    expect(unavailablePayload).toMatchObject({ code: 503204, data: null });
+    expect(await metadataUnavailable.json()).toMatchObject({
+      code: 503204,
+      data: null,
+    });
+    expect(
+      [malformed, missing, unavailable, metadataUnavailable].every(
+        (response) => response.headers.get("cache-control") === "no-store",
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(unavailablePayload)).not.toContain("private");
+    expect(findPaperAsset).toHaveBeenCalledTimes(3);
   });
 });

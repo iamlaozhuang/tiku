@@ -20,6 +20,7 @@ function createPaperAsset(
     id: 701,
     public_id: "paper_asset_public_123",
     paper_public_id: "paper_public_123",
+    profession: "logistics",
     paper_attachment_usage: "paper_source",
     file_name: "2026-logistics-skill.pdf",
     object_key:

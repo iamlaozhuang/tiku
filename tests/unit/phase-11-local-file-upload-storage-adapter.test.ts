@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -10,6 +10,7 @@ import {
   type PaperCompositionLifecycleRuntimeRepositories,
 } from "@/server/services/paper-composition-lifecycle-runtime";
 import {
+  readLocalPaperAssetFile,
   storeLocalPaperAssetFile,
   storeLocalResourceFile,
 } from "@/server/services/local-paper-asset-storage";
@@ -82,6 +83,7 @@ function createRepositories(
           id: 1,
           public_id: "paper-asset-local-upload-001",
           paper_public_id: preparedInput.paperPublicId,
+          profession: preparedInput.profession,
           paper_attachment_usage: preparedInput.paperAttachmentUsage,
           file_name: preparedInput.fileName,
           object_key: preparedInput.objectKey,
@@ -114,6 +116,84 @@ function createRepositories(
 }
 
 describe("phase 11 local file upload storage adapter", () => {
+  it("reads only an exact content-addressed paper_asset identity and verifies bytes", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-read-test-"));
+    const bytes = Buffer.from("controlled private bytes");
+    const fileHash = createHash("sha256").update(bytes).digest("hex");
+    const objectKey = `dev/paper-asset/marketing/202605/${fileHash}.pdf`;
+    const targetPath = join(storageRoot, ...objectKey.split("/"));
+
+    await mkdir(join(targetPath, ".."), { recursive: true });
+    await writeFile(targetPath, bytes);
+
+    await expect(
+      readLocalPaperAssetFile({
+        fileHash,
+        fileName: "source.pdf",
+        fileSizeByte: bytes.byteLength,
+        objectKey,
+        profession: "marketing",
+        storageRoot,
+      }),
+    ).resolves.toEqual(bytes);
+
+    for (const invalid of [
+      {
+        objectKey: `dev/paper-asset/marketing/202605/${fileHash.toUpperCase()}.pdf`,
+      },
+      { objectKey: `dev/paper-asset/marketing/${fileHash}.pdf` },
+      { objectKey: `dev/paper-asset/marketing/202613/${fileHash}.pdf` },
+      { objectKey: `dev/paper-asset/marketing/../202605/${fileHash}.pdf` },
+      { objectKey: `dev/paper-asset/logistics/202605/${fileHash}.pdf` },
+      { objectKey: `dev/paper-asset/marketing/202605/${fileHash}.txt` },
+      { fileHash: "0".repeat(64) },
+      { fileSizeByte: bytes.byteLength + 1 },
+    ]) {
+      await expect(
+        readLocalPaperAssetFile({
+          fileHash,
+          fileName: "source.pdf",
+          fileSizeByte: bytes.byteLength,
+          objectKey,
+          profession: "marketing",
+          storageRoot,
+          ...invalid,
+        }),
+      ).rejects.toThrow();
+    }
+  });
+
+  it("rejects a paper_asset real path that escapes through a directory link", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-read-root-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "tiku-read-outside-"));
+    const bytes = Buffer.from("outside private bytes");
+    const fileHash = createHash("sha256").update(bytes).digest("hex");
+    const outsideMonth = join(outsideRoot, "202605");
+    const linkedMonth = join(
+      storageRoot,
+      "dev",
+      "paper-asset",
+      "marketing",
+      "202605",
+    );
+
+    await mkdir(outsideMonth, { recursive: true });
+    await writeFile(join(outsideMonth, `${fileHash}.pdf`), bytes);
+    await mkdir(join(linkedMonth, ".."), { recursive: true });
+    await symlink(outsideMonth, linkedMonth, "junction");
+
+    await expect(
+      readLocalPaperAssetFile({
+        fileHash,
+        fileName: "source.pdf",
+        fileSizeByte: bytes.byteLength,
+        objectKey: `dev/paper-asset/marketing/202605/${fileHash}.pdf`,
+        profession: "marketing",
+        storageRoot,
+      }),
+    ).rejects.toThrow();
+  });
+
   it("stores uploaded paper_asset bytes under ignored runtime storage and returns metadata only", async () => {
     const storageRoot = await mkdtemp(join(tmpdir(), "tiku-upload-test-"));
     const fileBytes = new TextEncoder().encode("controlled local upload");

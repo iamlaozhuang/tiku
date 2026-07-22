@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
+  currentTaskId: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -275,6 +275,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
     - p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
     - p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
+    - p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -334,6 +335,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
     - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
     - p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+    - p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -428,77 +430,83 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21: closed
     p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21: closed
     p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21: closed
-    p1-remediation-rc-05-paper-structure-management-ui-2026-07-21: in_progress
+    p1-remediation-rc-05-paper-structure-management-ui-2026-07-21: closed
+    p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
-    title: Paper structure management UI
-    phase: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
+  - id: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
+    title: Paper asset retention and secure download foundation
+    phase: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0094_final_closure
-    branch: feat/paper-structure-management-ui
-    objective: expose the stable paper_section and question_group commands in the existing draft composer with container lifecycle, ordering, subtotal and compatible membership controls, then close F-0094
+    productClosureContribution: F-0096_secure_read_and_retention_partial
+    branch: fix/paper-asset-retention-download
+    objective: add protected content-admin paper_asset byte download and draft-only attachment deletion without claiming the remaining usage ingestion or physical lifecycle closure
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-05
     findingIds:
-      - F-0094
-    executionStage: product_validated_adversarially_reviewed_preparing_atomic_closeout
-    findingStatus: acceptance_satisfied_pending_atomic_closeout
+      - F-0096
+    executionStage: candidate_validated_pending_conditional_closeout
+    findingStatus: open_partitioned
     riskBoundary:
-      category: low_risk_existing_admin_UI_consumer
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      category: existing_content_admin_private_file_read_capability_and_database_retention_contraction
+      approvalId: guardian-f0096-private-download-retention-foundation-2026-07-21
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
+      newProtectedReadEndpoint: true
+      localPrivateFileRead: true
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: AdminPaperComposerPage_to_existing_paper_section_and_question_group_routes_to_validated_foundation
-      coreFiles: 4
-      contingencyFiles: 2
+      chain: AdminPaperDetailPage_to_nested_protected_download_route_to_paper_asset_service_repository_and_local_content_addressed_storage
+      coreFiles: 9
+      contingencyFiles: 7
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      requirements: module_02_container_lifecycle_order_subtotal_and_draft_group_membership
-      confirmedResidualRootCause: backend_foundation_is_complete_but_composer_still_addresses_sections_by_sort_order_and_exposes_no_container_or_membership_commands
+      testOnlyExpansionFiles:
+        - src/server/services/paper-asset-route.test.ts
+      testOnlyExpansionReason: PaperAssetService direct route mock must implement the same-task private download method; no product scope expansion
+      requirements: module_02_content_admin_download_learner_non_exposure_and_published_attachment_retention
+      confirmedResidualRootCause: upload_saga_is_durable_but_private_bytes_have_no_authorized_read_path_and_delete_does_not_bind_owner_paper_status
     expectedAcceptance:
-      - draft_composer_manages_section_create_rename_reorder_and_empty_delete_by_public_identity
-      - draft_composer_manages_group_rename_reorder_empty_delete_and_compatible_question_membership
-      - material_group_and_section_subtotals_and_real_hierarchy_are_visible
-      - published_and_archived_papers_remain_read_only_and_no_public_id_entry_is_added
-      - backend_schema_permissions_and_learner_snapshots_remain_unchanged
-    closeoutProjection:
-      current: product_validated_adversarially_reviewed_preparing_atomic_closeout
-      triggers: focused_lint_typecheck_build_and_adversarial_review_green_with_exact_diff
-      successProjection: F0094_closed_single_commit_ff_only_master_canonical_push_sync_cleanup_then_next_P1
-      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
-    verificationEvidence:
-      tddRed: expected_2_missing_structure_management_interaction_failures
-      focusedAndAffectedRegression: pass_22_of_22_across_2_files
-      lint: pass_changed_composer_and_interaction_test
-      typecheck: pass_tsc_noEmit
-      build: pass_next_build_100_static_pages
-      formatAndDiff: pass_targeted_prettier_and_git_diff_check
-      e2e: not_required_interactions_covered_by_real_DOM_focused_tests_and_no_browser_only_contract
-      mainThreadAdversarialReview: pass_stable_identity_exact_set_order_draft_only_empty_delete_material_compatibility_orphan_visibility_no_public_id_entry_no_permission_backend_schema_or_snapshot_change
-    metrics:
-      mandatoryFreshApprovals: 0_low_risk_standing_closeout
+      - only_existing_super_admin_and_content_admin_actor_boundary_can_download_by_paper_asset_public_id
+      - download_stream_is_no_store_nosniff_and_safe_attachment_with_metadata_or_byte_absence_fail_closed
+      - paper_asset_object_key_remains_server_private_and_directory_escape_is_rejected
+      - metadata_delete_is_allowed_only_for_draft_owner_and_published_or_archived_retention_fails_closed
+      - F0096_remains_open_for_usage_ingestion_and_durable_physical_delete_followups
+    validationEvidence:
+      tddRed: read_function_absent_and_atomic_draft_owner_predicate_absent
+      focused: pass_7_files_46_tests
+      lint: pass
+      typecheck: pass
+      build: pass_100_static_pages_and_protected_download_route_present
+      formatAndDiff: pass
+      adversarialReview: pass_auth_before_metadata_and_storage_exact_identity_realpath_hash_size_safe_headers_atomic_draft_delete_no_entitlement_expansion
+    residualBoundary:
+      findingStatus: open_partitioned
+      unresolved: six_usage_completion_streaming_size_type_ingestion_gates_and_durable_physical_file_lifecycle_outbox_reference_count
+    executionMetrics:
+      mandatoryFreshApprovals: 1_guardian_task_bound_conditional_closeout
       preventableScopeMissApprovals: 0
-      testOnlyExpansions: 0
+      testOnlyExpansions: 1_direct_service_route_mock
       candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: 24m_TDD_structure_hierarchy_lifecycle_membership_and_regression
-      mechanismOverhead: 4m_contract_state_validation_and_closeout_preparation
+      approvalWaitTurns: 1
       guardSmokeChanges: 0
+    closeoutProjection:
+      current: candidate_validated_pending_conditional_closeout
+      triggers: unchanged_final_index_then_single_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0096_residual
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     previousTaskCloseout:
-      taskId: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+      taskId: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
       findingId: F-0094
-      productClosureContribution: F-0094_backend_foundation_only
-      commit: b91f6e0aa0520bda0a4f64cca5ed405146324dc9
-      candidateTree: 41e1a142b2561116f9ccd7a4242798a950177548
+      productClosureContribution: F-0094_final_closure
+      commit: f42a9fed040025ebb463881c1767fc13c99329c8
+      candidateTree: 680f8e595babdba29eeeb1e695d40f98dafae19c
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: guardian-f0094-paper-structure-foundation-2026-07-21
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

@@ -1,14 +1,24 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-paper-structure-management-ui-2026-07-21",
-  "objective": "Close F-0094 by making the existing paper composer consume the stable paper_section and question_group command APIs: provide draft-only section create, rename, reorder and empty-delete controls; expose question_group identity, rename, reorder, empty-delete and system subtotal; and move a question between a compatible material group or standalone section without public-id entry controls. Preserve published/archived read-only behavior and do not change backend, schema, permissions or learner snapshots.",
+  "taskId": "p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21",
+  "objective": "Implement the independently verifiable F-0096 secure-read and retention partition without claiming finding closure: allow only the existing super_admin/content_admin paper-asset boundary to download an existing private local paper_asset by public ID with no-store, nosniff, exact content type and safe attachment disposition; fail closed when metadata or bytes are missing; expose the action in the content-admin paper detail; and prohibit paper_asset metadata deletion unless the owning paper is still draft. Do not change attachment usage values, upload limits, physical deletion/outbox, schema or migration in this partition.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/paper-composer/AdminPaperComposerPage.tsx",
-    "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-    "tests/unit/admin-paper-ui.test.ts"
+    "src/server/services/local-paper-asset-storage.ts",
+    "src/server/repositories/paper-asset-repository.ts",
+    "src/server/services/paper-asset-service.ts",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
+    "src/app/api/v1/paper-assets/[publicId]/download/route.ts",
+    "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+    "src/server/services/paper-asset-service.test.ts",
+    "src/server/services/paper-asset-route.test.ts",
+    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/admin-paper-ui.test.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -20,34 +30,46 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "schema, migration or persistent database access",
-    "backend route, service, repository or contract changes",
-    "published or archived paper mutation",
-    "question, material or scoring snapshot rewrite",
-    "permission or entitlement change",
-    "learner snapshot or another independent finding",
-    "Provider, external service, secret/env, deployment, PR or force-push"
+    "schema, migration or persistent database execution",
+    "paper_attachment_usage enum or glossary change",
+    "upload size/type policy or streaming ingestion change",
+    "physical file deletion, delete outbox or reference-count lifecycle",
+    "new role, entitlement, anonymous or learner download",
+    "dependency, Provider, external service, secret/env, deployment, PR or force-push",
+    "F-0097, F-0098 or another independent finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/paper-composer/AdminPaperComposerPage.tsx"
+    "src/server/services/local-paper-asset-storage.ts",
+    "src/server/repositories/paper-asset-repository.ts",
+    "src/server/services/paper-asset-service.ts",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
+    "src/app/api/v1/paper-assets/[publicId]/download/route.ts",
+    "src/features/admin/paper-management/AdminPaperDetailPage.tsx"
   ],
   "contingencyFiles": [
-    "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-    "tests/unit/admin-paper-ui.test.ts"
+    "src/server/services/paper-asset-service.test.ts",
+    "src/server/services/paper-asset-route.test.ts",
+    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/admin-paper-ui.test.ts",
+    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCaller": "AdminPaperComposerPage already owns the draft, revision, authenticated fetch boundary and question edit lifecycle. The UI follow-up can consume the two collection command routes without another product layer.",
-    "routeServiceRepositorySchema": "The b91f6e0 foundation already provides strict draft/revision/ownership commands, stable identities, exact-set reorder, empty-only delete and membership compatibility. This task does not alter that authority.",
-    "tests": "AdminPaperComposerPage.test.tsx directly mocks all composer requests and is the focused interaction contract. admin-paper-ui.test.ts is the static affected regression named by validation.",
-    "requirements": "Module 02 and F-0094 require independently maintainable section names/descriptions/order, manageable material groups with child subtotal, membership moves and empty-container publication rejection.",
-    "scopeDecision": "Group creation in the UI is limited to an existing standalone material snapshot already in the paper; this avoids public-id entry and cannot introduce a material outside the paper. Existing add-by-material remains the entry for a new material and question."
+    "uiApiCaller": "AdminPaperDetailPage already receives the protected paper_asset list but only renders metadata. It is the direct content-admin read surface for an authenticated download action.",
+    "routeService": "The paper composition runtime already enforces super_admin/content_admin for paper_asset collection/detail. A nested GET download route can reuse exactly that actor boundary while keeping objectKey out of JSON DTOs.",
+    "repository": "findPaperAssetByPublicId already joins paper and returns private object metadata. deletePaperAsset currently deletes by asset ID alone; joining the owner and requiring paper.status=draft is the minimal retention guard.",
+    "storage": "Local storage already validates content-addressed object keys on write. The read path must resolve the same five-segment identity inside the configured root and stream bytes without exposing the key.",
+    "tests": "Existing service/runtime/storage/admin UI tests are the direct mocks and regression boundaries; delete audit static tests protect transactional audit behavior.",
+    "requirements": "Module 02 section 3.9 requires content-admin download, learner non-exposure and published attachment retention.",
+    "nonClaims": "F-0031 upload saga already covers durable create/replay. This task does not resolve the remaining six-purpose enum, ingestion size/type policy or durable physical deletion, so F-0096 stays open."
   },
   "validationCommands": [
     {
-      "name": "f0094-paper-structure-management-ui-focused",
+      "name": "f0096-paper-asset-retention-download-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -55,30 +77,39 @@
         "exec",
         "vitest",
         "run",
-        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-        "tests/unit/admin-paper-ui.test.ts"
+        "src/server/services/paper-asset-service.test.ts",
+        "src/server/services/paper-asset-route.test.ts",
+        "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "tests/unit/admin-paper-ui.test.ts",
+        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
+        "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
       ]
     },
     {
-      "name": "f0094-paper-structure-management-ui-lint",
+      "name": "f0096-paper-asset-retention-download-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/features/admin/paper-composer/AdminPaperComposerPage.tsx",
-        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx"
+        "src/server/services/local-paper-asset-storage.ts",
+        "src/server/repositories/paper-asset-repository.ts",
+        "src/server/services/paper-asset-service.ts",
+        "src/server/services/paper-composition-lifecycle-runtime.ts",
+        "src/app/api/v1/paper-assets/[publicId]/download/route.ts",
+        "src/features/admin/paper-management/AdminPaperDetailPage.tsx"
       ]
     },
     {
-      "name": "f0094-paper-structure-management-ui-typecheck",
+      "name": "f0096-paper-asset-retention-download-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0094-paper-structure-management-ui-build",
+      "name": "f0096-paper-asset-retention-download-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -87,40 +118,40 @@
   "approvalSources": {
     "dependency": null,
     "database": null,
-    "permission": null,
+    "permission": "guardian-f0096-private-download-retention-foundation-2026-07-21",
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "low_risk_existing_admin_ui_consumer",
+    "category": "existing_content_admin_private_file_read_capability_and_database_retention_contraction",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
+    "newProtectedReadEndpoint": true,
+    "localPrivateFileRead": true,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
   "applicableStandingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
-  "conditionalCloseout": true,
-  "validationEvidence": {
-    "tddRed": "2 expected failures for missing section and group management interactions",
-    "focusedAndAffectedRegression": "22/22 across AdminPaperComposerPage interaction and admin paper UI static regression",
-    "lint": "pass changed composer and interaction test",
-    "typecheck": "pass tsc --noEmit",
-    "build": "pass Next build with 100 static pages",
-    "formatAndDiff": "pass targeted Prettier and git diff check",
-    "adversarialReview": "pass stable identity, exact-set reorder, draft-only controls, empty-only deletion, material-compatible membership, orphan visibility, published read-only, no public-id entry and no backend/schema/permission/snapshot change"
+  "freshApproval": {
+    "approvalId": "guardian-f0096-private-download-retention-foundation-2026-07-21",
+    "requestFingerprint": "0443a5c9d78de709829fe78d365b90b931db58c43e5e32b5e5f799b2c97e76c6",
+    "baseSha": "f42a9fed040025ebb463881c1767fc13c99329c8",
+    "candidateTree": null,
+    "risk": "permission",
+    "conditionalCloseout": true
   },
+  "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingId": "F-0094",
-    "task": "paper structure management UI final closure",
-    "condition": "backend foundation b91f6e0 is closed and synced"
+    "findingId": "F-0096",
+    "task": "paper asset secure download and published retention foundation",
+    "condition": "F-0094 closed at f42a9fed; guardian task-bound permission approval is active; F-0096 remains open after this partial closeout"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "guardian-f0096-private-download-retention-foundation-2026-07-21"
   }
 }

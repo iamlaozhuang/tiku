@@ -21,6 +21,7 @@ export type PaperAssetAccessRow = {
   id: number;
   public_id: string;
   paper_public_id: string;
+  profession: Profession;
   paper_attachment_usage: PaperAttachmentUsage;
   file_name: string;
   object_key: string;
@@ -156,6 +157,7 @@ export function createPostgresPaperAssetRepository(
           id: paperAsset.id,
           public_id: paperAsset.public_id,
           paper_public_id: paper.public_id,
+          profession: paper.profession,
           paper_attachment_usage: paperAsset.paper_attachment_usage,
           file_name: paperAsset.file_name,
           object_key: paperAsset.object_key,
@@ -192,7 +194,18 @@ export function createPostgresPaperAssetRepository(
         const scopedDatabase = transaction as RuntimeDatabase;
         const [row] = await scopedDatabase
           .delete(paperAsset)
-          .where(eq(paperAsset.public_id, publicId))
+          .where(
+            and(
+              eq(paperAsset.public_id, publicId),
+              inArray(
+                paperAsset.paper_id,
+                scopedDatabase
+                  .select({ id: paper.id })
+                  .from(paper)
+                  .where(eq(paper.paper_status, "draft")),
+              ),
+            ),
+          )
           .returning({ public_id: paperAsset.public_id });
 
         if (row === undefined) {
@@ -596,6 +609,7 @@ async function findPaperAssetByPublicId(
       id: paperAsset.id,
       public_id: paperAsset.public_id,
       paper_public_id: paper.public_id,
+      profession: paper.profession,
       paper_attachment_usage: paperAsset.paper_attachment_usage,
       file_name: paperAsset.file_name,
       object_key: paperAsset.object_key,
@@ -621,6 +635,7 @@ async function findPaperAssetById(
       id: paperAsset.id,
       public_id: paperAsset.public_id,
       paper_public_id: paper.public_id,
+      profession: paper.profession,
       paper_attachment_usage: paperAsset.paper_attachment_usage,
       file_name: paperAsset.file_name,
       object_key: paperAsset.object_key,
