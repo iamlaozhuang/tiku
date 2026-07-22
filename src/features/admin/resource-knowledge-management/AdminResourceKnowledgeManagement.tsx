@@ -168,6 +168,8 @@ type UploadState = {
   title: string;
 };
 
+const localResourceMaxFileSizeByte = 50 * 1024 * 1024;
+
 type ToastMessage = {
   message: string;
   tone: "success" | "error";
@@ -1166,6 +1168,18 @@ export function AdminResourceKnowledgeManagement() {
           uploadState.file === null
             ? "请选择资料文件"
             : "请至少选择一个适用等级",
+        tone: "error",
+      });
+      return;
+    }
+
+    if (
+      !Number.isSafeInteger(uploadState.file.size) ||
+      uploadState.file.size < 0 ||
+      uploadState.file.size > localResourceMaxFileSizeByte
+    ) {
+      setToastMessage({
+        message: "文件过大，请压缩或拆分后上传",
         tone: "error",
       });
       return;

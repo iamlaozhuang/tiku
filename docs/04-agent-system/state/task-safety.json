@@ -1,20 +1,23 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-06-resource-private-download-2026-07-22",
-  "objective": "Close F-0090 by making resource downloadAvailable truthful and implementing a private original-file download addressed only by resource publicId for existing super_admin/content_admin users, with authorization before metadata or file access, strict resource object identity and realpath containment checks, size/hash verification, safe attachment headers, no-store responses, redacted audit, and a content-admin UI action. Preserve student/citation privacy and all upload, conversion, publish, index, permission, schema, and Provider semantics.",
+  "taskId": "p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22",
+  "objective": "Complete the F-0037 application-amplification foundation by rejecting resource uploads larger than 50 MiB before application-owned full-buffer duplication, content-addressed file persistence, upload-operation creation, parsing, catalog mutation, or success audit; use Content-Length only as an early fast-fail hint and authoritative File.size as the fail-closed post-multipart boundary, preserve exact-limit success, return a stable business error, add a matching content-admin client gate, and leave F-0037 open_partitioned for ingress streaming and concurrency residuals without changing format conversion, schema, authorization, dependencies, or other findings.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/app/api/v1/resources/[publicId]/download/route.ts",
     "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
     "src/server/services/local-paper-asset-storage.ts",
     "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-    "tests/unit/p1-resource-private-download.test.ts",
+    "tests/unit/p1-resource-upload-size-boundary.test.ts",
     "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
     "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-resource-knowledge-ui-layout.test.ts"
+    "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
+    "tests/unit/p1-resource-upload-saga.test.ts",
+    "tests/unit/p1-resource-private-download.test.ts",
+    "src/app/api/v1/resources/route.ts",
+    "src/server/services/local-text-document-parser.ts",
+    "tests/unit/phase-11-local-text-document-parser-boundary.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -29,36 +32,40 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "schema/migration, real database/data access, dependency, Provider, external service, secret/env, deployment, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke",
-    "new roles or entitlement, anonymous/student/ops_admin-only download, objectKey/path exposure, public URL, upload/conversion/publish/index mutation, physical delete, or other finding"
+    "dependency, custom multipart package, schema/migration, real database/data, permission expansion, Provider, external service, secret/env, deployment, PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke",
+    "DOCX/PPTX/PDF conversion, conversion queue/retry/delete lifecycle, total storage quota, public download, paper_asset/content_image upload, or other finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/app/api/v1/resources/[publicId]/download/route.ts",
     "src/server/services/rag-resource-knowledge-runtime.ts",
-    "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
     "src/server/services/local-paper-asset-storage.ts",
     "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
+    "tests/unit/p1-resource-upload-size-boundary.test.ts",
+    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
+    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
+    "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
+    "tests/unit/p1-resource-upload-saga.test.ts",
     "tests/unit/p1-resource-private-download.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
-    "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
-    "tests/unit/admin-resource-knowledge-ui-layout.test.ts"
+    "src/app/api/v1/resources/route.ts",
+    "src/server/services/local-text-document-parser.ts",
+    "tests/unit/phase-11-local-text-document-parser-boundary.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirements": "RAG module 6.5 and CONTENT-RES-UX-08 require private original-file download for authorized content staff while students see citation metadata only.",
-    "caller": "AdminResourceKnowledgeManagement currently renders downloadAvailable but has no executable download action.",
-    "route": "resources routes have no publicId download endpoint; the paper-asset download route provides the established private binary response pattern.",
-    "serviceRepository": "rag runtime already resolves super_admin/content_admin; repository can project the exact stored identity without exposing it to JSON.",
-    "storage": "local-paper-asset-storage already owns resource object-key creation but only exports a paper-asset-specific strict reader.",
-    "rootCause": "The capability flag was added without the authorization, private byte-delivery, and UI command path needed to make it truthful."
+    "requirements": "RAG module 6.3 and US-05-03 require a 50 MiB single-resource limit and a stable too-large error.",
+    "caller": "AdminResourceKnowledgeManagement currently advertises the limit but submits any selected File.",
+    "route": "The resources route delegates directly to the runtime collection POST without an ingress size gate.",
+    "service": "uploadLocalResource calls request.formData and then prepareLocalResourceFile before any size decision.",
+    "storage": "prepareLocalResourceFile calls file.arrayBuffer and computes the content identity; storePreparedLocalResourceFile then persists it.",
+    "parser": "parseLocalTextDocumentAsset checks size only after persistence and classifies oversized content as conversion_failed success.",
+    "rootCause": "The 50 MiB invariant is owned by the downstream parser rather than the upload command and storage-preparation boundary."
   },
   "validationCommands": [
     {
-      "name": "f0090-resource-private-download-focused-test",
+      "name": "f0037-resource-upload-size-focused-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -66,43 +73,43 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-resource-private-download.test.ts",
+        "tests/unit/p1-resource-upload-size-boundary.test.ts",
         "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
         "tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts",
         "tests/unit/admin-resource-knowledge-ui-layout.test.ts",
+        "tests/unit/p1-resource-upload-saga.test.ts",
+        "tests/unit/p1-resource-private-download.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "f0090-resource-private-download-lint",
+      "name": "f0037-resource-upload-size-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/app/api/v1/resources/[publicId]/download/route.ts",
         "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
         "src/server/services/local-paper-asset-storage.ts",
         "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-private-download.test.ts"
+        "tests/unit/p1-resource-upload-size-boundary.test.ts"
       ]
     },
     {
-      "name": "f0090-resource-private-download-typecheck",
+      "name": "f0037-resource-upload-size-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0090-resource-private-download-build",
+      "name": "f0037-resource-upload-size-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
     },
     {
-      "name": "f0090-resource-private-download-format",
+      "name": "f0037-resource-upload-size-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -113,60 +120,74 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/app/api/v1/resources/[publicId]/download/route.ts",
         "src/server/services/rag-resource-knowledge-runtime.ts",
-        "src/server/repositories/rag-resource-knowledge-runtime-repository.ts",
         "src/server/services/local-paper-asset-storage.ts",
         "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx",
-        "tests/unit/p1-resource-private-download.test.ts"
+        "tests/unit/p1-resource-upload-size-boundary.test.ts"
       ]
     }
   ],
   "approvalSources": {
     "dependency": null,
     "database": null,
-    "permission": "guardian-f0090-resource-private-download-2026-07-22",
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "permission_and_private_local_file_read",
+    "category": "private_local_file_upload_resource_exhaustion_boundary",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "realExternalCall": false,
-    "dependencyOrMechanismChange": false
+    "dependencyOrMechanismChange": false,
+    "requiresGuardianDecision": false
   },
   "standingApprovals": ["standing-test-only-allowlist-expansion-2026-07-21"],
+  "testOnlyExpansion": {
+    "approvalId": "standing-test-only-allowlist-expansion-2026-07-21",
+    "files": [
+      "tests/unit/p1-resource-upload-saga.test.ts",
+      "tests/unit/p1-resource-private-download.test.ts"
+    ],
+    "reason": "Guardian-mandated affected regressions for the unchanged upload saga/idempotency and F-0090 private download paths."
+  },
   "conditionalCloseout": true,
   "guardianApproval": {
-    "approvalId": "guardian-f0090-resource-private-download-2026-07-22",
-    "baseSha": "d9ee8408a9ab0a2a6655629ad5feef99d0df22e9",
-    "requestFingerprint": "guardian-f0090-resource-private-download-d9ee8408-envelope-v1-2026-07-22",
-    "securityContract": [
-      "authorize super_admin or content_admin before repository, file reader, or resource-specific audit access",
-      "locate only by normalized resource publicId and keep objectStoragePath, absolute path, contentHash, and internal errors private",
-      "validate exact dev/resource/profession/YYYYMM/sha256.extension identity, canonical realpath containment, regular-file type, size, and SHA-256",
-      "return only a complete no-store attachment with controlled MIME, safe Content-Disposition, exact length, and nosniff after redacted audit succeeds",
-      "keep anonymous, student, and ops_admin-only fail closed without repository or file access; do not support Range",
-      "UI uses only the protected encoded publicId route and revokes temporary blob URLs"
+    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
+    "approvalId": "guardian-f0037-application-upload-boundary-foundation-2026-07-22",
+    "baseSha": "69f96d855e175dab7e72263b98c47e1ad5e3b982",
+    "approvalFingerprint": "9e0cc567a8d6ff6ce033a7d45d9d7ca3a1573a3fc972aa2fe25b87b785a26390",
+    "approvalMode": "application_amplification_foundation_only_with_conditional_task_closeout",
+    "findingDisposition": "open_partitioned/application_amplification_closed_ingress_streaming_and_concurrency_residual",
+    "residuals": [
+      "missing or understated Content-Length can allow an oversized multipart body to reach framework formData parsing without a trusted streaming cap",
+      "concurrent individually valid uploads have no process or platform aggregate inbound memory and traffic budget",
+      "full closure requires a separately approved trusted deployment body cap, streaming upload protocol, or maintained streaming multipart parser"
     ],
     "invalidatedBy": [
-      "base or origin drift",
-      "file scope or risk expansion",
-      "new role, entitlement, schema, dependency, Provider, mechanism, or real data access",
-      "authorization after metadata access or inability to prove namespace, realpath, size, hash, and audit fail-closed behavior"
+      "dependency, deployment, upload protocol, file envelope, base, remote, or risk drift",
+      "oversized upload reaches arrayBuffer, file stream, persistence, repository, parser, catalog, or success audit",
+      "multipart overhead fast-fail rejects an exact-limit file"
     ]
   },
+  "validationEvidence": {
+    "tddRed": "1_pass_7_fail_before_implementation",
+    "focused": "pass_6_files_63_tests",
+    "lint": "pass_targeted_4_files",
+    "typecheck": "pass_tsc_noEmit",
+    "build": "pass_next_build_with_existing_NFT_warning",
+    "review": "pass_application_buffer_persistence_operation_parser_catalog_and_success_audit_fail_closed_while_raw_ingress_and_concurrency_residuals_remain_explicit"
+  },
   "resumeAnchor": {
-    "findingIds": ["F-0090"],
-    "task": "After guardian approval, implement and close the private resource download path, then resume the next separate RC-06 finding",
-    "condition": "no role or scope expansion, schema, real database, dependency, Provider, external service, upload/conversion mutation, public storage, mechanism, or unrelated finding"
+    "findingIds": ["F-0037"],
+    "task": "Close only the application-amplification foundation, preserve F-0037 open_partitioned with ingress streaming and concurrency residuals, then continue the P1 queue.",
+    "condition": "no dependency, schema, real database, permission, Provider, mechanism, conversion lifecycle, or other finding expansion"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22",
-    "findingIds": ["F-0086"],
-    "commit": "d9ee8408a9ab0a2a6655629ad5feef99d0df22e9",
+    "taskId": "p1-remediation-rc-06-resource-private-download-2026-07-22",
+    "findingIds": ["F-0090"],
+    "commit": "69f96d855e175dab7e72263b98c47e1ad5e3b982",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -175,6 +196,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0090-resource-private-download-2026-07-22"
+    "approvalId": "guardian-f0037-application-upload-boundary-foundation-2026-07-22"
   }
 }

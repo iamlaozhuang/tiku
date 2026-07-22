@@ -109,6 +109,7 @@ export type ReadLocalResourceFileResult = {
   contentType: string;
 };
 
+export const resourceUploadMaxFileSizeByte = 50 * 1024 * 1024;
 export const defaultLocalUploadStorageRoot = join(
   process.cwd(),
   ".runtime",
@@ -580,7 +581,21 @@ export async function prepareLocalResourceFile({
   "storageRoot"
 >): Promise<PreparedLocalResourceFile> {
   const fileName = normalizeFileName(inputFileName ?? file.name);
+
+  if (
+    !Number.isSafeInteger(file.size) ||
+    file.size < 0 ||
+    file.size > resourceUploadMaxFileSizeByte
+  ) {
+    throw new Error("Resource file is too large or has an invalid size.");
+  }
+
   const bytes = Buffer.from(await file.arrayBuffer());
+
+  if (bytes.byteLength !== file.size) {
+    throw new Error("Resource file size changed while being prepared.");
+  }
+
   const fileHash = createHash("sha256").update(bytes).digest("hex");
   const extension = normalizeExtension(fileName);
   const objectKey = [

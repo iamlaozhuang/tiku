@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-06-resource-private-download-2026-07-22
+  currentTaskId: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
   currentCandidateClusterId: P1-RC-06
   candidateClusterOrder:
     - P1-RC-01
@@ -292,6 +292,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
     - p1-remediation-rc-06-resource-private-download-2026-07-22
+    - p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -367,6 +368,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-question-detail-read-model-2026-07-22
     - p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22
     - p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22
+    - p1-remediation-rc-06-resource-private-download-2026-07-22
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -478,12 +480,88 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-question-detail-read-model-2026-07-22: closed
     p1-remediation-rc-06-chinese-rag-chunk-retrieval-2026-07-22: closed
     p1-remediation-rc-06-resource-markdown-lineage-guard-2026-07-22: closed
-    p1-remediation-rc-06-resource-private-download-2026-07-22: in_progress
+    p1-remediation-rc-06-resource-private-download-2026-07-22: closed
+    p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22: in_progress
 activeTasks:
+  - id: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+    title: Resource upload 50 MiB application boundary
+    phase: p1-remediation-rc-06-resource-upload-size-boundary-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: product_remediation
+    productClosureContribution: F-0037_application_amplification_foundation_partial
+    branch: fix/resource-upload-size-boundary
+    objective: reject resource uploads above 50 MiB before application buffer duplication persistence operations parsing catalog mutation or success audit
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-06
+    findingIds:
+      - F-0037
+    executionStage: validated_reviewed_conditional_closeout_ready
+    findingStatus: open_partitioned
+    riskBoundary:
+      category: private_local_file_upload_resource_exhaustion_boundary
+      approvalId: guardian-f0037-application-upload-boundary-foundation-2026-07-22
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      realExternalCall: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: content_admin_upload_to_resources_POST_to_uploadLocalResource_to_prepareLocalResourceFile_to_persistence_parser_repository_and_catalog
+      coreFiles: 12
+      contingencyFiles: 3
+      preflightTestFiles: 6
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: size_limit_is_owned_by_the_post_persistence_parser_instead_of_the_upload_command_and_storage_preparation_boundary
+      disposition: separate_from_F0082_conversion_state_machine_and_converter_implementation
+    expectedAcceptance:
+      - oversized_Content_Length_fast_fails_before_formData
+      - authoritative_File_size_fails_before_arrayBuffer_persistence_operation_parser_catalog_or_audit
+      - exact_limit_upload_remains_allowed_and_spoofed_or_missing_Content_Length_cannot_bypass_File_size
+      - UI_blocks_oversized_selection_and_server_remains_authoritative
+      - no_dependency_schema_real_database_permission_Provider_conversion_lifecycle_mechanism_or_other_finding_change
+    closeoutProjection:
+      current: validated_reviewed_conditional_closeout_ready
+      triggers: TDD_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: foundation_task_closed_while_F0037_remains_open_partitioned
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 1_guardian_task_bound_foundation_approved
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 1
+      productValueTime: 7m_TDD_implementation_focused_regression_and_adversarial_review
+      mechanismOverhead: 3m_contract_state_validation_and_closeout_preparation
+      guardSmokeChanges: 0
+      testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
+      testOnlyExpansionFiles: 2_guardian_mandated_resource_upload_saga_and_private_download_regressions
+    validationEvidence:
+      tddRed: 1_pass_7_fail_before_implementation
+      focused: pass_6_files_63_tests
+      lint: pass_targeted_4_files
+      typecheck: pass_tsc_noEmit
+      build: pass_next_build_with_existing_NFT_warning
+      review: pass_application_buffer_persistence_operation_parser_catalog_and_success_audit_fail_closed_while_raw_ingress_and_concurrency_residuals_remain_explicit
+    residualBoundary:
+      findingDisposition: open_partitioned/application_amplification_closed_ingress_streaming_and_concurrency_residual
+      unresolved:
+        - no_trusted_streaming_cap_before_framework_formData_when_Content_Length_is_missing_or_understated
+        - no_process_or_platform_aggregate_budget_for_concurrent_valid_uploads
+        - full_closure_requires_separately_approved_deployment_cap_streaming_protocol_or_maintained_parser
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-06-resource-private-download-2026-07-22
+      findingIds:
+        - F-0090
+      commit: 69f96d855e175dab7e72263b98c47e1ad5e3b982
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
   - id: p1-remediation-rc-06-resource-private-download-2026-07-22
     title: Private original resource download
     phase: p1-remediation-rc-06-resource-private-download-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: product_remediation
     productClosureContribution: F-0090
@@ -493,8 +571,8 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-06
     findingIds:
       - F-0090
-    executionStage: validated_reviewed_conditional_closeout_ready
-    findingStatus: ready_for_conditional_closeout
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed
     riskBoundary:
       category: permission_and_private_local_file_read
       approvalId: guardian-f0090-resource-private-download-2026-07-22
@@ -519,10 +597,10 @@ activeTasks:
       - UI_download_action_uses_only_the_protected_publicId_route
       - no_schema_real_database_dependency_Provider_entitlement_expansion_or_other_finding_change
     closeoutProjection:
-      current: validated_reviewed_conditional_closeout_ready
-      triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0090_closed_then_next_separate_RC06_finding_JIT
-      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+      current: actual_closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      triggers: satisfied
+      successProjection: realized
+      terminalEvidence: commit_69f96d855_master_origin_synced_clean_single_worktree_branch_removed_and_closeout_kernel_passed
     executionMetrics:
       mandatoryFreshApprovals: 1_task_bound_guardian_permission_and_private_file_read
       preventableScopeMissApprovals: 0
@@ -543,6 +621,14 @@ activeTasks:
       findingIds:
         - F-0086
       commit: d9ee8408a9ab0a2a6655629ad5feef99d0df22e9
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
+    closeout:
+      commit: 69f96d855e175dab7e72263b98c47e1ad5e3b982
+      candidateTree: cb6e6714ccfe98d5ba90ebec1b50ecaae7a22b7b
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       masterOriginSync: pass
       worktreeClean: true

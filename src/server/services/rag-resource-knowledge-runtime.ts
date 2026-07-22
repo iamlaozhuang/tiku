@@ -58,6 +58,7 @@ import {
   defaultLocalUploadStorageRoot,
   prepareLocalResourceFile,
   readLocalResourceFile,
+  resourceUploadMaxFileSizeByte,
   storePreparedLocalResourceFile,
   type StoredLocalResourceMetadata,
 } from "./local-paper-asset-storage";
@@ -175,7 +176,8 @@ type LocalResourceDetailDto = {
   markdownContentHash: string | null;
 };
 
-export const localResourceMaxFileSizeByte = 50 * 1024 * 1024;
+export const localResourceMaxFileSizeByte = resourceUploadMaxFileSizeByte;
+export const resourceMultipartOverheadAllowanceByte = 1024 * 1024;
 export const resourceMarkdownMaxContentSizeByte = 1024 * 1024;
 
 export type LocalResourceRagRetrievalInput = {
@@ -216,6 +218,10 @@ const knowledgeNodeNotFoundResponse = createErrorResponse(
 const validationFailedResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
   "Request validation failed.",
+);
+const resourceUploadTooLargeResponse = createErrorResponse(
+  413001,
+  "Resource file is too large.",
 );
 const knowledgeNodeMutationConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
@@ -651,6 +657,20 @@ function isUploadFile(value: unknown): value is File {
     typeof (value as { arrayBuffer?: unknown }).arrayBuffer === "function" &&
     typeof (value as { size?: unknown }).size === "number"
   );
+}
+
+function readTrustedMultipartFastFailLength(request: Request): number | null {
+  const contentLength = request.headers.get("content-length");
+
+  if (contentLength === null || !/^\d+$/u.test(contentLength)) {
+    return null;
+  }
+
+  const parsedLength = Number(contentLength);
+
+  return Number.isSafeInteger(parsedLength) && parsedLength >= 0
+    ? parsedLength
+    : null;
 }
 
 function createMarkdownContentHash(markdownContent: string) {
@@ -1380,8 +1400,22 @@ async function uploadLocalResource(input: {
     localResource: LocalResourceUploadSummary;
   } | null>
 > {
+  const contentLength = readTrustedMultipartFastFailLength(input.request);
+
+  if (
+    contentLength !== null &&
+    contentLength >
+      localResourceMaxFileSizeByte + resourceMultipartOverheadAllowanceByte
+  ) {
+    return {
+      response: resourceUploadTooLargeResponse,
+      successAuditLocation: "external",
+    };
+  }
+
   const formData = await input.request.formData();
   const fileValue = formData.get("file");
+  const uploadFiles = Array.from(formData.values()).filter(isUploadFile);
   const professionValue = formData.get("profession");
   const resourceTypeValue = formData.get("resourceType");
   const title = normalizeLocalResourceTitle(formData.get("title"));
@@ -1389,12 +1423,25 @@ async function uploadLocalResource(input: {
 
   if (
     !isUploadFile(fileValue) ||
+    uploadFiles.length !== 1 ||
+    uploadFiles[0] !== fileValue ||
     !isProfession(professionValue) ||
     !isResourceType(resourceTypeValue) ||
     levelList === null
   ) {
     return {
       response: validationFailedResponse,
+      successAuditLocation: "external",
+    };
+  }
+
+  if (
+    !Number.isSafeInteger(fileValue.size) ||
+    fileValue.size < 0 ||
+    fileValue.size > localResourceMaxFileSizeByte
+  ) {
+    return {
+      response: resourceUploadTooLargeResponse,
       successAuditLocation: "external",
     };
   }
@@ -2232,6 +2279,14 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
                 metadataSummary: "redacted resource upload metadata",
               },
             );
+          }
+
+          if (result.response.code === resourceUploadTooLargeResponse.code) {
+            return createPrivateNoStoreJsonResponse(result.response, 413);
+          }
+
+          if (result.response.code === validationFailedResponse.code) {
+            return createPrivateNoStoreJsonResponse(result.response, 422);
           }
 
           return createJsonResponse(result.response);
