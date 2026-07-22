@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
+currentPhase: p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
 updatedAt: "2026-07-22T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
+  currentTaskId: p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -553,7 +553,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
     - p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
     - p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
+    - p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
     - p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
     - p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22
     - p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
@@ -693,7 +695,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22: closed
     p1-remediation-rc-07-ai-generation-provider-idempotency-2026-07-22: closed
     p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22: closed
-    p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22: in_progress
+    p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22: closed
+    p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -882,68 +885,70 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
-  title: Model config connection test truthful static closure
-  phase: p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
+  id: p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
+  title: RAG grounding prompt isolation
+  phase: p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: state_only_static_product_closure
-  productClosureContribution: closes_F0035_without_product_code_change
-  branch: fix/model-config-connection-test-truthful-static-closure
+  taskKind: bounded_provider_adapter_pure_logic
+  productClosureContribution: closes_F0091
+  branch: fix/rag-grounding-prompt-isolation
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0035
+    - F-0091
   candidateRootCauseCluster: P1-RC-07
-  objective: prove production model_config connection tests cannot report local configuration readiness as Provider success
+  objective: separate trusted generation instructions from untrusted RAG grounding data across admin and personal Provider paths
   executionStage: verified_ready_for_conditional_closeout
   findingStatus: verified_static_product_closure_pending_atomic_closeout
-  findingDisposition: F0035_verified_closed_without_product_code_by_truthful_production_fail_closed_connection_test
+  findingDisposition: F0091_verified_closed_by_system_user_role_separation_and_data_only_grounding_payload
   riskBoundary:
-    category: state_only_static_product_closure
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    approvedBaseSha: 6b909abb811c3360df8f0a1800ab5a398c0bd56f
+    category: bounded_provider_adapter_pure_logic
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    approvedBaseSha: 4ecd682f16f488ba1f84609b4cc2b2092f03e6b8
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
+    providerConfigurationChange: false
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: production_POST_route_to_default_runtime_factory_to_shared_executor_to_truthful_failed_or_adapter_backed_succeeded_projection
-    coreFiles: 3
-    contingencyFiles: 6
-    preflightTestFiles: 2
+    chain: admin_or_personal_route_to_owner_preview_control_to_shared_instruction_builder_to_Qwen_system_and_prompt_to_structured_preview_and_server_owned_grounding_summary
+    coreFiles: 9
+    contingencyFiles: 3
+    preflightTestFiles: 6
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: current_master_since_7e8763731_removed_local_readiness_as_success_from_the_production_route
-    residualDisposition: F0036_and_F0091_remain_separate_confirmed_root_cause_reviews_F0148_blocked
+    confirmedRootCause: trusted_rules_and_raw_chunkText_are_concatenated_into_one_prompt_string
+    residualDisposition: F0103_prompt_registry_and_F0036_ai_call_log_lifecycle_are_separate
   pendingApproval:
-    fingerprint: none_low_risk_standing_closeout
+    fingerprint: none_bounded_provider_adapter_pure_logic_standing_closeout
     status: not_required
   validationEvidence:
-    focused: 2_files_18_tests_GREEN
+    red: 1_file_5_tests_failed_before_instruction_boundary_implementation
+    focused: 6_files_144_tests_GREEN
     lint: targeted_GREEN_zero_warnings
     typecheck: tsc_noEmit_GREEN
-    build: not_required_no_product_code_change
-    adversarialReview: GREEN_production_default_executor_null_missing_adapter_failed_sample_service_no_production_import
-    prohibitedScope: no_product_source_test_schema_dependency_permission_Provider_secret_or_mechanism_change
+    build: next_production_build_GREEN_with_preexisting_NFT_warning
+    adversarialReview: GREEN_admin_and_personal_generateText_system_prompt_separated_malicious_chunk_never_in_system_output_and_citation_projection_unchanged
+    prohibitedScope: no_Prompt_Registry_ai_call_log_real_Provider_credential_configuration_dependency_schema_permission_or_mechanism_change
   closeoutProjection:
     current: verified_ready_for_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-    triggers: focused_lint_typecheck_format_diff_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0035_closed_then_resume_RC07_residual_review
+    triggers: RED_GREEN_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0091_closed_then_resume_RC07_prompt_provenance_residual_review
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
     mandatoryFreshApprovals: 0
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: current_master_authoritative_path_and_characterization_review
-    mechanismOverhead: three_state_contract_updates_and_kernel
+    productValueTime: JIT_root_cause_and_TDD_implementation
+    mechanismOverhead: task_contract_state_update_and_kernel
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22
+    taskId: p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
     findingIds:
-      - F-0149
-    commit: 6b909abb811c3360df8f0a1800ab5a398c0bd56f
+      - F-0035
+    commit: 4ecd682f16f488ba1f84609b4cc2b2092f03e6b8
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: closed
     masterOriginSync: pass

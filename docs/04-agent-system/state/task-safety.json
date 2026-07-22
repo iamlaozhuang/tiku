@@ -1,18 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22",
-  "findingIds": ["F-0035"],
-  "objective": "Close F-0035 without product code changes by proving the production model_config connection-test route never reports local configuration readiness as Provider success: the production route uses the runtime factory default with no executor, the shared executor fails closed as provider_adapter_unavailable, and only an explicitly injected adapter can produce a succeeded health check.",
+  "taskId": "p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22",
+  "findingIds": ["F-0091"],
+  "objective": "Separate trusted AI generation system instructions from untrusted RAG grounding data for every admin and personal generation Provider path, mark and serialize citations as data-only input, preserve the existing structured output and citation projection, and fail closed without changing Provider configuration or making real external calls.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/app/api/v1/model-configs/[publicId]/test-connection/route.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "src/server/services/admin-ai-audit-log-ops-service.ts",
-    "src/server/services/model-config-connection-test-executor.ts",
-    "src/server/services/model-config-connection-test-executor.test.ts",
-    "tests/unit/p1-ai-governance-fail-closed.test.ts"
+    "src/server/services/route-integrated-provider-instruction-service.ts",
+    "src/server/services/route-integrated-provider-instruction-service.test.ts",
+    "src/server/services/admin-ai-generation-runtime-bridge-service.ts",
+    "src/server/services/admin-ai-generation-runtime-bridge-service.test.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+    "src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -25,47 +28,60 @@
     "pnpm-lock.yaml",
     "src/db/schema/**",
     "drizzle/**",
-    "all product source and test changes",
-    "Provider calls configuration credentials secret env dependency schema migration real database permission deployment PR force-push and non-canonical remote"
+    "all source and test files outside the exact allowedFiles list",
+    "Prompt Registry ai_call_log schema migration real database permission Provider configuration credential secret env real external call dependency deployment PR force-push and non-canonical remote"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/services/route-integrated-provider-instruction-service.ts",
+    "src/server/services/route-integrated-provider-instruction-service.test.ts",
+    "src/server/services/admin-ai-generation-runtime-bridge-service.ts",
+    "src/server/services/admin-ai-generation-runtime-bridge-service.test.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts"
   ],
   "contingencyFiles": [
-    "src/app/api/v1/model-configs/[publicId]/test-connection/route.ts",
-    "src/server/services/admin-ai-audit-log-runtime.ts",
-    "src/server/services/admin-ai-audit-log-ops-service.ts",
-    "src/server/services/model-config-connection-test-executor.ts",
-    "src/server/services/model-config-connection-test-executor.test.ts",
-    "tests/unit/p1-ai-governance-fail-closed.test.ts"
+    "src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts"
   ],
-  "branch": "fix/model-config-connection-test-truthful-static-closure",
+  "branch": "fix/rag-grounding-prompt-isolation",
   "preRedImpactScan": {
-    "authoritativeChain": "POST production route -> default runtime route-handler factory -> model_config lookup and secret reference -> shared connection-test executor -> truthful failed or adapter-backed succeeded projection -> redacted audit_log and ai_call_log",
+    "authoritativeChain": "admin or personal generation route -> owner-preview controlled runtime -> shared route-integrated instruction builder -> Qwen generateText system plus prompt boundary -> structured preview and server-owned grounding summary -> result persistence",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 3,
-    "contingencyFileCount": 6,
+    "coreFileCount": 9,
+    "contingencyFileCount": 3,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCauseDisposition": "covered_by_current_master_since_7e8763731: production assembly supplies no executor and therefore reports provider_adapter_unavailable instead of synthetic success; the succeeded sample service is not imported by production source",
-    "residualDisposition": {
-      "F-0035": "current_no_product_code_static_closure",
-      "F-0036": "separate_ai_call_log_generation_lifecycle_root_cause",
-      "F-0148": "separate_blocked_product_decision_cost_calibration_and_quota_SSOT"
+    "confirmedRootCause": "the shared instruction builder currently concatenates trusted rules and raw citation chunkText into one prompt string, so both admin and personal Qwen paths lose the system-versus-untrusted-data trust boundary",
+    "bundleDisposition": {
+      "F-0091": "current_confirmed_root_cause_task",
+      "F-0103": "separate_prompt_registry_and_version_provenance_root_cause",
+      "F-0036": "separate_ai_call_log_lifecycle_root_cause"
     }
   },
+  "securityContract": {
+    "trustedSystem": "Only fixed application-owned policy, task constraints, output schema, and explicit ignore-untrusted-instructions rules may enter the Provider system field.",
+    "untrustedPrompt": "Generation parameters and citations are serialized as one explicitly marked data-only payload in the Provider prompt field; citation text never enters the system field.",
+    "contentHandling": "Citation text is preserved as data, JSON escaped, bounded by existing retrieval limits, and cannot supply role, system, tool, or instruction fields.",
+    "output": "Existing structured preview validation and server-owned grounding summary remain authoritative; model output cannot invent persisted citation identity.",
+    "failure": "Missing or insufficient grounding continues to fail before Provider execution; no fallback may concatenate untrusted chunks back into trusted instructions.",
+    "scope": "No real Provider call, credential, model configuration, Prompt Registry, ai_call_log, schema, dependency, permission, or external behavior expansion."
+  },
   "acceptance": [
-    "the production test-connection route uses createAdminAiAuditLogRuntimeRouteHandlers with its default null executor",
-    "missing secret and missing Provider adapter return missing_secret or provider_adapter_unavailable and never succeeded",
-    "only an explicitly injected executor result can produce succeeded and its failures are redacted",
-    "the synthetic sample service has no production import path and cannot establish health truth",
-    "no product source test schema dependency permission Provider configuration secret env mechanism or remote boundary changes"
+    "admin and personal Qwen generateText calls use separate system and prompt fields",
+    "raw citation text and adversarial ignore-previous-instructions content appear only in the marked untrusted data prompt and never in the trusted system instruction",
+    "the trusted system instruction explicitly requires treating grounding content as data and ignoring embedded instructions",
+    "the untrusted payload contains only allowlisted generation parameters and citation metadata plus text with deterministic serialization",
+    "structured preview output contracts and server-owned citation projection remain unchanged",
+    "missing or insufficient grounding executes zero Provider calls",
+    "no Prompt Registry ai_call_log Provider configuration credential real external dependency schema permission or mechanism change"
   ],
   "validationCommands": [
     {
-      "name": "model-config-connection-truth-focused",
+      "name": "rag-grounding-prompt-isolation-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -73,35 +89,48 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/model-config-connection-test-executor.test.ts",
-        "tests/unit/p1-ai-governance-fail-closed.test.ts",
+        "src/server/services/route-integrated-provider-instruction-service.test.ts",
+        "src/server/services/admin-ai-generation-runtime-bridge-service.test.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+        "src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "model-config-connection-truth-lint",
+      "name": "rag-grounding-prompt-isolation-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/app/api/v1/model-configs/[publicId]/test-connection/route.ts",
-        "src/server/services/admin-ai-audit-log-runtime.ts",
-        "src/server/services/admin-ai-audit-log-ops-service.ts",
-        "src/server/services/model-config-connection-test-executor.ts",
-        "src/server/services/model-config-connection-test-executor.test.ts",
-        "tests/unit/p1-ai-governance-fail-closed.test.ts"
+        "src/server/services/route-integrated-provider-instruction-service.ts",
+        "src/server/services/route-integrated-provider-instruction-service.test.ts",
+        "src/server/services/admin-ai-generation-runtime-bridge-service.ts",
+        "src/server/services/admin-ai-generation-runtime-bridge-service.test.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
+        "src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts"
       ]
     },
     {
-      "name": "model-config-connection-truth-typecheck",
+      "name": "rag-grounding-prompt-isolation-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "model-config-connection-truth-format",
+      "name": "rag-grounding-prompt-isolation-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.34.4", "run", "build"]
+    },
+    {
+      "name": "rag-grounding-prompt-isolation-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -111,11 +140,17 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "docs/04-agent-system/state/task-safety.json",
+        "src/server/services/route-integrated-provider-instruction-service.ts",
+        "src/server/services/route-integrated-provider-instruction-service.test.ts",
+        "src/server/services/admin-ai-generation-runtime-bridge-service.ts",
+        "src/server/services/admin-ai-generation-runtime-bridge-service.test.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts"
       ]
     },
     {
-      "name": "model-config-connection-truth-diff-check",
+      "name": "rag-grounding-prompt-isolation-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -129,38 +164,40 @@
     "secretEnv": null
   },
   "standingApprovalIds": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "state_only_static_product_closure",
+    "category": "bounded_provider_adapter_pure_logic",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "providerOrRealExternalCall": false,
+    "providerConfigurationChange": false,
     "dependencyOrMechanismChange": false
   },
   "validationEvidence": {
-    "focused": "2_files_18_tests_GREEN",
+    "red": "1_file_5_tests_failed_before_instruction_boundary_implementation",
+    "focused": "6_files_144_tests_GREEN",
     "lint": "targeted_GREEN_zero_warnings",
     "typecheck": "tsc_noEmit_GREEN",
-    "format": "three_state_files_prettier_GREEN",
+    "build": "next_production_build_GREEN_with_preexisting_NFT_warning",
+    "format": "changed_files_prettier_GREEN",
     "diff": "git_diff_check_GREEN",
-    "stateContract": "strict_JSON_YAML_WIP_one_and_exact_three_file_diff_GREEN",
-    "adversarialReview": "GREEN_production_default_executor_null_missing_adapter_failed_sample_service_no_production_import",
-    "build": "not_required_no_product_code_change"
+    "stateContract": "strict_JSON_YAML_WIP_one_and_exact_nine_file_diff_GREEN",
+    "adversarialReview": "GREEN_admin_and_personal_generateText_system_prompt_separated_malicious_chunk_never_in_system_output_and_citation_projection_unchanged"
   },
   "conditionalCloseout": true,
   "closeoutConditions": [
-    "actual diff is limited to the three state contract files",
-    "focused regression lint typecheck format diff and main-thread adversarial review are green",
-    "production route default assembly and no-production-import evidence remain unchanged",
+    "actual diff remains an exact subset of allowedFiles",
+    "all focused regression lint typecheck build format diff and main-thread adversarial review are green",
+    "no Prompt Registry ai_call_log real Provider credential configuration dependency schema permission or mechanism scope appears",
     "one reviewable commit ff-only canonical push sync and cleanup"
   ],
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-ai-generation-task-lifecycle-recovery-2026-07-22",
-    "findingIds": ["F-0149"],
-    "commit": "6b909abb811c3360df8f0a1800ab5a398c0bd56f",
+    "taskId": "p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22",
+    "findingIds": ["F-0035"],
+    "commit": "4ecd682f16f488ba1f84609b4cc2b2092f03e6b8",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -168,12 +205,12 @@
   },
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
-    "currentFinding": "F-0035",
-    "nextResidualReview": "F-0036_and_F-0091_confirmed_root_cause_grouping"
+    "currentFinding": "F-0091",
+    "nextResidualReview": "F-0036_and_F-0103_prompt_provenance_and_ai_call_log_grouping"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

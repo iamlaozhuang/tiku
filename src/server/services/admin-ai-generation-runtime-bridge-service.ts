@@ -234,12 +234,14 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
       typeof AbortSignal.timeout === "function"
         ? AbortSignal.timeout(input.limits.timeoutMs)
         : undefined;
+    const instructions = createAdminRouteIntegratedInstruction(
+      input.requestContext,
+      input.groundingContext,
+    );
     const result = await generateText({
       model: providerModel,
-      prompt: createAdminRouteIntegratedInstruction(
-        input.requestContext,
-        input.groundingContext,
-      ),
+      system: instructions.systemInstruction,
+      prompt: instructions.untrustedDataPrompt,
       maxOutputTokens: input.limits.maxOutputTokens,
       maxRetries: input.limits.maxRetries,
       abortSignal,
@@ -312,7 +314,7 @@ function ensureAdminRouteIntegratedExecutionSummaryRedacted(input: {
 function createAdminRouteIntegratedInstruction(
   requestContext: AdminAiGenerationRouteIntegratedProviderRequestContext,
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
-): string {
+) {
   const workspaceLabel =
     requestContext.workspace === "content" ? "内容草稿评审" : "组织草稿";
 

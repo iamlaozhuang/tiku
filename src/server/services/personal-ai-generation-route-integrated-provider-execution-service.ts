@@ -234,12 +234,14 @@ export async function executeQwenRouteIntegratedProviderRequest(
       typeof AbortSignal.timeout === "function"
         ? AbortSignal.timeout(input.limits.timeoutMs)
         : undefined;
+    const instructions = createPersonalRouteIntegratedInstruction(
+      input.requestContext,
+      input.groundingContext,
+    );
     const result = await generateText({
       model: providerModel,
-      prompt: createPersonalRouteIntegratedInstruction(
-        input.requestContext,
-        input.groundingContext,
-      ),
+      system: instructions.systemInstruction,
+      prompt: instructions.untrustedDataPrompt,
       maxOutputTokens: input.limits.maxOutputTokens,
       maxRetries: input.limits.maxRetries,
       abortSignal,
@@ -290,7 +292,7 @@ export async function executeQwenRouteIntegratedProviderRequest(
 function createPersonalRouteIntegratedInstruction(
   requestContext: PersonalAiGenerationRouteIntegratedProviderRequestContext,
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
-): string {
+) {
   return createRouteIntegratedProviderInstruction({
     taskType: requestContext.taskType,
     sceneLabel:
