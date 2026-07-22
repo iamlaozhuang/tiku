@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
+  currentTaskId: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -300,7 +300,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
     - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
     - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
+    - p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     - p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22
     - p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22
     - p1-remediation-rc-06-resource-office-conversion-boundary-2026-07-22
@@ -501,12 +503,83 @@ p1RemediationSerialProgram:
     p1-remediation-rc-06-resource-conversion-retry-lifecycle-2026-07-22: closed
     p1-remediation-rc-06-resource-failed-delete-recovery-2026-07-22: closed
     p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22: closed
-    p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22: in_progress
+    p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22: closed
+    p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22: in_progress
 activeTasks:
+  - id: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
+    title: AI explanation and hint runtime fallback
+    phase: p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22
+    status: in_progress
+    priority: p1
+    taskKind: bounded_provider_adapter_pure_logic
+    productClosureContribution: closes_F0178
+    branch: fix/ai-explanation-hint-runtime-fallback
+    objective: freeze a valid primary/fallback attempt plan, retry only approved failures, and persist one truthful log per actual attempt
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-07
+    findingIds:
+      - F-0178
+    executionStage: validated_candidate_pending_kernel_commit_and_closeout
+    findingStatus: validated_pending_closeout
+    findingDisposition: F0178_runtime_fallback_validated_pending_closeout
+    riskBoundary:
+      category: bounded_provider_adapter_pure_logic_and_local_mock_validation
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      approvedBaseSha: de3c630a960614100993e72c2f44656709dbb30b
+      schemaOrMigrationChange: false
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      providerOrRealExternalCall: false
+      dependencyChange: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: persisted_model_config_to_frozen_attempt_plan_to_shared_explanation_hint_service_to_mistake_book_runtime_to_per_attempt_ai_call_log
+      coreFiles: 9
+      contingencyFiles: 2
+      preflightTestFiles: 5
+      directCallerCalleeMocksFixturesReviewed: true
+      confirmedRootCause: enabled_primary_short_circuits_fallback_resolution_and_single_runner_failure_returns_unavailable_with_one_log
+    expectedAcceptance:
+      - primary_and_valid_fallback_snapshots_are_frozen_before_execution
+      - only_transient_or_explicit_output_validation_failures_trigger_one_fallback_attempt
+      - non_retryable_4xx_unknown_or_invalid_fallback_never_execute_fallback
+      - each_actual_attempt_persists_a_log_with_its_actual_model_snapshot
+      - both_attempts_must_fail_before_unavailable_when_fallback_is_permitted
+      - scoring_remains_single_model_and_no_real_provider_external_call_is_added
+    closeoutProjection:
+      current: validated_candidate_pending_kernel_commit_and_closeout
+      triggers: TDD_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0178_closed_then_continue_RC07_residual_queue
+      terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    executionMetrics:
+      mandatoryFreshApprovals: 0_covered_by_bounded_medium_standing_approval
+      preventableScopeMissApprovals: 0
+      candidateReapprovals: 0
+      approvalWaitTurns: 0
+      productValueTime: JIT_root_cause_analysis_TDD_and_runtime_attempt_orchestration
+      mechanismOverhead: task_contract_state_transition_and_closeout
+      guardSmokeChanges: 0
+    validationEvidence:
+      focused: 5_files_38_tests_passed_after_final_product_formatting
+      lint: targeted_ESLint_passed
+      typecheck: tsc_noEmit_passed
+      build: Next_production_build_passed_with_pre_existing_NFT_trace_warning_outside_diff
+      formatAndDiff: final_state_format_and_diff_check_pending
+      review: passed_main_thread_adversarial_review_fallback_limited_to_explanation_hint_invalid_fallback_never_executes_logs_persist_before_next_attempt_log_failure_stops_fallback_failed_completion_tokens_zero_snapshots_copied_scoring_single_model_no_real_provider
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
+      findingIds:
+        - F-0175
+      commit: de3c630a960614100993e72c2f44656709dbb30b
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
   - id: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
     title: Learning suggestion blocked-gate static closure
     phase: p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: state_only_static_product_closure
     productClosureContribution: closes_F0175_without_product_code_change
@@ -516,9 +589,9 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-07
     findingIds:
       - F-0175
-    executionStage: validated_state_only_candidate_pending_kernel_commit_and_closeout
-    findingStatus: validated_pending_closeout
-    findingDisposition: F0175_static_closure_validated_pending_closeout
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed
+    findingDisposition: F0175_static_closure_closed
     riskBoundary:
       category: low_risk_state_only_static_product_closure
       approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20

@@ -68,6 +68,57 @@ describe("phase 11 model_config fallback runtime", () => {
     });
   });
 
+  it("freezes the enabled primary and valid fallback as one immutable attempt plan", () => {
+    const catalog = createLocalModelConfigRuntimeCatalog({
+      overrides: {
+        "model-config-dev-ai-explanation": { isEnabled: true },
+        "model-config-dev-ai-explanation-fallback": { isEnabled: true },
+      },
+    });
+    const resolver = createModelConfigRuntimeResolver(catalog);
+
+    const plan = resolver.resolveAttemptPlan({
+      aiFuncType: "explanation",
+      allowFallback: true,
+      allowFixture: true,
+    });
+
+    expect(plan).toMatchObject({
+      status: "planned",
+      attempts: [
+        {
+          selectionReason: "primary",
+          modelConfigSnapshot: {
+            modelConfigPublicId: "model-config-dev-ai-explanation",
+          },
+        },
+        {
+          selectionReason: "fallback",
+          fallbackFromModelConfigPublicId: "model-config-dev-ai-explanation",
+          modelConfigSnapshot: {
+            modelConfigPublicId: "model-config-dev-ai-explanation-fallback",
+          },
+        },
+      ],
+    });
+    expect(plan.status === "planned" ? plan.attempts : []).toHaveLength(2);
+
+    const fallbackRecord = catalog.records.find(
+      (record) =>
+        record.modelConfigSnapshot.modelConfigPublicId ===
+        "model-config-dev-ai-explanation-fallback",
+    );
+
+    if (fallbackRecord === undefined || plan.status !== "planned") {
+      throw new Error("Expected the fallback attempt to be planned.");
+    }
+
+    fallbackRecord.modelConfigSnapshot.modelName = "changed-after-plan";
+    expect(plan.attempts[1]?.modelConfigSnapshot.modelName).toBe(
+      "mock-ai-explanation-fallback",
+    );
+  });
+
   it("does not auto-fallback for ai_scoring even when fallback is requested", () => {
     const resolver = createModelConfigRuntimeResolver(
       createLocalModelConfigRuntimeCatalog({
@@ -92,6 +143,27 @@ describe("phase 11 model_config fallback runtime", () => {
       reason: "fallback_not_allowed_for_ai_func_type",
       primaryModelConfigPublicId: "model-config-dev-ai-scoring",
     });
+  });
+
+  it("does not create runtime attempt fallback outside explanation and hint", () => {
+    const resolver = createModelConfigRuntimeResolver(
+      createLocalModelConfigRuntimeCatalog({
+        overrides: {
+          "model-config-dev-learning-suggestion": { isEnabled: true },
+          "model-config-dev-learning-suggestion-fallback": {
+            isEnabled: true,
+          },
+        },
+      }),
+    );
+
+    const plan = resolver.resolveAttemptPlan({
+      aiFuncType: "learning_suggestion",
+      allowFallback: true,
+      allowFixture: true,
+    });
+
+    expect(plan.status === "planned" ? plan.attempts : []).toHaveLength(1);
   });
 
   it("ignores enabled fallback candidates with mismatched ai_func_type", () => {
@@ -119,5 +191,38 @@ describe("phase 11 model_config fallback runtime", () => {
       primaryModelConfigPublicId: "model-config-dev-ai-explanation",
       fallbackModelConfigPublicId: "model-config-dev-ai-hint",
     });
+  });
+
+  it("keeps an enabled primary as the only attempt when its configured fallback is invalid", () => {
+    const resolver = createModelConfigRuntimeResolver(
+      createLocalModelConfigRuntimeCatalog({
+        overrides: {
+          "model-config-dev-ai-explanation": {
+            isEnabled: true,
+            fallbackModelConfigPublicId: "model-config-dev-ai-hint",
+          },
+          "model-config-dev-ai-hint": { isEnabled: true },
+        },
+      }),
+    );
+
+    const plan = resolver.resolveAttemptPlan({
+      aiFuncType: "explanation",
+      allowFallback: true,
+      allowFixture: true,
+    });
+
+    expect(plan).toMatchObject({
+      status: "planned",
+      attempts: [
+        {
+          selectionReason: "primary",
+          modelConfigSnapshot: {
+            modelConfigPublicId: "model-config-dev-ai-explanation",
+          },
+        },
+      ],
+    });
+    expect(plan.status === "planned" ? plan.attempts : []).toHaveLength(1);
   });
 });

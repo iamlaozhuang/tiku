@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createModelConfigSnapshot } from "../models/ai-rag";
 import {
+  AiExplanationHintRunnerError,
   createAiExplanationHintService,
   type AiExplanationContext,
   type AiExplanationRunner,
@@ -39,6 +40,38 @@ const hintModelConfigSnapshot = createModelConfigSnapshot({
   fallbackModelConfigPublicId: "model_config_public_hint_fallback",
   promptTemplateKey: "ai_hint_v1",
   promptTemplateVersion: 1,
+});
+
+const explanationFallbackModelConfigSnapshot = createModelConfigSnapshot({
+  providerPublicId: "model_provider_public_fallback",
+  providerKey: "fallback_provider",
+  providerDisplayName: "Fallback Provider",
+  modelConfigPublicId: "model_config_public_explanation_fallback",
+  aiFuncType: "explanation",
+  modelName: "fallback-explanation-model",
+  displayName: "Fallback explanation model",
+  configVersion: 3,
+  timeoutSecond: 30,
+  maxRetryCount: 0,
+  fallbackModelConfigPublicId: null,
+  promptTemplateKey: "ai_explanation_fallback_v1",
+  promptTemplateVersion: 2,
+});
+
+const hintFallbackModelConfigSnapshot = createModelConfigSnapshot({
+  providerPublicId: "model_provider_public_fallback",
+  providerKey: "fallback_provider",
+  providerDisplayName: "Fallback Provider",
+  modelConfigPublicId: "model_config_public_hint_fallback",
+  aiFuncType: "hint",
+  modelName: "fallback-hint-model",
+  displayName: "Fallback hint model",
+  configVersion: 5,
+  timeoutSecond: 30,
+  maxRetryCount: 0,
+  fallbackModelConfigPublicId: null,
+  promptTemplateKey: "ai_hint_fallback_v1",
+  promptTemplateVersion: 2,
 });
 
 const ragRetrievalResult = {
@@ -358,6 +391,226 @@ describe("ai explanation and hint service", () => {
     ]);
   });
 
+  it("tries one frozen fallback after a retryable primary failure and returns both attempt logs", async () => {
+    const explanationRunner: AiExplanationRunner = vi.fn(async (input) => {
+      if (
+        input.modelConfigSnapshot.modelConfigPublicId ===
+        explanationModelConfigSnapshot.modelConfigPublicId
+      ) {
+        throw new AiExplanationHintRunnerError("rate_limited");
+      }
+
+      return {
+        explanationText: "备用模型讲解",
+        keyPoints: ["备用模型要点"],
+        learningSuggestion: null,
+        providerRequestPayload: { provider: "fallback" },
+        providerResponsePayload: { output: "fallback output" },
+      };
+    });
+    const service = createAiExplanationHintService({
+      explanationRunner,
+      hintRunner: createHintRunner({
+        hintText: "should not be called",
+        improvementDirections: [],
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+    });
+
+    const result = await service.generateObjectiveExplanation({
+      ...explanationContext,
+      fallbackAttempt: {
+        modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+        promptTemplate: {
+          promptTemplateKey: "ai_explanation_fallback_v1",
+          version: 2,
+          templateHash: "ai_explanation_fallback_v1_hash",
+        },
+      },
+    });
+
+    expect(explanationRunner).toHaveBeenCalledTimes(2);
+    expect(result).toMatchObject({
+      explanationStatus: "explained",
+      explanationText: "备用模型讲解",
+      modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+      promptTemplateKey: "ai_explanation_fallback_v1",
+      promptTemplateVersion: 2,
+      aiCallLogDrafts: [
+        {
+          callStatus: "failed",
+          modelConfigSnapshot: explanationModelConfigSnapshot,
+        },
+        {
+          callStatus: "success",
+          modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+        },
+      ],
+    });
+  });
+
+  it("does not fallback for a non-retryable provider client error", async () => {
+    const explanationRunner: AiExplanationRunner = vi.fn(async () => {
+      throw new AiExplanationHintRunnerError("client_error");
+    });
+    const service = createAiExplanationHintService({
+      explanationRunner,
+      hintRunner: createHintRunner({
+        hintText: "should not be called",
+        improvementDirections: [],
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+    });
+
+    const result = await service.generateObjectiveExplanation({
+      ...explanationContext,
+      fallbackAttempt: {
+        modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+        promptTemplate: {
+          promptTemplateKey: "ai_explanation_fallback_v1",
+          version: 2,
+          templateHash: "ai_explanation_fallback_v1_hash",
+        },
+      },
+    });
+
+    expect(explanationRunner).toHaveBeenCalledTimes(1);
+    expect(result.explanationStatus).toBe("explanation_unavailable");
+    expect(result.aiCallLogDrafts).toHaveLength(1);
+  });
+
+  it("never executes a mismatched fallback snapshot supplied by a caller", async () => {
+    const explanationRunner: AiExplanationRunner = vi.fn(async () => {
+      throw new AiExplanationHintRunnerError("timeout");
+    });
+    const service = createAiExplanationHintService({
+      explanationRunner,
+      hintRunner: createHintRunner({
+        hintText: "should not be called",
+        improvementDirections: [],
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+    });
+
+    const result = await service.generateObjectiveExplanation({
+      ...explanationContext,
+      fallbackAttempt: {
+        modelConfigSnapshot: hintFallbackModelConfigSnapshot,
+        promptTemplate: {
+          promptTemplateKey: "ai_hint_fallback_v1",
+          version: 2,
+          templateHash: "ai_hint_fallback_v1_hash",
+        },
+      },
+    });
+
+    expect(explanationRunner).toHaveBeenCalledTimes(1);
+    expect(result.explanationStatus).toBe("explanation_unavailable");
+    expect(result.aiCallLogDrafts).toHaveLength(1);
+  });
+
+  it("returns unavailable with two failed logs when both permitted attempts fail", async () => {
+    const explanationRunner: AiExplanationRunner = vi.fn(async () => {
+      throw new AiExplanationHintRunnerError("provider_unavailable");
+    });
+    const service = createAiExplanationHintService({
+      explanationRunner,
+      hintRunner: createHintRunner({
+        hintText: "should not be called",
+        improvementDirections: [],
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+    });
+
+    const result = await service.generateObjectiveExplanation({
+      ...explanationContext,
+      fallbackAttempt: {
+        modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+        promptTemplate: {
+          promptTemplateKey: "ai_explanation_fallback_v1",
+          version: 2,
+          templateHash: "ai_explanation_fallback_v1_hash",
+        },
+      },
+    });
+
+    expect(explanationRunner).toHaveBeenCalledTimes(2);
+    expect(result.explanationStatus).toBe("explanation_unavailable");
+    expect(result.aiCallLogDrafts.map((draft) => draft.callStatus)).toEqual([
+      "failed",
+      "failed",
+    ]);
+    expect(
+      result.aiCallLogDrafts.map(
+        (draft) => draft.modelConfigSnapshot.modelConfigPublicId,
+      ),
+    ).toEqual([
+      "model_config_public_explanation",
+      "model_config_public_explanation_fallback",
+    ]);
+  });
+
+  it.each([
+    ["rate limit", Object.assign(new Error("limited"), { status: 429 }), 2],
+    ["provider 5xx", Object.assign(new Error("down"), { status: 503 }), 2],
+    [
+      "abort timeout",
+      Object.assign(new Error("aborted"), { name: "AbortError" }),
+      2,
+    ],
+    [
+      "network reset",
+      Object.assign(new Error("reset"), { code: "ECONNRESET" }),
+      2,
+    ],
+    ["client 4xx", Object.assign(new Error("bad request"), { status: 400 }), 1],
+    ["unknown error", new Error("unknown"), 1],
+  ])(
+    "classifies %s fallback eligibility fail closed",
+    async (_name, error, calls) => {
+      const explanationRunner: AiExplanationRunner = vi
+        .fn()
+        .mockRejectedValueOnce(error)
+        .mockResolvedValue({
+          explanationText: "fallback explanation",
+          keyPoints: [],
+          learningSuggestion: null,
+          providerRequestPayload: null,
+          providerResponsePayload: null,
+        });
+      const service = createAiExplanationHintService({
+        explanationRunner,
+        hintRunner: createHintRunner({
+          hintText: "should not be called",
+          improvementDirections: [],
+          providerRequestPayload: null,
+          providerResponsePayload: null,
+        }),
+      });
+
+      const result = await service.generateObjectiveExplanation({
+        ...explanationContext,
+        fallbackAttempt: {
+          modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+          promptTemplate: {
+            promptTemplateKey: "ai_explanation_fallback_v1",
+            version: 2,
+            templateHash: "ai_explanation_fallback_v1_hash",
+          },
+        },
+      });
+
+      expect(explanationRunner).toHaveBeenCalledTimes(calls);
+      expect(result.explanationStatus).toBe(
+        calls === 2 ? "explained" : "explanation_unavailable",
+      );
+    },
+  );
+
   it("generates subjective hints without directly revealing the standard answer", async () => {
     const hintRunner = createHintRunner({
       hintText:
@@ -403,6 +656,39 @@ describe("ai explanation and hint service", () => {
     expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
       "raw hint output must be redacted",
     );
+  });
+
+  it("fails closed before fallback when the primary attempt log cannot persist", async () => {
+    const explanationRunner: AiExplanationRunner = vi.fn(async () => {
+      throw new AiExplanationHintRunnerError("timeout");
+    });
+    const service = createAiExplanationHintService({
+      explanationRunner,
+      hintRunner: createHintRunner({
+        hintText: "should not be called",
+        improvementDirections: [],
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+      async onAttemptComplete() {
+        throw new Error("raw database failure");
+      },
+    });
+
+    await expect(
+      service.generateObjectiveExplanation({
+        ...explanationContext,
+        fallbackAttempt: {
+          modelConfigSnapshot: explanationFallbackModelConfigSnapshot,
+          promptTemplate: {
+            promptTemplateKey: "ai_explanation_fallback_v1",
+            version: 2,
+            templateHash: "ai_explanation_fallback_v1_hash",
+          },
+        },
+      }),
+    ).rejects.toThrow("attempt log persistence failed");
+    expect(explanationRunner).toHaveBeenCalledTimes(1);
   });
 
   it("returns non-blocking unavailable hint result when the runner fails", async () => {
@@ -473,5 +759,61 @@ describe("ai explanation and hint service", () => {
       sensitiveContext.studentAnswer,
       providerErrorMarker,
     ]);
+  });
+
+  it("uses the fallback hint snapshot after explicit output validation failure", async () => {
+    const hintRunner: AiHintRunner = vi.fn(async (input) => {
+      if (
+        input.modelConfigSnapshot.modelConfigPublicId ===
+        hintModelConfigSnapshot.modelConfigPublicId
+      ) {
+        throw new AiExplanationHintRunnerError("invalid_output");
+      }
+
+      return {
+        hintText: "先补充事实基础，再检查证据链。",
+        improvementDirections: ["补充事实基础", "检查证据链"],
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      };
+    });
+    const service = createAiExplanationHintService({
+      explanationRunner: createExplanationRunner({
+        explanationText: "should not be called",
+        keyPoints: [],
+        learningSuggestion: null,
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+      hintRunner,
+    });
+
+    const result = await service.generateSubjectiveHint({
+      ...hintContext,
+      fallbackAttempt: {
+        modelConfigSnapshot: hintFallbackModelConfigSnapshot,
+        promptTemplate: {
+          promptTemplateKey: "ai_hint_fallback_v1",
+          version: 2,
+          templateHash: "ai_hint_fallback_v1_hash",
+        },
+      },
+    });
+
+    expect(hintRunner).toHaveBeenCalledTimes(2);
+    expect(result).toMatchObject({
+      hintStatus: "hinted",
+      modelConfigSnapshot: hintFallbackModelConfigSnapshot,
+      aiCallLogDrafts: [
+        {
+          callStatus: "failed",
+          modelConfigSnapshot: hintModelConfigSnapshot,
+        },
+        {
+          callStatus: "success",
+          modelConfigSnapshot: hintFallbackModelConfigSnapshot,
+        },
+      ],
+    });
   });
 });

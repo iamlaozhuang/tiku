@@ -1,13 +1,19 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22",
-  "objective": "Close F-0175 without product-code changes by proving the production retry-learning-suggestion route does not assemble the local mock provider runtime, returns the existing unavailable response when no governed runtime is injected, and therefore cannot persist the mock suggestion or a false-success AI call log.",
+  "taskId": "p1-remediation-rc-07-ai-explanation-hint-runtime-fallback-2026-07-22",
+  "objective": "Close F-0178 by freezing a valid primary/fallback model attempt plan before execution, retrying only approved transient or output-validation failures, recording each attempt against its actual model snapshot, and returning unavailable only after the permitted attempts fail; subjective scoring remains single-model.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/exam-report-service.test.ts",
-    "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts"
+    "src/server/services/model-config-runtime.ts",
+    "src/server/services/ai-explanation-hint-service.ts",
+    "src/server/services/ai-explanation-hint-service.test.ts",
+    "src/server/services/student-mistake-book-runtime.ts",
+    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -18,39 +24,50 @@
     ".env*",
     "package.json",
     "pnpm-lock.yaml",
-    "all product source and test files outside the exact allowedFiles list",
-    "schema migration real database Provider external service permission secret deployment PR force-push and non-canonical remote"
+    "all source and test files outside the exact allowedFiles list",
+    "schema migration database execution permission Provider external service secret deployment PR force-push and non-canonical remote"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "src/server/services/model-config-runtime.ts",
+    "src/server/services/ai-explanation-hint-service.ts",
+    "src/server/services/student-mistake-book-runtime.ts",
+    "src/server/services/ai-explanation-hint-service.test.ts",
+    "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+    "tests/unit/phase-8-student-mistake-book-runtime.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/exam-report-service.test.ts",
-    "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts"
+    "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+    "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts"
   ],
-  "branch": "fix/learning-suggestion-blocked-gate-static-closure",
+  "branch": "fix/ai-explanation-hint-runtime-fallback",
   "preRedImpactScan": {
-    "authoritativeChain": "retry-learning-suggestion API -> student-experience route -> default student-flow runtime -> exam-report service without learningSuggestionOptions -> stable unavailable response",
+    "authoritativeChain": "persisted model_config catalog -> model-config runtime resolver -> frozen explanation/hint attempt plan -> shared explanation/hint service -> mistake-book governed runtime -> per-attempt ai_call_log",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 3,
+    "coreFileCount": 9,
     "contingencyFileCount": 2,
     "validationReferencedTestsPreallowed": true,
-    "confirmedDisposition": "covered_by_current_master_no_code_change",
-    "staticEvidence": "Production source has definitions but no non-test call to createMockAiProvider or createAiMockProviderRuntime; default route construction supplies no learningSuggestionOptions and the service returns unavailable before provider, AI log, or snapshot update."
+    "confirmedRootCause": "the resolver selects one enabled model before execution and the service catches one runner failure into unavailable, so no runtime fallback attempt or per-attempt log exists",
+    "currentProductionAssembly": "mistake-book objective explanation; the shared service also enforces the hint contract while no current production practice/hint composition exists"
   },
   "acceptance": [
-    "default production composition does not instantiate the mock provider runtime",
-    "direct retry returns the existing unavailable response when no governed runtime is injected",
-    "blocked mock output cannot be written as a generated report snapshot or successful AI call log",
-    "explicit test-only runtime injection remains available for isolated contract tests and is not production assembly",
-    "no product source schema dependency permission Provider mechanism or remote change"
+    "primary and valid fallback snapshots are resolved once before the request attempt begins",
+    "primary success does not call fallback",
+    "timeout rate-limit 5xx network and explicit output-validation failures may call fallback exactly once",
+    "non-retryable 4xx and unknown failures do not call fallback",
+    "primary failure plus fallback success records two logs using the respective model snapshots",
+    "both permitted attempts failing returns unavailable and records both failed attempts",
+    "disabled missing cross-function fixture or otherwise invalid fallback is never executed",
+    "pre-disabled primary preserves the existing direct fallback selection behavior",
+    "subjective scoring continues to disable fallback",
+    "no real Provider external database schema dependency permission or mechanism change"
   ],
   "validationCommands": [
     {
-      "name": "learning-suggestion-blocked-gate-static-closure-focused",
+      "name": "ai-explanation-hint-runtime-fallback-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -58,13 +75,46 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/exam-report-service.test.ts",
-        "tests/unit/student-experience/student-experience-layering-mistake-book.test.ts",
+        "src/server/services/ai-explanation-hint-service.test.ts",
+        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "learning-suggestion-blocked-gate-static-closure-format",
+      "name": "ai-explanation-hint-runtime-fallback-lint",
+      "kind": "lint",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@10.34.4",
+        "exec",
+        "eslint",
+        "src/server/services/model-config-runtime.ts",
+        "src/server/services/ai-explanation-hint-service.ts",
+        "src/server/services/ai-explanation-hint-service.test.ts",
+        "src/server/services/student-mistake-book-runtime.ts",
+        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+        "tests/unit/p1-ai-call-log-known-dimension-propagation.test.ts",
+        "tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts"
+      ]
+    },
+    {
+      "name": "ai-explanation-hint-runtime-fallback-typecheck",
+      "kind": "typecheck",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
+    },
+    {
+      "name": "ai-explanation-hint-runtime-fallback-build",
+      "kind": "other",
+      "executable": "corepack.cmd",
+      "arguments": ["pnpm@10.34.4", "run", "build"]
+    },
+    {
+      "name": "ai-explanation-hint-runtime-fallback-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -74,11 +124,17 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "docs/04-agent-system/state/task-safety.json",
+        "src/server/services/model-config-runtime.ts",
+        "src/server/services/ai-explanation-hint-service.ts",
+        "src/server/services/ai-explanation-hint-service.test.ts",
+        "src/server/services/student-mistake-book-runtime.ts",
+        "tests/unit/phase-11-model-config-fallback-runtime.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts"
       ]
     },
     {
-      "name": "learning-suggestion-blocked-gate-static-closure-diff-check",
+      "name": "ai-explanation-hint-runtime-fallback-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -91,8 +147,12 @@
     "deployment": null,
     "secretEnv": null
   },
+  "standingApprovalIds": [
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "standing-test-only-allowlist-expansion-2026-07-21"
+  ],
   "riskClassification": {
-    "category": "low_risk_state_only_static_product_closure",
+    "category": "bounded_provider_adapter_pure_logic_and_local_mock_validation",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -100,22 +160,24 @@
     "dependencyOrMechanismChange": false
   },
   "validationEvidence": {
-    "focused": "2 files and 19 tests passed",
-    "productionCallSiteScan": "definitions only; no non-test mock provider runtime assembly",
-    "formatAndDiff": "passed",
-    "productCodeChanged": false,
-    "mainThreadAdversarialReview": "passed; no Provider call, AI log, snapshot, schema, permission, dependency, or mechanism change"
+    "focused": "5 files and 38 tests passed after final product formatting",
+    "lint": "targeted ESLint passed",
+    "typecheck": "tsc --noEmit passed",
+    "build": "Next.js production build passed with one pre-existing NFT trace warning outside this diff",
+    "formatAndDiff": "Prettier applied before freeze; git diff check pending final state update",
+    "mainThreadAdversarialReview": "passed: fallback is limited to explanation/hint, invalid cross-function/self/fixture fallback cannot execute, non-retryable 4xx and unknown errors stop after primary, each actual attempt log persists before the next attempt, log failure stops fallback, failure completion tokens are zero, snapshots are copied before execution, scoring remains single-model, and no real Provider call or scope expansion exists"
   },
   "conditionalCloseout": true,
   "closeoutConditions": [
-    "actual diff remains the three state files only",
-    "focused tests and static production call-site review remain green",
-    "one state-only commit ff-only canonical push sync and cleanup under the low-risk standing approval"
+    "actual diff remains an exact subset of allowedFiles",
+    "all validation and the main-thread adversarial review are green",
+    "no real Provider call capability configuration credential or external side effect is added",
+    "one commit ff-only canonical push sync and cleanup under the bounded-medium standing approval"
   ],
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-ai-governance-fail-closed-read-write-2026-07-22",
-    "findingIds": ["F-0039", "F-0104"],
-    "commit": "7e876373107ac31a7c5f388c86d72c29209e0930",
+    "taskId": "p1-remediation-rc-07-learning-suggestion-blocked-gate-static-closure-2026-07-22",
+    "findingIds": ["F-0175"],
+    "commit": "de3c630a960614100993e72c2f44656709dbb30b",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -123,12 +185,12 @@
   },
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
-    "nextFinding": "F-0178",
-    "disposition": "separate JIT revalidation after F-0175 static closeout"
+    "nextFinding": "P1-RC-07 residual root-cause bundle JIT",
+    "disposition": "after F-0178 closeout continue without reopening closed F-0035 F-0039 F-0104 F-0159 F-0175"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

@@ -182,10 +182,6 @@ function createDefaultMistakeBookRagRetrievalRuntime(
   };
 }
 
-function estimateTokenCount(value: string): number {
-  return Math.max(1, Math.ceil(value.length / 4));
-}
-
 export function createGovernedMistakeBookAiExplanationRuntime(input: {
   aiCallLogRepository?: Pick<
     AdminAiAuditLogRuntimeRepositories,
@@ -199,37 +195,67 @@ export function createGovernedMistakeBookAiExplanationRuntime(input: {
   const aiCallLogRepository =
     input.aiCallLogRepository ??
     createPostgresAdminAiAuditLogRuntimeRepositories();
-  const modelConfigSelection = createModelConfigRuntimeResolver(
+  const modelConfigAttemptPlan = createModelConfigRuntimeResolver(
     input.modelConfigRuntimeCatalog,
-  ).resolve({
+  ).resolveAttemptPlan({
     aiFuncType: "explanation",
     allowFallback: true,
   });
 
   if (
-    modelConfigSelection.status !== "selected" ||
-    modelConfigSelection.executionMode !== "governed_provider"
+    modelConfigAttemptPlan.status !== "planned" ||
+    modelConfigAttemptPlan.attempts.some(
+      (attempt) => attempt.executionMode !== "governed_provider",
+    )
   ) {
     throw new Error("Governed ai_explanation model_config is unavailable.");
   }
 
-  const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
-  const promptTemplate = modelConfigSelection.promptTemplate;
+  const [primaryAttempt, fallbackAttempt] = modelConfigAttemptPlan.attempts;
   const ragRetrievalRuntime =
     input.ragRetrievalRuntime ??
     createDefaultMistakeBookRagRetrievalRuntime(input.localResourceStorageRoot);
-  const explanationHintService = createAiExplanationHintService({
-    explanationRunner: input.explanationRunner,
-    async hintRunner() {
-      throw new Error("Mistake book hint execution is not configured.");
-    },
-  });
 
   return {
     async generateObjectiveExplanation(
       context: MistakeBookAiExplanationRuntimeContext,
     ) {
-      const startedAt = new Date();
+      const explanationHintService = createAiExplanationHintService({
+        explanationRunner: input.explanationRunner,
+        async hintRunner() {
+          throw new Error("Mistake book hint execution is not configured.");
+        },
+        async onAttemptComplete(aiCallLogDraft) {
+          await aiCallLogRepository.appendAiCallLog({
+            userPublicId: context.userPublicId,
+            organizationPublicId: context.organizationPublicId ?? null,
+            profession: readSnapshotProfession(context.questionSnapshot),
+            level: readSnapshotLevel(context.questionSnapshot),
+            answerRecordPublicId: null,
+            mockExamPublicId: null,
+            questionPublicId: context.questionPublicId,
+            aiFuncType: "ai_explanation",
+            callStatus: aiCallLogDraft.callStatus,
+            modelConfigSnapshot: aiCallLogDraft.modelConfigSnapshot,
+            promptTemplateKey: aiCallLogDraft.promptTemplateKey,
+            promptTemplateVersion: aiCallLogDraft.promptTemplateVersion,
+            requestRedactedSnapshot: aiCallLogDraft.requestRedactedSnapshot,
+            responseRedactedSnapshot: aiCallLogDraft.responseRedactedSnapshot,
+            errorRedactedSnapshot: aiCallLogDraft.errorRedactedSnapshot,
+            citationRedactedSnapshot: aiCallLogDraft.citationRedactedSnapshot,
+            promptTokenCount: aiCallLogDraft.promptTokenCount,
+            completionTokenCount: aiCallLogDraft.completionTokenCount,
+            totalTokenCount: aiCallLogDraft.totalTokenCount,
+            latencyMs: Math.max(
+              1,
+              aiCallLogDraft.completedAt.getTime() -
+                aiCallLogDraft.startedAt.getTime(),
+            ),
+            startedAt: aiCallLogDraft.startedAt,
+            completedAt: aiCallLogDraft.completedAt,
+          });
+        },
+      });
       const result = await explanationHintService.generateObjectiveExplanation({
         userPublicId: context.userPublicId,
         practicePublicId: null,
@@ -244,44 +270,18 @@ export function createGovernedMistakeBookAiExplanationRuntime(input: {
         learnerAnswer: context.learnerAnswer,
         isCorrect: false,
         triggerReason: "manual_request",
-        modelConfigSnapshot,
-        promptTemplate,
+        modelConfigSnapshot: primaryAttempt.modelConfigSnapshot,
+        promptTemplate: primaryAttempt.promptTemplate,
+        fallbackAttempt:
+          fallbackAttempt === undefined
+            ? undefined
+            : {
+                modelConfigSnapshot: fallbackAttempt.modelConfigSnapshot,
+                promptTemplate: fallbackAttempt.promptTemplate,
+              },
         ragRetrievalResult:
           await ragRetrievalRuntime.retrieveForAiExplanation(context),
       });
-      const completedAt = new Date();
-
-      if (result.aiCallLogDraft !== null) {
-        await aiCallLogRepository.appendAiCallLog({
-          userPublicId: context.userPublicId,
-          organizationPublicId: context.organizationPublicId ?? null,
-          profession: readSnapshotProfession(context.questionSnapshot),
-          level: readSnapshotLevel(context.questionSnapshot),
-          answerRecordPublicId: null,
-          mockExamPublicId: null,
-          questionPublicId: context.questionPublicId,
-          aiFuncType: "ai_explanation",
-          callStatus: result.aiCallLogDraft.callStatus,
-          modelConfigSnapshot: result.aiCallLogDraft.modelConfigSnapshot,
-          promptTemplateKey: result.aiCallLogDraft.promptTemplateKey,
-          promptTemplateVersion: result.aiCallLogDraft.promptTemplateVersion,
-          requestRedactedSnapshot:
-            result.aiCallLogDraft.requestRedactedSnapshot,
-          responseRedactedSnapshot:
-            result.aiCallLogDraft.responseRedactedSnapshot,
-          errorRedactedSnapshot: result.aiCallLogDraft.errorRedactedSnapshot,
-          citationRedactedSnapshot:
-            result.aiCallLogDraft.citationRedactedSnapshot,
-          promptTokenCount: estimateTokenCount(context.learnerAnswer),
-          completionTokenCount: estimateTokenCount(result.explanationText),
-          totalTokenCount:
-            estimateTokenCount(context.learnerAnswer) +
-            estimateTokenCount(result.explanationText),
-          latencyMs: Math.max(1, completedAt.getTime() - startedAt.getTime()),
-          startedAt,
-          completedAt,
-        });
-      }
 
       return {
         explanationStatus: result.explanationStatus,

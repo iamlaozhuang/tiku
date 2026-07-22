@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { createStudentMistakeBookRuntimeRouteHandlers } from "@/server/services/student-mistake-book-runtime";
-import { createLocalModelConfigRuntimeCatalog } from "@/server/services/model-config-runtime";
+import {
+  createGovernedMistakeBookAiExplanationRuntime,
+  createStudentMistakeBookRuntimeRouteHandlers,
+} from "@/server/services/student-mistake-book-runtime";
+import {
+  createLocalModelConfigRuntimeCatalog,
+  type ModelConfigRuntimeCatalog,
+} from "@/server/services/model-config-runtime";
+import { AiExplanationHintRunnerError } from "@/server/services/ai-explanation-hint-service";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
@@ -399,6 +406,133 @@ describe("phase 8 student mistake_book runtime", () => {
       message: "Mistake book AI explanation is not configured.",
       data: null,
     });
+  });
+
+  it("persists one truthful call log per primary and fallback attempt", async () => {
+    const localCatalog = createLocalModelConfigRuntimeCatalog({
+      overrides: {
+        "model-config-dev-ai-explanation": { isEnabled: true },
+        "model-config-dev-ai-explanation-fallback": { isEnabled: true },
+      },
+    });
+    const governedCatalog: ModelConfigRuntimeCatalog = {
+      records: localCatalog.records.map((record) => ({
+        ...record,
+        executionMode: "governed_provider" as const,
+      })),
+    };
+    const aiCallLogEntries: Array<{
+      callStatus: string;
+      modelConfigPublicId: string;
+      completionTokenCount: number;
+      latencyMs: number;
+    }> = [];
+    const runtime = createGovernedMistakeBookAiExplanationRuntime({
+      modelConfigRuntimeCatalog: governedCatalog,
+      explanationRunner: async (input) => {
+        if (
+          input.modelConfigSnapshot.modelConfigPublicId ===
+          "model-config-dev-ai-explanation"
+        ) {
+          throw new AiExplanationHintRunnerError("timeout");
+        }
+
+        expect(aiCallLogEntries).toHaveLength(1);
+
+        return {
+          explanationText: "fallback explanation",
+          keyPoints: ["fallback key point"],
+          learningSuggestion: null,
+          providerRequestPayload: null,
+          providerResponsePayload: null,
+        };
+      },
+      aiCallLogRepository: {
+        async appendAiCallLog(input) {
+          aiCallLogEntries.push({
+            callStatus: input.callStatus,
+            modelConfigPublicId: input.modelConfigSnapshot.modelConfigPublicId,
+            completionTokenCount: input.completionTokenCount ?? 0,
+            latencyMs: input.latencyMs ?? 0,
+          });
+
+          return {
+            publicId: `ai-call-log-public-${aiCallLogEntries.length}`,
+            userPublicId: input.userPublicId,
+            organizationPublicId: input.organizationPublicId ?? null,
+            profession: input.profession ?? null,
+            level: input.level ?? null,
+            aiFuncType: input.aiFuncType,
+            callStatus: input.callStatus,
+            providerDisplayName: input.modelConfigSnapshot.providerDisplayName,
+            modelAlias: input.modelConfigSnapshot.modelName,
+            promptSummary: "redacted prompt snapshot",
+            outputSummary: "redacted model output snapshot",
+            promptTokenCount: input.promptTokenCount,
+            completionTokenCount: input.completionTokenCount,
+            totalTokenCount: input.totalTokenCount,
+            estimatedCostCny: "0.00",
+            latencyMs: input.latencyMs,
+            startedAt: input.startedAt.toISOString(),
+            completedAt: input.completedAt?.toISOString() ?? null,
+          };
+        },
+      },
+      ragRetrievalRuntime: {
+        async retrieveForAiExplanation() {
+          return {
+            evidenceStatus: "none",
+            citations: [],
+            evidenceSummary: {
+              evidenceStatus: "none",
+              citationCount: 0,
+              resourcePublicIds: [],
+              chunkPublicIds: [],
+              generationPublicIds: [],
+              chunkIndexes: [],
+              textHashes: [],
+              queryHash: "fallback-test-query",
+              maxScore: null,
+              retrievalMode: "fusion_sort",
+            },
+          };
+        },
+      },
+    });
+
+    const result = await runtime.generateObjectiveExplanation({
+      userPublicId: "user_public_student_123",
+      organizationPublicId: null,
+      mistakeBookPublicId: "mistake_book_public_123",
+      questionPublicId: "question_public_123",
+      paperQuestionPublicId: "paper_question_public_123",
+      questionSnapshot: {
+        profession: "monopoly",
+        level: 3,
+        stemRichText: "question",
+      },
+      standardAnswer: "answer",
+      analysis: "analysis",
+      learnerAnswer: "learner answer",
+      isCorrect: false,
+      triggerReason: "manual_request",
+    });
+
+    expect(result.explanationStatus).toBe("explained");
+    expect(aiCallLogEntries).toEqual([
+      {
+        callStatus: "failed",
+        modelConfigPublicId: "model-config-dev-ai-explanation",
+        completionTokenCount: 0,
+        latencyMs: expect.any(Number),
+      },
+      {
+        callStatus: "success",
+        modelConfigPublicId: "model-config-dev-ai-explanation-fallback",
+        completionTokenCount: 5,
+        latencyMs: expect.any(Number),
+      },
+    ]);
   });
 
   it("does not execute a local fixture model_config in the student runtime", async () => {

@@ -87,6 +87,20 @@ export type ModelConfigRuntimeSelection =
       fallbackModelConfigPublicId?: string;
     };
 
+export type SelectedModelConfigRuntime = Extract<
+  ModelConfigRuntimeSelection,
+  { status: "selected" }
+>;
+
+export type ModelConfigRuntimeAttemptPlan =
+  | {
+      status: "planned";
+      attempts:
+        | [SelectedModelConfigRuntime]
+        | [SelectedModelConfigRuntime, SelectedModelConfigRuntime];
+    }
+  | Extract<ModelConfigRuntimeSelection, { status: "unavailable" }>;
+
 export type ResolveModelConfigRuntimeInput = {
   aiFuncType: AiFuncType;
   preferredModelConfigPublicId?: string;
@@ -99,6 +113,10 @@ const fallbackAllowedAiFuncTypes = new Set<AiFuncType>([
   "hint",
   "kn_recommendation",
   "learning_suggestion",
+]);
+const runtimeAttemptFallbackAllowedAiFuncTypes = new Set<AiFuncType>([
+  "explanation",
+  "hint",
 ]);
 
 function createLocalRecord(input: {
@@ -500,17 +518,19 @@ function selectRecord(
     selectionReason: "primary" | "fallback";
     fallbackFromModelConfigPublicId: string | null;
   },
-): ModelConfigRuntimeSelection {
+): SelectedModelConfigRuntime {
+  const modelConfigSnapshot = { ...record.modelConfigSnapshot };
+
   return {
     status: "selected",
     selectionReason: input.selectionReason,
     fallbackFromModelConfigPublicId: input.fallbackFromModelConfigPublicId,
-    modelConfigSnapshot: record.modelConfigSnapshot,
+    modelConfigSnapshot,
     redactedModelConfigMetadata: createRedactedModelConfigRuntimeSnapshot(
-      record.modelConfigSnapshot,
+      modelConfigSnapshot,
       record.executionMode,
     ),
-    promptTemplate: record.promptTemplate,
+    promptTemplate: { ...record.promptTemplate },
     executionMode: record.executionMode,
   };
 }
@@ -624,6 +644,73 @@ export function createModelConfigRuntimeResolver(
         selectionReason: "fallback",
         fallbackFromModelConfigPublicId: primaryModelConfigPublicId,
       });
+    },
+
+    resolveAttemptPlan(
+      input: ResolveModelConfigRuntimeInput,
+    ): ModelConfigRuntimeAttemptPlan {
+      const initialSelection = this.resolve(input);
+
+      if (initialSelection.status !== "selected") {
+        return initialSelection;
+      }
+
+      if (
+        initialSelection.selectionReason === "fallback" ||
+        !input.allowFallback ||
+        !runtimeAttemptFallbackAllowedAiFuncTypes.has(input.aiFuncType)
+      ) {
+        return {
+          status: "planned",
+          attempts: [initialSelection],
+        };
+      }
+
+      const primaryModelConfigPublicId =
+        initialSelection.modelConfigSnapshot.modelConfigPublicId;
+      const fallbackModelConfigPublicId =
+        initialSelection.modelConfigSnapshot.fallbackModelConfigPublicId;
+
+      if (
+        fallbackModelConfigPublicId === null ||
+        fallbackModelConfigPublicId === primaryModelConfigPublicId
+      ) {
+        return {
+          status: "planned",
+          attempts: [initialSelection],
+        };
+      }
+
+      const fallbackRecord =
+        catalog.records.find(
+          (record) =>
+            record.modelConfigSnapshot.modelConfigPublicId ===
+            fallbackModelConfigPublicId,
+        ) ?? null;
+
+      if (
+        fallbackRecord === null ||
+        !fallbackRecord.isEnabled ||
+        fallbackRecord.modelConfigSnapshot.aiFuncType !== input.aiFuncType ||
+        (fallbackRecord.executionMode === "local_fixture" &&
+          input.allowFixture !== true)
+      ) {
+        return {
+          status: "planned",
+          attempts: [initialSelection],
+        };
+      }
+
+      return {
+        status: "planned",
+        attempts: [
+          initialSelection,
+          selectRecord(fallbackRecord, {
+            selectionReason: "fallback",
+            fallbackFromModelConfigPublicId: primaryModelConfigPublicId,
+          }),
+        ],
+      };
     },
   };
 }

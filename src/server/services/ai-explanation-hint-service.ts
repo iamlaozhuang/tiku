@@ -73,6 +73,24 @@ export type AiHintRunner = (
   input: AiHintRunnerInput,
 ) => Promise<AiHintRunnerResult>;
 
+export type AiExplanationHintRunnerFailureCategory =
+  | "timeout"
+  | "rate_limited"
+  | "provider_unavailable"
+  | "network"
+  | "invalid_output"
+  | "client_error";
+
+export class AiExplanationHintRunnerError extends Error {
+  constructor(
+    readonly failureCategory: AiExplanationHintRunnerFailureCategory,
+    message = failureCategory,
+  ) {
+    super(message);
+    this.name = "AiExplanationHintRunnerError";
+  }
+}
+
 export type AiExplanationCallLogDraft = {
   callStatus: AiCallStatus;
   modelConfigSnapshot: ModelConfigSnapshot;
@@ -82,6 +100,11 @@ export type AiExplanationCallLogDraft = {
   responseRedactedSnapshot: RedactedJsonObject | null;
   errorRedactedSnapshot: RedactedJsonObject | null;
   citationRedactedSnapshot: RedactedJsonObject | null;
+  startedAt: Date;
+  completedAt: Date;
+  promptTokenCount: number;
+  completionTokenCount: number;
+  totalTokenCount: number;
 };
 
 export type AiHintCallLogDraft = AiExplanationCallLogDraft;
@@ -99,6 +122,10 @@ export type AiExplanationContext = {
   triggerReason: AiExplanationTriggerReason;
   modelConfigSnapshot: ModelConfigSnapshot;
   promptTemplate: AiExplanationPromptTemplateSnapshot;
+  fallbackAttempt?: {
+    modelConfigSnapshot: ModelConfigSnapshot;
+    promptTemplate: AiExplanationPromptTemplateSnapshot;
+  };
   ragRetrievalResult: RagRetrievalResultDto;
 };
 
@@ -113,6 +140,10 @@ export type AiHintContext = {
   scoringPointLabels: string[];
   modelConfigSnapshot: ModelConfigSnapshot;
   promptTemplate: AiHintPromptTemplateSnapshot;
+  fallbackAttempt?: {
+    modelConfigSnapshot: ModelConfigSnapshot;
+    promptTemplate: AiHintPromptTemplateSnapshot;
+  };
   ragRetrievalResult: RagRetrievalResultDto;
 };
 
@@ -128,6 +159,7 @@ export type AiExplanationResult = {
   evidenceStatus: EvidenceStatus;
   citations: RagCitationDto[];
   aiCallLogDraft: AiExplanationCallLogDraft | null;
+  aiCallLogDrafts: AiExplanationCallLogDraft[];
 };
 
 export type AiHintResult = {
@@ -141,6 +173,7 @@ export type AiHintResult = {
   evidenceStatus: EvidenceStatus;
   citations: RagCitationDto[];
   aiCallLogDraft: AiHintCallLogDraft | null;
+  aiCallLogDrafts: AiHintCallLogDraft[];
 };
 
 export type AiExplanationHintService = {
@@ -153,6 +186,7 @@ export type AiExplanationHintService = {
 export type AiExplanationHintServiceDependencies = {
   explanationRunner: AiExplanationRunner;
   hintRunner: AiHintRunner;
+  onAttemptComplete?: (draft: AiExplanationCallLogDraft) => Promise<void>;
 };
 
 const insufficientEvidenceMessage =
@@ -161,6 +195,149 @@ const explanationUnavailableText = "AI explanation is temporarily unavailable.";
 const hintUnavailableText = "AI hint is temporarily unavailable.";
 const answerWithheldHintText =
   "Focus on the missing reasoning steps instead of reading the final answer.";
+const retryableRunnerFailureCategories =
+  new Set<AiExplanationHintRunnerFailureCategory>([
+    "timeout",
+    "rate_limited",
+    "provider_unavailable",
+    "network",
+    "invalid_output",
+  ]);
+const retryableNetworkErrorCodes = new Set([
+  "ECONNABORTED",
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ENETDOWN",
+  "ENETUNREACH",
+  "ETIMEDOUT",
+]);
+
+class AiExplanationHintAttemptLogPersistenceError extends Error {
+  constructor() {
+    super("AI explanation or hint attempt log persistence failed.");
+    this.name = "AiExplanationHintAttemptLogPersistenceError";
+  }
+}
+
+function estimateTokenCount(value: string): number {
+  return Math.max(1, Math.ceil(value.length / 4));
+}
+
+async function persistAttemptLog(
+  dependencies: AiExplanationHintServiceDependencies,
+  draft: AiExplanationCallLogDraft,
+): Promise<void> {
+  try {
+    await dependencies.onAttemptComplete?.(draft);
+  } catch {
+    throw new AiExplanationHintAttemptLogPersistenceError();
+  }
+}
+
+function readErrorProperty(error: unknown, property: string): unknown {
+  return error !== null && typeof error === "object" && property in error
+    ? error[property as keyof typeof error]
+    : null;
+}
+
+function readNestedErrorProperty(
+  error: unknown,
+  container: string,
+  property: string,
+): unknown {
+  return readErrorProperty(readErrorProperty(error, container), property);
+}
+
+function normalizeHttpStatus(value: unknown): number | null {
+  const status =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : null;
+
+  return status !== null &&
+    Number.isInteger(status) &&
+    status >= 100 &&
+    status <= 599
+    ? status
+    : null;
+}
+
+function isRetryableRunnerFailure(error: unknown): boolean {
+  if (error instanceof AiExplanationHintRunnerError) {
+    return retryableRunnerFailureCategories.has(error.failureCategory);
+  }
+
+  if (readErrorProperty(error, "name") === "AbortError") {
+    return true;
+  }
+
+  const status = [
+    readErrorProperty(error, "status"),
+    readErrorProperty(error, "statusCode"),
+    readNestedErrorProperty(error, "response", "status"),
+    readNestedErrorProperty(error, "response", "statusCode"),
+    readNestedErrorProperty(error, "cause", "status"),
+    readNestedErrorProperty(error, "cause", "statusCode"),
+  ]
+    .map(normalizeHttpStatus)
+    .find((candidate) => candidate !== null);
+
+  if (status !== undefined) {
+    return status === 408 || status === 429 || status >= 500;
+  }
+
+  const code = [
+    readErrorProperty(error, "code"),
+    readNestedErrorProperty(error, "cause", "code"),
+  ].find((candidate) => typeof candidate === "string");
+
+  return typeof code === "string" && retryableNetworkErrorCodes.has(code);
+}
+
+function isPromptAligned(
+  modelConfigSnapshot: ModelConfigSnapshot,
+  promptTemplate: AiExplanationPromptTemplateSnapshot,
+): boolean {
+  return (
+    modelConfigSnapshot.promptTemplateKey ===
+      promptTemplate.promptTemplateKey &&
+    modelConfigSnapshot.promptTemplateVersion === promptTemplate.version
+  );
+}
+
+function resolveValidFallbackAttempt(input: {
+  aiFuncType: "explanation" | "hint";
+  primaryModelConfigSnapshot: ModelConfigSnapshot;
+  fallbackAttempt:
+    | {
+        modelConfigSnapshot: ModelConfigSnapshot;
+        promptTemplate: AiExplanationPromptTemplateSnapshot;
+      }
+    | undefined;
+}):
+  | {
+      modelConfigSnapshot: ModelConfigSnapshot;
+      promptTemplate: AiExplanationPromptTemplateSnapshot;
+    }
+  | undefined {
+  const fallbackAttempt = input.fallbackAttempt;
+
+  return fallbackAttempt !== undefined &&
+    input.primaryModelConfigSnapshot.aiFuncType === input.aiFuncType &&
+    fallbackAttempt.modelConfigSnapshot.aiFuncType === input.aiFuncType &&
+    input.primaryModelConfigSnapshot.fallbackModelConfigPublicId ===
+      fallbackAttempt.modelConfigSnapshot.modelConfigPublicId &&
+    input.primaryModelConfigSnapshot.modelConfigPublicId !==
+      fallbackAttempt.modelConfigSnapshot.modelConfigPublicId &&
+    isPromptAligned(
+      fallbackAttempt.modelConfigSnapshot,
+      fallbackAttempt.promptTemplate,
+    )
+    ? fallbackAttempt
+    : undefined;
+}
 
 function getAttachableCitations(
   ragRetrievalResult: RagRetrievalResultDto,
@@ -210,6 +387,10 @@ function createAiCallLogDraft(input: {
   providerErrorPayload: unknown;
   ragRetrievalResult: RagRetrievalResultDto;
   citations: RagCitationDto[];
+  startedAt: Date;
+  completedAt: Date;
+  promptTokenCount: number;
+  completionTokenCount: number;
 }): AiExplanationCallLogDraft {
   const promptSnapshot = createPromptSnapshot({
     promptTemplateKey: input.promptTemplateKey,
@@ -274,6 +455,11 @@ function createAiCallLogDraft(input: {
       citations: redactedSnapshots.citations,
       evidenceSummary: input.ragRetrievalResult.evidenceSummary,
     },
+    startedAt: input.startedAt,
+    completedAt: input.completedAt,
+    promptTokenCount: input.promptTokenCount,
+    completionTokenCount: input.completionTokenCount,
+    totalTokenCount: input.promptTokenCount + input.completionTokenCount,
   };
 }
 
@@ -319,43 +505,45 @@ export function createAiExplanationHintService(
   return {
     async generateObjectiveExplanation(context) {
       const citations = getAttachableCitations(context.ragRetrievalResult);
-
-      try {
-        const runnerResult = await dependencies.explanationRunner({
-          questionText: context.questionText,
-          standardAnswer: context.standardAnswer,
-          analysis: context.analysis,
-          learnerAnswer: context.learnerAnswer,
-          isCorrect: context.isCorrect,
-          triggerReason: context.triggerReason,
-          ragRetrievalResult: context.ragRetrievalResult,
+      const fallbackAttempt = resolveValidFallbackAttempt({
+        aiFuncType: "explanation",
+        primaryModelConfigSnapshot: context.modelConfigSnapshot,
+        fallbackAttempt: context.fallbackAttempt,
+      });
+      const attempts = [
+        {
           modelConfigSnapshot: context.modelConfigSnapshot,
           promptTemplate: context.promptTemplate,
-        });
-        const modelOutput = {
-          explanationText: runnerResult.explanationText,
-          keyPoints: runnerResult.keyPoints,
-          learningSuggestion: runnerResult.learningSuggestion,
-        };
+        },
+        ...(fallbackAttempt === undefined ? [] : [fallbackAttempt]),
+      ];
+      const aiCallLogDrafts: AiExplanationCallLogDraft[] = [];
 
-        return {
-          explanationStatus: "explained",
-          explanationText: runnerResult.explanationText,
-          keyPoints: runnerResult.keyPoints,
-          learningSuggestion: runnerResult.learningSuggestion,
-          insufficientEvidenceMessage: getInsufficientEvidenceMessage(
-            context.ragRetrievalResult,
-          ),
-          modelConfigSnapshot: context.modelConfigSnapshot,
-          promptTemplateKey: context.promptTemplate.promptTemplateKey,
-          promptTemplateVersion: context.promptTemplate.version,
-          evidenceStatus: context.ragRetrievalResult.evidenceStatus,
-          citations,
-          aiCallLogDraft: createAiCallLogDraft({
-            modelConfigSnapshot: context.modelConfigSnapshot,
-            promptTemplateKey: context.promptTemplate.promptTemplateKey,
-            promptTemplateVersion: context.promptTemplate.version,
-            promptTemplateHash: context.promptTemplate.templateHash,
+      for (const [attemptIndex, attempt] of attempts.entries()) {
+        const attemptStartedAt = new Date();
+
+        try {
+          const runnerResult = await dependencies.explanationRunner({
+            questionText: context.questionText,
+            standardAnswer: context.standardAnswer,
+            analysis: context.analysis,
+            learnerAnswer: context.learnerAnswer,
+            isCorrect: context.isCorrect,
+            triggerReason: context.triggerReason,
+            ragRetrievalResult: context.ragRetrievalResult,
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplate: attempt.promptTemplate,
+          });
+          const modelOutput = {
+            explanationText: runnerResult.explanationText,
+            keyPoints: runnerResult.keyPoints,
+            learningSuggestion: runnerResult.learningSuggestion,
+          };
+          const successDraft = createAiCallLogDraft({
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            promptTemplateHash: attempt.promptTemplate.templateHash,
             questionPublicId: context.questionPublicId,
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "success",
@@ -367,27 +555,43 @@ export function createAiExplanationHintService(
             providerErrorPayload: null,
             ragRetrievalResult: context.ragRetrievalResult,
             citations,
-          }),
-        };
-      } catch (error) {
-        return {
-          explanationStatus: "explanation_unavailable",
-          explanationText: explanationUnavailableText,
-          keyPoints: [],
-          learningSuggestion: null,
-          insufficientEvidenceMessage: getInsufficientEvidenceMessage(
-            context.ragRetrievalResult,
-          ),
-          modelConfigSnapshot: context.modelConfigSnapshot,
-          promptTemplateKey: context.promptTemplate.promptTemplateKey,
-          promptTemplateVersion: context.promptTemplate.version,
-          evidenceStatus: context.ragRetrievalResult.evidenceStatus,
-          citations: [],
-          aiCallLogDraft: createAiCallLogDraft({
-            modelConfigSnapshot: context.modelConfigSnapshot,
-            promptTemplateKey: context.promptTemplate.promptTemplateKey,
-            promptTemplateVersion: context.promptTemplate.version,
-            promptTemplateHash: context.promptTemplate.templateHash,
+            startedAt: attemptStartedAt,
+            completedAt: new Date(),
+            promptTokenCount: estimateTokenCount(context.learnerAnswer),
+            completionTokenCount: estimateTokenCount(
+              runnerResult.explanationText,
+            ),
+          });
+
+          aiCallLogDrafts.push(successDraft);
+          await persistAttemptLog(dependencies, successDraft);
+
+          return {
+            explanationStatus: "explained",
+            explanationText: runnerResult.explanationText,
+            keyPoints: runnerResult.keyPoints,
+            learningSuggestion: runnerResult.learningSuggestion,
+            insufficientEvidenceMessage: getInsufficientEvidenceMessage(
+              context.ragRetrievalResult,
+            ),
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            evidenceStatus: context.ragRetrievalResult.evidenceStatus,
+            citations,
+            aiCallLogDraft: successDraft,
+            aiCallLogDrafts,
+          };
+        } catch (error) {
+          if (error instanceof AiExplanationHintAttemptLogPersistenceError) {
+            throw error;
+          }
+
+          const failedDraft = createAiCallLogDraft({
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            promptTemplateHash: attempt.promptTemplate.templateHash,
             questionPublicId: context.questionPublicId,
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "failed",
@@ -402,49 +606,85 @@ export function createAiExplanationHintService(
                 : error,
             ragRetrievalResult: context.ragRetrievalResult,
             citations: [],
-          }),
-        };
+            startedAt: attemptStartedAt,
+            completedAt: new Date(),
+            promptTokenCount: estimateTokenCount(context.learnerAnswer),
+            completionTokenCount: 0,
+          });
+
+          aiCallLogDrafts.push(failedDraft);
+          await persistAttemptLog(dependencies, failedDraft);
+
+          if (
+            attemptIndex < attempts.length - 1 &&
+            isRetryableRunnerFailure(error)
+          ) {
+            continue;
+          }
+
+          return {
+            explanationStatus: "explanation_unavailable",
+            explanationText: explanationUnavailableText,
+            keyPoints: [],
+            learningSuggestion: null,
+            insufficientEvidenceMessage: getInsufficientEvidenceMessage(
+              context.ragRetrievalResult,
+            ),
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            evidenceStatus: context.ragRetrievalResult.evidenceStatus,
+            citations: [],
+            aiCallLogDraft: failedDraft,
+            aiCallLogDrafts,
+          };
+        }
       }
+
+      throw new Error("AI explanation attempt plan is empty.");
     },
 
     async generateSubjectiveHint(context) {
       const citations = getAttachableCitations(context.ragRetrievalResult);
-
-      try {
-        const runnerResult = await dependencies.hintRunner({
-          questionText: context.questionText,
-          studentAnswer: context.studentAnswer,
-          scoringPointLabels: context.scoringPointLabels,
-          ragRetrievalResult: context.ragRetrievalResult,
+      const fallbackAttempt = resolveValidFallbackAttempt({
+        aiFuncType: "hint",
+        primaryModelConfigSnapshot: context.modelConfigSnapshot,
+        fallbackAttempt: context.fallbackAttempt,
+      });
+      const attempts = [
+        {
           modelConfigSnapshot: context.modelConfigSnapshot,
           promptTemplate: context.promptTemplate,
-        });
-        const hintText = sanitizeHintText(
-          runnerResult.hintText,
-          context.standardAnswer,
-        );
-        const modelOutput = {
-          hintText,
-          improvementDirections: runnerResult.improvementDirections,
-        };
+        },
+        ...(fallbackAttempt === undefined ? [] : [fallbackAttempt]),
+      ];
+      const aiCallLogDrafts: AiHintCallLogDraft[] = [];
 
-        return {
-          hintStatus: "hinted",
-          hintText,
-          improvementDirections: runnerResult.improvementDirections,
-          insufficientEvidenceMessage: getInsufficientEvidenceMessage(
-            context.ragRetrievalResult,
-          ),
-          modelConfigSnapshot: context.modelConfigSnapshot,
-          promptTemplateKey: context.promptTemplate.promptTemplateKey,
-          promptTemplateVersion: context.promptTemplate.version,
-          evidenceStatus: context.ragRetrievalResult.evidenceStatus,
-          citations,
-          aiCallLogDraft: createAiCallLogDraft({
-            modelConfigSnapshot: context.modelConfigSnapshot,
-            promptTemplateKey: context.promptTemplate.promptTemplateKey,
-            promptTemplateVersion: context.promptTemplate.version,
-            promptTemplateHash: context.promptTemplate.templateHash,
+      for (const [attemptIndex, attempt] of attempts.entries()) {
+        const attemptStartedAt = new Date();
+
+        try {
+          const runnerResult = await dependencies.hintRunner({
+            questionText: context.questionText,
+            studentAnswer: context.studentAnswer,
+            scoringPointLabels: context.scoringPointLabels,
+            ragRetrievalResult: context.ragRetrievalResult,
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplate: attempt.promptTemplate,
+          });
+          const hintText = sanitizeHintText(
+            runnerResult.hintText,
+            context.standardAnswer,
+          );
+          const modelOutput = {
+            hintText,
+            improvementDirections: runnerResult.improvementDirections,
+          };
+          const successDraft = createAiCallLogDraft({
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            promptTemplateHash: attempt.promptTemplate.templateHash,
             questionPublicId: context.questionPublicId,
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "success",
@@ -456,26 +696,40 @@ export function createAiExplanationHintService(
             providerErrorPayload: null,
             ragRetrievalResult: context.ragRetrievalResult,
             citations,
-          }),
-        };
-      } catch (error) {
-        return {
-          hintStatus: "hint_unavailable",
-          hintText: hintUnavailableText,
-          improvementDirections: [],
-          insufficientEvidenceMessage: getInsufficientEvidenceMessage(
-            context.ragRetrievalResult,
-          ),
-          modelConfigSnapshot: context.modelConfigSnapshot,
-          promptTemplateKey: context.promptTemplate.promptTemplateKey,
-          promptTemplateVersion: context.promptTemplate.version,
-          evidenceStatus: context.ragRetrievalResult.evidenceStatus,
-          citations: [],
-          aiCallLogDraft: createAiCallLogDraft({
-            modelConfigSnapshot: context.modelConfigSnapshot,
-            promptTemplateKey: context.promptTemplate.promptTemplateKey,
-            promptTemplateVersion: context.promptTemplate.version,
-            promptTemplateHash: context.promptTemplate.templateHash,
+            startedAt: attemptStartedAt,
+            completedAt: new Date(),
+            promptTokenCount: estimateTokenCount(context.studentAnswer),
+            completionTokenCount: estimateTokenCount(hintText),
+          });
+
+          aiCallLogDrafts.push(successDraft);
+          await persistAttemptLog(dependencies, successDraft);
+
+          return {
+            hintStatus: "hinted",
+            hintText,
+            improvementDirections: runnerResult.improvementDirections,
+            insufficientEvidenceMessage: getInsufficientEvidenceMessage(
+              context.ragRetrievalResult,
+            ),
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            evidenceStatus: context.ragRetrievalResult.evidenceStatus,
+            citations,
+            aiCallLogDraft: successDraft,
+            aiCallLogDrafts,
+          };
+        } catch (error) {
+          if (error instanceof AiExplanationHintAttemptLogPersistenceError) {
+            throw error;
+          }
+
+          const failedDraft = createAiCallLogDraft({
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            promptTemplateHash: attempt.promptTemplate.templateHash,
             questionPublicId: context.questionPublicId,
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "failed",
@@ -490,9 +744,41 @@ export function createAiExplanationHintService(
                 : error,
             ragRetrievalResult: context.ragRetrievalResult,
             citations: [],
-          }),
-        };
+            startedAt: attemptStartedAt,
+            completedAt: new Date(),
+            promptTokenCount: estimateTokenCount(context.studentAnswer),
+            completionTokenCount: 0,
+          });
+
+          aiCallLogDrafts.push(failedDraft);
+          await persistAttemptLog(dependencies, failedDraft);
+
+          if (
+            attemptIndex < attempts.length - 1 &&
+            isRetryableRunnerFailure(error)
+          ) {
+            continue;
+          }
+
+          return {
+            hintStatus: "hint_unavailable",
+            hintText: hintUnavailableText,
+            improvementDirections: [],
+            insufficientEvidenceMessage: getInsufficientEvidenceMessage(
+              context.ragRetrievalResult,
+            ),
+            modelConfigSnapshot: attempt.modelConfigSnapshot,
+            promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: attempt.promptTemplate.version,
+            evidenceStatus: context.ragRetrievalResult.evidenceStatus,
+            citations: [],
+            aiCallLogDraft: failedDraft,
+            aiCallLogDrafts,
+          };
+        }
       }
+
+      throw new Error("AI hint attempt plan is empty.");
     },
   };
 }
