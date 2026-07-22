@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import { basename, extname, resolve, sep } from "node:path";
 
+import { convertLocalOfficeDocumentBytes } from "@/server/services/local-office-document-converter";
+
 type LocalTextDocumentSource = {
   objectKey: string;
   fileName: string;
@@ -42,7 +44,11 @@ export type SkippedLocalTextDocumentAsset = {
   skippedReason:
     | "unsupported_extension"
     | "file_too_large"
-    | "converter_unavailable";
+    | "conversion_failed"
+    | "document_limit_exceeded"
+    | "format_mismatch"
+    | "invalid_text_content"
+    | "no_extractable_text";
   source: Omit<LocalTextDocumentSource, "contentType">;
 };
 
@@ -63,7 +69,7 @@ type HeadingCursor = {
 };
 
 const supportedTextExtensions = new Set(["txt", "md", "markdown"]);
-const converterUnavailableExtensions = new Set(["docx", "pptx", "pdf"]);
+const supportedOfficeExtensions = new Set(["docx", "pptx", "pdf"]);
 const defaultMaxFileSizeByte = 2 * 1024 * 1024;
 
 function resolveInsideStorageRoot(storageRoot: string, objectKey: string) {
@@ -91,11 +97,66 @@ function readFileName(objectKey: string): string {
 }
 
 function inferContentType(extension: string): string {
+  if (extension === "docx") {
+    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  }
+
+  if (extension === "pptx") {
+    return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+  }
+
+  if (extension === "pdf") {
+    return "application/pdf";
+  }
+
   if (extension === "md" || extension === "markdown") {
     return "text/markdown";
   }
 
   return "text/plain";
+}
+
+function decodeStrictTextContent(content: Buffer): string | null {
+  try {
+    const decoded = new TextDecoder("utf-8", { fatal: true }).decode(content);
+
+    return /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u.test(
+      decoded,
+    )
+      ? null
+      : decoded;
+  } catch {
+    return null;
+  }
+}
+
+function mapOfficeConversionFailureReason(
+  reason:
+    | "conversion_aborted"
+    | "conversion_busy"
+    | "conversion_failed"
+    | "conversion_timeout"
+    | "format_mismatch"
+    | "input_limit_exceeded"
+    | "no_extractable_text"
+    | "resource_limit_exceeded",
+): SkippedLocalTextDocumentAsset["skippedReason"] {
+  if (reason === "format_mismatch") {
+    return "format_mismatch";
+  }
+
+  if (reason === "no_extractable_text") {
+    return "no_extractable_text";
+  }
+
+  if (
+    reason === "input_limit_exceeded" ||
+    reason === "resource_limit_exceeded"
+  ) {
+    return "document_limit_exceeded";
+  }
+
+  return "conversion_failed";
 }
 
 function normalizeTextContent(content: string): string {
@@ -185,7 +246,7 @@ export async function parseLocalTextDocumentAsset({
 
   if (
     !supportedTextExtensions.has(extension) &&
-    !converterUnavailableExtensions.has(extension)
+    !supportedOfficeExtensions.has(extension)
   ) {
     return {
       status: "skipped",
@@ -207,19 +268,60 @@ export async function parseLocalTextDocumentAsset({
     };
   }
 
-  if (converterUnavailableExtensions.has(extension)) {
+  const fileContent = await readFile(targetPath);
+
+  if (fileContent.length > maxFileSizeByte) {
     return {
       status: "skipped",
       parserMode: "local_only",
-      skippedReason: "converter_unavailable",
+      skippedReason: "file_too_large",
       source: skippedSource,
     };
   }
 
-  const markdownContent = normalizeMarkdownContent(
-    await readFile(targetPath, "utf8"),
-    extension,
-  );
+  let markdownContent: string;
+
+  if (supportedOfficeExtensions.has(extension)) {
+    const conversionResult = await convertLocalOfficeDocumentBytes({
+      bytes: fileContent,
+      expectedExtension: extension as "docx" | "pdf" | "pptx",
+    });
+
+    if (conversionResult.status === "failed") {
+      return {
+        status: "skipped",
+        parserMode: "local_only",
+        skippedReason: mapOfficeConversionFailureReason(
+          conversionResult.reason,
+        ),
+        source: skippedSource,
+      };
+    }
+
+    markdownContent = normalizeTextContent(conversionResult.markdownContent);
+  } else {
+    const decodedContent = decodeStrictTextContent(fileContent);
+
+    if (decodedContent === null) {
+      return {
+        status: "skipped",
+        parserMode: "local_only",
+        skippedReason: "invalid_text_content",
+        source: skippedSource,
+      };
+    }
+
+    markdownContent = normalizeMarkdownContent(decodedContent, extension);
+  }
+
+  if (markdownContent.length === 0) {
+    return {
+      status: "skipped",
+      parserMode: "local_only",
+      skippedReason: "no_extractable_text",
+      source: skippedSource,
+    };
+  }
   const markdownContentHash = createContentHash(markdownContent);
   const headingPaths = collectHeadingPaths(markdownContent);
   const lineCount =

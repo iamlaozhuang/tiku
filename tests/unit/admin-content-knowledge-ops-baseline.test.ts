@@ -1360,6 +1360,10 @@ describe("admin content and knowledge ops baseline", () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "上传资料" }));
+    expect(
+      screen.getByText(/支持 DOCX、Markdown、文本、PPTX 和可抽取文本 PDF/u),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/扫描型 PDF 不支持 OCR/u)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("资料文件"), {
       target: {
         files: [
@@ -1431,7 +1435,10 @@ describe("admin content and knowledge ops baseline", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001",
       expect.objectContaining({
-        body: JSON.stringify({ markdownContent: "# 已校对\n\n受控摘要" }),
+        body: JSON.stringify({
+          markdownContent: "# 已校对\n\n受控摘要",
+          expectedUpdatedAt: "2026-05-20T12:00:00.000Z",
+        }),
         method: "PATCH",
       }),
     );
@@ -1583,6 +1590,7 @@ describe("admin content and knowledge ops baseline", () => {
       expect.objectContaining({
         body: JSON.stringify({
           markdownContent: "# 第一章\n\n# 第一节\n\n仅用于单元测试",
+          expectedUpdatedAt: "2026-05-20T12:00:00.000Z",
         }),
         method: "PATCH",
       }),

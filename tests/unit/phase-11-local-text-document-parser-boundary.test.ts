@@ -9,7 +9,10 @@ import { parseLocalTextDocumentAsset } from "@/server/services/local-text-docume
 import { storeLocalPaperAssetFile } from "@/server/services/local-paper-asset-storage";
 import { localResourceMaxFileSizeByte } from "@/server/services/rag-resource-knowledge-runtime";
 
-async function storeControlledAsset(input: { fileName: string; body: string }) {
+async function storeControlledAsset(input: {
+  fileName: string;
+  body: string | ArrayBuffer;
+}) {
   const storageRoot = await mkdtemp(join(tmpdir(), "tiku-parser-test-"));
   const paperAsset = await storeLocalPaperAssetFile({
     file: new File([input.body], input.fileName, { type: "text/plain" }),
@@ -130,6 +133,50 @@ describe("phase 11 local text document parser boundary", () => {
       },
     });
   });
+
+  it.each([
+    {
+      body: new Uint8Array([0xc3, 0x28]).buffer,
+      fileName: "invalid-utf8.md",
+    },
+    {
+      body: new Uint8Array([0x23, 0x20, 0x41, 0x00, 0x42]).buffer,
+      fileName: "binary-as-text.txt",
+    },
+    {
+      body: new Uint8Array([0x23, 0x20, 0x41, 0x07, 0x42]).buffer,
+      fileName: "control-character.md",
+    },
+    {
+      body: new Uint8Array([0x23, 0x20, 0x41, 0xc2, 0x85, 0x42]).buffer,
+      fileName: "c1-control-character.md",
+    },
+  ])(
+    "rejects $fileName before producing a draft",
+    async ({ body, fileName }) => {
+      const { paperAsset, storageRoot } = await storeControlledAsset({
+        body,
+        fileName,
+      });
+
+      await expect(
+        parseLocalTextDocumentAsset({
+          fileName: paperAsset.fileName,
+          objectKey: paperAsset.objectKey,
+          storageRoot,
+        }),
+      ).resolves.toEqual({
+        status: "skipped",
+        parserMode: "local_only",
+        skippedReason: "invalid_text_content",
+        source: {
+          extension: fileName.endsWith(".txt") ? "txt" : "md",
+          fileName,
+          objectKey: paperAsset.objectKey,
+        },
+      });
+    },
+  );
 
   it("enforces the 50MB local resource parser limit before reading document content", async () => {
     const storageRoot = await mkdtemp(join(tmpdir(), "tiku-parser-limit-"));

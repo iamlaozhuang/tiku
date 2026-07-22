@@ -2118,8 +2118,9 @@ function ResourceUploadPanel({
         </div>
       </div>
       <p className="text-text-muted mt-3 text-xs">
-        支持 Markdown 或文本文件生成解析草稿，单个文件上限 50MB。DOCX、PPTX
-        和可抽取文本 PDF 的解析接入由后续任务落地；扫描型 PDF 不在首期范围。
+        支持 DOCX、Markdown、文本、PPTX 和可抽取文本 PDF
+        生成解析草稿，单个文件上限 50MB。扫描型 PDF 不支持
+        OCR；解析失败时请处理原文件后重新上传。
       </p>
     </section>
   );

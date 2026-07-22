@@ -1,6 +1,8 @@
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { deflateRawSync } from "node:zlib";
+import { File as NodeFile } from "node:buffer";
 
 import { describe, expect, it } from "vitest";
 
@@ -12,11 +14,68 @@ import {
   buildLocalResourceRagRetrievalResult,
   createRagResourceKnowledgeRuntimeRouteHandlers,
 } from "@/server/services/rag-resource-knowledge-runtime";
+import { convertLocalOfficeDocumentBytes } from "@/server/services/local-office-document-converter";
 import type { RagResourceKnowledgeRuntimeRepositoriesWithAudit } from "@/server/services/rag-resource-knowledge-runtime";
 import type { SessionService } from "@/server/services/session-service";
 
 const createdAt = new Date("2026-05-24T08:00:00.000Z");
 const updatedAt = new Date("2026-05-24T08:30:00.000Z");
+
+function createRuntimeDocxBuffer(text: string) {
+  const entries = [
+    {
+      path: "[Content_Types].xml",
+      body: '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
+    },
+    {
+      path: "_rels/.rels",
+      body: '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+    },
+    {
+      path: "word/document.xml",
+      body: `<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>${text}</w:t></w:r></w:p></w:body></w:document>`,
+    },
+  ];
+  const localParts: Buffer[] = [];
+  const centralParts: Buffer[] = [];
+  let localOffset = 0;
+
+  for (const entry of entries) {
+    const fileName = Buffer.from(entry.path);
+    const body = Buffer.from(entry.body);
+    const compressedBody = deflateRawSync(body);
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);
+    localHeader.writeUInt16LE(20, 4);
+    localHeader.writeUInt16LE(8, 8);
+    localHeader.writeUInt32LE(compressedBody.length, 18);
+    localHeader.writeUInt32LE(body.length, 22);
+    localHeader.writeUInt16LE(fileName.length, 26);
+    localParts.push(localHeader, fileName, compressedBody);
+
+    const centralHeader = Buffer.alloc(46);
+    centralHeader.writeUInt32LE(0x02014b50, 0);
+    centralHeader.writeUInt16LE(20, 4);
+    centralHeader.writeUInt16LE(20, 6);
+    centralHeader.writeUInt16LE(8, 10);
+    centralHeader.writeUInt32LE(compressedBody.length, 20);
+    centralHeader.writeUInt32LE(body.length, 24);
+    centralHeader.writeUInt16LE(fileName.length, 28);
+    centralHeader.writeUInt32LE(localOffset, 42);
+    centralParts.push(centralHeader, fileName);
+    localOffset += localHeader.length + fileName.length + compressedBody.length;
+  }
+
+  const centralDirectory = Buffer.concat(centralParts);
+  const endRecord = Buffer.alloc(22);
+  endRecord.writeUInt32LE(0x06054b50, 0);
+  endRecord.writeUInt16LE(entries.length, 8);
+  endRecord.writeUInt16LE(entries.length, 10);
+  endRecord.writeUInt32LE(centralDirectory.length, 12);
+  endRecord.writeUInt32LE(localOffset, 16);
+
+  return Buffer.concat([...localParts, centralDirectory, endRecord]);
+}
 
 function createAdminSessionService(): Pick<
   SessionService,
@@ -1031,7 +1090,99 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
     });
   });
 
-  it("marks DOCX PPTX and PDF local resource uploads as conversion failed without converter dependencies", async () => {
+  it("converts a valid DOCX upload into a reviewable Markdown draft", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-docx-"));
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      localResourceStorageRoot: storageRoot,
+      repositories: createRepositories({
+        auditLogEntries: [],
+        publishCalls: [],
+      }),
+      sessionService: createAdminSessionService(),
+    });
+    const docxBytes = createRuntimeDocxBuffer(
+      "Controlled runtime DOCX conversion evidence",
+    );
+
+    await expect(
+      convertLocalOfficeDocumentBytes({
+        bytes: docxBytes,
+        expectedExtension: "docx",
+      }),
+    ).resolves.toMatchObject({ status: "converted", detectedType: "docx" });
+
+    const originalFileConstructor = globalThis.File;
+    Object.defineProperty(globalThis, "File", {
+      configurable: true,
+      value: NodeFile,
+    });
+    const boundary = "tiku-controlled-docx-boundary";
+    const multipartParts: Buffer[] = [];
+    for (const [name, value] of [
+      ["title", "受控 DOCX 转换验证"],
+      ["profession", "marketing"],
+      ["level", "3"],
+      ["resourceType", "knowledge_doc"],
+      ["fileName", "controlled-resource.docx"],
+    ]) {
+      multipartParts.push(
+        Buffer.from(
+          `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`,
+        ),
+      );
+    }
+    multipartParts.push(
+      Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="controlled-resource.docx"\r\nContent-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document\r\n\r\n`,
+      ),
+      docxBytes,
+      Buffer.from(`\r\n--${boundary}--\r\n`),
+    );
+
+    let uploadResponse: Response;
+    try {
+      uploadResponse = await handlers.resources.collection.POST(
+        new Request("http://localhost/api/v1/resources", {
+          body: Buffer.concat(multipartParts),
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "content-type": `multipart/form-data; boundary=${boundary}`,
+          },
+          method: "POST",
+        }),
+      );
+    } finally {
+      Object.defineProperty(globalThis, "File", {
+        configurable: true,
+        value: originalFileConstructor,
+      });
+    }
+    const uploadPayload = await uploadResponse.json();
+
+    expect(uploadPayload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        resource: {
+          originalFileName: "controlled-resource.docx",
+          resourceStatus: "draft",
+          markdownPreviewAvailable: true,
+          indexingErrorSummary: null,
+        },
+        localResource: {
+          parserMode: "local_only",
+          markdownContentHash: expect.stringMatching(/^[0-9a-f]{64}$/u),
+          skippedReason: null,
+        },
+      },
+    });
+    expect(JSON.stringify(uploadPayload)).not.toContain(storageRoot);
+    expect(JSON.stringify(uploadPayload)).not.toContain(
+      "Controlled runtime DOCX conversion evidence",
+    );
+  }, 35_000);
+
+  it("rejects corrupt DOCX PPTX and PDF bytes without creating a draft", async () => {
     const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-formats-"));
     const auditLogEntries: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
@@ -1080,7 +1231,7 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
             originalFileName: fileName,
             resourceStatus: "conversion_failed",
             markdownPreviewAvailable: false,
-            indexingErrorSummary: "converter_unavailable",
+            indexingErrorSummary: "redacted_indexing_error",
           },
           localResource: {
             parserMode: "local_only",
@@ -1090,7 +1241,7 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
             chunkCandidateCount: 0,
             headingPaths: [],
             redactedPreview: null,
-            skippedReason: "converter_unavailable",
+            skippedReason: "conversion_failed",
           },
         },
       });
