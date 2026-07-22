@@ -1,37 +1,14 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21",
-  "objective": "Implement the F-0094 backend foundation without claiming finding closure: give paper_section a stable public identity, enforce same-paper structure ordering/ownership constraints, expose paper_section identity in the existing draft DTO, add independent draft-only section and question_group create/update/reorder/delete commands, and allow an existing paper_question to move between a compatible group or standalone state under one paper revision transaction. Empty-container deletion must be explicit and non-empty deletion fail closed. UI structure management remains a separate low-risk follow-up before F-0094 can close.",
+  "taskId": "p1-remediation-rc-05-paper-structure-management-ui-2026-07-21",
+  "objective": "Close F-0094 by making the existing paper composer consume the stable paper_section and question_group command APIs: provide draft-only section create, rename, reorder and empty-delete controls; expose question_group identity, rename, reorder, empty-delete and system subtotal; and move a question between a compatible material group or standalone section without public-id entry controls. Preserve published/archived read-only behavior and do not change backend, schema, permissions or learner snapshots.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260722023000_p1_rc_05_paper_structure_identity.sql",
-    "drizzle/meta/20260722023000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/validators/paper-draft.ts",
-    "src/server/validators/paper-draft.test.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "src/server/mappers/paper-draft-mapper.ts",
-    "src/server/services/paper-draft-service.ts",
-    "src/server/services/paper-draft-service.test.ts",
-    "src/server/services/paper-draft-route.ts",
-    "src/server/services/paper-draft-route.test.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/app/api/v1/papers/[publicId]/paper-sections/route.ts",
-    "src/app/api/v1/papers/[publicId]/question-groups/route.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
-    "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-    "tests/unit/p1-paper-metadata-truth.test.ts",
+    "src/features/admin/paper-composer/AdminPaperComposerPage.tsx",
     "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-    "tests/unit/admin-paper-ui.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/lib/admin-ai-generation-formal-draft-payload.test.ts"
+    "tests/unit/admin-paper-ui.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -43,59 +20,34 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "migration execution or persistent database access",
-    "paper composer UI product implementation in this foundation partition",
-    "published or archived paper structure mutation",
-    "question/material/scoring snapshot rewrite",
+    "schema, migration or persistent database access",
+    "backend route, service, repository or contract changes",
+    "published or archived paper mutation",
+    "question, material or scoring snapshot rewrite",
     "permission or entitlement change",
-    "Provider, external service, secret/env, deployment, PR or force-push",
-    "F-0096, F-0097, F-0098 or another independent finding"
+    "learner snapshot or another independent finding",
+    "Provider, external service, secret/env, deployment, PR or force-push"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/paper.ts",
-    "src/db/schema/paper.test.ts",
-    "drizzle/20260722023000_p1_rc_05_paper_structure_identity.sql",
-    "drizzle/meta/20260722023000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/validators/paper-draft.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/mappers/paper-draft-mapper.ts",
-    "src/server/services/paper-draft-service.ts",
-    "src/server/services/paper-draft-route.ts",
-    "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/app/api/v1/papers/[publicId]/paper-sections/route.ts",
-    "src/app/api/v1/papers/[publicId]/question-groups/route.ts"
+    "src/features/admin/paper-composer/AdminPaperComposerPage.tsx"
   ],
   "contingencyFiles": [
-    "src/server/validators/paper-draft.test.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "src/server/services/paper-draft-service.test.ts",
-    "src/server/services/paper-draft-route.test.ts",
-    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-    "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
-    "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-    "tests/unit/p1-paper-metadata-truth.test.ts",
     "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-    "tests/unit/admin-paper-ui.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/lib/admin-ai-generation-formal-draft-payload.test.ts"
+    "tests/unit/admin-paper-ui.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCallers": "The current composer addresses sections by sortOrder and has no container command UI. This high-risk foundation intentionally stops at stable DTO/API commands; the next low-risk task will consume them and close the UI half of F-0094.",
-    "routeService": "Existing paper routes expose paper and paper_question lifecycle only. Two noun collection routes can carry draft-only section and group create/update/reorder/delete commands through the same content-admin authorization and audit boundary.",
-    "repository": "paper_section has no public_id or same-paper sort uniqueness; question_group already has public_id but no structure lifecycle command. Existing question update can move a whole group between sections but cannot explicitly change membership. All structure mutations must share advancePaperRevision and one transaction.",
-    "schema": "Add paper_section.public_id plus unique paper_id/sort_order and question_group paper_section_id/sort_order constraints. Existing question_group public_id is retained; no new table is required.",
-    "tests": "TDD covers stable identity mapping, draft/revision/ownership guards, non-empty deletion rejection, deterministic reorder, group membership compatibility and rollback-shaped null/conflict results; affected route/runtime/P0 regressions remain green.",
-    "requirements": "Module 02 requires independently maintainable paper_section name/description/order and question_group lifecycle with child score subtotal, while publishing rejects empty containers and inconsistent relationships.",
-    "nonClaims": "This partition does not close F-0094 until the follow-up composer UI exposes these commands; it does not execute migration or a real database and does not change learner snapshots, permissions or other findings."
+    "uiApiCaller": "AdminPaperComposerPage already owns the draft, revision, authenticated fetch boundary and question edit lifecycle. The UI follow-up can consume the two collection command routes without another product layer.",
+    "routeServiceRepositorySchema": "The b91f6e0 foundation already provides strict draft/revision/ownership commands, stable identities, exact-set reorder, empty-only delete and membership compatibility. This task does not alter that authority.",
+    "tests": "AdminPaperComposerPage.test.tsx directly mocks all composer requests and is the focused interaction contract. admin-paper-ui.test.ts is the static affected regression named by validation.",
+    "requirements": "Module 02 and F-0094 require independently maintainable section names/descriptions/order, manageable material groups with child subtotal, membership moves and empty-container publication rejection.",
+    "scopeDecision": "Group creation in the UI is limited to an existing standalone material snapshot already in the paper; this avoids public-id entry and cannot introduce a material outside the paper. Existing add-by-material remains the entry for a new material and question."
   },
   "validationCommands": [
     {
-      "name": "f0094-paper-structure-foundation-focused",
+      "name": "f0094-paper-structure-management-ui-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -103,54 +55,30 @@
         "exec",
         "vitest",
         "run",
-        "src/db/schema/paper.test.ts",
-        "src/server/validators/paper-draft.test.ts",
-        "src/server/repositories/paper-draft-repository.test.ts",
-        "src/server/services/paper-draft-service.test.ts",
-        "src/server/services/paper-draft-route.test.ts",
-        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
-        "tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts",
-        "tests/unit/p0-rc-05-schema-migration-source.test.ts",
-        "tests/unit/p1-paper-metadata-truth.test.ts",
         "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx",
-        "tests/unit/admin-paper-ui.test.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "src/lib/admin-ai-generation-formal-draft-payload.test.ts"
+        "tests/unit/admin-paper-ui.test.ts"
       ]
     },
     {
-      "name": "f0094-paper-structure-foundation-lint",
+      "name": "f0094-paper-structure-management-ui-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/db/schema/paper.ts",
-        "src/db/schema/paper.test.ts",
-        "src/server/contracts/paper-draft-contract.ts",
-        "src/server/validators/paper-draft.ts",
-        "src/server/validators/paper-draft.test.ts",
-        "src/server/repositories/paper-draft-repository.ts",
-        "src/server/repositories/paper-draft-repository.test.ts",
-        "src/server/mappers/paper-draft-mapper.ts",
-        "src/server/services/paper-draft-service.ts",
-        "src/server/services/paper-draft-service.test.ts",
-        "src/server/services/paper-draft-route.ts",
-        "src/server/services/paper-draft-route.test.ts",
-        "src/server/services/paper-composition-lifecycle-runtime.ts",
-        "src/app/api/v1/papers/[publicId]/paper-sections/route.ts",
-        "src/app/api/v1/papers/[publicId]/question-groups/route.ts"
+        "src/features/admin/paper-composer/AdminPaperComposerPage.tsx",
+        "src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx"
       ]
     },
     {
-      "name": "f0094-paper-structure-foundation-typecheck",
+      "name": "f0094-paper-structure-management-ui-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0094-paper-structure-foundation-build",
+      "name": "f0094-paper-structure-management-ui-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -158,51 +86,41 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0094-paper-structure-foundation-2026-07-21",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "schema_migration_source_and_database_application_structure_commands",
-    "schemaOrMigrationChange": true,
-    "migrationExecution": false,
+    "category": "low_risk_existing_admin_ui_consumer",
+    "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
-  "freshApproval": {
-    "approvalId": "guardian-f0094-paper-structure-foundation-2026-07-21",
-    "requestFingerprint": "59b7f31301a9ee3bab4f66da95a02810c691dfc5a7414d306975d3f1418971a5",
-    "baseSha": "7138c89b5a5e434298496bfe3ca9c281e2764ab0",
-    "candidateTree": null,
-    "risk": "database",
-    "conditionalCloseout": true
-  },
   "applicableStandingApprovals": [
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
   "validationEvidence": {
-    "tddRed": "8 expected failures across schema, validator and repository safety contracts",
-    "focusedAndAffectedRegression": "111/111 across 13 files",
-    "lint": "pass for all changed TypeScript product and test files",
+    "tddRed": "2 expected failures for missing section and group management interactions",
+    "focusedAndAffectedRegression": "22/22 across AdminPaperComposerPage interaction and admin paper UI static regression",
+    "lint": "pass changed composer and interaction test",
     "typecheck": "pass tsc --noEmit",
-    "build": "pass Next build with 100 static pages and both new dynamic routes",
-    "formatAndDiff": "pass targeted Prettier; generated SQL/snapshot validated structurally; git diff check pass",
-    "adversarialReview": "pass safe identity backfill, exact-set two-phase reorder, nested ownership, material compatibility, empty-only delete, draft revision transaction, no snapshot rewrite, HTTP/action binding and foundation-only boundary",
-    "migrationExecution": "not performed",
-    "realDatabaseAccess": "not performed"
+    "build": "pass Next build with 100 static pages",
+    "formatAndDiff": "pass targeted Prettier and git diff check",
+    "adversarialReview": "pass stable identity, exact-set reorder, draft-only controls, empty-only deletion, material-compatible membership, orphan visibility, published read-only, no public-id entry and no backend/schema/permission/snapshot change"
   },
   "resumeAnchor": {
     "findingId": "F-0094",
-    "task": "paper composer UI structure management follow-up",
-    "condition": "foundation closeout complete; F-0094 remains open"
+    "task": "paper structure management UI final closure",
+    "condition": "backend foundation b91f6e0 is closed and synced"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0094-paper-structure-foundation-2026-07-21"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+  currentTaskId: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -273,6 +273,8 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
     - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
     - p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
+    - p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+    - p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -331,6 +333,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-user-effective-authorization-read-model-2026-07-21
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
     - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
+    - p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -424,81 +427,78 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-question-binding-eligibility-2026-07-21: closed
     p1-remediation-rc-05-material-reference-snapshot-fact-source-2026-07-21: closed
     p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21: closed
-    p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21: in_progress
+    p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21: closed
+    p1-remediation-rc-05-paper-structure-management-ui-2026-07-21: in_progress
 activeTasks:
-  - id: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
-    title: Paper structure identity and command foundation
-    phase: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+  - id: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
+    title: Paper structure management UI
+    phase: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
     status: in_progress
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0094_backend_foundation_only
-    branch: feat/paper-structure-identity-commands
-    objective: add stable paper_section identity and independent draft-only paper_section/question_group lifecycle and membership commands as the backend foundation for F-0094 without claiming UI or finding closure
+    productClosureContribution: F-0094_final_closure
+    branch: feat/paper-structure-management-ui
+    objective: expose the stable paper_section and question_group commands in the existing draft composer with container lifecycle, ordering, subtotal and compatible membership controls, then close F-0094
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-05
     findingIds:
       - F-0094
-    executionStage: implementation_validated_adversarially_reviewed_preparing_final_index
+    executionStage: product_validated_adversarially_reviewed_preparing_atomic_closeout
+    findingStatus: acceptance_satisfied_pending_atomic_closeout
     riskBoundary:
-      category: schema_migration_source_and_database_application_structure_commands
-      approvalId: guardian-f0094-paper-structure-foundation-2026-07-21
-      schemaOrMigrationChange: true
+      category: low_risk_existing_admin_UI_consumer
+      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: future_composer_UI_to_two_structure_collection_routes_to_paper_service_repository_and_paper_section_question_group_schema
-      coreFiles: 17
-      contingencyFiles: 12
+      chain: AdminPaperComposerPage_to_existing_paper_section_and_question_group_routes_to_validated_foundation
+      coreFiles: 4
+      contingencyFiles: 2
       sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      requirements: module_02_independent_paper_section_and_question_group_identity_lifecycle_order_and_subtotals
-      confirmedResidualRootCause: paper_section_has_no_public_identity_and_both_containers_are_implicit_question_write_side_effects_without_independent_commands
+      requirements: module_02_container_lifecycle_order_subtotal_and_draft_group_membership
+      confirmedResidualRootCause: backend_foundation_is_complete_but_composer_still_addresses_sections_by_sort_order_and_exposes_no_container_or_membership_commands
     expectedAcceptance:
-      - paper_section_and_question_group_have_stable_public_identity_and_same_paper_order_constraints
-      - draft_only_create_update_reorder_delete_commands_use_expected_revision_and_one_transaction
-      - nonempty_container_delete_cross_paper_identity_and_incompatible_group_membership_fail_closed
-      - paper_question_can_move_between_compatible_group_or_standalone_state_without_snapshot_rewrite
-      - no_UI_closure_migration_execution_permission_learner_snapshot_or_independent_finding_claim
+      - draft_composer_manages_section_create_rename_reorder_and_empty_delete_by_public_identity
+      - draft_composer_manages_group_rename_reorder_empty_delete_and_compatible_question_membership
+      - material_group_and_section_subtotals_and_real_hierarchy_are_visible
+      - published_and_archived_papers_remain_read_only_and_no_public_id_entry_is_added
+      - backend_schema_permissions_and_learner_snapshots_remain_unchanged
     closeoutProjection:
-      current: product_candidate_validated_and_adversarially_reviewed_preparing_final_index
-      triggers: final_validation_and_adversarial_review_green_with_unchanged_base_scope_and_risk
-      successProjection: foundation_only_single_commit_ff_only_master_canonical_push_sync_cleanup_then_low_risk_UI_followup
+      current: product_validated_adversarially_reviewed_preparing_atomic_closeout
+      triggers: focused_lint_typecheck_build_and_adversarial_review_green_with_exact_diff
+      successProjection: F0094_closed_single_commit_ff_only_master_canonical_push_sync_cleanup_then_next_P1
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     verificationEvidence:
-      approvalId: guardian-f0094-paper-structure-foundation-2026-07-21
-      tddRed: expected_8_failures_across_schema_validator_and_repository_safety_contracts
-      focusedAndAffectedRegression: pass_111_of_111_across_13_files_after_test_contract_alignment
-      lint: pass_all_changed_product_and_test_TypeScript
+      tddRed: expected_2_missing_structure_management_interaction_failures
+      focusedAndAffectedRegression: pass_22_of_22_across_2_files
+      lint: pass_changed_composer_and_interaction_test
       typecheck: pass_tsc_noEmit
-      build: pass_next_build_100_static_pages_including_two_new_routes
-      formatAndDiff: pass_targeted_prettier_generated_snapshot_structure_and_git_diff_check
-      e2e: not_required_foundation_static_level_only
-      mainThreadAdversarialReview: pass_safe_identity_backfill_deterministic_two_phase_exact_set_reorder_nested_ownership_material_compatibility_empty_delete_draft_revision_transaction_no_snapshot_rewrite_method_action_binding_and_F0094_partial_only
+      build: pass_next_build_100_static_pages
+      formatAndDiff: pass_targeted_prettier_and_git_diff_check
+      e2e: not_required_interactions_covered_by_real_DOM_focused_tests_and_no_browser_only_contract
+      mainThreadAdversarialReview: pass_stable_identity_exact_set_order_draft_only_empty_delete_material_compatibility_orphan_visibility_no_public_id_entry_no_permission_backend_schema_or_snapshot_change
     metrics:
-      mandatoryFreshApprovals: 1_guardian_task_bound_schema_conditional_closeout
+      mandatoryFreshApprovals: 0_low_risk_standing_closeout
       preventableScopeMissApprovals: 0
-      testOnlyExpansions: 1_existing_formal_draft_sourceDescription_assertion
+      testOnlyExpansions: 0
       candidateReapprovals: 0
-      approvalWaitTurns: 3
-      productValueTime: 28m_JIT_TDD_schema_repository_service_routes_validation_and_adversarial_correction
-      mechanismOverhead: 7m_contract_state_guardian_wait_generation_freeze_and_closeout_preparation
+      approvalWaitTurns: 0
+      productValueTime: 24m_TDD_structure_hierarchy_lifecycle_membership_and_regression
+      mechanismOverhead: 4m_contract_state_validation_and_closeout_preparation
       guardSmokeChanges: 0
-    resumeAnchor:
-      findingId: F-0094
-      task: paper_composer_UI_structure_management_follow_up
-      condition: foundation_closeout_complete_F0094_remains_open
     previousTaskCloseout:
-      taskId: p1-remediation-rc-05-knowledge-recommendation-stale-review-guard-2026-07-21
-      findingId: F-0077
-      productClosureContribution: F-0077
-      commit: 7138c89b5a5e434298496bfe3ca9c281e2764ab0
-      candidateTree: 0f7a2d31c9db8d81c0a2b47bad1973539dce721e
+      taskId: p1-remediation-rc-05-paper-structure-identity-commands-2026-07-21
+      findingId: F-0094
+      productClosureContribution: F-0094_backend_foundation_only
+      commit: b91f6e0aa0520bda0a4f64cca5ed405146324dc9
+      candidateTree: 41e1a142b2561116f9ccd7a4242798a950177548
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      approvalId: guardian-f0094-paper-structure-foundation-2026-07-21
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

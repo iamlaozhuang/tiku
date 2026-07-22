@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -40,6 +41,7 @@ const paper: PaperDraftDto = {
   questionCount: 1,
   paperSections: [
     {
+      publicId: "paper_section_public_1",
       title: "单项选择题",
       description: null,
       sortOrder: 1,
@@ -256,6 +258,14 @@ function installComposerFetch(
         });
       }
 
+      if (
+        (url === `/api/v1/papers/${paperOverride.publicId}/paper-sections` ||
+          url === `/api/v1/papers/${paperOverride.publicId}/question-groups`) &&
+        ["POST", "PATCH", "DELETE"].includes(init?.method ?? "")
+      ) {
+        return jsonResponse({ code: 0, message: "ok", data: {} });
+      }
+
       throw new Error(`Unexpected request: ${url}`);
     });
 }
@@ -411,6 +421,7 @@ describe("AdminPaperComposerPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/已发布，只读查看/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "从题库选题" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "管理试卷结构" })).toBeNull();
     expect(screen.queryByRole("button", { name: "编辑题目设置" })).toBeNull();
   });
 
@@ -662,6 +673,307 @@ describe("AdminPaperComposerPage", () => {
         score: "4.5",
         sortOrder: 1,
         paperSection: { title: "单项选择题", sortOrder: 1 },
+      });
+    });
+  });
+
+  it("manages paper_section lifecycle by stable identity and exact ordering", async () => {
+    localStorage.setItem("tiku.localSessionToken", "test-session");
+    const structuredPaper: PaperDraftDto = {
+      ...paper,
+      revision: 4,
+      paperSections: [
+        paper.paperSections[0],
+        {
+          publicId: "paper_section_public_2",
+          title: "综合应用题",
+          description: "综合应用说明",
+          sortOrder: 2,
+          totalScore: "0.0",
+          paperQuestions: [],
+        },
+      ],
+    };
+    const fetchMock = installComposerFetch(structuredPaper);
+
+    render(<AdminPaperComposerPage paperPublicId={paper.publicId} />);
+    await screen.findByRole("heading", { name: paper.name });
+    fireEvent.click(screen.getByRole("button", { name: "管理试卷结构" }));
+
+    const sectionNameInput = screen.getByLabelText("大题名称：综合应用题");
+    fireEvent.change(sectionNameInput, {
+      target: { value: "综合实务题" },
+    });
+    fireEvent.click(
+      within(sectionNameInput.closest("form") as HTMLFormElement).getByRole(
+        "button",
+        { name: "保存大题" },
+      ),
+    );
+    await waitFor(() => {
+      const updateCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/paper-sections") &&
+          init?.method === "PATCH" &&
+          JSON.parse(String(init.body)).action === "update",
+      );
+      expect(JSON.parse(String(updateCall?.[1]?.body))).toEqual({
+        action: "update",
+        expectedRevision: 4,
+        paperSectionPublicId: "paper_section_public_2",
+        title: "综合实务题",
+        description: "综合应用说明",
+      });
+    });
+
+    fireEvent.change(screen.getByLabelText("新大题名称"), {
+      target: { value: "案例分析题" },
+    });
+    fireEvent.change(screen.getByLabelText("新大题说明"), {
+      target: { value: "阅读案例后作答" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "新增大题" }));
+
+    await waitFor(() => {
+      const createCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/paper-sections") && init?.method === "POST",
+      );
+      expect(JSON.parse(String(createCall?.[1]?.body))).toEqual({
+        action: "create",
+        expectedRevision: 4,
+        title: "案例分析题",
+        description: "阅读案例后作答",
+        sortOrder: 3,
+      });
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "上移大题 综合应用题" }),
+    );
+    await waitFor(() => {
+      const reorderCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/paper-sections") &&
+          init?.method === "PATCH" &&
+          JSON.parse(String(init.body)).action === "reorder",
+      );
+      expect(JSON.parse(String(reorderCall?.[1]?.body))).toEqual({
+        action: "reorder",
+        expectedRevision: 4,
+        paperSectionPublicIds: [
+          "paper_section_public_2",
+          "paper_section_public_1",
+        ],
+      });
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "删除空大题 综合应用题" }),
+    );
+    await waitFor(() => {
+      const deleteCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/paper-sections") &&
+          init?.method === "DELETE",
+      );
+      expect(JSON.parse(String(deleteCall?.[1]?.body))).toEqual({
+        action: "delete",
+        expectedRevision: 4,
+        paperSectionPublicId: "paper_section_public_2",
+      });
+    });
+  });
+
+  it("shows question_group subtotal and moves a compatible question by public identity", async () => {
+    localStorage.setItem("tiku.localSessionToken", "test-session");
+    const groupedPaper: PaperDraftDto = {
+      ...paper,
+      revision: 6,
+      paperSections: [
+        {
+          ...paper.paperSections[0],
+          paperQuestions: [
+            {
+              ...paper.paperSections[0].paperQuestions[0],
+              materialSnapshot: {
+                materialPublicId: "material_public_1",
+                title: "案例材料",
+                contentRichText: "<p>案例正文</p>",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+              },
+            },
+          ],
+        },
+      ],
+      questionGroups: [
+        {
+          publicId: "question_group_public_1",
+          paperSectionPublicId: "paper_section_public_1",
+          title: "案例题组",
+          materialPublicId: "material_public_1",
+          materialSnapshot: {
+            materialPublicId: "material_public_1",
+            title: "案例材料",
+            contentRichText: "<p>案例正文</p>",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+          },
+          sortOrder: 1,
+          questionCount: 0,
+          totalScore: "0.0",
+        },
+        {
+          publicId: "question_group_public_2",
+          paperSectionPublicId: "paper_section_public_1",
+          title: "备用题组",
+          materialPublicId: "material_public_1",
+          materialSnapshot: {
+            materialPublicId: "material_public_1",
+            title: "案例材料",
+            contentRichText: "<p>案例正文</p>",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+          },
+          sortOrder: 2,
+          questionCount: 0,
+          totalScore: "0.0",
+        },
+        {
+          publicId: "question_group_public_incompatible",
+          paperSectionPublicId: "paper_section_public_1",
+          title: "不兼容题组",
+          materialPublicId: "material_public_other",
+          materialSnapshot: {
+            materialPublicId: "material_public_other",
+            title: "另一份材料",
+            contentRichText: "<p>另一份案例正文</p>",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+          },
+          sortOrder: 3,
+          questionCount: 0,
+          totalScore: "0.0",
+        },
+      ],
+    };
+    const fetchMock = installComposerFetch(groupedPaper);
+
+    render(<AdminPaperComposerPage paperPublicId={paper.publicId} />);
+    await screen.findByRole("heading", { name: paper.name });
+    fireEvent.click(screen.getByRole("button", { name: "管理试卷结构" }));
+
+    expect(screen.getByText("案例题组 · 0 题 · 0.0 分")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "案例题组" }),
+    ).toBeInTheDocument();
+
+    const groupNameInput = screen.getByLabelText("题组名称：案例题组");
+    fireEvent.change(groupNameInput, { target: { value: "案例分析题组" } });
+    fireEvent.click(
+      within(groupNameInput.closest("form") as HTMLFormElement).getByRole(
+        "button",
+        { name: "保存题组" },
+      ),
+    );
+    await waitFor(() => {
+      const updateCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/question-groups") &&
+          init?.method === "PATCH" &&
+          JSON.parse(String(init.body)).action === "update",
+      );
+      expect(JSON.parse(String(updateCall?.[1]?.body))).toEqual({
+        action: "update",
+        expectedRevision: 6,
+        questionGroupPublicId: "question_group_public_1",
+        title: "案例分析题组",
+      });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "下移题组 案例题组" }));
+    await waitFor(() => {
+      const reorderCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/question-groups") &&
+          init?.method === "PATCH" &&
+          JSON.parse(String(init.body)).action === "reorder",
+      );
+      expect(JSON.parse(String(reorderCall?.[1]?.body))).toEqual({
+        action: "reorder",
+        expectedRevision: 6,
+        paperSectionPublicId: "paper_section_public_1",
+        questionGroupPublicIds: [
+          "question_group_public_2",
+          "question_group_public_1",
+          "question_group_public_incompatible",
+        ],
+      });
+    });
+
+    fireEvent.change(screen.getByLabelText("新题组名称"), {
+      target: { value: "新材料题组" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "新增材料题组" }));
+    await waitFor(() => {
+      const createCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/question-groups") && init?.method === "POST",
+      );
+      expect(JSON.parse(String(createCall?.[1]?.body))).toEqual({
+        action: "create",
+        expectedRevision: 6,
+        paperSectionPublicId: "paper_section_public_1",
+        materialPublicId: "material_public_1",
+        title: "新材料题组",
+        sortOrder: 4,
+      });
+    });
+
+    const membershipSelect = screen.getByLabelText("题组归属：可读题干摘要");
+    expect(
+      within(membershipSelect).queryByRole("option", {
+        name: "不兼容题组",
+      }),
+    ).toBeNull();
+    fireEvent.change(membershipSelect, {
+      target: { value: "question_group_public_1" },
+    });
+
+    await waitFor(() => {
+      const membershipCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/question-groups") &&
+          init?.method === "PATCH" &&
+          JSON.parse(String(init.body)).action === "set_question_membership",
+      );
+      expect(JSON.parse(String(membershipCall?.[1]?.body))).toEqual({
+        action: "set_question_membership",
+        expectedRevision: 6,
+        paperQuestionPublicId: "paper_question_public_1",
+        questionGroupPublicId: "question_group_public_1",
+        paperSectionPublicId: null,
+      });
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "删除空题组 案例题组" }),
+    );
+    await waitFor(() => {
+      const deleteCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input).endsWith("/question-groups") &&
+          init?.method === "DELETE",
+      );
+      expect(JSON.parse(String(deleteCall?.[1]?.body))).toEqual({
+        action: "delete",
+        expectedRevision: 6,
+        questionGroupPublicId: "question_group_public_1",
       });
     });
   });
