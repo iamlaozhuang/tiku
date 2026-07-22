@@ -13,7 +13,9 @@ export type AiCallLogFunctionType =
   | "ai_explanation"
   | "ai_hint"
   | "kn_recommendation"
-  | "learning_suggestion";
+  | "learning_suggestion"
+  | "ai_question_generation"
+  | "ai_paper_generation";
 
 export type AiCallLogStatus = "success" | "failed";
 

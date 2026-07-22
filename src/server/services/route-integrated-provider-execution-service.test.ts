@@ -21,6 +21,7 @@ describe("shared route-integrated Provider execution primitives", () => {
       providerCallExecuted: false,
       envSecretAccessed: false,
       providerConfigurationRead: false,
+      aiCallLogPublicId: null,
       executionSummary: {
         requestCount: 0,
         resultStatus: "blocked",

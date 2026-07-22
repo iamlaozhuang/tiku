@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 
 import type { AdminAiGenerationRouteIntegratedProviderRequestContext } from "../contracts/admin-ai-generation-runtime-bridge-contract";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 import {
   createOwnerPreviewQwenAdminRuntimeBridgeControl,
   createOwnerPreviewQwenPersonalRuntimeBridgeControl,
@@ -148,6 +150,98 @@ describe("owner preview Qwen visible AI runtime control", () => {
     ).resolves.toBeNull();
   });
 
+  it("reserves the deterministic running log against the exact claimed task scope", async () => {
+    const promptTemplate = promptTemplateDefinitions.find(
+      (definition) => definition.aiFuncType === "ai_question_generation",
+    );
+    if (promptTemplate === undefined) {
+      throw new Error("missing question generation prompt fixture");
+    }
+    const reserveAiCallLog = vi.fn(async (input) => ({
+      publicId: input.log.publicId,
+    }));
+    const control = createOwnerPreviewQwenAdminRuntimeBridgeControl({
+      ...createOwnerPreviewOptions(
+        explicitLocalOwnerPreviewProviderGate,
+        "synthetic-runtime-key",
+      ),
+      lifecycleRepository: { reserveAiCallLog },
+    });
+    const reserve = control?.providerExecution?.reserveAiCallLog;
+    expect(reserve).toBeDefined();
+    if (reserve === undefined) {
+      throw new Error("missing owner preview log reservation control");
+    }
+
+    const attempt = {
+      taskPublicId: "admin-ai-task-public-001",
+      retryCount: 1,
+      startedAt: new Date("2026-07-22T12:00:00.123Z"),
+    };
+    const result = await reserve({
+      requestContext: {
+        actorPublicId: "admin-public-001",
+        taskPublicId: attempt.taskPublicId,
+        resultPublicId: "admin-ai-result-public-001",
+        requestPublicId: "admin-ai-request-public-001",
+        routeWorkflow: "content_ai_question_generation",
+        taskType: "ai_question_generation",
+        workspace: "content",
+        generationKind: "question",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        organizationPublicId: null,
+        generationParameters: null,
+      },
+      governanceContext: {
+        modelConfigSnapshot: createModelConfigSnapshot({
+          providerPublicId: "model-provider-public-001",
+          providerKey: "alibaba_qwen",
+          providerDisplayName: "Alibaba Qwen",
+          modelConfigPublicId: "model-config-public-001",
+          aiFuncType: "ai_question_generation",
+          modelName: "qwen3.7-max",
+          displayName: "Qwen Question Generation",
+          configVersion: 1,
+          pricingVersion: null,
+          inputTokenPriceCnyPerMillion: null,
+          outputTokenPriceCnyPerMillion: null,
+          timeoutSecond: 60,
+          maxRetryCount: 0,
+          fallbackModelConfigPublicId: null,
+          promptTemplateKey: promptTemplate.promptTemplateKey,
+          promptTemplateVersion: promptTemplate.version,
+        }),
+        promptTemplate: {
+          ...promptTemplate,
+          aiFuncType: "ai_question_generation",
+        },
+      },
+      groundingSummary: { evidenceStatus: "sufficient", citationCount: 2 },
+      attempt,
+      startedAt: new Date("2026-07-22T12:00:01.000Z"),
+    });
+
+    expect(result.publicId).toMatch(/^ai-call-log-generation-[a-f0-9]{64}$/u);
+    expect(reserveAiCallLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scope: {
+          taskPublicId: attempt.taskPublicId,
+          ownerType: "platform",
+          ownerPublicId: "platform_content_review_pool",
+          organizationPublicId: null,
+          taskTypes: ["ai_question_generation"],
+        },
+        attempt,
+        log: expect.objectContaining({
+          publicId: result.publicId,
+          callStatus: "running",
+          completedAt: null,
+        }),
+      }),
+    );
+  });
+
   it.each([
     {
       taskType: "ai_question_generation" as const,
@@ -210,6 +304,7 @@ describe("owner preview Qwen visible AI runtime control", () => {
       const generationKind =
         taskType === "ai_question_generation" ? "question" : "paper";
       const requestContext = {
+        actorPublicId: "admin-public-grounding-test",
         taskPublicId: `synthetic_task_${generationKind}`,
         resultPublicId: `synthetic_result_${generationKind}`,
         requestPublicId: `synthetic_request_${generationKind}`,

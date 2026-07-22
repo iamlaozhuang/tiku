@@ -57,6 +57,7 @@ function createControl(
     contentPreviewMasked: "masked materialized preview",
     evidenceStatus: "none",
     citationCount: 0,
+    aiCallLogPublicId: "ai-call-log-materialization-121",
     now: () => new Date("2026-06-19T00:00:00.000Z"),
     persistDraftResult: async () => ({
       code: 0,
@@ -137,7 +138,7 @@ describe("personal AI route-integrated result materialization service", () => {
         },
         evidenceStatus: "none",
         citationCount: 0,
-        aiCallLogPublicId: null,
+        aiCallLogPublicId: "ai-call-log-materialization-121",
         createdAt: new Date("2026-06-19T00:00:00.000Z"),
       }),
     ]);

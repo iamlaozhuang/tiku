@@ -2,9 +2,10 @@ import {
   adminAiGenerationFormalAdoption,
   adminAiGenerationResult,
   adminAiGenerationTaskMetadata,
+  aiCallLog,
   aiGenerationTask,
 } from "@/db/schema";
-import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import type {
   AdminAiGenerationResultPersistenceGateway,
@@ -322,7 +323,58 @@ export async function persistAdminAiGenerationDraftResultAndCompleteTask(
   input: InsertAdminAiGenerationDraftResultInput,
 ): Promise<AdminAiGenerationResultPersistenceRow | null> {
   return database.transaction(async (transaction) => {
-    const [insertedRow] = await transaction
+    if (input.aiCallLogPublicId === null) {
+      throw new Error("admin AI generation success requires an ai_call_log.");
+    }
+
+    const boundTasks = await transaction
+      .select({
+        id: aiGenerationTask.id,
+        aiCallLogId: aiGenerationTask.ai_call_log_id,
+      })
+      .from(aiGenerationTask)
+      .where(
+        and(
+          createAdminAiGenerationTaskUpdateCondition(input),
+          createRunningAttemptCondition(input.attempt),
+          eq(aiGenerationTask.ai_call_log_public_id, input.aiCallLogPublicId),
+        ),
+      )
+      .for("update")
+      .limit(2);
+
+    if (boundTasks.length !== 1) {
+      throw new Error("admin AI generation attempt/log binding was lost.");
+    }
+    const boundTask = boundTasks[0];
+    const boundAiCallLogId = boundTask.aiCallLogId;
+    if (boundAiCallLogId === null) {
+      throw new Error("admin AI generation attempt/log binding was lost.");
+    }
+
+    const finalizedLogs = await transaction
+      .update(aiCallLog)
+      .set({
+        call_status: "success",
+        completed_at: input.createdAt,
+      })
+      .where(
+        and(
+          eq(aiCallLog.id, boundAiCallLogId),
+          eq(aiCallLog.public_id, input.aiCallLogPublicId),
+          sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+        ),
+      )
+      .returning({ id: aiCallLog.id });
+
+    if (
+      finalizedLogs.length !== 1 ||
+      finalizedLogs[0].id !== boundAiCallLogId
+    ) {
+      throw new Error("admin AI generation ai_call_log finalization was lost.");
+    }
+
+    const insertedRows = await transaction
       .insert(adminAiGenerationResult)
       .values(createAdminAiGenerationResultInsertValue(input))
       .onConflictDoNothing({
@@ -330,22 +382,25 @@ export async function persistAdminAiGenerationDraftResultAndCompleteTask(
       })
       .returning(adminAiGenerationResultSelection);
 
-    if (insertedRow === undefined) {
-      return null;
+    if (insertedRows.length !== 1) {
+      throw new Error("admin AI generation result persistence conflicted.");
     }
+    const insertedRow = insertedRows[0];
 
-    const [updatedTaskRow] = await transaction
+    const updatedTaskRows = await transaction
       .update(aiGenerationTask)
       .set(createAdminAiGenerationResultTaskUpdateValue(input))
       .where(
         and(
           createAdminAiGenerationTaskUpdateCondition(input),
           createRunningAttemptCondition(input.attempt),
+          eq(aiGenerationTask.ai_call_log_id, boundAiCallLogId),
+          eq(aiGenerationTask.ai_call_log_public_id, input.aiCallLogPublicId),
         ),
       )
       .returning({ public_id: aiGenerationTask.public_id });
 
-    if (updatedTaskRow === undefined) {
+    if (updatedTaskRows.length !== 1) {
       throw new Error("admin AI generation task completion attempt was lost.");
     }
 
@@ -420,11 +475,37 @@ async function findResultByTaskPublicId(
   const [row] = await database
     .select(adminAiGenerationResultWithFormalAdoptionSelection)
     .from(adminAiGenerationResult)
+    .innerJoin(
+      aiGenerationTask,
+      eq(adminAiGenerationResult.ai_generation_task_id, aiGenerationTask.id),
+    )
+    .innerJoin(
+      aiCallLog,
+      and(
+        eq(aiGenerationTask.ai_call_log_id, aiCallLog.id),
+        eq(adminAiGenerationResult.ai_call_log_public_id, aiCallLog.public_id),
+      ),
+    )
     .leftJoin(
       adminAiGenerationFormalAdoption,
       createAdminAiGenerationFormalAdoptionReadCondition(),
     )
-    .where(createAdminAiGenerationResultByTaskCondition(query))
+    .where(
+      and(
+        createAdminAiGenerationResultByTaskCondition(query),
+        createAdminAiGenerationTaskLookupCondition(query),
+        eq(aiGenerationTask.task_status, "succeeded"),
+        eq(
+          aiGenerationTask.result_public_id,
+          adminAiGenerationResult.public_id,
+        ),
+        eq(
+          aiGenerationTask.ai_call_log_public_id,
+          adminAiGenerationResult.ai_call_log_public_id,
+        ),
+        eq(aiCallLog.call_status, "success"),
+      ),
+    )
     .limit(1);
 
   return row === undefined

@@ -38,10 +38,12 @@ export type AdminAiGenerationRuntimeBridgeBlockedReason =
   | "cost_calibration_gate_blocked"
   | "real_provider_execution_requires_follow_up_task"
   | "insufficient_grounding_evidence"
+  | "governance_context_unavailable"
   | "missing_provider_credential"
   | "provider_error"
   | "timeout"
-  | "redaction_violation";
+  | "redaction_violation"
+  | "ai_call_log_unavailable";
 
 export type AdminAiGenerationRuntimeBridgeInput = {
   actorPublicId: string;
@@ -63,6 +65,7 @@ export type AdminAiGenerationRuntimeBridgeRouteWorkflow =
   | "organization_ai_paper_generation";
 
 export type AdminAiGenerationRouteIntegratedProviderRequestContext = {
+  actorPublicId: string;
   taskPublicId: string;
   resultPublicId: string;
   requestPublicId: string;
@@ -123,6 +126,7 @@ export type AdminAiGenerationRuntimeBridgeDto = {
   redactionStatus: "redacted";
   providerMetadata: AiGenerationRouteIntegratedProviderMetadata;
   providerExecutionSummary: AiGenerationRouteIntegratedProviderExecutionSummary;
+  aiCallLogPublicId: string | null;
   visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
   providerRequestContext: AdminAiGenerationRouteIntegratedProviderRequestContext;
   blockedReasons: AdminAiGenerationRuntimeBridgeBlockedReason[];

@@ -84,6 +84,16 @@ export type AppendAiCallLogInput = {
   completedAt: Date | null;
 };
 
+export type UpdateRunningAiCallLogObservationInput = {
+  publicId: string;
+  attempt: {
+    taskPublicId: string;
+    retryCount: number;
+    startedAt: Date;
+  };
+  observation: AppendAiCallLogInput;
+};
+
 export type AppendModelConfigAuditLogInput = Omit<
   AuditLogSummaryDto,
   "publicId" | "createdAt"
@@ -133,6 +143,9 @@ export type AdminAiAuditLogRuntimeRepositories = {
     isActive: boolean,
   ): Promise<boolean>;
   appendAiCallLog(input: AppendAiCallLogInput): Promise<AiCallLogSummaryDto>;
+  updateRunningAiCallLogObservation?(
+    input: UpdateRunningAiCallLogObservationInput,
+  ): Promise<{ publicId: string }>;
   enableModelConfig?(publicId: string): Promise<boolean>;
   disableModelConfig?(publicId: string): Promise<boolean>;
   appendAuditLog?(input: AppendModelConfigAuditLogInput): Promise<void>;
@@ -1045,6 +1058,48 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
       );
     },
 
+    async updateRunningAiCallLogObservation(input) {
+      const database = getDatabase();
+      const observation = input.observation;
+      const updatedRows = await executeSql<{ public_id: string }>(
+        database,
+        sql`
+          update ai_call_log as call_log
+          set
+            response_redacted_snapshot = ${JSON.stringify(observation.responseRedactedSnapshot)}::jsonb,
+            error_redacted_snapshot = ${JSON.stringify(observation.errorRedactedSnapshot)}::jsonb,
+            citation_redacted_snapshot = ${JSON.stringify(observation.citationRedactedSnapshot)}::jsonb,
+            prompt_token_count = ${observation.promptTokenCount},
+            completion_token_count = ${observation.completionTokenCount},
+            total_token_count = ${observation.totalTokenCount},
+            estimated_cost_cny = null,
+            latency_ms = ${observation.latencyMs}
+          where call_log.public_id = ${input.publicId}
+            and call_log.call_status = 'running'
+            and call_log.completed_at is null
+            and exists (
+              select 1
+              from ai_generation_task as task
+              where task.public_id = ${input.attempt.taskPublicId}
+                and task.task_status = 'running'
+                and task.retry_count = ${input.attempt.retryCount}
+                and task.started_at = ${input.attempt.startedAt.toISOString()}
+                and task.ai_call_log_id = call_log.id
+                and task.ai_call_log_public_id = call_log.public_id
+            )
+          returning call_log.public_id
+        `,
+      );
+
+      if (updatedRows.length !== 1) {
+        throw new Error(
+          "Expected exactly one running ai_call_log observation to be updated.",
+        );
+      }
+
+      return { publicId: input.publicId };
+    },
+
     async enableModelConfig(publicId) {
       return updateModelConfigEnabled(getDatabase(), publicId, true);
     },
@@ -1172,7 +1227,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               started_at,
               completed_at
             from ai_call_log
-            where ${keywordCondition}
+            where call_status in ('success', 'failed')
+              and ${keywordCondition}
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
               and ${userPublicIdCondition}
@@ -1191,7 +1247,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         sql`
             select count(*)::int as value
             from ai_call_log
-            where ${keywordCondition}
+            where call_status in ('success', 'failed')
+              and ${keywordCondition}
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
               and ${userPublicIdCondition}
@@ -1274,7 +1331,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               coalesce(sum(total_token_count), 0)::int as total_token_count,
               coalesce(sum(estimated_cost_cny), 0)::text as estimated_cost_cny
             from ai_call_log
-            where ${keywordCondition}
+            where call_status in ('success', 'failed')
+              and ${keywordCondition}
               and ${aiFuncTypeCondition}
               and ${callStatusCondition}
               and ${userPublicIdCondition}
@@ -1300,7 +1358,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             from (
               select 1
               from ai_call_log
-              where ${keywordCondition}
+              where call_status in ('success', 'failed')
+                and ${keywordCondition}
                 and ${aiFuncTypeCondition}
                 and ${callStatusCondition}
                 and ${userPublicIdCondition}
@@ -1568,6 +1627,8 @@ function toAdminAiFuncType(value: string): AdminAiFunctionType {
   if (
     value === "kn_recommendation" ||
     value === "learning_suggestion" ||
+    value === "ai_question_generation" ||
+    value === "ai_paper_generation" ||
     value === "ai_scoring" ||
     value === "ai_explanation" ||
     value === "ai_hint"

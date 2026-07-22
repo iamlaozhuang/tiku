@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 
 import {
   createPersonalAiGenerationTaskCancelRouteHandler,
@@ -22,7 +23,11 @@ import type {
 } from "../repositories/question-repository";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
-import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
+import type {
+  AiGenerationRouteIntegratedGovernanceContext,
+  AiGenerationRouteIntegratedGroundingContext,
+} from "../contracts/route-integrated-provider-execution-contract";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 import type { SessionService } from "./session-service";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type { EffectiveAuthorizationService } from "./effective-authorization-service";
@@ -85,6 +90,66 @@ const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
       },
     ],
   };
+
+function createTestPersonalGovernanceContext(
+  taskType: "ai_question_generation" | "ai_paper_generation",
+): AiGenerationRouteIntegratedGovernanceContext {
+  const promptTemplate = promptTemplateDefinitions.find(
+    (definition) => definition.aiFuncType === taskType,
+  );
+  if (promptTemplate === undefined) {
+    throw new Error("missing personal route prompt fixture");
+  }
+
+  return {
+    modelConfigSnapshot: createModelConfigSnapshot({
+      providerPublicId: "model-provider-personal-route-test",
+      providerKey: "alibaba_qwen",
+      providerDisplayName: "Alibaba Qwen",
+      modelConfigPublicId: `model-config-personal-route-${taskType}`,
+      aiFuncType: taskType,
+      modelName: "qwen3.7-max",
+      displayName: "Qwen Generation",
+      configVersion: 1,
+      pricingVersion: null,
+      inputTokenPriceCnyPerMillion: null,
+      outputTokenPriceCnyPerMillion: null,
+      timeoutSecond: 30,
+      maxRetryCount: 0,
+      fallbackModelConfigPublicId: null,
+      promptTemplateKey: promptTemplate.promptTemplateKey,
+      promptTemplateVersion: promptTemplate.version,
+    }),
+    promptTemplate: { ...promptTemplate, aiFuncType: taskType },
+  };
+}
+
+function withTestPersonalGenerationProvenance(
+  control: NonNullable<
+    PersonalAiGenerationRequestRouteDependencies["runtimeBridgeControl"]
+  >,
+): NonNullable<
+  PersonalAiGenerationRequestRouteDependencies["runtimeBridgeControl"]
+> {
+  if (control.providerExecution === undefined) {
+    return control;
+  }
+
+  return {
+    ...control,
+    providerExecution: {
+      resolveGovernanceContext: ({ requestContext }) =>
+        createTestPersonalGovernanceContext(requestContext.taskType),
+      reserveAiCallLog: async () => ({
+        publicId: "ai-call-log-personal-route-test",
+      }),
+      appendAiCallLog: async () => ({
+        publicId: "ai-call-log-personal-route-test",
+      }),
+      ...control.providerExecution,
+    },
+  };
+}
 const insufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
   {
     ...sufficientGroundingContext,
@@ -498,6 +563,13 @@ function createPersonalAiGenerationRequestRouteHandlers(
         dependencies.lifecycleRepository ??
         createClaimingPersonalAiGenerationLifecycleRepository(),
       ...dependencies,
+      ...(dependencies.runtimeBridgeControl === undefined
+        ? {}
+        : {
+            runtimeBridgeControl: withTestPersonalGenerationProvenance(
+              dependencies.runtimeBridgeControl,
+            ),
+          }),
     },
   );
 }
@@ -3611,6 +3683,7 @@ describe("personal AI generation request route handlers", () => {
             contentPreviewMasked: "masked route result preview",
             evidenceStatus: "none",
             citationCount: 0,
+            aiCallLogPublicId: "ai-call-log-personal-route-test",
             persistDraftResult: async (input) => {
               persistedInputs.push(input);
 

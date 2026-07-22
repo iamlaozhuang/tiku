@@ -21,10 +21,12 @@ export type PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto = {
   failureCategory:
     | "provider_call_blocked"
     | "insufficient_grounding_evidence"
+    | "governance_context_unavailable"
     | "missing_provider_credential"
     | "provider_error"
     | "timeout"
     | "redaction_violation"
+    | "ai_call_log_unavailable"
     | null;
   durationMs: number;
   usageSummary: Record<string, number> | null;
@@ -101,6 +103,7 @@ export type PersonalAiGenerationRuntimeBridgeDto = {
     providerErrorPayload: RedactedJsonObject | null;
   };
   providerExecutionSummary: PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto;
+  aiCallLogPublicId: string | null;
   resultMaterializationSummary: PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto;
   visibleGeneratedContent: PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto;
   paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto;

@@ -28,6 +28,11 @@ import type {
   AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
+
+type AdminAiGenerationLocalContractRuntimeBridgeWithLog =
+  AdminAiGenerationLocalContractRuntimeBridgeDto & {
+    aiCallLogPublicId: string | null;
+  };
 import type {
   AdminAiGenerationResultDto,
   AdminAiGenerationResultPersistenceRepository,
@@ -765,7 +770,7 @@ function resolveAdminAiGenerationTaskHistoryQuery(input: {
 
 function createDefaultAdminAiGenerationRuntimeBridge(
   input: AdminAiGenerationRuntimeBridgeInput,
-): AdminAiGenerationLocalContractRuntimeBridgeDto {
+): AdminAiGenerationLocalContractRuntimeBridgeWithLog {
   const runtimeBridge = buildAdminAiGenerationRuntimeBridgeReadModel(input);
 
   return mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
@@ -775,14 +780,25 @@ function createDefaultAdminAiGenerationRuntimeBridge(
 
 function mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
   runtimeBridge: AdminAiGenerationRuntimeBridgeDto,
-): AdminAiGenerationLocalContractRuntimeBridgeDto {
+): AdminAiGenerationLocalContractRuntimeBridgeWithLog {
   return {
     bridgeStatus: runtimeBridge.bridgeStatus,
     providerCallExecuted: runtimeBridge.providerCallExecuted,
     envSecretAccessed: runtimeBridge.envSecretAccessed,
     providerConfigurationRead: runtimeBridge.providerConfigurationRead,
     costCalibrationExecuted: runtimeBridge.costCalibrationExecuted,
-    executionSummary: runtimeBridge.providerExecutionSummary,
+    executionSummary: {
+      ...runtimeBridge.providerExecutionSummary,
+      failureCategory:
+        runtimeBridge.providerExecutionSummary.failureCategory ===
+        "governance_context_unavailable"
+          ? "provider_call_blocked"
+          : runtimeBridge.providerExecutionSummary.failureCategory ===
+              "ai_call_log_unavailable"
+            ? "provider_error"
+            : runtimeBridge.providerExecutionSummary.failureCategory,
+    },
+    aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
     visibleGeneratedContent: runtimeBridge.visibleGeneratedContent,
     redactionStatus: runtimeBridge.redactionStatus,
     blockedReasons: runtimeBridge.blockedReasons,
@@ -858,7 +874,8 @@ function createUnacceptableAdminAiGenerationResultResponse(
 async function resolveAdminAiGenerationRuntimeBridge(input: {
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   runtimeBridgeInput: AdminAiGenerationRuntimeBridgeInput;
-}): Promise<AdminAiGenerationLocalContractRuntimeBridgeDto> {
+  attempt: AiGenerationTaskAttemptIdentity;
+}): Promise<AdminAiGenerationLocalContractRuntimeBridgeWithLog> {
   if (
     input.runtimeBridgeControl?.bridgeMode === "controlled_runner" &&
     input.runtimeBridgeControl.explicitLocalSwitchPresent === true &&
@@ -871,7 +888,10 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
           runtimeBridgeControl: {
             bridgeMode: "controlled_runner",
             explicitLocalSwitchPresent: true,
-            providerExecution: input.runtimeBridgeControl.providerExecution,
+            providerExecution: {
+              ...input.runtimeBridgeControl.providerExecution,
+              attempt: input.attempt,
+            },
           },
         },
       ),
@@ -1080,12 +1100,13 @@ async function buildAdminAiGenerationLocalContract(input: {
   }
   const attempt = claimResult.attempt;
 
-  let runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
+  let runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeWithLog;
 
   try {
     runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
       runtimeBridgeControl: input.runtimeBridgeControl,
       runtimeBridgeInput,
+      attempt,
     });
   } catch {
     await input.lifecycleRepository.failTask({
@@ -1096,6 +1117,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       taskTypes: [taskPersistence.task.taskType],
       attempt,
       failureCategory: "system_error",
+      aiCallLogPublicId: null,
       finishedAt: input.requestClock(),
     });
     throw new Error("admin AI generation Provider execution unavailable");
@@ -1124,6 +1146,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       failureCategory: resolveAdminAiGenerationLifecycleFailureCategory(
         runtimeBridge.executionSummary.failureCategory,
       ),
+      aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
       finishedAt: input.requestClock(),
     });
     return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
@@ -1152,6 +1175,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       taskTypes: [taskPersistence.task.taskType],
       attempt,
       failureCategory: "system_error",
+      aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
       finishedAt: input.requestClock(),
     });
     throw new Error("admin AI generation paper assembly unavailable");
@@ -1166,6 +1190,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       taskTypes: [taskPersistence.task.taskType],
       attempt,
       failureCategory: "system_error",
+      aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
       finishedAt: input.requestClock(),
     });
     return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
@@ -1230,6 +1255,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       taskTypes: [taskPersistence.task.taskType],
       attempt,
       failureCategory: "system_error",
+      aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
       finishedAt: input.requestClock(),
     });
     throw new Error("admin AI generation result persistence unavailable");
@@ -1475,7 +1501,9 @@ function createAdminAiGenerationResolvedLocalContract(input: {
 function createAdminAiGenerationLocalContractResultInput(input: {
   attempt: AiGenerationTaskAttemptIdentity;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
-  localContract: AdminAiGenerationLocalContractBaseDto;
+  localContract: AdminAiGenerationLocalContractBaseDto & {
+    runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeWithLog;
+  };
   organizationTrainingPaperDraftDetail: OrganizationTrainingPaperDraftDetailSnapshot | null;
   taskPersistence: AdminAiGenerationTaskPersistenceResult;
   createdAt: Date;
@@ -1511,7 +1539,7 @@ function createAdminAiGenerationLocalContractResultInput(input: {
     citationCount:
       input.localContract.runtimeBridge.visibleGeneratedContent
         ?.groundingSummary?.citationCount ?? 0,
-    aiCallLogPublicId: null,
+    aiCallLogPublicId: input.localContract.runtimeBridge.aiCallLogPublicId,
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
     createdAt: input.createdAt,

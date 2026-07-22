@@ -143,6 +143,7 @@ function buildPersonalAiGenerationRuntimeBridgeDto(
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
     providerExecutionSummary: executionOutcome.executionSummary,
+    aiCallLogPublicId: null,
     resultMaterializationSummary:
       createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
     visibleGeneratedContent: null,
@@ -266,6 +267,7 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
     providerExecutionSummary: executionOutcome.executionSummary,
+    aiCallLogPublicId: executionOutcome.aiCallLogPublicId,
     resultMaterializationSummary,
     visibleGeneratedContent: executionOutcome.visibleGeneratedContent,
     paperAssembly: paperAssemblyResult.paperAssembly,
@@ -273,7 +275,15 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
       ? []
       : executionOutcome.executionSummary.failureCategory === null
         ? ["real_provider_execution_requires_fresh_approval"]
-        : [executionOutcome.executionSummary.failureCategory],
+        : [
+            executionOutcome.executionSummary.failureCategory ===
+            "governance_context_unavailable"
+              ? "provider_call_blocked"
+              : executionOutcome.executionSummary.failureCategory ===
+                  "ai_call_log_unavailable"
+                ? "provider_error"
+                : executionOutcome.executionSummary.failureCategory,
+          ],
   };
 }
 

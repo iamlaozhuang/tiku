@@ -33,6 +33,7 @@ export function createAdminAiGenerationRouteIntegratedProviderRequestContext(
   input: AdminAiGenerationRuntimeBridgeInput,
 ): AdminAiGenerationRouteIntegratedProviderRequestContext {
   return {
+    actorPublicId: input.actorPublicId,
     taskPublicId: input.taskPublicId,
     resultPublicId: input.resultPublicId,
     requestPublicId: input.requestPublicId,
@@ -77,6 +78,7 @@ export function buildAdminAiGenerationRuntimeBridgeReadModel(
     redactionStatus: "redacted",
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     providerExecutionSummary: providerDisabledOutcome.executionSummary,
+    aiCallLogPublicId: null,
     visibleGeneratedContent: null,
     providerRequestContext:
       createAdminAiGenerationRouteIntegratedProviderRequestContext(input),
@@ -135,6 +137,26 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
         "insufficient_grounding_evidence",
       ),
+      aiCallLogPublicId: null,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  const governanceContext =
+    control.resolveGovernanceContext === undefined
+      ? null
+      : await control.resolveGovernanceContext({ requestContext });
+
+  if (governanceContext === null) {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "governance_context_unavailable",
+      ),
+      aiCallLogPublicId: null,
       visibleGeneratedContent: null,
     };
   }
@@ -150,6 +172,52 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
         "missing_provider_credential",
       ),
+      aiCallLogPublicId: null,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  if (
+    control.attempt === undefined ||
+    control.reserveAiCallLog === undefined ||
+    control.appendAiCallLog === undefined
+  ) {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "ai_call_log_unavailable",
+      ),
+      aiCallLogPublicId: null,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  const attempt = control.attempt;
+  const startedAt = new Date();
+  let aiCallLogPublicId: string;
+
+  try {
+    const reservation = await control.reserveAiCallLog({
+      requestContext,
+      governanceContext,
+      groundingSummary: createRouteIntegratedGroundingSummary(groundingContext),
+      attempt,
+      startedAt,
+    });
+    aiCallLogPublicId = reservation.publicId;
+  } catch {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "ai_call_log_unavailable",
+      ),
+      aiCallLogPublicId: null,
       visibleGeneratedContent: null,
     };
   }
@@ -167,6 +235,7 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
     },
     requestContext,
     groundingContext,
+    governanceContext,
     providerCredential,
   });
   const executionSummary = ensureAdminRouteIntegratedExecutionSummaryRedacted({
@@ -202,12 +271,42 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       ? visibleContentCheck.visibleGeneratedContent
       : null;
 
+  try {
+    const completedAt = new Date();
+    const log = await control.appendAiCallLog({
+      aiCallLogPublicId,
+      requestContext,
+      governanceContext,
+      groundingSummary: createRouteIntegratedGroundingSummary(groundingContext),
+      attempt,
+      executionSummary: finalExecutionSummary,
+      startedAt,
+      completedAt,
+    });
+    if (log.publicId !== aiCallLogPublicId) {
+      throw new Error("AI generation log observation identity drifted.");
+    }
+  } catch {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: finalExecutionSummary.requestCount === 1,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "ai_call_log_unavailable",
+      ),
+      aiCallLogPublicId,
+      visibleGeneratedContent: null,
+    };
+  }
+
   return {
     realProviderExecutionApproved: true,
     providerCallExecuted: finalExecutionSummary.requestCount === 1,
     envSecretAccessed: true,
     providerConfigurationRead: true,
     executionSummary: finalExecutionSummary,
+    aiCallLogPublicId,
     visibleGeneratedContent,
   };
 }
@@ -236,6 +335,7 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
         : undefined;
     const instructions = createAdminRouteIntegratedInstruction(
       input.requestContext,
+      input.governanceContext,
       input.groundingContext,
     );
     const result = await generateText({
@@ -313,6 +413,7 @@ function ensureAdminRouteIntegratedExecutionSummaryRedacted(input: {
 
 function createAdminRouteIntegratedInstruction(
   requestContext: AdminAiGenerationRouteIntegratedProviderRequestContext,
+  governanceContext: AdminAiGenerationRouteIntegratedProviderExecutionInput["governanceContext"],
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
 ) {
   const workspaceLabel =
@@ -325,6 +426,7 @@ function createAdminRouteIntegratedInstruction(
     }`,
     draftInstruction:
       "不要写入正式题库；输出可评审的结构化题目草稿和关键检查点。",
+    governanceContext,
     groundingContext,
   });
 }
@@ -375,6 +477,7 @@ function createAdminAiGenerationRuntimeBridgeReadModelFromProviderOutcome(input:
     redactionStatus: "redacted",
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     providerExecutionSummary: input.providerExecutionOutcome.executionSummary,
+    aiCallLogPublicId: input.providerExecutionOutcome.aiCallLogPublicId,
     visibleGeneratedContent:
       input.providerExecutionOutcome.visibleGeneratedContent,
     providerRequestContext:

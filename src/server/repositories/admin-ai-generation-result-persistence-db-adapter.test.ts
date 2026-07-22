@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type {
   AdminAiGenerationResultPersistenceRow,
@@ -37,7 +37,7 @@ function createDraftResultInput(
     citationRedactedSnapshot: null,
     evidenceStatus: "weak",
     citationCount: 1,
-    aiCallLogPublicId: null,
+    aiCallLogPublicId: "ai_call_log_public_901",
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
     isFormalAdoptionBlocked: true,
@@ -98,7 +98,17 @@ describe("admin AI generation result persistence DB adapter", () => {
       id: 901,
       ...createAdminAiGenerationResultInsertValue(input),
     };
+    let updateCallCount = 0;
     const transactionDatabase = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            for: () => ({
+              limit: async () => [{ id: 701, aiCallLogId: 801 }],
+            }),
+          }),
+        }),
+      }),
       insert: () => ({
         values: () => ({
           onConflictDoNothing: () => ({
@@ -106,11 +116,17 @@ describe("admin AI generation result persistence DB adapter", () => {
           }),
         }),
       }),
-      update: () => ({
-        set: () => ({
-          where: () => ({ returning: async () => [] }),
-        }),
-      }),
+      update: () => {
+        updateCallCount += 1;
+        return {
+          set: () => ({
+            where: () => ({
+              returning: async () =>
+                updateCallCount === 1 ? [{ id: 801 }] : [],
+            }),
+          }),
+        };
+      },
     };
     const transaction = async (callback: (database: unknown) => unknown) =>
       callback(transactionDatabase);
@@ -121,6 +137,127 @@ describe("admin AI generation result persistence DB adapter", () => {
         input,
       ),
     ).rejects.toThrow("completion attempt was lost");
+  });
+
+  it("finalizes the exact bound running log, inserts one result, and completes the same attempt in one transaction", async () => {
+    const input = createDraftResultInput();
+    const insertedRow = {
+      id: 901,
+      ...createAdminAiGenerationResultInsertValue(input),
+    };
+    const updateValues: unknown[] = [];
+    let updateCallCount = 0;
+    const transactionDatabase = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            for: () => ({
+              limit: async () => [{ id: 701, aiCallLogId: 801 }],
+            }),
+          }),
+        }),
+      }),
+      insert: () => ({
+        values: () => ({
+          onConflictDoNothing: () => ({ returning: async () => [insertedRow] }),
+        }),
+      }),
+      update: () => {
+        updateCallCount += 1;
+        return {
+          set: (values: unknown) => {
+            updateValues.push(values);
+            return {
+              where: () => ({
+                returning: async () =>
+                  updateCallCount === 1
+                    ? [{ id: 801 }]
+                    : [{ public_id: input.taskPublicId }],
+              }),
+            };
+          },
+        };
+      },
+    };
+    const transaction = vi.fn(async (callback) =>
+      callback(transactionDatabase),
+    );
+
+    const result = await persistAdminAiGenerationDraftResultAndCompleteTask(
+      { transaction } as unknown as RuntimeDatabase,
+      input,
+    );
+
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(updateValues).toEqual([
+      expect.objectContaining({ call_status: "success" }),
+      expect.objectContaining({
+        task_status: "succeeded",
+        ai_call_log_public_id: input.aiCallLogPublicId,
+      }),
+    ]);
+    expect(result?.ai_call_log_public_id).toBe(input.aiCallLogPublicId);
+  });
+
+  it("fails closed when log finalization returns more than one row", async () => {
+    const input = createDraftResultInput();
+    const transactionDatabase = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            for: () => ({ limit: async () => [{ id: 701, aiCallLogId: 801 }] }),
+          }),
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({ returning: async () => [{ id: 801 }, { id: 802 }] }),
+        }),
+      }),
+    };
+
+    await expect(
+      persistAdminAiGenerationDraftResultAndCompleteTask(
+        {
+          transaction: async (callback: (database: unknown) => unknown) =>
+            callback(transactionDatabase),
+        } as unknown as RuntimeDatabase,
+        input,
+      ),
+    ).rejects.toThrow("ai_call_log finalization was lost");
+  });
+
+  it("rolls back the finalized log when result insertion conflicts", async () => {
+    const input = createDraftResultInput();
+    const transactionDatabase = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            for: () => ({ limit: async () => [{ id: 701, aiCallLogId: 801 }] }),
+          }),
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({ returning: async () => [{ id: 801 }] }),
+        }),
+      }),
+      insert: () => ({
+        values: () => ({
+          onConflictDoNothing: () => ({ returning: async () => [] }),
+        }),
+      }),
+    };
+
+    await expect(
+      persistAdminAiGenerationDraftResultAndCompleteTask(
+        {
+          transaction: async (callback: (database: unknown) => unknown) =>
+            callback(transactionDatabase),
+        } as unknown as RuntimeDatabase,
+        input,
+      ),
+    ).rejects.toThrow("result persistence conflicted");
   });
 
   it("builds a backend admin draft result insert value without raw provider or formal columns", () => {
@@ -145,7 +282,7 @@ describe("admin AI generation result persistence DB adapter", () => {
       citation_redacted_snapshot: null,
       evidence_status: "weak",
       citation_count: 1,
-      ai_call_log_public_id: null,
+      ai_call_log_public_id: input.aiCallLogPublicId,
       source_question_public_id: null,
       source_paper_public_id: null,
       is_formal_adoption_blocked: true,

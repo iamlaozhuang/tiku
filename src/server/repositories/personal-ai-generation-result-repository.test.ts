@@ -273,20 +273,44 @@ describe("personal AI generation result repository", () => {
   });
 
   it("persists the draft result and succeeded task state in one database transaction", async () => {
-    const insertedRow = createPersistenceRow();
-    const updateReturning = vi.fn(async () => [
-      { public_id: insertedRow.task_public_id },
-    ]);
-    const updateWhere = vi.fn(() => ({ returning: updateReturning }));
-    const updateSet = vi.fn(() => ({ where: updateWhere }));
+    const insertedRow = createPersistenceRow({
+      ai_call_log_public_id: "ai-call-log-personal-170",
+    });
+    const updateValues: unknown[] = [];
+    let updateCallCount = 0;
     const insertReturning = vi.fn(async () => [insertedRow]);
     const insertOnConflict = vi.fn(() => ({ returning: insertReturning }));
     const insertValues = vi.fn(() => ({
       onConflictDoNothing: insertOnConflict,
     }));
     const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            for: vi.fn(() => ({
+              limit: vi.fn(async () => [{ aiCallLogId: 801 }]),
+            })),
+          })),
+        })),
+      })),
       insert: vi.fn(() => ({ values: insertValues })),
-      update: vi.fn(() => ({ set: updateSet })),
+      update: vi.fn(() => {
+        updateCallCount += 1;
+        return {
+          set: vi.fn((values: unknown) => {
+            updateValues.push(values);
+            return {
+              where: vi.fn(() => ({
+                returning: vi.fn(async () =>
+                  updateCallCount === 1
+                    ? [{ id: 801 }]
+                    : [{ public_id: insertedRow.task_public_id }],
+                ),
+              })),
+            };
+          }),
+        };
+      }),
     };
     const transaction = vi.fn(async (callback) =>
       callback(transactionDatabase),
@@ -298,20 +322,32 @@ describe("personal AI generation result repository", () => {
     );
 
     expect(transaction).toHaveBeenCalledTimes(1);
-    expect(updateSet).toHaveBeenCalledWith(
+    expect(updateValues).toEqual([
+      expect.objectContaining({ call_status: "success" }),
       expect.objectContaining({
         task_status: "succeeded",
         result_public_id: insertedRow.public_id,
+        ai_call_log_public_id: insertedRow.ai_call_log_public_id,
       }),
-    );
-    expect(updateWhere).toHaveBeenCalledTimes(1);
-    expect(updateReturning).toHaveBeenCalledTimes(1);
+    ]);
     expect(result).toEqual(insertedRow);
   });
 
   it("rolls back when the owner-scoped task cannot be completed", async () => {
-    const insertedRow = createPersistenceRow();
+    const insertedRow = createPersistenceRow({
+      ai_call_log_public_id: "ai-call-log-personal-170",
+    });
+    let updateCallCount = 0;
     const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            for: vi.fn(() => ({
+              limit: vi.fn(async () => [{ aiCallLogId: 801 }]),
+            })),
+          })),
+        })),
+      })),
       insert: vi.fn(() => ({
         values: vi.fn(() => ({
           onConflictDoNothing: vi.fn(() => ({
@@ -319,11 +355,18 @@ describe("personal AI generation result repository", () => {
           })),
         })),
       })),
-      update: vi.fn(() => ({
-        set: vi.fn(() => ({
-          where: vi.fn(() => ({ returning: vi.fn(async () => []) })),
-        })),
-      })),
+      update: vi.fn(() => {
+        updateCallCount += 1;
+        return {
+          set: vi.fn(() => ({
+            where: vi.fn(() => ({
+              returning: vi.fn(async () =>
+                updateCallCount === 1 ? [{ id: 801 }] : [],
+              ),
+            })),
+          })),
+        };
+      }),
     };
     const transaction = vi.fn(async (callback) =>
       callback(transactionDatabase),
@@ -337,6 +380,79 @@ describe("personal AI generation result repository", () => {
     ).rejects.toThrow(
       "personal AI generation task completion persistence failed.",
     );
+  });
+
+  it("fails closed when personal log finalization is not unique", async () => {
+    const insertedRow = createPersistenceRow({
+      ai_call_log_public_id: "ai-call-log-personal-170",
+    });
+    const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            for: vi.fn(() => ({
+              limit: vi.fn(async () => [{ aiCallLogId: 801 }]),
+            })),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn(() => ({
+          where: vi.fn(() => ({
+            returning: vi.fn(async () => [{ id: 801 }, { id: 802 }]),
+          })),
+        })),
+      })),
+    };
+
+    await expect(
+      persistPersonalAiGenerationDraftResultAndCompleteTask(
+        {
+          transaction: async (callback: (database: unknown) => unknown) =>
+            callback(transactionDatabase),
+        } as unknown as RuntimeDatabase,
+        createAtomicPersistenceInput(insertedRow),
+      ),
+    ).rejects.toThrow("ai_call_log finalization was lost");
+  });
+
+  it("rolls back the personal log when result insertion conflicts", async () => {
+    const insertedRow = createPersistenceRow({
+      ai_call_log_public_id: "ai-call-log-personal-170",
+    });
+    const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            for: vi.fn(() => ({
+              limit: vi.fn(async () => [{ aiCallLogId: 801 }]),
+            })),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn(() => ({
+          where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 801 }]) })),
+        })),
+      })),
+      insert: vi.fn(() => ({
+        values: vi.fn(() => ({
+          onConflictDoNothing: vi.fn(() => ({
+            returning: vi.fn(async () => []),
+          })),
+        })),
+      })),
+    };
+
+    await expect(
+      persistPersonalAiGenerationDraftResultAndCompleteTask(
+        {
+          transaction: async (callback: (database: unknown) => unknown) =>
+            callback(transactionDatabase),
+        } as unknown as RuntimeDatabase,
+        createAtomicPersistenceInput(insertedRow),
+      ),
+    ).rejects.toThrow("result persistence conflicted");
   });
 
   it("builds owner-scoped result history conditions", () => {

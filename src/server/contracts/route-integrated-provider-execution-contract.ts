@@ -1,4 +1,5 @@
 import type { EvidenceStatus } from "../models/ai-rag";
+import type { ModelConfigSnapshot } from "../models/ai-rag";
 
 export type AiGenerationRouteIntegratedProviderMetadata = {
   modelProvider: "openai_compatible";
@@ -28,11 +29,26 @@ export type AiGenerationRouteIntegratedProviderErrorSummary = {
 export type AiGenerationRouteIntegratedProviderFailureCategory =
   | "provider_call_blocked"
   | "insufficient_grounding_evidence"
+  | "governance_context_unavailable"
   | "missing_provider_credential"
   | "provider_error"
   | "timeout"
   | "redaction_violation"
+  | "ai_call_log_unavailable"
   | null;
+
+export type AiGenerationRouteIntegratedGovernanceContext = {
+  modelConfigSnapshot: ModelConfigSnapshot;
+  promptTemplate: {
+    promptTemplateKey: string;
+    aiFuncType: "ai_question_generation" | "ai_paper_generation";
+    version: number;
+    templateContent: string;
+    templateHash: string;
+    requiredVariables: readonly string[];
+    isActive: boolean;
+  };
+};
 
 export type AiGenerationRouteIntegratedProviderExecutionResultStatus =
   | "pass"
@@ -63,6 +79,7 @@ export type AiGenerationRouteIntegratedProviderExecutionInput<
   limits: AiGenerationRouteIntegratedProviderLimits;
   requestContext: TRequestContext;
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null;
+  governanceContext: AiGenerationRouteIntegratedGovernanceContext;
   providerCredential: string;
 };
 
@@ -81,11 +98,47 @@ export type AiGenerationRouteIntegratedProviderExecutionControl<
   maxRetries: 0;
   maxOutputTokens: number;
   timeoutMs: number;
+  attempt?: {
+    taskPublicId: string;
+    retryCount: number;
+    startedAt: Date;
+  };
   resolveGroundingContext?: (input: {
     requestContext: TRequestContext;
   }) =>
     | Promise<AiGenerationRouteIntegratedGroundingContext>
     | AiGenerationRouteIntegratedGroundingContext;
+  resolveGovernanceContext?: (input: {
+    requestContext: TRequestContext;
+  }) =>
+    | Promise<AiGenerationRouteIntegratedGovernanceContext | null>
+    | AiGenerationRouteIntegratedGovernanceContext
+    | null;
+  reserveAiCallLog?: (input: {
+    requestContext: TRequestContext;
+    governanceContext: AiGenerationRouteIntegratedGovernanceContext;
+    groundingSummary: AiGenerationRouteIntegratedGroundingSummary;
+    attempt: {
+      taskPublicId: string;
+      retryCount: number;
+      startedAt: Date;
+    };
+    startedAt: Date;
+  }) => Promise<{ publicId: string }>;
+  appendAiCallLog?: (input: {
+    aiCallLogPublicId: string;
+    requestContext: TRequestContext;
+    governanceContext: AiGenerationRouteIntegratedGovernanceContext;
+    groundingSummary: AiGenerationRouteIntegratedGroundingSummary;
+    attempt: {
+      taskPublicId: string;
+      retryCount: number;
+      startedAt: Date;
+    };
+    executionSummary: AiGenerationRouteIntegratedProviderExecutionSummary;
+    startedAt: Date;
+    completedAt: Date;
+  }) => Promise<{ publicId: string }>;
   readProviderCredential: () => Promise<string | null> | string | null;
   executeProviderRequest?: AiGenerationRouteIntegratedProviderExecutor<TRequestContext>;
 };
@@ -470,5 +523,6 @@ export type AiGenerationRouteIntegratedProviderExecutionOutcome = {
   envSecretAccessed: boolean;
   providerConfigurationRead: boolean;
   executionSummary: AiGenerationRouteIntegratedProviderExecutionSummary;
+  aiCallLogPublicId: string | null;
   visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
 };

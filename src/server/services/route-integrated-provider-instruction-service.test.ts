@@ -1,7 +1,49 @@
 import { describe, expect, it } from "vitest";
 
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
+
 import { createRouteIntegratedProviderInstruction } from "./route-integrated-provider-instruction-service";
-import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
+import type {
+  AiGenerationRouteIntegratedGovernanceContext,
+  AiGenerationRouteIntegratedGroundingContext,
+} from "../contracts/route-integrated-provider-execution-contract";
+
+function createGovernanceContext(
+  taskType: "ai_question_generation" | "ai_paper_generation",
+): AiGenerationRouteIntegratedGovernanceContext {
+  const promptTemplate = promptTemplateDefinitions.find(
+    (definition) => definition.aiFuncType === taskType,
+  );
+
+  if (promptTemplate === undefined || promptTemplate.aiFuncType !== taskType) {
+    throw new Error("missing_test_prompt_template");
+  }
+
+  return {
+    modelConfigSnapshot: {
+      providerPublicId: "provider-public-synthetic",
+      providerKey: "alibaba_qwen",
+      providerDisplayName: "Synthetic Provider",
+      modelConfigPublicId: "model-config-public-synthetic",
+      aiFuncType: taskType,
+      modelName: "qwen3.7-max",
+      displayName: "Synthetic Model",
+      configVersion: 1,
+      pricingVersion: null,
+      inputTokenPriceCnyPerMillion: null,
+      outputTokenPriceCnyPerMillion: null,
+      timeoutSecond: 30,
+      maxRetryCount: 0,
+      fallbackModelConfigPublicId: null,
+      promptTemplateKey: promptTemplate.promptTemplateKey,
+      promptTemplateVersion: promptTemplate.version,
+    },
+    promptTemplate: {
+      ...promptTemplate,
+      aiFuncType: taskType,
+    },
+  };
+}
 
 function createGroundingContext(
   questionCount: number,
@@ -54,6 +96,7 @@ describe("route-integrated Provider instruction service", () => {
         taskType: "ai_question_generation",
         sceneLabel: "内容草稿评审 AI出题",
         draftInstruction: "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
+        governanceContext: createGovernanceContext("ai_question_generation"),
         groundingContext: createGroundingContext(questionCount),
       });
 
@@ -130,6 +173,7 @@ describe("route-integrated Provider instruction service", () => {
       taskType: "ai_paper_generation",
       sceneLabel: "个人训练 AI组卷",
       draftInstruction: "输出可读的组卷方案摘要。",
+      governanceContext: createGovernanceContext("ai_paper_generation"),
       groundingContext: createGroundingContext(50, {
         paperStructure: "by_knowledge_node",
         questionTypeDistribution: "single_50_multi_25_true_false_25",
@@ -192,12 +236,14 @@ describe("route-integrated Provider instruction service", () => {
       taskType: "ai_paper_generation",
       sceneLabel: "内容草稿评审 AI组卷",
       draftInstruction: "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
+      governanceContext: createGovernanceContext("ai_paper_generation"),
       groundingContext,
     });
     const personalInstruction = createRouteIntegratedProviderInstruction({
       taskType: "ai_paper_generation",
       sceneLabel: "个人训练 AI组卷",
       draftInstruction: "不要引用真实题目全文；输出可读的要点或小练习草稿。",
+      governanceContext: createGovernanceContext("ai_paper_generation"),
       groundingContext,
     });
 
@@ -221,6 +267,7 @@ describe("route-integrated Provider instruction service", () => {
       taskType: "ai_question_generation",
       sceneLabel: "内容草稿评审 AI出题",
       draftInstruction: "只输出受控结构化草稿。",
+      governanceContext: createGovernanceContext("ai_question_generation"),
       groundingContext,
     });
 

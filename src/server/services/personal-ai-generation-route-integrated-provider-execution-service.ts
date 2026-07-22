@@ -40,6 +40,10 @@ export type PersonalAiGenerationRouteIntegratedProviderLimits =
   AiGenerationRouteIntegratedProviderLimits;
 
 export type PersonalAiGenerationRouteIntegratedProviderRequestContext = {
+  actorPublicId: string;
+  ownerType: PersonalAiGenerationRequestFlowDto["taskRequest"]["ownerType"];
+  ownerPublicId: string;
+  organizationPublicId: string | null;
   taskPublicId: string;
   taskType: PersonalAiGenerationRequestFlowDto["resultReference"]["taskType"];
   routeWorkflow:
@@ -92,6 +96,10 @@ export function createRouteIntegratedProviderRequestContext(
   requestFlow: PersonalAiGenerationRequestFlowDto,
 ): PersonalAiGenerationRouteIntegratedProviderRequestContext {
   return {
+    actorPublicId: requestFlow.taskRequest.actorPublicId,
+    ownerType: requestFlow.taskRequest.ownerType,
+    ownerPublicId: requestFlow.taskRequest.ownerPublicId,
+    organizationPublicId: requestFlow.taskRequest.organizationPublicId,
     taskPublicId: requestFlow.resultReference.taskPublicId,
     taskType: requestFlow.resultReference.taskType,
     routeWorkflow:
@@ -126,6 +134,26 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
       executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
         "insufficient_grounding_evidence",
       ),
+      aiCallLogPublicId: null,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  const governanceContext =
+    control.resolveGovernanceContext === undefined
+      ? null
+      : await control.resolveGovernanceContext({ requestContext });
+
+  if (governanceContext === null) {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "governance_context_unavailable",
+      ),
+      aiCallLogPublicId: null,
       visibleGeneratedContent: null,
     };
   }
@@ -141,6 +169,52 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
       executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
         "missing_provider_credential",
       ),
+      aiCallLogPublicId: null,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  if (
+    control.attempt === undefined ||
+    control.reserveAiCallLog === undefined ||
+    control.appendAiCallLog === undefined
+  ) {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "ai_call_log_unavailable",
+      ),
+      aiCallLogPublicId: null,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  const attempt = control.attempt;
+  const startedAt = new Date();
+  let aiCallLogPublicId: string;
+
+  try {
+    const reservation = await control.reserveAiCallLog({
+      requestContext,
+      governanceContext,
+      groundingSummary: createRouteIntegratedGroundingSummary(groundingContext),
+      attempt,
+      startedAt,
+    });
+    aiCallLogPublicId = reservation.publicId;
+  } catch {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "ai_call_log_unavailable",
+      ),
+      aiCallLogPublicId: null,
       visibleGeneratedContent: null,
     };
   }
@@ -157,6 +231,7 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
     },
     requestContext,
     groundingContext,
+    governanceContext,
     providerCredential,
   });
   const visibleGeneratedContentWithPreview =
@@ -202,12 +277,42 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
       ? visibleContentCheck.visibleGeneratedContent
       : null;
 
+  try {
+    const completedAt = new Date();
+    const log = await control.appendAiCallLog({
+      aiCallLogPublicId,
+      requestContext,
+      governanceContext,
+      groundingSummary: createRouteIntegratedGroundingSummary(groundingContext),
+      attempt,
+      executionSummary,
+      startedAt,
+      completedAt,
+    });
+    if (log.publicId !== aiCallLogPublicId) {
+      throw new Error("AI generation log observation identity drifted.");
+    }
+  } catch {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: executionSummary.requestCount === 1,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "ai_call_log_unavailable",
+      ),
+      aiCallLogPublicId,
+      visibleGeneratedContent: null,
+    };
+  }
+
   return {
     realProviderExecutionApproved: true,
     providerCallExecuted: executionSummary.requestCount === 1,
     envSecretAccessed: true,
     providerConfigurationRead: true,
     executionSummary,
+    aiCallLogPublicId,
     visibleGeneratedContent,
   };
 }
@@ -236,6 +341,7 @@ export async function executeQwenRouteIntegratedProviderRequest(
         : undefined;
     const instructions = createPersonalRouteIntegratedInstruction(
       input.requestContext,
+      input.governanceContext,
       input.groundingContext,
     );
     const result = await generateText({
@@ -291,6 +397,7 @@ export async function executeQwenRouteIntegratedProviderRequest(
 
 function createPersonalRouteIntegratedInstruction(
   requestContext: PersonalAiGenerationRouteIntegratedProviderRequestContext,
+  governanceContext: PersonalAiGenerationRouteIntegratedProviderExecutionInput["governanceContext"],
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
 ) {
   return createRouteIntegratedProviderInstruction({
@@ -300,6 +407,7 @@ function createPersonalRouteIntegratedInstruction(
         ? "个人训练 AI出题"
         : "个人训练 AI组卷",
     draftInstruction: "不要引用资料原文；输出可训练使用的结构化题目草稿。",
+    governanceContext,
     groundingContext,
   });
 }

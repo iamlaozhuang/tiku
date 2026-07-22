@@ -330,6 +330,13 @@
       "when": 1784726496129,
       "tag": "20260722063000_p1_rc_06_resource_failed_delete_recovery",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1784745406586,
+      "tag": "20260722183000_p1_rc_07_ai_generation_prompt_provenance",
+      "breakpoints": true
     }
   ]
 }

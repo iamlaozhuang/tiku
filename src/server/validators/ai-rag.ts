@@ -63,6 +63,8 @@ const aiFuncTypeSet = new Set<AiFuncType>([
   "hint",
   "kn_recommendation",
   "learning_suggestion",
+  "ai_question_generation",
+  "ai_paper_generation",
 ]);
 const MODEL_CONFIG_FALLBACK_ORDER_ITEM_LIMIT = 100;
 

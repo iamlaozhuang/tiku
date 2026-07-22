@@ -21,6 +21,7 @@ export type PersonalAiGenerationRouteIntegratedResultMaterializationControl = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   citationRedactedSnapshot?: RedactedJsonObject | null;
+  aiCallLogPublicId?: string;
   now?: () => Date;
   persistDraftResult: (
     input: PersonalAiGenerationResultPersistenceInput,
@@ -79,6 +80,10 @@ export async function materializeRouteIntegratedRedactedResult(
     return createBlockedMaterializationSummary("unsupported_task_type");
   }
 
+  if (control.aiCallLogPublicId === undefined) {
+    return createBlockedMaterializationSummary("persistence_unavailable");
+  }
+
   const persistenceInput: PersonalAiGenerationResultPersistenceInput = {
     resultPublicId: control.resultPublicId,
     taskPublicId: requestFlow.resultReference.taskPublicId,
@@ -99,8 +104,7 @@ export async function materializeRouteIntegratedRedactedResult(
       createEmptyCitationRedactedSnapshot(control),
     evidenceStatus: control.evidenceStatus,
     citationCount: control.citationCount,
-    aiCallLogPublicId:
-      requestFlow.resultReference.aiCallLogReference.aiCallLogPublicId,
+    aiCallLogPublicId: control.aiCallLogPublicId,
     createdAt: control.now?.() ?? new Date(),
   };
   const optimisticSummary = createMaterializedSummary({

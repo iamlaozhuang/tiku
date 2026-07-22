@@ -4,6 +4,8 @@ export const aiFunctionContractValues = [
   "ai_hint",
   "kn_recommendation",
   "learning_suggestion",
+  "ai_question_generation",
+  "ai_paper_generation",
 ] as const;
 
 export type AiFunctionContractValue = (typeof aiFunctionContractValues)[number];

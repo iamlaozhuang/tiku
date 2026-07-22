@@ -11,6 +11,8 @@ const aiCallLogFunctionTypes = [
   "ai_hint",
   "kn_recommendation",
   "learning_suggestion",
+  "ai_question_generation",
+  "ai_paper_generation",
 ] as const;
 const aiCallLogStatuses = ["success", "failed"] as const;
 const aiCallLogProfessions = ["monopoly", "marketing", "logistics"] as const;

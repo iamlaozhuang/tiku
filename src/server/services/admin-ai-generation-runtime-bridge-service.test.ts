@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 
 import {
   buildAdminAiGenerationRuntimeBridgeReadModelForRoute,
@@ -6,8 +7,12 @@ import {
   createAdminAiGenerationRouteIntegratedProviderRequestContext,
   executeQwenAdminRouteIntegratedProviderRequest,
 } from "./admin-ai-generation-runtime-bridge-service";
-import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
+import type {
+  AiGenerationRouteIntegratedGovernanceContext,
+  AiGenerationRouteIntegratedGroundingContext,
+} from "../contracts/route-integrated-provider-execution-contract";
 import type { AdminAiGenerationRouteIntegratedProviderExecutionInput } from "../contracts/admin-ai-generation-runtime-bridge-contract";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 
 const { generateTextMock } = vi.hoisted(() => ({
   generateTextMock: vi.fn(),
@@ -54,6 +59,52 @@ const adminSufficientGroundingContext: AiGenerationRouteIntegratedGroundingConte
       },
     ],
   };
+
+function createAdminGovernanceContext(
+  taskType: "ai_question_generation" | "ai_paper_generation",
+): AiGenerationRouteIntegratedGovernanceContext {
+  const promptTemplate = promptTemplateDefinitions.find(
+    (definition) => definition.aiFuncType === taskType,
+  );
+  if (promptTemplate === undefined) {
+    throw new Error("missing admin generation prompt fixture");
+  }
+
+  return {
+    modelConfigSnapshot: createModelConfigSnapshot({
+      providerPublicId: "model-provider-public-admin-test",
+      providerKey: "alibaba_qwen",
+      providerDisplayName: "Alibaba Qwen",
+      modelConfigPublicId: `model-config-public-${taskType}`,
+      aiFuncType: taskType,
+      modelName: "qwen3.7-max",
+      displayName: "Qwen Generation",
+      configVersion: 1,
+      pricingVersion: null,
+      inputTokenPriceCnyPerMillion: null,
+      outputTokenPriceCnyPerMillion: null,
+      timeoutSecond: 60,
+      maxRetryCount: 0,
+      fallbackModelConfigPublicId: null,
+      promptTemplateKey: promptTemplate.promptTemplateKey,
+      promptTemplateVersion: promptTemplate.version,
+    }),
+    promptTemplate: { ...promptTemplate, aiFuncType: taskType },
+  };
+}
+
+const adminGenerationLogControls = {
+  attempt: {
+    taskPublicId: "admin-ai-task-public-test",
+    retryCount: 0,
+    startedAt: new Date("2026-07-22T12:00:00.123Z"),
+  },
+  resolveGovernanceContext: (input: {
+    requestContext: AdminAiGenerationRouteIntegratedProviderExecutionInput["requestContext"];
+  }) => createAdminGovernanceContext(input.requestContext.taskType),
+  reserveAiCallLog: async () => ({ publicId: "ai-call-log-admin-test" }),
+  appendAiCallLog: async () => ({ publicId: "ai-call-log-admin-test" }),
+};
 
 describe("admin AI generation runtime bridge service", () => {
   it("passes trusted system policy and adversarial grounding as separate Provider fields", async () => {
@@ -111,6 +162,7 @@ describe("admin AI generation runtime bridge service", () => {
         ],
         citationCount: 1,
       },
+      governanceContext: createAdminGovernanceContext("ai_question_generation"),
       providerCredential: "synthetic-admin-provider-credential",
     });
 
@@ -201,6 +253,7 @@ describe("admin AI generation runtime bridge service", () => {
         organizationPublicId: "organization_public_runtime_bridge_101",
       }),
     ).toEqual({
+      actorPublicId: "org_admin_public_runtime_bridge_101",
       taskPublicId: "admin_ai_generation_task_org_bridge_101",
       resultPublicId: "admin_ai_generation_result_org_bridge_101",
       requestPublicId: "admin_ai_generation_request_org_bridge_101",
@@ -241,6 +294,7 @@ describe("admin AI generation runtime bridge service", () => {
             maxRetries: 0,
             maxOutputTokens: 1800,
             timeoutMs: 60000,
+            ...adminGenerationLogControls,
             readProviderCredential: () => "synthetic-admin-provider-credential",
             resolveGroundingContext: () => adminSufficientGroundingContext,
             executeProviderRequest: async (providerInput) => {
@@ -300,6 +354,7 @@ describe("admin AI generation runtime bridge service", () => {
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
         organizationPublicId: null,
+        actorPublicId: "admin_public_runtime_bridge_102",
       },
     });
     expect(bridge).toMatchObject({
@@ -372,6 +427,7 @@ describe("admin AI generation runtime bridge service", () => {
             maxRetries: 0,
             maxOutputTokens: 1800,
             timeoutMs: 60000,
+            ...adminGenerationLogControls,
             readProviderCredential: () => "synthetic-admin-provider-credential",
             resolveGroundingContext: () => adminSufficientGroundingContext,
             executeProviderRequest: async () => ({
@@ -499,6 +555,7 @@ describe("admin AI generation runtime bridge service", () => {
             maxRetries: 0,
             maxOutputTokens: 1800,
             timeoutMs: 60000,
+            ...adminGenerationLogControls,
             readProviderCredential: () => null,
             resolveGroundingContext: () => adminSufficientGroundingContext,
             executeProviderRequest: async (providerInput) => {

@@ -1,5 +1,9 @@
-import { aiGenerationTask, personalAiGenerationResult } from "@/db/schema";
-import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import {
+  aiCallLog,
+  aiGenerationTask,
+  personalAiGenerationResult,
+} from "@/db/schema";
+import { and, asc, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import type { PersonalAiGenerationResultPersistenceDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { EvidenceStatus } from "../models/ai-rag";
@@ -498,7 +502,67 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
   input: InsertPersonalAiGenerationDraftResultAndCompleteTaskInput,
 ): Promise<PersonalAiGenerationResultPersistenceRow | null> {
   return database.transaction(async (transaction) => {
-    const [row] = await transaction
+    if (input.result.aiCallLogPublicId === null) {
+      throw new Error(
+        "personal AI generation success requires an ai_call_log.",
+      );
+    }
+
+    const boundTasks = await transaction
+      .select({ aiCallLogId: aiGenerationTask.ai_call_log_id })
+      .from(aiGenerationTask)
+      .where(
+        and(
+          createPersonalAiGenerationTaskLookupCondition({
+            ownerType: input.task.ownerType,
+            ownerPublicId: input.task.ownerPublicId,
+            actorPublicId: input.task.actorPublicId,
+            taskPublicId: input.task.taskPublicId,
+          }),
+          createRunningAttemptCondition(input.task.attempt),
+          eq(
+            aiGenerationTask.ai_call_log_public_id,
+            input.result.aiCallLogPublicId,
+          ),
+        ),
+      )
+      .for("update")
+      .limit(2);
+
+    if (boundTasks.length !== 1) {
+      throw new Error("personal AI generation attempt/log binding was lost.");
+    }
+    const boundTask = boundTasks[0];
+    const boundAiCallLogId = boundTask.aiCallLogId;
+    if (boundAiCallLogId === null) {
+      throw new Error("personal AI generation attempt/log binding was lost.");
+    }
+
+    const finalizedLogs = await transaction
+      .update(aiCallLog)
+      .set({
+        call_status: "success",
+        completed_at: input.result.createdAt,
+      })
+      .where(
+        and(
+          eq(aiCallLog.id, boundAiCallLogId),
+          eq(aiCallLog.public_id, input.result.aiCallLogPublicId),
+          sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+        ),
+      )
+      .returning({ id: aiCallLog.id });
+
+    if (
+      finalizedLogs.length !== 1 ||
+      finalizedLogs[0].id !== boundAiCallLogId
+    ) {
+      throw new Error(
+        "personal AI generation ai_call_log finalization was lost.",
+      );
+    }
+
+    const insertedRows = await transaction
       .insert(personalAiGenerationResult)
       .values({
         public_id: input.result.resultPublicId,
@@ -524,11 +588,12 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
       })
       .returning(personalAiGenerationResultSelection);
 
-    if (row === undefined) {
-      return null;
+    if (insertedRows.length !== 1) {
+      throw new Error("personal AI generation result persistence conflicted.");
     }
+    const row = insertedRows[0];
 
-    const [updatedTaskRow] = await transaction
+    const updatedTaskRows = await transaction
       .update(aiGenerationTask)
       .set({
         task_status: input.task.taskStatus,
@@ -549,11 +614,16 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
             taskPublicId: input.task.taskPublicId,
           }),
           createRunningAttemptCondition(input.task.attempt),
+          eq(aiGenerationTask.ai_call_log_id, boundAiCallLogId),
+          eq(
+            aiGenerationTask.ai_call_log_public_id,
+            input.result.aiCallLogPublicId,
+          ),
         ),
       )
       .returning({ public_id: aiGenerationTask.public_id });
 
-    if (updatedTaskRow === undefined) {
+    if (updatedTaskRows.length !== 1) {
       throw new Error(
         "personal AI generation task completion persistence failed.",
       );
@@ -592,7 +662,31 @@ async function findResultByTaskPublicId(
       aiGenerationTask,
       eq(personalAiGenerationResult.ai_generation_task_id, aiGenerationTask.id),
     )
-    .where(createPersonalAiGenerationResultByTaskCondition(query))
+    .innerJoin(
+      aiCallLog,
+      and(
+        eq(aiGenerationTask.ai_call_log_id, aiCallLog.id),
+        eq(
+          personalAiGenerationResult.ai_call_log_public_id,
+          aiCallLog.public_id,
+        ),
+      ),
+    )
+    .where(
+      and(
+        createPersonalAiGenerationResultByTaskCondition(query),
+        eq(aiGenerationTask.task_status, "succeeded"),
+        eq(
+          aiGenerationTask.result_public_id,
+          personalAiGenerationResult.public_id,
+        ),
+        eq(
+          aiGenerationTask.ai_call_log_public_id,
+          personalAiGenerationResult.ai_call_log_public_id,
+        ),
+        eq(aiCallLog.call_status, "success"),
+      ),
+    )
     .limit(1);
 
   return (row as PersonalAiGenerationResultPersistenceRow | undefined) ?? null;

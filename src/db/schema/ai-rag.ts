@@ -48,13 +48,23 @@ export const aiFuncTypeValues = [
   "hint",
   "kn_recommendation",
   "learning_suggestion",
+  "ai_question_generation",
+  "ai_paper_generation",
 ] as const;
 
 export const aiFuncTypeEnum = pgEnum("ai_func_type", aiFuncTypeValues);
 
 export const aiCallStatusValues = ["success", "failed"] as const;
 
-export const aiCallStatusEnum = pgEnum("ai_call_status", aiCallStatusValues);
+export const aiCallStatusDatabaseValues = [
+  "running",
+  ...aiCallStatusValues,
+] as const;
+
+export const aiCallStatusEnum = pgEnum(
+  "ai_call_status",
+  aiCallStatusDatabaseValues,
+);
 
 export const aiScoringAttemptStatusValues = [
   "pending",
@@ -389,7 +399,9 @@ export const aiCallLog = pgTable(
     mock_exam_public_id: text("mock_exam_public_id"),
     question_public_id: text("question_public_id"),
     ai_func_type: aiFuncTypeEnum("ai_func_type").notNull(),
-    call_status: aiCallStatusEnum("call_status").notNull(),
+    call_status: aiCallStatusEnum("call_status")
+      .$type<(typeof aiCallStatusValues)[number]>()
+      .notNull(),
     model_config_id: bigint("model_config_id", { mode: "number" })
       .notNull()
       .references(() => modelConfig.id, { onDelete: "restrict" }),

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 
 import {
   createAdminAiGenerationTaskCancelRouteHandler,
@@ -22,8 +23,10 @@ import type {
 } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedGovernanceContext,
   AiGenerationRouteIntegratedGroundingContext,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type {
@@ -69,6 +72,62 @@ const defaultAdminGenerationParameters: AiGenerationRouteIntegratedGenerationPar
     difficulty: "medium",
     learningObjective: "专项练习",
   };
+
+function createTestAdminGovernanceContext(
+  taskType: "ai_question_generation" | "ai_paper_generation",
+): AiGenerationRouteIntegratedGovernanceContext {
+  const promptTemplate = promptTemplateDefinitions.find(
+    (definition) => definition.aiFuncType === taskType,
+  );
+  if (promptTemplate === undefined) {
+    throw new Error("missing admin route prompt fixture");
+  }
+
+  return {
+    modelConfigSnapshot: createModelConfigSnapshot({
+      providerPublicId: "model-provider-admin-route-test",
+      providerKey: "alibaba_qwen",
+      providerDisplayName: "Alibaba Qwen",
+      modelConfigPublicId: `model-config-admin-route-${taskType}`,
+      aiFuncType: taskType,
+      modelName: "qwen3.7-max",
+      displayName: "Qwen Generation",
+      configVersion: 1,
+      pricingVersion: null,
+      inputTokenPriceCnyPerMillion: null,
+      outputTokenPriceCnyPerMillion: null,
+      timeoutSecond: 30,
+      maxRetryCount: 0,
+      fallbackModelConfigPublicId: null,
+      promptTemplateKey: promptTemplate.promptTemplateKey,
+      promptTemplateVersion: promptTemplate.version,
+    }),
+    promptTemplate: { ...promptTemplate, aiFuncType: taskType },
+  };
+}
+
+function withTestAdminGenerationProvenance(
+  control: AdminAiGenerationRuntimeBridgeControl,
+): AdminAiGenerationRuntimeBridgeControl {
+  if (control.providerExecution === undefined) {
+    return control;
+  }
+
+  return {
+    ...control,
+    providerExecution: {
+      resolveGovernanceContext: ({ requestContext }) =>
+        createTestAdminGovernanceContext(requestContext.taskType),
+      reserveAiCallLog: async () => ({
+        publicId: "ai-call-log-admin-route-test",
+      }),
+      appendAiCallLog: async () => ({
+        publicId: "ai-call-log-admin-route-test",
+      }),
+      ...control.providerExecution,
+    },
+  };
+}
 const sufficientAdminGroundingContext: AiGenerationRouteIntegratedGroundingContext =
   {
     evidenceStatus: "sufficient",
@@ -422,7 +481,11 @@ async function postLocalContractRequest(input: {
     requestClock: () =>
       input.requestedAt ?? new Date("2026-06-26T20:00:00.000Z"),
     ...(input.runtimeBridgeControl
-      ? { runtimeBridgeControl: input.runtimeBridgeControl }
+      ? {
+          runtimeBridgeControl: withTestAdminGenerationProvenance(
+            input.runtimeBridgeControl,
+          ),
+        }
       : {}),
     ...(input.paperAssemblyResolver
       ? { paperAssemblyResolver: input.paperAssemblyResolver }

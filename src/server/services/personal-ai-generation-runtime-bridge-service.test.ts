@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
 import {
@@ -6,8 +7,12 @@ import {
   buildPersonalAiGenerationRuntimeBridgeReadModelForRoute,
   type PersonalAiGenerationRuntimeBridgeControl,
 } from "./personal-ai-generation-runtime-bridge-service";
-import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
+import type {
+  AiGenerationRouteIntegratedGovernanceContext,
+  AiGenerationRouteIntegratedGroundingContext,
+} from "../contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 
 const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
   {
@@ -38,6 +43,52 @@ const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
       },
     ],
   };
+
+const personalBridgePromptTemplate = promptTemplateDefinitions.find(
+  (definition) => definition.aiFuncType === "ai_question_generation",
+);
+if (personalBridgePromptTemplate === undefined) {
+  throw new Error("missing personal bridge prompt fixture");
+}
+const personalBridgeGovernanceContext: AiGenerationRouteIntegratedGovernanceContext =
+  {
+    modelConfigSnapshot: createModelConfigSnapshot({
+      providerPublicId: "model-provider-personal-bridge-test",
+      providerKey: "alibaba_qwen",
+      providerDisplayName: "Alibaba Qwen",
+      modelConfigPublicId: "model-config-personal-bridge-test",
+      aiFuncType: "ai_question_generation",
+      modelName: "qwen3.7-max",
+      displayName: "Qwen Question Generation",
+      configVersion: 1,
+      pricingVersion: null,
+      inputTokenPriceCnyPerMillion: null,
+      outputTokenPriceCnyPerMillion: null,
+      timeoutSecond: 30,
+      maxRetryCount: 0,
+      fallbackModelConfigPublicId: null,
+      promptTemplateKey: personalBridgePromptTemplate.promptTemplateKey,
+      promptTemplateVersion: personalBridgePromptTemplate.version,
+    }),
+    promptTemplate: {
+      ...personalBridgePromptTemplate,
+      aiFuncType: "ai_question_generation",
+    },
+  };
+const personalBridgeLogControls = {
+  attempt: {
+    taskPublicId: "ai_generation_task_public_bridge_121",
+    retryCount: 0,
+    startedAt: new Date("2026-07-22T12:00:00.123Z"),
+  },
+  resolveGovernanceContext: () => personalBridgeGovernanceContext,
+  reserveAiCallLog: async () => ({
+    publicId: "ai-call-log-personal-bridge-test",
+  }),
+  appendAiCallLog: async () => ({
+    publicId: "ai-call-log-personal-bridge-test",
+  }),
+};
 
 function createBaseInput() {
   return {
@@ -169,6 +220,7 @@ describe("personal AI generation runtime bridge service", () => {
         contentPreviewMasked: "masked local result preview",
         evidenceStatus: "none",
         citationCount: 0,
+        aiCallLogPublicId: "ai-call-log-personal-bridge-test",
         persistDraftResult: async (input: unknown) => {
           persistedInputs.push(input);
 
@@ -247,7 +299,7 @@ describe("personal AI generation runtime bridge service", () => {
         contentPreviewMasked: "masked local result preview",
         evidenceStatus: "none",
         citationCount: 0,
-        aiCallLogPublicId: null,
+        aiCallLogPublicId: "ai-call-log-personal-bridge-test",
         contentRedactedSnapshot: expect.objectContaining({
           redactionStatus: "redacted",
           contentVisibility: "redacted_snapshot",
@@ -274,6 +326,7 @@ describe("personal AI generation runtime bridge service", () => {
               maxRetries: 0,
               maxOutputTokens: 220,
               timeoutMs: 30000,
+              ...personalBridgeLogControls,
               resolveGroundingContext: () => sufficientGroundingContext,
               readProviderCredential: () => "synthetic-bridge-credential",
               executeProviderRequest: async () => ({
@@ -331,6 +384,7 @@ describe("personal AI generation runtime bridge service", () => {
               maxRetries: 0,
               maxOutputTokens: 220,
               timeoutMs: 30000,
+              ...personalBridgeLogControls,
               resolveGroundingContext: () => sufficientGroundingContext,
               readProviderCredential: () => "synthetic-bridge-credential",
               executeProviderRequest: async () => ({
@@ -359,6 +413,7 @@ describe("personal AI generation runtime bridge service", () => {
               contentPreviewMasked: "masked local result preview",
               evidenceStatus: "none",
               citationCount: 0,
+              aiCallLogPublicId: "ai-call-log-personal-bridge-test",
               persistDraftResult: async (input: unknown) => {
                 persistedInputs.push(input);
 

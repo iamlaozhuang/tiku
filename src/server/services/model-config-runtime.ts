@@ -280,7 +280,10 @@ export function createPersistedModelConfigRuntimeCatalog(
           templateHash:
             promptTemplate?.bodyDigest ?? `${promptTemplateKey}_baseline`,
         },
-        isEnabled: modelConfig.isEnabled && modelConfig.status === "enabled",
+        isEnabled:
+          modelConfig.isEnabled &&
+          modelConfig.status === "enabled" &&
+          promptTemplate !== null,
         priority: modelConfig.fallbackPriority,
         executionMode: "governed_provider",
       };

@@ -29,6 +29,7 @@ function createRow(
     startedAt: null,
     finishedAt: null,
     resultPublicId: null,
+    aiCallLogPublicId: null,
     ...overrides,
   };
 }
@@ -71,6 +72,7 @@ function createGateway(row: AiGenerationTaskLifecycleRow | null) {
         taskStatus: "failed",
         failureCategory: input.failureCategory,
         finishedAt: input.finishedAt,
+        aiCallLogPublicId: input.aiCallLogPublicId,
       });
       return currentRow;
     }),
@@ -273,6 +275,34 @@ describe("AI generation task lifecycle repository", () => {
       finishedAt: claimedAt,
     });
     expect(staleResult.disposition).toBe("attempt_lost");
+  });
+
+  it("attaches the exact attempt ai_call_log through the running-attempt failure CAS", async () => {
+    const { gateway } = createGateway(
+      createRow({ taskStatus: "running", startedAt }),
+    );
+    const result = await createAiGenerationTaskLifecycleRepository(
+      gateway,
+    ).failTask({
+      ...scope,
+      attempt: { taskPublicId, retryCount: 0, startedAt },
+      failureCategory: "provider_temporary_error",
+      aiCallLogPublicId: "ai-call-log-generation-failed-001",
+      finishedAt: claimedAt,
+    });
+
+    expect(result).toMatchObject({
+      disposition: "failed",
+      task: {
+        taskStatus: "failed",
+        aiCallLogPublicId: "ai-call-log-generation-failed-001",
+      },
+    });
+    expect(gateway.failAttempt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aiCallLogPublicId: "ai-call-log-generation-failed-001",
+      }),
+    );
   });
 
   it("cancels only pending or running work and projects a terminal safe state", async () => {

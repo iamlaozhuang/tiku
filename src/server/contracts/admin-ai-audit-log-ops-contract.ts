@@ -31,7 +31,9 @@ export type AdminAiFunctionType =
   | "ai_explanation"
   | "ai_hint"
   | "kn_recommendation"
-  | "learning_suggestion";
+  | "learning_suggestion"
+  | "ai_question_generation"
+  | "ai_paper_generation";
 
 export type AdminAuditResultStatus = "success" | "failed";
 
@@ -115,6 +117,8 @@ const adminAiFunctionTypes = [
   "ai_hint",
   "kn_recommendation",
   "learning_suggestion",
+  "ai_question_generation",
+  "ai_paper_generation",
 ] as const;
 
 const aiCallStatuses = ["success", "failed"] as const;

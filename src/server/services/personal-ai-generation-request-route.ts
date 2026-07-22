@@ -805,18 +805,29 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
 }): PersonalAiGenerationRuntimeBridgeControl | undefined {
   const resultRepository = input.resultRepository;
 
-  if (
-    input.runtimeBridgeControl === undefined ||
-    resultRepository === undefined ||
-    input.attempt === null
-  ) {
+  if (input.runtimeBridgeControl === undefined || input.attempt === null) {
     return input.runtimeBridgeControl;
   }
 
   const attempt = input.attempt;
+  const runtimeBridgeControlWithAttempt: PersonalAiGenerationRuntimeBridgeControl =
+    {
+      ...input.runtimeBridgeControl,
+      providerExecution:
+        input.runtimeBridgeControl.providerExecution === undefined
+          ? undefined
+          : {
+              ...input.runtimeBridgeControl.providerExecution,
+              attempt,
+            },
+    };
+
+  if (resultRepository === undefined) {
+    return runtimeBridgeControlWithAttempt;
+  }
 
   return {
-    ...input.runtimeBridgeControl,
+    ...runtimeBridgeControlWithAttempt,
     paperAssemblyResolver: input.paperAssemblyResolver,
     createResultMaterialization: ({
       executionOutcome,
@@ -824,11 +835,13 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
       requestFlow,
     }) => {
       const visibleGeneratedContent = executionOutcome.visibleGeneratedContent;
+      const aiCallLogPublicId = executionOutcome.aiCallLogPublicId;
 
       if (
         !executionOutcome.providerCallExecuted ||
         executionOutcome.executionSummary.resultStatus !== "pass" ||
-        visibleGeneratedContent === null
+        visibleGeneratedContent === null ||
+        aiCallLogPublicId === null
       ) {
         return null;
       }
@@ -873,6 +886,7 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
         citationCount:
           groundingSummary?.citationCount ??
           requestFlow.resultReference.resultReference.citationCount,
+        aiCallLogPublicId,
         persistDraftResult: async (resultInput) => {
           try {
             return createSuccessResponse(
@@ -1324,6 +1338,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                     ...lifecycleScope,
                     attempt: claimResult.attempt,
                     failureCategory: "system_error",
+                    aiCallLogPublicId: null,
                     finishedAt: now(),
                   });
                 }
@@ -1345,6 +1360,8 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                     experienceResponse.data.runtimeBridge
                       .providerExecutionSummary.failureCategory,
                   ),
+                aiCallLogPublicId:
+                  experienceResponse.data.runtimeBridge.aiCallLogPublicId,
                 finishedAt: now(),
               });
             }

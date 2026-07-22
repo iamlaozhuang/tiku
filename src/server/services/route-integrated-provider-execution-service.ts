@@ -127,6 +127,7 @@ export function createDefaultBlockedRouteIntegratedProviderExecutionOutcome(): A
     executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
       "provider_call_blocked",
     ),
+    aiCallLogPublicId: null,
     visibleGeneratedContent: null,
   };
 }

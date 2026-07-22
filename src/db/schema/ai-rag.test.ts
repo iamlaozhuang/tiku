@@ -6,6 +6,7 @@ import * as aiRagSchema from "./ai-rag";
 import {
   aiCallLog,
   aiCallStatusValues,
+  aiCallStatusDatabaseValues,
   aiFuncTypeEnum,
   aiFuncTypeValues,
   aiScoringAttempt,
@@ -90,6 +91,11 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
 
   it("registers AI call status enum values from the glossary", () => {
     expect(aiCallStatusValues).toEqual(["success", "failed"]);
+    expect(aiCallStatusDatabaseValues).toEqual([
+      "running",
+      "success",
+      "failed",
+    ]);
   });
 
   it("registers AI scoring attempt status values for retry persistence", () => {
@@ -142,6 +148,8 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       "hint",
       "kn_recommendation",
       "learning_suggestion",
+      "ai_question_generation",
+      "ai_paper_generation",
     ]);
   });
 
