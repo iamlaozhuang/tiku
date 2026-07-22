@@ -29,6 +29,7 @@ import type {
   PaperType,
   Profession,
   QuestionStatus,
+  QuestionDifficulty,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -46,6 +47,7 @@ import {
   appendContentMutationAuditLog,
   type ContentMutationContext,
 } from "./content-mutation-audit";
+import { loadQuestionKnowledgeMetadata } from "./question-repository";
 import {
   createLazyRuntimeDatabaseGetter,
   type RuntimeDatabase,
@@ -475,6 +477,7 @@ type SourceQuestionSnapshotRow = {
   profession: Profession;
   level: number;
   subject: Subject;
+  difficulty: QuestionDifficulty | null;
   stem_rich_text: string;
   analysis_rich_text: string;
   standard_answer_rich_text: string;
@@ -2291,6 +2294,7 @@ async function findSourceQuestionByPublicId(
       profession: question.profession,
       level: question.level,
       subject: question.subject,
+      difficulty: question.difficulty,
       stem_rich_text: question.stem_rich_text,
       analysis_rich_text: question.analysis_rich_text,
       standard_answer_rich_text: question.standard_answer_rich_text,
@@ -2317,6 +2321,13 @@ async function buildQuestionSnapshot(
     .from(questionOption)
     .where(eq(questionOption.question_id, sourceQuestion.id))
     .orderBy(asc(questionOption.sort_order));
+  const knowledgeMetadata = (
+    await loadQuestionKnowledgeMetadata(database, [sourceQuestion.id])
+  ).get(sourceQuestion.id) ?? {
+    knowledgeNodePublicIds: [],
+    parentKnowledgeNodePublicIds: [],
+    ancestorKnowledgeNodePublicIds: [],
+  };
 
   return {
     questionPublicId: sourceQuestion.public_id,
@@ -2325,6 +2336,10 @@ async function buildQuestionSnapshot(
     profession: sourceQuestion.profession,
     level: sourceQuestion.level,
     subject: sourceQuestion.subject,
+    ...copyQuestionSourceMetadataToSnapshot({
+      difficulty: sourceQuestion.difficulty,
+      ...knowledgeMetadata,
+    }),
     stemRichText: sourceQuestion.stem_rich_text,
     questionOptions: optionRows.map((optionRow) => ({
       label: optionRow.label,
@@ -2337,6 +2352,26 @@ async function buildQuestionSnapshot(
     multiChoiceRule: sourceQuestion.multi_choice_rule,
     scoringMethod: sourceQuestion.scoring_method,
     fillBlankAnswers: sourceQuestion.fill_blank_answers ?? [],
+  };
+}
+
+export function copyQuestionSourceMetadataToSnapshot(input: {
+  difficulty: QuestionDifficulty | null;
+  knowledgeNodePublicIds: readonly string[];
+  parentKnowledgeNodePublicIds: readonly string[];
+  ancestorKnowledgeNodePublicIds: readonly string[];
+}): Pick<
+  QuestionSnapshotDto,
+  | "difficulty"
+  | "knowledgeNodePublicIds"
+  | "parentKnowledgeNodePublicIds"
+  | "ancestorKnowledgeNodePublicIds"
+> {
+  return {
+    difficulty: input.difficulty,
+    knowledgeNodePublicIds: [...input.knowledgeNodePublicIds],
+    parentKnowledgeNodePublicIds: [...input.parentKnowledgeNodePublicIds],
+    ancestorKnowledgeNodePublicIds: [...input.ancestorKnowledgeNodePublicIds],
   };
 }
 

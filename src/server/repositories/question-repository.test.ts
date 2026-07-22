@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   QuestionBindingEligibilityError,
+  QuestionKnowledgeHierarchyIntegrityError,
+  buildQuestionKnowledgeMetadata,
   createPostgresQuestionRepository,
   createQuestionKnowledgeNodePublicIdCondition,
   createQuestionKnowledgeNodePublicIdsCondition,
@@ -10,6 +12,106 @@ import {
   requireEligibleQuestionKnowledgeNodeIds,
   requireEligibleQuestionMaterialId,
 } from "./question-repository";
+
+describe("question knowledge hierarchy snapshot", () => {
+  const root = {
+    id: 1,
+    public_id: "knowledge_node_root",
+    knowledge_base_id: 10,
+    parent_knowledge_node_id: null,
+    profession: "marketing" as const,
+  };
+  const parent = {
+    ...root,
+    id: 2,
+    public_id: "knowledge_node_parent",
+    parent_knowledge_node_id: 1,
+  };
+  const child = {
+    ...root,
+    id: 3,
+    public_id: "knowledge_node_child",
+    parent_knowledge_node_id: 2,
+  };
+
+  it("builds deterministic direct, parent, and complete ancestor metadata", () => {
+    expect(
+      buildQuestionKnowledgeMetadata(
+        [{ ...child, question_id: 101, question_profession: "marketing" }],
+        [parent, root],
+      ),
+    ).toEqual(
+      new Map([
+        [
+          101,
+          {
+            knowledgeNodePublicIds: ["knowledge_node_child"],
+            parentKnowledgeNodePublicIds: ["knowledge_node_parent"],
+            ancestorKnowledgeNodePublicIds: [
+              "knowledge_node_parent",
+              "knowledge_node_root",
+            ],
+          },
+        ],
+      ]),
+    );
+  });
+
+  it.each([
+    { name: "missing parent", ancestors: [root] },
+    {
+      name: "cross-tree parent",
+      ancestors: [{ ...parent, knowledge_base_id: 11 }],
+    },
+    {
+      name: "cycle",
+      ancestors: [{ ...parent, parent_knowledge_node_id: 3 }, root],
+    },
+  ])("fails closed for $name", ({ ancestors }) => {
+    expect(() =>
+      buildQuestionKnowledgeMetadata(
+        [{ ...child, question_id: 101, question_profession: "marketing" }],
+        ancestors,
+      ),
+    ).toThrow(QuestionKnowledgeHierarchyIntegrityError);
+  });
+
+  it.each([
+    {
+      name: "question profession mismatch",
+      directRows: [
+        {
+          ...child,
+          question_id: 101,
+          question_profession: "logistics" as const,
+        },
+      ],
+    },
+    {
+      name: "direct nodes from different knowledge bases",
+      directRows: [
+        {
+          ...child,
+          question_id: 101,
+          question_profession: "marketing" as const,
+        },
+        {
+          ...child,
+          id: 4,
+          public_id: "knowledge_node_other_tree",
+          knowledge_base_id: 11,
+          parent_knowledge_node_id: null,
+          question_id: 101,
+          question_profession: "marketing" as const,
+        },
+      ],
+    },
+  ])("fails closed for $name", ({ directRows }) => {
+    expect(() =>
+      buildQuestionKnowledgeMetadata(directRows, [parent, root]),
+    ).toThrow(QuestionKnowledgeHierarchyIntegrityError);
+  });
+});
 
 type CapturedSelect = {
   calls: string[];
@@ -272,7 +374,17 @@ describe("question detail repository read model", () => {
         ],
         [],
         [],
-        [{ question_id: 1, public_id: "knowledge-node-public-001" }],
+        [
+          {
+            question_id: 1,
+            question_profession: "marketing",
+            id: 101,
+            public_id: "knowledge-node-public-001",
+            knowledge_base_id: 201,
+            parent_knowledge_node_id: null,
+            profession: "marketing",
+          },
+        ],
         [{ question_id: 1, public_id: "tag-public-001" }],
         [
           {

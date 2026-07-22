@@ -31,6 +31,7 @@ import type {
   FillBlankAnswer,
   MultiChoiceRule,
   Profession,
+  QuestionDifficulty,
   QuestionStatus,
   QuestionType,
   ScoringMethod,
@@ -86,6 +87,7 @@ export type QuestionAccessRow = {
   profession: Profession;
   level: number;
   subject: Subject;
+  difficulty?: QuestionDifficulty | null;
   stem_rich_text: string;
   analysis_rich_text: string;
   standard_answer_rich_text: string;
@@ -100,6 +102,8 @@ export type QuestionAccessRow = {
   question_options: QuestionOptionAccessRow[];
   scoring_points: ScoringPointAccessRow[];
   knowledge_node_public_ids: string[];
+  parent_knowledge_node_public_ids?: string[];
+  ancestor_knowledge_node_public_ids?: string[];
   tag_public_ids: string[];
   created_at: Date;
   updated_at: Date;
@@ -109,6 +113,142 @@ export type QuestionListResult = {
   rows: QuestionAccessRow[];
   total: number;
 };
+
+export type QuestionKnowledgeHierarchyRow = {
+  id: number;
+  public_id: string;
+  knowledge_base_id: number;
+  parent_knowledge_node_id: number | null;
+  profession: Profession;
+};
+
+export type QuestionKnowledgeBindingHierarchyRow =
+  QuestionKnowledgeHierarchyRow & {
+    question_id: number;
+    question_profession: Profession;
+  };
+
+export type QuestionKnowledgeMetadata = {
+  knowledgeNodePublicIds: string[];
+  parentKnowledgeNodePublicIds: string[];
+  ancestorKnowledgeNodePublicIds: string[];
+};
+
+export class QuestionKnowledgeHierarchyIntegrityError extends Error {
+  constructor() {
+    super("Question knowledge hierarchy is not internally consistent.");
+    this.name = "QuestionKnowledgeHierarchyIntegrityError";
+  }
+}
+
+export function buildQuestionKnowledgeMetadata(
+  directRows: readonly QuestionKnowledgeBindingHierarchyRow[],
+  ancestorRows: readonly QuestionKnowledgeHierarchyRow[],
+): Map<number, QuestionKnowledgeMetadata> {
+  const hierarchyRowsById = new Map<number, QuestionKnowledgeHierarchyRow>();
+
+  for (const row of [...directRows, ...ancestorRows]) {
+    const existing = hierarchyRowsById.get(row.id);
+
+    if (
+      existing !== undefined &&
+      (existing.public_id !== row.public_id ||
+        existing.knowledge_base_id !== row.knowledge_base_id ||
+        existing.parent_knowledge_node_id !== row.parent_knowledge_node_id ||
+        existing.profession !== row.profession)
+    ) {
+      throw new QuestionKnowledgeHierarchyIntegrityError();
+    }
+
+    hierarchyRowsById.set(row.id, row);
+  }
+
+  const directRowsByQuestionId = new Map<
+    number,
+    QuestionKnowledgeBindingHierarchyRow[]
+  >();
+
+  for (const row of directRows) {
+    directRowsByQuestionId.set(row.question_id, [
+      ...(directRowsByQuestionId.get(row.question_id) ?? []),
+      row,
+    ]);
+  }
+
+  return new Map(
+    [...directRowsByQuestionId.entries()].map(([questionId, rows]) => {
+      const knowledgeNodePublicIds: string[] = [];
+      const parentKnowledgeNodePublicIds: string[] = [];
+      const ancestorKnowledgeNodePublicIds: string[] = [];
+      const directPublicIds = new Set<string>();
+      const [firstDirectRow] = rows;
+
+      if (
+        firstDirectRow === undefined ||
+        rows.some(
+          (row) =>
+            row.knowledge_base_id !== firstDirectRow.knowledge_base_id ||
+            row.profession !== firstDirectRow.profession ||
+            row.profession !== row.question_profession,
+        )
+      ) {
+        throw new QuestionKnowledgeHierarchyIntegrityError();
+      }
+
+      for (const directRow of [...rows].sort((left, right) =>
+        left.public_id.localeCompare(right.public_id),
+      )) {
+        if (directPublicIds.has(directRow.public_id)) {
+          throw new QuestionKnowledgeHierarchyIntegrityError();
+        }
+
+        directPublicIds.add(directRow.public_id);
+        knowledgeNodePublicIds.push(directRow.public_id);
+        const visitedIds = new Set<number>([directRow.id]);
+        let parentId = directRow.parent_knowledge_node_id;
+        let isDirectParent = true;
+
+        while (parentId !== null) {
+          if (visitedIds.has(parentId)) {
+            throw new QuestionKnowledgeHierarchyIntegrityError();
+          }
+
+          const parentRow = hierarchyRowsById.get(parentId);
+
+          if (
+            parentRow === undefined ||
+            parentRow.knowledge_base_id !== directRow.knowledge_base_id ||
+            parentRow.profession !== directRow.profession
+          ) {
+            throw new QuestionKnowledgeHierarchyIntegrityError();
+          }
+
+          visitedIds.add(parentId);
+          if (
+            isDirectParent &&
+            !parentKnowledgeNodePublicIds.includes(parentRow.public_id)
+          ) {
+            parentKnowledgeNodePublicIds.push(parentRow.public_id);
+          }
+          if (!ancestorKnowledgeNodePublicIds.includes(parentRow.public_id)) {
+            ancestorKnowledgeNodePublicIds.push(parentRow.public_id);
+          }
+          isDirectParent = false;
+          parentId = parentRow.parent_knowledge_node_id;
+        }
+      }
+
+      return [
+        questionId,
+        {
+          knowledgeNodePublicIds,
+          parentKnowledgeNodePublicIds,
+          ancestorKnowledgeNodePublicIds,
+        },
+      ];
+    }),
+  );
+}
 
 export type QuestionDetailAccessRow = QuestionAccessRow & {
   material_detail: {
@@ -329,6 +469,7 @@ export function createPostgresQuestionRepository(
           .values({
             analysis_rich_text: input.analysisRichText,
             created_by_admin_id: actorAdminId,
+            difficulty: input.difficulty ?? null,
             level: input.level,
             material_id: materialId,
             multi_choice_rule: input.multiChoiceRule,
@@ -417,6 +558,9 @@ export function createPostgresQuestionRepository(
           .update(question)
           .set({
             analysis_rich_text: input.analysisRichText,
+            ...(input.difficulty === undefined
+              ? {}
+              : { difficulty: input.difficulty }),
             level: input.level,
             material_id: materialId,
             multi_choice_rule: input.multiChoiceRule,
@@ -560,6 +704,7 @@ export function createPostgresQuestionRepository(
           .values({
             analysis_rich_text: sourceQuestion.analysis_rich_text,
             created_by_admin_id: actorAdminId,
+            difficulty: sourceQuestion.difficulty ?? null,
             is_locked: false,
             level: sourceQuestion.level,
             material_id: materialId,
@@ -630,6 +775,8 @@ type QuestionBaseRow = Omit<
   | "question_options"
   | "scoring_points"
   | "knowledge_node_public_ids"
+  | "parent_knowledge_node_public_ids"
+  | "ancestor_knowledge_node_public_ids"
   | "tag_public_ids"
 >;
 
@@ -641,6 +788,7 @@ function createQuestionBaseSelection() {
     profession: question.profession,
     level: question.level,
     subject: question.subject,
+    difficulty: question.difficulty,
     stem_rich_text: question.stem_rich_text,
     analysis_rich_text: question.analysis_rich_text,
     standard_answer_rich_text: question.standard_answer_rich_text,
@@ -999,18 +1147,10 @@ async function hydrateQuestions(
     .from(scoringPoint)
     .where(inArray(scoringPoint.question_id, questionIds))
     .orderBy(asc(scoringPoint.sort_order));
-  const knowledgeNodeBindingRows = await database
-    .select({
-      question_id: questionKnowledgeNode.question_id,
-      public_id: knowledgeNode.public_id,
-    })
-    .from(questionKnowledgeNode)
-    .innerJoin(
-      knowledgeNode,
-      eq(knowledgeNode.id, questionKnowledgeNode.knowledge_node_id),
-    )
-    .where(inArray(questionKnowledgeNode.question_id, questionIds))
-    .orderBy(asc(knowledgeNode.public_id));
+  const knowledgeMetadataByQuestionId = await loadQuestionKnowledgeMetadata(
+    database,
+    questionIds,
+  );
   const tagBindingRows = await database
     .select({
       question_id: questionTag.question_id,
@@ -1021,21 +1161,109 @@ async function hydrateQuestions(
     .where(inArray(questionTag.question_id, questionIds))
     .orderBy(asc(tag.public_id));
 
-  return rows.map((row) => ({
-    ...row,
-    question_options: optionRows.filter(
-      (questionOptionRow) => questionOptionRow.question_id === row.id,
+  return rows.map((row) => {
+    const knowledgeMetadata = knowledgeMetadataByQuestionId.get(row.id) ?? {
+      knowledgeNodePublicIds: [],
+      parentKnowledgeNodePublicIds: [],
+      ancestorKnowledgeNodePublicIds: [],
+    };
+
+    return {
+      ...row,
+      question_options: optionRows.filter(
+        (questionOptionRow) => questionOptionRow.question_id === row.id,
+      ),
+      scoring_points: scoringPointRows.filter(
+        (scoringPointRow) => scoringPointRow.question_id === row.id,
+      ),
+      knowledge_node_public_ids: knowledgeMetadata.knowledgeNodePublicIds,
+      parent_knowledge_node_public_ids:
+        knowledgeMetadata.parentKnowledgeNodePublicIds,
+      ancestor_knowledge_node_public_ids:
+        knowledgeMetadata.ancestorKnowledgeNodePublicIds,
+      tag_public_ids: tagBindingRows
+        .filter((bindingRow) => bindingRow.question_id === row.id)
+        .map((bindingRow) => bindingRow.public_id),
+    };
+  });
+}
+
+export async function loadQuestionKnowledgeMetadata(
+  database: RuntimeDatabase,
+  questionIds: readonly number[],
+): Promise<Map<number, QuestionKnowledgeMetadata>> {
+  if (questionIds.length === 0) {
+    return new Map();
+  }
+
+  const directRows = await database
+    .select({
+      question_id: questionKnowledgeNode.question_id,
+      question_profession: question.profession,
+      id: knowledgeNode.id,
+      public_id: knowledgeNode.public_id,
+      knowledge_base_id: knowledgeNode.knowledge_base_id,
+      parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
+      profession: knowledgeNode.profession,
+    })
+    .from(questionKnowledgeNode)
+    .innerJoin(question, eq(question.id, questionKnowledgeNode.question_id))
+    .innerJoin(
+      knowledgeNode,
+      eq(knowledgeNode.id, questionKnowledgeNode.knowledge_node_id),
+    )
+    .where(inArray(questionKnowledgeNode.question_id, questionIds))
+    .orderBy(asc(knowledgeNode.public_id));
+  const knownIds = new Set(directRows.map((row) => row.id));
+  const ancestorRows: QuestionKnowledgeHierarchyRow[] = [];
+  let pendingParentIds = [
+    ...new Set(
+      directRows.flatMap((row) =>
+        row.parent_knowledge_node_id === null ||
+        knownIds.has(row.parent_knowledge_node_id)
+          ? []
+          : [row.parent_knowledge_node_id],
+      ),
     ),
-    scoring_points: scoringPointRows.filter(
-      (scoringPointRow) => scoringPointRow.question_id === row.id,
-    ),
-    knowledge_node_public_ids: knowledgeNodeBindingRows
-      .filter((bindingRow) => bindingRow.question_id === row.id)
-      .map((bindingRow) => bindingRow.public_id),
-    tag_public_ids: tagBindingRows
-      .filter((bindingRow) => bindingRow.question_id === row.id)
-      .map((bindingRow) => bindingRow.public_id),
-  }));
+  ];
+
+  while (pendingParentIds.length > 0) {
+    const rows = await database
+      .select({
+        id: knowledgeNode.id,
+        public_id: knowledgeNode.public_id,
+        knowledge_base_id: knowledgeNode.knowledge_base_id,
+        parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
+        profession: knowledgeNode.profession,
+      })
+      .from(knowledgeNode)
+      .where(inArray(knowledgeNode.id, pendingParentIds))
+      .orderBy(asc(knowledgeNode.public_id));
+
+    if (rows.length === 0) {
+      break;
+    }
+
+    for (const row of rows) {
+      if (!knownIds.has(row.id)) {
+        knownIds.add(row.id);
+        ancestorRows.push(row);
+      }
+    }
+
+    pendingParentIds = [
+      ...new Set(
+        rows.flatMap((row) =>
+          row.parent_knowledge_node_id === null ||
+          knownIds.has(row.parent_knowledge_node_id)
+            ? []
+            : [row.parent_knowledge_node_id],
+        ),
+      ),
+    ];
+  }
+
+  return buildQuestionKnowledgeMetadata(directRows, ancestorRows);
 }
 
 type QuestionChildBindingIds = {

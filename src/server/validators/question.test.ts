@@ -62,6 +62,31 @@ function createObjectiveQuestionInput(
 }
 
 describe("question validator", () => {
+  it.each(["easy", "medium", "hard"])(
+    "preserves canonical question difficulty %s",
+    (difficulty) => {
+      expect(
+        normalizeCreateQuestionInput(
+          createObjectiveQuestionInput({ difficulty }),
+        ),
+      ).toMatchObject({
+        success: true,
+        value: { difficulty },
+      });
+    },
+  );
+
+  it("keeps omitted legacy difficulty null and rejects unknown values", () => {
+    expect(
+      normalizeCreateQuestionInput(createObjectiveQuestionInput()),
+    ).toMatchObject({ success: true, value: { difficulty: null } });
+    expect(
+      normalizeCreateQuestionInput(
+        createObjectiveQuestionInput({ difficulty: "extreme" }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+  });
+
   it.each(["   ", "<p><br></p>", "<div>&nbsp;</div>", "<p>\u200B\u2060</p>"])(
     "rejects semantically empty required rich text: %s",
     (emptyRichText) => {
@@ -385,13 +410,18 @@ describe("question validator", () => {
         tagPublicIds: ["tag_public_1", "tag_public_2"],
       },
     });
-    expect(normalizeUpdateQuestionInput(input)).toMatchObject({
+    const updateResult = normalizeUpdateQuestionInput(input);
+
+    expect(updateResult).toMatchObject({
       success: true,
       value: {
         knowledgeNodePublicIds: ["knowledge_node_public_1"],
         tagPublicIds: ["tag_public_1", "tag_public_2"],
       },
     });
+    expect(updateResult.success && updateResult.value.difficulty).toBe(
+      undefined,
+    );
   });
 
   it("requires a canonical optimistic concurrency timestamp for update", () => {

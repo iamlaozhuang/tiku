@@ -86,15 +86,6 @@ describe("AI组卷 route plan select wiring", () => {
       questionRepository,
       organizationTrainingRepository:
         createThrowingOrganizationTrainingRepository(),
-      knowledgeNodeParentPublicIdsByPublicId: {
-        knowledge_node_public_a: "knowledge_node_parent_public_a",
-        knowledge_node_public_b: "knowledge_node_parent_public_b",
-      },
-      difficultyByQuestionPublicId: {
-        platform_question_public_a: "medium",
-        platform_question_public_b: "medium",
-        platform_question_public_c: "medium",
-      },
     });
     const serializedResult = JSON.stringify(result);
 
@@ -158,12 +149,6 @@ describe("AI组卷 route plan select wiring", () => {
         }),
       ]),
       organizationTrainingRepository,
-      knowledgeNodeParentPublicIdsByPublicId: {
-        knowledge_node_public_b: "knowledge_node_parent_public_b",
-      },
-      difficultyByQuestionPublicId: {
-        platform_question_public_c: "medium",
-      },
     });
 
     expect(result.status).toBe("assembled");
@@ -302,9 +287,6 @@ describe("AI组卷 route plan select wiring", () => {
       ]),
       organizationTrainingRepository:
         createThrowingOrganizationTrainingRepository(),
-      difficultyByQuestionPublicId: {
-        platform_question_unrelated_knowledge: "medium",
-      },
     });
 
     expect(result.status).toBe("insufficient");
@@ -363,7 +345,10 @@ function createQuestionRow(
       },
     ],
     scoring_points: [],
+    difficulty: "medium",
     knowledge_node_public_ids: ["knowledge_node_public_a"],
+    parent_knowledge_node_public_ids: ["knowledge_node_parent_public_a"],
+    ancestor_knowledge_node_public_ids: ["knowledge_node_parent_public_a"],
     tag_public_ids: [],
     created_at: new Date("2026-07-06T00:00:00.000Z"),
     updated_at: new Date("2026-07-06T00:00:00.000Z"),
@@ -418,6 +403,10 @@ function createTrainingQuestion(publicId: string) {
       },
     ],
     score: 1,
+    difficulty: "medium",
+    knowledgeNodePublicIds: ["knowledge_node_public_a"],
+    parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
+    ancestorKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
   } satisfies NonNullable<
     OrganizationTrainingPublishedVersionDto["questions"]
   >[number];

@@ -20,6 +20,7 @@ import type { QuestionOptionDto } from "../contracts/question-contract";
 import {
   multiChoiceRuleValues,
   paperTypeValues,
+  questionDifficultyValues,
   professionValues,
   questionTypeValues,
   scoringMethodValues,
@@ -181,6 +182,7 @@ function isQuestionDraftPayload(
     isProfessionValue(value.profession) &&
     typeof value.level === "number" &&
     isSubjectValue(value.subject) &&
+    questionDifficultyValues.includes(value.difficulty as never) &&
     typeof value.stemRichText === "string" &&
     typeof value.analysisRichText === "string" &&
     typeof value.standardAnswerRichText === "string" &&
@@ -271,6 +273,7 @@ function sanitizeQuestionDraftPayload(
     profession: payload.profession,
     level: payload.level,
     subject: payload.subject,
+    difficulty: payload.difficulty,
     stemRichText: payload.stemRichText,
     analysisRichText: payload.analysisRichText,
     standardAnswerRichText: payload.standardAnswerRichText,

@@ -1,6 +1,7 @@
 import {
   multiChoiceRuleValues,
   professionValues,
+  questionDifficultyValues,
   questionStatusValues,
   questionTypeValues,
   scoringMethodValues,
@@ -39,6 +40,7 @@ export type NormalizedCreateQuestionInput = {
   profession: (typeof professionValues)[number];
   level: number;
   subject: (typeof subjectValues)[number];
+  difficulty?: (typeof questionDifficultyValues)[number] | null;
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;
@@ -117,6 +119,21 @@ function normalizeOptionalPublicId(value: unknown): string | null | undefined {
   const publicId = value.trim();
 
   return publicId.length === 0 ? undefined : publicId;
+}
+
+function normalizeQuestionDifficulty(
+  value: unknown,
+): (typeof questionDifficultyValues)[number] | null | undefined {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return typeof value === "string" &&
+    questionDifficultyValues.includes(
+      value as (typeof questionDifficultyValues)[number],
+    )
+    ? (value as (typeof questionDifficultyValues)[number])
+    : undefined;
 }
 
 function normalizePublicIdList(value: unknown): string[] | null {
@@ -413,6 +430,7 @@ export function normalizeCreateQuestionInput(
     input.standardAnswerRichText,
   );
   const materialPublicId = normalizeOptionalPublicId(input.materialPublicId);
+  const difficulty = normalizeQuestionDifficulty(input.difficulty);
   const questionOptions = normalizeQuestionOptions(input.questionOptions);
   const scoringPoints = normalizeScoringPoints(input.scoringPoints);
   const fillBlankAnswers = normalizeFillBlankAnswers(input.fillBlankAnswers);
@@ -426,6 +444,7 @@ export function normalizeCreateQuestionInput(
     !isProfession(input.profession) ||
     level === null ||
     !isSubject(input.subject) ||
+    difficulty === undefined ||
     stemRichText === null ||
     analysisRichText === null ||
     standardAnswerRichText === null ||
@@ -473,6 +492,7 @@ export function normalizeCreateQuestionInput(
       profession: input.profession,
       level,
       subject: input.subject,
+      difficulty,
       stemRichText,
       analysisRichText,
       standardAnswerRichText,
@@ -512,6 +532,9 @@ export function normalizeUpdateQuestionInput(
     success: true,
     value: {
       ...questionInput.value,
+      difficulty: Object.hasOwn(input, "difficulty")
+        ? questionInput.value.difficulty
+        : undefined,
       expectedUpdatedAt,
       status: input.status,
     },

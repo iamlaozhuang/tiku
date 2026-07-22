@@ -4,10 +4,6 @@ import type { QuestionAccessRow } from "../repositories/question-repository";
 
 export type AiPaperPlatformQuestionSourceAdapterInput = {
   questionRows: readonly QuestionAccessRow[];
-  knowledgeNodeParentPublicIdsByPublicId?: Readonly<
-    Record<string, string | null>
-  >;
-  difficultyByQuestionPublicId?: Readonly<Record<string, string | null>>;
 };
 
 export type AiPaperEnterpriseQuestionSourceAdapterInput = {
@@ -36,13 +32,14 @@ export function mapPlatformQuestionRowsToAiPaperQuestions(
       level: questionRow.level,
       subject: questionRow.subject,
       questionType: questionRow.question_type,
-      difficulty:
-        input.difficultyByQuestionPublicId?.[questionRow.public_id] ?? null,
+      difficulty: questionRow.difficulty ?? null,
       knowledgeNodePublicIds: [...questionRow.knowledge_node_public_ids],
-      parentKnowledgeNodePublicIds: mapParentKnowledgeNodePublicIds(
-        questionRow.knowledge_node_public_ids,
-        input.knowledgeNodeParentPublicIdsByPublicId ?? {},
-      ),
+      parentKnowledgeNodePublicIds: [
+        ...(questionRow.parent_knowledge_node_public_ids ?? []),
+      ],
+      ancestorKnowledgeNodePublicIds: [
+        ...(questionRow.ancestor_knowledge_node_public_ids ?? []),
+      ],
     }));
 }
 
@@ -73,31 +70,18 @@ export function mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions(
           level: trainingVersion.level,
           subject: trainingVersion.subject,
           questionType: questionSnapshot.questionType,
-          difficulty: null,
-          knowledgeNodePublicIds: [],
-          parentKnowledgeNodePublicIds: [],
+          difficulty: questionSnapshot.difficulty ?? null,
+          knowledgeNodePublicIds: [
+            ...(questionSnapshot.knowledgeNodePublicIds ?? []),
+          ],
+          parentKnowledgeNodePublicIds: [
+            ...(questionSnapshot.parentKnowledgeNodePublicIds ?? []),
+          ],
+          ancestorKnowledgeNodePublicIds: [
+            ...(questionSnapshot.ancestorKnowledgeNodePublicIds ?? []),
+          ],
         } satisfies AiPaperSelectableQuestionDto,
       ];
     });
   });
-}
-
-function mapParentKnowledgeNodePublicIds(
-  knowledgeNodePublicIds: readonly string[],
-  knowledgeNodeParentPublicIdsByPublicId: Readonly<
-    Record<string, string | null>
-  >,
-): string[] {
-  return [
-    ...new Set(
-      knowledgeNodePublicIds
-        .map((knowledgeNodePublicId) => {
-          return (
-            knowledgeNodeParentPublicIdsByPublicId[knowledgeNodePublicId] ??
-            null
-          );
-        })
-        .filter((publicId): publicId is string => publicId !== null),
-    ),
-  ];
 }

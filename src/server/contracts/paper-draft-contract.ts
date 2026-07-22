@@ -6,6 +6,7 @@ import type {
   PaperType,
   Profession,
   QuestionStatus,
+  QuestionDifficulty,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -27,6 +28,10 @@ export type QuestionSnapshotDto = {
   profession: Profession;
   level: number;
   subject: Subject;
+  difficulty?: QuestionDifficulty | null;
+  knowledgeNodePublicIds?: string[];
+  parentKnowledgeNodePublicIds?: string[];
+  ancestorKnowledgeNodePublicIds?: string[];
   stemRichText: string;
   questionOptions: {
     label: string;

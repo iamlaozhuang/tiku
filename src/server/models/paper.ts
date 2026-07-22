@@ -18,6 +18,7 @@ import {
   question,
   questionGroup,
   questionOption,
+  questionDifficultyValues,
   questionStatusValues,
   questionTypeValues,
   type FillBlankAnswerValue,
@@ -36,6 +37,7 @@ export {
   paperTypeValues,
   professionValues,
   questionStatusValues,
+  questionDifficultyValues,
   questionTypeValues,
   scoringMethodValues,
   subjectValues,
@@ -46,6 +48,7 @@ export type Subject = (typeof subjectValues)[number];
 export type ExamSubject = Subject;
 export type QuestionType = (typeof questionTypeValues)[number];
 export type QuestionStatus = (typeof questionStatusValues)[number];
+export type QuestionDifficulty = (typeof questionDifficultyValues)[number];
 export type MaterialStatus = (typeof materialStatusValues)[number];
 export type PaperType = (typeof paperTypeValues)[number];
 export type PaperGenerationMethod =

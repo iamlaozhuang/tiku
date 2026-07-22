@@ -3,6 +3,7 @@ import type {
   MultiChoiceRule,
   Profession,
   QuestionStatus,
+  QuestionDifficulty,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -30,6 +31,7 @@ export type QuestionDto = {
   profession: Profession;
   level: number;
   subject: Subject;
+  difficulty?: QuestionDifficulty | null;
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;

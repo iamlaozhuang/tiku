@@ -20,6 +20,7 @@ export function mapQuestionToApi(question: QuestionAccessRow): QuestionDto {
     profession: question.profession,
     level: question.level,
     subject: question.subject,
+    difficulty: question.difficulty ?? null,
     stemRichText: question.stem_rich_text,
     analysisRichText: question.analysis_rich_text,
     standardAnswerRichText: question.standard_answer_rich_text,

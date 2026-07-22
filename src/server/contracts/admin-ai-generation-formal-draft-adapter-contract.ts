@@ -10,6 +10,7 @@ import type {
   PaperType,
   Profession,
   QuestionStatus,
+  QuestionDifficulty,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -31,6 +32,7 @@ export type AdminAiGenerationFormalQuestionDraftPayload = {
   profession: Profession;
   level: number;
   subject: Subject;
+  difficulty: QuestionDifficulty;
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;

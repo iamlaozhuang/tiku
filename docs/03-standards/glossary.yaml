@@ -375,6 +375,13 @@ enums:
       - { key: available, chinese: 可用 }
       - { key: disabled, chinese: 停用 }
 
+  question_difficulty:
+    db_column: difficulty
+    values:
+      - { key: easy, chinese: 简单 }
+      - { key: medium, chinese: 中等 }
+      - { key: hard, chinese: 困难 }
+
   material_status:
     db_column: material_status
     values:

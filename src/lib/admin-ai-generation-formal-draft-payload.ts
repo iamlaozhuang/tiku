@@ -14,6 +14,7 @@ import type {
   MultiChoiceRule,
   PaperType,
   Profession,
+  QuestionDifficulty,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -170,12 +171,27 @@ function createFormalQuestionDraftPayload(
   const questionType = normalizeQuestionType(
     questionDraft.questionType ?? generationParameters.questionType,
   );
+  const difficulty = normalizeQuestionDifficulty(questionDraft.difficulty);
+  const knowledgeNodePublicIds = [
+    ...new Set(generationParameters.knowledgeNodePublicIds),
+  ];
+
+  if (
+    difficulty === null ||
+    generationParameters.knowledgeNodeMode !== "selected" ||
+    knowledgeNodePublicIds.length === 0 ||
+    knowledgeNodePublicIds.length !==
+      generationParameters.knowledgeNodePublicIds.length
+  ) {
+    return null;
+  }
 
   return {
     questionType,
     profession: generationParameters.profession as Profession,
     level: generationParameters.level,
     subject: generationParameters.subject as Subject,
+    difficulty,
     stemRichText,
     analysisRichText,
     standardAnswerRichText,
@@ -191,9 +207,17 @@ function createFormalQuestionDraftPayload(
       questionType === "fill_blank"
         ? createFillBlankAnswers(standardAnswerRichText)
         : [],
-    knowledgeNodePublicIds: [...generationParameters.knowledgeNodePublicIds],
+    knowledgeNodePublicIds,
     tagPublicIds: [],
   };
+}
+
+function normalizeQuestionDifficulty(
+  value: string | null | undefined,
+): QuestionDifficulty | null {
+  return value === "easy" || value === "medium" || value === "hard"
+    ? value
+    : null;
 }
 
 function normalizeQuestionType(value: string | null | undefined): QuestionType {

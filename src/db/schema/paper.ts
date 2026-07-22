@@ -58,6 +58,7 @@ export const questionTypeValues = [
   "calculation",
 ] as const;
 export const questionStatusValues = ["available", "disabled"] as const;
+export const questionDifficultyValues = ["easy", "medium", "hard"] as const;
 export const materialStatusValues = ["available", "disabled"] as const;
 export const paperStatusValues = ["draft", "published", "archived"] as const;
 export const multiChoiceRuleValues = [
@@ -108,6 +109,10 @@ export const questionTypeEnum = pgEnum("question_type", questionTypeValues);
 export const questionStatusEnum = pgEnum(
   "question_status",
   questionStatusValues,
+);
+export const questionDifficultyEnum = pgEnum(
+  "question_difficulty",
+  questionDifficultyValues,
 );
 export const materialStatusEnum = pgEnum(
   "material_status",
@@ -180,6 +185,7 @@ export const question = pgTable(
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
     subject: subjectEnum("subject").notNull(),
+    difficulty: questionDifficultyEnum("difficulty"),
     stem_rich_text: text("stem_rich_text").notNull(),
     analysis_rich_text: text("analysis_rich_text").notNull(),
     standard_answer_rich_text: text("standard_answer_rich_text").notNull(),

@@ -41,10 +41,6 @@ export type AiPaperRouteSourceResolutionInput = {
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
   >;
-  knowledgeNodeParentPublicIdsByPublicId?: Readonly<
-    Record<string, string | null>
-  >;
-  difficultyByQuestionPublicId?: Readonly<Record<string, string | null>>;
 };
 
 export type AiPaperRouteSourceResolutionResult =
@@ -83,9 +79,6 @@ export async function resolveAiPaperRouteQuestionSources(
       platformQuestionListResult,
       input,
     ),
-    knowledgeNodeParentPublicIdsByPublicId:
-      input.knowledgeNodeParentPublicIdsByPublicId,
-    difficultyByQuestionPublicId: input.difficultyByQuestionPublicId,
   });
 
   if (!requiresEnterpriseSource(input.role)) {
@@ -156,9 +149,9 @@ function filterQuestionRowsBySelectedKnowledgeScope(
     questionRow.knowledge_node_public_ids.some((knowledgeNodePublicId) =>
       isWithinSelectedKnowledgeScope({
         includeDescendants: input.generationParameters.includeDescendants,
-        knowledgeNodeParentPublicIdsByPublicId:
-          input.knowledgeNodeParentPublicIdsByPublicId ?? {},
         knowledgeNodePublicId,
+        ancestorKnowledgeNodePublicIds:
+          questionRow.ancestor_knowledge_node_public_ids ?? [],
         selectedKnowledgeNodePublicIdSet,
       }),
     ),
@@ -175,10 +168,8 @@ function getSelectedKnowledgeNodePublicIds(
 
 function isWithinSelectedKnowledgeScope(input: {
   includeDescendants: boolean;
-  knowledgeNodeParentPublicIdsByPublicId: Readonly<
-    Record<string, string | null>
-  >;
   knowledgeNodePublicId: string;
+  ancestorKnowledgeNodePublicIds: readonly string[];
   selectedKnowledgeNodePublicIdSet: ReadonlySet<string>;
 }): boolean {
   if (input.selectedKnowledgeNodePublicIdSet.has(input.knowledgeNodePublicId)) {
@@ -189,22 +180,9 @@ function isWithinSelectedKnowledgeScope(input: {
     return false;
   }
 
-  const visitedPublicIds = new Set<string>();
-  let currentPublicId: string | null =
-    input.knowledgeNodeParentPublicIdsByPublicId[input.knowledgeNodePublicId] ??
-    null;
-
-  while (currentPublicId !== null && !visitedPublicIds.has(currentPublicId)) {
-    if (input.selectedKnowledgeNodePublicIdSet.has(currentPublicId)) {
-      return true;
-    }
-
-    visitedPublicIds.add(currentPublicId);
-    currentPublicId =
-      input.knowledgeNodeParentPublicIdsByPublicId[currentPublicId] ?? null;
-  }
-
-  return false;
+  return input.ancestorKnowledgeNodePublicIds.some((ancestorPublicId) =>
+    input.selectedKnowledgeNodePublicIdSet.has(ancestorPublicId),
+  );
 }
 
 function dedupeQuestionRowsByPublicId(

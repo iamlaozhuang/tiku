@@ -209,6 +209,83 @@ describe("paper_attachment_usage contract", () => {
 });
 
 describe("paper schema question_type enum", () => {
+  it("registers the legacy-safe question difficulty enum and nullable column", () => {
+    expect(paperSchema.questionDifficultyValues).toEqual([
+      "easy",
+      "medium",
+      "hard",
+    ]);
+    expect(getColumnNames(question)).toContain("difficulty");
+
+    const glossarySource = readFileSync(
+      resolve(process.cwd(), "docs/03-standards/glossary.yaml"),
+      "utf8",
+    );
+    const contractStart = glossarySource.lastIndexOf(
+      "  question_difficulty:\n",
+    );
+    const contractEnd = glossarySource.indexOf(
+      "\n  material_status:",
+      contractStart,
+    );
+    const contract = glossarySource.slice(contractStart, contractEnd);
+
+    expect(contractStart).toBeGreaterThan(-1);
+    expect(contract).toContain("db_column: difficulty");
+    expect(contract).toContain("key: easy, chinese: 简单");
+    expect(contract).toContain("key: medium, chinese: 中等");
+    expect(contract).toContain("key: hard, chinese: 困难");
+  });
+
+  it("generates only the additive nullable question difficulty source", () => {
+    const migrationSource = readFileSync(
+      resolve(
+        process.cwd(),
+        "drizzle/20260722230000_p1_rc_07_formal_question_ai_paper_metadata.sql",
+      ),
+      "utf8",
+    );
+    const previousSnapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260722213000_snapshot.json"),
+        "utf8",
+      ),
+    ) as { id: string };
+    const snapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260722230000_snapshot.json"),
+        "utf8",
+      ),
+    ) as {
+      prevId: string;
+      enums: Record<string, { values: string[] }>;
+      tables: Record<
+        string,
+        { columns: Record<string, { notNull: boolean; type: string }> }
+      >;
+    };
+
+    expect(migrationSource).toBe(
+      "CREATE TYPE \"public\".\"question_difficulty\" AS ENUM('easy', 'medium', 'hard');--> statement-breakpoint\n" +
+        'ALTER TABLE "question" ADD COLUMN "difficulty" "question_difficulty";',
+    );
+    expect(migrationSource).not.toMatch(
+      /\b(?:DROP|RENAME|UPDATE|DELETE|INSERT|SET DEFAULT|SET NOT NULL)\b/u,
+    );
+    expect(snapshot.prevId).toBe(previousSnapshot.id);
+    expect(snapshot.enums["public.question_difficulty"]?.values).toEqual([
+      "easy",
+      "medium",
+      "hard",
+    ]);
+    expect(snapshot.tables["public.question"]?.columns.difficulty).toEqual(
+      expect.objectContaining({
+        notNull: false,
+        type: "question_difficulty",
+      }),
+    );
+  });
+
   it("persists managed content_image metadata and its resumable upload operation independently from paper_asset", () => {
     const schema = paperSchema as unknown as Record<string, unknown>;
     const contentImage = schema.contentImage;

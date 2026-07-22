@@ -69,6 +69,7 @@ function createQuestion(
     difficulty: "medium",
     knowledgeNodePublicIds: ["knowledge_node_public_a"],
     parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
+    ancestorKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
     ...override,
   };
 }
@@ -492,21 +493,30 @@ describe("AI组卷 plan-and-select 后端合同", () => {
     ]);
   });
 
-  it("按 exact -> nearby knowledge -> same scope 降级选题，题源不足时不虚构题目", () => {
+  it("按 exact -> descendant -> nearby knowledge -> same scope 降级选题，题源不足时不虚构题目", () => {
     const result = assembleAiPaperFromPlan(
       createInput({
         plan: {
           ...basePlan,
-          targetQuestionCount: 4,
+          targetQuestionCount: 5,
           sections: [
             {
               ...basePlan.sections[0],
-              targetQuestionCount: 4,
+              targetQuestionCount: 5,
             },
           ],
         },
         platformQuestions: [
           createQuestion({ publicId: "question_exact" }),
+          createQuestion({
+            publicId: "question_descendant",
+            knowledgeNodePublicIds: ["knowledge_node_public_descendant"],
+            parentKnowledgeNodePublicIds: ["knowledge_node_public_child"],
+            ancestorKnowledgeNodePublicIds: [
+              "knowledge_node_public_child",
+              "knowledge_node_public_a",
+            ],
+          }),
           createQuestion({
             publicId: "question_nearby_knowledge",
             difficulty: "hard",
@@ -531,11 +541,17 @@ describe("AI组卷 plan-and-select 后端合同", () => {
       result.container.sections[0]?.selectedQuestions.map(
         (question) => question.matchTier,
       ),
-    ).toEqual(["exact", "nearby_knowledge", "same_scope"]);
-    expect(result.container.selectedQuestionCount).toBe(3);
+    ).toEqual(["exact", "descendant", "nearby_knowledge", "same_scope"]);
+    expect(result.container.selectedQuestionCount).toBe(4);
+    expect(result.container.sections[0]?.degradationSummary).toMatchObject({
+      exactCount: 1,
+      descendantCount: 1,
+      nearbyKnowledgeCount: 1,
+      sameScopeCount: 1,
+    });
     expect(result.insufficiency).toEqual({
-      requestedQuestionCount: 4,
-      selectedQuestionCount: 3,
+      requestedQuestionCount: 5,
+      selectedQuestionCount: 4,
       missingQuestionCount: 1,
       failureCategory: "insufficient_formal_question_source",
     });
@@ -576,6 +592,40 @@ describe("AI组卷 plan-and-select 后端合同", () => {
     expect(result.container.sections[0]?.selectedQuestions).toEqual([
       {
         questionPublicId: "question_same_scope_only",
+        sourceKind: "platform_formal_question",
+        matchTier: "same_scope",
+        score: 2,
+      },
+    ]);
+  });
+
+  it("legacy difficulty 缺失时即使知识元数据匹配也只能显式降级为 same scope", () => {
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 1,
+          sections: [
+            {
+              ...basePlan.sections[0],
+              targetQuestionCount: 1,
+            },
+          ],
+        },
+        platformQuestions: [
+          createQuestion({
+            publicId: "question_legacy_difficulty_unavailable",
+            difficulty: null,
+          }),
+        ],
+      }),
+    );
+
+    expect(result.status).toBe("assembled");
+    expect(result.container.matchQuality).toBe("supplemented_from_same_scope");
+    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+      {
+        questionPublicId: "question_legacy_difficulty_unavailable",
         sourceKind: "platform_formal_question",
         matchTier: "same_scope",
         score: 2,

@@ -132,7 +132,7 @@ function createContentPaperContract(
 }
 
 describe("content admin formal reviewed draft payload", () => {
-  it("carries selected knowledge node public ids into formal question drafts", () => {
+  it("carries strict difficulty and selected knowledge node public ids into formal question drafts", () => {
     const payload = createContentAdminFormalReviewedDraftPayload({
       localContractSummary: createContentQuestionContract(),
       generationParameters,
@@ -145,6 +145,7 @@ describe("content admin formal reviewed draft payload", () => {
       profession: "marketing",
       level: 3,
       subject: "theory",
+      difficulty: "medium",
       knowledgeNodePublicIds: ["knowledge_node_public_selected"],
       tagPublicIds: [],
     });
@@ -153,7 +154,7 @@ describe("content admin formal reviewed draft payload", () => {
     expect(serializedPayload).not.toContain("providerPayload");
   });
 
-  it("keeps balanced submissions without selected ids empty", () => {
+  it("rejects generated labels that have not been resolved to selected knowledge node public ids", () => {
     const payload = createContentAdminFormalReviewedDraftPayload({
       localContractSummary: createContentQuestionContract(),
       generationParameters: {
@@ -167,10 +168,32 @@ describe("content admin formal reviewed draft payload", () => {
       requestedAt: "2026-07-08T10:00:00.000Z",
     });
 
-    expect(payload).toMatchObject({
-      knowledgeNodePublicIds: [],
-    });
+    expect(payload).toBeNull();
   });
+
+  it.each([null, "unknown"])(
+    "rejects a formal question draft with non-canonical difficulty %s",
+    (difficulty) => {
+      const contract = createContentQuestionContract();
+      const preview =
+        contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+
+      if (preview?.kind === "question_set") {
+        preview.draftSummaries[0] = {
+          ...preview.draftSummaries[0],
+          difficulty,
+        };
+      }
+
+      expect(
+        createContentAdminFormalReviewedDraftPayload({
+          localContractSummary: contract,
+          generationParameters,
+          requestedAt: "2026-07-08T10:00:00.000Z",
+        }),
+      ).toBeNull();
+    },
+  );
 
   it("creates a formal paper draft payload from selected platform question references", () => {
     const payload = createContentAdminFormalReviewedDraftPayload({

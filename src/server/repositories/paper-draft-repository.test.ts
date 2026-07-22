@@ -3,11 +3,43 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import {
+  copyQuestionSourceMetadataToSnapshot,
   createPaperQuestionSectionMovePlan,
   createTwoPhaseSortOrderPlan,
   isExactPublicIdOrder,
   isQuestionGroupMembershipCompatible,
 } from "./paper-draft-repository";
+
+describe("paper question metadata snapshot", () => {
+  it("deep copies difficulty and complete knowledge hierarchy facts", () => {
+    const knowledgeNodePublicIds = ["knowledge_node_child"];
+    const parentKnowledgeNodePublicIds = ["knowledge_node_parent"];
+    const ancestorKnowledgeNodePublicIds = [
+      "knowledge_node_parent",
+      "knowledge_node_root",
+    ];
+    const snapshot = copyQuestionSourceMetadataToSnapshot({
+      difficulty: "hard",
+      knowledgeNodePublicIds,
+      parentKnowledgeNodePublicIds,
+      ancestorKnowledgeNodePublicIds,
+    });
+
+    knowledgeNodePublicIds.push("knowledge_node_mutated");
+    parentKnowledgeNodePublicIds.push("knowledge_node_mutated_parent");
+    ancestorKnowledgeNodePublicIds.push("knowledge_node_mutated_ancestor");
+
+    expect(snapshot).toEqual({
+      difficulty: "hard",
+      knowledgeNodePublicIds: ["knowledge_node_child"],
+      parentKnowledgeNodePublicIds: ["knowledge_node_parent"],
+      ancestorKnowledgeNodePublicIds: [
+        "knowledge_node_parent",
+        "knowledge_node_root",
+      ],
+    });
+  });
+});
 
 describe("paper question section move planning", () => {
   it("moves a standalone paper question without rebuilding its snapshot", () => {

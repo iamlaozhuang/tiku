@@ -26,7 +26,11 @@ export type AiPaperSourcePreference =
   | "prefer_platform"
   | "prefer_enterprise";
 
-export type AiPaperMatchTier = "exact" | "nearby_knowledge" | "same_scope";
+export type AiPaperMatchTier =
+  | "exact"
+  | "descendant"
+  | "nearby_knowledge"
+  | "same_scope";
 
 export type AiPaperMatchQuality =
   | "fully_matched"
@@ -94,6 +98,7 @@ export type AiPaperSelectableQuestionDto = {
   difficulty: string | null;
   knowledgeNodePublicIds: string[];
   parentKnowledgeNodePublicIds: string[];
+  ancestorKnowledgeNodePublicIds?: string[];
 };
 
 export type AiPaperPlanAndSelectInput = {
@@ -120,6 +125,7 @@ export type AiPaperPlanAndSelectSectionDto = {
   selectedQuestions: AiPaperSelectedQuestionDto[];
   degradationSummary: {
     exactCount: number;
+    descendantCount?: number;
     nearbyKnowledgeCount: number;
     sameScopeCount: number;
   };

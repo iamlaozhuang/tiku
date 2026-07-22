@@ -2665,6 +2665,19 @@ function mapPaperQuestionSnapshotRowToDto(
     publicId,
     sequenceNumber,
     questionType,
+    difficulty: getQuestionDifficulty(snapshot.difficulty),
+    knowledgeNodePublicIds: getStringListField(
+      snapshot,
+      "knowledgeNodePublicIds",
+    ),
+    parentKnowledgeNodePublicIds: getStringListField(
+      snapshot,
+      "parentKnowledgeNodePublicIds",
+    ),
+    ancestorKnowledgeNodePublicIds: getStringListField(
+      snapshot,
+      "ancestorKnowledgeNodePublicIds",
+    ),
     materialTitle:
       materialSnapshot === null
         ? null
@@ -2681,6 +2694,30 @@ function mapPaperQuestionSnapshotRowToDto(
     options: mapQuestionOptionSnapshots(snapshot, publicId),
     score: getNonNegativeNumber(row.score ?? snapshot.score),
   };
+}
+
+function getQuestionDifficulty(
+  value: unknown,
+): "easy" | "medium" | "hard" | null {
+  return value === "easy" || value === "medium" || value === "hard"
+    ? value
+    : null;
+}
+
+function getStringListField(
+  value: Record<string, unknown>,
+  key: string,
+): string[] {
+  const field = value[key];
+
+  if (
+    !Array.isArray(field) ||
+    field.some((item) => typeof item !== "string" || item.trim().length === 0)
+  ) {
+    return [];
+  }
+
+  return [...new Set(field.map((item) => item.trim()))];
 }
 
 function mapPaperQuestionSnapshotRowToAdminDetail(

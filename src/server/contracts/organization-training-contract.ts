@@ -12,7 +12,7 @@ import type {
   OrganizationTrainingValidationStatus,
   OrganizationTrainingVersionStatus,
 } from "../models/organization-training";
-import type { Subject } from "../models/paper";
+import type { QuestionDifficulty, Subject } from "../models/paper";
 
 export type OrganizationTrainingDraftDto = {
   publicId: string;
@@ -53,6 +53,10 @@ export type OrganizationTrainingQuestionSnapshotDto = {
   publicId: string;
   sequenceNumber: number;
   questionType: OrganizationTrainingQuestionType;
+  difficulty?: QuestionDifficulty | null;
+  knowledgeNodePublicIds?: string[];
+  parentKnowledgeNodePublicIds?: string[];
+  ancestorKnowledgeNodePublicIds?: string[];
   materialTitle: string | null;
   materialContent: string | null;
   stem: string;

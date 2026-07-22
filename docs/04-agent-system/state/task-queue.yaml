@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22
+  currentTaskId: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -307,6 +307,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
     - p1-remediation-rc-07-ai-generation-prompt-provenance-call-log-2026-07-22
     - p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22
+    - p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
   completedTaskIds:
     - p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22
     - p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22
@@ -521,81 +522,85 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-model-config-connection-truthful-static-closure-2026-07-22: closed
     p1-remediation-rc-07-rag-grounding-prompt-isolation-2026-07-22: closed
     p1-remediation-rc-07-ai-generation-prompt-provenance-call-log-2026-07-22: closed
-    p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22: in_progress
+    p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22: closed
+    p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22: in_progress
 activeTasks:
-  - id: p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22
-    title: AI question draft schema and private snapshot integrity
-    phase: p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22
+  - id: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
+    title: Formal question and AI paper source metadata foundation
+    phase: p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
     status: in_progress
     priority: p1
-    taskKind: schema_migration_source_database_application_logic_and_bounded_provider_output_parser
-    productClosureContribution: closes_F0151_and_F0152
-    branch: fix/ai-question-draft-snapshot-integrity
-    objective: require one complete versioned question draft schema, preserve exact requested count across consumers, and create personal learning sessions only from an immutable owner-scoped server snapshot
+    taskKind: schema_migration_source_and_database_application_logic
+    productClosureContribution: partial_F0154_formal_question_and_source_metadata_foundation
+    branch: fix/formal-question-ai-paper-metadata
+    objective: add legacy-safe formal question difficulty and immutable knowledge hierarchy metadata, preserve them through selected-mode adoption and training snapshots, and remove test-only metadata injection from production AI paper source resolution
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-07
     findingIds:
-      - F-0151
-      - F-0152
-    executionStage: validated_candidate_pre_commit
-    findingStatus: in_progress
-    findingDisposition: F0151_F0152_bundled_same_authoritative_validated_question_draft_snapshot_F0154_separate
+      - F-0154
+    executionStage: validated_candidate_ready_conditional_closeout
+    findingStatus: open_partitioned
+    findingDisposition: F0154_open_partitioned_current_formal_question_and_source_metadata_foundation_generated_label_confirmation_and_legacy_manual_metadata_residual
     riskBoundary:
-      category: schema_migration_source_database_application_logic_and_bounded_provider_output_parser
-      approvalId: guardian-f0151-f0152-question-draft-snapshot-integrity-2026-07-22
-      approvedBaseSha: 9501691ee10b4f144c832a697a45d3ac3e6f9232
+      category: schema_migration_source_and_database_application_logic
+      approvalId: guardian-f0154-formal-question-source-metadata-foundation-2026-07-22
+      approvedBaseSha: fdcc00a3823dbaa2be9e029e9353450722d4931e
       schemaOrMigrationChange: true
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       providerOrRealExternalCall: false
       providerConfigurationChange: false
       dependencyChange: false
-      conditionalCloseout: true
+      conditionalCloseout: approved
     preRedImpactScan:
-      chain: Provider_output_to_shared_question_schema_parser_to_exact_count_consumers_to_personal_result_private_snapshot_to_owner_scoped_learning_session_and_safe_history_projection
-      coreFiles: 31
-      contingencyFiles: 15
-      preflightTestFiles: 15
+      chain: content_AI_strict_draft_to_formal_question_metadata_to_immutable_paper_and_training_snapshot_to_database_backed_AI_paper_source_resolution
+      coreFiles: 25
+      contingencyFiles: 16
+      preflightTestFiles: 14
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedRootCause: one_display_oriented_permissive_question_preview_is_reused_as_success_adoption_and_learning_fact_without_complete_schema_count_conservation_or_server_owned_output_snapshot
-      bundleDisposition: F0151_and_F0152_share_one_validated_question_draft_snapshot_and_validation_matrix_F0154_has_a_different_formal_question_metadata_and_selection_path
+      confirmedRootCause: formal_question_and_immutable_training_snapshots_omit_difficulty_and_hierarchy_projection_while_production_source_resolution_depends_on_optional_test_only_maps
+      bundleDisposition: F0154_partition_one_additive_formal_question_and_source_metadata_foundation_only
+    taskBoundApproval:
+      fingerprint: 5fdb650fb70e5afd6d6f7f49ca7941815b0456966f1585f9cbf02cf1637d2b99
+      status: approved_guardian_task_bound_conditional_closeout
     validationEvidence:
-      red: strict_legacy_plaintext_duplicate_key_wrong_count_client_fact_and_seven_question_type_cases_failed_before_GREEN
-      focused: pass_18_files_386_tests_48_8s
-      lint: pass_34_changed_typescript_files_0_warnings_9_0s
-      typecheck: pass_tsc_noEmit_8_3s
-      build: pass_next_build_72_1s_with_pre_existing_NFT_dynamic_path_warning
-      schemaMigrationSource: pass_5_additive_personal_ai_generation_result_statements_snapshot_parent_and_journal_verified_no_apply
-      formatAndDiff: pass_prettier_and_git_diff_check
-      stateContractParse: pass_JSON_and_Pretty_YAML_parse
-      adversarialReview: pass_strict_unknown_and_duplicate_key_rejection_exact_count_all_seven_types_static_v2_prompt_hash_server_owned_digest_owner_auth_before_private_lookup_concurrent_session_recheck_private_runtime_and_creation_DTO_redaction_legacy_unavailable_no_F0154_or_out_of_envelope_diff
-      prohibitedScope: no_migration_apply_real_DB_real_Provider_call_permission_dependency_mechanism_or_F0154_change
+      red: pass_expected_18_failures_120_passes_before_implementation
+      focused: pass_14_files_258_tests
+      lint: pass_targeted
+      typecheck: pass_tsc_no_emit
+      build: pass_next_production_build_with_preexisting_NFT_warning
+      schemaMigrationSource: pass_additive_nullable_enum_and_column_snapshot_parent_and_monotonic_journal
+      formatAndDiff: pass_prettier_write_and_git_diff_check
+      stateContractParse: pass_json_and_yaml
+      adversarialReview: pass_cross_tree_cycle_missing_parent_legacy_metadata_no_override_snapshot_immutability_and_manual_update_preservation
+      prohibitedScope: no_migration_apply_real_DB_real_Provider_permission_dependency_mechanism_balanced_label_confirmation_or_full_F0154_claim
     expectedAcceptance:
-      - non_JSON_or_incomplete_or_unknown_question_draft_never_reaches_success
-      - every_question_matches_one_versioned_type_aware_schema_and_exact_requested_count
-      - content_organization_and_personal_consumers_never_filter_or_find_a_smaller_successful_subset
-      - personal_question_result_persists_one_immutable_server_owned_snapshot_with_schema_version_and_digest
-      - learning_session_accepts_only_sourceResultPublicId_and_uses_the_owner_scoped_persisted_snapshot
-      - history_remains_redacted_and_never_returns_answers_or_private_snapshot
+      - question_difficulty_enum_and_nullable_column_are_additive_and_legacy_safe
+      - selected_mode_content_AI_adoption_persists_exact_difficulty_and_selected_knowledge_public_ids
+      - unconfirmed_generated_labels_never_create_an_unbound_formal_question
+      - paper_and_training_snapshots_preserve_difficulty_and_complete_knowledge_hierarchy
+      - production_source_resolution_has_no_optional_test_only_metadata_override
+      - exact_descendant_nearby_and_same_scope_tiers_are_distinct_and_observable
+      - F0154_remains_open_for_generated_label_confirmation_and_legacy_manual_metadata
     closeoutProjection:
-      current: validated_candidate_pre_commit
-      triggers: approval_then_RED_GREEN_focused_lint_typecheck_build_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0151_and_F0152_closed_then_resume_F0154_separate_JIT
+      current: validated_candidate_ready_for_kernel_commit_and_conditional_closeout
+      triggers: unchanged_tree_kernel_commit_ff_only_canonical_push_sync_cleanup
+      successProjection: F0154_open_partitioned_then_resume_generated_label_confirmation_and_legacy_manual_metadata
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     executionMetrics:
-      mandatoryFreshApprovals: 3_parent_and_two_exact_scope_amendments
-      preventableScopeMissApprovals: 2_prompt_contract_and_learning_question_type_direct_chain
+      mandatoryFreshApprovals: 1_task_bound_schema_approval_requested
+      preventableScopeMissApprovals: 0
       candidateReapprovals: 0
-      approvalWaitTurns: 2_scope_amendment_waits
-      productValueTime: strict_parser_snapshot_persistence_learning_reconstruction_and_exact_count_consumers
-      mechanismOverhead: contract_state_scope_amendments_validation_and_conditional_closeout
+      approvalWaitTurns: 0
+      productValueTime: JIT_formal_question_and_source_metadata_root_cause_analysis
+      mechanismOverhead: task_contract_materialization_and_single_guardian_request
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-07-ai-generation-prompt-provenance-call-log-2026-07-22
+      taskId: p1-remediation-rc-07-ai-question-draft-snapshot-integrity-2026-07-22
       findingIds:
-        - F-0036
-        - F-0103
-      commit: 9501691ee10b4f144c832a697a45d3ac3e6f9232
+        - F-0151
+        - F-0152
+      commit: fdcc00a3823dbaa2be9e029e9353450722d4931e
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       findingStatus: closed
       masterOriginSync: pass

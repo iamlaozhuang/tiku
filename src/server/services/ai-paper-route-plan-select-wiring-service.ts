@@ -33,10 +33,6 @@ export type AiPaperRoutePlanSelectWiringInput = {
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
   >;
-  knowledgeNodeParentPublicIdsByPublicId?: Readonly<
-    Record<string, string | null>
-  >;
-  difficultyByQuestionPublicId?: Readonly<Record<string, string | null>>;
 };
 
 export type AiPaperRoutePlanSelectWiringResult =
@@ -65,9 +61,6 @@ export async function resolveAndAssembleAiPaperFromRoute(
     generationParameters: input.generationParameters,
     questionRepository: input.questionRepository,
     organizationTrainingRepository: input.organizationTrainingRepository,
-    knowledgeNodeParentPublicIdsByPublicId:
-      input.knowledgeNodeParentPublicIdsByPublicId,
-    difficultyByQuestionPublicId: input.difficultyByQuestionPublicId,
   });
 
   if (sourceResolution.status === "rejected") {

@@ -51,7 +51,13 @@ function createQuestionRow(
         updated_at: new Date("2026-07-06T00:00:00.000Z"),
       },
     ],
+    difficulty: "medium",
     knowledge_node_public_ids: ["knowledge_node_public_child"],
+    parent_knowledge_node_public_ids: ["knowledge_node_public_parent"],
+    ancestor_knowledge_node_public_ids: [
+      "knowledge_node_public_parent",
+      "knowledge_node_public_root",
+    ],
     tag_public_ids: ["tag_public_a"],
     created_at: new Date("2026-07-06T00:00:00.000Z"),
     updated_at: new Date("2026-07-06T00:00:00.000Z"),
@@ -98,6 +104,13 @@ function createTrainingVersion(
           },
         ],
         score: 1,
+        difficulty: "hard",
+        knowledgeNodePublicIds: ["knowledge_node_training_child"],
+        parentKnowledgeNodePublicIds: ["knowledge_node_training_parent"],
+        ancestorKnowledgeNodePublicIds: [
+          "knowledge_node_training_parent",
+          "knowledge_node_training_root",
+        ],
       },
       {
         publicId: "training_question_public_b",
@@ -124,9 +137,6 @@ describe("AI组卷题源 adapter", () => {
           status: "disabled",
         }),
       ],
-      knowledgeNodeParentPublicIdsByPublicId: {
-        knowledge_node_public_child: "knowledge_node_public_parent",
-      },
     });
     const serializedResult = JSON.stringify(result);
 
@@ -140,9 +150,13 @@ describe("AI组卷题源 adapter", () => {
         level: 3,
         subject: "theory",
         questionType: "single_choice",
-        difficulty: null,
+        difficulty: "medium",
         knowledgeNodePublicIds: ["knowledge_node_public_child"],
         parentKnowledgeNodePublicIds: ["knowledge_node_public_parent"],
+        ancestorKnowledgeNodePublicIds: [
+          "knowledge_node_public_parent",
+          "knowledge_node_public_root",
+        ],
       },
     ]);
     expect(serializedResult).not.toContain('"id"');
@@ -181,9 +195,13 @@ describe("AI组卷题源 adapter", () => {
         level: 3,
         subject: "theory",
         questionType: "single_choice",
-        difficulty: null,
-        knowledgeNodePublicIds: [],
-        parentKnowledgeNodePublicIds: [],
+        difficulty: "hard",
+        knowledgeNodePublicIds: ["knowledge_node_training_child"],
+        parentKnowledgeNodePublicIds: ["knowledge_node_training_parent"],
+        ancestorKnowledgeNodePublicIds: [
+          "knowledge_node_training_parent",
+          "knowledge_node_training_root",
+        ],
       },
       {
         publicId: "training_question_public_b",
@@ -197,6 +215,7 @@ describe("AI组卷题源 adapter", () => {
         difficulty: null,
         knowledgeNodePublicIds: [],
         parentKnowledgeNodePublicIds: [],
+        ancestorKnowledgeNodePublicIds: [],
       },
     ]);
     expect(serializedResult).not.toContain("SENSITIVE_TRAINING_TITLE_MARKER");

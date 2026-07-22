@@ -161,6 +161,11 @@ function assembleSections(
       selectedQuestions,
       degradationSummary: {
         exactCount: countMatchTier(selectedQuestions, "exact"),
+        ...(countMatchTier(selectedQuestions, "descendant") === 0
+          ? {}
+          : {
+              descendantCount: countMatchTier(selectedQuestions, "descendant"),
+            }),
         nearbyKnowledgeCount: countMatchTier(
           selectedQuestions,
           "nearby_knowledge",
@@ -209,6 +214,7 @@ function selectQuestionsForSection(
 
   for (const matchTier of [
     "exact",
+    "descendant",
     "nearby_knowledge",
     "same_scope",
   ] as const) {
@@ -315,10 +321,24 @@ function matchesSection(
     return true;
   }
 
+  if (question.difficulty === null) {
+    return false;
+  }
+
   if (matchTier === "nearby_knowledge") {
     return intersects(
       question.parentKnowledgeNodePublicIds,
       section.parentKnowledgeNodePublicIds,
+    );
+  }
+
+  if (matchTier === "descendant") {
+    return (
+      matchesExactDifficulty(question, section) &&
+      intersects(
+        question.ancestorKnowledgeNodePublicIds ?? [],
+        section.knowledgeNodePublicIds,
+      )
     );
   }
 
@@ -375,7 +395,7 @@ function matchesExactDifficulty(
   section: AiPaperAssemblyPlanSectionDto,
 ): boolean {
   return (
-    section.difficulty === null || question.difficulty === section.difficulty
+    section.difficulty !== null && question.difficulty === section.difficulty
   );
 }
 
@@ -410,6 +430,12 @@ function resolveMatchQuality(
     selectedQuestions.some(
       (question) => question.matchTier === "nearby_knowledge",
     )
+  ) {
+    return "supplemented_from_nearby_knowledge";
+  }
+
+  if (
+    selectedQuestions.some((question) => question.matchTier === "descendant")
   ) {
     return "supplemented_from_nearby_knowledge";
   }

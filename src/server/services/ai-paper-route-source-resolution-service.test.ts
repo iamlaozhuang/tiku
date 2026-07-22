@@ -73,7 +73,13 @@ function createQuestionRow(
         updated_at: new Date("2026-07-06T00:00:00.000Z"),
       },
     ],
+    difficulty: "medium",
     knowledge_node_public_ids: ["knowledge_node_public_child"],
+    parent_knowledge_node_public_ids: ["knowledge_node_public_parent"],
+    ancestor_knowledge_node_public_ids: [
+      "knowledge_node_public_parent",
+      "knowledge_node_public_root",
+    ],
     tag_public_ids: ["tag_public_a"],
     created_at: new Date("2026-07-06T00:00:00.000Z"),
     updated_at: new Date("2026-07-06T00:00:00.000Z"),
@@ -158,12 +164,6 @@ describe("AI组卷 route source resolution", () => {
         generationParameters,
         questionRepository,
         organizationTrainingRepository,
-        knowledgeNodeParentPublicIdsByPublicId: {
-          knowledge_node_public_child: "knowledge_node_public_parent",
-        },
-        difficultyByQuestionPublicId: {
-          platform_question_public_a: "medium",
-        },
       });
 
       expect(result.status).toBe("resolved");
@@ -216,9 +216,6 @@ describe("AI组卷 route source resolution", () => {
       questionRepository,
       organizationTrainingRepository:
         createThrowingOrganizationTrainingRepository(),
-      knowledgeNodeParentPublicIdsByPublicId: {
-        knowledge_node_public_child: "knowledge_node_public_parent",
-      },
     });
 
     expect(result.status).toBe("resolved");

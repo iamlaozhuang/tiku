@@ -1236,6 +1236,13 @@ function createPaperQuestionSnapshotRow(
     paperQuestionPublicId: "paper_question_public_123",
     questionSnapshot: {
       questionType: "single_choice",
+      difficulty: "hard",
+      knowledgeNodePublicIds: ["knowledge_node_child"],
+      parentKnowledgeNodePublicIds: ["knowledge_node_parent"],
+      ancestorKnowledgeNodePublicIds: [
+        "knowledge_node_parent",
+        "knowledge_node_root",
+      ],
       stemRichText: "<p>Question stem</p>",
       questionOptions: [
         {
@@ -2422,6 +2429,13 @@ describe("organization training repository", () => {
         publicId: "paper_question_public_123",
         sequenceNumber: 1,
         questionType: "single_choice",
+        difficulty: "hard",
+        knowledgeNodePublicIds: ["knowledge_node_child"],
+        parentKnowledgeNodePublicIds: ["knowledge_node_parent"],
+        ancestorKnowledgeNodePublicIds: [
+          "knowledge_node_parent",
+          "knowledge_node_root",
+        ],
         materialTitle: "Training material",
         materialContent: "<p>Training material body</p>",
         stem: "<p>Question stem</p>",
