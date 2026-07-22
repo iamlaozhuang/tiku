@@ -1,28 +1,20 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21",
-  "objective": "Close F-0155 and F-0156 as one confirmed formal-adoption command-integrity bundle: require the exact expected source content digest, load the immutable reviewed draft only from the server-owned generated-result snapshot, reject any browser draft authority, replay only the same persisted review decision, fail closed on an opposite decision, and drive UI success from the returned persisted state. Keep F-0029 atomic target creation separate and open; do not change schema, permissions, Provider behavior or formal target writers.",
+  "taskId": "p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21",
+  "objective": "Close F-0029 by executing content AI formal-adoption review persistence, complete question or paper draft creation, all paper composition writes, audit effects, and final adoption target metadata inside one database transaction. Any writer or metadata failure must roll back the full command; committed replay must return the single persisted target without creating duplicates. Preserve the F-0155/F-0156 digest and decision contracts and do not change schema, permissions, Provider behavior, formal content semantics, or public API envelopes.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/admin-ai-generation-formal-adoption.ts",
-    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
-    "src/server/validators/admin-ai-generation-formal-adoption.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
     "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
     "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/contracts/admin-ai-generation-local-contract.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts"
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/repositories/paper-draft-repository.test.ts",
+    "src/server/services/paper-draft-service.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -36,48 +28,38 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "question or paper writer transaction implementation",
-    "formal target creation atomicity or F-0029 closure",
-    "organization AI copy or personal AI adoption",
-    "permission, role, entitlement or evidence-status policy changes",
-    "Provider, external service, secret/env, deployment, PR or force-push",
+    "question, paper, adoption, audit, or public API business semantics",
+    "permission, role, entitlement, Provider, external service, secret/env, deployment, PR or force-push",
+    "real database execution or runtime acceptance",
     "another independent finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/admin-ai-generation-formal-adoption.ts",
-    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
-    "src/server/validators/admin-ai-generation-formal-adoption.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-    "src/server/contracts/admin-ai-generation-local-contract.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx"
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts"
   ],
   "contingencyFiles": [
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
     "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
     "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts"
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/repositories/paper-draft-repository.test.ts",
+    "src/server/services/paper-draft-service.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirement": "The content AI formal-adoption boundary must adopt only a reviewed server-owned result, preserve digest traceability and return the actual persisted review state; a semantic opposite replay must fail closed.",
-    "caller": "AdminAiGenerationEntryPage currently sends reviewedDraft from browser state and sets adopted/rejected UI state from the requested decision. The direct history DTO/mapper omits contentDigest, so the exact two-file authoritative caller chain supplement is required to propagate the existing immutable digest.",
-    "routeService": "The runtime injects trusted actor/result identity, but the service forwards input.reviewedDraft to the formal-draft adapter and does not require expectedContentDigest.",
-    "repository": "The repository loads the generated result and the first adoption row, but its source projection omits the reviewed draft, it does not bind the request to source contentDigest, and any existing row is reused without comparing review decision.",
-    "database": "The generated result already stores content_redacted_snapshot plus content_digest; no schema or migration is needed to consume that immutable source fact.",
-    "bundleDecision": "F-0155 and F-0156 share the same route/service/repository command, source-result read model and focused matrix. F-0029 has a distinct transaction boundary across adoption, question and paper writers and remains separate."
+    "requirement": "A reviewed content AI result may enter formal content only as one traceable command; partial or duplicate formal drafts violate review lineage and draft integrity.",
+    "routeService": "The route currently constructs adoption, question, and paper repositories independently; the service then commits adoption, invokes draft writers, and finally updates target metadata as three separate phases.",
+    "repository": "Question create and paper create/add-question writers are individually transactional and already accept RuntimeDatabaseOptions, but no outer transaction spans the whole adoption command.",
+    "database": "Drizzle PostgreSQL transaction objects support nested transaction/savepoint calls, so all existing repositories can share one outer transaction through the existing createDatabase injection without schema changes.",
+    "rootCause": "The production runtime lacks a unit-of-work boundary; service error responses resolve normally, so a wrapper must deliberately roll back on any nonzero response as well as thrown failures.",
+    "findingDecision": "F-0029 is one atomic command boundary. F-0155 and F-0156 are already closed and remain protected regressions rather than reopened work."
   },
   "validationCommands": [
     {
-      "name": "f0155-f0156-formal-adoption-command-integrity",
+      "name": "f0029-formal-adoption-atomic-command",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -85,49 +67,36 @@
         "exec",
         "vitest",
         "run",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
         "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
         "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts"
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/repositories/paper-draft-repository.test.ts",
+        "src/server/services/paper-draft-service.test.ts"
       ]
     },
     {
-      "name": "f0155-f0156-formal-adoption-command-integrity-lint",
+      "name": "f0029-formal-adoption-atomic-command-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/models/admin-ai-generation-formal-adoption.ts",
-        "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
-        "src/server/validators/admin-ai-generation-formal-adoption.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
         "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/server/contracts/admin-ai-generation-local-contract.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts"
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts"
       ]
     },
     {
-      "name": "f0155-f0156-formal-adoption-command-integrity-typecheck",
+      "name": "f0029-formal-adoption-atomic-command-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0155-f0156-formal-adoption-command-integrity-build",
+      "name": "f0029-formal-adoption-atomic-command-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -141,7 +110,7 @@
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_contract_and_low_risk_UI_projection",
+    "category": "bounded_database_application_transaction_orchestration",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -154,14 +123,14 @@
   ],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingIds": ["F-0155", "F-0156"],
-    "task": "close the server-owned digest-bound review command bundle, then resume the separate F-0029 atomic target-write transaction or the next eligible RC-05 residual",
-    "condition": "do not claim F-0029, organization AI copy, Provider execution or runtime database acceptance"
+    "findingIds": ["F-0029"],
+    "task": "close the atomic formal-adoption unit of work, then continue the next eligible RC-05 residual",
+    "condition": "do not claim runtime database proof, change schema, or reopen F-0155/F-0156"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21",
-    "findingId": "F-0098",
-    "commit": "2ea0c3de27b4cfc7f97a847fb0916de0cc015f86",
+    "taskId": "p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21",
+    "findingIds": ["F-0155", "F-0156"],
+    "commit": "c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -169,13 +138,14 @@
   },
   "candidateEvidence": {
     "executionStage": "validated_reviewed_conditional_closeout_ready",
-    "tddRed": "7 expected failures across 104 tests plus a unique-key-loser opposite-decision RED",
-    "focused": "7 files, 118 tests passed",
+    "tddRed": "3 expected failures across 8 runtime tests because the transactional command wrapper did not exist",
+    "focused": "8 files, 77 tests passed; the directly changed service replay test also passed after the fixture type correction",
     "lint": "passed",
-    "typecheck": "passed",
+    "typecheck": "passed after removing an invalid test-only rejectAction field",
     "build": "passed with 100 static pages and the pre-existing NFT tracing warning only",
     "formatAndDiff": "passed",
-    "adversarialReview": "passed: browser draft ignored, exact source digest required, existing and concurrently inserted opposite decisions fail closed, UI consumes persisted review decision, and F-0029 remains open"
+    "adversarialReview": "passed: production defaults share one outer transaction across adoption, question, paper composition, audits and final metadata; nonzero responses and exceptions roll back; committed replay bypasses all writers; existing paper composition failure and repository transaction regressions remain green; no schema, permission, Provider, dependency or mechanism expansion",
+    "runtimeDatabaseProof": "not_claimed_static_and_synthetic_transaction_harness_only"
   },
   "push": {
     "target": "origin/master",

@@ -85,6 +85,55 @@ function createRejectedAdoptionResult(): AdminAiGenerationFormalAdoptionResult {
   };
 }
 
+function createDraftCreatedAdoptionResult(): AdminAiGenerationFormalAdoptionResult {
+  const rejectedResult = createRejectedAdoptionResult();
+
+  return {
+    ...rejectedResult,
+    persistenceStatus: "reused",
+    adoption: {
+      ...rejectedResult.adoption,
+      targetReference: {
+        ...rejectedResult.adoption.targetReference,
+        formalTargetWriteStatus: "draft_created",
+        formalQuestionPublicId: "question_formal_draft_service_177",
+      },
+      review: {
+        ...rejectedResult.adoption.review,
+        reviewStatus: "approved_for_formal_adoption",
+        reviewDecision: "approved",
+      },
+      audit: {
+        ...rejectedResult.adoption.audit,
+        actionType: "admin_ai_generation_result.formal_adoption.approve",
+      },
+      reviewTraceability: {
+        ...rejectedResult.adoption.reviewTraceability,
+        reviewStatus: "approved_for_formal_adoption",
+        reviewDecision: "approved",
+        adoptAction: {
+          actionStatus: "executed",
+          actionType: "admin_ai_generation_result.formal_adoption.approve",
+          actorPublicId: "admin_content_public_177",
+          actionAt: "2026-06-26T20:00:00.000Z",
+          formalTargetWriteStatus: "draft_created",
+          formalQuestionPublicId: "question_formal_draft_service_177",
+          formalPaperPublicId: null,
+        },
+        rejectAction: {
+          actionStatus: "not_executed",
+          actorPublicId: null,
+          actionAt: null,
+        },
+        auditSummary: {
+          ...rejectedResult.adoption.reviewTraceability.auditSummary,
+          actionType: "admin_ai_generation_result.formal_adoption.approve",
+        },
+      },
+    },
+  };
+}
+
 function createRepository(result: AdminAiGenerationFormalAdoptionResult) {
   return {
     createOrReuseFormalAdoption: vi.fn(async () => result),
@@ -240,5 +289,36 @@ describe("admin AI generation formal adoption service", () => {
     expect(formalDraftAdapter.createFormalDraft).not.toHaveBeenCalledWith(
       expect.objectContaining({ reviewedDraft: tamperedBrowserDraft }),
     );
+  });
+
+  it("replays a committed draft target without invoking any writer again", async () => {
+    const adoptionResult = createDraftCreatedAdoptionResult();
+    const adoptionRepository = createRepository(adoptionResult);
+    const formalDraftAdapter = createFormalDraftAdapter();
+    const service = createAdminAiGenerationFormalAdoptionService({
+      adoptionRepository,
+      formalDraftAdapter,
+    });
+
+    const response = await service.approveFormalAdoption({
+      adoptionPublicId: "admin_ai_formal_adoption_public_retry_177",
+      actor: {
+        publicId: "admin_content_public_177",
+        roles: ["content_admin"],
+      },
+      resultPublicId: "admin_ai_generation_result_content_question_177",
+      targetType: "question",
+      reviewDecision: "approved",
+      reviewerConfirmed: true,
+      expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      reviewedAt: "2026-06-26T20:01:00.000Z",
+    });
+
+    expect(response).toEqual({ code: 0, message: "ok", data: adoptionResult });
+    expect(
+      adoptionRepository.findTrustedReviewedDraftForAdoption,
+    ).not.toHaveBeenCalled();
+    expect(formalDraftAdapter.createFormalDraft).not.toHaveBeenCalled();
+    expect(adoptionRepository.markFormalDraftCreated).not.toHaveBeenCalled();
   });
 });

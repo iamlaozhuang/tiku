@@ -6,7 +6,11 @@ import type {
   AdminAiGenerationFormalAdoptionResult,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
 import type { AuthContextDto } from "../contracts/auth-contract";
-import { createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers } from "./admin-ai-generation-formal-adoption-runtime";
+import type { RuntimeDatabase } from "../repositories/runtime-database";
+import {
+  createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers,
+  createTransactionalAdminAiGenerationFormalAdoptionService,
+} from "./admin-ai-generation-formal-adoption-runtime";
 import type { AdminAiGenerationFormalDraftAdapterService } from "./admin-ai-generation-formal-draft-adapter";
 
 function createSessionResponse(
@@ -366,6 +370,101 @@ function createPostRequest(body: Record<string, unknown>): Request {
 async function readJsonResponse(response: Response): Promise<unknown> {
   return response.json();
 }
+
+function createTransactionHarness() {
+  const transactionDatabase = {} as RuntimeDatabase;
+  let rolledBack = false;
+  const database = {
+    transaction: vi.fn(
+      async <TResult>(
+        execute: (transaction: RuntimeDatabase) => Promise<TResult>,
+      ) => {
+        try {
+          return await execute(transactionDatabase);
+        } catch (error) {
+          rolledBack = true;
+          throw error;
+        }
+      },
+    ),
+  } as unknown as RuntimeDatabase;
+
+  return {
+    database,
+    transactionDatabase,
+    wasRolledBack: () => rolledBack,
+  };
+}
+
+describe("admin AI generation formal adoption transaction service", () => {
+  it("uses one scoped database for the complete successful command", async () => {
+    const transactionHarness = createTransactionHarness();
+    const approveFormalAdoption = vi.fn(async () => ({
+      code: 0,
+      message: "ok",
+      data: createAdoptionResult({
+        formalQuestionPublicId: "question_formal_draft_route_177",
+        formalTargetWriteStatus: "draft_created",
+      }),
+    }));
+    const createCommandService = vi.fn((databaseOptions) => {
+      expect(databaseOptions.createDatabase?.()).toBe(
+        transactionHarness.transactionDatabase,
+      );
+      return { approveFormalAdoption };
+    });
+    const service = createTransactionalAdminAiGenerationFormalAdoptionService({
+      createCommandService,
+      createDatabase: () => transactionHarness.database,
+    });
+
+    const response = await service.approveFormalAdoption({
+      command: "approve",
+    });
+
+    expect(response.code).toBe(0);
+    expect(transactionHarness.database.transaction).toHaveBeenCalledTimes(1);
+    expect(createCommandService).toHaveBeenCalledTimes(1);
+    expect(transactionHarness.wasRolledBack()).toBe(false);
+  });
+
+  it("forces rollback when a paper writer or metadata phase returns an error response", async () => {
+    const transactionHarness = createTransactionHarness();
+    const writerFailure = {
+      code: 422203,
+      message: "Formal draft writer failed.",
+      data: null,
+    };
+    const service = createTransactionalAdminAiGenerationFormalAdoptionService({
+      createCommandService: () => ({
+        approveFormalAdoption: vi.fn(async () => writerFailure),
+      }),
+      createDatabase: () => transactionHarness.database,
+    });
+
+    await expect(
+      service.approveFormalAdoption({ command: "approve-paper" }),
+    ).resolves.toEqual(writerFailure);
+    expect(transactionHarness.wasRolledBack()).toBe(true);
+  });
+
+  it("forces rollback and preserves a thrown persistence failure", async () => {
+    const transactionHarness = createTransactionHarness();
+    const service = createTransactionalAdminAiGenerationFormalAdoptionService({
+      createCommandService: () => ({
+        approveFormalAdoption: vi.fn(async () => {
+          throw new Error("metadata persistence failed");
+        }),
+      }),
+      createDatabase: () => transactionHarness.database,
+    });
+
+    await expect(
+      service.approveFormalAdoption({ command: "approve-question" }),
+    ).rejects.toThrow("metadata persistence failed");
+    expect(transactionHarness.wasRolledBack()).toBe(true);
+  });
+});
 
 describe("admin AI generation formal adoption runtime route", () => {
   it("allows content admin to adopt a generated question into a formal question draft and updates redacted metadata", async () => {

@@ -16,9 +16,15 @@ import { createPostgresAdminAiGenerationFormalAdoptionRepository } from "../repo
 import { createPostgresPaperDraftRepository } from "../repositories/paper-draft-repository";
 import { createPostgresQuestionRepository } from "../repositories/question-repository";
 import {
+  createLazyRuntimeDatabaseGetter,
+  type RuntimeDatabase,
+  type RuntimeDatabaseOptions,
+} from "../repositories/runtime-database";
+import {
   ADMIN_AI_GENERATION_FORMAL_ADOPTION_ERROR_CODES,
   ADMIN_AI_GENERATION_FORMAL_ADOPTION_PERMISSION_DENIED_MESSAGE,
   createAdminAiGenerationFormalAdoptionService,
+  type AdminAiGenerationFormalAdoptionService,
 } from "./admin-ai-generation-formal-adoption-service";
 import {
   createAdminAiGenerationFormalDraftAdapterService,
@@ -84,9 +90,11 @@ function createDefaultAdoptionPublicId(): string {
   return `admin_ai_formal_adoption_${randomUUID().replaceAll("-", "")}`;
 }
 
-function createDefaultFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterService {
-  const questionRepository = createPostgresQuestionRepository();
-  const paperRepository = createPostgresPaperDraftRepository();
+function createDefaultFormalDraftAdapter(
+  databaseOptions: RuntimeDatabaseOptions = {},
+): AdminAiGenerationFormalDraftAdapterService {
+  const questionRepository = createPostgresQuestionRepository(databaseOptions);
+  const paperRepository = createPostgresPaperDraftRepository(databaseOptions);
 
   return createAdminAiGenerationFormalDraftAdapterService({
     paperWriter: {
@@ -107,6 +115,72 @@ function createDefaultFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterS
         }).createQuestion(input, options),
     },
   });
+}
+
+type AdminAiGenerationFormalAdoptionCommandServiceFactory = (
+  databaseOptions: RuntimeDatabaseOptions,
+) => AdminAiGenerationFormalAdoptionService;
+
+export type TransactionalAdminAiGenerationFormalAdoptionServiceOptions =
+  RuntimeDatabaseOptions & {
+    createCommandService?: AdminAiGenerationFormalAdoptionCommandServiceFactory;
+  };
+
+class FormalAdoptionTransactionRollback extends Error {
+  constructor(
+    readonly response: Awaited<
+      ReturnType<
+        AdminAiGenerationFormalAdoptionService["approveFormalAdoption"]
+      >
+    >,
+  ) {
+    super("admin AI generation formal adoption transaction rolled back");
+  }
+}
+
+function createDefaultFormalAdoptionCommandService(
+  databaseOptions: RuntimeDatabaseOptions,
+): AdminAiGenerationFormalAdoptionService {
+  return createAdminAiGenerationFormalAdoptionService({
+    adoptionRepository:
+      createPostgresAdminAiGenerationFormalAdoptionRepository(databaseOptions),
+    formalDraftAdapter: createDefaultFormalDraftAdapter(databaseOptions),
+  });
+}
+
+export function createTransactionalAdminAiGenerationFormalAdoptionService(
+  options: TransactionalAdminAiGenerationFormalAdoptionServiceOptions = {},
+): AdminAiGenerationFormalAdoptionService {
+  const getDatabase = createLazyRuntimeDatabaseGetter(
+    options,
+    "DATABASE_URL is required for atomic admin AI generation formal adoption.",
+  );
+  const createCommandService =
+    options.createCommandService ?? createDefaultFormalAdoptionCommandService;
+
+  return {
+    async approveFormalAdoption(input) {
+      try {
+        return await getDatabase().transaction(async (transaction) => {
+          const response = await createCommandService({
+            createDatabase: () => transaction as RuntimeDatabase,
+          }).approveFormalAdoption(input);
+
+          if (response.code !== 0 || response.data === null) {
+            throw new FormalAdoptionTransactionRollback(response);
+          }
+
+          return response;
+        });
+      } catch (error) {
+        if (error instanceof FormalAdoptionTransactionRollback) {
+          return error.response;
+        }
+
+        throw error;
+      }
+    },
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -156,15 +230,15 @@ function resolveFormalAdoptionActor(
 export function createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers(
   options: AdminAiGenerationFormalAdoptionRuntimeOptions = {},
 ) {
-  const adoptionRepository =
-    options.adoptionRepository ??
-    createPostgresAdminAiGenerationFormalAdoptionRepository();
   const createAdoptionPublicId =
     options.createAdoptionPublicId ?? createDefaultAdoptionPublicId;
   const requestClock = options.requestClock ?? (() => new Date());
-  const formalDraftAdapter =
-    options.formalDraftAdapter ?? createDefaultFormalDraftAdapter();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const transactionalService =
+    options.adoptionRepository === undefined &&
+    options.formalDraftAdapter === undefined
+      ? createTransactionalAdminAiGenerationFormalAdoptionService()
+      : null;
 
   return createRouteHandlersWithErrorEnvelope({
     formalAdoptions: {
@@ -186,10 +260,15 @@ export function createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers(
 
         const { publicId } = await context.params;
         const requestBody = await readRequestJson(request);
-        const service = createAdminAiGenerationFormalAdoptionService({
-          adoptionRepository,
-          formalDraftAdapter,
-        });
+        const service =
+          transactionalService ??
+          createAdminAiGenerationFormalAdoptionService({
+            adoptionRepository:
+              options.adoptionRepository ??
+              createPostgresAdminAiGenerationFormalAdoptionRepository(),
+            formalDraftAdapter:
+              options.formalDraftAdapter ?? createDefaultFormalDraftAdapter(),
+          });
 
         return createJsonResponse(
           await service.approveFormalAdoption({

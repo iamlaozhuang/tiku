@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
+  currentTaskId: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -282,6 +282,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
     - p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21
     - p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
+    - p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -451,25 +452,25 @@ p1RemediationSerialProgram:
     p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21: closed
     p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21: closed
     p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21: closed
+    p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21: closed
 activeTasks:
-  - id: p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
-    title: Server-owned formal adoption command integrity
-    phase: p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
+  - id: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
+    title: Atomic content AI formal adoption command
+    phase: p1-remediation-rc-05-formal-adoption-atomic-command-2026-07-21
     status: closed
     priority: p1
     taskKind: product_remediation
-    productClosureContribution: F-0155_and_F-0156
-    branch: fix/formal-adoption-command-integrity
-    objective: bind content AI formal adoption to the server-owned immutable reviewed draft and expected digest, and make idempotent review responses reflect the persisted decision while conflicting decisions fail closed
+    productClosureContribution: F-0029
+    branch: fix/formal-adoption-atomic-command
+    objective: execute adoption review persistence, full question or paper draft creation, paper composition, audit effects and final target metadata as one database transaction with deterministic replay
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-05
     findingIds:
-      - F-0155
-      - F-0156
+      - F-0029
     executionStage: validated_reviewed_conditional_closeout_ready
     findingStatus: closed_static_product_verified
     riskBoundary:
-      category: bounded_database_application_contract_and_low_risk_UI_projection
+      category: bounded_database_application_transaction_orchestration
       approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
@@ -477,42 +478,42 @@ activeTasks:
       realExternalCall: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: AdminAiGenerationEntryPage_to_formal_adoption_route_runtime_service_repository_db_adapter_source_result_snapshot_and_formal_draft_adapter
-      coreFiles: 12
+      chain: content_formal_adoption_route_to_transactional_runtime_unit_of_work_to_adoption_question_and_paper_repositories
+      coreFiles: 4
       contingencyFiles: 8
-      preflightTestFiles: 7
-      sameTaskAuthoritativeCallChainExpansion: 2
-      sameTaskAuthoritativeCallChainEvidence: history_generated_result_DTO_and_mapper_are_the_two_direct_caller_files_required_to_propagate_the_existing_immutable_contentDigest
+      preflightTestFiles: 8
+      sameTaskAuthoritativeCallChainExpansion: 0
       directCallerCalleeMocksFixturesReviewed: true
       testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-      confirmedResidualRootCause: the_same_formal_adoption_command_accepts_browser_reviewedDraft_without_source_digest_binding_and_reuses_the_first_persisted_decision_without_checking_semantic_conflict_or_driving_UI_from_server_state
-    residualDisposition:
-      F-0029: separate_atomic_target_write_transaction_boundary_across_adoption_question_and_paper_writers
-      F-0155: bundle_current_server_owned_source_snapshot_and_digest_binding
-      F-0156: bundle_current_persisted_decision_idempotency_and_conflict_semantics
+      confirmedResidualRootCause: production_runtime_constructs_three_independent_repository_transactions_and_treats_nonzero_service_responses_as_normal_completion
+    protectedRegressions:
+      F-0155: server_owned_digest_bound_reviewed_draft
+      F-0156: persisted_review_decision_idempotency_and_conflict
     expectedAcceptance:
-      - approve_requires_exact_expectedContentDigest_and_uses_only_the_server_owned_source_result_reviewedDraft
-      - client_reviewedDraft_is_not_sent_or_trusted_and_tampering_cannot_change_formal_content
-      - same_persisted_decision_replays_the_authoritative_result_and_opposite_decision_returns_conflict_without_writer_or_metadata_side_effects
-      - UI_success_state_is_derived_from_the_persisted_server_decision_not_the_requested_decision
-      - no_schema_migration_real_database_provider_permission_dependency_or_mechanism_change
-      - F0029_atomic_target_write_remains_explicitly_separate_and_open
+      - production_default_runtime_executes_adoption_question_or_complete_paper_and_metadata_in_one_outer_transaction
+      - any_nonzero_writer_or_metadata_result_forces_outer_transaction_rollback
+      - thrown_failures_force_outer_transaction_rollback_and_preserve_standard_error_envelope
+      - committed_response_loss_replay_returns_the_single_draft_created_target_without_reinvoking_writers
+      - paper_question_failure_cannot_commit_shell_partial_questions_audit_or_adoption
+      - no_schema_migration_real_database_permission_provider_dependency_or_mechanism_change
     validationEvidence:
-      tddRed: pass_7_expected_failures_across_104_tests_plus_unique_key_loser_opposite_decision_red
-      focused: pass_7_files_118_tests
+      tddRed: pass_3_expected_transaction_wrapper_failures_across_8_runtime_tests
+      focused: pass_8_files_77_tests
+      changedServiceReplayTest: pass_1_file_4_tests_after_fixture_type_correction
       lint: pass
       typecheck: pass
-      build: pass_100_static_pages
+      build: pass_100_static_pages_with_preexisting_NFT_warning_only
       formatAndDiff: pass
-      adversarialReview: pass_browser_draft_has_no_authority_exact_digest_and_persisted_decision_are_fail_closed_unique_key_loser_is_revalidated_UI_uses_server_decision_no_scope_or_risk_expansion
+      adversarialReview: pass_single_outer_transaction_nonzero_and_exception_rollback_committed_replay_writer_bypass_existing_composition_failure_regression_no_scope_or_risk_expansion
+      runtimeDatabaseProof: not_claimed_static_and_synthetic_only
     closureEvidence:
-      F-0155: exact_expected_digest_and_server_owned_snapshot_draft_are_required_for_formal_adoption
-      F-0156: same_decision_replay_is_authoritative_and_opposite_existing_or_concurrent_decision_fails_closed
-      F-0029: remains_open_for_atomic_adoption_target_writer_transaction
+      F-0029: production_default_formal_adoption_is_one_outer_transaction_and_committed_replay_returns_the_single_persisted_target_without_writer_reentry
+      F-0155: remains_closed_server_owned_digest_bound_reviewed_draft_regression_green
+      F-0156: remains_closed_persisted_decision_idempotency_and_conflict_regression_green
     closeoutProjection:
       current: validated_reviewed_conditional_closeout_ready
       triggers: TDD_green_validation_main_thread_review_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-      successProjection: F0155_and_F0156_closed_then_resume_F0029_or_next_RC05_residual
+      successProjection: F0029_closed_then_resume_next_eligible_RC05_residual
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     executionMetrics:
       mandatoryFreshApprovals: 0
@@ -520,15 +521,17 @@ activeTasks:
       candidateReapprovals: 0
       approvalWaitTurns: 0
       productValueTime: not_reliably_reconstructable_after_context_compaction
-      mechanismOverhead: fresh_validation_approximately_100_seconds_plus_candidate_closeout_pending
+      mechanismOverhead: fresh_validation_approximately_90_seconds_plus_candidate_closeout_pending
       guardSmokeChanges: 0
     previousTaskCloseout:
-      taskId: p1-remediation-rc-05-published-paper-snapshot-grouped-mock-navigation-2026-07-21
-      findingId: F-0098
-      productClosureContribution: F-0098_final_grouped_mock_navigation_and_static_acceptance
-      commit: 2ea0c3de27b4cfc7f97a847fb0916de0cc015f86
+      taskId: p1-remediation-rc-05-formal-adoption-command-integrity-2026-07-21
+      findingIds:
+        - F-0155
+        - F-0156
+      productClosureContribution: F-0155_and_F-0156
+      commit: c6ef2d108e10aabeafcf417b81a2ae59b7a9fa5e
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
