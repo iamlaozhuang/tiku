@@ -1628,7 +1628,13 @@ describe("StudentExamReportPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("案例模块 得分率 80%")).toBeInTheDocument();
     expect(screen.getByText("材料题组：客户服务案例 2 题")).toBeInTheDocument();
-    expect(screen.getAllByText("案例模块 · 客户服务案例")).toHaveLength(2);
+    expect(
+      screen.getByRole("heading", { name: "客户服务案例" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("案例模块 · 题组小计 8.0 / 10.0"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("案例模块 · 客户服务案例")).toBeNull();
     expect(screen.getByText("案例分析题")).toBeInTheDocument();
     expect(screen.getByText("计算题")).toBeInTheDocument();
     expect(
@@ -1642,6 +1648,90 @@ describe("StudentExamReportPage", () => {
     expect(
       screen.getByText("Synthetic calculation report item"),
     ).toBeInTheDocument();
+  });
+
+  it("keeps same-title groups separate and refuses to group incomplete identities", () => {
+    const createResult = (overrides: Record<string, unknown>) => ({
+      paperQuestionPublicId: "paper-question-group-boundary",
+      questionPublicId: "question-group-boundary",
+      questionType: "short_answer",
+      title: "Group boundary result",
+      isCorrect: null,
+      score: "1.0",
+      maxScore: "2.0",
+      selectedAnswer: "selected",
+      standardAnswer: "reference",
+      mistakeBookPublicId: null,
+      paperSectionTitle: "技能模块",
+      ...overrides,
+    });
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-group-identity-boundary",
+      reportSnapshot: {
+        totalScoreText: "总分 1.0",
+        accuracyText: "得分率 20%",
+        scoreSummaryText: "得分 1.0 / 5.0",
+        questionResults: [
+          createResult({
+            paperQuestionPublicId: "paper-question-group-a",
+            questionPublicId: "question-group-a",
+            title: "Group A result",
+            questionGroupPublicId: "question-group-a",
+            questionGroupTitle: "同名题组",
+          }),
+          createResult({
+            paperQuestionPublicId: "paper-question-group-b",
+            questionPublicId: "question-group-b",
+            title: "Group B result",
+            score: null,
+            maxScore: "3.0",
+            questionGroupPublicId: "question-group-b",
+            questionGroupTitle: "同名题组",
+          }),
+          createResult({
+            paperQuestionPublicId: "paper-question-incomplete-group",
+            questionPublicId: "question-incomplete-group",
+            title: "Incomplete group identity result",
+            questionGroupPublicId: null,
+            questionGroupTitle: "不可信题组标题",
+          }),
+          createResult({
+            paperQuestionPublicId: "paper-question-invalid-score",
+            questionPublicId: "question-invalid-score",
+            title: "Invalid score result",
+            score: "0x1",
+            maxScore: "3.0",
+            questionGroupPublicId: "question-group-invalid-score",
+            questionGroupTitle: "损坏分值题组",
+          }),
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-group-identity-boundary",
+        examReports: [report],
+      }),
+    );
+
+    expect(screen.getAllByRole("heading", { name: "同名题组" })).toHaveLength(
+      2,
+    );
+    expect(
+      screen.getByText("技能模块 · 题组小计 1.0 / 2.0"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("技能模块 · 题组小计 待评分 / 3.0"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "不可信题组标题" }),
+    ).toBeNull();
+    expect(
+      screen.getByText("Incomplete group identity result"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("技能模块 · 题组小计生成中")).toBeInTheDocument();
   });
 
   it("renders knowledge_node weakness analysis from historical report snapshots", () => {
@@ -1782,6 +1872,58 @@ describe("StudentExamReportPage", () => {
           element?.textContent === "blank_2：purchase frequency（1.0 分）",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("fails closed instead of reordering a noncontiguous question_group", () => {
+    const createResult = (
+      paperQuestionPublicId: string,
+      title: string,
+      questionGroupPublicId: string | null,
+    ) => ({
+      paperQuestionPublicId,
+      questionPublicId: `question-${paperQuestionPublicId}`,
+      questionType: "short_answer",
+      paperSectionTitle: "技能模块",
+      questionGroupPublicId,
+      questionGroupTitle: questionGroupPublicId === null ? null : "非连续题组",
+      title,
+      isCorrect: null,
+      score: "1.0",
+      maxScore: "1.0",
+      selectedAnswer: "selected",
+      standardAnswer: "reference",
+      mistakeBookPublicId: null,
+    });
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-noncontiguous-group",
+      reportSnapshot: {
+        totalScoreText: "总分 3.0",
+        accuracyText: "得分率 100%",
+        scoreSummaryText: "得分 3.0 / 3.0",
+        questionResults: [
+          createResult("paper-question-group-first", "Group first", "group-a"),
+          createResult("paper-question-standalone", "Standalone middle", null),
+          createResult("paper-question-group-last", "Group last", "group-a"),
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-noncontiguous-group",
+        examReports: [report],
+      }),
+    );
+
+    expect(screen.queryByRole("heading", { name: "非连续题组" })).toBeNull();
+    const reportText = document.body.textContent ?? "";
+    expect(reportText.indexOf("Group first")).toBeLessThan(
+      reportText.indexOf("Standalone middle"),
+    );
+    expect(reportText.indexOf("Standalone middle")).toBeLessThan(
+      reportText.indexOf("Group last"),
+    );
   });
 
   it("renders scoring, scoring partial failed, completed, loading, error, authorization expired, and empty report states", () => {

@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+currentPhase: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+  currentTaskId: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -821,23 +821,23 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
-  title: Published paper snapshot question_group hierarchy foundation
-  phase: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+  id: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
+  title: Published paper snapshot grouped exam_report presentation
+  phase: p1-remediation-rc-05-published-paper-snapshot-grouped-report-ui-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0098_versioned_nested_snapshot_and_shared_consumer_foundation_partial
-  branch: fix/published-paper-snapshot-hierarchy-foundation
+  productClosureContribution: F-0098_grouped_exam_report_presentation_partial
+  branch: fix/published-paper-snapshot-grouped-learning-ui
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0098
   candidateRootCauseCluster: P1-RC-05
-  objective: produce a versioned nested paper_section-question_group-paper_question snapshot and make current practice, mock_exam, exam_report and API consumers traverse it through one legacy-compatible contract
+  objective: group immutable exam_report question results by paper_section and question_group identity, render one group heading and a display-only subtotal, and preserve standalone and legacy reports
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: open_partitioned
   riskBoundary:
-    category: low_risk_product_snapshot_read_projection
+    category: low_risk_learner_report_read_projection
     approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
@@ -845,51 +845,49 @@ currentTask:
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: published_paper_repository_snapshot_producer_to_shared_snapshot_reader_to_practice_mock_exam_report_services_mappers_and_student_surfaces
-    coreFiles: 13
-    contingencyFiles: 10
+    chain: immutable_exam_report_snapshot_to_StudentExamReportPage_parser_group_projection_and_direct_UI_regression
+    coreFiles: 4
+    contingencyFiles: 1
     sameTaskAuthoritativeCallChainExpansion: 0
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    requirements: module_02_section_3_7_and_decision_package_D14_question_group_structure
-    confirmedResidualRootCause: paper_snapshot_remains_an_unversioned_flat_section_question_shape_and_each_consumer_reimplements_that_shape_after_question_group_became_authoritative
+    requirements: module_02_section_3_7_question_group_container_and_system_subtotal
+    confirmedResidualRootCause: report_results_now_preserve_group_identity_but_the_student_UI_still_flattens_every_child_and_repeats_the_group_label
   expectedAcceptance:
-    - new_snapshot_version_explicitly_nests_question_groups_and_standalone_questions
-    - group_public_identity_order_shared_material_and_computed_subtotal_are_preserved_once
-    - shared_reader_consumes_v2_and_legacy_flat_snapshots_without_question_loss_or_duplication
-    - practice_mock_exam_report_services_mappers_and_student_surfaces_remain_compatible
-    - learner_projection_still_removes_teacher_only_answer_fields_inside_nested_questions
-    - no_schema_migration_permission_dependency_organization_training_or_mechanism_change
-    - F0098_remains_open_only_for_grouped_mock_report_presentation_and_independent_acceptance
+    - each_question_group_public_identity_renders_one_container_heading
+    - group_score_subtotal_is_computed_from_existing_result_facts_without_changing_scoring
+    - standalone_and_legacy_results_remain_visible_in_stable_order
+    - same_title_distinct_group_public_ids_do_not_merge
+    - no_server_snapshot_scoring_schema_permission_dependency_or_mechanism_change
+    - F0098_remains_open_only_for_grouped_mock_exam_navigation_and_final_independent_acceptance
+  validationEvidence:
+    tddRed: pass_group_heading_missing_noncontiguous_identity_reordered_and_nondecimal_score_coerced_before_fixes
+    focused: pass_1_file_46_tests
+    lint: pass_component_and_direct_test
+    typecheck: pass
+    build: pass_100_static_pages_with_preexisting_nft_trace_warning_only
+    formatAndDiff: pass
+    adversarialReview: pass_public_identity_not_title_is_authoritative_conflicting_incomplete_or_noncontiguous_groups_fail_closed_without_reordering_and_invalid_subtotals_are_not_fabricated
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    triggers: unchanged_final_tree_kernel_commit_ff_only_canonical_push_sync_and_cleanup
-    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0098_learner_presentation_partition
+    triggers: TDD_green_validation_main_thread_review_kernel_commit_ff_only_canonical_push_sync_and_cleanup
+    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0098_grouped_mock_exam_navigation
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
-  validationEvidence:
-    tddRed: shared_reader_producer_practice_mock_report_and_student_UI_failures_reproduced_before_GREEN
-    focused: 11_files_181_tests_exit_0
-    lint: 20_changed_typescript_files_exit_0
-    typecheck: tsc_noEmit_exit_0
-    build: next_build_100_routes_exit_0_existing_NFT_trace_warning_only
-    stateAndDiff: strict_JSON_YAML_parse_and_git_diff_check_exit_0
-    adversarialReview: pass_after_fixing_legacy_progress_gap_noncanonical_score_acceptance_and_null_material_drift
-    proofBoundary: repository_snapshot_assembly_is_static_and_unit_verified_without_runtime_database_execution
   executionMetrics:
     mandatoryFreshApprovals: 0
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: 46m
-    mechanismOverhead: 11m_including_contract_state_validation_and_closeout_orchestration
+    productValueTime: 9m
+    mechanismOverhead: 4m
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-paper-asset-file-lifecycle-2026-07-21
-    findingId: F-0096
-    productClosureContribution: F-0096_physical_file_lifecycle_partial
-    commit: fa84e7c398b5bac954d1a00f93539924ecafeeb2
+    taskId: p1-remediation-rc-05-published-paper-snapshot-hierarchy-foundation-2026-07-21
+    findingId: F-0098
+    productClosureContribution: F-0098_versioned_nested_snapshot_and_shared_consumer_foundation_partial
+    commit: 88555861039c19a3e1e92f64ed5b0323b35a2266
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: guardian-f0096-paper-asset-file-lifecycle-2026-07-21
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -903,9 +901,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: f42a9fed040025ebb463881c1767fc13c99329c8
-  lastKnownOriginMasterSha: f42a9fed040025ebb463881c1767fc13c99329c8
-  lastKnownRemoteMasterSha: f42a9fed040025ebb463881c1767fc13c99329c8
+  lastKnownMasterSha: 88555861039c19a3e1e92f64ed5b0323b35a2266
+  lastKnownOriginMasterSha: 88555861039c19a3e1e92f64ed5b0323b35a2266
+  lastKnownRemoteMasterSha: 88555861039c19a3e1e92f64ed5b0323b35a2266
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

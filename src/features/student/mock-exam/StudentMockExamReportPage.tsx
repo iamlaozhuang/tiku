@@ -480,6 +480,14 @@ type ParsedReportSnapshot = {
   questionResults: ReportQuestionResult[];
 };
 
+type ReportQuestionResultGroup = {
+  groupKey: string;
+  paperSectionTitle: string | null;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
+  questionResults: ReportQuestionResult[];
+};
+
 type ParsedLearningSuggestion = {
   summaryText: string | null;
   suggestionItems: ParsedLearningSuggestionItem[];
@@ -1288,6 +1296,228 @@ function parseReportSnapshot(
       },
     ),
   };
+}
+
+function parseReportScore(value: string | null): number | null {
+  if (value === null || !/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value)) {
+    return null;
+  }
+
+  const score = Number(value);
+
+  return Number.isFinite(score) && score >= 0 ? score : null;
+}
+
+function formatReportScoreTotal(value: number): string {
+  return value.toFixed(1);
+}
+
+function getReportQuestionGroupScoreText(
+  questionResults: ReportQuestionResult[],
+): string {
+  let score = 0;
+  let maxScore = 0;
+  let hasPendingScore = false;
+
+  for (const questionResult of questionResults) {
+    const questionMaxScore = parseReportScore(questionResult.maxScore);
+    const questionScore = parseReportScore(questionResult.score);
+
+    if (
+      questionMaxScore === null ||
+      (questionResult.score !== null && questionScore === null) ||
+      (questionScore !== null && questionScore > questionMaxScore)
+    ) {
+      return "题组小计生成中";
+    }
+
+    maxScore += questionMaxScore;
+
+    if (questionScore === null) {
+      hasPendingScore = true;
+    } else {
+      score += questionScore;
+    }
+  }
+
+  if (hasPendingScore) {
+    return `题组小计 待评分 / ${formatReportScoreTotal(maxScore)}`;
+  }
+
+  return `题组小计 ${formatReportScoreTotal(score)} / ${formatReportScoreTotal(maxScore)}`;
+}
+
+function groupReportQuestionResults(
+  questionResults: ReportQuestionResult[],
+): ReportQuestionResultGroup[] {
+  const groupMetadataByPublicId = new Map<
+    string,
+    { paperSectionTitle: string; questionGroupTitle: string }
+  >();
+  const invalidGroupPublicIds = new Set<string>();
+  const completedGroupPublicIds = new Set<string>();
+  let activeGroupPublicId: string | null = null;
+
+  questionResults.forEach((questionResult) => {
+    const questionGroupPublicId = questionResult.questionGroupPublicId;
+
+    if (questionGroupPublicId !== activeGroupPublicId) {
+      if (activeGroupPublicId !== null) {
+        completedGroupPublicIds.add(activeGroupPublicId);
+      }
+
+      if (
+        questionGroupPublicId !== null &&
+        completedGroupPublicIds.has(questionGroupPublicId)
+      ) {
+        invalidGroupPublicIds.add(questionGroupPublicId);
+      }
+
+      activeGroupPublicId = questionGroupPublicId;
+    }
+
+    if (questionResult.questionGroupPublicId === null) {
+      return;
+    }
+
+    if (
+      questionResult.paperSectionTitle === null ||
+      questionResult.questionGroupTitle === null
+    ) {
+      invalidGroupPublicIds.add(questionResult.questionGroupPublicId);
+      return;
+    }
+
+    const previousMetadata = groupMetadataByPublicId.get(
+      questionResult.questionGroupPublicId,
+    );
+
+    if (
+      previousMetadata !== undefined &&
+      (previousMetadata.paperSectionTitle !==
+        questionResult.paperSectionTitle ||
+        previousMetadata.questionGroupTitle !==
+          questionResult.questionGroupTitle)
+    ) {
+      invalidGroupPublicIds.add(questionResult.questionGroupPublicId);
+      return;
+    }
+
+    groupMetadataByPublicId.set(questionResult.questionGroupPublicId, {
+      paperSectionTitle: questionResult.paperSectionTitle,
+      questionGroupTitle: questionResult.questionGroupTitle,
+    });
+  });
+
+  return questionResults.reduce<ReportQuestionResultGroup[]>(
+    (groups, questionResult) => {
+      const canGroup =
+        questionResult.questionGroupPublicId !== null &&
+        questionResult.questionGroupTitle !== null &&
+        questionResult.paperSectionTitle !== null &&
+        !invalidGroupPublicIds.has(questionResult.questionGroupPublicId);
+
+      if (!canGroup) {
+        return [
+          ...groups,
+          {
+            groupKey: `paper_question:${questionResult.paperQuestionPublicId}`,
+            paperSectionTitle: questionResult.paperSectionTitle,
+            questionGroupPublicId: null,
+            questionGroupTitle: null,
+            questionResults: [questionResult],
+          },
+        ];
+      }
+
+      const groupKey = `question_group:${questionResult.questionGroupPublicId}`;
+      const existingGroupIndex = groups.findIndex(
+        (group) => group.groupKey === groupKey,
+      );
+
+      if (existingGroupIndex === -1) {
+        return [
+          ...groups,
+          {
+            groupKey,
+            paperSectionTitle: questionResult.paperSectionTitle,
+            questionGroupPublicId: questionResult.questionGroupPublicId,
+            questionGroupTitle: questionResult.questionGroupTitle,
+            questionResults: [questionResult],
+          },
+        ];
+      }
+
+      return groups.map((group, groupIndex) =>
+        groupIndex === existingGroupIndex
+          ? {
+              ...group,
+              questionResults: [...group.questionResults, questionResult],
+            }
+          : group,
+      );
+    },
+    [],
+  );
+}
+
+function ReportQuestionResultCard({
+  questionResult,
+  showStructureLabel,
+}: {
+  questionResult: ReportQuestionResult;
+  showStructureLabel: boolean;
+}) {
+  return (
+    <article className="border-border bg-background space-y-2 rounded-lg border p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          {questionResult.questionType === null ? null : (
+            <p className="text-text-muted text-xs">
+              {questionTypeLabels[questionResult.questionType]}
+            </p>
+          )}
+          {!showStructureLabel ||
+          questionResult.paperSectionTitle === null ? null : (
+            <p className="text-text-muted text-xs">
+              {questionResult.paperSectionTitle}
+            </p>
+          )}
+          <p className="text-text-primary text-sm font-semibold">
+            {questionResult.title}
+          </p>
+          {questionResult.scoringMethod === null ? null : (
+            <p className="text-text-secondary text-xs">
+              计分方式：
+              {scoringMethodLabels[questionResult.scoringMethod] ??
+                questionResult.scoringMethod}
+            </p>
+          )}
+        </div>
+        <p className="text-text-secondary text-xs">
+          {questionResult.score ?? "待评分"} / {questionResult.maxScore}
+        </p>
+      </div>
+      <p className="text-text-secondary text-sm">
+        作答：{questionResult.selectedAnswer ?? "未作答"}；标准答案：
+        {questionResult.standardAnswer ?? "生成中"}
+      </p>
+      {questionResult.fillBlankAnswers.length === 0 ? null : (
+        <ul className="text-text-secondary space-y-1 text-xs">
+          {questionResult.fillBlankAnswers.map((fillBlankAnswer) => (
+            <li key={fillBlankAnswer.blankKey}>
+              {fillBlankAnswer.blankKey}：
+              {fillBlankAnswer.standardAnswers.join(" / ")}（
+              {fillBlankAnswer.score} 分）
+            </li>
+          ))}
+        </ul>
+      )}
+      {questionResult.mistakeBookPublicId === null ? null : (
+        <p className="text-warning text-sm font-medium">已加入错题本</p>
+      )}
+    </article>
+  );
 }
 
 function parseLearningSuggestion(
@@ -3100,6 +3330,9 @@ export function StudentExamReportPage({
   }
 
   const parsedReportSnapshot = parseReportSnapshot(examReport.reportSnapshot);
+  const questionResultGroups = groupReportQuestionResults(
+    parsedReportSnapshot.questionResults,
+  );
   const parsedLearningSuggestion = parseLearningSuggestion(
     examReport.learningSuggestionSnapshot,
   );
@@ -3311,67 +3544,48 @@ export function StudentExamReportPage({
             题目结果
           </h2>
         </div>
-        {parsedReportSnapshot.questionResults.length === 0 ? (
+        {questionResultGroups.length === 0 ? (
           <p className="text-text-secondary text-sm">题目结果生成中</p>
         ) : (
           <div className="space-y-3">
-            {parsedReportSnapshot.questionResults.map((questionResult) => (
-              <article
-                key={questionResult.paperQuestionPublicId}
-                className="border-border bg-background space-y-2 rounded-lg border p-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    {questionResult.questionType === null ? null : (
-                      <p className="text-text-muted text-xs">
-                        {questionTypeLabels[questionResult.questionType]}
-                      </p>
-                    )}
-                    {questionResult.paperSectionTitle === null ? null : (
-                      <p className="text-text-muted text-xs">
-                        {questionResult.questionGroupTitle === null
-                          ? questionResult.paperSectionTitle
-                          : `${questionResult.paperSectionTitle} · ${questionResult.questionGroupTitle}`}
-                      </p>
-                    )}
-                    <p className="text-text-primary text-sm font-semibold">
-                      {questionResult.title}
+            {questionResultGroups.map((questionResultGroup) =>
+              questionResultGroup.questionGroupPublicId === null ||
+              questionResultGroup.questionGroupTitle === null ? (
+                <ReportQuestionResultCard
+                  key={questionResultGroup.groupKey}
+                  questionResult={questionResultGroup.questionResults[0]}
+                  showStructureLabel
+                />
+              ) : (
+                <section
+                  key={questionResultGroup.groupKey}
+                  className="border-border bg-background space-y-3 rounded-lg border p-3"
+                >
+                  <div>
+                    <h3 className="font-heading text-text-primary text-sm font-semibold">
+                      {questionResultGroup.questionGroupTitle}
+                    </h3>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {questionResultGroup.paperSectionTitle} ·{" "}
+                      {getReportQuestionGroupScoreText(
+                        questionResultGroup.questionResults,
+                      )}
                     </p>
-                    {questionResult.scoringMethod === null ? null : (
-                      <p className="text-text-secondary text-xs">
-                        计分方式：
-                        {scoringMethodLabels[questionResult.scoringMethod] ??
-                          questionResult.scoringMethod}
-                      </p>
+                  </div>
+                  <div className="space-y-2">
+                    {questionResultGroup.questionResults.map(
+                      (questionResult) => (
+                        <ReportQuestionResultCard
+                          key={questionResult.paperQuestionPublicId}
+                          questionResult={questionResult}
+                          showStructureLabel={false}
+                        />
+                      ),
                     )}
                   </div>
-                  <p className="text-text-secondary text-xs">
-                    {questionResult.score ?? "待评分"} /{" "}
-                    {questionResult.maxScore}
-                  </p>
-                </div>
-                <p className="text-text-secondary text-sm">
-                  作答：{questionResult.selectedAnswer ?? "未作答"}；标准答案：
-                  {questionResult.standardAnswer ?? "生成中"}
-                </p>
-                {questionResult.fillBlankAnswers.length === 0 ? null : (
-                  <ul className="text-text-secondary space-y-1 text-xs">
-                    {questionResult.fillBlankAnswers.map((fillBlankAnswer) => (
-                      <li key={fillBlankAnswer.blankKey}>
-                        {fillBlankAnswer.blankKey}：
-                        {fillBlankAnswer.standardAnswers.join(" / ")}（
-                        {fillBlankAnswer.score} 分）
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {questionResult.mistakeBookPublicId === null ? null : (
-                  <p className="text-warning text-sm font-medium">
-                    已加入错题本
-                  </p>
-                )}
-              </article>
-            ))}
+                </section>
+              ),
+            )}
           </div>
         )}
       </div>
