@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+currentPhase: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+  currentTaskId: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
   currentCandidateClusterId: P1-RC-05
   candidateClusterOrder:
     - P1-RC-01
@@ -534,7 +534,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21
     - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
     - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
-    - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+    - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -587,6 +587,8 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-04-org-auth-reference-picker-2026-07-21
     - p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21
     - p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+    - p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+    - p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -639,6 +641,7 @@ p1RemediationSerialProgram:
     p1-execution-policy-capsule-v1-1-2026-07-21: closed
     p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21: closed
     p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21: closed
+    p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -827,71 +830,71 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
-  title: Atomic organization AI result training draft copy command
-  phase: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
+  id: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
+  title: Canonical paper REST boundary and exam-papers alias retirement
+  phase: p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21
   status: closed
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0166_and_F-0167
-  branch: fix/organization-ai-training-copy-command
+  productClosureContribution: F-0097
+  branch: fix/canonical-paper-rest-boundary
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0166
-    - F-0167
+    - F-0097
   candidateRootCauseCluster: P1-RC-05
-  objective: replace the browser-coordinated two-write copy flow with one server-owned atomic and deterministic organization AI result-to-training-draft command
+  objective: retire the never-wired contract-incompatible exam-papers route family and keep api_v1_papers as the single canonical formal paper REST boundary
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: closed_static_product_verified
   riskBoundary:
-    category: bounded_database_application_transaction_and_existing_permission_semantics
-    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    category: low_risk_nonfunctional_API_alias_retirement
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     realExternalCall: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: immutable_admin_AI_result_snapshot_to_atomic_copy_route_service_repository_transaction_to_training_draft_source_context_and_UI
-    coreFiles: 14
-    contingencyFiles: 8
-    preflightTestFiles: 8
+    chain: ADR_and_traceability_to_exam_papers_routes_to_isolated_handler_repository_contract_validator_and_stub_test
+    coreFiles: 16
+    contingencyFiles: 2
+    preflightTestFiles: 3
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    confirmedResidualRootCause: browser_combines_historical_result_with_current_form_scope_then_performs_two_independent_generic_writes
-    bundleDecision: F0166_and_F0167_share_one_server_owned_copy_command_transaction_and_validation_matrix
+    confirmedResidualRootCause: early_layering_scaffold_was_published_as_REST_but_never_connected_to_the_canonical_paper_aggregate
+    disposition: separate_retire_nonfunctional_alias_no_runtime_unification_needed
   expectedAcceptance:
-    - client_submits_only_organization_source_task_source_result_and_weak_evidence_confirmation
-    - server_derives_scope_content_original_authorization_and_evidence_from_one_immutable_source_result_snapshot
-    - task_result_organization_scope_authorization_and_evidence_mismatch_fail_closed_without_writes
-    - draft_and_source_context_are_created_in_one_transaction_and_same_result_replay_returns_one_deterministic_draft
-    - response_loss_concurrency_and_second_insert_failure_do_not_create_duplicates_or_orphans
-    - no_schema_real_database_permission_provider_dependency_mechanism_or_other_finding_change
+    - api_v1_papers_is_the_only_documented_and_executable_formal_paper_REST_boundary
+    - all_five_never_wired_exam_papers_routes_and_their_isolated_adapter_stack_are_removed
+    - canonical_paper_lifecycle_and_admin_UI_regressions_remain_GREEN
+    - static_regression_prevents_reintroducing_exam_papers_as_a_public_route_or_current_SSOT_reference
+    - historical_audit_remains_read_only
+    - no_schema_database_permission_provider_dependency_mechanism_or_canonical_paper_behavior_change
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
     triggers: TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0166_and_F0167_closed_then_JIT_next_remaining_P1_finding
+    successProjection: F0097_closed_then_RC05_residual_reconciliation
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_standing_bounded_medium_risk
+    mandatoryFreshApprovals: 0_low_risk_standing_closeout
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: includes_TDD_snapshot_truth_atomic_copy_command_UI_replacement_and_adversarial_hardening
-    mechanismOverhead: includes_JIT_contract_state_validation_kernel_and_closeout
+    productValueTime: JIT_root_cause_confirmation_TDD_alias_retirement_and_SSOT_correction
+    mechanismOverhead: contract_state_validation_kernel_and_closeout
     guardSmokeChanges: 0
   validationEvidence:
-    red: 3_expected_failures_missing_generation_snapshot_mapper_and_copy_validator
-    focused: 8_files_254_tests_passed
-    lint: targeted_changed_and_direct_contract_files_passed
-    typecheck: tsc_noEmit_passed
-    build: next_build_passed_with_preexisting_NFT_warning
-    review: one_main_thread_adversarial_review_passed_no_scope_or_entitlement_expansion
+    red: 2_expected_failures_alias_files_and_current_SSOT_still_present
+    focused: 3_files_23_tests_passed
+    lint: canonical_boundary_test_passed
+    typecheck: tsc_noEmit_passed_after_regenerating_stale_Next_route_types
+    build: next_build_passed_100_static_pages_exam_papers_absent_with_preexisting_NFT_warning
+    review: pass_dead_stack_only_no_canonical_paper_permission_schema_dependency_provider_or_historical_audit_change
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21
+    taskId: p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21
     findingIds:
-      - F-0160
-    commit: ca1636e1d95f9045aa12ca1d38990f3070f55e96
+      - F-0166
+      - F-0167
+    commit: 28b3fb320f4ab13681d02a65abd579ad6f7f30b7
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     masterOriginSync: pass
     worktreeClean: true
@@ -906,9 +909,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: ca1636e1d95f9045aa12ca1d38990f3070f55e96
-  lastKnownOriginMasterSha: ca1636e1d95f9045aa12ca1d38990f3070f55e96
-  lastKnownRemoteMasterSha: ca1636e1d95f9045aa12ca1d38990f3070f55e96
+  lastKnownMasterSha: 28b3fb320f4ab13681d02a65abd579ad6f7f30b7
+  lastKnownOriginMasterSha: 28b3fb320f4ab13681d02a65abd579ad6f7f30b7
+  lastKnownRemoteMasterSha: 28b3fb320f4ab13681d02a65abd579ad6f7f30b7
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

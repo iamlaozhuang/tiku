@@ -113,10 +113,9 @@ Candidate file/module paths are planning targets only. They are not evidence tha
 - `targetTechnicalLayer`: admin UI, service, repository, model/schema, storage boundary, mapper, validator, snapshot
   boundary, adoption governance
 - `candidateFilesOrModules`: `src/app/(admin)/**`, `src/app/api/v1/questions/**`,
-  `src/app/api/v1/exam-papers/**`, `src/server/services/question-paper/**`,
-  `src/server/repositories/question-paper/**`, `src/server/contracts/question-paper/**`,
-  `src/server/mappers/question-paper/**`, `src/server/validators/question-paper/**`, `src/db/schema/*question*`,
-  `src/db/schema/*paper*`
+  `src/app/api/v1/papers/**`, `src/server/services/paper-composition-lifecycle-runtime.ts`,
+  `src/server/repositories/paper-draft-repository.ts`, `src/server/contracts/paper-draft-contract.ts`,
+  `src/server/validators/paper-draft.ts`, `src/db/schema/*question*`, `src/db/schema/*paper*`
 - `implementationEligible`: `blocked_until_gate_approved`
 - `blockedGates`: provider/env/secret/quota/cost, storage/schema/UI, and formal adoption review gates remain blocked.
 - `conflictRefs`: `CFX-FORMAL-001`, `CFX-AI-001`, `CFX-PROVIDER-001`

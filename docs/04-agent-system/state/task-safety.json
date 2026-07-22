@@ -1,30 +1,26 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21",
-  "objective": "Close F-0166 and F-0167 with one server-owned organization AI result-to-training-draft copy command. Persist the normalized generation parameters inside the immutable redacted AI result snapshot; accept only organizationPublicId, sourceTaskPublicId, sourceResultPublicId, and weak-evidence confirmation from the client; atomically validate exact task/result/organization/original org_auth lineage and current advanced authorization, create or deterministically replay one training draft plus one source context, and derive scope/content metadata from the source snapshot. Remove the browser two-write workflow and all use of current form scope. Do not change schema/migration, entitlement semantics, Provider behavior, dependencies, or another finding.",
+  "taskId": "p1-remediation-rc-05-canonical-paper-rest-boundary-2026-07-21",
+  "objective": "Close F-0097 by retiring the never-wired and contract-incompatible /api/v1/exam-papers route family and its isolated adapter stack, naming /api/v1/papers as the only canonical formal paper REST boundary, and preserving an executable regression against reintroducing the alias. Do not change the canonical paper implementation, paper lifecycle semantics, schema, permissions, dependencies, Provider behavior, or historical audit evidence.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/app/api/v1/organization-trainings/ai-result-copies/route.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-    "src/server/contracts/admin-ai-generation-local-contract.ts",
-    "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "src/server/services/organization-training-service.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/validators/organization-training.ts",
-    "src/server/validators/organization-training.test.ts",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts"
+    "docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md",
+    "docs/01-requirements/traceability/unified-use-case-technical-matrix.md",
+    "src/app/api/v1/exam-papers/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/copy/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/publish/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/unpublish/route.ts",
+    "src/server/contracts/question-paper/exam-paper-contract.ts",
+    "src/server/repositories/question-paper/question-paper-repository.ts",
+    "src/server/services/question-paper/route-handlers.ts",
+    "src/server/validators/question-paper/exam-paper-validator.ts",
+    "tests/unit/question-paper/question-paper-rest-layering.test.ts",
+    "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts",
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/admin-paper-ui.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -32,6 +28,12 @@
     "scripts/**",
     ".git/hooks/**",
     "docs/05-execution-logs/**",
+    "docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md",
+    "src/app/api/v1/papers/**",
+    "src/server/services/paper-composition-lifecycle-runtime.ts",
+    "src/server/repositories/paper-draft-repository.ts",
+    "src/server/contracts/paper-draft-contract.ts",
+    "src/server/contracts/question-paper/material-lifecycle-boundary.ts",
     "src/db/**",
     "drizzle/**",
     "migrations/**",
@@ -39,50 +41,43 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "migration execution or real database/data access",
-    "new role, entitlement, organization scope, quota, default capability or authorization semantics",
-    "Provider/external service, prompt/RAG, credential/config, secret/env or deployment",
-    "platform formal question/paper adoption, employee learner AI output or another finding",
+    "schema/migration or real database/data access",
+    "paper lifecycle, permission, entitlement, Provider, external service, secret/env or deployment",
     "PR, force-push, non-canonical remote, Subagent, kernel/guard/smoke"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/app/api/v1/organization-trainings/ai-result-copies/route.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-    "src/server/contracts/admin-ai-generation-local-contract.ts",
-    "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/server/services/organization-training-service.ts",
-    "src/server/validators/organization-training.ts"
+    "docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md",
+    "docs/01-requirements/traceability/unified-use-case-technical-matrix.md",
+    "src/app/api/v1/exam-papers/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/copy/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/publish/route.ts",
+    "src/app/api/v1/exam-papers/[publicId]/unpublish/route.ts",
+    "src/server/contracts/question-paper/exam-paper-contract.ts",
+    "src/server/repositories/question-paper/question-paper-repository.ts",
+    "src/server/services/question-paper/route-handlers.ts",
+    "src/server/validators/question-paper/exam-paper-validator.ts",
+    "tests/unit/question-paper/question-paper-rest-layering.test.ts",
+    "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts"
   ],
   "contingencyFiles": [
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-    "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/validators/organization-training.test.ts",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts"
+    "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+    "tests/unit/admin-paper-ui.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "requirements": "Organization AI output may enter only an editable organization training draft, with exact organization, original authorization, generation scope, evidence and immutable result content preserved; response loss and concurrent replay must converge.",
-    "uiCaller": "AdminAiGenerationEntryPage currently combines a historical task/result with current page generationParameters and current authorizationPublicId, then performs draft POST followed by source-context POST.",
-    "routeService": "The two existing organization-training endpoints independently validate client-reported scope but neither owns the source task/result pair or a single copy transaction.",
-    "repository": "organization-training persistence exposes separate draft/source inserts; organization_training_draft public_id and last operation/digest fields can support a deterministic one-result copy command without schema change.",
-    "sourceSnapshot": "admin AI result content_redacted_snapshot already owns immutable generated question/paper detail and content_digest but omits the normalized generationParameters needed to reconstruct scope.",
-    "rootCause": "The product models one business action as two browser-coordinated generic writes and does not persist the server-owned generation scope alongside the immutable source result.",
-    "bundleDecision": "F-0166 and F-0167 share the same source-result-to-training-draft command, invariant, transaction boundary and validation matrix; one atomic server-owned copy command closes both."
+    "requirements": "ADR-002 makes /api/v1 a stable multi-client boundary while the paper requirement SSOT defines one draft/published/archived paper lifecycle.",
+    "canonicalRoute": "/api/v1/papers is wired to the production paper composition lifecycle runtime and is the only route family used by product callers.",
+    "aliasRoute": "/api/v1/exam-papers constructs an empty optional repository in every App Router entry and therefore returns 503 before authorization or business handling.",
+    "isolatedStack": "The exam-paper contract, repository, validator and handler are referenced only by the dead routes and their injected-stub test.",
+    "rootCause": "An early layering scaffold was published and documented as a REST capability but was never connected to the canonical paper aggregate, leaving two incompatible public contracts.",
+    "disposition": "separate_confirmed_root_cause_retire_nonfunctional_alias_and_keep_only_canonical_papers"
   },
   "validationCommands": [
     {
-      "name": "f0166-f0167-organization-ai-copy-focused",
+      "name": "f0097-canonical-paper-rest-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -90,53 +85,31 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-        "src/server/validators/organization-training.test.ts",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts"
+        "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts",
+        "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
+        "tests/unit/admin-paper-ui.test.ts",
+        "--maxWorkers=1"
       ]
     },
     {
-      "name": "f0166-f0167-organization-ai-copy-lint",
+      "name": "f0097-canonical-paper-rest-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/app/api/v1/organization-trainings/ai-result-copies/route.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-        "src/server/contracts/admin-ai-generation-local-contract.ts",
-        "src/server/contracts/admin-ai-generation-result-persistence-contract.ts",
-        "src/server/contracts/organization-training-contract.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-repository.ts",
-        "src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts",
-        "src/server/repositories/organization-training-repository.ts",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/organization-training-route.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "src/server/services/organization-training-service.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/validators/organization-training.ts",
-        "src/server/validators/organization-training.test.ts",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts"
+        "tests/unit/question-paper/canonical-paper-rest-boundary.test.ts"
       ]
     },
     {
-      "name": "f0166-f0167-organization-ai-copy-typecheck",
+      "name": "f0097-canonical-paper-rest-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0166-f0167-organization-ai-copy-build",
+      "name": "f0097-canonical-paper-rest-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -144,13 +117,13 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "database": null,
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "bounded_database_application_transaction_and_existing_permission_semantics",
+    "category": "low_risk_nonfunctional_api_alias_retirement",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -158,19 +131,19 @@
     "dependencyOrMechanismChange": false
   },
   "standingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "conditionalCloseout": true,
   "resumeAnchor": {
-    "findingIds": ["F-0166", "F-0167"],
-    "task": "implement one atomic server-owned organization AI result copy command, close both findings, then JIT the next remaining P1 finding",
-    "condition": "do not add schema, execute DB, expand organization AI permission, change Provider behavior, or enter another finding"
+    "findingIds": ["F-0097"],
+    "task": "retire the nonfunctional exam-papers alias, close F-0097, then complete RC-05 residual reconciliation",
+    "condition": "do not modify canonical paper behavior, historical audits, schema, permission, dependency, Provider or mechanism"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-05-personal-ai-generation-input-snapshot-2026-07-21",
-    "findingIds": ["F-0160"],
-    "commit": "ca1636e1d95f9045aa12ca1d38990f3070f55e96",
+    "taskId": "p1-remediation-rc-05-organization-ai-training-copy-command-2026-07-21",
+    "findingIds": ["F-0166", "F-0167"],
+    "commit": "28b3fb320f4ab13681d02a65abd579ad6f7f30b7",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "masterOriginSync": true,
     "worktreeClean": true,
@@ -179,6 +152,6 @@
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

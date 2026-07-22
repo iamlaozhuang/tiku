@@ -30,7 +30,8 @@ route handlers / server actions -> service -> repository -> model
 
 The layer ownership rules are:
 
-- `src/app/api/v1/*` exposes REST route handlers for external clients, for example `src/app/api/v1/exam-papers/route.ts` and `src/app/api/v1/mock-exams/[publicId]/submit/route.ts`.
+- `src/app/api/v1/*` exposes REST route handlers for external clients, for example `src/app/api/v1/papers/route.ts` and `src/app/api/v1/mock-exams/[publicId]/submit/route.ts`.
+- Formal paper lifecycle has one canonical REST family: `/api/v1/papers`. Do not publish an `exam-papers` alias with a separate contract or adapter stack.
 - Route handlers and Server Actions are thin adapters only. They validate transport input, call services, map service results to API response contracts, and return the standard transport response.
 - Business logic belongs in `src/server/services`.
 - Database access belongs in `src/server/repositories`.
