@@ -30,6 +30,120 @@ function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   );
 }
 
+describe("paper_attachment_usage contract", () => {
+  it("separates the seven persisted values from the six creatable values", () => {
+    expect(paperSchema.paperAttachmentUsageValues).toEqual([
+      "paper_source",
+      "answer_analysis",
+      "answer_sheet",
+      "other",
+      "material_paper",
+      "answer_paper",
+      "source_material",
+    ]);
+    expect(paperSchema.paperAttachmentCreatableUsageValues).toEqual([
+      "paper_source",
+      "material_paper",
+      "answer_sheet",
+      "answer_paper",
+      "answer_analysis",
+      "source_material",
+    ]);
+  });
+
+  it("registers the canonical database column and labels in the glossary", () => {
+    const glossarySource = readFileSync(
+      resolve(process.cwd(), "docs/03-standards/glossary.yaml"),
+      "utf8",
+    );
+    const usageContractStart = glossarySource.lastIndexOf(
+      "  paper_attachment_usage:\n",
+    );
+    const usageContractEnd = glossarySource.indexOf(
+      "\n  exam_mode:",
+      usageContractStart,
+    );
+    const usageContract = glossarySource.slice(
+      usageContractStart,
+      usageContractEnd,
+    );
+
+    expect(usageContract).toContain("db_column: paper_attachment_usage");
+    expect(usageContract).toContain("key: paper_source, chinese: 试卷文件");
+    expect(usageContract).toContain("key: material_paper, chinese: 材料卷");
+    expect(usageContract).toContain("key: answer_sheet, chinese: 答题卷");
+    expect(usageContract).toContain("key: answer_paper, chinese: 答案卷");
+    expect(usageContract).toContain("key: answer_analysis, chinese: 解析文件");
+    expect(usageContract).toContain(
+      "key: source_material, chinese: 来源教材或课件",
+    );
+    expect(usageContract).toContain("key: other, chinese: 其他（历史）");
+  });
+
+  it("generates only the three additive enum values with a monotonic snapshot", () => {
+    const migrationSource = readFileSync(
+      resolve(
+        process.cwd(),
+        "drizzle/20260722033000_p1_rc_05_paper_asset_usage_contract.sql",
+      ),
+      "utf8",
+    );
+    const previousSnapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260722023000_snapshot.json"),
+        "utf8",
+      ),
+    ) as { id: string };
+    const snapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260722033000_snapshot.json"),
+        "utf8",
+      ),
+    ) as {
+      prevId: string;
+      enums: Record<string, { values: string[] }>;
+    };
+    const journal = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/_journal.json"),
+        "utf8",
+      ),
+    ) as { entries: Array<{ idx: number; tag: string; when: number }> };
+
+    expect(
+      migrationSource.match(
+        /ALTER TYPE "public"\."paper_attachment_usage" ADD VALUE/g,
+      ),
+    ).toHaveLength(3);
+    expect(migrationSource).toContain("ADD VALUE 'material_paper'");
+    expect(migrationSource).toContain("ADD VALUE 'answer_paper'");
+    expect(migrationSource).toContain("ADD VALUE 'source_material'");
+    expect(migrationSource).not.toMatch(
+      /\b(?:DROP|RENAME|CREATE TYPE|ALTER TABLE|UPDATE|DELETE|INSERT)\b/u,
+    );
+    expect(snapshot.prevId).toBe(previousSnapshot.id);
+    expect(snapshot.enums["public.paper_attachment_usage"]?.values).toEqual([
+      "paper_source",
+      "answer_analysis",
+      "answer_sheet",
+      "other",
+      "material_paper",
+      "answer_paper",
+      "source_material",
+    ]);
+    expect(journal.entries.at(-1)).toEqual({
+      idx: 43,
+      version: "7",
+      when: 1784691000000,
+      tag: "20260722033000_p1_rc_05_paper_asset_usage_contract",
+      breakpoints: true,
+    });
+    expect(journal.entries.at(-2)?.when).toBeLessThan(
+      journal.entries.at(-1)?.when ?? 0,
+    );
+  });
+});
+
 describe("paper schema question_type enum", () => {
   it("persists managed content_image metadata and its resumable upload operation independently from paper_asset", () => {
     const schema = paperSchema as unknown as Record<string, unknown>;

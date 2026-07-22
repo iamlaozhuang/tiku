@@ -7,6 +7,7 @@ import {
   multiChoiceRuleValues,
   paper,
   paperAsset,
+  paperAttachmentCreatableUsageValues,
   paperAttachmentUsageValues,
   paperGenerationMethodValues,
   paperQuestion,
@@ -28,6 +29,7 @@ import {
 export {
   materialStatusValues,
   multiChoiceRuleValues,
+  paperAttachmentCreatableUsageValues,
   paperAttachmentUsageValues,
   paperGenerationMethodValues,
   paperStatusValues,
@@ -52,6 +54,8 @@ export type PaperStatus = (typeof paperStatusValues)[number];
 export type MultiChoiceRule = (typeof multiChoiceRuleValues)[number];
 export type ScoringMethod = (typeof scoringMethodValues)[number];
 export type PaperAttachmentUsage = (typeof paperAttachmentUsageValues)[number];
+export type CreatablePaperAttachmentUsage =
+  (typeof paperAttachmentCreatableUsageValues)[number];
 export type FillBlankAnswer = FillBlankAnswerValue;
 
 export type MaterialRow = InferSelectModel<typeof material>;

@@ -19,9 +19,9 @@ import {
   type PaperDraftRepository,
 } from "../repositories/paper-draft-repository";
 import {
-  paperAttachmentUsageValues,
+  paperAttachmentCreatableUsageValues,
   professionValues,
-  type PaperAttachmentUsage,
+  type CreatablePaperAttachmentUsage,
   type Profession,
 } from "../models/paper";
 import {
@@ -214,15 +214,17 @@ function readRequiredFormText(formData: FormData, key: string): string | null {
 
 function readPaperAttachmentUsage(
   value: string | null,
-): PaperAttachmentUsage | null {
+): CreatablePaperAttachmentUsage | null {
   if (
     value === null ||
-    !paperAttachmentUsageValues.includes(value as PaperAttachmentUsage)
+    !paperAttachmentCreatableUsageValues.includes(
+      value as CreatablePaperAttachmentUsage,
+    )
   ) {
     return null;
   }
 
-  return value as PaperAttachmentUsage;
+  return value as CreatablePaperAttachmentUsage;
 }
 
 function readProfession(value: string | null): Profession | null {

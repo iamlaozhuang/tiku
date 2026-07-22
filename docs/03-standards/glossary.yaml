@@ -512,12 +512,15 @@ enums:
       - { key: specified_nodes, chinese: 指定企业列表 }
 
   paper_attachment_usage:
-    db_column: usage_type
+    db_column: paper_attachment_usage
     values:
-      - { key: paper_source, chinese: 试卷原档 }
-      - { key: answer_analysis, chinese: 答案解析 }
-      - { key: answer_sheet, chinese: 答题卡 }
-      - { key: other, chinese: 其他 }
+      - { key: paper_source, chinese: 试卷文件 }
+      - { key: answer_analysis, chinese: 解析文件 }
+      - { key: answer_sheet, chinese: 答题卷 }
+      - { key: other, chinese: 其他（历史） }
+      - { key: material_paper, chinese: 材料卷 }
+      - { key: answer_paper, chinese: 答案卷 }
+      - { key: source_material, chinese: 来源教材或课件 }
 
   exam_mode:
     db_column: exam_mode

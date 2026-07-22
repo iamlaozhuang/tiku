@@ -6,6 +6,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { createPaperAssetService } from "./paper-asset-service";
+import {
+  normalizeCreatePaperAssetInput,
+  normalizePaperAssetListInput,
+} from "../validators/paper-asset";
 import type {
   PaperAssetAccessRow,
   PaperAssetRepository,
@@ -96,6 +100,43 @@ function createRepository(
 }
 
 describe("paper asset service", () => {
+  it("accepts exactly the six creatable attachment usages", () => {
+    const creatableUsages = [
+      "paper_source",
+      "material_paper",
+      "answer_sheet",
+      "answer_paper",
+      "answer_analysis",
+      "source_material",
+    ];
+    const createInput = (paperAttachmentUsage: string) => ({
+      commandPublicId: "paper-asset-command-service-contract",
+      paperPublicId: "paper_public_123",
+      paperAttachmentUsage,
+      fileName: "controlled.pdf",
+      objectKey: `dev/paper-asset/logistics/202605/${"a".repeat(64)}.pdf`,
+      contentType: "application/pdf",
+      fileSizeByte: 10,
+      fileHash: "a".repeat(64),
+    });
+
+    for (const usage of creatableUsages) {
+      expect(normalizeCreatePaperAssetInput(createInput(usage))).toMatchObject({
+        success: true,
+        value: { paperAttachmentUsage: usage },
+      });
+    }
+    for (const usage of ["other", "", "PAPER_SOURCE", "unknown"]) {
+      expect(normalizeCreatePaperAssetInput(createInput(usage))).toEqual({
+        success: false,
+        message: "Invalid paper_asset input.",
+      });
+    }
+    expect(
+      normalizePaperAssetListInput({ paperAttachmentUsage: "other" }),
+    ).toMatchObject({ paperAttachmentUsage: "other" });
+  });
+
   it("lists paper_asset metadata without exposing object keys", async () => {
     const receivedQueries: unknown[] = [];
     const service = createPaperAssetService(

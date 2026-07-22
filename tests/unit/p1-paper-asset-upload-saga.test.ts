@@ -51,12 +51,12 @@ function createSessionService(): Pick<SessionService, "getCurrentSession"> {
   };
 }
 
-function createUploadRequest(): Request {
+function createUploadRequest(paperAttachmentUsage = "paper_source"): Request {
   const formData = new FormData();
 
   formData.set("commandPublicId", commandPublicId);
   formData.set("paperPublicId", "paper-public-upload");
-  formData.set("paperAttachmentUsage", "paper_source");
+  formData.set("paperAttachmentUsage", paperAttachmentUsage);
   formData.set("profession", "marketing");
   formData.set("fileName", "controlled-paper.md");
   formData.set(
@@ -545,6 +545,53 @@ describe("F-0031 paper_asset durable upload saga", () => {
       data: null,
     });
     expect(calls.preparePaperAssetUpload).not.toHaveBeenCalled();
+  });
+
+  it("accepts a new explicit usage and rejects legacy or malformed create usages before file writes", async () => {
+    const acceptedStorageRoot = await mkdtemp(
+      join(tmpdir(), "tiku-paper-saga-usage-accepted-"),
+    );
+    const acceptedHarness = createRepositoryHarness();
+    const acceptedHandlers =
+      createPaperCompositionLifecycleRuntimeRouteHandlers({
+        localPaperAssetStorageRoot: acceptedStorageRoot,
+        repositories: acceptedHarness.repositories,
+        sessionService: createSessionService(),
+      } as never);
+
+    const acceptedResponse = await acceptedHandlers.paperAssets.collection.POST(
+      createUploadRequest("source_material"),
+    );
+
+    expect(acceptedResponse.status).toBe(200);
+    expect(acceptedHarness.calls.preparePaperAssetUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ paperAttachmentUsage: "source_material" }),
+    );
+
+    for (const usage of ["other", "", "PAPER_SOURCE", "unknown"]) {
+      const storageRoot = await mkdtemp(
+        join(tmpdir(), "tiku-paper-saga-usage-rejected-"),
+      );
+      const harness = createRepositoryHarness();
+      const handlers = createPaperCompositionLifecycleRuntimeRouteHandlers({
+        localPaperAssetStorageRoot: storageRoot,
+        repositories: harness.repositories,
+        sessionService: createSessionService(),
+      } as never);
+      const response = await handlers.paperAssets.collection.POST(
+        createUploadRequest(usage),
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: 422205,
+        message: "Invalid paper_asset input.",
+        data: null,
+      });
+      expect(harness.calls.preparePaperAssetUpload).not.toHaveBeenCalled();
+      await expect(readdir(storageRoot, { recursive: true })).resolves.toEqual(
+        [],
+      );
+    }
   });
 
   it("removes the legacy repository mutation that bypassed file lifecycle state", () => {

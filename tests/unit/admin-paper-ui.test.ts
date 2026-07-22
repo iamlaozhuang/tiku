@@ -915,6 +915,34 @@ describe("AdminPaperManagement", () => {
     ).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("metadata");
     expect(document.querySelector('input[type="file"]')).not.toBeNull();
+    const usageSelect = screen.getByLabelText("附件用途");
+    expect(within(usageSelect).getAllByRole("option")).toHaveLength(7);
+    expect(
+      within(usageSelect).getByRole("option", { name: "请选择附件用途" }),
+    ).toHaveValue("");
+    expect(
+      within(usageSelect).getByRole("option", { name: "试卷文件" }),
+    ).toHaveValue("paper_source");
+    expect(
+      within(usageSelect).getByRole("option", { name: "材料卷" }),
+    ).toHaveValue("material_paper");
+    expect(
+      within(usageSelect).getByRole("option", { name: "答题卷" }),
+    ).toHaveValue("answer_sheet");
+    expect(
+      within(usageSelect).getByRole("option", { name: "答案卷" }),
+    ).toHaveValue("answer_paper");
+    expect(
+      within(usageSelect).getByRole("option", { name: "解析文件" }),
+    ).toHaveValue("answer_analysis");
+    expect(
+      within(usageSelect).getByRole("option", { name: "来源教材或课件" }),
+    ).toHaveValue("source_material");
+    expect(
+      within(usageSelect).queryByRole("option", { name: /其他/u }),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "保存附件" })).toBeDisabled();
+    fireEvent.change(usageSelect, { target: { value: "source_material" } });
     fireEvent.change(screen.getByLabelText("本地文件"), {
       target: {
         files: [
@@ -933,6 +961,14 @@ describe("AdminPaperManagement", () => {
       "/api/v1/paper-assets",
       expect.objectContaining({ method: "POST" }),
     );
+    const uploadCall = fetchMock.mock.calls.find(
+      ([path, init]) =>
+        path === "/api/v1/paper-assets" && init?.method === "POST",
+    );
+    expect(uploadCall?.[1]?.body).toBeInstanceOf(FormData);
+    expect(
+      (uploadCall?.[1]?.body as FormData).get("paperAttachmentUsage"),
+    ).toBe("source_material");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("dev/paper-asset");
   });
@@ -942,7 +978,7 @@ describe("AdminPaperManagement", () => {
     const asset = {
       publicId: "paper-asset-public-001",
       paperPublicId: "paper-public-001",
-      paperAttachmentUsage: "paper_source",
+      paperAttachmentUsage: "other",
       fileName: "controlled-source.pdf",
       contentType: "application/pdf",
       fileSizeByte: 19,
@@ -1016,6 +1052,7 @@ describe("AdminPaperManagement", () => {
       createElement(AdminPaperDetailPage, { publicId: "paper-public-001" }),
     );
 
+    expect(await screen.findByText("其他（历史）")).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "下载" }));
 
     await waitFor(() =>

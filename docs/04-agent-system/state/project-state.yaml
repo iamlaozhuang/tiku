@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
+currentPhase: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
 updatedAt: "2026-07-21T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -821,80 +821,81 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
-  title: Paper asset retention and secure download foundation
-  phase: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
+  id: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
+  title: Paper asset six-purpose contract
+  phase: p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21
   status: in_progress
   priority: p1
   taskKind: product_remediation
-  productClosureContribution: F-0096_secure_read_and_retention_partial
-  branch: fix/paper-asset-retention-download
+  productClosureContribution: F-0096_usage_integrity_partial
+  branch: fix/paper-asset-usage-contract
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0096
   candidateRootCauseCluster: P1-RC-05
-  objective: add protected content-admin paper_asset byte download and draft-only attachment deletion without claiming the remaining usage ingestion or physical lifecycle closure
-  executionStage: candidate_validated_pending_conditional_closeout
+  objective: register and enforce the six required paper_attachment_usage purposes while retaining legacy other rows as read-only compatibility; expose explicit purpose selection in content administration without claiming ingestion or physical lifecycle closure
+  executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: open_partitioned
   riskBoundary:
-    category: existing_content_admin_private_file_read_capability_and_database_retention_contraction
-    approvalId: guardian-f0096-private-download-retention-foundation-2026-07-21
-    schemaOrMigrationChange: false
+    category: schema_migration_source_and_attachment_usage_contract
+    approvalId: guardian-f0096-paper-asset-usage-contract-2026-07-21
+    schemaOrMigrationChange: true
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
-    newProtectedReadEndpoint: true
-    localPrivateFileRead: true
     realExternalCall: false
     conditionalCloseout: true
+    scopeAmendmentId: guardian-f0096-paper-asset-usage-contract-scope-amendment-01-2026-07-21
+  normalizedUsageContract:
+    persistedReadValues:
+      [
+        paper_source,
+        answer_analysis,
+        answer_sheet,
+        other,
+        material_paper,
+        answer_paper,
+        source_material,
+      ]
+    creatableValuesInUiOrder:
+      [
+        paper_source,
+        material_paper,
+        answer_sheet,
+        answer_paper,
+        answer_analysis,
+        source_material,
+      ]
+    legacyReadOnlyValue: other
   preRedImpactScan:
-    chain: AdminPaperDetailPage_to_nested_protected_download_route_to_paper_asset_service_repository_and_local_content_addressed_storage
-    coreFiles: 9
-    contingencyFiles: 7
-    sameTaskAuthoritativeCallChainExpansion: 0
+    chain: requirements_and_glossary_to_paper_attachment_usage_enum_migration_to_runtime_upload_validator_to_admin_selector_and_detail_labels
+    coreFiles: 16
+    contingencyFiles: 5
+    sameTaskAuthoritativeCallChainExpansion: 2
+    scopeAmendmentId: guardian-f0096-paper-asset-usage-contract-scope-amendment-01-2026-07-21
+    scopeAmendmentBoundary: direct_read_labels_and_creatable_storage_input_type_only
     directCallerCalleeMocksFixturesReviewed: true
     testOnlyExpansionApprovalId: standing-test-only-allowlist-expansion-2026-07-21
-    testOnlyExpansionFiles:
-      - src/server/services/paper-asset-route.test.ts
-    testOnlyExpansionReason: PaperAssetService direct route mock must implement the same-task private download method; no product scope expansion
-    requirements: module_02_content_admin_download_learner_non_exposure_and_published_attachment_retention
-    confirmedResidualRootCause: upload_saga_is_durable_but_private_bytes_have_no_authorized_read_path_and_delete_does_not_bind_owner_paper_status
+    requirements: module_02_six_paper_asset_purposes_and_glossary_enum_ssot
+    confirmedResidualRootCause: persisted_enum_and_admin_upload_contract_collapse_six_required_purposes_into_three_specific_values_plus_other_and_force_every_new_upload_to_paper_source
   expectedAcceptance:
-    - only_existing_super_admin_and_content_admin_actor_boundary_can_download_by_paper_asset_public_id
-    - download_stream_is_no_store_nosniff_and_safe_attachment_with_metadata_or_byte_absence_fail_closed
-    - paper_asset_object_key_remains_server_private_and_directory_escape_is_rejected
-    - metadata_delete_is_allowed_only_for_draft_owner_and_published_or_archived_retention_fails_closed
-    - F0096_remains_open_for_usage_ingestion_and_durable_physical_delete_followups
-  validationEvidence:
-    tddRed: read_function_absent_and_atomic_draft_owner_predicate_absent
-    focused: pass_7_files_46_tests
-    lint: pass
-    typecheck: pass
-    build: pass_100_static_pages_and_protected_download_route_present
-    formatAndDiff: pass
-    adversarialReview: pass_auth_before_metadata_and_storage_exact_identity_realpath_hash_size_safe_headers_atomic_draft_delete_no_entitlement_expansion
-  residualBoundary:
-    findingStatus: open_partitioned
-    unresolved: six_usage_completion_streaming_size_type_ingestion_gates_and_durable_physical_file_lifecycle_outbox_reference_count
-  executionMetrics:
-    mandatoryFreshApprovals: 1_guardian_task_bound_conditional_closeout
-    preventableScopeMissApprovals: 0
-    testOnlyExpansions: 1_direct_service_route_mock
-    candidateReapprovals: 0
-    approvalWaitTurns: 1
-    guardSmokeChanges: 0
+    - six_requirement_purposes_have_explicit_registered_values_and_labels
+    - new_uploads_must_choose_one_of_the_six_supported_purposes_and_cannot_create_legacy_other
+    - legacy_other_rows_remain_readable_filterable_and_downloadable_without_destructive_rewrite
+    - no_migration_execution_real_database_access_permission_or_physical_file_lifecycle_change
+    - F0096_remains_open_for_streaming_size_type_and_durable_physical_lifecycle_followups
   closeoutProjection:
-    current: candidate_validated_pending_conditional_closeout
-    triggers: unchanged_final_index_then_single_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0096_residual
+    current: validated_reviewed_conditional_closeout_ready
+    triggers: final_tree_binding_kernel_commit_ff_only_canonical_push_sync_and_cleanup
+    successProjection: partial_single_commit_ff_only_master_canonical_push_sync_cleanup_then_F0096_ingestion_lifecycle_residual
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   previousTaskCloseout:
-    taskId: p1-remediation-rc-05-paper-structure-management-ui-2026-07-21
-    findingId: F-0094
-    productClosureContribution: F-0094_final_closure
-    commit: f42a9fed040025ebb463881c1767fc13c99329c8
-    candidateTree: 680f8e595babdba29eeeb1e695d40f98dafae19c
+    taskId: p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21
+    findingId: F-0096
+    productClosureContribution: F-0096_secure_read_and_retention_partial
+    commit: b4b21d5272e0820c7eee524d8f1591470c4e2c23
+    candidateTree: d82b02ff1cb2dfdf4bc25c8d8078b4ecd2dd403b
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    approvalId: guardian-f0096-private-download-retention-foundation-2026-07-21
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass

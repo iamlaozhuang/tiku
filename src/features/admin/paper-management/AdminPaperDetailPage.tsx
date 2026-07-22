@@ -67,10 +67,13 @@ const attachmentUsageLabels: Record<
   PaperAssetDto["paperAttachmentUsage"],
   string
 > = {
-  answer_analysis: "答案与解析",
+  answer_analysis: "解析文件",
+  answer_paper: "答案卷",
   answer_sheet: "答题卷",
-  other: "其他附件",
-  paper_source: "试卷原始文件",
+  material_paper: "材料卷",
+  other: "其他（历史）",
+  paper_source: "试卷文件",
+  source_material: "来源教材或课件",
 };
 
 function isNotFoundCode(code: number): boolean {

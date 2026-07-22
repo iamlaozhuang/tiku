@@ -71,6 +71,17 @@ export const paperAttachmentUsageValues = [
   "answer_analysis",
   "answer_sheet",
   "other",
+  "material_paper",
+  "answer_paper",
+  "source_material",
+] as const;
+export const paperAttachmentCreatableUsageValues = [
+  "paper_source",
+  "material_paper",
+  "answer_sheet",
+  "answer_paper",
+  "answer_analysis",
+  "source_material",
 ] as const;
 export const paperAssetUploadOperationStatusValues = [
   "pending",

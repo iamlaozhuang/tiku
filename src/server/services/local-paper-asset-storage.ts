@@ -2,7 +2,10 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve, sep } from "node:path";
 
-import type { PaperAttachmentUsage, Profession } from "../models/paper";
+import type {
+  CreatablePaperAttachmentUsage,
+  Profession,
+} from "../models/paper";
 import type { ResourceType } from "../models/ai-rag";
 import type { NormalizedCreatePaperAssetInput } from "../validators/paper-asset";
 
@@ -10,7 +13,7 @@ export type StoreLocalPaperAssetFileInput = {
   file: File;
   fileName?: string;
   paperPublicId: string;
-  paperAttachmentUsage: PaperAttachmentUsage;
+  paperAttachmentUsage: CreatablePaperAttachmentUsage;
   profession: Profession;
   storageRoot?: string;
   uploadedAt?: Date;

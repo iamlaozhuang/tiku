@@ -1,11 +1,14 @@
-import { paperAttachmentUsageValues } from "../models/paper";
+import {
+  paperAttachmentCreatableUsageValues,
+  paperAttachmentUsageValues,
+} from "../models/paper";
 import type { NormalizedPagination } from "./pagination";
 import { normalizePagination } from "./pagination";
 
 export type NormalizedCreatePaperAssetInput = {
   commandPublicId: string;
   paperPublicId: string;
-  paperAttachmentUsage: (typeof paperAttachmentUsageValues)[number];
+  paperAttachmentUsage: (typeof paperAttachmentCreatableUsageValues)[number];
   fileName: string;
   objectKey: string;
   contentType: string;
@@ -66,13 +69,24 @@ function normalizeQueryInteger(value: unknown): number | undefined {
   return Number.isFinite(parsedValue) ? parsedValue : undefined;
 }
 
-function isPaperAttachmentUsage(
+function isPersistedPaperAttachmentUsage(
   value: unknown,
 ): value is (typeof paperAttachmentUsageValues)[number] {
   return (
     typeof value === "string" &&
     paperAttachmentUsageValues.includes(
       value as (typeof paperAttachmentUsageValues)[number],
+    )
+  );
+}
+
+function isCreatablePaperAttachmentUsage(
+  value: unknown,
+): value is (typeof paperAttachmentCreatableUsageValues)[number] {
+  return (
+    typeof value === "string" &&
+    paperAttachmentCreatableUsageValues.includes(
+      value as (typeof paperAttachmentCreatableUsageValues)[number],
     )
   );
 }
@@ -105,7 +119,7 @@ export function normalizeCreatePaperAssetInput(
   if (
     commandPublicId === null ||
     paperPublicId === null ||
-    !isPaperAttachmentUsage(input.paperAttachmentUsage) ||
+    !isCreatablePaperAttachmentUsage(input.paperAttachmentUsage) ||
     fileName === null ||
     objectKey === null ||
     contentType === null ||
@@ -151,7 +165,9 @@ export function normalizePaperAssetListInput(
       input.paperPublicId.trim().length > 0
         ? input.paperPublicId.trim()
         : null,
-    paperAttachmentUsage: isPaperAttachmentUsage(input.paperAttachmentUsage)
+    paperAttachmentUsage: isPersistedPaperAttachmentUsage(
+      input.paperAttachmentUsage,
+    )
       ? input.paperAttachmentUsage
       : null,
   };

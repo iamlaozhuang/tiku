@@ -1,24 +1,29 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-05-paper-asset-retention-download-foundation-2026-07-21",
-  "objective": "Implement the independently verifiable F-0096 secure-read and retention partition without claiming finding closure: allow only the existing super_admin/content_admin paper-asset boundary to download an existing private local paper_asset by public ID with no-store, nosniff, exact content type and safe attachment disposition; fail closed when metadata or bytes are missing; expose the action in the content-admin paper detail; and prohibit paper_asset metadata deletion unless the owning paper is still draft. Do not change attachment usage values, upload limits, physical deletion/outbox, schema or migration in this partition.",
+  "taskId": "p1-remediation-rc-05-paper-asset-usage-contract-2026-07-21",
+  "objective": "Implement the independently verifiable F-0096 paper_attachment_usage integrity partition without claiming finding closure: register the six required purposes (paper file, material paper, answer sheet, answer paper, analysis file, source material), preserve existing other rows as legacy read-only compatibility, reject new other uploads, and let content administrators explicitly choose and view the supported purpose. Generate only offline Drizzle migration source; do not execute migration or access a real database. Do not change upload size/type/streaming, storage, download authorization, physical deletion, outbox, reference counting, dependencies or permissions.",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
+    "docs/03-standards/glossary.yaml",
+    "src/db/schema/paper.ts",
+    "src/db/schema/paper.test.ts",
+    "drizzle/20260722033000_p1_rc_05_paper_asset_usage_contract.sql",
+    "drizzle/meta/20260722033000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/models/paper.ts",
+    "src/server/validators/paper-asset.ts",
     "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/app/api/v1/paper-assets/[publicId]/download/route.ts",
+    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
     "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+    "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+    "src/server/services/local-paper-asset-storage.ts",
     "src/server/services/paper-asset-service.test.ts",
-    "src/server/services/paper-asset-route.test.ts",
     "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
     "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
     "tests/unit/admin-paper-ui.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
+    "tests/unit/p1-paper-asset-upload-saga.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -30,11 +35,10 @@
     "pnpm-lock.yaml",
     ".github/workflows/**",
     ".env*",
-    "schema, migration or persistent database execution",
-    "paper_attachment_usage enum or glossary change",
-    "upload size/type policy or streaming ingestion change",
-    "physical file deletion, delete outbox or reference-count lifecycle",
-    "new role, entitlement, anonymous or learner download",
+    "migration execution, persistent database access or real data",
+    "upload size/type/magic-byte/streaming behavior",
+    "local storage, download authorization, physical deletion, outbox or reference counting",
+    "role, permission, entitlement or learner visibility changes",
     "dependency, Provider, external service, secret/env, deployment, PR or force-push",
     "F-0097, F-0098 or another independent finding"
   ],
@@ -42,34 +46,40 @@
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/local-paper-asset-storage.ts",
-    "src/server/repositories/paper-asset-repository.ts",
-    "src/server/services/paper-asset-service.ts",
+    "docs/03-standards/glossary.yaml",
+    "src/db/schema/paper.ts",
+    "src/db/schema/paper.test.ts",
+    "drizzle/20260722033000_p1_rc_05_paper_asset_usage_contract.sql",
+    "drizzle/meta/20260722033000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/server/models/paper.ts",
+    "src/server/validators/paper-asset.ts",
     "src/server/services/paper-composition-lifecycle-runtime.ts",
-    "src/app/api/v1/paper-assets/[publicId]/download/route.ts",
-    "src/features/admin/paper-management/AdminPaperDetailPage.tsx"
+    "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+    "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+    "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+    "src/server/services/local-paper-asset-storage.ts"
   ],
   "contingencyFiles": [
     "src/server/services/paper-asset-service.test.ts",
-    "src/server/services/paper-asset-route.test.ts",
     "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
     "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
     "tests/unit/admin-paper-ui.test.ts",
-    "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-    "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
+    "tests/unit/p1-paper-asset-upload-saga.test.ts"
   ],
   "authoritativeChainEvidence": {
-    "uiApiCaller": "AdminPaperDetailPage already receives the protected paper_asset list but only renders metadata. It is the direct content-admin read surface for an authenticated download action.",
-    "routeService": "The paper composition runtime already enforces super_admin/content_admin for paper_asset collection/detail. A nested GET download route can reuse exactly that actor boundary while keeping objectKey out of JSON DTOs.",
-    "repository": "findPaperAssetByPublicId already joins paper and returns private object metadata. deletePaperAsset currently deletes by asset ID alone; joining the owner and requiring paper.status=draft is the minimal retention guard.",
-    "storage": "Local storage already validates content-addressed object keys on write. The read path must resolve the same five-segment identity inside the configured root and stream bytes without exposing the key.",
-    "tests": "Existing service/runtime/storage/admin UI tests are the direct mocks and regression boundaries; delete audit static tests protect transactional audit behavior.",
-    "requirements": "Module 02 section 3.9 requires content-admin download, learner non-exposure and published attachment retention.",
-    "nonClaims": "F-0031 upload saga already covers durable create/replay. This task does not resolve the remaining six-purpose enum, ingestion size/type policy or durable physical deletion, so F-0096 stays open."
+    "requirements": "Module 02 section 3.9 defines six file purposes and requires each attachment to carry its purpose.",
+    "glossary": "glossary.yaml is the enum naming SSOT and currently lists only paper_source, answer_analysis, answer_sheet and other.",
+    "schemaMigration": "paperAttachmentUsageValues owns the PostgreSQL enum consumed by paper_asset and paper_asset_upload_operation; additive enum migration source is required, with no database execution.",
+    "runtimeValidator": "The multipart runtime and service validator consume the enum before upload preparation and persistence; supported create values must be the six required purposes while legacy other remains readable.",
+    "uiCaller": "AdminPaperManagementClient currently hard-codes every upload to paper_source; AdminPaperDetailPage and the direct AdminPaperManagement fixture own purpose labels for existing rows.",
+    "scopeAmendment": "guardian-f0096-paper-asset-usage-contract-scope-amendment-01-2026-07-21 permits only seven-value read labels in the direct fixture and a creatable-usage input type in the direct local storage adapter; no storage behavior changes.",
+    "tests": "Schema, service, runtime, storage adapter, saga and admin UI tests are the direct contracts and mocks.",
+    "nonClaims": "The prior b4b21d527 partition already added private download and draft-only metadata delete. This task does not address streaming gates or durable physical file lifecycle, so F-0096 stays open."
   },
   "validationCommands": [
     {
-      "name": "f0096-paper-asset-retention-download-focused",
+      "name": "f0096-paper-asset-usage-contract-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -77,39 +87,40 @@
         "exec",
         "vitest",
         "run",
+        "src/db/schema/paper.test.ts",
         "src/server/services/paper-asset-service.test.ts",
-        "src/server/services/paper-asset-route.test.ts",
         "tests/unit/phase-11-local-file-upload-storage-adapter.test.ts",
         "tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts",
         "tests/unit/admin-paper-ui.test.ts",
-        "tests/unit/p1-paper-asset-delete-audit-atomicity.test.ts",
-        "tests/unit/phase-22-content-admin-cookie-session-repair.test.ts"
+        "tests/unit/p1-paper-asset-upload-saga.test.ts"
       ]
     },
     {
-      "name": "f0096-paper-asset-retention-download-lint",
+      "name": "f0096-paper-asset-usage-contract-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.15.1",
         "exec",
         "eslint",
-        "src/server/services/local-paper-asset-storage.ts",
-        "src/server/repositories/paper-asset-repository.ts",
-        "src/server/services/paper-asset-service.ts",
+        "src/db/schema/paper.ts",
+        "src/server/models/paper.ts",
+        "src/server/validators/paper-asset.ts",
         "src/server/services/paper-composition-lifecycle-runtime.ts",
-        "src/app/api/v1/paper-assets/[publicId]/download/route.ts",
-        "src/features/admin/paper-management/AdminPaperDetailPage.tsx"
+        "src/server/services/local-paper-asset-storage.ts",
+        "src/features/admin/paper-management/AdminPaperManagementClient.tsx",
+        "src/features/admin/paper-management/AdminPaperDetailPage.tsx",
+        "src/components/admin/PaperManagement/AdminPaperManagement.tsx"
       ]
     },
     {
-      "name": "f0096-paper-asset-retention-download-typecheck",
+      "name": "f0096-paper-asset-usage-contract-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "f0096-paper-asset-retention-download-build",
+      "name": "f0096-paper-asset-usage-contract-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.15.1", "run", "build"]
@@ -117,18 +128,16 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
-    "permission": "guardian-f0096-private-download-retention-foundation-2026-07-21",
+    "database": "guardian-f0096-paper-asset-usage-contract-2026-07-21",
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "riskClassification": {
-    "category": "existing_content_admin_private_file_read_capability_and_database_retention_contraction",
-    "schemaOrMigrationChange": false,
+    "category": "schema_migration_source_and_attachment_usage_contract",
+    "schemaOrMigrationChange": true,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
-    "newProtectedReadEndpoint": true,
-    "localPrivateFileRead": true,
     "realExternalCall": false,
     "dependencyOrMechanismChange": false
   },
@@ -136,22 +145,73 @@
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "freshApproval": {
-    "approvalId": "guardian-f0096-private-download-retention-foundation-2026-07-21",
-    "requestFingerprint": "0443a5c9d78de709829fe78d365b90b931db58c43e5e32b5e5f799b2c97e76c6",
-    "baseSha": "f42a9fed040025ebb463881c1767fc13c99329c8",
+    "approvalId": "guardian-f0096-paper-asset-usage-contract-2026-07-21",
+    "requestFingerprint": "0aa2f1b1164de4becee5a0d18862374bf2f910ad55c69729a6ec137319ebcbc2",
+    "baseSha": "b4b21d5272e0820c7eee524d8f1591470c4e2c23",
     "candidateTree": null,
-    "risk": "permission",
+    "risk": "database",
     "conditionalCloseout": true
   },
   "conditionalCloseout": true,
+  "scopeAmendments": [
+    {
+      "amendmentId": "guardian-f0096-paper-asset-usage-contract-scope-amendment-01-2026-07-21",
+      "requestFingerprint": "56f8811f77ef485b40b4251f7180bada56f02c6a",
+      "baseSha": "b4b21d5272e0820c7eee524d8f1591470c4e2c23",
+      "addedCoreFiles": [
+        "src/components/admin/PaperManagement/AdminPaperManagement.tsx",
+        "src/server/services/local-paper-asset-storage.ts"
+      ],
+      "semanticBoundary": "read-label completeness and creatable input type narrowing only"
+    }
+  ],
+  "normalizedUsageContract": {
+    "persistedReadValues": [
+      "paper_source",
+      "answer_analysis",
+      "answer_sheet",
+      "other",
+      "material_paper",
+      "answer_paper",
+      "source_material"
+    ],
+    "creatableValuesInUiOrder": [
+      "paper_source",
+      "material_paper",
+      "answer_sheet",
+      "answer_paper",
+      "answer_analysis",
+      "source_material"
+    ],
+    "legacyReadOnlyValue": "other",
+    "labels": {
+      "paper_source": "试卷文件",
+      "material_paper": "材料卷",
+      "answer_sheet": "答题卷",
+      "answer_paper": "答案卷",
+      "answer_analysis": "解析文件",
+      "source_material": "来源教材或课件",
+      "other": "其他（历史）"
+    }
+  },
+  "validationEvidence": {
+    "tddRed": "4 test files; 34 tests; 6 expected contract failures; exit 1",
+    "focused": "6 test files; 52 tests; exit 0",
+    "lint": "8 affected product files including both amended direct-chain files; exit 0",
+    "typecheck": "tsc --noEmit; exit 0 after the exact scope amendment",
+    "build": "Next.js production build; 100 routes; exit 0; existing NFT trace warning only",
+    "formatAndDiff": "targeted Prettier check and git diff --check pass",
+    "schemaSource": "snapshot drift is limited to paper_attachment_usage enum values; migration contains exactly three additive ADD VALUE statements and no destructive or data SQL",
+    "adversarialReview": "pass: seven persisted/read values and six creatable values remain distinct; legacy other remains list/detail/download compatible and is rejected before upload file I/O; no cast/default fallback, storage behavior, permission, dependency, real database or extra-file drift"
+  },
   "resumeAnchor": {
     "findingId": "F-0096",
-    "task": "paper asset secure download and published retention foundation",
-    "condition": "F-0094 closed at f42a9fed; guardian task-bound permission approval is active; F-0096 remains open after this partial closeout"
+    "task": "paper asset six-purpose contract",
+    "condition": "b4b21d527 secure-read and draft-retention partition is closed; the usage contract candidate is validated and adversarially reviewed under the guardian parent approval plus scope amendment; perform only conditional closeout without reopening download or retention scope"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0096-private-download-retention-foundation-2026-07-21"
+    "approvalId": "guardian-f0096-paper-asset-usage-contract-2026-07-21"
   }
 }

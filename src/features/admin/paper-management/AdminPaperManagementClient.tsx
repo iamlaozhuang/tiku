@@ -42,6 +42,7 @@ import type {
   PaperPublishResultDto,
 } from "@/server/contracts/paper-draft-contract";
 import type {
+  CreatablePaperAttachmentUsage,
   PaperStatus,
   PaperGenerationMethod,
   PaperType,
@@ -86,8 +87,21 @@ type PaperFormValues = {
 type PaperAssetFormValues = {
   paperPublicId: string;
   profession: Profession;
+  paperAttachmentUsage: CreatablePaperAttachmentUsage | "";
   file: File | null;
 };
+
+const creatablePaperAttachmentUsageOptions: readonly [
+  CreatablePaperAttachmentUsage,
+  string,
+][] = [
+  ["paper_source", "试卷文件"],
+  ["material_paper", "材料卷"],
+  ["answer_sheet", "答题卷"],
+  ["answer_paper", "答案卷"],
+  ["answer_analysis", "解析文件"],
+  ["source_material", "来源教材或课件"],
+];
 type ActivePaperForm =
   | {
       kind: "paper";
@@ -550,7 +564,7 @@ function createPaperAssetFormData(
 
   formData.set("commandPublicId", commandPublicId);
   formData.set("paperPublicId", values.paperPublicId);
-  formData.set("paperAttachmentUsage", "paper_source");
+  formData.set("paperAttachmentUsage", values.paperAttachmentUsage);
   formData.set("profession", values.profession);
 
   if (values.file !== null) {
@@ -837,6 +851,11 @@ export function AdminPaperManagement({
       return;
     }
 
+    if (values.paperAttachmentUsage === "") {
+      setActionError("请选择附件用途后再保存。");
+      return;
+    }
+
     if (values.file === null) {
       setActionError("请选择本地文件后再保存。");
       return;
@@ -847,6 +866,7 @@ export function AdminPaperManagement({
     const commandKey = [
       "paper-asset",
       values.paperPublicId,
+      values.paperAttachmentUsage,
       values.file.name,
       values.file.size,
       values.file.lastModified,
@@ -1177,6 +1197,7 @@ export function AdminPaperManagement({
             values: {
               paperPublicId: publicId,
               profession: selectedPaper?.profession ?? "marketing",
+              paperAttachmentUsage: "",
               file: null,
             },
           });
@@ -1573,6 +1594,32 @@ function PaperAssetWriteForm({
         本地会把文件写入忽略目录；不会创建对象存储、公网识别或公开链接。
       </p>
       <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">附件用途</span>
+        <select
+          aria-label="附件用途"
+          className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+          value={formValues.paperAttachmentUsage}
+          onChange={(event) => {
+            const paperAttachmentUsage =
+              creatablePaperAttachmentUsageOptions.find(
+                ([value]) => value === event.target.value,
+              )?.[0] ?? "";
+
+            setFormValues({
+              ...formValues,
+              paperAttachmentUsage,
+            });
+          }}
+        >
+          <option value="">请选择附件用途</option>
+          {creatablePaperAttachmentUsageOptions.map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">本地文件</span>
         <Input
           aria-label="本地文件"
@@ -1587,7 +1634,14 @@ function PaperAssetWriteForm({
         />
       </label>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting} type="submit">
+        <Button
+          disabled={
+            isSubmitting ||
+            formValues.paperAttachmentUsage === "" ||
+            formValues.file === null
+          }
+          type="submit"
+        >
           保存附件
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
