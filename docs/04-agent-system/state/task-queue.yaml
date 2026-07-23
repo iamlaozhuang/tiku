@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
+  currentTaskId: p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -545,75 +545,103 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-content-ai-review-editor-2026-07-22: closed
     p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22: closed
     p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22: closed
-    p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22: in_progress
+    p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22: closed
+    p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22: in_progress
 activeTasks:
-  - id: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
-    title: AI paper material question group integrity
-    phase: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
+  - id: p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22
+    title: AI generation quota fail-closed gate
+    phase: p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22
     status: in_progress
     priority: p1
-    taskKind: bounded_database_application_logic_and_product_contract_propagation
-    productClosureContribution: closes_F0169
-    branch: fix/ai-paper-material-question-group-integrity
-    objective: preserve material-backed questions as one atomic server-owned question_group from source selection through organization drafts and personal or employee learning sessions
+    taskKind: permission_quota_semantics_contraction
+    productClosureContribution: closes_F0148_by_making_unapproved_quota_fact_fail_closed
+    branch: fix/ai-generation-quota-fail-closed-gate
+    objective: block every new authorized content, organization and personal AI generation attempt before persistence or Provider side effects while Cost Calibration and a durable quota ledger remain unapproved
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-07
     findingIds:
-      - F-0169
+      - F-0148
     executionStage: validated_reviewed_conditional_closeout_ready
-    findingStatus: validated_pending_terminal_closeout
-    findingDisposition: F0169_confirmed_same_root_cause_atomic_product_bundle
+    findingStatus: validated_in_progress
+    findingDisposition: F0148_single_fail_closed_product_bundle
     riskBoundary:
-      category: bounded_database_application_logic_and_product_contract_propagation
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      approvedBaseSha: 92491b38358be99d3551b22ae86968547d4892f2
+      category: permission_quota_semantics_contraction
+      approvalId: guardian-f0148-ai-generation-quota-fail-closed-gate-2026-07-22
+      testHarnessAmendmentId: guardian-f0148-test-harness-amendment-01-2026-07-22
+      testHarnessBoundary: explicit_per_test_policy_mock_only_restored_after_each_and_production_unreachable
+      studentUiAmendmentId: guardian-f0148-student-ui-production-false-amendment-02-2026-07-22
+      studentUiBoundary: canonical_request_draft_false_only_server_admission_remains_authoritative
+      approvedBaseSha: f76553aa132c4087aac95bf7512ccf609dfe4874
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       providerOrRealExternalCall: false
+      quotaLedgerOrPricingChange: false
       dependencyChange: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: formal_or_enterprise_question_source_to_atomic_group_candidate_to_plan_select_to_persisted_result_to_organization_draft_and_learning_session
-      coreFiles: 29
+      chain: authorized_generation_route_to_request_policy_to_persistence_claim_provider_result_log_audit_and_materialization
+      coreFiles: 10
       contingencyFiles: 4
       directCallerCalleeMocksFixturesReviewed: true
-      sameTaskCallChainExpansion: organization_training_mapper_and_direct_test_only_under_capsule_v1_1_two_file_allowance
-      confirmedRootCause: independent_question_only_contract_discards_platform_material_and_enterprise_group_identity_then_allows_partial_or_cross_section_selection_and_flat_downstream_consumption
-      bundleDisposition: one_atomic_F0169_bundle
+      confirmedRootCause: platform_organization_and_personal_generation_hard_code_quota_available_before_any_authoritative_quota_fact_exists
+      bundleDisposition: one_F0148_fail_closed_bundle
     expectedAcceptance:
-      - complete_material_group_selected_wholly_in_one_compatible_section_or_not_at_all
-      - stable_public_group_identity_immutable_material_snapshot_member_order_and_child_scores_survive_all_consumers
-      - malformed_legacy_cross_section_split_stale_or_inconsistent_groups_fail_closed
-      - standalone_questions_and_existing_authorization_boundaries_do_not_regress
+      - authorization_edition_scope_and_request_validation_precede_quota_gate
+      - content_organization_and_personal_generation_return_quota_insufficient_without_new_side_effects
+      - retry_reclaim_and_nonterminal_tasks_cannot_bypass_the_gate
+      - history_detail_review_and_cancel_read_or_convergence_paths_remain_available
+      - no_production_quota_available_true_default_remains
+      - Cost_Calibration_and_durable_ledger_remain_unimplemented_and_fresh_approval_gated
     closeoutProjection:
-      current: validated_reviewed_candidate_pending_kernel_commit_push_sync_cleanup
+      current: validated_reviewed_conditional_closeout_ready
       triggers: TDD_focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0169_closed_then_continue_RC07_residual_JIT
+      successProjection: F0148_closed_then_RC07_residual_JIT
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
-    validationEvidence:
-      focused: passed_270_of_270_across_15_files
-      lint: passed_exact_affected_files_zero_warnings
-      typecheck: passed_tsc_no_emit
-      build: passed_next_production_build_with_pre_existing_nft_trace_warning
-      mainThreadAdversarialReview: passed_atomic_membership_authoritative_count_scope_snapshot_redaction_and_fail_closed_review
-      scope: 30_changed_files_all_within_33_allowed_files
     executionMetrics:
-      mandatoryFreshApprovals: 0
-      preventableScopeMissApprovals: 0
+      mandatoryFreshApprovals: 3
+      preventableScopeMissApprovals: 2_test_contract_and_student_UI_production_fact
       candidateReapprovals: 0
-      approvalWaitTurns: 0
-      productValueTime: terminal_clock_not_reconstructable_product_analysis_TDD_implementation_and_adversarial_corrections_completed
-      mechanismOverhead: terminal_clock_not_reconstructable_includes_contract_state_validation_and_closeout
+      approvalWaitTurns: 5
+      productValueTime: running
+      mechanismOverhead: running_includes_approval_wait_and_contract_materialization
       guardSmokeChanges: 0
+    freshValidation:
+      focused: exit_0_6_files_202_tests_passed
+      lint: exit_0_10_files
+      typecheck: exit_0
+      build: exit_0_with_pre_existing_NFT_trace_warning
+      format: exit_0_13_validation_paths
+      stateParse: exit_0_JSON_and_two_YAML_documents
+      diffCheck: exit_0
+      productionBypassScan: no_production_quota_true_or_bypass_surface_tests_and_fixtures_excluded
+      mainThreadAdversarialReview: pass_authorization_precedes_gate_all_non_create_policy_outcomes_fail_closed_zero_side_effect_tests_unmocked_student_payload_false_server_authoritative_harness_production_unreachable
+      evidenceBoundary: unmocked_quota_gate_and_zero_side_effect_tests_close_F0148_mocked_tests_only_preserve_after_admission_pipeline
     previousTaskCloseout:
-      taskId: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
+      taskId: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
       findingIds:
-        - F-0158
-      commit: 92491b38358be99d3551b22ae86968547d4892f2
+        - F-0169
+      commit: f76553aa132c4087aac95bf7512ccf609dfe4874
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      findingStatus: open_partitioned
-      residual: browser_runtime_acceptance_runtime_hold_excluded_from_current_program
+      findingStatus: closed
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+  - id: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
+    title: AI paper material question group integrity
+    phase: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
+    status: closed
+    priority: p1
+    taskKind: bounded_database_application_logic_and_product_contract_propagation
+    productClosureContribution: closes_F0169
+    branch: fix/ai-paper-material-question-group-integrity
+    candidateRootCauseCluster: P1-RC-07
+    findingIds:
+      - F-0169
+    findingStatus: closed
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    closeoutEvidence:
+      commit: f76553aa132c4087aac95bf7512ccf609dfe4874
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass

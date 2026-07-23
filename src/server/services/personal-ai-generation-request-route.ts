@@ -39,7 +39,10 @@ import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
-import { buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute } from "./personal-ai-generation-local-browser-experience-service";
+import {
+  buildPersonalAiGenerationLocalBrowserExperienceReadModel,
+  buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute,
+} from "./personal-ai-generation-local-browser-experience-service";
 import type {
   PersonalAiGenerationPaperAssemblyResolver,
   PersonalAiGenerationRuntimeBridgeControl,
@@ -432,7 +435,7 @@ function createServerOwnedLocalBrowserRequestInput(
     effectiveEdition: "advanced",
     isAuthorizationActive: true,
     isScopeAllowed: true,
-    isQuotaAvailable: true,
+    isQuotaAvailable: false,
     isRuntimeConfigReady: true,
     existingTaskPublicId: null,
     existingTaskStatus: null,
@@ -1290,6 +1293,20 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               );
             const serverOwnedRequestInput =
               createServerOwnedLocalBrowserRequestInput(authorizedRequestInput);
+            const quotaGateResponse =
+              buildPersonalAiGenerationLocalBrowserExperienceReadModel(
+                serverOwnedRequestInput,
+              );
+
+            if (
+              quotaGateResponse.code !== 0 ||
+              quotaGateResponse.data === null ||
+              quotaGateResponse.data.requestFlow.taskRequest.decision !==
+                "create_pending_task"
+            ) {
+              return createJsonResponse(quotaGateResponse);
+            }
+
             const requestedAt = now();
             const localBrowserRequestInput =
               await createRequestInputWithPersistentRequestMetadata(

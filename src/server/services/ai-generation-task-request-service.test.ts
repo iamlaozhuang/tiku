@@ -143,6 +143,20 @@ describe("AI generation task request policy service", () => {
     expect(
       buildAiGenerationTaskRequestPolicyReadModel({
         ...createBaseInput(),
+        isQuotaAvailable: false,
+      }),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        decision: "reject_request",
+        initialStatus: null,
+        blockedFailureCategory: "quota_insufficient",
+      },
+    });
+
+    expect(
+      buildAiGenerationTaskRequestPolicyReadModel({
+        ...createBaseInput(),
         isRuntimeConfigReady: false,
       }),
     ).toMatchObject({

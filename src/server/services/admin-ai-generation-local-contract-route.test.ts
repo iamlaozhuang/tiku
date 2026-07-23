@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import {
   aiQuestionDraftSchemaVersion,
   promptTemplateDefinitions,
@@ -10,6 +10,8 @@ import {
   type AdminAiGenerationRuntimeBridgeControl,
   type AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract-route";
+import * as adminAiGenerationRouteModule from "./admin-ai-generation-local-contract-route";
+import type { AdminAiGenerationLocalContractRouteOptions } from "./admin-ai-generation-local-contract-route";
 import type { AdminAiGenerationRuntimeBridgeExecutionSummaryDto } from "../contracts/admin-ai-generation-local-contract";
 import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type {
@@ -47,6 +49,43 @@ import type {
 } from "../repositories/question-repository";
 import type { SessionService } from "./session-service";
 import type { AiGenerationTaskLifecycleRepository } from "../repositories/ai-generation-task-lifecycle-repository";
+
+const syntheticQuotaAvailabilityHarness = vi.hoisted(() => ({
+  isEnabled: false,
+}));
+
+vi.mock("./ai-generation-task-request-service", async (importOriginal) => {
+  const original =
+    await importOriginal<
+      typeof import("./ai-generation-task-request-service")
+    >();
+
+  return {
+    ...original,
+    buildAiGenerationTaskRequestPolicyReadModel(input: unknown) {
+      if (
+        syntheticQuotaAvailabilityHarness.isEnabled &&
+        typeof input === "object" &&
+        input !== null
+      ) {
+        return original.buildAiGenerationTaskRequestPolicyReadModel({
+          ...input,
+          isQuotaAvailable: true,
+        });
+      }
+
+      return original.buildAiGenerationTaskRequestPolicyReadModel(input);
+    },
+  };
+});
+
+function enableSyntheticQuotaAvailableAfterAdmissionHarness(): void {
+  syntheticQuotaAvailabilityHarness.isEnabled = true;
+}
+
+afterEach(() => {
+  syntheticQuotaAvailabilityHarness.isEnabled = false;
+});
 
 const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto =
   {
@@ -1442,6 +1481,23 @@ function createRejectedPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
 }
 
 describe("admin AI generation local contract route handlers", () => {
+  it("keeps the synthetic quota harness absent from production route exports and options", () => {
+    expect(
+      Object.keys(adminAiGenerationRouteModule).filter((exportName) =>
+        /quota|synthetic|test.?only/iu.test(exportName),
+      ),
+    ).toEqual([]);
+    expectTypeOf<
+      Extract<
+        keyof AdminAiGenerationLocalContractRouteOptions,
+        | "quotaResolver"
+        | "quotaOverride"
+        | "syntheticQuotaAvailability"
+        | "testToken"
+      >
+    >().toEqualTypeOf<never>();
+  });
+
   it("rejects unauthorized content cancellation before lifecycle lookup", async () => {
     const cancelCalls: unknown[] = [];
     const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
@@ -1539,6 +1595,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("accepts content admin AI question requests as platform-owned local contracts", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const response = await postLocalContractRequest({
@@ -1641,6 +1698,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists only a safe citation projection from the exact grounding context", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const generatedResultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();
     const response = await postLocalContractRequest({
@@ -1698,6 +1756,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists a server-owned unresolved generated-label candidate for balanced content questions", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const generatedResultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();
     const requestPublicId =
@@ -1745,6 +1804,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("scopes admin generation task identity to each request so stale actor-level results are not reused", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -1797,6 +1857,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("claims one stable admin task before Provider execution for the same client intent", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder({
@@ -1854,6 +1915,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists a running attempt before admin Provider execution", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const events: string[] = [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
@@ -1921,6 +1983,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists a redacted admin failure for the current running attempt", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const failCalls: unknown[] = [];
     const claimedAt = new Date("2026-07-22T12:05:00.123Z");
     const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
@@ -1999,6 +2062,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("fails the claimed attempt when atomic result persistence rejects", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const failCalls: unknown[] = [];
     const claimedAt = new Date("2026-07-22T12:05:00.123Z");
     const baseResultRepository =
@@ -2039,6 +2103,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("fails the claimed attempt when Provider execution throws", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const failCalls: unknown[] = [];
     const claimedAt = new Date("2026-07-22T12:05:00.123Z");
     const baseLifecycleRepository = createClaimingLifecycleRepository();
@@ -2079,6 +2144,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("fails the claimed attempt when paper assembly throws", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const failCalls: unknown[] = [];
     const claimedAt = new Date("2026-07-22T12:05:00.123Z");
     const baseLifecycleRepository = createClaimingLifecycleRepository();
@@ -2112,6 +2178,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists content admin local contracts through the injected task persistence repository", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -2179,6 +2246,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("blocks content admin provider-disabled requests before task or result persistence", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const generatedResultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();
@@ -2220,6 +2288,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("claims a reused pending organization task before Provider execution", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder({
@@ -2275,6 +2344,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists organization advanced admin grounded generated result summaries", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -2349,6 +2419,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists organization AI question results with enterprise training question draft snapshots", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const generatedResultPersistenceRecorder =
@@ -2461,6 +2532,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("hands off assembled AI paper containers in organization advanced admin local contracts before persistence", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const paperAssemblyResolverCalls: string[] = [];
@@ -2603,6 +2675,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("uses repository-backed paper assembly by default for organization advanced admin paper requests", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const generatedResultPersistenceRecorder =
@@ -2778,6 +2851,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("preserves one immutable material question_group in the organization paper draft and rejects current source identity drift", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const createGroupedRouteResult = () => {
       const routeResult = createAssembledPaperRouteResult();
       const section = routeResult.assembly?.container.sections[0];
@@ -2890,6 +2964,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("does not invoke AI paper assembly for admin AI question local contracts", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const paperAssemblyResolverCalls: string[] = [];
@@ -2921,6 +2996,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("blocks admin AI paper persistence when local paper assembly rejects the provider plan", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const paperAssemblyResolverCalls: string[] = [];
@@ -2965,6 +3041,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("exposes organization-owned draft and training source boundaries without platform publish access", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const response = await postLocalContractRequest({
@@ -3012,6 +3089,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("accepts organization advanced admin AI paper requests as organization-owned local contracts", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const response = await postLocalContractRequest({
@@ -3079,6 +3157,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("passes admin runtime bridge context into provider-disabled diagnostics", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const runtimeBridgeInputs: AdminAiGenerationRuntimeBridgeInput[] = [];
     const response = await postLocalContractRequest({
       workspace: "organization",
@@ -3141,6 +3220,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("allows injected provider-disabled diagnostics without enabling provider execution", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const response = await postLocalContractRequest({
       workspace: "content",
       adminRoles: ["content_admin"],
@@ -3177,6 +3257,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("returns a redacted missing Provider credential category without persistence", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const resultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();
@@ -3266,6 +3347,7 @@ describe("admin AI generation local contract route handlers", () => {
   ])(
     "runs provider-enabled fake Provider route workflow $routeWorkflow",
     async (routeCase) => {
+      enableSyntheticQuotaAvailableAfterAdmissionHarness();
       const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
         [];
       const resultPersistenceRecorder =
@@ -3385,6 +3467,7 @@ describe("admin AI generation local contract route handlers", () => {
   );
 
   it("blocks admin result persistence when Provider grounding evidence is insufficient", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -3431,6 +3514,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("blocks admin result persistence when Provider output cannot be parsed into the requested draft kind", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -3479,6 +3563,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("uses service-computed org_auth public id for organization AI task persistence", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -3553,6 +3638,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("keeps one raw request identity across selected org_auth scopes for snapshot conflict detection", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
@@ -3715,7 +3801,65 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_H");
   });
 
+  it.each([
+    {
+      workspace: "content" as const,
+      adminRoles: ["content_admin"] as AdminRole[],
+      organizationPublicId: null,
+    },
+    {
+      workspace: "organization" as const,
+      adminRoles: ["org_advanced_admin"] as AdminRole[],
+      organizationPublicId: "organization_public_123",
+    },
+  ])(
+    "fails closed for $workspace generation when quota facts are unavailable before any task or Provider side effect",
+    async ({ workspace, adminRoles, organizationPublicId }) => {
+      expect(syntheticQuotaAvailabilityHarness.isEnabled).toBe(false);
+      const taskPersistenceRecorder = createTaskPersistenceRecorder();
+      const resultPersistenceRecorder =
+        createGeneratedResultPersistenceRecorder();
+      const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+        [];
+      const response = await postLocalContractRequest({
+        workspace,
+        adminRoles,
+        organizationPublicId,
+        taskPersistenceRepository: taskPersistenceRecorder.repository,
+        resultPersistenceRepository: resultPersistenceRecorder.repository,
+        lifecycleRepository: {
+          async claimTask() {
+            throw new Error("quota gate must precede lifecycle claim");
+          },
+          async failTask() {
+            throw new Error("quota gate must precede lifecycle failure");
+          },
+          async cancelTask() {
+            throw new Error("quota gate must not cancel an uncreated task");
+          },
+        },
+        runtimeBridgeControl:
+          createFakeProviderRuntimeBridgeControl(providerInputs),
+        body: {
+          generationKind: "question",
+          requestedRuntimeMode: "route_integrated_provider",
+        },
+      });
+
+      await expect(response.json()).resolves.toEqual({
+        code: 409019,
+        message:
+          "AI generation quota facts are unavailable pending Cost Calibration.",
+        data: null,
+      });
+      expect(taskPersistenceRecorder.calls).toEqual([]);
+      expect(resultPersistenceRecorder.calls).toEqual([]);
+      expect(providerInputs).toEqual([]);
+    },
+  );
+
   it("passes structured knowledge scope through admin AI generation local contracts", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
@@ -3762,6 +3906,7 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("passes organization AI paper distribution and structure parameters through local contracts", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();

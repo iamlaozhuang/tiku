@@ -172,7 +172,7 @@ export function createAdminAiGenerationTaskInsertValue(
     citation_count: 0,
     is_authorization_active: true,
     is_scope_allowed: true,
-    is_quota_available: true,
+    is_quota_available: false,
     is_runtime_config_ready: true,
     ai_call_log_public_id: null,
     generation_snapshot_version: input.generationSnapshotVersion,

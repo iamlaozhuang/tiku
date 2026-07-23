@@ -2508,7 +2508,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       effectiveEdition: "advanced",
       isAuthorizationActive: true,
       isScopeAllowed: true,
-      isQuotaAvailable: true,
+      isQuotaAvailable: false,
       isRuntimeConfigReady: true,
       idempotencyKeyHash: expect.stringMatching(
         /^sha256:student-local-request-/,
@@ -3021,7 +3021,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       effectiveEdition: "advanced",
       isAuthorizationActive: true,
       isScopeAllowed: true,
-      isQuotaAvailable: true,
+      isQuotaAvailable: false,
       isRuntimeConfigReady: true,
     });
     expect(submittedBodies[0]).not.toHaveProperty("aiFuncType");

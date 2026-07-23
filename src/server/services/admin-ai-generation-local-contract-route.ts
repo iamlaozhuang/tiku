@@ -256,6 +256,7 @@ const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
 const ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE = 409015;
 const ADMIN_AI_GENERATION_IDEMPOTENCY_CONFLICT_CODE = 409016;
 const ADMIN_AI_GENERATION_HISTORY_UNAVAILABLE_CODE = 409018;
+const ADMIN_AI_GENERATION_QUOTA_UNAVAILABLE_CODE = 409019;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
 const ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
@@ -276,6 +277,10 @@ const invalidAdminAiGenerationRequestResponse = createErrorResponse(
 const adminAiGenerationHistoryUnavailableResponse = createErrorResponse(
   ADMIN_AI_GENERATION_HISTORY_UNAVAILABLE_CODE,
   "AI generation history is unavailable.",
+);
+const adminAiGenerationQuotaUnavailableResponse = createErrorResponse(
+  ADMIN_AI_GENERATION_QUOTA_UNAVAILABLE_CODE,
+  "AI generation quota facts are unavailable pending Cost Calibration.",
 );
 
 type AdminAiGenerationLocalContractRouteResponseData =
@@ -651,7 +656,7 @@ function createAdminAiGenerationPolicyInput(input: {
       effectiveEdition: "advanced",
       isAuthorizationActive: true,
       isScopeAllowed: true,
-      isQuotaAvailable: true,
+      isQuotaAvailable: false,
       isRuntimeConfigReady: true,
       idempotencyKeyHash: `sha256:admin_${idempotencyScopeDigest}`,
       existingTaskPublicId: null,
@@ -691,7 +696,7 @@ function createAdminAiGenerationPolicyInput(input: {
     effectiveEdition: "advanced",
     isAuthorizationActive: true,
     isScopeAllowed: true,
-    isQuotaAvailable: true,
+    isQuotaAvailable: false,
     isRuntimeConfigReady: true,
     idempotencyKeyHash: `sha256:admin_${idempotencyScopeDigest}`,
     existingTaskPublicId: null,
@@ -1077,6 +1082,14 @@ async function buildAdminAiGenerationLocalContract(input: {
   }
 
   const taskRequest = taskRequestResponse.data;
+
+  if (
+    taskRequest.decision === "reject_request" &&
+    taskRequest.blockedFailureCategory === "quota_insufficient"
+  ) {
+    return adminAiGenerationQuotaUnavailableResponse;
+  }
+
   const resultPublicId = createAdminAiGenerationResultPublicId(
     taskRequest.taskPublicId,
   );

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 
 import {
@@ -8,6 +8,7 @@ import {
   type PersonalAiGenerationRequestRouteDependencies,
   type PersonalAiGenerationRequestUserResolver,
 } from "./personal-ai-generation-request-route";
+import * as personalAiGenerationRouteModule from "./personal-ai-generation-request-route";
 import { SESSION_COOKIE_NAME } from "../auth/session-cookie";
 import type {
   CreatePersonalAiGenerationRequestInput,
@@ -38,6 +39,43 @@ import type {
   EffectivePersonalAuthRow,
 } from "../repositories/effective-authorization-repository";
 import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+
+const syntheticQuotaAvailabilityHarness = vi.hoisted(() => ({
+  isEnabled: false,
+}));
+
+vi.mock("./ai-generation-task-request-service", async (importOriginal) => {
+  const original =
+    await importOriginal<
+      typeof import("./ai-generation-task-request-service")
+    >();
+
+  return {
+    ...original,
+    buildAiGenerationTaskRequestPolicyReadModel(input: unknown) {
+      if (
+        syntheticQuotaAvailabilityHarness.isEnabled &&
+        typeof input === "object" &&
+        input !== null
+      ) {
+        return original.buildAiGenerationTaskRequestPolicyReadModel({
+          ...input,
+          isQuotaAvailable: true,
+        });
+      }
+
+      return original.buildAiGenerationTaskRequestPolicyReadModel(input);
+    },
+  };
+});
+
+function enableSyntheticQuotaAvailableAfterAdmissionHarness(): void {
+  syntheticQuotaAvailabilityHarness.isEnabled = true;
+}
+
+afterEach(() => {
+  syntheticQuotaAvailabilityHarness.isEnabled = false;
+});
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
@@ -933,6 +971,23 @@ function createTrainingQuestion(publicId: string) {
 }
 
 describe("personal AI generation request route handlers", () => {
+  it("keeps the synthetic quota harness absent from production route exports and dependencies", () => {
+    expect(
+      Object.keys(personalAiGenerationRouteModule).filter((exportName) =>
+        /quota|synthetic|test.?only/iu.test(exportName),
+      ),
+    ).toEqual([]);
+    expectTypeOf<
+      Extract<
+        keyof PersonalAiGenerationRequestRouteDependencies,
+        | "quotaResolver"
+        | "quotaOverride"
+        | "syntheticQuotaAvailability"
+        | "testToken"
+      >
+    >().toEqualTypeOf<never>();
+  });
+
   it("rejects cross-owner personal cancellation before lifecycle lookup", async () => {
     const cancelCalls: unknown[] = [];
     const handler = createPersonalAiGenerationTaskCancelRouteHandler(
@@ -1237,6 +1292,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("lets an employee select their personal advanced authorization instead of an organization standard authorization", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => employeeUserContext,
@@ -1317,6 +1373,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("keeps an employee's personal and organization advanced authorization selections independent", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => employeeUserContext,
@@ -1373,6 +1430,93 @@ describe("personal AI generation request route handlers", () => {
       requestRepository.createCalls.map((call) => call.authorizationPublicId),
     ).toEqual(["personal_auth_public_123", "org_auth_public_123"]);
   });
+
+  it.each([
+    {
+      name: "personal",
+      currentUserContext: userContext,
+      authorizationPublicId: "personal_auth_public_123",
+    },
+    {
+      name: "organization employee",
+      currentUserContext: employeeUserContext,
+      authorizationPublicId: "org_auth_public_123",
+    },
+  ])(
+    "fails closed for $name generation when quota facts are unavailable before persistence, claim, Provider, or result writes",
+    async ({ currentUserContext, authorizationPublicId }) => {
+      expect(syntheticQuotaAvailabilityHarness.isEnabled).toBe(false);
+      const requestRepository = createRequestRepository();
+      const resultRepository = createResultRepository();
+      const providerExecutorCalls: unknown[] = [];
+      const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+        async () => currentUserContext,
+        {
+          requestRepository,
+          resultRepository,
+          lifecycleRepository: {
+            async claimTask() {
+              throw new Error("quota gate must precede lifecycle claim");
+            },
+            async failTask() {
+              throw new Error("quota gate must precede lifecycle failure");
+            },
+            async cancelTask() {
+              throw new Error("quota gate must not cancel an uncreated task");
+            },
+          },
+          runtimeBridgeControl: {
+            bridgeMode: "controlled_runner",
+            explicitLocalSwitchPresent: true,
+            providerExecution: {
+              executionMode: "route_integrated_provider",
+              realProviderExecutionApproved: true,
+              maxRequests: 1,
+              maxRetries: 0,
+              maxOutputTokens: 220,
+              timeoutMs: 30000,
+              resolveGroundingContext: () => sufficientGroundingContext,
+              readProviderCredential: async () => "synthetic-test-credential",
+              executeProviderRequest: async (executionInput) => {
+                providerExecutorCalls.push(executionInput);
+                throw new Error("quota gate must precede Provider execution");
+              },
+            },
+          },
+        },
+      );
+
+      const response = await collection.POST(
+        createPostRequest({
+          ...createBaseFlowBody(),
+          authorizationPublicId,
+        }),
+      );
+
+      await expect(response.json()).resolves.toMatchObject({
+        code: 0,
+        message: "ok",
+        data: {
+          flowStatus: "blocked",
+          requestState: {
+            action: {
+              isEnabled: false,
+              disabledReason: "quota_insufficient",
+            },
+          },
+          requestFlow: {
+            taskRequest: {
+              decision: "reject_request",
+              blockedFailureCategory: "quota_insufficient",
+            },
+          },
+        },
+      });
+      expect(requestRepository.createCalls).toEqual([]);
+      expect(resultRepository.createCalls).toEqual([]);
+      expect(providerExecutorCalls).toEqual([]);
+    },
+  );
 
   it.each([
     {
@@ -1592,6 +1736,7 @@ describe("personal AI generation request route handlers", () => {
   );
 
   it("persists employee local browser POST metadata under the organization owner", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestedAt = new Date("2026-06-12T18:30:00.000Z");
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
@@ -1782,6 +1927,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("does not reuse the same client idempotency key across authorization scopes", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => employeeUserContext,
@@ -1865,6 +2011,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("isolates a numeric-string scope idempotency key by the selected personal authorization for the same owner", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository();
     const personalAuthorizationPublicIds = [
       "personal_auth_public_123",
@@ -1923,6 +2070,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("allows advanced employee local browser POST when only production enablement is blocked", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => employeeUserContext,
@@ -2428,6 +2576,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("returns the local browser experience contract when requested", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
     );
@@ -2579,6 +2728,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("exposes controlled runner state only from server-side route dependencies", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
       {
@@ -2617,6 +2767,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("executes the route-integrated provider only from server-side route dependencies", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerExecutorCalls: unknown[] = [];
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
@@ -2737,6 +2888,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("closes provider success into current visible content and a redacted draft result", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => employeeUserContext,
@@ -2848,6 +3000,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("closes provider paper success into a parsed paper draft result", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
       ...sufficientGroundingContext,
@@ -2981,6 +3134,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("hands off assembled AI paper containers for organization advanced employees before result materialization", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const paperAssemblyResolverCalls: string[] = [];
     const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
@@ -3187,6 +3341,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("uses repository-backed AI paper assembly for organization advanced employee paper requests", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const questionRepositoryCalls: unknown[] = [];
     const trainingRepositoryCalls: unknown[] = [];
@@ -3217,7 +3372,13 @@ describe("personal AI generation request route handlers", () => {
         return [
           createTrainingVersion({
             questions: [
-              createTrainingQuestion("enterprise_question_public_employee_a"),
+              {
+                ...createTrainingQuestion(
+                  "enterprise_question_public_employee_a",
+                ),
+                materialTitle: null,
+                materialContent: null,
+              },
             ],
           }),
         ];
@@ -3326,6 +3487,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("uses only platform formal questions for personal advanced student paper assembly", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const trainingRepositoryCalls: unknown[] = [];
     const questionRepository: AiPaperQuestionSourceRepository = {
@@ -3446,6 +3608,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("does not invoke AI paper assembly for personal AI question requests", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const paperAssemblyResolverCalls: string[] = [];
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
@@ -3521,6 +3684,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("blocks personal paper result materialization when local paper assembly rejects the provider plan", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const paperAssemblyResolverCalls: string[] = [];
     const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
@@ -3610,6 +3774,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("marks malformed personal Provider output failed without materializing a draft result", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => employeeUserContext,
@@ -3694,6 +3859,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("blocks personal Provider execution before request when grounding evidence is insufficient", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const resultRepository = createResultRepository();
     let providerExecuted = false;
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
@@ -3773,6 +3939,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("materializes only redacted result references from server-side route dependencies", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const persistedInputs: unknown[] = [];
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
@@ -3885,6 +4052,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("persists local browser POST metadata with session-normalized ownership public ids", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const staleBodyPublicId = "body_stale_owner_public_999";
     const requestedAt = new Date("2026-06-12T18:00:00.000Z");
     const requestRepository = createRequestRepository();
@@ -3948,7 +4116,7 @@ describe("personal AI generation request route handlers", () => {
         aiCallLogPublicId: null,
         isAuthorizationActive: true,
         isScopeAllowed: true,
-        isQuotaAvailable: true,
+        isQuotaAvailable: false,
         isRuntimeConfigReady: true,
         generationParameters: sufficientGroundingContext.generationParameters,
       },
@@ -3960,6 +4128,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("uses server-owned pending metadata instead of client-supplied result and evidence references", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const staleClientResultPublicId = "client_result_public_stale_route";
     const staleClientAiCallLogPublicId =
       "client_ai_call_log_public_stale_route";
@@ -4039,7 +4208,7 @@ describe("personal AI generation request route handlers", () => {
       aiCallLogPublicId: null,
       isAuthorizationActive: true,
       isScopeAllowed: true,
-      isQuotaAvailable: true,
+      isQuotaAvailable: false,
       isRuntimeConfigReady: true,
     });
     expect(serializedPayload).not.toContain(staleClientResultPublicId);
@@ -4048,6 +4217,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("persists a running attempt before personal Provider execution", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const events: string[] = [];
     const requestRepository = createRequestRepository();
     const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
@@ -4125,6 +4295,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("persists a redacted personal failure for the current running attempt", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const failCalls: unknown[] = [];
     const claimedAt = new Date("2026-07-22T12:05:00.123Z");
     const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
@@ -4211,6 +4382,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("fails the claimed personal attempt when Provider execution throws", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const failCalls: unknown[] = [];
     const claimedAt = new Date("2026-07-22T12:05:00.123Z");
     const lifecycleRepository: AiGenerationTaskLifecycleRepository = {
@@ -4290,6 +4462,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("uses reused persistent task metadata for idempotent local browser POST responses", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerExecutorCalls: unknown[] = [];
     const requestRepository = createRequestRepository([], {
       createResult: {
@@ -4409,6 +4582,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("returns a redacted error envelope when local browser POST persistence fails", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository([], {
       createError: new Error("database stack with internal connection details"),
     });
@@ -4436,6 +4610,7 @@ describe("personal AI generation request route handlers", () => {
   });
 
   it("returns a conflict without retrying when the idempotency snapshot differs", async () => {
+    enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const requestRepository = createRequestRepository([], {
       createError: new PersonalAiGenerationSnapshotConflictError(),
     });
