@@ -518,16 +518,14 @@ function createGeneratedKnowledgeConfirmationReviewedDraft(
     materialPublicId: null,
     questionOptions: [
       {
-        publicId: "question_option_public_a",
-        optionLabel: "A",
-        optionText: "server-owned option A",
+        label: "A",
+        contentRichText: "server-owned option A",
         isCorrect: true,
         sortOrder: 1,
       },
       {
-        publicId: "question_option_public_b",
-        optionLabel: "B",
-        optionText: "server-owned option B",
+        label: "B",
+        contentRichText: "server-owned option B",
         isCorrect: false,
         sortOrder: 2,
       },
@@ -546,6 +544,65 @@ function createGeneratedKnowledgeConfirmationReviewedDraft(
       sourceContentDigest:
         "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       generatedLabels: ["营销基础"],
+    },
+  };
+}
+
+function createPaperReviewDraft() {
+  return {
+    name: "待审试卷草稿",
+    profession: "marketing" as const,
+    level: 3,
+    subject: "theory" as const,
+    paperType: "mock_paper" as const,
+    year: null,
+    month: null,
+    sourceDescription: "content_ai_generation",
+    sourceRegion: null,
+    sourceOrganization: null,
+    questionBasis: null,
+    generationMethod: "ai" as const,
+    durationMinute: null,
+    totalScore: null,
+    paperSections: [
+      {
+        title: "单选题",
+        description: null,
+        sortOrder: 1,
+        paperQuestions: [
+          {
+            questionPublicId: "platform_formal_question_public_a",
+            companionQuestionDraft: null,
+            score: "1.0",
+            sortOrder: 1,
+            questionGroup: null,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function createVersionedReviewDraftResponse(input: {
+  resultPublicId: string;
+  targetType: "question" | "paper";
+  reviewedDraft: unknown;
+}) {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      status: "versioned",
+      resultPublicId: input.resultPublicId,
+      sourceContentDigest:
+        "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      targetType: input.targetType,
+      currentRevision: 3,
+      currentDraftPublicId: "admin-ai-generation-review-draft-public-003",
+      currentDraftDigest:
+        "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      reviewedDraft: input.reviewedDraft,
+      redactionStatus: "redacted",
     },
   };
 }
@@ -2457,6 +2514,9 @@ describe("admin AI generation entry surfaces", () => {
     const resultPublicId =
       "admin_ai_generation_result_content_question_current_review_456";
     const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewDraftUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/review-drafts`;
+    const serverReviewedDraft =
+      createGeneratedKnowledgeConfirmationReviewedDraft(resultPublicId);
     const blockedResponse = createLocalContractResponse({
       workspace: "content",
       generationKind: "question",
@@ -2584,10 +2644,7 @@ describe("admin AI generation entry surfaces", () => {
                     "redacted generated result summary for current review",
                   evidenceStatus: "sufficient",
                   citationCount: 2,
-                  reviewedDraft:
-                    createGeneratedKnowledgeConfirmationReviewedDraft(
-                      resultPublicId,
-                    ),
+                  reviewedDraft: serverReviewedDraft,
                 },
               })
             : createEmptyTaskHistoryResponse("content"),
@@ -2598,6 +2655,16 @@ describe("admin AI generation entry surfaces", () => {
         return Response.json(createAiKnowledgeNodeOptionsResponse());
       }
 
+      if (path === reviewDraftUrl && init?.method === "GET") {
+        return Response.json(
+          createVersionedReviewDraftResponse({
+            resultPublicId,
+            targetType: "question",
+            reviewedDraft: serverReviewedDraft,
+          }),
+        );
+      }
+
       if (path === adoptionUrl && init?.method === "POST") {
         const adoptionRequestBody = JSON.parse(String(init.body));
 
@@ -2606,6 +2673,9 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "question",
           expectedContentDigest: "sha256:admin_ai_generation_history_result",
+          expectedReviewDraftRevision: 3,
+          expectedReviewDraftDigest:
+            "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         });
         expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
@@ -2679,9 +2749,8 @@ describe("admin AI generation entry surfaces", () => {
     expect(traceabilitySummary).not.toHaveTextContent(
       "synthetic reviewed question stem",
     );
-    expect(
-      screen.getByTestId("content-admin-review-next-actions"),
-    ).toHaveTextContent("采用到内容草稿");
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+    expect(await screen.findByText("当前修订：3")).toBeInTheDocument();
     fireEvent.change(await screen.findByLabelText("确认知识点 营销基础"), {
       target: { value: "knowledge-node-public-marketing-3" },
     });
@@ -2942,6 +3011,8 @@ describe("admin AI generation entry surfaces", () => {
     const resultPublicId =
       "admin_ai_generation_result_content_paper_current_review_456";
     const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewDraftUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/review-drafts`;
+    const serverReviewedDraft = createPaperReviewDraft();
     const blockedResponse = createLocalContractResponse({
       workspace: "content",
       generationKind: "paper",
@@ -3082,6 +3153,16 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
+      if (path === reviewDraftUrl && init?.method === "GET") {
+        return Response.json(
+          createVersionedReviewDraftResponse({
+            resultPublicId,
+            targetType: "paper",
+            reviewedDraft: serverReviewedDraft,
+          }),
+        );
+      }
+
       if (path === adoptionUrl && init?.method === "POST") {
         const adoptionRequestBody = JSON.parse(String(init.body));
 
@@ -3090,6 +3171,9 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "paper",
           expectedContentDigest: "sha256:admin_ai_generation_history_result",
+          expectedReviewDraftRevision: 3,
+          expectedReviewDraftDigest:
+            "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         });
         expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain(
@@ -3166,6 +3250,8 @@ describe("admin AI generation entry surfaces", () => {
     expect(traceabilitySummary).not.toHaveTextContent("rawPrompt");
     expect(traceabilitySummary).not.toHaveTextContent("rawOutput");
     expect(traceabilitySummary).not.toHaveTextContent("providerPayload");
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+    expect(await screen.findByText("当前修订：3")).toBeInTheDocument();
     fireEvent.click(
       await screen.findByTestId("content-admin-review-adopt-action"),
     );
@@ -3269,13 +3355,14 @@ describe("admin AI generation entry surfaces", () => {
     ).toBeDisabled();
     expect(
       screen.getByTestId("content-admin-review-reject-action"),
-    ).toBeEnabled();
+    ).toBeDisabled();
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
     ).toHaveTextContent("需本次结构化草稿");
     expect(
       screen.getByTestId("content-admin-review-reject-action"),
     ).toHaveTextContent("驳回草稿");
+    expect(screen.getByRole("button", { name: "打开评审草稿" })).toBeEnabled();
 
     expect(document.body.textContent).not.toContain("adopt_disabled");
     expect(document.body.textContent).not.toContain("reject_disabled");
@@ -3294,11 +3381,13 @@ describe("admin AI generation entry surfaces", () => {
     const resultPublicId =
       "admin_ai_generation_result_content_question_history_review_456";
     const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewDraftUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/review-drafts`;
     const reviewedDraft = {
       questionType: "single_choice",
       profession: "marketing",
       level: 3,
       subject: "theory",
+      difficulty: "medium",
       stemRichText: "synthetic historical question stem",
       standardAnswerRichText: "A",
       analysisRichText: "synthetic historical analysis",
@@ -3350,6 +3439,16 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
+      if (path === reviewDraftUrl && init?.method === "GET") {
+        return Response.json(
+          createVersionedReviewDraftResponse({
+            resultPublicId,
+            targetType: "question",
+            reviewedDraft,
+          }),
+        );
+      }
+
       if (path === adoptionUrl && init?.method === "POST") {
         const requestBody = JSON.parse(String(init.body));
         expect(requestBody).toMatchObject({
@@ -3357,6 +3456,9 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "question",
           expectedContentDigest: "sha256:admin_ai_generation_history_result",
+          expectedReviewDraftRevision: 3,
+          expectedReviewDraftDigest:
+            "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         });
         expect(requestBody).not.toHaveProperty("reviewedDraft");
 
@@ -3393,6 +3495,9 @@ describe("admin AI generation entry surfaces", () => {
       "content-admin-review-adopt-action",
     );
 
+    expect(adoptAction).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+    expect(await screen.findByText("当前修订：3")).toBeInTheDocument();
     expect(adoptAction).toBeEnabled();
     expect(adoptAction).toHaveTextContent("采用到待审题目草稿");
 
@@ -3412,10 +3517,111 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
   });
 
+  it("binds content rejection to the exact loaded review revision without sending the draft", async () => {
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_reject_revision_456";
+    const reviewDraftUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/review-drafts`;
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewedDraft =
+      createGeneratedKnowledgeConfirmationReviewedDraft(resultPublicId);
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked: "redacted rejection candidate",
+              evidenceStatus: "sufficient",
+              citationCount: 1,
+              reviewedDraft,
+            },
+          }),
+        );
+      }
+
+      if (path === reviewDraftUrl && init?.method === "GET") {
+        return Response.json(
+          createVersionedReviewDraftResponse({
+            resultPublicId,
+            targetType: "question",
+            reviewedDraft,
+          }),
+        );
+      }
+
+      if (path === adoptionUrl && init?.method === "POST") {
+        const requestBody = JSON.parse(String(init.body));
+        expect(requestBody).toMatchObject({
+          reviewDecision: "rejected",
+          reviewerConfirmed: true,
+          targetType: "question",
+          expectedContentDigest: "sha256:admin_ai_generation_history_result",
+          expectedReviewDraftRevision: 3,
+          expectedReviewDraftDigest:
+            "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        });
+        expect(requestBody).not.toHaveProperty("reviewedDraft");
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              review: { reviewDecision: "rejected" },
+              targetReference: { formalTargetWriteStatus: null },
+              redactionStatus: "redacted",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const rejectAction = await screen.findByTestId(
+      "content-admin-review-reject-action",
+    );
+    expect(rejectAction).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+    expect(await screen.findByText("当前修订：3")).toBeInTheDocument();
+    expect(rejectAction).toBeEnabled();
+    fireEvent.click(rejectAction);
+
+    expect(
+      await screen.findByText("草稿驳回已提交；生成结果不会写入正式内容。"),
+    ).toBeInTheDocument();
+  });
+
   it("requires exact generated-label knowledge-node confirmation before adoption", async () => {
     const resultPublicId =
       "admin_ai_generation_result_content_question_candidate_456";
     const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewDraftUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/review-drafts`;
     const reviewedDraft = {
       questionType: "short_answer",
       profession: "marketing",
@@ -3496,6 +3702,16 @@ describe("admin AI generation entry surfaces", () => {
         });
       }
 
+      if (path === reviewDraftUrl && init?.method === "GET") {
+        return Response.json(
+          createVersionedReviewDraftResponse({
+            resultPublicId,
+            targetType: "question",
+            reviewedDraft,
+          }),
+        );
+      }
+
       if (path === adoptionUrl && init?.method === "POST") {
         const requestBody = JSON.parse(String(init.body));
         expect(requestBody).toMatchObject({
@@ -3544,6 +3760,12 @@ describe("admin AI generation entry surfaces", () => {
       "content-admin-review-adopt-action",
     );
     expect(adoptAction).toBeDisabled();
+    expect(
+      screen.getByTestId("content-admin-review-reject-action"),
+    ).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+    expect(await screen.findByText("当前修订：3")).toBeInTheDocument();
     expect(
       screen.getByTestId("content-admin-review-reject-action"),
     ).toBeEnabled();
@@ -3654,6 +3876,9 @@ describe("admin AI generation entry surfaces", () => {
     const resultPublicId =
       "admin_ai_generation_result_content_question_weak_hidden_456";
     const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewDraftUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/review-drafts`;
+    const serverReviewedDraft =
+      createGeneratedKnowledgeConfirmationReviewedDraft(resultPublicId);
     const blockedResponse = createLocalContractResponse({
       workspace: "content",
       generationKind: "question",
@@ -3776,10 +4001,7 @@ describe("admin AI generation entry surfaces", () => {
                     "redacted generated result summary for weak evidence review",
                   evidenceStatus: "weak",
                   citationCount: 1,
-                  reviewedDraft:
-                    createGeneratedKnowledgeConfirmationReviewedDraft(
-                      resultPublicId,
-                    ),
+                  reviewedDraft: serverReviewedDraft,
                 },
               })
             : createEmptyTaskHistoryResponse("content"),
@@ -3788,6 +4010,16 @@ describe("admin AI generation entry surfaces", () => {
 
       if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
         return Response.json(createAiKnowledgeNodeOptionsResponse());
+      }
+
+      if (path === reviewDraftUrl && init?.method === "GET") {
+        return Response.json(
+          createVersionedReviewDraftResponse({
+            resultPublicId,
+            targetType: "question",
+            reviewedDraft: serverReviewedDraft,
+          }),
+        );
       }
 
       if (path === adoptionUrl && init?.method === "POST") {
@@ -3799,6 +4031,9 @@ describe("admin AI generation entry surfaces", () => {
           targetType: "question",
           weakEvidenceConfirmed: true,
           expectedContentDigest: "sha256:admin_ai_generation_history_result",
+          expectedReviewDraftRevision: 3,
+          expectedReviewDraftDigest:
+            "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         });
         expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
 
@@ -3842,6 +4077,8 @@ describe("admin AI generation entry surfaces", () => {
     const adoptAction = await screen.findByTestId(
       "content-admin-review-adopt-action",
     );
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+    expect(await screen.findByText("当前修订：3")).toBeInTheDocument();
     fireEvent.change(await screen.findByLabelText("确认知识点 营销基础"), {
       target: { value: "knowledge-node-public-marketing-3" },
     });

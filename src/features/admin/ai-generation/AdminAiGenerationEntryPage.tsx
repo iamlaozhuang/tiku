@@ -16,6 +16,7 @@ import {
 } from "@/components/admin/AdminToast/AdminToast";
 import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
 import type { AdminAiGenerationFormalQuestionReviewCandidatePayload } from "@/server/contracts/admin-ai-generation-formal-draft-adapter-contract";
+import type { AdminAiGenerationReviewDraftDto } from "@/server/contracts/admin-ai-generation-review-draft-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   AdminAiGenerationTaskHistoryGeneratedResultDto,
@@ -61,10 +62,8 @@ import {
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
 import { resolveOrganizationWorkspacePageAccess } from "../organization-workspace/admin-organization-workspace-access";
-import {
-  createContentAdminFormalReviewedDraftPayload,
-  type AdminAiGenerationFormalReviewedDraftPayload,
-} from "./admin-ai-generation-formal-draft-payload";
+import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-payload";
+import { AdminAiGenerationReviewDraftEditor } from "./AdminAiGenerationReviewDraftEditor";
 
 type AdminAiGenerationEntryLoadState =
   | "loading"
@@ -136,6 +135,8 @@ type ContentAdminReviewActionState =
   | "error";
 type ContentAdminReviewActionInput = {
   expectedContentDigest: string;
+  expectedReviewDraftDigest: string;
+  expectedReviewDraftRevision: number;
   generationKind: AdminAiGenerationKind;
   resultPublicId: string;
   reviewDecision: ContentAdminReviewDecision;
@@ -2466,22 +2467,6 @@ function AdminAiGenerationTaskHistoryPanel({
         <div className="mt-4 space-y-3">
           {items.map((taskItem) => {
             const lifecycle = readAdminTaskLifecycle(taskItem);
-            const currentContentAdminReviewedDraft =
-              workspace === "content" &&
-              taskItem.generatedResult !== null &&
-              currentLocalContractSummary?.generatedResult?.resultPublicId ===
-                taskItem.generatedResult.resultPublicId
-                ? createContentAdminFormalReviewedDraftPayload({
-                    localContractSummary: currentLocalContractSummary,
-                    generationParameters,
-                    requestedAt: taskItem.requestedAt,
-                  })
-                : null;
-            const contentAdminReviewedDraft =
-              currentContentAdminReviewedDraft ??
-              (workspace === "content"
-                ? (taskItem.generatedResult?.reviewedDraft ?? null)
-                : null);
             const currentContentAdminTraceabilitySummary =
               workspace === "content" &&
               taskItem.generatedResult !== null &&
@@ -2630,7 +2615,6 @@ function AdminAiGenerationTaskHistoryPanel({
                         }
                         generationKind={taskItem.generationKind}
                         generatedResult={taskItem.generatedResult}
-                        reviewedDraft={contentAdminReviewedDraft}
                         resultPublicId={taskItem.generatedResult.resultPublicId}
                         traceabilitySummary={
                           currentContentAdminTraceabilitySummary
@@ -2872,7 +2856,6 @@ function ContentAdminReviewTraceabilityPanel({
   actionState,
   generationKind,
   generatedResult,
-  reviewedDraft,
   resultPublicId,
   traceabilitySummary,
   onReviewContentDraft,
@@ -2880,11 +2863,28 @@ function ContentAdminReviewTraceabilityPanel({
   actionState: ContentAdminReviewActionState;
   generationKind: AdminAiGenerationKind;
   generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto;
-  reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   resultPublicId: string;
   traceabilitySummary: ContentAdminGenerationTraceabilitySummary | null;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
 }) {
+  const [currentReviewDraft, setCurrentReviewDraft] =
+    useState<AdminAiGenerationReviewDraftDto | null>(null);
+  const handleReviewDraftRevisionChange = useCallback(
+    (nextRevision: AdminAiGenerationReviewDraftDto | null) => {
+      setCurrentReviewDraft(nextRevision);
+    },
+    [],
+  );
+  const reviewedDraft = currentReviewDraft?.reviewedDraft ?? null;
+  const currentReviewDraftIdentity =
+    currentReviewDraft?.status === "versioned" &&
+    currentReviewDraft.currentRevision !== null &&
+    currentReviewDraft.currentDraftDigest !== undefined
+      ? {
+          currentRevision: currentReviewDraft.currentRevision,
+          currentDraftDigest: currentReviewDraft.currentDraftDigest,
+        }
+      : null;
   const generatedKnowledgeCandidate =
     resolveGeneratedKnowledgeReviewCandidate(reviewedDraft);
   const [candidateKnowledgeNodeOptions, setCandidateKnowledgeNodeOptions] =
@@ -3011,9 +3011,11 @@ function ContentAdminReviewTraceabilityPanel({
     isSubmitting ||
     isCompleted ||
     reviewReadiness === "blocked" ||
+    currentReviewDraftIdentity === null ||
     !hasReviewedDraft ||
     !isCandidateResolutionReady;
-  const isRejectActionDisabled = isSubmitting || isCompleted;
+  const isRejectActionDisabled =
+    isSubmitting || isCompleted || currentReviewDraftIdentity === null;
   const evidenceLabel =
     reviewReadiness === "ready"
       ? "资料充足"
@@ -3054,10 +3056,6 @@ function ContentAdminReviewTraceabilityPanel({
         : reviewReadiness === "weak_confirmation_required"
           ? `确认资料较少并采用到${draftTargetLabel}`
           : `采用到${draftTargetLabel}`);
-  const nextActionLabels =
-    generationKind === "paper"
-      ? ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"]
-      : ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"];
   const formalDraftDetailEntry = getContentFormalDraftDetailEntry({
     generationKind,
     generatedResult,
@@ -3111,6 +3109,13 @@ function ContentAdminReviewTraceabilityPanel({
         />
       )}
 
+      <AdminAiGenerationReviewDraftEditor
+        key={`${resultPublicId}:${generationKind}`}
+        resultPublicId={resultPublicId}
+        targetType={generationKind}
+        onRevisionChange={handleReviewDraftRevisionChange}
+      />
+
       <section
         className="border-border bg-muted/40 mt-3 rounded-md border p-3"
         data-testid="content-admin-review-batch-retry-diff-history-local-validation"
@@ -3155,20 +3160,6 @@ function ContentAdminReviewTraceabilityPanel({
           ))}
         </div>
       </section>
-
-      <div
-        className="mt-3 flex flex-wrap gap-2"
-        data-testid="content-admin-review-next-actions"
-      >
-        {nextActionLabels.map((actionLabel) => (
-          <span
-            className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium"
-            key={actionLabel}
-          >
-            {actionLabel}
-          </span>
-        ))}
-      </div>
 
       {generatedKnowledgeCandidate === null ? null : (
         <section
@@ -3252,9 +3243,17 @@ function ContentAdminReviewTraceabilityPanel({
           data-testid="content-admin-review-adopt-action"
           disabled={isAdoptActionDisabled}
           type="button"
-          onClick={() =>
+          onClick={() => {
+            if (currentReviewDraftIdentity === null) {
+              return;
+            }
+
             onReviewContentDraft({
               expectedContentDigest: generatedResult.contentDigest,
+              expectedReviewDraftDigest:
+                currentReviewDraftIdentity.currentDraftDigest,
+              expectedReviewDraftRevision:
+                currentReviewDraftIdentity.currentRevision,
               generationKind,
               resultPublicId,
               reviewDecision: "approved",
@@ -3263,8 +3262,8 @@ function ContentAdminReviewTraceabilityPanel({
                   ? true
                   : undefined,
               knowledgeNodeResolutions,
-            })
-          }
+            });
+          }}
         >
           {adoptActionLabel}
         </button>
@@ -3273,14 +3272,22 @@ function ContentAdminReviewTraceabilityPanel({
           data-testid="content-admin-review-reject-action"
           disabled={isRejectActionDisabled}
           type="button"
-          onClick={() =>
+          onClick={() => {
+            if (currentReviewDraftIdentity === null) {
+              return;
+            }
+
             onReviewContentDraft({
               expectedContentDigest: generatedResult.contentDigest,
+              expectedReviewDraftDigest:
+                currentReviewDraftIdentity.currentDraftDigest,
+              expectedReviewDraftRevision:
+                currentReviewDraftIdentity.currentRevision,
               generationKind,
               resultPublicId,
               reviewDecision: "rejected",
-            })
-          }
+            });
+          }}
         >
           {actionState === "rejected" || isPersistedRejected
             ? "已提交驳回"
@@ -3980,6 +3987,8 @@ export function AdminAiGenerationEntryPage({
               reviewerConfirmed: true,
               targetType: input.generationKind,
               expectedContentDigest: input.expectedContentDigest,
+              expectedReviewDraftRevision: input.expectedReviewDraftRevision,
+              expectedReviewDraftDigest: input.expectedReviewDraftDigest,
               weakEvidenceConfirmed: input.weakEvidenceConfirmed,
               knowledgeNodeResolutions: input.knowledgeNodeResolutions,
             }),
