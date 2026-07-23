@@ -84,8 +84,34 @@ function createRepository(): ExamReportRepository {
         subjective_score: null,
         total_score: "0.0",
         duration_second: 300,
+        report_revision: 1,
         report_snapshot: {
           paperPublicId: "paper-dev-theory",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          examStatus: "completed",
+          scoreSummary: {
+            objectiveScore: "0.0",
+            subjectiveScore: "0.0",
+            totalScore: "0.0",
+          },
+          questionResults: [
+            {
+              paperQuestionPublicId: "paper-question-dev-single-choice",
+              questionPublicId: "question-dev-single-choice",
+              questionType: "single_choice",
+              paperSectionTitle: "Objective questions",
+              questionGroupPublicId: null,
+              questionGroupTitle: null,
+              isCorrect: false,
+              score: "0.0",
+              maxScore: "5.0",
+              aiScoringEvidence: null,
+            },
+          ],
+          knowledgeNodeAnalyticsStatus: "available",
+          knowledgeNodeAnalysis: [],
         },
         learning_suggestion_snapshot: null,
         generated_at: now,
@@ -174,9 +200,17 @@ describe("phase 7 exam report learning suggestion runtime", () => {
     expect(capturedContexts).toHaveLength(1);
     expect(capturedContexts[0]).toMatchObject({
       userPublicId: "user-dev-student",
-      answerRecordPublicId: "answer-record-dev-learning-suggestion",
       mockExamPublicId: "mock-exam-dev-learning-suggestion",
-      questionPublicId: "question-dev-single-choice",
+      learningSuggestionInput: {
+        schemaVersion: 1,
+        reportRevision: 1,
+        variables: {
+          answerRecordSummary: {
+            questionCount: 1,
+            wrongQuestionCount: 1,
+          },
+        },
+      },
       modelConfigSnapshot: {
         modelConfigPublicId: "model-config-dev-learning-suggestion",
       },

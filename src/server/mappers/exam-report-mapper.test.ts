@@ -44,6 +44,8 @@ function createExamReportRow(
     created_at: createdAt,
     updated_at: updatedAt,
     ...overrides,
+    report_revision:
+      overrides.report_revision === undefined ? 1 : overrides.report_revision,
   };
 }
 

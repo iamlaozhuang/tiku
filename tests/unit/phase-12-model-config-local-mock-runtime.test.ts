@@ -2,11 +2,47 @@ import { describe, expect, it } from "vitest";
 
 import { createModelConfigSnapshot } from "@/server/models/ai-rag";
 import { createAiMockProviderRuntime } from "@/server/services/ai-mock-provider-runtime";
+import type { LearningSuggestionInput } from "@/server/services/learning-suggestion-input";
 import {
   createLocalModelConfigRuntimeCatalog,
   createModelConfigRuntimeResolver,
   createRedactedModelConfigRuntimeSnapshot,
 } from "@/server/services/model-config-runtime";
+
+const learningSuggestionInputPreimage = {
+  schemaVersion: 1 as const,
+  reportPublicId: "exam-report-public-001",
+  reportRevision: 1,
+  variables: {
+    examReport: {
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      examStatus: "completed" as const,
+      objectiveScore: "1.0",
+      subjectiveScore: "0.0",
+      totalScore: "1.0",
+      durationSecond: 60,
+    },
+    answerRecordSummary: {
+      questionCount: 1,
+      wrongQuestionCount: 0,
+      questionTypeSummaries: [],
+      paperSectionSummaries: [],
+      errorSummaries: [],
+    },
+    knowledgeNodeSnapshot: {
+      status: "available" as const,
+      weaknesses: [],
+    },
+  },
+};
+const learningSuggestionInput: LearningSuggestionInput = {
+  ...learningSuggestionInputPreimage,
+  inputDigest: createHash("sha256")
+    .update(JSON.stringify(learningSuggestionInputPreimage))
+    .digest("hex"),
+};
 
 describe("phase 12 local mock model config runtime", () => {
   it("resolves local deterministic provider metadata without secrets", () => {
@@ -40,6 +76,7 @@ describe("phase 12 local mock model config runtime", () => {
 
   it("adds redaction-safe model config metadata to mock ai call logs", async () => {
     const appendedInputs: unknown[] = [];
+    const providerInputs: unknown[] = [];
     const rawPrompt = "prompt-fixture";
     const rawAnswer = "answer-fixture";
     const rawProviderPayload = "payload-fixture";
@@ -61,7 +98,8 @@ describe("phase 12 local mock model config runtime", () => {
     });
     const runtime = createAiMockProviderRuntime({
       provider: {
-        async generateLearningSuggestion() {
+        async generateLearningSuggestion(input) {
+          providerInputs.push(input);
           return {
             learningSuggestion: "Use the local mock explanation.",
             providerRequestPayload: { payload: rawProviderPayload },
@@ -104,11 +142,8 @@ describe("phase 12 local mock model config runtime", () => {
 
     await runtime.generateLearningSuggestion({
       userPublicId: "user-public-001",
-      answerRecordPublicId: "answer-record-public-001",
       mockExamPublicId: null,
-      questionPublicId: "question-public-001",
-      rawPrompt,
-      rawAnswer,
+      learningSuggestionInput,
       modelConfigSnapshot,
       promptTemplate: {
         promptTemplateKey: "learning_suggestion_v1",
@@ -118,6 +153,35 @@ describe("phase 12 local mock model config runtime", () => {
     });
 
     expect(appendedInputs).toHaveLength(1);
+    expect(providerInputs).toHaveLength(1);
+    expect(providerInputs[0]).toMatchObject({
+      rawAnswer: "",
+      modelConfigSnapshot: {
+        aiFuncType: "learning_suggestion",
+      },
+      promptTemplate: {
+        promptTemplateKey: "learning_suggestion_v1",
+      },
+    });
+    const providerInput = providerInputs[0];
+    if (
+      typeof providerInput !== "object" ||
+      providerInput === null ||
+      !("rawPrompt" in providerInput) ||
+      typeof providerInput.rawPrompt !== "string"
+    ) {
+      throw new Error("Provider input was not captured.");
+    }
+    const providerVariables: unknown = JSON.parse(providerInput.rawPrompt);
+    if (typeof providerVariables !== "object" || providerVariables === null) {
+      throw new Error("Provider variables were not an object.");
+    }
+    expect(Object.keys(providerVariables)).toEqual([
+      "examReport",
+      "answerRecordSummary",
+      "knowledgeNodeSnapshot",
+    ]);
+    expect(JSON.stringify(providerVariables)).not.toContain("PublicId");
     expect(appendedInputs[0]).toMatchObject({
       requestRedactedSnapshot: {
         modelConfig: createRedactedModelConfigRuntimeSnapshot(
@@ -132,3 +196,4 @@ describe("phase 12 local mock model config runtime", () => {
     expect(JSON.stringify(appendedInputs)).not.toContain("apiKey");
   });
 });
+import { createHash } from "node:crypto";

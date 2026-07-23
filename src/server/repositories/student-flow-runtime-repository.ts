@@ -7,6 +7,7 @@ import {
   gt,
   ilike,
   inArray,
+  isNull,
   lte,
   or,
   sql,
@@ -2558,10 +2559,10 @@ function createPostgresExamReportRepository(
       const userId = await findUserIdByPublicId(database, input.userPublicId);
 
       if (userId === null) {
-        return;
+        throw new Error("Exam report learning suggestion user is unavailable.");
       }
 
-      await database
+      const updatedRows = await database
         .update(examReport)
         .set({
           learning_suggestion_snapshot: input.learningSuggestionSnapshot,
@@ -2571,8 +2572,16 @@ function createPostgresExamReportRepository(
           and(
             eq(examReport.user_id, userId),
             eq(examReport.public_id, input.publicId),
+            eq(examReport.exam_status, "completed"),
+            eq(examReport.report_revision, input.expectedReportRevision),
+            isNull(examReport.learning_suggestion_snapshot),
           ),
-        );
+        )
+        .returning({ id: examReport.id });
+
+      if (updatedRows.length !== 1) {
+        throw new Error("Exam report learning suggestion revision conflict.");
+      }
     },
   };
 }
@@ -3597,6 +3606,7 @@ function mapExamReportListRow(
     subjective_score: attempt.subjective_score,
     total_score: attempt.total_score,
     duration_second: calculateMockExamRecordDurationSecond(attempt),
+    report_revision: null,
     report_snapshot: {},
     learning_suggestion_snapshot: null,
     generated_at: getMockExamRecordGeneratedAt(attempt),
@@ -3627,6 +3637,7 @@ function mapExamReportRow(
     subjective_score: row.subjective_score,
     total_score: row.total_score,
     duration_second: row.duration_second,
+    report_revision: row.report_revision,
     report_snapshot: asRecord(row.report_snapshot),
     learning_suggestion_snapshot:
       row.learning_suggestion_snapshot === null

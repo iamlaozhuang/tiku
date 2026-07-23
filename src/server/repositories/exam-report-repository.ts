@@ -894,6 +894,7 @@ export type ExamReportRow = {
   subjective_score: string | null;
   total_score: string | null;
   duration_second: number;
+  report_revision: number | null;
   report_snapshot: ExamReportSnapshotDto;
   learning_suggestion_snapshot: LearningSuggestionSnapshotDto;
   generated_at: Date;
@@ -953,6 +954,7 @@ export type ExamReportAnswerRecordRow = {
 export type UpdateExamReportLearningSuggestionInput = {
   userPublicId: string;
   publicId: string;
+  expectedReportRevision: number;
   learningSuggestionSnapshot: LearningSuggestionSnapshotDto;
 };
 

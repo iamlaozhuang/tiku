@@ -170,7 +170,45 @@ function createExamReportRow(
     created_at: now,
     updated_at: now,
     ...overrides,
+    report_revision:
+      overrides.report_revision === undefined ? 1 : overrides.report_revision,
   };
+}
+
+function createLearningSuggestionReadyReportRow(
+  overrides: Partial<ExamReportRow> = {},
+): ExamReportRow {
+  return createExamReportRow({
+    report_snapshot: {
+      paperPublicId: "paper_public_123",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      examStatus: "completed",
+      scoreSummary: {
+        objectiveScore: "1.0",
+        subjectiveScore: null,
+        totalScore: "1.0",
+      },
+      questionResults: [
+        {
+          paperQuestionPublicId: "paper_question_public_123",
+          questionPublicId: "question_public_123",
+          questionType: "single_choice",
+          paperSectionTitle: "一、单项选择题",
+          questionGroupPublicId: null,
+          questionGroupTitle: null,
+          isCorrect: true,
+          score: "1.0",
+          maxScore: "1.0",
+          aiScoringEvidence: null,
+        },
+      ],
+      knowledgeNodeAnalyticsStatus: "unavailable",
+      knowledgeNodeAnalysis: [],
+    },
+    ...overrides,
+  });
 }
 
 function createMockExamRow(
@@ -1306,6 +1344,9 @@ describe("exam report service", () => {
     const updateInputs: unknown[] = [];
     const service = createExamReportService(
       createRepository({
+        async findExamReportByPublicId() {
+          return createLearningSuggestionReadyReportRow();
+        },
         async updateExamReportLearningSuggestionSnapshot(input) {
           updateInputs.push(input);
         },
@@ -1329,20 +1370,24 @@ describe("exam report service", () => {
       organizationPublicId: "organization_public_123",
       profession: "monopoly",
       level: 3,
+      learningSuggestionInput: {
+        schemaVersion: 1,
+        reportRevision: 1,
+      },
     });
     expect(updateInputs).toEqual([
       {
         userPublicId: "user_public_123",
         publicId: "exam_report_public_123",
+        expectedReportRevision: 1,
         learningSuggestionSnapshot: {
           status: "generated",
           learningSuggestion: "Review missed knowledge nodes.",
           evidenceStatus: "none",
           generatedAt: "2026-05-19T09:00:00.000Z",
-          reportPublicId: "exam_report_public_123",
-          mockExamPublicId: "mock_exam_public_123",
-          selectedAnswerRecordPublicId: "answer_record_public_123",
-          selectedQuestionPublicId: "question_public_123",
+          inputSchemaVersion: 1,
+          inputDigest: expect.stringMatching(/^[0-9a-f]{64}$/u),
+          reportRevision: 1,
           modelConfigSnapshot: {
             modelConfigPublicId: "model-config-dev-learning-suggestion",
             aiFuncType: "learning_suggestion",
@@ -1364,6 +1409,109 @@ describe("exam report service", () => {
     expect(serializedSnapshot).not.toContain("rawPrompt");
     expect(serializedSnapshot).not.toContain("rawAnswer");
     expect(serializedSnapshot).not.toContain("ai_call_log_public_redacted");
+  });
+
+  it("replays an exact persisted revision without Provider or write side effects", async () => {
+    let persistedSnapshot: ExamReportRow["learning_suggestion_snapshot"] = null;
+    const firstContexts: LearningSuggestionMockContext[] = [];
+    const firstService = createExamReportService(
+      createRepository({
+        async findExamReportByPublicId() {
+          return createLearningSuggestionReadyReportRow();
+        },
+        async updateExamReportLearningSuggestionSnapshot(input) {
+          persistedSnapshot = input.learningSuggestionSnapshot;
+        },
+      }),
+      clock,
+      createIdFactory(),
+      createLearningSuggestionOptions(firstContexts),
+    );
+    await firstService.retryLearningSuggestion(
+      userContext,
+      "exam_report_public_123",
+      { requestedFromClientAt: "2026-05-19T09:05:00.000Z" },
+    );
+
+    let replayWriteCount = 0;
+    const replayContexts: LearningSuggestionMockContext[] = [];
+    const replayService = createExamReportService(
+      createRepository({
+        async findExamReportByPublicId() {
+          return createLearningSuggestionReadyReportRow({
+            learning_suggestion_snapshot: persistedSnapshot,
+          });
+        },
+        async updateExamReportLearningSuggestionSnapshot() {
+          replayWriteCount += 1;
+        },
+      }),
+      clock,
+      createIdFactory(),
+      createLearningSuggestionOptions(replayContexts),
+    );
+
+    await expect(
+      replayService.retryLearningSuggestion(
+        userContext,
+        "exam_report_public_123",
+        { requestedFromClientAt: "2026-05-19T09:06:00.000Z" },
+      ),
+    ).resolves.toEqual({ code: 0, message: "ok", data: null });
+    expect(firstContexts).toHaveLength(1);
+    expect(replayContexts).toHaveLength(0);
+    expect(replayWriteCount).toBe(0);
+  });
+
+  it("fails closed before Provider and persistence for a corrupt completed report", async () => {
+    const contexts: LearningSuggestionMockContext[] = [];
+    let writeCount = 0;
+    const service = createExamReportService(
+      createRepository({
+        async updateExamReportLearningSuggestionSnapshot() {
+          writeCount += 1;
+        },
+      }),
+      clock,
+      createIdFactory(),
+      createLearningSuggestionOptions(contexts),
+    );
+
+    await expect(
+      service.retryLearningSuggestion(userContext, "exam_report_public_123", {
+        requestedFromClientAt: "2026-05-19T09:05:00.000Z",
+      }),
+    ).resolves.toEqual({
+      code: 409323,
+      message: "Learning suggestion input is unavailable.",
+      data: null,
+    });
+    expect(contexts).toHaveLength(0);
+    expect(writeCount).toBe(0);
+  });
+
+  it("rejects a revision CAS conflict after Provider without reporting success", async () => {
+    const contexts: LearningSuggestionMockContext[] = [];
+    const service = createExamReportService(
+      createRepository({
+        async findExamReportByPublicId() {
+          return createLearningSuggestionReadyReportRow();
+        },
+        async updateExamReportLearningSuggestionSnapshot() {
+          throw new Error("revision conflict");
+        },
+      }),
+      clock,
+      createIdFactory(),
+      createLearningSuggestionOptions(contexts),
+    );
+
+    await expect(
+      service.retryLearningSuggestion(userContext, "exam_report_public_123", {
+        requestedFromClientAt: "2026-05-19T09:05:00.000Z",
+      }),
+    ).rejects.toThrow("revision conflict");
+    expect(contexts).toHaveLength(1);
   });
 
   it("does not generate report for terminated or unknown mock_exam attempts", async () => {

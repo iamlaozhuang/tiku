@@ -74,6 +74,8 @@ describe("AI provider redaction and function contract", () => {
     expect(promptTemplateKeysByFuncType).toEqual({
       ai_explanation: "ai_explanation_v1",
       ai_hint: "ai_hint_v1",
+      ai_paper_generation: "ai_paper_generation_v1",
+      ai_question_generation: "ai_question_generation_v2",
       ai_scoring: "ai_scoring_v1",
       kn_recommendation: "kn_recommendation_v1",
       learning_suggestion: "learning_suggestion_v1",
@@ -103,6 +105,14 @@ describe("AI provider redaction and function contract", () => {
       {
         aiFuncType: "learning_suggestion",
         key: "learning_suggestion_v1",
+      },
+      {
+        aiFuncType: "ai_question_generation",
+        key: "ai_question_generation_v2",
+      },
+      {
+        aiFuncType: "ai_paper_generation",
+        key: "ai_paper_generation_v1",
       },
     ]);
   });

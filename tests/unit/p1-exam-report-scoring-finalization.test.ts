@@ -9,11 +9,11 @@ import { createPostgresAiScoringTaskRepository } from "@/server/repositories/ai-
 import type { RuntimeDatabase } from "@/server/repositories/runtime-database";
 
 const TASK_ID =
-  "p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23";
-const BASE_SHA = "1f4b953f015ad125db42add291cd41288424bd53";
-const BRANCH = "fix/paper-question-knowledge-snapshot";
+  "p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23";
+const BASE_SHA = "9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148";
+const BRANCH = "fix/learning-suggestion-whole-report-input";
 const APPROVAL_ID =
-  "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23";
+  "guardian-f0176-learning-suggestion-whole-report-input-2026-07-23";
 const CLOSED_TASK_ID =
   "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23";
 
@@ -26,7 +26,7 @@ type TaskSafetyContract = {
   coreFiles: string[];
   contingencyFiles: string[];
   validationCommands: Array<{ executable: string; arguments: string[] }>;
-  approvalSources: { database: string | null };
+  approvalSources: { database: string | null; provider: string | null };
   conditionalCloseout: boolean;
 };
 
@@ -114,12 +114,12 @@ describe("F-0067 exam report scoring finalization", () => {
       taskId: TASK_ID,
       baseSha: BASE_SHA,
       branch: BRANCH,
-      approvalSources: { database: APPROVAL_ID },
+      approvalSources: { database: APPROVAL_ID, provider: APPROVAL_ID },
       conditionalCloseout: true,
     });
-    expect(contract.allowedFiles).toHaveLength(16);
-    expect(contract.coreFiles).toHaveLength(13);
-    expect(contract.contingencyFiles).toHaveLength(3);
+    expect(contract.allowedFiles).toHaveLength(21);
+    expect(contract.coreFiles).toHaveLength(16);
+    expect(contract.contingencyFiles).toHaveLength(5);
     expect(projectState.currentTask).toMatchObject({
       id: TASK_ID,
       status: "in_progress",

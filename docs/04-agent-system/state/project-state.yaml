@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
+currentPhase: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
 updatedAt: "2026-07-23T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
+  currentTaskId: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -577,7 +577,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
     - p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
     - p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
+    - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
     - p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
     - p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
     - p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
@@ -764,7 +766,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23: closed
     p1-remediation-rc-08-student-answer-input-bounds-2026-07-23: closed
     p1-remediation-rc-08-ai-scoring-question-context-2026-07-23: closed
-    p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23: in_progress
+    p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23: closed
+    p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -965,69 +968,74 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
-  title: Organization analytics eligible denominator
-  phase: p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
+  id: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
+  title: Learning suggestion whole-report input integrity
+  phase: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: schema_migration_source_database_application_logic_and_permission_scoped_analytics_truth
-  productClosureContribution: closes_F0126_static_eligible_denominator_and_empty_state_gap_with_legacy_unavailable
-  branch: fix/organization-analytics-eligible-denominator
+  taskKind: database_application_logic_and_provider_adapter_pure_logic
+  productClosureContribution: closes_F0176_static_whole_report_input_minimization_and_revision_binding_gap
+  branch: fix/learning-suggestion-whole-report-input
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0126
+    - F-0176
   candidateRootCauseCluster: P1-RC-08
-  objective: capture an immutable server-owned employee recipient snapshot when each organization training version is published, derive analytics denominators from that snapshot before left joining official submissions, and return truthful zero or explicit legacy-unavailable states instead of false 100 percent completion or permission denial
+  objective: derive one strict versioned and minimized learning_suggestion input from the finalized immutable exam_report snapshot, bind it to report revision, fulfill the existing Prompt Registry variable contract and reject stale or corrupt facts before Provider execution or persistence
   executionStage: ready_for_closeout
-  findingStatus: closed_static_product
-  findingDisposition: immutable_recipient_denominator_closed_without_migration_apply_real_database_or_browser_runtime_proof
+  findingStatus: implemented_verified_static_pending_closeout
+  findingDisposition: F0176_independent_and_ordered_before_F0065_to_avoid_automating_invalid_single_answer_semantics
   riskBoundary:
-    category: schema_migration_source_database_application_logic_and_permission_scoped_analytics_truth
-    approvalId: guardian-f0126-organization-analytics-eligible-denominator-2026-07-23
-    approvalFingerprint: 2ead8bdf1b375cc56d8828928e47dc46cfa4b9c1e1ff5b8ac58da2fb4e8a6425
-    approvedBaseSha: 33621628a226b593160ce0a8b788f6700d118ce4
-    schemaOrMigrationChange: true
+    category: database_application_logic_and_provider_adapter_pure_logic
+    approvalId: guardian-f0176-learning-suggestion-whole-report-input-2026-07-23
+    approvalFingerprint: 535931d19a89828469dae9318698cb2b30848d04e1732cf5029ca8536d0e3ad8
+    requestFingerprint: 535931d19a89828469dae9318698cb2b30848d04e1732cf5029ca8536d0e3ad8
+    approvedBaseSha: 9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148
+    requestedBaseSha: 9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148
+    schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
+    providerAdapterPureLogic: true
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: canonical_publish_transaction_to_immutable_version_recipient_snapshot_to_authorized_scope_and_version_interval_to_left_joined_official_submissions_to_dashboard_and_employee_pagination
-    coreFiles: 18
-    contingencyFiles: 6
+    chain: authorized_completed_exam_report_to_immutable_report_snapshot_and_revision_to_learning_suggestion_input_v1_to_existing_prompt_variables_to_provider_adapter_to_revision_CAS
+    coreFiles: 16
+    contingencyFiles: 5
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0126_independent_from_F0013_F0065_F0157_F0162_F0163_F0164_F0176_F0177
+    bundleDisposition: F0176_precedes_independent_F0065_lifecycle; F0063_and_F0137_are_statically_covered; F0013_remains_runtime_hold
   requiredSemantics:
-    authorization: existing_advanced_org_auth_and_visible_organization_scope_are_resolved_before_analytics_fact_queries
-    schema: four_field_versioned_recipient_marker_all_null_legacy_or_all_present_current_schema_version_1_plus_restrict_version_fk_append_only_recipient_rows
-    recipientAuthorization: employee_exact_recipient_org_auth_is_distinct_from_publisher_version_authorization_and_multi_candidate_conflict_fails_closed_without_existing_explicit_priority
-    canonicalDigest: versioned_unambiguous_digest_over_schema_version_and_ordinal_case_sensitive_sorted_full_recipient_tuples
-    denominator: eligible_employees_and_visible_training_versions_come_from_the_immutable_publish_time_recipient_snapshot_not_submission_rows_or_current_mutable_membership
-    interval: relevant_version_and_official_submission_must_satisfy_inclusive_publish_deadline_takedown_and_request_range_bounds
-    emptyState: authorized_zero_submission_ranges_return_success_with_zero_counts_and_empty_employee_rows
-    legacy: versions_without_a_complete_recipient_snapshot_are_explicitly_temporary_unavailable_distinct_from_permission_denial_and_are_never_reconstructed_from_current_membership_or_treated_as_zero
-    closeoutTokens: fresh_database_and_permission_tokens_must_bind_the_final_candidate_tree_and_PS5_multi_token_failure_stops_without_bypass
-    privacy: summary_only_no_raw_answers_AI_content_prompt_provider_payload_or_cross_scope_facts
-    unchanged: additive_nullable_legacy_safe_schema_source_only_no_migration_apply_real_database_permission_expansion_provider_dependency_UI_or_export_change
+    source: completed_authorized_persisted_report_only_with_exact_row_snapshot_identity_score_status_and_positive_report_revision
+    contract: one_strict_allowlisted_version_1_input_with_examReport_answerRecordSummary_and_knowledgeNodeSnapshot
+    wholeReport: deterministic_type_section_error_scoring_point_evidence_and_knowledge_weakness_facts_from_the_complete_report_snapshot
+    minimization: no_selected_or_standard_answer_full_question_or_answer_snapshot_raw_prompt_citation_internal_id_or_provider_payload
+    persistence: exact_user_report_revision_completed_status_CAS_rejects_stale_report_rebuild_and_non_single_cardinality
+    prompt: existing_learning_suggestion_v1_semantics_remain_unchanged_and_runtime_must_fulfill_its_three_declared_variables
+    unchanged: no_F0065_lifecycle_F0177_usage_provenance_schema_permission_quota_dependency_UI_or_real_provider_work
   validationEvidence:
-    tddRed: pass_7_expected_failures_for_missing_recipient_schema_canonicalizer_and_analytics_source
-    focused: pass_declared_13_files_246_tests
-    lint: pass_0_errors_3_preexisting_unrelated_warnings_after_changed_file_warnings_removed
-    typecheck: pass
-    build: pass_with_preexisting_Next_output_tracing_warning
-    formatAndDiff: pass
-    stateAndSchemaSource: pass_strict_YAML_JSON_WIP_1_exact_additive_migration_and_snapshot_journal_parent
-    adversarialReview: pass_authorization_before_facts_versioned_digest_exact_recipient_lineage_inclusive_interval_zero_states_legacy_unavailable_DB_pagination_summary_only_and_no_answer_derived_fallback
-    runtimeBoundary: static_and_synthetic_only_no_migration_apply_real_database_or_browser_runtime_proof
+    tddRed: failed_as_expected_missing_unique_learning_suggestion_input_module_before_implementation
+    focused: 11_files_105_tests_GREEN
+    lint: exit_0_with_3_pre_existing_warnings_outside_changed_files
+    typecheck: tsc_noEmit_GREEN
+    build: next_production_build_GREEN_with_pre_existing_NFT_trace_warning
+    formatAndDiff: GREEN
+    stateAndSource: GREEN
+    adversarialReview: GREEN_unique_whole_report_builder_full_fact_projection_provider_three_variable_allowlist_untrusted_JSON_no_answer_or_question_lineage_exact_revision_completed_single_row_CAS_same_revision_replay_zero_side_effect
+    runtimeBoundary: static_and_synthetic_only_no_real_database_or_provider_runtime_proof
+  residualDisposition:
+    F0013: runtime_hold
+    F0063: not_actionable_original_path_covered_by_persisted_attempt_cap_and_atomic_claim_static_only
+    F0137: not_actionable_original_path_covered_by_unique_identity_and_atomic_upserts_static_only
+    F0065: confirmed_independent_lifecycle_gap_deferred_until_after_F0176
+    F0176: current_WIP_confirmed
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
+    taskId: p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
     findingIds:
-      - F-0172
-    commit: 33621628a226b593160ce0a8b788f6700d118ce4
-    tree: e3a54aeff821a6210eb2ad58e75dce065f710a94
+      - F-0126
+    commit: 9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148
+    tree: 87d983cdf62ddfb908db4095e6647a759c7f4680
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_product_without_real_provider_database_or_browser_runtime_proof
+    findingStatus: closed_static_product_without_migration_apply_real_database_or_browser_runtime_proof
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
@@ -1041,9 +1049,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 33621628a226b593160ce0a8b788f6700d118ce4
-  lastKnownOriginMasterSha: 33621628a226b593160ce0a8b788f6700d118ce4
-  lastKnownRemoteMasterSha: 33621628a226b593160ce0a8b788f6700d118ce4
+  lastKnownMasterSha: 9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148
+  lastKnownOriginMasterSha: 9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148
+  lastKnownRemoteMasterSha: 9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

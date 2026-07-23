@@ -18,7 +18,6 @@ import {
   getPaperName,
 } from "../repositories/exam-report-repository";
 import type {
-  ExamReportAnswerRecordRow,
   ExamReportAuthorizationScopeRow,
   ExamReportMockExamRow,
   ExamReportRepository,
@@ -29,6 +28,12 @@ import type {
   LearningSuggestionMockContext,
 } from "./ai-mock-provider-runtime";
 import type { ModelConfigSnapshot } from "../models/ai-rag";
+import {
+  buildLearningSuggestionInput,
+  LearningSuggestionInputIntegrityError,
+  type LearningSuggestionInput,
+  validatePersistedLearningSuggestionSnapshot,
+} from "./learning-suggestion-input";
 import {
   normalizeExamReportListQuery,
   normalizeGenerateExamReportInput,
@@ -121,8 +126,7 @@ function createMockExamNotFoundResponse(): ApiResponse<null> {
 }
 
 function buildLearningSuggestionSnapshot(
-  report: ExamReportRow,
-  answerRecord: ExamReportAnswerRecordRow | null,
+  input: LearningSuggestionInput,
   result: Awaited<
     ReturnType<
       ExamReportLearningSuggestionRuntime["generateLearningSuggestion"]
@@ -136,10 +140,9 @@ function buildLearningSuggestionSnapshot(
     learningSuggestion: result.learningSuggestion,
     evidenceStatus: "none",
     generatedAt: generatedAt.toISOString(),
-    reportPublicId: report.public_id,
-    mockExamPublicId: report.mock_exam_public_id,
-    selectedAnswerRecordPublicId: answerRecord?.public_id ?? null,
-    selectedQuestionPublicId: answerRecord?.question_public_id ?? null,
+    inputSchemaVersion: input.schemaVersion,
+    inputDigest: input.inputDigest,
+    reportRevision: input.reportRevision,
     modelConfigSnapshot: {
       modelConfigPublicId: options.modelConfigSnapshot.modelConfigPublicId,
       aiFuncType: options.modelConfigSnapshot.aiFuncType,
@@ -197,45 +200,23 @@ function isExamReportRow(
   return "public_id" in value;
 }
 
-function selectLearningSuggestionAnswerRecord(
-  answerRecords: ExamReportAnswerRecordRow[],
-): ExamReportAnswerRecordRow | null {
-  return (
-    answerRecords.find((answerRecord) => answerRecord.is_correct === false) ??
-    answerRecords[0] ??
-    null
-  );
-}
-
-function buildLearningSuggestionPrompt(
-  report: ExamReportRow,
-  answerRecord: ExamReportAnswerRecordRow | null,
-): string {
-  return JSON.stringify({
-    reportPublicId: report.public_id,
-    paperPublicId: report.paper_public_id,
-    mockExamPublicId: report.mock_exam_public_id,
-    totalScore: report.total_score,
-    selectedQuestionPublicId: answerRecord?.question_public_id ?? null,
-    selectedAnswerRecordPublicId: answerRecord?.public_id ?? null,
-    selectedAnswerScore: answerRecord?.score ?? null,
-    selectedAnswerMaxScore: answerRecord?.max_score ?? null,
-  });
-}
-
-function buildLearningSuggestionRawAnswer(
-  answerRecord: ExamReportAnswerRecordRow | null,
-): string {
-  if (answerRecord === null) {
-    return "no answer record";
-  }
-
-  return JSON.stringify({
-    answerSnapshot: answerRecord.answer_snapshot,
-    questionSnapshot: answerRecord.question_snapshot,
-    isCorrect: answerRecord.is_correct,
-    score: answerRecord.score,
-    maxScore: answerRecord.max_score,
+function createLearningSuggestionInput(report: ExamReportRow) {
+  return buildLearningSuggestionInput({
+    report: {
+      publicId: report.public_id,
+      reportRevision: report.report_revision,
+      mockExamPublicId: report.mock_exam_public_id,
+      paperPublicId: report.paper_public_id,
+      profession: report.profession,
+      level: report.level,
+      subject: report.subject,
+      examStatus: report.exam_status,
+      objectiveScore: report.objective_score,
+      subjectiveScore: report.subjective_score,
+      totalScore: report.total_score,
+      durationSecond: report.duration_second,
+      reportSnapshot: report.report_snapshot,
+    },
   });
 }
 
@@ -379,20 +360,50 @@ export function createExamReportService(
         );
       }
 
-      const answerRecords = await repository.listMockExamAnswerRecords({
-        userPublicId: userContext.userPublicId,
-        mockExamPublicId: report.mock_exam_public_id,
-      });
-      const selectedAnswerRecord =
-        selectLearningSuggestionAnswerRecord(answerRecords);
+      let learningSuggestionInput: LearningSuggestionInput;
+      try {
+        learningSuggestionInput = createLearningSuggestionInput(report);
+        if (report.learning_suggestion_snapshot !== null) {
+          validatePersistedLearningSuggestionSnapshot(
+            report.learning_suggestion_snapshot,
+            learningSuggestionInput,
+            {
+              modelConfigSnapshot: {
+                modelConfigPublicId:
+                  learningSuggestionOptions.modelConfigSnapshot
+                    .modelConfigPublicId,
+                aiFuncType:
+                  learningSuggestionOptions.modelConfigSnapshot.aiFuncType,
+                modelName:
+                  learningSuggestionOptions.modelConfigSnapshot.modelName,
+                providerDisplayName:
+                  learningSuggestionOptions.modelConfigSnapshot
+                    .providerDisplayName,
+                configVersion:
+                  learningSuggestionOptions.modelConfigSnapshot.configVersion,
+              },
+              promptTemplate: {
+                promptTemplateKey:
+                  learningSuggestionOptions.promptTemplate.promptTemplateKey,
+                version: learningSuggestionOptions.promptTemplate.version,
+                templateHash:
+                  learningSuggestionOptions.promptTemplate.templateHash,
+              },
+            },
+          );
+          return createSuccessResponse(null);
+        }
+      } catch (error) {
+        if (error instanceof LearningSuggestionInputIntegrityError) {
+          return createErrorResponse(
+            409323,
+            "Learning suggestion input is unavailable.",
+          );
+        }
+        throw error;
+      }
 
       const generatedAt = clock.now();
-      const suggestionPrompt = buildLearningSuggestionPrompt(
-        report,
-        selectedAnswerRecord,
-      );
-      const suggestionAnswer =
-        buildLearningSuggestionRawAnswer(selectedAnswerRecord);
       const learningSuggestionResult =
         await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
           {
@@ -400,11 +411,8 @@ export function createExamReportService(
             organizationPublicId: userContext.organizationPublicId ?? null,
             profession: report.profession,
             level: report.level,
-            answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,
             mockExamPublicId: report.mock_exam_public_id,
-            questionPublicId: selectedAnswerRecord?.question_public_id ?? null,
-            rawPrompt: suggestionPrompt,
-            rawAnswer: suggestionAnswer,
+            learningSuggestionInput,
             modelConfigSnapshot: learningSuggestionOptions.modelConfigSnapshot,
             promptTemplate: learningSuggestionOptions.promptTemplate,
             startedAt: generatedAt,
@@ -414,9 +422,9 @@ export function createExamReportService(
       await repository.updateExamReportLearningSuggestionSnapshot({
         userPublicId: userContext.userPublicId,
         publicId: report.public_id,
+        expectedReportRevision: learningSuggestionInput.reportRevision,
         learningSuggestionSnapshot: buildLearningSuggestionSnapshot(
-          report,
-          selectedAnswerRecord,
+          learningSuggestionInput,
           learningSuggestionResult,
           learningSuggestionOptions,
           generatedAt,

@@ -14,6 +14,7 @@ import type {
 } from "@/server/repositories/admin-ai-audit-log-runtime-repository";
 import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
 import { createAiMockProviderRuntime } from "@/server/services/ai-mock-provider-runtime";
+import type { LearningSuggestionInput } from "@/server/services/learning-suggestion-input";
 import type { SessionService } from "@/server/services/session-service";
 
 type AdminRole = "super_admin" | "ops_admin" | "content_admin";
@@ -40,6 +41,40 @@ const promptTemplate = {
   promptTemplateKey: "learning_suggestion_v1",
   version: 1,
   templateHash: "learning_suggestion_v1_baseline",
+};
+const learningSuggestionInputPreimage = {
+  schemaVersion: 1 as const,
+  reportPublicId: "exam-report-dev-001",
+  reportRevision: 1,
+  variables: {
+    examReport: {
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      examStatus: "completed" as const,
+      objectiveScore: "1.0",
+      subjectiveScore: "0.0",
+      totalScore: "1.0",
+      durationSecond: 60,
+    },
+    answerRecordSummary: {
+      questionCount: 1,
+      wrongQuestionCount: 0,
+      questionTypeSummaries: [],
+      paperSectionSummaries: [],
+      errorSummaries: [],
+    },
+    knowledgeNodeSnapshot: {
+      status: "available" as const,
+      weaknesses: [],
+    },
+  },
+};
+const learningSuggestionInput: LearningSuggestionInput = {
+  ...learningSuggestionInputPreimage,
+  inputDigest: createHash("sha256")
+    .update(JSON.stringify(learningSuggestionInputPreimage))
+    .digest("hex"),
 };
 
 function createSessionService(role: AdminRole | null): SessionService {
@@ -239,11 +274,8 @@ describe("phase 7 AI mock provider and log runtime smoke", () => {
       organizationPublicId: "organization-public-001",
       profession: "monopoly",
       level: 3,
-      answerRecordPublicId: "answer-record-dev-001",
       mockExamPublicId: "mock-exam-dev-001",
-      questionPublicId: "question-dev-single-choice",
-      rawPrompt: "RAW_PROMPT: 学员错题与标准答案明文",
-      rawAnswer: "RAW_ANSWER: 学员原始答案明文",
+      learningSuggestionInput,
       modelConfigSnapshot,
       promptTemplate,
       startedAt,
@@ -369,3 +401,4 @@ describe("phase 7 AI mock provider and log runtime smoke", () => {
     });
   });
 });
+import { createHash } from "node:crypto";

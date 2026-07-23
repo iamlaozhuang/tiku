@@ -8,6 +8,11 @@ import type {
   AppendAiCallLogInput,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
 import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
+import {
+  LearningSuggestionInputIntegrityError,
+  serializeLearningSuggestionProviderVariables,
+  type LearningSuggestionInput,
+} from "./learning-suggestion-input";
 
 export type AiMockProviderPromptTemplateSnapshot = {
   promptTemplateKey: string;
@@ -20,11 +25,8 @@ export type LearningSuggestionMockContext = {
   organizationPublicId?: string | null;
   profession?: AppendAiCallLogInput["profession"];
   level?: number | null;
-  answerRecordPublicId: string | null;
   mockExamPublicId: string | null;
-  questionPublicId: string | null;
-  rawPrompt: string;
-  rawAnswer: string;
+  learningSuggestionInput: LearningSuggestionInput;
   modelConfigSnapshot: ModelConfigSnapshot;
   promptTemplate: AiMockProviderPromptTemplateSnapshot;
   startedAt?: Date;
@@ -46,19 +48,35 @@ export function createAiMockProviderRuntime(
 
   return {
     async generateLearningSuggestion(context: LearningSuggestionMockContext) {
+      if (
+        context.modelConfigSnapshot.aiFuncType !== "learning_suggestion" ||
+        context.promptTemplate.promptTemplateKey !== "learning_suggestion_v1" ||
+        context.promptTemplate.version !== 1 ||
+        context.promptTemplate.templateHash !==
+          "learning_suggestion_v1_baseline"
+      ) {
+        throw new LearningSuggestionInputIntegrityError();
+      }
       const startedAt = context.startedAt ?? now();
-      const providerResult =
-        await options.provider.generateLearningSuggestion(context);
+      const providerVariables = serializeLearningSuggestionProviderVariables(
+        context.learningSuggestionInput,
+      );
+      const providerResult = await options.provider.generateLearningSuggestion({
+        rawPrompt: providerVariables,
+        rawAnswer: "",
+        modelConfigSnapshot: context.modelConfigSnapshot,
+        promptTemplate: context.promptTemplate,
+      });
       const completedAt = now();
       const redactedSnapshots = createAiCallLogRedactedSnapshots({
         prompt: {
           promptTemplateKey: context.promptTemplate.promptTemplateKey,
           promptTemplateVersion: context.promptTemplate.version,
           templateHash: context.promptTemplate.templateHash,
-          questionPublicId: context.questionPublicId,
-          answerRecordPublicId: context.answerRecordPublicId,
+          questionPublicId: null,
+          answerRecordPublicId: null,
         },
-        userAnswer: context.rawAnswer,
+        userAnswer: "",
         modelOutput: {
           learningSuggestion: providerResult.learningSuggestion,
         },
@@ -76,9 +94,9 @@ export function createAiMockProviderRuntime(
         organizationPublicId: context.organizationPublicId ?? null,
         profession: context.profession ?? null,
         level: context.level ?? null,
-        answerRecordPublicId: context.answerRecordPublicId,
+        answerRecordPublicId: null,
         mockExamPublicId: context.mockExamPublicId,
-        questionPublicId: context.questionPublicId,
+        questionPublicId: null,
         aiFuncType: "learning_suggestion",
         callStatus: "success",
         modelConfigSnapshot: context.modelConfigSnapshot,
