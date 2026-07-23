@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type {
   AdminAiGenerationFormalAdoptionAuditActionType,
   AdminAiGenerationFormalAdoptionDto,
@@ -6,12 +8,18 @@ import type {
   AdminAiGenerationFormalAdoptionResult,
   AdminAiGenerationFormalAdoptionReviewTraceabilityDto,
   AdminAiGenerationFormalAdoptionRow,
+  AdminAiGenerationKnowledgeNodeCandidateSnapshot,
+  AdminAiGenerationKnowledgeNodeResolutionSnapshot,
   CreateAdminAiGenerationFormalAdoptionInput,
   FindAdminAiGenerationFormalAdoptionQuery,
   FindTrustedAdminAiGenerationFormalDraftInput,
   InsertAdminAiGenerationFormalAdoptionInput,
   MarkAdminAiGenerationFormalDraftCreatedInput,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
+import type {
+  AdminAiGenerationFormalQuestionDraftPayload,
+  AdminAiGenerationFormalQuestionKnowledgeNodeCandidateSource,
+} from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
 import {
   canAdoptAdminAiGenerationPlatformFormalContent,
   resolveAdminAiGenerationTaskTypeForFormalTarget,
@@ -26,6 +34,17 @@ const formalAdoptionApproveAuditActionType =
   "admin_ai_generation_result.formal_adoption.approve";
 const formalAdoptionRejectAuditActionType =
   "admin_ai_generation_result.formal_adoption.reject";
+
+type ParsedGeneratedKnowledgeCandidate = {
+  candidateSnapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot;
+  candidateDigest: string;
+  questionDraft: AdminAiGenerationFormalQuestionDraftPayload;
+};
+
+type KnowledgeNodeResolutionBinding = ParsedGeneratedKnowledgeCandidate & {
+  resolutionSnapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot;
+  resolutionDigest: string;
+};
 
 export function createAdminAiGenerationFormalAdoptionRepository(
   gateway: AdminAiGenerationFormalAdoptionGateway,
@@ -45,16 +64,31 @@ export function createAdminAiGenerationFormalAdoptionRepository(
       assertSourceResultEligibleForPlatformFormalAdoption(sourceResult, input);
       assertExpectedContentDigest(sourceResult, input.expectedContentDigest);
 
+      const knowledgeNodeBinding = await createKnowledgeNodeResolutionBinding(
+        gateway,
+        sourceResult,
+        input,
+      );
+
       const query = createAdoptionLookupQuery(input);
       const existingRow = await gateway.findAdoptionBySourceResult(query);
 
       if (existingRow !== null) {
-        assertExistingAdoptionMatchesCommand(existingRow, sourceResult, input);
+        assertExistingAdoptionMatchesCommand(
+          existingRow,
+          sourceResult,
+          input,
+          knowledgeNodeBinding,
+        );
         return createFormalAdoptionResponse("reused", existingRow);
       }
 
       const insertedRow = await gateway.insertAdoptionRecord(
-        createInsertAdoptionRecordInput(input, sourceResult),
+        createInsertAdoptionRecordInput(
+          input,
+          sourceResult,
+          knowledgeNodeBinding,
+        ),
       );
       const resolvedRow =
         insertedRow ?? (await gateway.findAdoptionBySourceResult(query));
@@ -65,7 +99,12 @@ export function createAdminAiGenerationFormalAdoptionRepository(
         );
       }
 
-      assertExistingAdoptionMatchesCommand(resolvedRow, sourceResult, input);
+      assertExistingAdoptionMatchesCommand(
+        resolvedRow,
+        sourceResult,
+        input,
+        knowledgeNodeBinding,
+      );
 
       return createFormalAdoptionResponse(
         insertedRow === null ? "reused" : "created",
@@ -82,7 +121,17 @@ export function createAdminAiGenerationFormalAdoptionRepository(
       }
 
       assertTrustedReviewedDraftSource(sourceResult, input);
-      return sourceResult.reviewedDraft;
+      const adoptionRow = await gateway.findAdoptionBySourceResult({
+        sourceResultPublicId: input.resultPublicId,
+        targetType: input.targetType,
+        targetDomain: platformFormalContentTargetDomain,
+      });
+
+      if (adoptionRow === null) {
+        throw new Error("admin AI generation formal adoption was not found");
+      }
+
+      return resolveTrustedReviewedDraft(sourceResult, adoptionRow);
     },
     async markFormalDraftCreated(input) {
       assertFormalDraftCreatedInput(input);
@@ -118,6 +167,7 @@ function assertExistingAdoptionMatchesCommand(
   existingRow: AdminAiGenerationFormalAdoptionRow,
   sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
   input: CreateAdminAiGenerationFormalAdoptionInput,
+  knowledgeNodeBinding: KnowledgeNodeResolutionBinding | null,
 ): void {
   if (
     existingRow.content_digest !== sourceResult.contentDigest ||
@@ -135,6 +185,8 @@ function assertExistingAdoptionMatchesCommand(
       "admin AI generation formal adoption review decision conflict",
     );
   }
+
+  assertKnowledgeNodeBindingMatchesRow(existingRow, knowledgeNodeBinding);
 }
 
 function assertTrustedReviewedDraftSource(
@@ -244,6 +296,382 @@ function assertSourceResultEvidenceAllowsAdoption(
   }
 }
 
+async function createKnowledgeNodeResolutionBinding(
+  gateway: AdminAiGenerationFormalAdoptionGateway,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  input: CreateAdminAiGenerationFormalAdoptionInput,
+): Promise<KnowledgeNodeResolutionBinding | null> {
+  const candidate = parseGeneratedKnowledgeCandidate(sourceResult);
+
+  if (candidate === null) {
+    if (input.knowledgeNodeResolutions !== undefined) {
+      throw new Error("admin AI generation knowledge node resolution conflict");
+    }
+
+    return null;
+  }
+
+  const mappings = input.knowledgeNodeResolutions ?? [];
+
+  if (input.reviewDecision === "approved") {
+    assertExactKnowledgeNodeResolution(
+      candidate.candidateSnapshot.generatedLabels,
+      mappings,
+    );
+    const knowledgeNodes = await gateway.findKnowledgeNodesForResolution({
+      knowledgeNodePublicIds: mappings.map(
+        (mapping) => mapping.knowledgeNodePublicId,
+      ),
+    });
+    assertKnowledgeNodesEligible(
+      candidate.candidateSnapshot,
+      mappings,
+      knowledgeNodes,
+    );
+  } else if (mappings.length !== 0) {
+    throw new Error("admin AI generation knowledge node resolution conflict");
+  }
+
+  const resolutionSnapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot = {
+    schemaVersion: 1,
+    decision: input.reviewDecision,
+    sourceContentDigest: candidate.candidateSnapshot.sourceContentDigest,
+    generatedLabels: [...candidate.candidateSnapshot.generatedLabels],
+    mappings: mappings.map((mapping) => ({ ...mapping })),
+  };
+
+  return {
+    ...candidate,
+    resolutionSnapshot,
+    resolutionDigest: createResolutionDigest(resolutionSnapshot),
+  };
+}
+
+function parseGeneratedKnowledgeCandidate(
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+): ParsedGeneratedKnowledgeCandidate | null {
+  if (!isRecord(sourceResult.reviewedDraft)) {
+    return null;
+  }
+
+  const confirmation = sourceResult.reviewedDraft.knowledgeNodeConfirmation;
+
+  if (confirmation === undefined) {
+    return null;
+  }
+
+  if (
+    !isRecord(confirmation) ||
+    confirmation.schemaVersion !== 1 ||
+    confirmation.status !== "unresolved" ||
+    (confirmation.generationMode !== "balanced" &&
+      confirmation.generationMode !== "comprehensive") ||
+    confirmation.resultPublicId !== sourceResult.resultPublicId ||
+    confirmation.taskPublicId !== sourceResult.taskPublicId ||
+    confirmation.requestPublicId !== sourceResult.requestPublicId ||
+    typeof confirmation.sourceContentDigest !== "string" ||
+    !/^sha256:[0-9a-f]{64}$/u.test(confirmation.sourceContentDigest) ||
+    !Array.isArray(confirmation.generatedLabels) ||
+    confirmation.generatedLabels.length === 0 ||
+    confirmation.generatedLabels.some((label) => typeof label !== "string") ||
+    !Array.isArray(sourceResult.reviewedDraft.knowledgeNodePublicIds) ||
+    sourceResult.reviewedDraft.knowledgeNodePublicIds.length !== 0 ||
+    !isProfession(sourceResult.reviewedDraft.profession) ||
+    !Number.isSafeInteger(sourceResult.reviewedDraft.level)
+  ) {
+    throw new Error("admin AI generation knowledge node candidate is invalid");
+  }
+
+  const generatedLabels = normalizeCandidateLabels(
+    confirmation.generatedLabels as string[],
+  );
+
+  if (generatedLabels === null) {
+    throw new Error("admin AI generation knowledge node candidate is invalid");
+  }
+
+  const questionDraft = createCanonicalQuestionDraft(
+    sourceResult.reviewedDraft,
+  );
+  const candidateSource: AdminAiGenerationFormalQuestionKnowledgeNodeCandidateSource =
+    {
+      schemaVersion: 1,
+      generationMode: confirmation.generationMode,
+      requestPublicId: sourceResult.requestPublicId,
+      resultPublicId: sourceResult.resultPublicId,
+      taskPublicId: sourceResult.taskPublicId,
+      generatedLabels,
+      questionDraft,
+    };
+
+  if (createDigest(candidateSource) !== confirmation.sourceContentDigest) {
+    throw new Error(
+      "admin AI generation knowledge node candidate digest conflict",
+    );
+  }
+
+  const candidateSnapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot = {
+    schemaVersion: 1,
+    generationMode: confirmation.generationMode,
+    resultPublicId: sourceResult.resultPublicId,
+    taskPublicId: sourceResult.taskPublicId,
+    requestPublicId: sourceResult.requestPublicId,
+    sourceContentDigest: confirmation.sourceContentDigest,
+    profession: sourceResult.reviewedDraft.profession,
+    level: sourceResult.reviewedDraft.level as number,
+    generatedLabels,
+  };
+
+  return {
+    candidateSnapshot,
+    candidateDigest: createCandidateDigest(candidateSnapshot),
+    questionDraft,
+  };
+}
+
+function createCanonicalQuestionDraft(
+  value: Record<string, unknown>,
+): AdminAiGenerationFormalQuestionDraftPayload {
+  return {
+    questionType:
+      value.questionType as AdminAiGenerationFormalQuestionDraftPayload["questionType"],
+    profession:
+      value.profession as AdminAiGenerationFormalQuestionDraftPayload["profession"],
+    level: value.level as number,
+    subject:
+      value.subject as AdminAiGenerationFormalQuestionDraftPayload["subject"],
+    difficulty:
+      value.difficulty as AdminAiGenerationFormalQuestionDraftPayload["difficulty"],
+    stemRichText: value.stemRichText as string,
+    analysisRichText: value.analysisRichText as string,
+    standardAnswerRichText: value.standardAnswerRichText as string,
+    multiChoiceRule:
+      value.multiChoiceRule as AdminAiGenerationFormalQuestionDraftPayload["multiChoiceRule"],
+    scoringMethod:
+      value.scoringMethod as AdminAiGenerationFormalQuestionDraftPayload["scoringMethod"],
+    materialPublicId: value.materialPublicId as string | null,
+    questionOptions:
+      value.questionOptions as AdminAiGenerationFormalQuestionDraftPayload["questionOptions"],
+    scoringPoints:
+      value.scoringPoints as AdminAiGenerationFormalQuestionDraftPayload["scoringPoints"],
+    fillBlankAnswers:
+      value.fillBlankAnswers as AdminAiGenerationFormalQuestionDraftPayload["fillBlankAnswers"],
+    knowledgeNodePublicIds: [],
+    tagPublicIds: value.tagPublicIds as string[],
+  };
+}
+
+function normalizeCandidateLabels(values: string[]): string[] | null {
+  const exactLabels = new Set<string>();
+  const collisionKeys = new Set<string>();
+  const labels: string[] = [];
+
+  for (const value of values) {
+    const label = value.trim().normalize("NFC");
+    const collisionKey = label.normalize("NFKC").toLocaleLowerCase("und");
+
+    if (
+      label !== value ||
+      label.length === 0 ||
+      label.length > 128 ||
+      /[\u0000-\u001f\u007f-\u009f]/u.test(label) ||
+      exactLabels.has(label) ||
+      collisionKeys.has(collisionKey)
+    ) {
+      return null;
+    }
+
+    exactLabels.add(label);
+    collisionKeys.add(collisionKey);
+    labels.push(label);
+  }
+
+  return labels.length > 50 ? null : labels;
+}
+
+function assertExactKnowledgeNodeResolution(
+  generatedLabels: string[],
+  mappings: NonNullable<
+    CreateAdminAiGenerationFormalAdoptionInput["knowledgeNodeResolutions"]
+  >,
+): void {
+  if (
+    mappings.length !== generatedLabels.length ||
+    mappings.some(
+      (mapping, index) => mapping.label !== generatedLabels[index],
+    ) ||
+    new Set(mappings.map((mapping) => mapping.knowledgeNodePublicId)).size !==
+      mappings.length
+  ) {
+    throw new Error("admin AI generation knowledge node resolution conflict");
+  }
+}
+
+function assertKnowledgeNodesEligible(
+  candidate: AdminAiGenerationKnowledgeNodeCandidateSnapshot,
+  mappings: NonNullable<
+    CreateAdminAiGenerationFormalAdoptionInput["knowledgeNodeResolutions"]
+  >,
+  knowledgeNodes: Awaited<
+    ReturnType<
+      AdminAiGenerationFormalAdoptionGateway["findKnowledgeNodesForResolution"]
+    >
+  >,
+): void {
+  const knowledgeNodeByPublicId = new Map(
+    knowledgeNodes.map((knowledgeNode) => [
+      knowledgeNode.publicId,
+      knowledgeNode,
+    ]),
+  );
+  const knowledgeBasePublicIds = new Set<string>();
+
+  for (const mapping of mappings) {
+    const knowledgeNode = knowledgeNodeByPublicId.get(
+      mapping.knowledgeNodePublicId,
+    );
+
+    if (
+      knowledgeNode === undefined ||
+      knowledgeNode.profession !== candidate.profession ||
+      (knowledgeNode.levelList.length > 0 &&
+        !knowledgeNode.levelList.includes(candidate.level)) ||
+      !knowledgeNode.isActive ||
+      !knowledgeNode.isRecommendable
+    ) {
+      throw new Error(
+        "admin AI generation knowledge node resolution is not eligible",
+      );
+    }
+
+    knowledgeBasePublicIds.add(knowledgeNode.knowledgeBasePublicId);
+  }
+
+  if (
+    knowledgeNodeByPublicId.size !== mappings.length ||
+    knowledgeBasePublicIds.size !== 1
+  ) {
+    throw new Error(
+      "admin AI generation knowledge node resolution is not eligible",
+    );
+  }
+}
+
+function assertKnowledgeNodeBindingMatchesRow(
+  row: AdminAiGenerationFormalAdoptionRow,
+  binding: KnowledgeNodeResolutionBinding | null,
+): void {
+  if (binding === null) {
+    if (
+      row.knowledge_node_candidate_snapshot !== null ||
+      row.knowledge_node_candidate_digest !== null ||
+      row.knowledge_node_resolution_snapshot !== null ||
+      row.knowledge_node_resolution_digest !== null
+    ) {
+      throw new Error("admin AI generation knowledge node resolution conflict");
+    }
+
+    return;
+  }
+
+  if (
+    row.knowledge_node_candidate_snapshot === null ||
+    row.knowledge_node_resolution_snapshot === null ||
+    row.knowledge_node_candidate_digest !== binding.candidateDigest ||
+    row.knowledge_node_resolution_digest !== binding.resolutionDigest ||
+    createCandidateDigest(row.knowledge_node_candidate_snapshot) !==
+      binding.candidateDigest ||
+    createResolutionDigest(row.knowledge_node_resolution_snapshot) !==
+      binding.resolutionDigest
+  ) {
+    throw new Error("admin AI generation knowledge node resolution conflict");
+  }
+}
+
+function resolveTrustedReviewedDraft(
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  adoptionRow: AdminAiGenerationFormalAdoptionRow,
+): unknown {
+  const candidate = parseGeneratedKnowledgeCandidate(sourceResult);
+
+  if (candidate === null) {
+    assertKnowledgeNodeBindingMatchesRow(adoptionRow, null);
+    return sourceResult.reviewedDraft;
+  }
+
+  const resolutionSnapshot = adoptionRow.knowledge_node_resolution_snapshot;
+
+  if (
+    adoptionRow.review_status !== "approved_for_formal_adoption" ||
+    resolutionSnapshot === null ||
+    resolutionSnapshot.decision !== "approved"
+  ) {
+    throw new Error(
+      "admin AI generation knowledge node resolution is not eligible",
+    );
+  }
+
+  const binding: KnowledgeNodeResolutionBinding = {
+    ...candidate,
+    resolutionSnapshot,
+    resolutionDigest: createResolutionDigest(resolutionSnapshot),
+  };
+  assertKnowledgeNodeBindingMatchesRow(adoptionRow, binding);
+  assertExactKnowledgeNodeResolution(
+    candidate.candidateSnapshot.generatedLabels,
+    resolutionSnapshot.mappings,
+  );
+
+  return {
+    ...candidate.questionDraft,
+    knowledgeNodePublicIds: resolutionSnapshot.mappings.map(
+      (mapping) => mapping.knowledgeNodePublicId,
+    ),
+  };
+}
+
+function createCandidateDigest(
+  snapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot,
+): string {
+  return createDigest({
+    schemaVersion: 1,
+    generationMode: snapshot.generationMode,
+    resultPublicId: snapshot.resultPublicId,
+    taskPublicId: snapshot.taskPublicId,
+    requestPublicId: snapshot.requestPublicId,
+    sourceContentDigest: snapshot.sourceContentDigest,
+    profession: snapshot.profession,
+    level: snapshot.level,
+    generatedLabels: snapshot.generatedLabels,
+  });
+}
+
+function createResolutionDigest(
+  snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot,
+): string {
+  return createDigest({
+    schemaVersion: 1,
+    decision: snapshot.decision,
+    sourceContentDigest: snapshot.sourceContentDigest,
+    generatedLabels: snapshot.generatedLabels,
+    mappings: snapshot.mappings,
+  });
+}
+
+function createDigest(value: unknown): string {
+  return `sha256:${createHash("sha256").update(JSON.stringify(value)).digest("hex")}`;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isProfession(
+  value: unknown,
+): value is "monopoly" | "marketing" | "logistics" {
+  return value === "monopoly" || value === "marketing" || value === "logistics";
+}
+
 function createAdoptionLookupQuery(
   input: Pick<
     CreateAdminAiGenerationFormalAdoptionInput,
@@ -260,6 +688,7 @@ function createAdoptionLookupQuery(
 function createInsertAdoptionRecordInput(
   input: CreateAdminAiGenerationFormalAdoptionInput,
   sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  knowledgeNodeBinding: KnowledgeNodeResolutionBinding | null,
 ): InsertAdminAiGenerationFormalAdoptionInput {
   return {
     adoptionPublicId: input.adoptionPublicId,
@@ -284,6 +713,13 @@ function createInsertAdoptionRecordInput(
     evidenceStatus: sourceResult.evidenceStatus,
     citationCount: sourceResult.citationCount,
     aiCallLogPublicId: sourceResult.aiCallLogPublicId,
+    knowledgeNodeCandidateSnapshot:
+      knowledgeNodeBinding?.candidateSnapshot ?? null,
+    knowledgeNodeCandidateDigest: knowledgeNodeBinding?.candidateDigest ?? null,
+    knowledgeNodeResolutionSnapshot:
+      knowledgeNodeBinding?.resolutionSnapshot ?? null,
+    knowledgeNodeResolutionDigest:
+      knowledgeNodeBinding?.resolutionDigest ?? null,
     createdAt: input.reviewedAt,
   };
 }

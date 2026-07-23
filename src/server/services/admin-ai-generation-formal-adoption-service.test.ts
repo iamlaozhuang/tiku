@@ -321,4 +321,36 @@ describe("admin AI generation formal adoption service", () => {
     expect(formalDraftAdapter.createFormalDraft).not.toHaveBeenCalled();
     expect(adoptionRepository.markFormalDraftCreated).not.toHaveBeenCalled();
   });
+
+  it("maps generated-knowledge resolution conflicts to a stable eligibility error", async () => {
+    const adoptionRepository = createRepository(createRejectedAdoptionResult());
+    adoptionRepository.createOrReuseFormalAdoption.mockRejectedValueOnce(
+      new Error("admin AI generation knowledge node resolution conflict"),
+    );
+    const service = createAdminAiGenerationFormalAdoptionService({
+      adoptionRepository,
+      formalDraftAdapter: createFormalDraftAdapter(),
+    });
+
+    const response = await service.approveFormalAdoption({
+      adoptionPublicId: "admin_ai_formal_adoption_public_service_177",
+      actor: {
+        publicId: "admin_content_public_177",
+        roles: ["content_admin"],
+      },
+      resultPublicId: "admin_ai_generation_result_content_question_177",
+      expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      targetType: "question",
+      reviewDecision: "approved",
+      reviewerConfirmed: true,
+      reviewedAt: "2026-06-26T20:00:00.000Z",
+    });
+
+    expect(response).toEqual({
+      code: 409014,
+      message:
+        "Admin AI generation result is not eligible for formal adoption.",
+      data: null,
+    });
+  });
 });

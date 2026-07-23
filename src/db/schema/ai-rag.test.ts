@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
@@ -13,6 +16,7 @@ import {
   aiScoringAttemptStatusValues,
   aiScoringTask,
   aiScoringTaskStatusValues,
+  adminAiGenerationFormalAdoption,
   knowledgeBase,
   knowledgeNode,
   knowledgeNodeResource,
@@ -1163,5 +1167,46 @@ describe("admin AI generated content result schema", () => {
         (databaseObjectName) => databaseObjectName.length <= 63,
       ),
     ).toBe(true);
+  });
+});
+
+describe("admin AI generated knowledge confirmation schema", () => {
+  it("adds legacy-nullable immutable candidate and resolution snapshot pairs", () => {
+    expect(getColumnNames(adminAiGenerationFormalAdoption)).toEqual(
+      expect.arrayContaining([
+        "knowledge_node_candidate_snapshot",
+        "knowledge_node_candidate_digest",
+        "knowledge_node_resolution_snapshot",
+        "knowledge_node_resolution_digest",
+      ]),
+    );
+    expect(getCheckNames(adminAiGenerationFormalAdoption)).toEqual(
+      expect.arrayContaining([
+        "chk_admin_ai_formal_adoption_kn_resolution_coherence",
+        "chk_admin_ai_formal_adoption_kn_digest_format",
+      ]),
+    );
+    expect(
+      getColumnConfig(
+        adminAiGenerationFormalAdoption,
+        "knowledge_node_candidate_snapshot",
+      )?.notNull,
+    ).toBe(false);
+  });
+
+  it("keeps the migration source purely additive and data-free", () => {
+    const migrationSql = readFileSync(
+      resolve(
+        process.cwd(),
+        "drizzle/20260722233000_p1_rc_07_formal_question_knowledge_confirmation.sql",
+      ),
+      "utf8",
+    );
+
+    expect(migrationSql.match(/ADD COLUMN/gu)).toHaveLength(4);
+    expect(migrationSql.match(/ADD CONSTRAINT/gu)).toHaveLength(2);
+    expect(migrationSql).not.toMatch(
+      /\b(?:UPDATE|DELETE|DROP|TRUNCATE|INSERT)\b|ALTER\s+COLUMN|SET\s+DEFAULT|SET\s+NOT\s+NULL/iu,
+    );
   });
 });

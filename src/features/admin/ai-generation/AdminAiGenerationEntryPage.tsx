@@ -15,6 +15,7 @@ import {
   type AdminFeedback,
 } from "@/components/admin/AdminToast/AdminToast";
 import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
+import type { AdminAiGenerationFormalQuestionReviewCandidatePayload } from "@/server/contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   AdminAiGenerationTaskHistoryGeneratedResultDto,
@@ -139,6 +140,10 @@ type ContentAdminReviewActionInput = {
   resultPublicId: string;
   reviewDecision: ContentAdminReviewDecision;
   weakEvidenceConfirmed?: boolean;
+  knowledgeNodeResolutions?: Array<{
+    label: string;
+    knowledgeNodePublicId: string;
+  }>;
 };
 type OrganizationAiTrainingDraftCopyState =
   | "idle"
@@ -755,6 +760,33 @@ function mapAdminAiKnowledgeNodeOption(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function resolveGeneratedKnowledgeReviewCandidate(
+  value: AdminAiGenerationFormalReviewedDraftPayload | null,
+): AdminAiGenerationFormalQuestionReviewCandidatePayload | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const candidateRecord = value as Record<string, unknown>;
+  const confirmation = candidateRecord.knowledgeNodeConfirmation;
+
+  if (!isRecord(confirmation)) {
+    return null;
+  }
+
+  return confirmation.schemaVersion === 1 &&
+    confirmation.status === "unresolved" &&
+    (confirmation.generationMode === "balanced" ||
+      confirmation.generationMode === "comprehensive") &&
+    Array.isArray(confirmation.generatedLabels) &&
+    confirmation.generatedLabels.length > 0 &&
+    confirmation.generatedLabels.every((label) => typeof label === "string") &&
+    isAdminAiGenerationProfession(candidateRecord.profession) &&
+    isAdminAiGenerationLevel(candidateRecord.level)
+    ? (candidateRecord as AdminAiGenerationFormalQuestionReviewCandidatePayload)
+    : null;
 }
 
 function isAdminAiGenerationProfession(
@@ -2575,6 +2607,7 @@ function AdminAiGenerationTaskHistoryPanel({
                     </dl>
                     {workspace === "content" ? (
                       <ContentAdminReviewTraceabilityPanel
+                        key={`${taskItem.generatedResult.resultPublicId}:${taskItem.generatedResult.contentDigest}`}
                         actionState={
                           reviewActionStateByResultPublicId[
                             taskItem.generatedResult.resultPublicId
@@ -2837,6 +2870,105 @@ function ContentAdminReviewTraceabilityPanel({
   traceabilitySummary: ContentAdminGenerationTraceabilitySummary | null;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
 }) {
+  const generatedKnowledgeCandidate =
+    resolveGeneratedKnowledgeReviewCandidate(reviewedDraft);
+  const [candidateKnowledgeNodeOptions, setCandidateKnowledgeNodeOptions] =
+    useState<AdminAiKnowledgeNodeOption[]>([]);
+  const [candidateKnowledgeNodeLoadState, setCandidateKnowledgeNodeLoadState] =
+    useState<AdminAiKnowledgeNodeLoadState>("idle");
+  const [candidateResolutionByIndex, setCandidateResolutionByIndex] = useState<
+    string[]
+  >([]);
+  const candidateIdentity =
+    generatedKnowledgeCandidate?.knowledgeNodeConfirmation
+      .sourceContentDigest ?? null;
+  const candidateProfession = generatedKnowledgeCandidate?.profession ?? null;
+  const candidateLevel = generatedKnowledgeCandidate?.level ?? null;
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (
+      candidateIdentity === null ||
+      candidateProfession === null ||
+      candidateLevel === null
+    ) {
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const profession = candidateProfession;
+    const level =
+      candidateLevel as AiGenerationRouteIntegratedGenerationParameters["level"];
+
+    async function loadCandidateKnowledgeNodes() {
+      try {
+        const response = await fetchAdminApi<AdminKnowledgeNodeOpsListDto>(
+          createAdminAiKnowledgeNodeOptionsPath({ profession, level }),
+          getStoredSessionToken(),
+          { method: "GET" },
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (
+          isUnauthorizedResponse(response) ||
+          response.code !== 0 ||
+          response.data === null
+        ) {
+          setCandidateKnowledgeNodeLoadState("error");
+          return;
+        }
+
+        const options = response.data.knowledgeNodes
+          .filter((knowledgeNode) =>
+            isAdminAiKnowledgeNodeVisibleForGenerationParameters(
+              knowledgeNode,
+              { profession, level },
+            ),
+          )
+          .map(mapAdminAiKnowledgeNodeOption);
+        setCandidateKnowledgeNodeOptions(options);
+        setCandidateKnowledgeNodeLoadState(
+          options.length === 0 ? "empty" : "ready",
+        );
+      } catch {
+        if (isActive) {
+          setCandidateKnowledgeNodeLoadState("error");
+        }
+      }
+    }
+
+    void loadCandidateKnowledgeNodes();
+
+    return () => {
+      isActive = false;
+    };
+  }, [candidateIdentity, candidateLevel, candidateProfession]);
+
+  const knowledgeNodeResolutions =
+    generatedKnowledgeCandidate === null
+      ? undefined
+      : generatedKnowledgeCandidate.knowledgeNodeConfirmation.generatedLabels
+          .map((label, index) => ({
+            label,
+            knowledgeNodePublicId: candidateResolutionByIndex[index] ?? "",
+          }))
+          .filter((mapping) => mapping.knowledgeNodePublicId.length > 0);
+  const isCandidateResolutionReady =
+    generatedKnowledgeCandidate === null ||
+    (candidateKnowledgeNodeLoadState === "ready" &&
+      knowledgeNodeResolutions?.length ===
+        generatedKnowledgeCandidate.knowledgeNodeConfirmation.generatedLabels
+          .length &&
+      new Set(
+        knowledgeNodeResolutions.map(
+          (mapping) => mapping.knowledgeNodePublicId,
+        ),
+      ).size === knowledgeNodeResolutions.length);
   const isSubmitting =
     actionState === "adopting" || actionState === "rejecting";
   const reviewReadiness = getContentAdminReviewReadiness(generatedResult);
@@ -2864,7 +2996,8 @@ function ContentAdminReviewTraceabilityPanel({
     isSubmitting ||
     isCompleted ||
     reviewReadiness === "blocked" ||
-    !hasReviewedDraft;
+    !hasReviewedDraft ||
+    !isCandidateResolutionReady;
   const isRejectActionDisabled = isSubmitting || isCompleted;
   const evidenceLabel =
     reviewReadiness === "ready"
@@ -3022,6 +3155,56 @@ function ContentAdminReviewTraceabilityPanel({
         ))}
       </div>
 
+      {generatedKnowledgeCandidate === null ? null : (
+        <section
+          className="border-border bg-muted/40 mt-3 rounded-md border p-3"
+          data-testid="content-admin-generated-knowledge-confirmation"
+        >
+          <p className="text-brand-primary text-xs font-medium">知识点确认</p>
+          <p className="text-text-secondary mt-1 text-xs leading-5">
+            生成标签不会自动成为正式知识点；采用前须逐项绑定当前范围内的知识点。
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {generatedKnowledgeCandidate.knowledgeNodeConfirmation.generatedLabels.map(
+              (label, index) => (
+                <label className="block" key={label}>
+                  <span className="text-text-secondary text-xs font-medium">
+                    {label}
+                  </span>
+                  <select
+                    aria-label={`确认知识点 ${label}`}
+                    className={aiGenerationDetailControlClassName}
+                    disabled={candidateKnowledgeNodeLoadState !== "ready"}
+                    value={candidateResolutionByIndex[index] ?? ""}
+                    onChange={(event) => {
+                      const knowledgeNodePublicId = event.currentTarget.value;
+                      setCandidateResolutionByIndex((current) => {
+                        const next = [...current];
+                        next[index] = knowledgeNodePublicId;
+                        return next;
+                      });
+                    }}
+                  >
+                    <option value="">请选择正式知识点</option>
+                    {candidateKnowledgeNodeOptions.map((option) => (
+                      <option key={option.publicId} value={option.publicId}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ),
+            )}
+          </div>
+          {candidateKnowledgeNodeLoadState === "error" ||
+          candidateKnowledgeNodeLoadState === "empty" ? (
+            <p className="text-destructive mt-2 text-xs" role="alert">
+              当前范围的知识点暂不可用于确认，不能采用该草稿。
+            </p>
+          ) : null}
+        </section>
+      )}
+
       <div
         className="border-border bg-muted/40 mt-3 rounded-md border p-3"
         data-testid="content-admin-formal-draft-detail-entry"
@@ -3064,6 +3247,7 @@ function ContentAdminReviewTraceabilityPanel({
                 reviewReadiness === "weak_confirmation_required"
                   ? true
                   : undefined,
+              knowledgeNodeResolutions,
             })
           }
         >
@@ -3782,6 +3966,7 @@ export function AdminAiGenerationEntryPage({
               targetType: input.generationKind,
               expectedContentDigest: input.expectedContentDigest,
               weakEvidenceConfirmed: input.weakEvidenceConfirmed,
+              knowledgeNodeResolutions: input.knowledgeNodeResolutions,
             }),
             headers: {
               "content-type": "application/json",

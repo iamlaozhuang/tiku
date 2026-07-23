@@ -149,7 +149,8 @@ function mapFormalAdoptionRepositoryError(error: unknown): ApiResponse<null> {
     message.includes("not eligible") ||
     message.includes("target type mismatch") ||
     message.includes("content digest conflict") ||
-    message.includes("review decision conflict")
+    message.includes("review decision conflict") ||
+    message.includes("knowledge node")
   ) {
     return createErrorResponse(
       ADMIN_AI_GENERATION_FORMAL_ADOPTION_ERROR_CODES.resultNotEligible,

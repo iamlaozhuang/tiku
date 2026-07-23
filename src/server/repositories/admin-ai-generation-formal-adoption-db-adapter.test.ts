@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type {
   AdminAiGenerationFormalAdoptionRow,
+  AdminAiGenerationKnowledgeNodeCandidateSnapshot,
+  AdminAiGenerationKnowledgeNodeResolutionSnapshot,
   InsertAdminAiGenerationFormalAdoptionInput,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
 import type { AdminAiGenerationFormalAdoptionSourceResult } from "../models/admin-ai-generation-formal-adoption";
@@ -38,6 +40,10 @@ function createAdoptionInput(
     evidenceStatus: "weak",
     citationCount: 1,
     aiCallLogPublicId: null,
+    knowledgeNodeCandidateSnapshot: null,
+    knowledgeNodeCandidateDigest: null,
+    knowledgeNodeResolutionSnapshot: null,
+    knowledgeNodeResolutionDigest: null,
     createdAt: new Date("2026-06-26T23:50:00.000Z"),
     ...overrides,
   };
@@ -70,6 +76,10 @@ function createAdoptionDbRow(
     evidence_status: "weak",
     citation_count: 1,
     ai_call_log_public_id: null,
+    knowledge_node_candidate_snapshot: null,
+    knowledge_node_candidate_digest: null,
+    knowledge_node_resolution_snapshot: null,
+    knowledge_node_resolution_digest: null,
     created_at: new Date("2026-06-26T23:50:00.000Z"),
     updated_at: new Date("2026-06-26T23:50:00.000Z"),
     ...overrides,
@@ -142,6 +152,10 @@ type AdminAiGenerationFormalAdoptionDbRowFixture = {
   evidence_status: string;
   citation_count: number;
   ai_call_log_public_id: string | null;
+  knowledge_node_candidate_snapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot | null;
+  knowledge_node_candidate_digest: string | null;
+  knowledge_node_resolution_snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
+  knowledge_node_resolution_digest: string | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -167,6 +181,51 @@ type AdminAiGenerationFormalAdoptionSourceResultDbRowFixture = {
 };
 
 describe("admin AI generation formal adoption DB adapter", () => {
+  it("maps immutable generated-knowledge snapshots and digests without exposing them in public DTOs", () => {
+    const candidateSnapshot = {
+      schemaVersion: 1 as const,
+      generationMode: "balanced" as const,
+      resultPublicId: "admin_ai_generation_result_public_901",
+      taskPublicId: "admin_ai_generation_task_public_901",
+      requestPublicId: "admin_ai_generation_request_public_901",
+      sourceContentDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      profession: "marketing" as const,
+      level: 3,
+      generatedLabels: ["营销基础"],
+    };
+    const resolutionSnapshot = {
+      schemaVersion: 1 as const,
+      decision: "approved" as const,
+      sourceContentDigest: candidateSnapshot.sourceContentDigest,
+      generatedLabels: ["营销基础"],
+      mappings: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+      ],
+    };
+    const values = createAdminAiGenerationFormalAdoptionInsertValue(
+      createAdoptionInput({
+        knowledgeNodeCandidateSnapshot: candidateSnapshot,
+        knowledgeNodeCandidateDigest:
+          "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        knowledgeNodeResolutionSnapshot: resolutionSnapshot,
+        knowledgeNodeResolutionDigest:
+          "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      }),
+    );
+
+    expect(values).toMatchObject({
+      knowledge_node_candidate_snapshot: candidateSnapshot,
+      knowledge_node_candidate_digest:
+        "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      knowledge_node_resolution_snapshot: resolutionSnapshot,
+      knowledge_node_resolution_digest:
+        "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    });
+  });
   it("builds metadata-only adoption insert values without raw generated content or formal draft writes", () => {
     const input = createAdoptionInput();
     const values = createAdminAiGenerationFormalAdoptionInsertValue(input);

@@ -1,5 +1,7 @@
 import type {
+  AdminAiGenerationFormalQuestionKnowledgeNodeCandidateSource,
   AdminAiGenerationFormalQuestionDraftPayload,
+  AdminAiGenerationFormalQuestionReviewCandidatePayload,
   AdminAiGenerationFormalReviewedDraftPayload,
 } from "@/server/contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type {
@@ -28,6 +30,14 @@ type CreateContentAdminFormalReviewedDraftPayloadInput = {
   localContractSummary: ContentAdminFormalReviewedDraftLocalContract | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   requestedAt: string;
+  sourceIdentity?: {
+    requestPublicId: string;
+    resultPublicId: string;
+    taskPublicId: string;
+  };
+  createSourceContentDigest?: (
+    source: AdminAiGenerationFormalQuestionKnowledgeNodeCandidateSource,
+  ) => string;
 };
 
 export type { AdminAiGenerationFormalReviewedDraftPayload };
@@ -53,6 +63,8 @@ export function createContentAdminFormalReviewedDraftPayload({
   localContractSummary,
   generationParameters,
   requestedAt,
+  sourceIdentity,
+  createSourceContentDigest,
 }: CreateContentAdminFormalReviewedDraftPayloadInput): AdminAiGenerationFormalReviewedDraftPayload | null {
   if (localContractSummary?.workspace !== "content") {
     return null;
@@ -80,6 +92,9 @@ export function createContentAdminFormalReviewedDraftPayload({
     return createFormalQuestionDraftPayload(
       structuredPreview.draftSummaries[0],
       generationParameters,
+      sourceIdentity === undefined || createSourceContentDigest === undefined
+        ? undefined
+        : { sourceIdentity, createSourceContentDigest },
     );
   }
 
@@ -153,7 +168,18 @@ export function createContentAdminFormalReviewedDraftPayload({
 function createFormalQuestionDraftPayload(
   questionDraft: AiGenerationRouteIntegratedQuestionDraftSummary,
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
-): AdminAiGenerationFormalQuestionDraftPayload | null {
+  candidateContext?: {
+    sourceIdentity: NonNullable<
+      CreateContentAdminFormalReviewedDraftPayloadInput["sourceIdentity"]
+    >;
+    createSourceContentDigest: NonNullable<
+      CreateContentAdminFormalReviewedDraftPayloadInput["createSourceContentDigest"]
+    >;
+  },
+):
+  | AdminAiGenerationFormalQuestionDraftPayload
+  | AdminAiGenerationFormalQuestionReviewCandidatePayload
+  | null {
   const stemRichText = normalizeRequiredText(questionDraft.questionStem);
   const standardAnswerRichText = normalizeRequiredText(
     questionDraft.standardAnswer,
@@ -176,17 +202,11 @@ function createFormalQuestionDraftPayload(
     ...new Set(generationParameters.knowledgeNodePublicIds),
   ];
 
-  if (
-    difficulty === null ||
-    generationParameters.knowledgeNodeMode !== "selected" ||
-    knowledgeNodePublicIds.length === 0 ||
-    knowledgeNodePublicIds.length !==
-      generationParameters.knowledgeNodePublicIds.length
-  ) {
+  if (difficulty === null) {
     return null;
   }
 
-  return {
+  const questionPayload: AdminAiGenerationFormalQuestionDraftPayload = {
     questionType,
     profession: generationParameters.profession as Profession,
     level: generationParameters.level,
@@ -210,6 +230,107 @@ function createFormalQuestionDraftPayload(
     knowledgeNodePublicIds,
     tagPublicIds: [],
   };
+
+  if (generationParameters.knowledgeNodeMode === "selected") {
+    return knowledgeNodePublicIds.length > 0 &&
+      knowledgeNodePublicIds.length ===
+        generationParameters.knowledgeNodePublicIds.length
+      ? questionPayload
+      : null;
+  }
+
+  if (
+    candidateContext === undefined ||
+    (generationParameters.knowledgeNodeMode !== "balanced" &&
+      generationParameters.knowledgeNodeMode !== "comprehensive")
+  ) {
+    return null;
+  }
+
+  const generatedLabels = normalizeGeneratedKnowledgeNodeLabels(
+    questionDraft.knowledgeNodeLabels,
+  );
+
+  if (generatedLabels === null) {
+    return null;
+  }
+
+  const candidateSource: AdminAiGenerationFormalQuestionKnowledgeNodeCandidateSource =
+    {
+      schemaVersion: 1,
+      generationMode: generationParameters.knowledgeNodeMode,
+      requestPublicId: candidateContext.sourceIdentity.requestPublicId,
+      resultPublicId: candidateContext.sourceIdentity.resultPublicId,
+      taskPublicId: candidateContext.sourceIdentity.taskPublicId,
+      generatedLabels,
+      questionDraft: {
+        ...questionPayload,
+        knowledgeNodePublicIds: [],
+      },
+    };
+  const sourceContentDigest =
+    candidateContext.createSourceContentDigest(candidateSource);
+
+  if (!/^sha256:[0-9a-f]{64}$/u.test(sourceContentDigest)) {
+    return null;
+  }
+
+  return {
+    ...candidateSource.questionDraft,
+    knowledgeNodePublicIds: [],
+    knowledgeNodeConfirmation: {
+      schemaVersion: 1,
+      status: "unresolved",
+      generationMode: candidateSource.generationMode,
+      requestPublicId: candidateSource.requestPublicId,
+      resultPublicId: candidateSource.resultPublicId,
+      taskPublicId: candidateSource.taskPublicId,
+      sourceContentDigest,
+      generatedLabels,
+    },
+  };
+}
+
+function normalizeGeneratedKnowledgeNodeLabels(
+  values: readonly string[] | undefined,
+): string[] | null {
+  if (values === undefined || values.length === 0 || values.length > 50) {
+    return null;
+  }
+
+  const generatedLabels: string[] = [];
+  const exactLabels = new Set<string>();
+  const collisionKeys = new Set<string>();
+
+  for (const value of values) {
+    const label = value.normalize("NFC");
+
+    if (
+      label !== value ||
+      label.trim() !== label ||
+      label.length === 0 ||
+      label.length > 128 ||
+      /[\u0000-\u001f\u007f-\u009f]/u.test(label)
+    ) {
+      return null;
+    }
+
+    if (exactLabels.has(label)) {
+      continue;
+    }
+
+    const collisionKey = label.normalize("NFKC").toLocaleLowerCase("und");
+
+    if (collisionKeys.has(collisionKey)) {
+      return null;
+    }
+
+    exactLabels.add(label);
+    collisionKeys.add(collisionKey);
+    generatedLabels.push(label);
+  }
+
+  return generatedLabels.length === 0 ? null : generatedLabels;
 }
 
 function normalizeQuestionDifficulty(

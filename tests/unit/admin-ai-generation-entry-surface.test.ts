@@ -490,6 +490,55 @@ function createTaskHistoryResponse(input: {
   };
 }
 
+function createGeneratedKnowledgeConfirmationReviewedDraft(
+  resultPublicId: string,
+) {
+  return {
+    questionType: "single_choice" as const,
+    profession: "marketing" as const,
+    level: 3,
+    subject: "theory" as const,
+    difficulty: "medium" as const,
+    stemRichText: "server-owned question",
+    standardAnswerRichText: "A",
+    analysisRichText: "server-owned analysis",
+    multiChoiceRule: "all_correct_only" as const,
+    scoringMethod: "manual" as const,
+    materialPublicId: null,
+    questionOptions: [
+      {
+        publicId: "question_option_public_a",
+        optionLabel: "A",
+        optionText: "server-owned option A",
+        isCorrect: true,
+        sortOrder: 1,
+      },
+      {
+        publicId: "question_option_public_b",
+        optionLabel: "B",
+        optionText: "server-owned option B",
+        isCorrect: false,
+        sortOrder: 2,
+      },
+    ],
+    scoringPoints: [],
+    fillBlankAnswers: [],
+    knowledgeNodePublicIds: [],
+    tagPublicIds: [],
+    knowledgeNodeConfirmation: {
+      schemaVersion: 1 as const,
+      status: "unresolved" as const,
+      generationMode: "balanced" as const,
+      requestPublicId: "admin_ai_generation_request_candidate_shared",
+      resultPublicId,
+      taskPublicId: "admin_ai_generation_task_candidate_shared",
+      sourceContentDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      generatedLabels: ["营销基础"],
+    },
+  };
+}
+
 function createEmptyTaskHistoryResponse(workspace: "content" | "organization") {
   return {
     code: 0,
@@ -2519,10 +2568,18 @@ describe("admin AI generation entry surfaces", () => {
                     "redacted generated result summary for current review",
                   evidenceStatus: "sufficient",
                   citationCount: 2,
+                  reviewedDraft:
+                    createGeneratedKnowledgeConfirmationReviewedDraft(
+                      resultPublicId,
+                    ),
                 },
               })
             : createEmptyTaskHistoryResponse("content"),
         );
+      }
+
+      if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+        return Response.json(createAiKnowledgeNodeOptionsResponse());
       }
 
       if (path === adoptionUrl && init?.method === "POST") {
@@ -2609,6 +2666,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("content-admin-review-next-actions"),
     ).toHaveTextContent("采用到内容草稿");
+    fireEvent.change(await screen.findByLabelText("确认知识点 营销基础"), {
+      target: { value: "knowledge-node-public-marketing-3" },
+    });
     fireEvent.click(
       await screen.findByTestId("content-admin-review-adopt-action"),
     );
@@ -3336,6 +3396,177 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
   });
 
+  it("requires exact generated-label knowledge-node confirmation before adoption", async () => {
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_candidate_456";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewedDraft = {
+      questionType: "short_answer",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      difficulty: "medium",
+      stemRichText: "server-owned question",
+      standardAnswerRichText: "server-owned answer",
+      analysisRichText: "server-owned analysis",
+      multiChoiceRule: "all_correct_only",
+      scoringMethod: "ai_scoring",
+      materialPublicId: null,
+      questionOptions: [],
+      scoringPoints: [],
+      fillBlankAnswers: [],
+      knowledgeNodePublicIds: [],
+      tagPublicIds: [],
+      knowledgeNodeConfirmation: {
+        schemaVersion: 1,
+        status: "unresolved",
+        generationMode: "balanced",
+        requestPublicId: "admin_ai_generation_request_candidate_456",
+        resultPublicId,
+        taskPublicId: "admin_ai_generation_task_candidate_456",
+        sourceContentDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        generatedLabels: ["营销基础", "客户需求"],
+      },
+    };
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked: "redacted generated candidate",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              reviewedDraft,
+            },
+          }),
+        );
+      }
+
+      if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            knowledgeNodes: [
+              ...createAiKnowledgeNodeOptionsResponse().data.knowledgeNodes,
+              {
+                ...createAiKnowledgeNodeOptionsResponse().data
+                  .knowledgeNodes[0],
+                publicId: "knowledge-node-public-customer-3",
+                name: "客户需求",
+                pathName: "营销/基础知识/客户需求",
+                sortOrder: 20,
+              },
+            ],
+          },
+        });
+      }
+
+      if (path === adoptionUrl && init?.method === "POST") {
+        const requestBody = JSON.parse(String(init.body));
+        expect(requestBody).toMatchObject({
+          reviewDecision: "approved",
+          knowledgeNodeResolutions: [
+            {
+              label: "营销基础",
+              knowledgeNodePublicId: "knowledge-node-public-marketing-3",
+            },
+            {
+              label: "客户需求",
+              knowledgeNodePublicId: "knowledge-node-public-customer-3",
+            },
+          ],
+        });
+        expect(requestBody).not.toHaveProperty("questionStem");
+        expect(requestBody).not.toHaveProperty("difficulty");
+        expect(requestBody).not.toHaveProperty("reviewedDraft");
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              review: { reviewDecision: "approved" },
+              targetReference: { formalTargetWriteStatus: "draft_created" },
+              redactionStatus: "redacted",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const adoptAction = await screen.findByTestId(
+      "content-admin-review-adopt-action",
+    );
+    expect(adoptAction).toBeDisabled();
+    expect(
+      screen.getByTestId("content-admin-review-reject-action"),
+    ).toBeEnabled();
+
+    const marketingResolution =
+      await screen.findByLabelText("确认知识点 营销基础");
+    const customerResolution = screen.getByLabelText("确认知识点 客户需求");
+    fireEvent.change(marketingResolution, {
+      target: { value: "knowledge-node-public-marketing-3" },
+    });
+    await waitFor(() =>
+      expect(marketingResolution).toHaveValue(
+        "knowledge-node-public-marketing-3",
+      ),
+    );
+    expect(adoptAction).toBeDisabled();
+    fireEvent.change(customerResolution, {
+      target: { value: "knowledge-node-public-marketing-3" },
+    });
+    await waitFor(() =>
+      expect(customerResolution).toHaveValue(
+        "knowledge-node-public-marketing-3",
+      ),
+    );
+    expect(adoptAction).toBeDisabled();
+    fireEvent.change(customerResolution, {
+      target: { value: "knowledge-node-public-customer-3" },
+    });
+
+    await waitFor(() => expect(adoptAction).toBeEnabled());
+    fireEvent.click(adoptAction);
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        adoptionUrl,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+  });
+
   it("keeps content admin adoption disabled until a generated result is grounded", async () => {
     const resultPublicId =
       "admin_ai_generation_result_content_question_ungrounded_hidden_456";
@@ -3529,10 +3760,18 @@ describe("admin AI generation entry surfaces", () => {
                     "redacted generated result summary for weak evidence review",
                   evidenceStatus: "weak",
                   citationCount: 1,
+                  reviewedDraft:
+                    createGeneratedKnowledgeConfirmationReviewedDraft(
+                      resultPublicId,
+                    ),
                 },
               })
             : createEmptyTaskHistoryResponse("content"),
         );
+      }
+
+      if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+        return Response.json(createAiKnowledgeNodeOptionsResponse());
       }
 
       if (path === adoptionUrl && init?.method === "POST") {
@@ -3587,6 +3826,9 @@ describe("admin AI generation entry surfaces", () => {
     const adoptAction = await screen.findByTestId(
       "content-admin-review-adopt-action",
     );
+    fireEvent.change(await screen.findByLabelText("确认知识点 营销基础"), {
+      target: { value: "knowledge-node-public-marketing-3" },
+    });
 
     expect(traceabilityPanel).toHaveTextContent("资料较少");
     expect(traceabilityPanel).toHaveTextContent("需人工确认");

@@ -7,7 +7,9 @@ import type {
   AdminAiGenerationFormalAdoptionTargetDomain,
   AdminAiGenerationFormalAdoptionTargetType,
   AdminAiGenerationFormalTargetWriteStatus,
+  AdminAiGenerationKnowledgeNodeResolutionCommand,
 } from "../models/admin-ai-generation-formal-adoption";
+import type { Profession } from "../models/paper";
 import type {
   AdminAiGenerationKind,
   AdminAiGenerationWorkspace,
@@ -50,7 +52,40 @@ export type InsertAdminAiGenerationFormalAdoptionInput = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   aiCallLogPublicId: string | null;
+  knowledgeNodeCandidateSnapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot | null;
+  knowledgeNodeCandidateDigest: string | null;
+  knowledgeNodeResolutionSnapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
+  knowledgeNodeResolutionDigest: string | null;
   createdAt: Date;
+};
+
+export type AdminAiGenerationKnowledgeNodeCandidateSnapshot = {
+  schemaVersion: 1;
+  generationMode: "balanced" | "comprehensive";
+  resultPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  sourceContentDigest: string;
+  profession: Profession;
+  level: number;
+  generatedLabels: string[];
+};
+
+export type AdminAiGenerationKnowledgeNodeResolutionSnapshot = {
+  schemaVersion: 1;
+  decision: AdminAiGenerationFormalAdoptionReviewDecision;
+  sourceContentDigest: string;
+  generatedLabels: string[];
+  mappings: AdminAiGenerationKnowledgeNodeResolutionCommand[];
+};
+
+export type AdminAiGenerationKnowledgeNodeResolutionRow = {
+  publicId: string;
+  knowledgeBasePublicId: string;
+  profession: Profession;
+  levelList: number[];
+  isActive: boolean;
+  isRecommendable: boolean;
 };
 
 export type MarkAdminAiGenerationFormalDraftCreatedInput = {
@@ -89,6 +124,10 @@ export type AdminAiGenerationFormalAdoptionRow = {
   evidence_status: EvidenceStatus;
   citation_count: number;
   ai_call_log_public_id: string | null;
+  knowledge_node_candidate_snapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot | null;
+  knowledge_node_candidate_digest: string | null;
+  knowledge_node_resolution_snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
+  knowledge_node_resolution_digest: string | null;
   created_at: Date;
 };
 
@@ -480,6 +519,9 @@ export type AdminAiGenerationFormalAdoptionGateway = {
   findSourceResultForAdoption(
     resultPublicId: string,
   ): Promise<AdminAiGenerationFormalAdoptionSourceResult | null>;
+  findKnowledgeNodesForResolution(input: {
+    knowledgeNodePublicIds: string[];
+  }): Promise<AdminAiGenerationKnowledgeNodeResolutionRow[]>;
   insertAdoptionRecord(
     input: InsertAdminAiGenerationFormalAdoptionInput,
   ): Promise<AdminAiGenerationFormalAdoptionRow | null>;

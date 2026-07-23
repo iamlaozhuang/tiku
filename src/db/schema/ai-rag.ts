@@ -799,6 +799,14 @@ export const adminAiGenerationFormalAdoption = pgTable(
       .notNull(),
     citation_count: integer("citation_count").default(0).notNull(),
     ai_call_log_public_id: text("ai_call_log_public_id"),
+    knowledge_node_candidate_snapshot: jsonb(
+      "knowledge_node_candidate_snapshot",
+    ),
+    knowledge_node_candidate_digest: text("knowledge_node_candidate_digest"),
+    knowledge_node_resolution_snapshot: jsonb(
+      "knowledge_node_resolution_snapshot",
+    ),
+    knowledge_node_resolution_digest: text("knowledge_node_resolution_digest"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -822,6 +830,22 @@ export const adminAiGenerationFormalAdoption = pgTable(
     ),
     index("idx_admin_ai_generation_formal_adoption_created_at").on(
       table.created_at,
+    ),
+    check(
+      "chk_admin_ai_formal_adoption_kn_resolution_coherence",
+      sql`(
+        (${table.knowledge_node_candidate_snapshot} is null and ${table.knowledge_node_candidate_digest} is null and ${table.knowledge_node_resolution_snapshot} is null and ${table.knowledge_node_resolution_digest} is null)
+        or
+        (${table.knowledge_node_candidate_snapshot} is not null and jsonb_typeof(${table.knowledge_node_candidate_snapshot}) = 'object' and ${table.knowledge_node_candidate_digest} is not null and ${table.knowledge_node_resolution_snapshot} is not null and jsonb_typeof(${table.knowledge_node_resolution_snapshot}) = 'object' and ${table.knowledge_node_resolution_digest} is not null)
+      )`,
+    ),
+    check(
+      "chk_admin_ai_formal_adoption_kn_digest_format",
+      sql`(
+        (${table.knowledge_node_candidate_digest} is null or ${table.knowledge_node_candidate_digest} ~ '^sha256:[0-9a-f]{64}$')
+        and
+        (${table.knowledge_node_resolution_digest} is null or ${table.knowledge_node_resolution_digest} ~ '^sha256:[0-9a-f]{64}$')
+      )`,
     ),
   ],
 );

@@ -193,7 +193,8 @@ function isQuestionDraftPayload(
     isScoringPointArray(value.scoringPoints) &&
     isFillBlankAnswerArray(value.fillBlankAnswers) &&
     isStringArray(value.knowledgeNodePublicIds) &&
-    isStringArray(value.tagPublicIds)
+    isStringArray(value.tagPublicIds) &&
+    value.knowledgeNodeConfirmation === undefined
   );
 }
 

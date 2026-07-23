@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it, vi } from "vitest";
 
 import type {
@@ -35,6 +37,53 @@ function createSourceResult(
   };
 }
 
+function createGeneratedKnowledgeCandidate() {
+  const questionDraft = {
+    questionType: "short_answer",
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    difficulty: "medium",
+    stemRichText: "trusted server-owned draft",
+    analysisRichText: "trusted server-owned analysis",
+    standardAnswerRichText: "trusted server-owned answer",
+    multiChoiceRule: "all_correct_only",
+    scoringMethod: "ai_scoring",
+    materialPublicId: null,
+    questionOptions: [],
+    scoringPoints: [],
+    fillBlankAnswers: [],
+    knowledgeNodePublicIds: [],
+    tagPublicIds: [],
+  } as const;
+  const candidateSource = {
+    schemaVersion: 1,
+    generationMode: "balanced",
+    requestPublicId: "admin_ai_generation_request_public_177",
+    resultPublicId: "admin_ai_generation_result_public_177",
+    taskPublicId: "admin_ai_generation_task_public_177",
+    generatedLabels: ["营销基础", "客户需求"],
+    questionDraft,
+  } as const;
+  const sourceContentDigest = `sha256:${createHash("sha256")
+    .update(JSON.stringify(candidateSource))
+    .digest("hex")}`;
+
+  return {
+    ...questionDraft,
+    knowledgeNodeConfirmation: {
+      schemaVersion: 1,
+      status: "unresolved",
+      generationMode: "balanced",
+      resultPublicId: "admin_ai_generation_result_public_177",
+      taskPublicId: "admin_ai_generation_task_public_177",
+      requestPublicId: "admin_ai_generation_request_public_177",
+      sourceContentDigest,
+      generatedLabels: ["营销基础", "客户需求"],
+    },
+  } as const;
+}
+
 function createAdoptionRow(
   overrides: Partial<AdminAiGenerationFormalAdoptionRow> = {},
 ): AdminAiGenerationFormalAdoptionRow {
@@ -61,6 +110,10 @@ function createAdoptionRow(
     evidence_status: "weak",
     citation_count: 1,
     ai_call_log_public_id: null,
+    knowledge_node_candidate_snapshot: null,
+    knowledge_node_candidate_digest: null,
+    knowledge_node_resolution_snapshot: null,
+    knowledge_node_resolution_digest: null,
     created_at: new Date("2026-06-26T23:40:00.000Z"),
     ...overrides,
   };
@@ -71,6 +124,14 @@ function createGateway(options: {
   existingRow?: AdminAiGenerationFormalAdoptionRow | null;
   insertedRow?: AdminAiGenerationFormalAdoptionRow | null;
   updatedRow?: AdminAiGenerationFormalAdoptionRow | null;
+  knowledgeNodes?: Array<{
+    publicId: string;
+    knowledgeBasePublicId: string;
+    profession: "marketing";
+    levelList: number[];
+    isActive: boolean;
+    isRecommendable: boolean;
+  }>;
 }) {
   const findAdoptionBySourceResult = vi.fn(
     async () => options.existingRow ?? null,
@@ -78,10 +139,18 @@ function createGateway(options: {
   const findSourceResultForAdoption = vi.fn(
     async () => options.sourceResult ?? createSourceResult(),
   );
-  const insertAdoptionRecord = vi.fn(async () =>
+  const insertAdoptionRecord = vi.fn(async (input) =>
     Object.hasOwn(options, "insertedRow")
       ? (options.insertedRow ?? null)
-      : createAdoptionRow(),
+      : createAdoptionRow({
+          review_status: input.reviewStatus,
+          knowledge_node_candidate_snapshot:
+            input.knowledgeNodeCandidateSnapshot,
+          knowledge_node_candidate_digest: input.knowledgeNodeCandidateDigest,
+          knowledge_node_resolution_snapshot:
+            input.knowledgeNodeResolutionSnapshot,
+          knowledge_node_resolution_digest: input.knowledgeNodeResolutionDigest,
+        }),
   );
   const updateFormalDraftMetadata = vi.fn(
     async () =>
@@ -91,10 +160,33 @@ function createGateway(options: {
         formal_target_write_status: "draft_created",
       }),
   );
+  const findKnowledgeNodesForResolution = vi.fn(async () =>
+    options.knowledgeNodes === undefined
+      ? [
+          {
+            publicId: "knowledge_node_public_marketing",
+            knowledgeBasePublicId: "knowledge_base_public_marketing",
+            profession: "marketing" as const,
+            levelList: [3],
+            isActive: true,
+            isRecommendable: true,
+          },
+          {
+            publicId: "knowledge_node_public_customer",
+            knowledgeBasePublicId: "knowledge_base_public_marketing",
+            profession: "marketing" as const,
+            levelList: [3],
+            isActive: true,
+            isRecommendable: true,
+          },
+        ]
+      : options.knowledgeNodes,
+  );
 
   const gateway: AdminAiGenerationFormalAdoptionGateway = {
     findAdoptionBySourceResult,
     findSourceResultForAdoption,
+    findKnowledgeNodesForResolution,
     insertAdoptionRecord,
     updateFormalDraftMetadata,
   };
@@ -103,6 +195,7 @@ function createGateway(options: {
     gateway,
     findAdoptionBySourceResult,
     findSourceResultForAdoption,
+    findKnowledgeNodesForResolution,
     insertAdoptionRecord,
     updateFormalDraftMetadata,
   };
@@ -146,6 +239,403 @@ function createBaseInput() {
 }
 
 describe("admin AI generation formal adoption repository", () => {
+  it("persists an immutable candidate and exact scoped resolution before returning a resolved draft", async () => {
+    const candidate = createGeneratedKnowledgeCandidate();
+    const sourceResult = createSourceResult({
+      reviewedDraft: candidate,
+    });
+    const { gateway, findKnowledgeNodesForResolution, insertAdoptionRecord } =
+      createGateway({ sourceResult });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+    const input = {
+      ...createBaseInput(),
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+        {
+          label: "客户需求",
+          knowledgeNodePublicId: "knowledge_node_public_customer",
+        },
+      ],
+    };
+
+    await repository.createOrReuseFormalAdoption(input);
+
+    expect(findKnowledgeNodesForResolution).toHaveBeenCalledWith({
+      knowledgeNodePublicIds: [
+        "knowledge_node_public_marketing",
+        "knowledge_node_public_customer",
+      ],
+    });
+    expect(insertAdoptionRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeNodeCandidateSnapshot: expect.objectContaining({
+          schemaVersion: 1,
+          sourceContentDigest:
+            candidate.knowledgeNodeConfirmation.sourceContentDigest,
+          generatedLabels: ["营销基础", "客户需求"],
+          profession: "marketing",
+          level: 3,
+        }),
+        knowledgeNodeCandidateDigest: expect.stringMatching(
+          /^sha256:[0-9a-f]{64}$/u,
+        ),
+        knowledgeNodeResolutionSnapshot: {
+          schemaVersion: 1,
+          decision: "approved",
+          sourceContentDigest:
+            candidate.knowledgeNodeConfirmation.sourceContentDigest,
+          generatedLabels: ["营销基础", "客户需求"],
+          mappings: input.knowledgeNodeResolutions,
+        },
+        knowledgeNodeResolutionDigest: expect.stringMatching(
+          /^sha256:[0-9a-f]{64}$/u,
+        ),
+      }),
+    );
+  });
+
+  it.each([
+    {
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+      ],
+    },
+    {
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+        {
+          label: "客户需求",
+          knowledgeNodePublicId: "knowledge_node_public_customer",
+        },
+        {
+          label: "额外知识点",
+          knowledgeNodePublicId: "knowledge_node_public_extra",
+        },
+      ],
+    },
+    {
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+        {
+          label: "客户需求 ",
+          knowledgeNodePublicId: "knowledge_node_public_customer",
+        },
+      ],
+    },
+  ])(
+    "rejects non-exact candidate mapping $knowledgeNodeResolutions",
+    async ({ knowledgeNodeResolutions }) => {
+      const { gateway, findKnowledgeNodesForResolution, insertAdoptionRecord } =
+        createGateway({
+          sourceResult: createSourceResult({
+            reviewedDraft: createGeneratedKnowledgeCandidate(),
+          }),
+        });
+      const repository =
+        createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+      await expect(
+        repository.createOrReuseFormalAdoption({
+          ...createBaseInput(),
+          knowledgeNodeResolutions,
+        }),
+      ).rejects.toThrow("knowledge node resolution conflict");
+      expect(findKnowledgeNodesForResolution).not.toHaveBeenCalled();
+      expect(insertAdoptionRecord).not.toHaveBeenCalled();
+    },
+  );
+
+  it("accepts active scoped nodes whose empty level list authorizes every level", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult({
+        reviewedDraft: createGeneratedKnowledgeCandidate(),
+      }),
+      knowledgeNodes: [
+        {
+          publicId: "knowledge_node_public_marketing",
+          knowledgeBasePublicId: "knowledge_base_public_marketing",
+          profession: "marketing",
+          levelList: [],
+          isActive: true,
+          isRecommendable: true,
+        },
+        {
+          publicId: "knowledge_node_public_customer",
+          knowledgeBasePublicId: "knowledge_base_public_marketing",
+          profession: "marketing",
+          levelList: [],
+          isActive: true,
+          isRecommendable: true,
+        },
+      ],
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await repository.createOrReuseFormalAdoption({
+      ...createBaseInput(),
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+        {
+          label: "客户需求",
+          knowledgeNodePublicId: "knowledge_node_public_customer",
+        },
+      ],
+    });
+
+    expect(insertAdoptionRecord).toHaveBeenCalledOnce();
+  });
+
+  it("rejects inactive or out-of-level nodes without persisting an adoption", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult({
+        reviewedDraft: createGeneratedKnowledgeCandidate(),
+      }),
+      knowledgeNodes: [
+        {
+          publicId: "knowledge_node_public_marketing",
+          knowledgeBasePublicId: "knowledge_base_public_marketing",
+          profession: "marketing",
+          levelList: [3],
+          isActive: true,
+          isRecommendable: true,
+        },
+        {
+          publicId: "knowledge_node_public_customer",
+          knowledgeBasePublicId: "knowledge_base_public_marketing",
+          profession: "marketing",
+          levelList: [4],
+          isActive: false,
+          isRecommendable: true,
+        },
+      ],
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption({
+        ...createBaseInput(),
+        knowledgeNodeResolutions: [
+          {
+            label: "营销基础",
+            knowledgeNodePublicId: "knowledge_node_public_marketing",
+          },
+          {
+            label: "客户需求",
+            knowledgeNodePublicId: "knowledge_node_public_customer",
+          },
+        ],
+      }),
+    ).rejects.toThrow("knowledge node resolution is not eligible");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
+  it("rejects a resolution split across knowledge bases", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult({
+        reviewedDraft: createGeneratedKnowledgeCandidate(),
+      }),
+      knowledgeNodes: [
+        {
+          publicId: "knowledge_node_public_marketing",
+          knowledgeBasePublicId: "knowledge_base_public_marketing_a",
+          profession: "marketing",
+          levelList: [3],
+          isActive: true,
+          isRecommendable: true,
+        },
+        {
+          publicId: "knowledge_node_public_customer",
+          knowledgeBasePublicId: "knowledge_base_public_marketing_b",
+          profession: "marketing",
+          levelList: [3],
+          isActive: true,
+          isRecommendable: true,
+        },
+      ],
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption({
+        ...createBaseInput(),
+        knowledgeNodeResolutions: [
+          {
+            label: "营销基础",
+            knowledgeNodePublicId: "knowledge_node_public_marketing",
+          },
+          {
+            label: "客户需求",
+            knowledgeNodePublicId: "knowledge_node_public_customer",
+          },
+        ],
+      }),
+    ).rejects.toThrow("knowledge node resolution is not eligible");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
+  it("reconstructs a server-owned resolved draft from the immutable adoption binding", async () => {
+    const sourceResult = createSourceResult({
+      reviewedDraft: createGeneratedKnowledgeCandidate(),
+    });
+    const first = createGateway({ sourceResult });
+    const firstRepository = createAdminAiGenerationFormalAdoptionRepository(
+      first.gateway,
+    );
+    await firstRepository.createOrReuseFormalAdoption({
+      ...createBaseInput(),
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+        {
+          label: "客户需求",
+          knowledgeNodePublicId: "knowledge_node_public_customer",
+        },
+      ],
+    });
+    const insertInput = first.insertAdoptionRecord.mock.calls[0]?.[0];
+    const second = createGateway({
+      sourceResult,
+      existingRow: createAdoptionRow({
+        knowledge_node_candidate_snapshot:
+          insertInput?.knowledgeNodeCandidateSnapshot ?? null,
+        knowledge_node_candidate_digest:
+          insertInput?.knowledgeNodeCandidateDigest ?? null,
+        knowledge_node_resolution_snapshot:
+          insertInput?.knowledgeNodeResolutionSnapshot ?? null,
+        knowledge_node_resolution_digest:
+          insertInput?.knowledgeNodeResolutionDigest ?? null,
+      }),
+    });
+    const secondRepository = createAdminAiGenerationFormalAdoptionRepository(
+      second.gateway,
+    );
+
+    const resolvedDraft =
+      await secondRepository.findTrustedReviewedDraftForAdoption({
+        expectedContentDigest: sourceResult.contentDigest,
+        resultPublicId: sourceResult.resultPublicId,
+        targetType: "question",
+      });
+
+    expect(resolvedDraft).toMatchObject({
+      stemRichText: "trusted server-owned draft",
+      difficulty: "medium",
+      knowledgeNodePublicIds: [
+        "knowledge_node_public_marketing",
+        "knowledge_node_public_customer",
+      ],
+    });
+    expect(JSON.stringify(resolvedDraft)).not.toContain(
+      "knowledgeNodeConfirmation",
+    );
+  });
+
+  it("persists an immutable rejected candidate without fabricating a mapping", async () => {
+    const { gateway, findKnowledgeNodesForResolution, insertAdoptionRecord } =
+      createGateway({
+        sourceResult: createSourceResult({
+          reviewedDraft: createGeneratedKnowledgeCandidate(),
+        }),
+      });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await repository.createOrReuseFormalAdoption({
+      ...createBaseInput(),
+      reviewDecision: "rejected",
+      knowledgeNodeResolutions: undefined,
+    });
+
+    expect(findKnowledgeNodesForResolution).not.toHaveBeenCalled();
+    expect(insertAdoptionRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeNodeCandidateDigest: expect.stringMatching(
+          /^sha256:[0-9a-f]{64}$/u,
+        ),
+        knowledgeNodeResolutionSnapshot: expect.objectContaining({
+          decision: "rejected",
+          mappings: [],
+        }),
+        knowledgeNodeResolutionDigest: expect.stringMatching(
+          /^sha256:[0-9a-f]{64}$/u,
+        ),
+      }),
+    );
+  });
+
+  it("rejects replay with a different immutable candidate resolution", async () => {
+    const sourceResult = createSourceResult({
+      reviewedDraft: createGeneratedKnowledgeCandidate(),
+    });
+    const first = createGateway({ sourceResult });
+    const firstRepository = createAdminAiGenerationFormalAdoptionRepository(
+      first.gateway,
+    );
+    await firstRepository.createOrReuseFormalAdoption({
+      ...createBaseInput(),
+      knowledgeNodeResolutions: [
+        {
+          label: "营销基础",
+          knowledgeNodePublicId: "knowledge_node_public_marketing",
+        },
+        {
+          label: "客户需求",
+          knowledgeNodePublicId: "knowledge_node_public_customer",
+        },
+      ],
+    });
+    const insertInput = first.insertAdoptionRecord.mock.calls[0]?.[0];
+    const second = createGateway({
+      sourceResult,
+      existingRow: createAdoptionRow({
+        knowledge_node_candidate_snapshot:
+          insertInput?.knowledgeNodeCandidateSnapshot ?? null,
+        knowledge_node_candidate_digest:
+          insertInput?.knowledgeNodeCandidateDigest ?? null,
+        knowledge_node_resolution_snapshot:
+          insertInput?.knowledgeNodeResolutionSnapshot ?? null,
+        knowledge_node_resolution_digest:
+          insertInput?.knowledgeNodeResolutionDigest ?? null,
+      }),
+    });
+    const secondRepository = createAdminAiGenerationFormalAdoptionRepository(
+      second.gateway,
+    );
+
+    await expect(
+      secondRepository.createOrReuseFormalAdoption({
+        ...createBaseInput(),
+        knowledgeNodeResolutions: [
+          {
+            label: "营销基础",
+            knowledgeNodePublicId: "knowledge_node_public_customer",
+          },
+          {
+            label: "客户需求",
+            knowledgeNodePublicId: "knowledge_node_public_marketing",
+          },
+        ],
+      }),
+    ).rejects.toThrow("knowledge node resolution conflict");
+    expect(second.insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
   it("blocks platform formal adoption when the content AI result has no evidence", async () => {
     const { gateway, insertAdoptionRecord } = createGateway({
       sourceResult: createSourceResult({

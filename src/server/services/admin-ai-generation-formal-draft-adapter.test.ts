@@ -232,6 +232,39 @@ function createPaperWriter(): AdminAiGenerationFormalDraftPaperWriter {
 }
 
 describe("admin AI generation formal draft adapter service", () => {
+  it("rejects an unresolved generated-label candidate before the formal question writer", async () => {
+    const questionWriter = createQuestionWriter();
+    const service = createAdminAiGenerationFormalDraftAdapterService({
+      paperWriter: createPaperWriter(),
+      questionWriter,
+    });
+
+    const response = await service.createFormalDraft({
+      adoption: createAdoption(),
+      reviewedDraft: {
+        ...createQuestionDraftPayload(),
+        knowledgeNodeConfirmation: {
+          schemaVersion: 1,
+          status: "unresolved",
+          generationMode: "balanced",
+          requestPublicId: "admin_ai_generation_request_public_377",
+          resultPublicId: "admin_ai_generation_result_public_377",
+          taskPublicId: "admin_ai_generation_task_public_377",
+          sourceContentDigest:
+            "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          generatedLabels: ["营销基础"],
+        },
+      },
+      targetType: "question",
+    });
+
+    expect(response).toMatchObject({
+      code: ADMIN_AI_GENERATION_FORMAL_DRAFT_ADAPTER_ERROR_CODES.invalidInput,
+      data: null,
+    });
+    expect(questionWriter.createQuestion).not.toHaveBeenCalled();
+  });
+
   it("creates a formal question draft through the existing question writer and returns only redacted draft identifiers", async () => {
     const questionWriter = createQuestionWriter();
     const paperWriter = createPaperWriter();

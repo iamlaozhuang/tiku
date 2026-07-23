@@ -5,6 +5,7 @@ import {
   type AdminAiGenerationFormalAdoptionCommandInput,
   type AdminAiGenerationFormalAdoptionReviewDecision,
   type AdminAiGenerationFormalAdoptionTargetType,
+  type AdminAiGenerationKnowledgeNodeResolutionCommand,
 } from "../models/admin-ai-generation-formal-adoption";
 
 export type AdminAiGenerationFormalAdoptionValidationResult =
@@ -97,6 +98,80 @@ function normalizeReviewedAt(value: unknown): Date | null {
   return Number.isNaN(reviewedAt.getTime()) ? null : reviewedAt;
 }
 
+function normalizeExactRequiredText(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim().normalize("NFC");
+  return normalizedValue.length > 0 &&
+    normalizedValue === value &&
+    !/[\u0000-\u001f\u007f-\u009f]/u.test(normalizedValue)
+    ? normalizedValue
+    : null;
+}
+
+function normalizeKnowledgeNodeResolutions(
+  value: unknown,
+): AdminAiGenerationKnowledgeNodeResolutionCommand[] | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!Array.isArray(value) || value.length === 0 || value.length > 50) {
+    return null;
+  }
+
+  const resolutions: AdminAiGenerationKnowledgeNodeResolutionCommand[] = [];
+  const labelCollisionKeys = new Set<string>();
+  const knowledgeNodePublicIds = new Set<string>();
+
+  for (const item of value) {
+    if (!isRecord(item)) {
+      return null;
+    }
+
+    const label = normalizeExactRequiredText(item.label);
+    const knowledgeNodePublicId = normalizeExactRequiredText(
+      item.knowledgeNodePublicId,
+    );
+
+    if (
+      label === null ||
+      label.length > 128 ||
+      knowledgeNodePublicId === null ||
+      knowledgeNodePublicId.length > 200
+    ) {
+      return null;
+    }
+
+    const labelCollisionKey = label.normalize("NFKC").toLocaleLowerCase("und");
+
+    if (
+      labelCollisionKeys.has(labelCollisionKey) ||
+      knowledgeNodePublicIds.has(knowledgeNodePublicId)
+    ) {
+      return null;
+    }
+
+    labelCollisionKeys.add(labelCollisionKey);
+    knowledgeNodePublicIds.add(knowledgeNodePublicId);
+    resolutions.push({ label, knowledgeNodePublicId });
+  }
+
+  return resolutions;
+}
+
+const forbiddenClientContentKeys = [
+  "analysis",
+  "candidate",
+  "difficulty",
+  "knowledgeNodeConfirmation",
+  "questionDraft",
+  "questionStem",
+  "standardAnswer",
+] as const;
+
 export function isAdminAiGenerationFormalAdoptionConfirmationMissing(
   input: unknown,
 ): boolean {
@@ -122,6 +197,9 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
   const targetType = normalizeTargetType(input.targetType);
   const reviewDecision = normalizeReviewDecision(input.reviewDecision);
   const reviewedAt = normalizeReviewedAt(input.reviewedAt);
+  const knowledgeNodeResolutions = normalizeKnowledgeNodeResolutions(
+    input.knowledgeNodeResolutions,
+  );
 
   if (
     adoptionPublicId === null ||
@@ -131,7 +209,10 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
     targetType === null ||
     reviewDecision === null ||
     input.reviewerConfirmed !== true ||
-    reviewedAt === null
+    reviewedAt === null ||
+    knowledgeNodeResolutions === null ||
+    (reviewDecision === "rejected" && knowledgeNodeResolutions !== undefined) ||
+    forbiddenClientContentKeys.some((key) => Object.hasOwn(input, key))
   ) {
     return {
       success: false,
@@ -152,6 +233,9 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
       ...(input.weakEvidenceConfirmed === true
         ? { weakEvidenceConfirmed: true }
         : {}),
+      ...(knowledgeNodeResolutions === undefined
+        ? {}
+        : { knowledgeNodeResolutions }),
       reviewedAt,
     },
   };

@@ -1,61 +1,109 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22",
-  "objective": "Complete the manual content question editor partition of F-0154 by requiring an explicit canonical easy, medium, or hard difficulty for new and edited questions, round-tripping persisted difficulty, and preventing legacy null metadata from being silently resaved. This task does not implement generated-label confirmation, backfill legacy data, apply migrations, or claim full F-0154 closure.",
+  "taskId": "p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22",
+  "objective": "Complete the generated-label confirmation partition of F-0154 by persisting an immutable unresolved formal-question review candidate, requiring a content administrator to map every generated knowledge label to one currently eligible in-scope knowledge_node public id, binding that exact mapping to the formal adoption record, and creating the disabled formal question only from the server-validated resolution. Selected-mode public ids remain unchanged. F-0154 remains open for legacy backfill/runtime acceptance.",
   "findingIds": ["F-0154"],
   "candidateRootCauseCluster": "P1-RC-07",
-  "baseSha": "2ecc8e40ca8295f128ea31d1351d3c4e009e2506",
-  "branch": "fix/formal-question-ai-metadata-confirmation",
+  "baseSha": "18a5325561c362993a1c081a0dc64f94a0e1ffd7",
+  "branch": "fix/formal-question-generated-knowledge-confirmation",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
-    "tests/unit/admin-question-material-ui.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts"
+    "src/db/schema/ai-rag.ts",
+    "src/db/schema/ai-rag.test.ts",
+    "drizzle/20260722233000_p1_rc_07_formal_question_knowledge_confirmation.sql",
+    "drizzle/meta/20260722233000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/lib/admin-ai-generation-formal-draft-payload.ts",
+    "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
+    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
+    "src/server/models/admin-ai-generation-formal-adoption.ts",
+    "src/server/validators/admin-ai-generation-formal-adoption.ts",
+    "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
+    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
     "docs/04-agent-system/sop/**",
     "scripts/**",
     ".githooks/**",
-    "src/db/**",
-    "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
-    "generated-label confirmation, legacy backfill, migration or real database execution, permission, Provider, secret/env, deployment, PR, force-push, non-canonical remote, or full F-0154 closure"
+    "migration apply, real database/data access, Provider/external calls, permission/entitlement changes, dependency, secret/env, deployment, PR, force-push, non-canonical remote, legacy backfill, AI paper behavior, or full F-0154 closure"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx"
+    "src/db/schema/ai-rag.ts",
+    "src/db/schema/ai-rag.test.ts",
+    "drizzle/20260722233000_p1_rc_07_formal_question_knowledge_confirmation.sql",
+    "drizzle/meta/20260722233000_snapshot.json",
+    "drizzle/meta/_journal.json",
+    "src/lib/admin-ai-generation-formal-draft-payload.ts",
+    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
+    "src/server/models/admin-ai-generation-formal-adoption.ts",
+    "src/server/validators/admin-ai-generation-formal-adoption.ts",
+    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx"
   ],
   "contingencyFiles": [
-    "tests/unit/admin-question-material-ui.test.ts",
-    "tests/unit/admin-question-editor-route.test.ts"
+    "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
+    "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "QuestionDto difficulty -> question form values -> explicit difficulty selector -> createQuestionInput -> existing question validator and repository",
+    "authoritativeChain": "persisted structured question preview -> immutable unresolved formal review candidate -> content-admin label-to-public-id confirmation -> adoption repository exact eligible knowledge_node resolution -> persisted resolution snapshot/digest -> resolved server-owned formal draft -> existing disabled question writer",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 4,
-    "contingencyFileCount": 2,
+    "coreFileCount": 18,
+    "contingencyFileCount": 12,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "The manual question editor does not model or submit the persisted question difficulty, so legacy null can be silently resaved and newly authored formal questions cannot complete the metadata contract.",
-    "findingDisposition": "F-0154_open_partitioned_manual_editor_partition_current_generated_label_confirmation_and_legacy_backfill_residual"
+    "confirmedRootCause": "Balanced and comprehensive content AI question results preserve generated knowledge labels only in the visible preview; the persisted formal reviewed draft currently exists only for selected mode, so there is no immutable candidate, reviewer mapping, server scope validation, or idempotent adoption binding from labels to knowledge_node public ids.",
+    "findingDisposition": "F-0154_open_partitioned_generated_label_confirmation_current_legacy_backfill_and_runtime_acceptance_residual"
   },
   "acceptance": [
-    "the form exposes exactly easy, medium, and hard with glossary-aligned labels",
-    "create and edit require an explicit difficulty before submission",
-    "persisted difficulty round-trips into edit requests without fallback or guessing",
-    "legacy null is shown as unresolved and cannot be silently resaved",
-    "existing question type, knowledge binding, material, scoring, and optimistic concurrency behavior remains unchanged",
-    "F-0154 remains open for generated-label confirmation and legacy backfill"
+    "balanced and comprehensive question results persist an immutable unresolved candidate containing canonical difficulty and exact generated labels without treating labels as knowledge ids",
+    "selected mode preserves its already authorized public ids and does not require generated-label mapping",
+    "approved unresolved candidates require an exact one-to-one confirmation for every unique generated label; missing, extra, duplicate, stale, cross-profession, wrong-level, disabled, or non-recommendable nodes fail closed before question creation",
+    "the adoption record stores an immutable canonical resolution snapshot and SHA-256 digest; replay is allowed only for the exact same source digest, decision, and resolution",
+    "formal draft creation consumes only the server-resolved snapshot; unresolved candidates can never reach the question writer",
+    "the UI loads current eligible nodes for the historical candidate scope, requires every label mapping, and sends no client-authored question content",
+    "migration source is additive and legacy-safe; no migration is applied and no real database is accessed",
+    "F-0154 remains open for legacy backfill and runtime acceptance"
   ],
   "validationCommands": [
     {
-      "name": "formal-question-manual-difficulty-editor-test",
+      "name": "formal-question-generated-knowledge-confirmation-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -63,38 +111,53 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts",
+        "src/db/schema/ai-rag.test.ts",
+        "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
+        "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "formal-question-manual-difficulty-editor-lint",
+      "name": "formal-question-generated-knowledge-confirmation-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts"
+        "src/lib/admin-ai-generation-formal-draft-payload.ts",
+        "src/server/validators/admin-ai-generation-formal-adoption.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx"
       ]
     },
     {
-      "name": "formal-question-manual-difficulty-editor-typecheck",
+      "name": "formal-question-generated-knowledge-confirmation-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "formal-question-manual-difficulty-editor-build",
+      "name": "formal-question-generated-knowledge-confirmation-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "formal-question-manual-difficulty-editor-format",
+      "name": "formal-question-generated-knowledge-confirmation-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -105,13 +168,36 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx",
-        "tests/unit/admin-question-material-ui.test.ts",
-        "tests/unit/admin-question-editor-route.test.ts"
+        "src/db/schema/ai-rag.ts",
+        "src/db/schema/ai-rag.test.ts",
+        "drizzle/meta/20260722233000_snapshot.json",
+        "drizzle/meta/_journal.json",
+        "src/lib/admin-ai-generation-formal-draft-payload.ts",
+        "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
+        "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
+        "src/server/models/admin-ai-generation-formal-adoption.ts",
+        "src/server/validators/admin-ai-generation-formal-adoption.ts",
+        "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
+        "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
+        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts"
       ]
     },
     {
-      "name": "formal-question-manual-difficulty-editor-diff-check",
+      "name": "formal-question-generated-knowledge-confirmation-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -119,18 +205,20 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "guardian-f0154-generated-knowledge-confirmation-2026-07-22",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "standingApprovalIds": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
+  "pendingApproval": {
+    "approvalId": "guardian-f0154-generated-knowledge-confirmation-2026-07-22",
+    "risk": "schema_migration_source_and_database_application_logic",
+    "conditionalCloseoutRequested": true,
+    "status": "granted"
+  },
   "riskClassification": {
-    "category": "low_risk_ui_contract",
-    "schemaOrMigrationChange": false,
+    "category": "schema_migration_source_and_database_application_logic",
+    "schemaOrMigrationChange": true,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "providerOrRealExternalCall": false,
@@ -138,9 +226,9 @@
   },
   "conditionalCloseout": true,
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22",
+    "taskId": "p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22",
     "findingIds": ["F-0154"],
-    "commit": "2ecc8e40ca8295f128ea31d1351d3c4e009e2506",
+    "commit": "18a5325561c362993a1c081a0dc64f94a0e1ffd7",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "open_partitioned",
     "masterOriginSync": true,
@@ -150,11 +238,11 @@
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
     "currentFindings": ["F-0154"],
-    "nextResidualReview": "F-0154_generated_label_confirmation_then_legacy_backfill_runtime_hold"
+    "nextResidualReview": "F-0154_legacy_backfill_and_runtime_acceptance_after_generated_label_confirmation"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "guardian-f0154-generated-knowledge-confirmation-2026-07-22"
   }
 }

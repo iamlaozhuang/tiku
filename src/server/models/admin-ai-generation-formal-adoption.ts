@@ -75,7 +75,13 @@ export type AdminAiGenerationFormalAdoptionCommandInput = {
   reviewDecision: AdminAiGenerationFormalAdoptionReviewDecision;
   reviewerConfirmed: boolean;
   weakEvidenceConfirmed?: boolean;
+  knowledgeNodeResolutions?: AdminAiGenerationKnowledgeNodeResolutionCommand[];
   reviewedAt: Date;
+};
+
+export type AdminAiGenerationKnowledgeNodeResolutionCommand = {
+  label: string;
+  knowledgeNodePublicId: string;
 };
 
 export function canAdoptAdminAiGenerationPlatformFormalContent(

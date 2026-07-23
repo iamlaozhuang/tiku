@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AdminAiGenerationLocalContractDto } from "@/server/contracts/admin-ai-generation-local-contract";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "@/server/contracts/route-integrated-provider-execution-contract";
@@ -154,22 +154,128 @@ describe("content admin formal reviewed draft payload", () => {
     expect(serializedPayload).not.toContain("providerPayload");
   });
 
-  it("rejects generated labels that have not been resolved to selected knowledge node public ids", () => {
-    const payload = createContentAdminFormalReviewedDraftPayload({
-      localContractSummary: createContentQuestionContract(),
-      generationParameters: {
-        ...generationParameters,
-        knowledgeNode: null,
-        knowledgeNodeMode: "balanced",
-        knowledgeNodePublicIds: [],
-        includeDescendants: false,
-        knowledgeNodeSupplement: null,
-      },
-      requestedAt: "2026-07-08T10:00:00.000Z",
-    });
+  it.each(["balanced", "comprehensive"] as const)(
+    "persists a server-owned unresolved generated-label candidate for %s mode",
+    (knowledgeNodeMode) => {
+      const contract = createContentQuestionContract();
+      const preview =
+        contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
 
-    expect(payload).toBeNull();
+      if (preview?.kind === "question_set") {
+        preview.draftSummaries[0] = {
+          ...preview.draftSummaries[0],
+          knowledgeNodeLabels: ["营销基础", "客户需求", "营销基础"],
+        };
+      }
+
+      const createSourceContentDigest = vi.fn(
+        () =>
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      );
+      const payload = createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: contract,
+        generationParameters: {
+          ...generationParameters,
+          knowledgeNode: null,
+          knowledgeNodeMode,
+          knowledgeNodePublicIds: [],
+          includeDescendants: false,
+          knowledgeNodeSupplement: null,
+        },
+        requestedAt: "2026-07-08T10:00:00.000Z",
+        sourceIdentity: {
+          requestPublicId: "admin_ai_generation_request_public_candidate",
+          resultPublicId: "admin_ai_generation_result_public_candidate",
+          taskPublicId: "admin_ai_generation_task_public_candidate",
+        },
+        createSourceContentDigest,
+      });
+
+      expect(payload).toMatchObject({
+        difficulty: "medium",
+        knowledgeNodePublicIds: [],
+        knowledgeNodeConfirmation: {
+          schemaVersion: 1,
+          status: "unresolved",
+          generationMode: knowledgeNodeMode,
+          requestPublicId: "admin_ai_generation_request_public_candidate",
+          resultPublicId: "admin_ai_generation_result_public_candidate",
+          taskPublicId: "admin_ai_generation_task_public_candidate",
+          sourceContentDigest:
+            "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          generatedLabels: ["营销基础", "客户需求"],
+        },
+      });
+      expect(createSourceContentDigest).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("fails closed when generated labels collide after Unicode or case canonicalization", () => {
+    const contract = createContentQuestionContract();
+    const preview =
+      contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+
+    if (preview?.kind === "question_set") {
+      preview.draftSummaries[0] = {
+        ...preview.draftSummaries[0],
+        knowledgeNodeLabels: ["ＫＮＯＷＬＥＤＧＥ", "knowledge"],
+      };
+    }
+
+    expect(
+      createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: contract,
+        generationParameters: {
+          ...generationParameters,
+          knowledgeNodeMode: "balanced",
+          knowledgeNodePublicIds: [],
+        },
+        requestedAt: "2026-07-08T10:00:00.000Z",
+        sourceIdentity: {
+          requestPublicId: "admin_ai_generation_request_public_candidate",
+          resultPublicId: "admin_ai_generation_result_public_candidate",
+          taskPublicId: "admin_ai_generation_task_public_candidate",
+        },
+        createSourceContentDigest: () =>
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      }),
+    ).toBeNull();
   });
+
+  it.each([" 营销基础", "营销基础 ", "营销\n基础"])(
+    "fails closed instead of rewriting or exposing an invalid generated label %j",
+    (generatedLabel) => {
+      const contract = createContentQuestionContract();
+      const preview =
+        contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+
+      if (preview?.kind === "question_set") {
+        preview.draftSummaries[0] = {
+          ...preview.draftSummaries[0],
+          knowledgeNodeLabels: [generatedLabel],
+        };
+      }
+
+      expect(
+        createContentAdminFormalReviewedDraftPayload({
+          localContractSummary: contract,
+          generationParameters: {
+            ...generationParameters,
+            knowledgeNodeMode: "balanced",
+            knowledgeNodePublicIds: [],
+          },
+          requestedAt: "2026-07-08T10:00:00.000Z",
+          sourceIdentity: {
+            requestPublicId: "admin_ai_generation_request_public_candidate",
+            resultPublicId: "admin_ai_generation_result_public_candidate",
+            taskPublicId: "admin_ai_generation_task_public_candidate",
+          },
+          createSourceContentDigest: () =>
+            "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        }),
+      ).toBeNull();
+    },
+  );
 
   it.each([null, "unknown"])(
     "rejects a formal question draft with non-canonical difficulty %s",

@@ -1509,6 +1509,9 @@ function createAdminAiGenerationLocalContractResultInput(input: {
   createdAt: Date;
 }): CreateAdminAiGenerationResultInput {
   const task = input.taskPersistence.task;
+  const resultPublicId = createAdminAiGenerationResultPublicId(
+    task.taskPublicId,
+  );
   const contentRedactedSnapshot =
     createAdminAiGenerationLocalContractRedactedSnapshot({
       createdAt: input.createdAt,
@@ -1516,10 +1519,15 @@ function createAdminAiGenerationLocalContractResultInput(input: {
       localContract: input.localContract,
       organizationTrainingPaperDraftDetail:
         input.organizationTrainingPaperDraftDetail,
+      sourceIdentity: {
+        requestPublicId: task.requestPublicId,
+        resultPublicId,
+        taskPublicId: task.taskPublicId,
+      },
     });
 
   return {
-    resultPublicId: createAdminAiGenerationResultPublicId(task.taskPublicId),
+    resultPublicId,
     taskPublicId: task.taskPublicId,
     workspace: task.workspace,
     generationKind: task.generationKind,
@@ -1560,6 +1568,11 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   localContract: AdminAiGenerationLocalContractBaseDto;
   organizationTrainingPaperDraftDetail: OrganizationTrainingPaperDraftDetailSnapshot | null;
+  sourceIdentity: {
+    requestPublicId: string;
+    resultPublicId: string;
+    taskPublicId: string;
+  };
 }) {
   const formalReviewedDraft =
     input.generationParameters === null
@@ -1568,6 +1581,11 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
           generationParameters: input.generationParameters,
           localContractSummary: input.localContract,
           requestedAt: input.createdAt.toISOString(),
+          sourceIdentity: input.sourceIdentity,
+          createSourceContentDigest: (source) =>
+            `sha256:${createHash("sha256")
+              .update(JSON.stringify(source))
+              .digest("hex")}`,
         });
   const organizationTrainingQuestionDraft =
     input.generationParameters === null

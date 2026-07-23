@@ -46,6 +46,31 @@ export type AdminAiGenerationFormalQuestionDraftPayload = {
   tagPublicIds: string[];
 };
 
+export type AdminAiGenerationFormalQuestionKnowledgeNodeCandidateSource = {
+  schemaVersion: 1;
+  generationMode: "balanced" | "comprehensive";
+  requestPublicId: string;
+  resultPublicId: string;
+  taskPublicId: string;
+  generatedLabels: string[];
+  questionDraft: AdminAiGenerationFormalQuestionDraftPayload;
+};
+
+export type AdminAiGenerationFormalQuestionReviewCandidatePayload =
+  AdminAiGenerationFormalQuestionDraftPayload & {
+    knowledgeNodePublicIds: [];
+    knowledgeNodeConfirmation: {
+      schemaVersion: 1;
+      status: "unresolved";
+      generationMode: "balanced" | "comprehensive";
+      requestPublicId: string;
+      resultPublicId: string;
+      taskPublicId: string;
+      sourceContentDigest: string;
+      generatedLabels: string[];
+    };
+  };
+
 export type AdminAiGenerationFormalPaperDraftPayload = {
   name: string;
   profession: Profession;
@@ -66,6 +91,7 @@ export type AdminAiGenerationFormalPaperDraftPayload = {
 
 export type AdminAiGenerationFormalReviewedDraftPayload =
   | AdminAiGenerationFormalQuestionDraftPayload
+  | AdminAiGenerationFormalQuestionReviewCandidatePayload
   | AdminAiGenerationFormalPaperDraftPayload;
 
 export type AdminAiGenerationFormalPaperSectionDraftPayload = {

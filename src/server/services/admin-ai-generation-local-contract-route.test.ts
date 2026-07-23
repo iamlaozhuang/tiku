@@ -1530,6 +1530,53 @@ describe("admin AI generation local contract route handlers", () => {
     expect(providerInputs).toHaveLength(1);
   });
 
+  it("persists a server-owned unresolved generated-label candidate for balanced content questions", async () => {
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const requestPublicId =
+      "admin_ai_generation_request_public_generated_candidate";
+
+    await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestPublicId,
+      taskPersistenceRepository: createTaskPersistenceRecorder().repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl([]),
+      body: {
+        generationKind: "question",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 1,
+          knowledgeNodeMode: "balanced",
+          knowledgeNodePublicIds: [],
+        },
+      },
+    });
+
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
+    const persistedInput = generatedResultPersistenceRecorder.calls[0];
+    const candidate = persistedInput?.contentRedactedSnapshot
+      .formalReviewedDraft as Record<string, unknown>;
+
+    expect(candidate).toMatchObject({
+      difficulty: "medium",
+      knowledgeNodePublicIds: [],
+      knowledgeNodeConfirmation: {
+        schemaVersion: 1,
+        status: "unresolved",
+        generationMode: "balanced",
+        requestPublicId,
+        resultPublicId: persistedInput?.resultPublicId,
+        taskPublicId: persistedInput?.taskPublicId,
+        sourceContentDigest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/u),
+        generatedLabels: ["redacted_knowledge_node"],
+      },
+    });
+    expect(JSON.stringify(candidate)).not.toContain("providerPayload");
+  });
+
   it("scopes admin generation task identity to each request so stale actor-level results are not reused", async () => {
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];

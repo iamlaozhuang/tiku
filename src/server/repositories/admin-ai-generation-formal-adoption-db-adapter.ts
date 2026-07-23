@@ -1,13 +1,17 @@
 import {
   adminAiGenerationFormalAdoption,
   adminAiGenerationResult,
+  knowledgeBase,
+  knowledgeNode,
 } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import type {
   AdminAiGenerationFormalAdoptionGateway,
   AdminAiGenerationFormalAdoptionRepository,
   AdminAiGenerationFormalAdoptionRow,
+  AdminAiGenerationKnowledgeNodeCandidateSnapshot,
+  AdminAiGenerationKnowledgeNodeResolutionSnapshot,
   FindAdminAiGenerationFormalAdoptionQuery,
   InsertAdminAiGenerationFormalAdoptionInput,
   MarkAdminAiGenerationFormalDraftCreatedInput,
@@ -62,6 +66,10 @@ export type AdminAiGenerationFormalAdoptionDbRow = {
   evidence_status: string;
   citation_count: number;
   ai_call_log_public_id: string | null;
+  knowledge_node_candidate_snapshot: AdminAiGenerationKnowledgeNodeCandidateSnapshot | null;
+  knowledge_node_candidate_digest: string | null;
+  knowledge_node_resolution_snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
+  knowledge_node_resolution_digest: string | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -117,6 +125,14 @@ const adminAiGenerationFormalAdoptionSelection = {
   evidence_status: adminAiGenerationFormalAdoption.evidence_status,
   citation_count: adminAiGenerationFormalAdoption.citation_count,
   ai_call_log_public_id: adminAiGenerationFormalAdoption.ai_call_log_public_id,
+  knowledge_node_candidate_snapshot:
+    adminAiGenerationFormalAdoption.knowledge_node_candidate_snapshot,
+  knowledge_node_candidate_digest:
+    adminAiGenerationFormalAdoption.knowledge_node_candidate_digest,
+  knowledge_node_resolution_snapshot:
+    adminAiGenerationFormalAdoption.knowledge_node_resolution_snapshot,
+  knowledge_node_resolution_digest:
+    adminAiGenerationFormalAdoption.knowledge_node_resolution_digest,
   created_at: adminAiGenerationFormalAdoption.created_at,
   updated_at: adminAiGenerationFormalAdoption.updated_at,
 };
@@ -171,6 +187,10 @@ export function createAdminAiGenerationFormalAdoptionInsertValue(
     evidence_status: input.evidenceStatus,
     citation_count: input.citationCount,
     ai_call_log_public_id: input.aiCallLogPublicId,
+    knowledge_node_candidate_snapshot: input.knowledgeNodeCandidateSnapshot,
+    knowledge_node_candidate_digest: input.knowledgeNodeCandidateDigest,
+    knowledge_node_resolution_snapshot: input.knowledgeNodeResolutionSnapshot,
+    knowledge_node_resolution_digest: input.knowledgeNodeResolutionDigest,
     created_at: input.createdAt,
     updated_at: input.createdAt,
   };
@@ -227,6 +247,41 @@ export function createPostgresAdminAiGenerationFormalAdoptionGateway(
         : mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult(
             normalizeAdminAiGenerationFormalAdoptionSourceResultDbRow(row),
           );
+    },
+    async findKnowledgeNodesForResolution(input) {
+      if (input.knowledgeNodePublicIds.length === 0) {
+        return [];
+      }
+
+      const rows = await getDatabase()
+        .select({
+          publicId: knowledgeNode.public_id,
+          knowledgeBasePublicId: knowledgeBase.public_id,
+          profession: knowledgeNode.profession,
+          levelList: knowledgeNode.level_list,
+          knStatus: knowledgeNode.kn_status,
+          isRecommendable: knowledgeNode.is_recommendable,
+          isKnowledgeBaseEnabled: knowledgeBase.is_enabled,
+        })
+        .from(knowledgeNode)
+        .innerJoin(
+          knowledgeBase,
+          and(
+            eq(knowledgeBase.id, knowledgeNode.knowledge_base_id),
+            eq(knowledgeBase.profession, knowledgeNode.profession),
+          ),
+        )
+        .where(inArray(knowledgeNode.public_id, input.knowledgeNodePublicIds))
+        .for("share");
+
+      return rows.map((row) => ({
+        publicId: row.publicId,
+        knowledgeBasePublicId: row.knowledgeBasePublicId,
+        profession: toProfession(row.profession),
+        levelList: toLevelList(row.levelList),
+        isActive: row.knStatus === "active" && row.isKnowledgeBaseEnabled,
+        isRecommendable: row.isRecommendable,
+      }));
     },
     async insertAdoptionRecord(input) {
       const [row] = await getDatabase()
@@ -312,8 +367,31 @@ export function mapAdminAiGenerationFormalAdoptionDbRowToRow(
     evidence_status: toEvidenceStatus(row.evidence_status),
     citation_count: row.citation_count,
     ai_call_log_public_id: row.ai_call_log_public_id,
+    knowledge_node_candidate_snapshot: row.knowledge_node_candidate_snapshot,
+    knowledge_node_candidate_digest: row.knowledge_node_candidate_digest,
+    knowledge_node_resolution_snapshot: row.knowledge_node_resolution_snapshot,
+    knowledge_node_resolution_digest: row.knowledge_node_resolution_digest,
     created_at: row.created_at,
   };
+}
+
+function toProfession(value: string): "monopoly" | "marketing" | "logistics" {
+  if (value === "monopoly" || value === "marketing" || value === "logistics") {
+    return value;
+  }
+
+  throw new Error("unsafe admin AI generation knowledge node profession");
+}
+
+function toLevelList(value: unknown): number[] {
+  if (
+    !Array.isArray(value) ||
+    value.some((level) => !Number.isSafeInteger(level) || level < 1)
+  ) {
+    throw new Error("unsafe admin AI generation knowledge node level list");
+  }
+
+  return value as number[];
 }
 
 export function mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult(
