@@ -504,6 +504,98 @@ describe("personal AI generation learning session service", () => {
       expect(feedback.isCorrect).toBeNull();
     }
   });
+
+  it("rejects blank or oversized subjective answers before persistence and restores one bounded answer", async () => {
+    const persistedAnswerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[] =
+      [];
+    const baseRepository = createInMemoryRepository();
+    const repository: PersonalAiGenerationLearningSessionRepository = {
+      ...baseRepository,
+      async saveAnswerFeedback(answerFeedback) {
+        persistedAnswerFeedbacks.push(answerFeedback);
+        await baseRepository.saveAnswerFeedback(answerFeedback);
+      },
+    };
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    });
+
+    await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_subjective_boundary",
+      sourceResultPublicId: "ai_generation_result_subjective_boundary",
+      sourceTaskPublicId: "ai_generation_task_subjective_boundary",
+      ownerType: "personal",
+      ownerPublicId: "student_subjective_boundary",
+      actorPublicId: "student_subjective_boundary",
+      questionDraftSnapshot: createSevenTypeQuestionSnapshot(),
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+      createdAt: new Date("2026-07-23T10:00:00.000Z"),
+    });
+
+    const blank = await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_subjective_boundary",
+      sessionQuestionPublicId: "ai_learning_session_subjective_boundary_q_5",
+      actorPublicId: "student_subjective_boundary",
+      selectedOptionLabels: [],
+      textAnswer: "   \n  ",
+      submittedAt: new Date("2026-07-23T10:01:00.000Z"),
+    });
+    const oversized = await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_subjective_boundary",
+      sessionQuestionPublicId: "ai_learning_session_subjective_boundary_q_5",
+      actorPublicId: "student_subjective_boundary",
+      selectedOptionLabels: [],
+      textAnswer: "x".repeat(4_001),
+      submittedAt: new Date("2026-07-23T10:02:00.000Z"),
+    });
+    const emptyProgress = await service.getLearningSessionProgress({
+      sessionPublicId: "ai_learning_session_subjective_boundary",
+      actorPublicId: "student_subjective_boundary",
+      viewedAt: new Date("2026-07-23T10:03:00.000Z"),
+    });
+
+    expect(blank).toMatchObject({
+      status: "blocked",
+      blockReason: "answer_required",
+      textAnswer: null,
+    });
+    expect(oversized).toMatchObject({
+      status: "blocked",
+      blockReason: "answer_too_long",
+    });
+    expect(persistedAnswerFeedbacks).toHaveLength(0);
+    expect(emptyProgress.progress?.statistics.submittedCount).toBe(0);
+
+    const accepted = await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_subjective_boundary",
+      sessionQuestionPublicId: "ai_learning_session_subjective_boundary_q_5",
+      actorPublicId: "student_subjective_boundary",
+      selectedOptionLabels: [],
+      textAnswer: "  synthetic bounded learner answer  ",
+      submittedAt: new Date("2026-07-23T10:04:00.000Z"),
+    });
+    const restoredProgress = await service.getLearningSessionProgress({
+      sessionPublicId: "ai_learning_session_subjective_boundary",
+      actorPublicId: "student_subjective_boundary",
+      viewedAt: new Date("2026-07-23T10:05:00.000Z"),
+    });
+
+    expect(accepted).toMatchObject({
+      status: "submitted_review_required",
+      blockReason: null,
+      textAnswer: "synthetic bounded learner answer",
+      isCorrect: null,
+    });
+    expect(persistedAnswerFeedbacks).toHaveLength(1);
+    expect(restoredProgress.progress?.statistics).toMatchObject({
+      submittedCount: 1,
+      reviewRequiredCount: 1,
+    });
+    expect(restoredProgress.progress?.answerFeedbacks[0]).toMatchObject({
+      textAnswer: "synthetic bounded learner answer",
+    });
+  });
   it("reuses the first persisted paper session snapshot for repeated starts", async () => {
     const repository = createInMemoryRepository();
     const service = createPersonalAiGenerationLearningSessionService({

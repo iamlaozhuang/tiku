@@ -13,6 +13,7 @@ import type {
   PersonalAiGenerationLearningSessionStatisticsDto,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
+import { PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH } from "../models/personal-ai-generation-learning-session";
 import {
   createBlockedPersonalAiLearningFormalWriteBoundary,
   createPersonalAiLearningSessionQuestion,
@@ -398,16 +399,43 @@ async function submitLearningSessionAnswer(
   const selectedOptionLabels = normalizePersonalAiLearningLabels(
     input.selectedOptionLabels,
   );
-
-  if (
+  const isSubjectiveQuestion =
     question.questionType === "short_answer" ||
     question.questionType === "fill_blank" ||
     question.questionType === "case_analysis" ||
-    question.questionType === "calculation" ||
-    question.standardAnswerLabels.length === 0
-  ) {
+    question.questionType === "calculation";
+
+  if (isSubjectiveQuestion) {
+    const textAnswer = input.textAnswer?.trim() ?? "";
+
+    if (selectedOptionLabels.length > 0) {
+      return createBlockedAnswerFeedback({
+        input,
+        submittedAt: fallbackSubmittedAt,
+        blockReason: "answer_shape_invalid",
+      });
+    }
+
+    if (textAnswer.length === 0) {
+      return createBlockedAnswerFeedback({
+        input,
+        submittedAt: fallbackSubmittedAt,
+        blockReason: "answer_required",
+      });
+    }
+
+    if (
+      textAnswer.length > PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH
+    ) {
+      return createBlockedAnswerFeedback({
+        input,
+        submittedAt: fallbackSubmittedAt,
+        blockReason: "answer_too_long",
+      });
+    }
+
     const answerFeedback = createAnswerFeedback({
-      input,
+      input: { ...input, textAnswer },
       question,
       selectedOptionLabels,
       status: "submitted_review_required",
@@ -418,6 +446,14 @@ async function submitLearningSessionAnswer(
     await repository.saveAnswerFeedback(answerFeedback);
 
     return answerFeedback;
+  }
+
+  if ((input.textAnswer?.trim().length ?? 0) > 0) {
+    return createBlockedAnswerFeedback({
+      input,
+      submittedAt: fallbackSubmittedAt,
+      blockReason: "answer_shape_invalid",
+    });
   }
 
   const standardAnswerLabels = normalizePersonalAiLearningLabels(

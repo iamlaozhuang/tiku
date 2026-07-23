@@ -52,6 +52,7 @@ import type {
   AiGenerationRouteIntegratedSourcePreference,
 } from "@/server/contracts/route-integrated-provider-execution-contract";
 import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
+import { PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH } from "@/server/models/personal-ai-generation-learning-session";
 import { createPersonalAiLearningSessionQuestion } from "@/server/validators/personal-ai-generation-learning-session";
 
 type StudentPersonalAiGenerationPageState =
@@ -102,6 +103,7 @@ type StudentAiLearningAnswerFeedbackByQuestion = Record<
 >;
 
 type StudentAiLearningSelectedLabelsByQuestion = Record<string, string[]>;
+type StudentAiLearningTextAnswersByQuestion = Record<string, string>;
 
 type StudentSessionRequestToken = string | null;
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
@@ -2601,7 +2603,49 @@ function StudentPersonalAiGenerationContractSummary({
   );
 }
 
+function isStudentAiLearningSubjectiveQuestion(
+  question: PersonalAiGenerationLearningSessionPublicQuestionDto,
+): boolean {
+  return (
+    question.questionType === "fill_blank" ||
+    question.questionType === "short_answer" ||
+    question.questionType === "case_analysis" ||
+    question.questionType === "calculation"
+  );
+}
+
+function hasCompleteStudentAiLearningAnswers(input: {
+  questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
+  selectedOptionLabelsByQuestion: StudentAiLearningSelectedLabelsByQuestion;
+  textAnswersByQuestion: StudentAiLearningTextAnswersByQuestion;
+}): boolean {
+  return (
+    input.questions.length > 0 &&
+    input.questions.every((question) => {
+      if (isStudentAiLearningSubjectiveQuestion(question)) {
+        const textAnswer =
+          input.textAnswersByQuestion[
+            question.sessionQuestionPublicId
+          ]?.trim() ?? "";
+
+        return (
+          textAnswer.length > 0 &&
+          textAnswer.length <=
+            PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH
+        );
+      }
+
+      return (
+        question.questionOptions.length > 0 &&
+        (input.selectedOptionLabelsByQuestion[question.sessionQuestionPublicId]
+          ?.length ?? 0) > 0
+      );
+    })
+  );
+}
+
 function StudentPersonalAiGenerationPracticeFeedbackActions({
+  canSubmitAnswer,
   canUseGeneratedPractice,
   hasActiveLearningSession,
   isRetryDisabled,
@@ -2611,6 +2655,7 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
   onSubmitAnswer,
   onViewFeedback,
 }: {
+  canSubmitAnswer: boolean;
   canUseGeneratedPractice: boolean;
   hasActiveLearningSession: boolean;
   isRetryDisabled: boolean;
@@ -2650,7 +2695,7 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
         </button>
         <button
           type="button"
-          disabled={!hasActiveLearningSession}
+          disabled={!hasActiveLearningSession || !canSubmitAnswer}
           onClick={onSubmitAnswer}
           className={generatedPracticeActionClassName}
         >
@@ -2688,17 +2733,21 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
 
 function StudentAiLearningSessionPanel({
   answerFeedbackByQuestion,
+  onChangeTextAnswer,
   onSelectOptionLabel,
   questions,
   selectedOptionLabelsByQuestion,
+  textAnswersByQuestion,
 }: {
   answerFeedbackByQuestion: StudentAiLearningAnswerFeedbackByQuestion;
+  onChangeTextAnswer: (questionPublicId: string, textAnswer: string) => void;
   onSelectOptionLabel: (
     question: PersonalAiGenerationLearningSessionPublicQuestionDto,
     optionLabel: string,
   ) => void;
   questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
   selectedOptionLabelsByQuestion: StudentAiLearningSelectedLabelsByQuestion;
+  textAnswersByQuestion: StudentAiLearningTextAnswersByQuestion;
 }) {
   const summary = createStudentAiLearningSessionSummary({
     answerFeedbackByQuestion,
@@ -2756,6 +2805,10 @@ function StudentAiLearningSessionPanel({
             [];
           const answerFeedback =
             answerFeedbackByQuestion[question.sessionQuestionPublicId] ?? null;
+          const textAnswer =
+            textAnswersByQuestion[question.sessionQuestionPublicId] ?? "";
+          const isSubjectiveQuestion =
+            isStudentAiLearningSubjectiveQuestion(question);
           const inputType =
             question.questionType === "multi_choice" ? "checkbox" : "radio";
           const questionGroup = question.questionGroup ?? null;
@@ -2797,7 +2850,8 @@ function StudentAiLearningSessionPanel({
                 <p className="text-text-primary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
                   {question.questionStem}
                 </p>
-                {question.questionOptions.length > 0 ? (
+                {!isSubjectiveQuestion &&
+                question.questionOptions.length > 0 ? (
                   <fieldset className="mt-3 space-y-2">
                     <legend className="text-text-secondary text-xs font-medium">
                       选择答案
@@ -2829,9 +2883,31 @@ function StudentAiLearningSessionPanel({
                       </label>
                     ))}
                   </fieldset>
+                ) : isSubjectiveQuestion ? (
+                  <label className="text-text-secondary mt-3 block text-xs font-medium">
+                    题目 {question.sourceDraftNumber} 主观答案
+                    <textarea
+                      aria-label={`题目 ${question.sourceDraftNumber} 主观答案`}
+                      className="border-border bg-background text-text-primary mt-2 min-h-28 w-full resize-y rounded-md border px-3 py-2 text-sm leading-6 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={answerFeedback !== null}
+                      maxLength={
+                        PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH
+                      }
+                      onChange={(event) =>
+                        onChangeTextAnswer(
+                          question.sessionQuestionPublicId,
+                          event.target.value,
+                        )
+                      }
+                      value={textAnswer}
+                    />
+                    <span className="mt-1 block">
+                      当前题型需人工评阅，本次不写入 AI 评分。
+                    </span>
+                  </label>
                 ) : (
-                  <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm">
-                    当前题型需人工评阅，本次不写入 AI 评分。
+                  <p className="text-status-danger mt-3 text-sm">
+                    题目结构不可作答，请重新生成。
                   </p>
                 )}
 
@@ -3632,6 +3708,10 @@ export function StudentPersonalAiGenerationPage() {
     setSelectedAiLearningAnswerLabelsByQuestion,
   ] = useState<StudentAiLearningSelectedLabelsByQuestion>({});
   const [
+    selectedAiLearningTextAnswersByQuestion,
+    setSelectedAiLearningTextAnswersByQuestion,
+  ] = useState<StudentAiLearningTextAnswersByQuestion>({});
+  const [
     aiLearningAnswerFeedbackByQuestion,
     setAiLearningAnswerFeedbackByQuestion,
   ] = useState<StudentAiLearningAnswerFeedbackByQuestion>({});
@@ -4027,6 +4107,7 @@ export function StudentPersonalAiGenerationPage() {
     setLearningSessionResultPublicId(null);
     setServerAiLearningSessionQuestions([]);
     setSelectedAiLearningAnswerLabelsByQuestion({});
+    setSelectedAiLearningTextAnswersByQuestion({});
     setAiLearningAnswerFeedbackByQuestion({});
     setHasSessionToken(true);
     setPageState("loading");
@@ -4479,6 +4560,7 @@ export function StudentPersonalAiGenerationPage() {
     setLearningSessionResultPublicId(null);
     setServerAiLearningSessionQuestions([]);
     setSelectedAiLearningAnswerLabelsByQuestion({});
+    setSelectedAiLearningTextAnswersByQuestion({});
     setAiLearningAnswerFeedbackByQuestion({});
     void loadAiGenerationHistories(
       taskType,
@@ -4850,6 +4932,11 @@ export function StudentPersonalAiGenerationPage() {
     isAiGenerationActionDisabled ||
     !hasLocalAiGenerationExperience ||
     !canRetryCurrentGeneratedPractice(experience);
+  const canSubmitAiLearningAnswers = hasCompleteStudentAiLearningAnswers({
+    questions: activeAiLearningSessionQuestions,
+    selectedOptionLabelsByQuestion: selectedAiLearningAnswerLabelsByQuestion,
+    textAnswersByQuestion: selectedAiLearningTextAnswersByQuestion,
+  });
 
   async function ensureAiLearningSessionStarted(): Promise<
     PersonalAiGenerationLearningSessionPublicQuestionDto[] | null
@@ -4924,6 +5011,7 @@ export function StudentPersonalAiGenerationPage() {
       setActiveAiLearningSessionPublicId(session.sessionPublicId);
       setIsAiLearningSessionStarted(true);
       setSelectedAiLearningAnswerLabelsByQuestion({});
+      setSelectedAiLearningTextAnswersByQuestion({});
       setAiLearningAnswerFeedbackByQuestion({});
       setPracticeFeedbackState("practice_ready");
 
@@ -4945,6 +5033,14 @@ export function StudentPersonalAiGenerationPage() {
               answerFeedbacks.map((answerFeedback) => [
                 answerFeedback.sessionQuestionPublicId,
                 answerFeedback.selectedOptionLabels,
+              ]),
+            ),
+          );
+          setSelectedAiLearningTextAnswersByQuestion(
+            Object.fromEntries(
+              answerFeedbacks.map((answerFeedback) => [
+                answerFeedback.sessionQuestionPublicId,
+                answerFeedback.textAnswer ?? "",
               ]),
             ),
           );
@@ -4996,8 +5092,15 @@ export function StudentPersonalAiGenerationPage() {
     if (
       sessionQuestions === null ||
       activeAiLearningSessionPublicId === null ||
-      selectedAuthorizationPublicId === null
+      selectedAuthorizationPublicId === null ||
+      !hasCompleteStudentAiLearningAnswers({
+        questions: sessionQuestions,
+        selectedOptionLabelsByQuestion:
+          selectedAiLearningAnswerLabelsByQuestion,
+        textAnswersByQuestion: selectedAiLearningTextAnswersByQuestion,
+      })
     ) {
+      setPracticeFeedbackState("insufficient");
       return;
     }
 
@@ -5014,7 +5117,11 @@ export function StudentPersonalAiGenerationPage() {
                 selectedAiLearningAnswerLabelsByQuestion[
                   question.sessionQuestionPublicId
                 ] ?? [],
-              textAnswer: null,
+              textAnswer: isStudentAiLearningSubjectiveQuestion(question)
+                ? (selectedAiLearningTextAnswersByQuestion[
+                    question.sessionQuestionPublicId
+                  ]?.trim() ?? null)
+                : null,
             },
           ),
         ),
@@ -5126,6 +5233,7 @@ export function StudentPersonalAiGenerationPage() {
         ) : null}
 
         <StudentPersonalAiGenerationPracticeFeedbackActions
+          canSubmitAnswer={canSubmitAiLearningAnswers}
           canUseGeneratedPractice={canUseGeneratedPractice}
           hasActiveLearningSession={
             isAiLearningSessionStarted &&
@@ -5143,6 +5251,15 @@ export function StudentPersonalAiGenerationPage() {
         activeAiLearningSessionQuestions.length > 0 ? (
           <StudentAiLearningSessionPanel
             answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
+            onChangeTextAnswer={(questionPublicId, textAnswer) => {
+              setSelectedAiLearningTextAnswersByQuestion(
+                (currentTextAnswers) => ({
+                  ...currentTextAnswers,
+                  [questionPublicId]: textAnswer,
+                }),
+              );
+              setAiLearningAnswerFeedbackByQuestion({});
+            }}
             onSelectOptionLabel={(question, optionLabel) => {
               setSelectedAiLearningAnswerLabelsByQuestion(
                 (currentSelectedLabels) => {
@@ -5170,6 +5287,7 @@ export function StudentPersonalAiGenerationPage() {
             selectedOptionLabelsByQuestion={
               selectedAiLearningAnswerLabelsByQuestion
             }
+            textAnswersByQuestion={selectedAiLearningTextAnswersByQuestion}
           />
         ) : null}
 

@@ -1,48 +1,40 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23",
-  "findingIds": ["F-0135"],
+  "taskId": "p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23",
+  "findingIds": ["F-0161"],
   "candidateRootCauseCluster": "P1-RC-08",
   "status": "validated_reviewed_conditional_closeout_ready",
-  "branch": "fix/practice-resume-authoritative-progress",
-  "baseSha": "f3d165b06282dca6e049cdfe2ff8a63bf208f99a",
-  "objective": "Close F-0135 statically by returning one server-owned, deterministic per-question practice resume projection and restoring saved answers, feedback stage, retry budget and the next usable question across refresh or device changes without trusting client-derived progress.",
-  "riskCategory": "low_risk_api_ui_application_logic",
+  "branch": "fix/personal-ai-learning-subjective-answer",
+  "baseSha": "ecfe6a1e1a36492d05d2547609f5d4fb99b82362",
+  "objective": "Close F-0161 statically by requiring a bounded nonblank text answer for subjective personal AI learning questions, restoring that text across progress reads, and preventing unanswered questions from being persisted or counted as submitted.",
+  "riskCategory": "low_risk_api_ui_validation_logic",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/practice-contract.ts",
-    "src/server/repositories/practice-repository.ts",
-    "src/server/repositories/student-flow-runtime-repository.ts",
-    "src/server/mappers/practice-mapper.ts",
-    "src/server/mappers/practice-mapper.test.ts",
-    "src/server/services/practice-service.ts",
-    "src/server/services/practice-service.test.ts",
-    "src/features/student/practice/StudentPracticePage.tsx",
-    "tests/unit/student-practice-ui.test.ts",
-    "tests/unit/p1-practice-resume-authoritative-progress.test.ts",
-    "src/server/services/practice-route.test.ts",
-    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts"
+    "src/server/models/personal-ai-generation-learning-session.ts",
+    "src/server/services/personal-ai-generation-learning-session-service.ts",
+    "src/server/services/personal-ai-generation-learning-session-service.test.ts",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts",
+    "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
+    "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
+    "src/server/services/personal-ai-generation-learning-session-route.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/practice-contract.ts",
-    "src/server/repositories/practice-repository.ts",
-    "src/server/repositories/student-flow-runtime-repository.ts",
-    "src/server/mappers/practice-mapper.ts",
-    "src/server/mappers/practice-mapper.test.ts",
-    "src/server/services/practice-service.ts",
-    "src/server/services/practice-service.test.ts",
-    "src/features/student/practice/StudentPracticePage.tsx",
-    "tests/unit/student-practice-ui.test.ts",
-    "tests/unit/p1-practice-resume-authoritative-progress.test.ts"
+    "src/server/models/personal-ai-generation-learning-session.ts",
+    "src/server/services/personal-ai-generation-learning-session-service.ts",
+    "src/server/services/personal-ai-generation-learning-session-service.test.ts",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts",
+    "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/practice-route.test.ts",
-    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts"
+    "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
+    "src/server/services/personal-ai-generation-learning-session-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -54,31 +46,37 @@
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
-    "any permission, authorization, Provider, quota, deployment or external-service configuration"
+    "any permission, authorization, quota, Provider, deployment or external-service configuration"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "student practice page -> POST/GET practice route -> practice service -> practice mapper and repository -> answer_record rows plus immutable paper snapshot -> per-question resume projection -> direct mapper/service/UI/runtime fixtures",
-    "coreFileCount": 13,
+    "authoritativeChain": "student personal AI generation learning panel -> answer POST route -> learning session service -> existing answer feedback repository -> progress service -> restored UI answer state and statistics",
+    "coreFileCount": 9,
     "contingencyFileCount": 2,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
     "schemaMigrationRequired": false,
-    "permissionSemantics": "unchanged; existing authenticated owner-scoped practice lookup remains the only source",
-    "providerSemantics": "unchanged; unavailable AI hint, explanation and scoring facts remain unavailable rather than being reconstructed",
-    "currentMasterEvidence": "PracticeResultDto returns answerRecords, but StudentPracticePage discards their snapshots and initializes answer and feedback maps empty; mapPracticeToApi advances on any row without a server-owned phase projection."
+    "permissionSemantics": "unchanged; existing session, owner and current authorization checks remain authoritative and precede answer persistence",
+    "providerSemantics": "unchanged; subjective answers remain submitted_review_required with AI scoring blocked",
+    "currentMasterEvidence": "The UI renders no text input for optionless subjective questions and submits textAnswer null for every question; the service persists blank subjective feedback and statistics count every feedback row as submitted."
   },
-  "resumeContract": {
-    "authority": "the server derives each question state from the immutable practice paper snapshot and the complete persisted answer_record set; the client never infers completion from array length",
-    "cardinality": "unknown questions, duplicate public identities, mixed legacy and numbered attempts, gaps, duplicate attempt numbers or conflicting max counts fail closed",
-    "answer": "selected labels or text answer are restored only from the authoritative current answer record",
-    "feedback": "objective feedback and current unavailable subjective AI state are reconstructed from persisted answer facts and the immutable question snapshot without inventing Provider output",
-    "navigation": "currentQuestionIndex points to the first server-projected actionable question; when all questions are terminal it stays on the final question with restored feedback",
-    "legacy": "one coherent legacy all-null attempt may be projected explicitly; ambiguous legacy history is rejected rather than guessed",
-    "privacy": "only the already authorized practice owner receives the existing learner-safe paper projection and answer feedback; no internal id or new answer visibility is added"
+  "subjectiveAnswerContract": {
+    "questionTypes": [
+      "fill_blank",
+      "short_answer",
+      "case_analysis",
+      "calculation"
+    ],
+    "serverValidation": "subjective questions require a trimmed nonblank bounded text answer and reject selected-option substitution before saveAnswerFeedback",
+    "objectiveValidation": "single_choice, multi_choice and true_false continue to require their existing option semantics and do not consume text as an answer",
+    "ui": "the learner receives a controlled textarea for subjective questions; submit remains disabled until every question has an answer of the correct shape",
+    "resume": "progress restores the persisted subjective text answer and never reconstructs it from generated preview or client cache",
+    "statistics": "only successfully persisted scored or submitted_review_required feedback counts toward submittedCount and completionRate",
+    "bounds": "a focused conservative text limit is enforced before persistence without expanding into the separate cross-domain F-0174 answer-budget finding",
+    "formalBoundary": "formal question, paper, practice, mock_exam, exam_report and mistake_book writes remain blocked"
   },
   "validationCommands": [
     {
-      "name": "practice-resume-focused",
+      "name": "personal-ai-subjective-answer-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -86,27 +84,10 @@
         "exec",
         "vitest",
         "run",
-        "src/server/mappers/practice-mapper.test.ts",
-        "src/server/services/practice-service.test.ts",
-        "src/server/services/practice-route.test.ts",
-        "tests/unit/student-practice-ui.test.ts",
-        "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "tests/unit/p1-practice-resume-authoritative-progress.test.ts",
-        "--maxWorkers=1"
-      ]
-    },
-    {
-      "name": "practice-atomic-direct-regression",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@11.9.0",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-practice-answer-atomic-command.test.ts",
-        "-t",
-        "allows only the additive practice-attempt and mistake-book uniqueness migration|uses one authoritative transaction command and atomic mistake-book upserts",
+        "src/server/services/personal-ai-generation-learning-session-service.test.ts",
+        "src/server/services/personal-ai-generation-learning-session-route.test.ts",
+        "tests/unit/student-personal-ai-generation-ui.test.ts",
+        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
         "--maxWorkers=1"
       ]
     },
@@ -140,17 +121,14 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/contracts/practice-contract.ts",
-        "src/server/repositories/practice-repository.ts",
-        "src/server/repositories/student-flow-runtime-repository.ts",
-        "src/server/mappers/practice-mapper.ts",
-        "src/server/mappers/practice-mapper.test.ts",
-        "src/server/services/practice-service.ts",
-        "src/server/services/practice-service.test.ts",
-        "src/server/services/practice-route.test.ts",
-        "src/features/student/practice/StudentPracticePage.tsx",
-        "tests/unit/student-practice-ui.test.ts",
-        "tests/unit/p1-practice-resume-authoritative-progress.test.ts"
+        "src/server/models/personal-ai-generation-learning-session.ts",
+        "src/server/services/personal-ai-generation-learning-session-service.ts",
+        "src/server/services/personal-ai-generation-learning-session-service.test.ts",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+        "tests/unit/student-personal-ai-generation-ui.test.ts",
+        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
+        "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
+        "src/server/services/personal-ai-generation-learning-session-route.test.ts"
       ]
     },
     {
@@ -162,9 +140,9 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-practice-resume-authoritative-progress.test.ts",
+        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
         "-t",
-        "strictly parses the F-0135 task contract and WIP state",
+        "strictly parses the F-0161 task contract and WIP state",
         "--maxWorkers=1"
       ]
     }
@@ -178,27 +156,20 @@
     "provider": null
   },
   "conditionalCloseout": true,
-  "validationEvidence": {
-    "red": "4_files_67_tests_6_failed_61_passed_before_implementation",
-    "focused": "6_files_76_tests_passed",
-    "practiceAtomicDirectRegression": "1_file_2_selected_tests_passed_1_state_only_test_filtered_out",
-    "typecheck": "exit_0",
-    "lint": "exit_0_with_3_preexisting_unrelated_warnings",
-    "build": "exit_0_100_static_and_dynamic_routes_generated",
-    "format": "preapplied_to_all_actual_changed_files_final_check_pending_kernel",
-    "adversarialReview": "GREEN_complete_owner_scoped_answer_set_batched_once_snapshot_identity_and_attempt_cardinality_fail_closed_no_provider_fact_invented_standard_answer_only_for_answered_questions_final_terminal_question_restored_and_no_schema_permission_or_provider_change",
-    "validationCorrections": [
-      "made_missing_questionProgress_runtime_compatible_without_reintroducing_client_answer-count_inference",
-      "bound_fill_blank_objective_or_subjective_resume_semantics_to_persisted_scoringMethod",
-      "split_prior_F0027_product_regression_from_its_stale_active-task_state assertion",
-      "reran_pnpm_validations_sequentially_after_one_parallel_node_modules_EPERM_contention"
-    ]
-  },
   "closeoutProjection": {
     "current": "validated_reviewed_conditional_closeout_ready",
     "triggers": "focused_lint_typecheck_build_format_diff_state_parse_and_main_thread_adversarial_review_GREEN_with_unchanged_base_origin_and_envelope",
-    "successProjection": "F0135_closed_static_without_browser_or_runtime_database_proof",
+    "successProjection": "F0161_closed_static_without_browser_or_runtime_database_proof",
     "terminalEvidence": "only actual commit push sync and cleanup evidence may prove closeout"
+  },
+  "validationEvidence": {
+    "red": "4_files_78_tests_3_failed_75_passed",
+    "focused": "4_files_79_tests_passed",
+    "lint": "pass_with_3_preexisting_unrelated_warnings",
+    "typecheck": "pass",
+    "build": "pass_with_preexisting_next_output_tracing_warning",
+    "formatDiffState": "pass",
+    "adversarialReview": "pass_server_owned_question_type_nonblank_4000_character_bound_zero_rejected_persistence_objective_text_substitution_rejected_and_server_progress_restore"
   },
   "executionMetrics": {
     "mandatoryFreshApprovals": 0,
@@ -210,27 +181,27 @@
     "guardSmokeChanges": 0
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23",
-    "findingIds": ["F-0067"],
-    "commit": "f3d165b06282dca6e049cdfe2ff8a63bf208f99a",
+    "taskId": "p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23",
+    "findingIds": ["F-0135"],
+    "commit": "ecfe6a1e1a36492d05d2547609f5d4fb99b82362",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "findingStatus": "closed_static_product_without_runtime_database_or_provider_proof",
+    "findingStatus": "closed_static_product_without_browser_or_runtime_database_proof",
     "masterOriginSync": true,
     "worktreeCleanBeforeBranch": true,
     "shortBranchCleanup": true
   },
   "residualDisposition": {
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
-    "F-0063": "not_actionable_on_current_durable_path_static_only",
     "F-0065": "confirmed_deferred_by_F0148_quota_and_Cost_Calibration_gate",
-    "F-0067": "closed_static_product_without_runtime_database_or_provider_proof",
-    "F-0135": "validated_static_candidate_conditional_closeout_ready"
+    "F-0079": "confirmed_high_confidence_but_requires_separate_database_application_snapshot_task",
+    "F-0135": "closed_static_product_without_browser_or_runtime_database_proof",
+    "F-0161": "confirmed_high_confidence_and_currently_eligible"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0135",
-    "currentPartition": "practice_resume_authoritative_progress",
-    "nextReviewHints": ["continue_RC08_residual_JIT_after_F0135_closeout"]
+    "currentFindingId": "F-0161",
+    "currentPartition": "personal_ai_learning_subjective_answer",
+    "nextReviewHints": ["continue_RC08_residual_JIT_after_F0161_closeout"]
   },
   "push": {
     "target": "origin/master",

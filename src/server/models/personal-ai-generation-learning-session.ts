@@ -19,6 +19,8 @@ export const personalAiGenerationLearningSessionQuestionTypeValues = [
 export type PersonalAiGenerationLearningSessionQuestionType =
   (typeof personalAiGenerationLearningSessionQuestionTypeValues)[number];
 
+export const PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH = 4_000;
+
 export type PersonalAiGenerationLearningContentDomain = "personal_ai_learning";
 
 export type PersonalAiGenerationLearningFormalWriteStatus = "blocked";
@@ -51,7 +53,10 @@ export type PersonalAiGenerationLearningSessionCreationBlockReason =
 export type PersonalAiGenerationLearningAnswerBlockReason =
   | "session_not_found"
   | "actor_not_allowed"
-  | "question_not_found";
+  | "question_not_found"
+  | "answer_required"
+  | "answer_too_long"
+  | "answer_shape_invalid";
 
 export type PersonalAiGenerationLearningSessionProgressStatus =
   | "ready"

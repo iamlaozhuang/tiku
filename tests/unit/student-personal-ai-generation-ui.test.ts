@@ -492,6 +492,9 @@ function createAuthorizationListResponse(
 function createPersonalAiGenerationFetchMock(
   experienceResponse: unknown = localExperienceResponse,
   historyResponse: unknown = emptyServerHistoryResponse,
+  learningSessionObservers: {
+    onAnswerSubmitBody?: (body: Record<string, unknown>) => void;
+  } = {},
 ) {
   const learningSessionMockState = createPersonalAiLearningSessionMockState();
 
@@ -582,6 +585,7 @@ function createPersonalAiGenerationFetchMock(
         readMockExperienceSourceTaskPublicId(experienceResponse),
       persistedVisibleGeneratedContent:
         readMockExperienceVisibleGeneratedContent(experienceResponse),
+      onAnswerSubmitBody: learningSessionObservers.onAnswerSubmitBody,
       state: learningSessionMockState,
     });
 
@@ -841,6 +845,7 @@ function createLearningAnswerFeedbackResponse(input: {
   actorPublicId: string;
   question: PersonalAiGenerationLearningSessionQuestionDto;
   selectedOptionLabels: string[];
+  textAnswer?: string | null;
 }): {
   code: 0;
   message: "ok";
@@ -849,20 +854,26 @@ function createLearningAnswerFeedbackResponse(input: {
   const isCorrect =
     input.selectedOptionLabels.join("|") ===
     input.question.standardAnswerLabels.join("|");
+  const isSubjective = [
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ].includes(input.question.questionType);
 
   return {
     code: 0,
     message: "ok",
     data: {
-      status: "scored",
+      status: isSubjective ? "submitted_review_required" : "scored",
       blockReason: null,
       sessionPublicId: input.sessionPublicId,
       sessionQuestionPublicId: input.question.sessionQuestionPublicId,
       actorPublicId: input.actorPublicId,
       selectedOptionLabels: input.selectedOptionLabels,
-      textAnswer: null,
-      isCorrect,
-      score: isCorrect ? "1.0" : "0.0",
+      textAnswer: input.textAnswer?.trim() || null,
+      isCorrect: isSubjective ? null : isCorrect,
+      score: isSubjective ? null : isCorrect ? "1.0" : "0.0",
       maxScore: "1.0",
       standardAnswerLabels: input.question.standardAnswerLabels,
       standardAnswerText: input.question.standardAnswerText,
@@ -1011,6 +1022,24 @@ async function handlePersonalAiLearningSessionFetch(input: {
       typeof body.sessionPublicId === "string"
         ? body.sessionPublicId
         : `ai_learning_session_${sourceResultPublicId}`;
+    const existingSession = input.state.sessionsByPublicId.get(sessionPublicId);
+
+    if (existingSession !== undefined) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () =>
+          createLearningSessionCreatedResponse({
+            actorPublicId: existingSession.actorPublicId,
+            ownerPublicId: existingSession.ownerPublicId,
+            ownerType: existingSession.ownerType,
+            questions: existingSession.questions,
+            sessionPublicId: existingSession.sessionPublicId,
+            sourceResultPublicId: existingSession.sourceResultPublicId,
+            sourceTaskPublicId: existingSession.sourceTaskPublicId,
+          }),
+      };
+    }
     const sourceTaskPublicId =
       typeof body.sourceTaskPublicId === "string"
         ? body.sourceTaskPublicId
@@ -1092,6 +1121,7 @@ async function handlePersonalAiLearningSessionFetch(input: {
       question,
       selectedOptionLabels,
       sessionPublicId,
+      textAnswer: typeof body.textAnswer === "string" ? body.textAnswer : null,
     });
     session.answerFeedbacksByQuestionPublicId.set(
       question.sessionQuestionPublicId,
@@ -4928,6 +4958,126 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("raw prompt");
+  });
+
+  it("requires, submits, and restores a bounded subjective learning answer", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const sourceResultPublicId = "ai-generation-result-subjective-ui-001";
+    const sourceTaskPublicId = "ai-generation-task-subjective-ui-001";
+    const answerSubmitBodies: Array<Record<string, unknown>> = [];
+    const visibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          taskPublicId: sourceTaskPublicId,
+          resultPublicId: sourceResultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "synthetic subjective learning draft",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 1,
+              actualQuestionCount: 1,
+              draftCount: 1,
+              draftSummaries: [
+                {
+                  draftPublicId: "ai_question_draft_subjective_ui_001",
+                  draftNumber: 1,
+                  questionType: "short_answer",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  knowledgeNodeLabels: ["synthetic knowledge node"],
+                  questionStem: "synthetic subjective learner stem",
+                  questionOptions: [],
+                  standardAnswer: "synthetic server-only standard answer",
+                  analysis: "synthetic server-only analysis",
+                  scoringPoints: [
+                    {
+                      description: "synthetic scoring point",
+                      score: "1.0",
+                      sortOrder: 1,
+                    },
+                  ],
+                  fillBlankAnswers: [],
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          blockedReasons: [],
+        },
+      },
+    };
+    const fetchMock = createPersonalAiGenerationFetchMock(
+      visibleResponse,
+      emptyServerHistoryResponse,
+      {
+        onAnswerSubmitBody(body) {
+          answerSubmitBodies.push(body);
+        },
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+    expect(
+      await screen.findByText("synthetic subjective learner stem"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
+
+    const submitButton = screen.getByRole("button", { name: "提交作答" });
+    expect(submitButton).toBeDisabled();
+    const textArea = await screen.findByRole("textbox", {
+      name: "题目 1 主观答案",
+    });
+    fireEvent.change(textArea, {
+      target: { value: "  synthetic learner subjective answer  " },
+    });
+    expect(submitButton).not.toBeDisabled();
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(answerSubmitBodies).toHaveLength(1));
+    expect(answerSubmitBodies[0]).toMatchObject({
+      selectedOptionLabels: [],
+      textAnswer: "synthetic learner subjective answer",
+    });
+    expect(await screen.findByText("已提交，待人工评阅")).toBeInTheDocument();
+
+    cleanup();
+    render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+    await screen.findByText("synthetic subjective learner stem");
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
+
+    const restoredTextArea = await screen.findByRole("textbox", {
+      name: "题目 1 主观答案",
+    });
+    expect(restoredTextArea).toHaveValue("synthetic learner subjective answer");
+    expect(restoredTextArea).toBeDisabled();
+    expect(screen.getByTestId("student-ai-learning-session")).toHaveTextContent(
+      "已提交 1 题",
+    );
   });
 
   it("persists an organization employee personal-authorization AI question learning session under personal owner context", async () => {
