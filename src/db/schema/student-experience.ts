@@ -293,6 +293,8 @@ export const answerRecord = pgTable(
     question_snapshot: jsonb("question_snapshot").notNull(),
     answer_snapshot: jsonb("answer_snapshot").notNull(),
     answer_revision: integer("answer_revision").default(1).notNull(),
+    practice_attempt_number: integer("practice_attempt_number"),
+    practice_max_attempt_count: integer("practice_max_attempt_count"),
     client_operation_id: text("client_operation_id"),
     client_saved_at: nullableTimestampColumn("client_saved_at"),
     answer_record_status: answerRecordStatusEnum("answer_record_status")
@@ -311,7 +313,26 @@ export const answerRecord = pgTable(
       "chk_answer_record_answer_revision",
       sql`${table.answer_revision} > 0`,
     ),
+    check(
+      "chk_answer_record_practice_attempt_completeness",
+      sql`(${table.practice_attempt_number} is null and ${table.practice_max_attempt_count} is null) or (${table.practice_attempt_number} is not null and ${table.practice_max_attempt_count} is not null)`,
+    ),
+    check(
+      "chk_answer_record_practice_attempt_mode",
+      sql`${table.practice_attempt_number} is null or (${table.exam_mode} = 'practice' and ${table.practice_id} is not null and ${table.mock_exam_id} is null)`,
+    ),
+    check(
+      "chk_answer_record_practice_attempt_bounds",
+      sql`${table.practice_attempt_number} is null or (${table.practice_attempt_number} >= 1 and ${table.practice_attempt_number} <= ${table.practice_max_attempt_count} and ${table.practice_max_attempt_count} in (1, 2))`,
+    ),
     uniqueIndex("udx_answer_record_public_id").on(table.public_id),
+    uniqueIndex("udx_answer_record_practice_question_attempt")
+      .on(
+        table.practice_id,
+        table.paper_question_public_id,
+        table.practice_attempt_number,
+      )
+      .where(sql`${table.practice_attempt_number} is not null`),
     uniqueIndex("udx_answer_record_mock_exam_id_client_operation_id")
       .on(table.mock_exam_id, table.client_operation_id)
       .where(sql`${table.client_operation_id} is not null`),
@@ -392,6 +413,10 @@ export const mistakeBook = pgTable(
   },
   (table) => [
     uniqueIndex("udx_mistake_book_public_id").on(table.public_id),
+    uniqueIndex("udx_mistake_book_user_id_question_public_id").on(
+      table.user_id,
+      table.question_public_id,
+    ),
     index("idx_mistake_book_user_id").on(table.user_id),
     index("idx_mistake_book_question_public_id").on(table.question_public_id),
     index("idx_mistake_book_profession_level_subject").on(

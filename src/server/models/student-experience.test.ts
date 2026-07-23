@@ -127,6 +127,8 @@ describe("student experience domain models", () => {
       is_correct: true,
       score: "1.0",
       max_score: "1.0",
+      practice_attempt_number: null,
+      practice_max_attempt_count: null,
       answered_at: createdAt,
       submitted_at: null,
       created_at: createdAt,

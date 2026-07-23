@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-active-answer-session-claim-2026-07-23",
-  "objective": "Enforce one active practice and one active mock_exam per user and paper through database partial uniqueness plus one transactionally serialized create-or-return-existing claim, preserving exact authorization lineage and returning the authoritative existing progress under concurrent starts.",
-  "status": "validated_candidate_ready_for_conditional_closeout",
-  "branch": "fix/active-answer-session-claim",
-  "baseSha": "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
-  "findingIds": ["F-0026"],
+  "taskId": "p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23",
+  "findingIds": ["F-0027"],
   "candidateRootCauseCluster": "P1-RC-08",
+  "status": "validated_candidate_pending_commit",
+  "branch": "fix/practice-answer-atomic-command",
+  "baseSha": "da410333050b0db8b17ed7ca5b16074fb0faa45e",
+  "objective": "Close only the practice-answer atomicity partition of F-0027 by making attempt limits, answer insertion, practice progress and wrong-answer mistake_book mutation one authoritative transaction command; keep mock submit/scoring finalization as a separate residual.",
   "riskCategory": "schema_migration_source_and_database_application_logic",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
@@ -14,19 +14,18 @@
     "docs/04-agent-system/state/task-safety.json",
     "src/db/schema/student-experience.ts",
     "src/db/schema/student-experience.test.ts",
-    "drizzle/20260723013000_p1_rc_08_active_answer_session_claim.sql",
-    "drizzle/meta/20260723013000_snapshot.json",
+    "drizzle/20260723023000_p1_rc_08_practice_answer_atomic_command.sql",
+    "drizzle/meta/20260723023000_snapshot.json",
     "drizzle/meta/_journal.json",
     "src/server/repositories/practice-repository.ts",
-    "src/server/repositories/mock-exam-repository.ts",
     "src/server/repositories/student-flow-runtime-repository.ts",
     "src/server/services/practice-service.ts",
     "src/server/services/practice-service.test.ts",
-    "src/server/services/mock-exam-service.ts",
-    "src/server/services/mock-exam-service.test.ts",
+    "tests/unit/p1-practice-answer-atomic-command.test.ts",
     "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
     "tests/unit/p1-answer-session-authorization-lineage.test.ts",
-    "tests/unit/p1-active-answer-session-claim.test.ts"
+    "tests/unit/p1-active-answer-session-claim.test.ts",
+    "src/server/models/student-experience.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
@@ -34,21 +33,20 @@
     "docs/04-agent-system/state/task-safety.json",
     "src/db/schema/student-experience.ts",
     "src/db/schema/student-experience.test.ts",
-    "drizzle/20260723013000_p1_rc_08_active_answer_session_claim.sql",
-    "drizzle/meta/20260723013000_snapshot.json",
+    "drizzle/20260723023000_p1_rc_08_practice_answer_atomic_command.sql",
+    "drizzle/meta/20260723023000_snapshot.json",
     "drizzle/meta/_journal.json",
     "src/server/repositories/practice-repository.ts",
-    "src/server/repositories/mock-exam-repository.ts",
     "src/server/repositories/student-flow-runtime-repository.ts",
     "src/server/services/practice-service.ts",
     "src/server/services/practice-service.test.ts",
-    "src/server/services/mock-exam-service.ts",
-    "src/server/services/mock-exam-service.test.ts",
-    "tests/unit/p1-active-answer-session-claim.test.ts"
+    "tests/unit/p1-practice-answer-atomic-command.test.ts"
   ],
   "contingencyFiles": [
     "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "tests/unit/p1-answer-session-authorization-lineage.test.ts"
+    "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+    "tests/unit/p1-active-answer-session-claim.test.ts",
+    "src/server/models/student-experience.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -57,45 +55,33 @@
     ".husky/**",
     "package.json",
     "pnpm-lock.yaml",
-    "all dependency and configuration files outside allowedFiles",
-    "all authorization, quota, Provider, secret/env, deployment, PR and force-push surfaces outside allowedFiles",
-    "all historical evidence/audit/task-plan files"
+    "src/server/services/mock-exam-service.ts",
+    "src/server/repositories/mock-exam-repository.ts",
+    "all provider, secret/env, deployment and historical evidence/audit files"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "practice/mock_exam start route -> start validator -> service paper and exact authorization selection -> repository transaction -> authorization lineage lock -> deterministic user/paper session-start advisory lock -> active-row recheck -> create-or-return-existing -> partial unique index -> authoritative progress response",
-    "coreFileCount": 16,
-    "contingencyFileCount": 2,
+    "authoritativeChain": "practice answer route and validator -> practice service -> PracticeRepository command contract -> student-flow runtime repository transaction -> answer_record/practice/mistake_book schema and migration -> direct tests, mocks and F-0008/F-0026 regressions",
+    "coreFileCount": 13,
+    "contingencyFileCount": 4,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
-    "bundleDisposition": "F-0013 remains runtime_hold; F-0026 is a separate confirmed root cause; F-0027 remains separate because answer mutation/scoring atomicity has a different command boundary and validation matrix",
-    "currentMasterEvidence": "the legacy in-process practice promise map cannot protect multiple processes; mock_exam has no equivalent guard; both repository create paths still insert after an out-of-transaction active lookup; neither table has an active user-paper partial unique index",
+    "bundleDisposition": "F-0027 is partitioned: this task covers practice answer atomicity only; mock submit/scoring finalization remains a separate independently accepted residual; F-0013 remains runtime_hold.",
+    "currentMasterEvidence": "practice service performs answer existence/count reads before three separate repository writes; the repository has no shared transaction or attempt constraint and mistake_book uses a read-then-update/insert sequence without user-question uniqueness",
     "schemaMigrationRequired": true,
-    "permissionSemantics": "unchanged; the task preserves F-0008 exact authorization lineage and never substitutes authorization sources"
+    "permissionSemantics": "unchanged; every command must revalidate the exact F-0008 authorization lineage under the existing serialization boundary"
   },
-  "activeSessionClaimContract": {
-    "databaseInvariant": "at most one practice row with practice_status=in_progress and at most one mock_exam row with exam_status=in_progress for the same user_id and paper_id",
-    "transaction": "after the existing organization authorization serialization boundary, each start transaction acquires one deterministic mode+user+paper advisory lock, rechecks all active rows under the lock, validates exact authorization and published paper facts, and either inserts once or returns the single authoritative existing row",
-    "corruption": "more than one pre-existing active row or an identity/authorization conflict fails closed; no arbitrary first-row selection or silent repair",
-    "concurrentReplay": "all concurrent callers converge on one publicId; the loser does not create a deadline task or second session and receives existing answer progress instead of an empty synthetic response",
-    "authorization": "an existing lineaged session may be resumed only under its exact authorization source/publicId; legacy all-null behavior remains compatible and no lineage is rewritten",
-    "snapshot": "a stale or incompatible existing snapshot is handled by the existing explicit expire/terminate-and-restart rules under the same claim boundary, never by creating a second active row",
-    "migration": "only two additive partial unique indexes and coherent Drizzle snapshot/journal metadata; no backfill, data mutation, destructive DDL or migration apply"
+  "practiceAnswerAtomicCommandContract": {
+    "attemptInvariant": "objective questions allow exactly one persisted attempt and subjective questions allow at most two; the database stores legacy-nullable attempt number and max-attempt facts and rejects partial or impossible combinations",
+    "transaction": "one authoritative repository transaction revalidates the owned active practice and exact authorization lineage, locks the practice/question command boundary, reads all attempts, inserts one answer, updates practice.last_answered_at and atomically upserts mistake_book for a wrong objective answer",
+    "concurrency": "concurrent objective submissions yield one committed answer; concurrent subjective submissions cannot exceed two; corruption or ambiguous history fails closed with zero partial writes",
+    "mistakeBook": "one row per user and question; a wrong answer atomically increments wrong_count and refreshes the latest snapshot without lost updates",
+    "legacy": "legacy answer rows remain readable but are never guessed or backfilled; ambiguous legacy attempt history fails closed",
+    "authorization": "the client supplies no authorization fact beyond the already validated context; another source covering the same scope cannot replace the captured lineage",
+    "findingDisposition": "F-0027 remains open_partitioned after this task because mock submit/scoring finalization atomicity is not implemented here"
   },
-  "acceptance": [
-    "two concurrent practice starts across independent service instances converge on one active practice and one publicId",
-    "two concurrent mock_exam starts converge on one active mock_exam and exactly one deadline task",
-    "database partial unique indexes independently reject a second active row while allowing historical completed, expired or terminated rows",
-    "same user with different papers and different users with the same paper do not contend semantically",
-    "same-scope requests with different explicit authorization lineage fail closed rather than switching or rewriting the active session",
-    "pre-existing duplicate active rows fail closed without choosing one or mutating data",
-    "existing authoritative answer progress is returned for a concurrent replay and is not replaced with an empty response",
-    "F-0008 exact-lineage creation and cancellation regressions remain GREEN",
-    "migration source is additive only and is not applied; no real database proof is claimed",
-    "no permission, entitlement, quota, Provider, dependency, mechanism or external boundary changes"
-  ],
   "validationCommands": [
     {
-      "name": "active-answer-session-claim-focused",
+      "name": "practice-answer-atomic-command-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -105,33 +91,34 @@
         "run",
         "src/db/schema/student-experience.test.ts",
         "src/server/services/practice-service.test.ts",
-        "src/server/services/mock-exam-service.test.ts",
+        "tests/unit/p1-practice-answer-atomic-command.test.ts",
         "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
         "tests/unit/p1-answer-session-authorization-lineage.test.ts",
         "tests/unit/p1-active-answer-session-claim.test.ts",
+        "src/server/models/student-experience.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "active-answer-session-claim-lint",
+      "name": "practice-answer-atomic-command-lint",
       "kind": "lint",
       "executable": "npm.cmd",
       "arguments": ["run", "lint"]
     },
     {
-      "name": "active-answer-session-claim-typecheck",
+      "name": "practice-answer-atomic-command-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@11.9.0", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "active-answer-session-claim-build",
+      "name": "practice-answer-atomic-command-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@11.9.0", "run", "build"]
     },
     {
-      "name": "active-answer-session-claim-format",
+      "name": "practice-answer-atomic-command-format",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -145,25 +132,24 @@
         "src/db/schema/student-experience.ts",
         "src/db/schema/student-experience.test.ts",
         "src/server/repositories/practice-repository.ts",
-        "src/server/repositories/mock-exam-repository.ts",
         "src/server/repositories/student-flow-runtime-repository.ts",
         "src/server/services/practice-service.ts",
         "src/server/services/practice-service.test.ts",
-        "src/server/services/mock-exam-service.ts",
-        "src/server/services/mock-exam-service.test.ts",
+        "tests/unit/p1-practice-answer-atomic-command.test.ts",
         "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
         "tests/unit/p1-answer-session-authorization-lineage.test.ts",
-        "tests/unit/p1-active-answer-session-claim.test.ts"
+        "tests/unit/p1-active-answer-session-claim.test.ts",
+        "src/server/models/student-experience.test.ts"
       ]
     },
     {
-      "name": "active-answer-session-claim-diff-check",
+      "name": "practice-answer-atomic-command-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
     },
     {
-      "name": "active-answer-session-claim-state-parse",
+      "name": "practice-answer-atomic-command-state-parse",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -171,14 +157,14 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-active-answer-session-claim.test.ts",
+        "tests/unit/p1-practice-answer-atomic-command.test.ts",
         "-t",
-        "strictly parses the F-0026 task contract and WIP state",
+        "strictly parses the F-0027 practice partition contract and WIP state",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "active-answer-session-claim-schema-source",
+      "name": "practice-answer-atomic-command-schema-source",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -186,16 +172,16 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-active-answer-session-claim.test.ts",
+        "tests/unit/p1-practice-answer-atomic-command.test.ts",
         "-t",
-        "allows only the two additive active-session partial unique indexes",
+        "allows only the additive practice-attempt and mistake-book uniqueness migration",
         "--maxWorkers=1"
       ]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0026-active-answer-session-claim-2026-07-23",
+    "database": "guardian-f0027-practice-answer-atomic-command-2026-07-23",
     "permission": null,
     "deployment": null,
     "secretEnv": null
@@ -206,10 +192,10 @@
   ],
   "pendingApproval": {
     "status": "approved_before_product_RED",
-    "proposedApprovalId": "guardian-f0026-active-answer-session-claim-2026-07-23",
-    "approvalFingerprint": "3776342f7ccfb92dc14d9ceb79313acaf0aeec7e3ee33f63163aaccf5e4c1a4f",
+    "proposedApprovalId": "guardian-f0027-practice-answer-atomic-command-2026-07-23",
+    "approvalFingerprint": "06a16723f44c1d7888711a1d4e14df0017dbc5853ac1c7cb5b9f1d40f91e4fcb",
     "riskCategory": "schema_migration_source_and_database_application_logic",
-    "baseSha": "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
+    "baseSha": "da410333050b0db8b17ed7ca5b16074fb0faa45e",
     "requestedOperations": [
       "additive schema and migration source without apply",
       "offline Drizzle generation",
@@ -223,76 +209,74 @@
     "conditionalCloseoutRequested": true,
     "approved": true
   },
-  "conditionalCloseout": true,
+  "approvalAmendments": [
+    {
+      "approvalId": "guardian-f0027-test-fixture-schema-inferselect-amendment-2026-07-23",
+      "parentApprovalId": "guardian-f0027-practice-answer-atomic-command-2026-07-23",
+      "approvalFingerprint": "f0027-test-fixture-schema-inferselect-amendment-da410333-2026-07-23",
+      "scope": "test_only_legacy_answer_record_inferselect_fixture_null_fields",
+      "addedFiles": ["src/server/models/student-experience.test.ts"],
+      "riskCategoryChanged": false
+    }
+  ],
   "validationEvidence": {
-    "tddRed": "5 expected failures and 73 passes before implementation",
-    "focused": "6 files and 90 tests passed",
-    "lint": "exit 0 with 3 pre-existing warnings outside the changed product files",
-    "typecheck": "tsc --noEmit exit 0",
-    "build": "Next.js production build exit 0 with the existing NFT tracing warning",
-    "format": "exact Prettier check exit 0",
-    "diff": "git diff --check exit 0",
-    "schemaSource": "exact two-statement additive partial-unique-index migration, coherent snapshot and monotonic journal",
-    "databaseRuntime": "not executed; proof is static and synthetic only"
+    "red": "3_files_4_expected_failures_40_passes_exit_1",
+    "focused": "7_files_58_tests_GREEN",
+    "lint": "exit_0_with_3_pre_existing_warnings_outside_changed_files",
+    "typecheck": "exit_0",
+    "build": "exit_0_with_existing_NFT_tracing_warning",
+    "formatAndDiff": "exit_0",
+    "stateAndSchema": "strict_parse_GREEN_and_exact_7_statement_additive_migration_GREEN",
+    "databaseRuntime": "not_executed_static_and_synthetic_evidence_only"
   },
   "adversarialReview": {
     "status": "GREEN",
     "conclusions": [
-      "authorization serialization lock is acquired before the namespaced mode-user-paper claim lock",
-      "claim transactions re-read every active row and reject duplicate or incompatible authoritative state",
-      "practice and mock_exam are separated in the lock identity and partial unique indexes",
-      "exact F-0008 lineage is preserved while coherent legacy all-null lineage remains read-compatible",
-      "stale snapshot replacement, mock deadline cancellation and fresh creation share one claim transaction",
-      "repository replay returns authoritative answer progress and never synthesizes an empty concurrent response",
-      "migration contains no data mutation, destructive DDL, backfill or apply"
+      "authorization serialization precedes the owned active practice row lock and practice-question attempt lock",
+      "all attempt rows are read under the transaction lock and corrupt identity, partial legacy, mixed legacy-numbered, duplicate or non-contiguous history fails closed",
+      "prepared objective and subjective facts are checked before insert and a wrong objective answer requires the same-transaction mistake_book upsert",
+      "answer insert, monotonic practice progress update and atomic wrong_count increment share one rollback boundary",
+      "favorite and wrong-answer races preserve is_favorite, wrong_count, latest wrong facts and existing source merge semantics",
+      "migration source is additive and no migration or real database execution occurred"
     ],
-    "residual": "migration apply and real cross-process PostgreSQL concurrency proof remain outside this task"
+    "residual": "mock_exam submit and scoring finalization atomicity remains a separate F-0027 partition"
   },
   "executionMetrics": {
     "mandatoryFreshApprovals": 1,
-    "preventableScopeMissApprovals": 0,
+    "preventableScopeMissApprovals": 1,
     "candidateReapprovals": 0,
     "approvalWaitTurns": 1,
-    "productValueTime": "includes JIT root-cause review, TDD, implementation and adversarial correction; exact wall-clock not reconstructed",
-    "mechanismOverhead": "includes three-file contract materialization, offline generation and validation; exact wall-clock not reconstructed",
+    "productValueTime": "includes_JIT_TDD_schema_transaction_service_and_adversarial_review_exact_clock_not_reconstructed",
+    "mechanismOverhead": "includes_contract_state_offline_generation_scope_amendment_and_validation_exact_clock_not_reconstructed",
     "guardSmokeChanges": 0
   },
-  "candidateFreezeAdjustment": {
-    "count": 1,
-    "cause": "mandatory lint-staged normalized only the generated Drizzle snapshot before Kernel token validation",
-    "scope": "drizzle/meta/20260723013000_snapshot.json formatting only; product code, schema source and migration SQL unchanged",
-    "disposition": "old tree token discarded; complete validation and adversarial review rerun before binding a new final tree",
-    "manualCandidateReapproval": false
-  },
-  "conditionalCloseoutProjection": {
-    "currentState": "validated_uncommitted_candidate",
-    "trigger": "unchanged final index tree plus one fresh database token bound to this approvalId, taskId and candidateTree; pre-commit Kernel/full GREEN",
-    "successProjection": "one commit, ff-only master, one canonical origin/master ordinary push, sync verification and short-branch cleanup",
-    "notYetFacts": ["commit", "merge", "push", "remote sync", "branch cleanup"]
-  },
+  "conditionalCloseout": true,
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22",
-    "findingIds": ["F-0008"],
-    "commit": "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
+    "taskId": "p1-remediation-rc-08-active-answer-session-claim-2026-07-23",
+    "findingIds": ["F-0026"],
+    "commit": "da410333050b0db8b17ed7ca5b16074fb0faa45e",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "closed_static_without_migration_apply_or_runtime_database_proof",
     "masterOriginSync": true,
-    "worktreeClean": true,
+    "worktreeCleanBeforeBranch": true,
     "shortBranchCleanup": true
   },
   "residualDisposition": {
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
-    "F-0026": "separate_current_WIP_cross_process_active_session_claim",
-    "F-0027": "separate_mock_save_submit_scoring_partially_covered_by_P0_but_practice_answer_and_legacy_scoring_transaction_residual_remain"
+    "F-0026": "closed_static_without_migration_apply_or_runtime_database_proof",
+    "F-0027": "open_partitioned_practice_answer_atomic_command_current_mock_submit_scoring_finalize_residual_later"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0026",
-    "nextReviewHints": ["F-0027_separate_after_F0026"]
+    "currentFindingId": "F-0027",
+    "currentPartition": "practice_answer_atomic_command",
+    "nextReviewHints": [
+      "F-0027_mock_submit_scoring_finalize_after_current_partition"
+    ]
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0026-active-answer-session-claim-2026-07-23"
+    "approvalId": "guardian-f0027-practice-answer-atomic-command-2026-07-23"
   }
 }

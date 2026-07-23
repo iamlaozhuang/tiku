@@ -79,6 +79,8 @@ export type PracticeAnswerRecordRow = {
   is_correct: boolean | null;
   score: string | null;
   max_score: string;
+  practice_attempt_number: number | null;
+  practice_max_attempt_count: number | null;
   answered_at: Date | null;
   submitted_at: Date | null;
 };
@@ -134,6 +136,32 @@ export type CreatePracticeAnswerInput = {
   answeredAt: Date;
   submittedAt: Date;
 };
+
+export type SubmitPracticeAnswerInput = CreatePracticeAnswerInput & {
+  expectedPracticeSnapshot: Record<string, unknown>;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  authorizationLineage: AnswerSessionAuthorizationLineage | null;
+  maxAttemptCount: 1 | 2;
+  mistakeBook: UpsertMistakeBookInput | null;
+};
+
+export type SubmitPracticeAnswerResult =
+  | {
+      status: "created";
+      answerRecord: PracticeAnswerRecordRow;
+      mistakeBookPublicId: string | null;
+    }
+  | {
+      status: "objective_already_answered";
+    }
+  | {
+      status: "subjective_retry_exhausted";
+    }
+  | {
+      status: "authoritative_state_conflict";
+    };
 
 export type UpsertMistakeBookInput = {
   publicId: string;
@@ -193,16 +221,9 @@ export type PracticeRepository = {
     userPublicId: string;
     practicePublicId: string;
   }): Promise<PracticeAnswerRecordRow[]>;
-  createPracticeAnswerRecord(
-    input: CreatePracticeAnswerInput,
-  ): Promise<PracticeAnswerRecordRow>;
-  updatePracticeLastAnsweredAt(input: {
-    publicId: string;
-    lastAnsweredAt: Date;
-  }): Promise<void>;
-  upsertMistakeBookFromWrongAnswer(
-    input: UpsertMistakeBookInput,
-  ): Promise<{ public_id: string }>;
+  submitPracticeAnswer(
+    input: SubmitPracticeAnswerInput,
+  ): Promise<SubmitPracticeAnswerResult>;
   upsertMistakeBookFromFavorite(
     input: UpsertMistakeBookFromFavoriteInput,
   ): Promise<{ public_id: string }>;

@@ -200,24 +200,26 @@ function createPracticeRepository(): PracticeRepository {
     async listAnswerRecordsByPractice() {
       return [];
     },
-    async createPracticeAnswerRecord(input) {
+    async submitPracticeAnswer(input) {
       return {
-        public_id: input.publicId,
-        exam_mode: "practice",
-        paper_question_public_id: input.paperQuestionPublicId,
-        question_public_id: input.questionPublicId,
-        answer_snapshot: input.answerSnapshot,
-        answer_record_status: "scored",
-        is_correct: true,
-        score: "5.0",
-        max_score: "5.0",
-        answered_at: input.answeredAt,
-        submitted_at: input.submittedAt,
+        status: "created",
+        answerRecord: {
+          public_id: input.publicId,
+          exam_mode: "practice",
+          paper_question_public_id: input.paperQuestionPublicId,
+          question_public_id: input.questionPublicId,
+          answer_snapshot: input.answerSnapshot,
+          answer_record_status: "scored",
+          is_correct: true,
+          score: "5.0",
+          max_score: "5.0",
+          practice_attempt_number: 1,
+          practice_max_attempt_count: input.maxAttemptCount,
+          answered_at: input.answeredAt,
+          submitted_at: input.submittedAt,
+        },
+        mistakeBookPublicId: input.mistakeBook?.publicId ?? null,
       };
-    },
-    async updatePracticeLastAnsweredAt() {},
-    async upsertMistakeBookFromWrongAnswer() {
-      return { public_id: "mistake-book-dev-smoke" };
     },
     async upsertMistakeBookFromFavorite() {
       return { public_id: "mistake-book-dev-smoke-favorite" };

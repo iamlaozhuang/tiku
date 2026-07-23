@@ -96,40 +96,46 @@ function normalizeSql(statement: string): string {
 }
 
 describe("F-0026 active answer session claim", () => {
-  it("strictly parses the F-0026 task contract and WIP state", () => {
-    const contract = parseRepositoryJson<TaskSafetyContract>(
+  it("strictly parses the F-0026 durable closeout state", () => {
+    parseRepositoryJson<TaskSafetyContract>(
       "docs/04-agent-system/state/task-safety.json",
     );
     const projectState = parseRepositoryYaml(
       "docs/04-agent-system/state/project-state.yaml",
     ) as {
-      currentTask: { id: string };
-      p1RemediationSerialProgram: { currentTaskId: string };
+      currentTask: {
+        previousTaskCloseout: { taskId: string; commit: string };
+      };
     };
     const queue = parseRepositoryYaml(
       "docs/04-agent-system/state/task-queue.yaml",
-    ) as { activeTasks: Array<{ id: string; status: string }> };
+    ) as {
+      activeTasks: Array<{
+        id: string;
+        status: string;
+        branch: string;
+        riskBoundary: { approvalId: string; approvedBaseSha: string };
+        closeoutEvidence?: { commit: string };
+      }>;
+    };
 
-    expect(contract).toMatchObject({
+    expect(projectState.currentTask.previousTaskCloseout).toMatchObject({
       taskId: TASK_ID,
-      baseSha: BASE_SHA,
-      branch: BRANCH,
-      approvalSources: { database: APPROVAL_ID, permission: null },
-      conditionalCloseout: true,
+      commit: "da410333050b0db8b17ed7ca5b16074fb0faa45e",
     });
-    expect(contract.allowedFiles).toHaveLength(18);
-    expect(contract.coreFiles).toHaveLength(16);
-    expect(contract.contingencyFiles).toHaveLength(2);
-    expect(projectState.currentTask.id).toBe(TASK_ID);
-    expect(projectState.p1RemediationSerialProgram.currentTaskId).toBe(TASK_ID);
-    expect(
-      queue.activeTasks.filter((task) => task.status === "in_progress"),
-    ).toEqual([expect.objectContaining({ id: TASK_ID })]);
-
-    for (const command of contract.validationCommands) {
-      expect(command.executable).not.toMatch(/[<>]/u);
-      expect(command.arguments.join(" ")).not.toMatch(/<[^>]+>/u);
-    }
+    expect(queue.activeTasks.find((task) => task.id === TASK_ID)).toMatchObject(
+      {
+        status: "closed",
+        branch: BRANCH,
+        riskBoundary: {
+          approvalId: APPROVAL_ID,
+          approvedBaseSha: BASE_SHA,
+        },
+        closeoutEvidence: {
+          commit: "da410333050b0db8b17ed7ca5b16074fb0faa45e",
+        },
+      },
+    );
   });
 
   it("allows only the two additive active-session partial unique indexes", () => {
@@ -153,8 +159,12 @@ describe("F-0026 active answer session claim", () => {
     const journal = parseRepositoryJson<DrizzleJournal>(
       "drizzle/meta/_journal.json",
     );
-    const currentEntry = journal.entries.at(-1);
-    const previousEntry = journal.entries.at(-2);
+    const currentEntry = journal.entries.find(
+      (entry) => entry.tag === MIGRATION_TAG,
+    );
+    const previousEntry = journal.entries.find(
+      (entry) => entry.idx === currentEntry!.idx - 1,
+    );
     const currentSnapshot = parseRepositoryJson<DrizzleSnapshot>(
       "drizzle/meta/20260723013000_snapshot.json",
     );

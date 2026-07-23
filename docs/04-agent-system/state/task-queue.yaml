@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-active-answer-session-claim-2026-07-23
+  currentTaskId: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -320,6 +320,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-residual-static-disposition-2026-07-22
     - p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
     - p1-remediation-rc-08-active-answer-session-claim-2026-07-23
+    - p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
   completedTaskIds:
     - p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
     - p1-remediation-rc-07-residual-static-disposition-2026-07-22
@@ -556,12 +557,92 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22: closed
     p1-remediation-rc-07-residual-static-disposition-2026-07-22: closed
     p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22: closed
-    p1-remediation-rc-08-active-answer-session-claim-2026-07-23: in_progress
+    p1-remediation-rc-08-active-answer-session-claim-2026-07-23: closed
+    p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23: in_progress
 activeTasks:
+  - id: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
+    title: Practice answer atomic command
+    phase: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
+    status: in_progress
+    priority: p1
+    taskKind: schema_migration_source_and_database_application_logic
+    productClosureContribution: closes_F0027_practice_answer_atomicity_partition_only
+    branch: fix/practice-answer-atomic-command
+    objective: make practice answer attempt enforcement, answer persistence, progress update and wrong-answer mistake_book mutation one authoritative transaction command while leaving mock submit and scoring finalization as a separate residual
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-08
+    findingIds:
+      - F-0027
+    executionStage: validated_candidate_pending_commit
+    findingStatus: open_partitioned
+    findingDisposition: practice_answer_atomicity_current_mock_submit_scoring_finalize_residual
+    riskBoundary:
+      category: schema_migration_source_and_database_application_logic
+      approvalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
+      requestedApprovalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
+      approvedBaseSha: da410333050b0db8b17ed7ca5b16074fb0faa45e
+      schemaOrMigrationChange: true
+      persistentDatabaseExecution: false
+      authorizationOrEntitlementExpansion: false
+      providerOrRealExternalCall: false
+      dependencyChange: false
+      conditionalCloseout: true
+    preRedImpactScan:
+      chain: practice_answer_route_to_service_to_repository_atomic_command_to_answer_record_practice_mistake_book_schema_and_direct_regressions
+      coreFiles: 13
+      contingencyFiles: 4
+      directCallerCalleeMocksFixturesReviewed: true
+      bundleDisposition: F0013_runtime_hold_F0026_closed_F0027_practice_partition_current_mock_finalize_later
+    requiredSemantics:
+      attemptLimit: objective_one_subjective_two_with_database_backed_attempt_identity
+      transaction: exact_lineage_revalidation_answer_insert_progress_update_and_mistake_book_upsert_all_or_nothing
+      concurrency: concurrent_commands_cannot_duplicate_objective_or_exceed_subjective_limit
+      corruption: ambiguous_or_partial_legacy_attempt_history_fails_closed
+      authorization: preserve_F0008_exact_lineage_without_silent_source_switch
+      migration: additive_legacy_nullable_attempt_facts_and_user_question_mistake_book_uniqueness_without_apply_or_data_mutation
+    pendingApproval:
+      status: approved_before_product_RED
+      proposedApprovalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
+      approvalFingerprint: 06a16723f44c1d7888711a1d4e14df0017dbc5853ac1c7cb5b9f1d40f91e4fcb
+      conditionalCloseoutRequested: true
+      approved: true
+    approvalAmendments:
+      - approvalId: guardian-f0027-test-fixture-schema-inferselect-amendment-2026-07-23
+        parentApprovalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
+        scope: test_only_legacy_answer_record_inferselect_fixture_null_fields
+        addedFile: src/server/models/student-experience.test.ts
+    validationEvidence:
+      red: 3_files_4_expected_failures_40_passes_exit_1
+      focused: 7_files_58_tests_GREEN
+      lint: exit_0_with_3_pre_existing_warnings_outside_changed_files
+      typecheck: exit_0
+      build: exit_0_with_existing_NFT_tracing_warning
+      formatAndDiff: exit_0
+      schemaSource: exact_7_statement_additive_migration_and_coherent_snapshot_journal
+      databaseRuntime: not_executed_static_and_synthetic_evidence_only
+    adversarialReview: GREEN_exact_lineage_lock_order_all_attempt_rows_corrupt_history_fail_closed_atomic_answer_progress_mistake_upsert_favorite_merge_preserved
+    executionMetrics:
+      mandatoryFreshApprovals: 1
+      preventableScopeMissApprovals: 1
+      candidateReapprovals: 0
+      approvalWaitTurns: 1
+      productValueTime: includes_JIT_TDD_schema_transaction_service_and_adversarial_review_exact_clock_not_reconstructed
+      mechanismOverhead: includes_contract_state_offline_generation_scope_amendment_and_validation_exact_clock_not_reconstructed
+      guardSmokeChanges: 0
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-08-active-answer-session-claim-2026-07-23
+      findingIds:
+        - F-0026
+      commit: da410333050b0db8b17ed7ca5b16074fb0faa45e
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed_static_without_migration_apply_or_runtime_database_proof
+      masterOriginSync: pass
+      worktreeCleanBeforeBranch: true
+      shortBranchCleanup: pass
   - id: p1-remediation-rc-08-active-answer-session-claim-2026-07-23
     title: Active answer session claim
     phase: p1-remediation-rc-08-active-answer-session-claim-2026-07-23
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: schema_migration_source_and_database_application_logic
     productClosureContribution: closes_F0026_cross_process_active_session_duplication
@@ -571,8 +652,8 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-08
     findingIds:
       - F-0026
-    executionStage: validated_candidate_ready_for_conditional_closeout
-    findingStatus: validated_static_candidate_without_migration_apply_or_runtime_database_proof
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed_static_without_migration_apply_or_runtime_database_proof
     findingDisposition: separate_confirmed_root_cause
     riskBoundary:
       category: schema_migration_source_and_database_application_logic
@@ -620,22 +701,18 @@ activeTasks:
       productValueTime: includes_JIT_root_cause_TDD_implementation_and_adversarial_review_exact_clock_not_reconstructed
       mechanismOverhead: includes_contract_state_generation_and_validation_exact_clock_not_reconstructed
       guardSmokeChanges: 0
-    conditionalCloseoutProjection:
-      currentState: validated_uncommitted_candidate
-      trigger: unchanged_final_tree_and_exact_fresh_database_token_then_kernel_full_GREEN
-      successProjection: one_commit_ff_only_master_one_canonical_push_sync_and_cleanup
-      notYetFacts:
-        - commit
-        - merge
-        - push
-        - remote_sync
-        - branch_cleanup
-    pendingApproval:
-      status: approved_before_product_RED
-      proposedApprovalId: guardian-f0026-active-answer-session-claim-2026-07-23
+    closeoutEvidence:
+      commit: da410333050b0db8b17ed7ca5b16074fb0faa45e
+      parent: b6fdab26fde7213f547d579e9fa18b0d34bd243c
+      tree: aa50c8d0d19a600a383bbb06c90fd2bb09258feb
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+    consumedApproval:
+      approvalId: guardian-f0026-active-answer-session-claim-2026-07-23
       approvalFingerprint: 3776342f7ccfb92dc14d9ceb79313acaf0aeec7e3ee33f63163aaccf5e4c1a4f
-      conditionalCloseoutRequested: true
-      approved: true
+      conditionalCloseout: true
+      status: consumed_by_closeout_commit_da410333
   - id: p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
     title: Answer session authorization lineage
     phase: p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22

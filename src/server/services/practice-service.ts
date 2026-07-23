@@ -181,6 +181,27 @@ function toAuthorizationLineage(
   };
 }
 
+function toStoredAuthorizationLineage(
+  practice: PracticeRow,
+): AnswerSessionAuthorizationLineage | null {
+  if (
+    practice.authorization_source === null ||
+    practice.authorization_public_id === null ||
+    practice.quota_owner_type === null ||
+    practice.quota_owner_public_id === null
+  ) {
+    return null;
+  }
+
+  return {
+    authorizationSource: practice.authorization_source,
+    authorizationPublicId: practice.authorization_public_id,
+    organizationPublicId: practice.authorization_organization_public_id,
+    quotaOwnerType: practice.quota_owner_type,
+    quotaOwnerPublicId: practice.quota_owner_public_id,
+  };
+}
+
 function hasEffectiveAuthorizationForPractice(
   scopes: PracticeAuthorizationScopeRow[],
   practice: PracticeRow,
@@ -1037,44 +1058,13 @@ export function createPracticeService(
         return createErrorResponse(422303, "Practice question is invalid.");
       }
 
-      const existingAnswer =
-        await repository.findAnswerRecordByPracticeAndQuestion({
-          userPublicId: userContext.userPublicId,
-          practicePublicId: publicId,
-          paperQuestionPublicId: normalizedInput.paperQuestionPublicId,
-        });
-
-      if (existingAnswer !== null && isObjectiveQuestion(question)) {
-        if (normalizedInput.aiExplanationTrigger === "manual_request") {
-          return createErrorResponse(
-            503303,
-            "Practice AI explanation is not configured.",
-          );
-        }
-
+      if (
+        isObjectiveQuestion(question) &&
+        normalizedInput.aiExplanationTrigger === "manual_request"
+      ) {
         return createErrorResponse(
-          409301,
-          "Practice objective question has already been answered.",
-        );
-      }
-
-      const subjectiveAnswerCount = isSubjectiveQuestion(question)
-        ? (
-            await repository.listAnswerRecordsByPractice({
-              userPublicId: userContext.userPublicId,
-              practicePublicId: publicId,
-            })
-          ).filter(
-            (answerRecord) =>
-              answerRecord.paper_question_public_id ===
-              normalizedInput.paperQuestionPublicId,
-          ).length
-        : 0;
-
-      if (isSubjectiveQuestion(question) && subjectiveAnswerCount >= 2) {
-        return createErrorResponse(
-          409302,
-          "Practice subjective question retry limit reached.",
+          503303,
+          "Practice AI explanation is not configured.",
         );
       }
 
@@ -1094,10 +1084,32 @@ export function createPracticeService(
       );
       const subjectiveFinalScore = null;
       const answerSnapshot = buildAnswerSnapshot(normalizedInput);
-      const answerRecord = await repository.createPracticeAnswerRecord({
-        publicId: publicIdFactory.createPublicId("answer_record"),
+      const answerRecordPublicId =
+        publicIdFactory.createPublicId("answer_record");
+      const mistakeBookInput =
+        isCorrect === false
+          ? {
+              publicId: publicIdFactory.createPublicId("mistake_book"),
+              userPublicId: userContext.userPublicId,
+              questionPublicId: question.questionPublicId,
+              paperQuestionPublicId: question.paperQuestionPublicId,
+              profession: practice.profession,
+              level: practice.level,
+              subject: practice.subject,
+              questionSnapshot: question.snapshot,
+              latestAnswerSnapshot: answerSnapshot,
+              latestWrongAt: now,
+            }
+          : null;
+      const commandResult = await repository.submitPracticeAnswer({
+        publicId: answerRecordPublicId,
         userPublicId: userContext.userPublicId,
-        practicePublicId: practice.public_id,
+        practicePublicId: publicId,
+        expectedPracticeSnapshot: practice.paper_snapshot,
+        profession: practice.profession,
+        level: practice.level,
+        subject: practice.subject,
+        authorizationLineage: toStoredAuthorizationLineage(practice),
         paperQuestionPublicId: question.paperQuestionPublicId,
         questionPublicId: question.questionPublicId,
         questionSnapshot: question.snapshot,
@@ -1111,28 +1123,32 @@ export function createPracticeService(
         maxScore: question.score,
         answeredAt: now,
         submittedAt: now,
+        maxAttemptCount: isObjectiveQuestion(question) ? 1 : 2,
+        mistakeBook: mistakeBookInput,
       });
 
-      await repository.updatePracticeLastAnsweredAt({
-        publicId: practice.public_id,
-        lastAnsweredAt: now,
-      });
+      if (commandResult.status === "objective_already_answered") {
+        return createErrorResponse(
+          409301,
+          "Practice objective question has already been answered.",
+        );
+      }
 
-      const mistakeBook =
-        isCorrect === false
-          ? await repository.upsertMistakeBookFromWrongAnswer({
-              publicId: publicIdFactory.createPublicId("mistake_book"),
-              userPublicId: userContext.userPublicId,
-              questionPublicId: question.questionPublicId,
-              paperQuestionPublicId: question.paperQuestionPublicId,
-              profession: practice.profession,
-              level: practice.level,
-              subject: practice.subject,
-              questionSnapshot: question.snapshot,
-              latestAnswerSnapshot: answerSnapshot,
-              latestWrongAt: now,
-            })
-          : null;
+      if (commandResult.status === "subjective_retry_exhausted") {
+        return createErrorResponse(
+          409302,
+          "Practice subjective question retry limit reached.",
+        );
+      }
+
+      if (commandResult.status === "authoritative_state_conflict") {
+        return createErrorResponse(
+          409303,
+          "Practice answer conflicts with authoritative state.",
+        );
+      }
+
+      const answerRecord = commandResult.answerRecord;
       const aiFeedback = createEmptyAiFeedback();
       const aiExplanationStatus = isObjectiveQuestion(question)
         ? "unavailable"
@@ -1150,7 +1166,7 @@ export function createPracticeService(
           max_score: answerRecord.max_score,
           standard_answer_rich_text: question.standardAnswerRichText,
           analysis_rich_text: question.analysisRichText,
-          mistake_book_public_id: mistakeBook?.public_id ?? null,
+          mistake_book_public_id: commandResult.mistakeBookPublicId,
           ai_explanation_status: aiExplanationStatus,
           ai_hint_status: aiHintStatus,
           ...aiFeedback,

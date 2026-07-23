@@ -187,6 +187,28 @@ describe("student experience schema baseline", () => {
     );
   });
 
+  it("enforces database-backed practice attempts and one mistake-book row per user question", () => {
+    expect(getColumnNames(answerRecord)).toEqual(
+      expect.arrayContaining([
+        "practice_attempt_number",
+        "practice_max_attempt_count",
+      ]),
+    );
+    expect(getCheckNames(answerRecord)).toEqual(
+      expect.arrayContaining([
+        "chk_answer_record_practice_attempt_completeness",
+        "chk_answer_record_practice_attempt_mode",
+        "chk_answer_record_practice_attempt_bounds",
+      ]),
+    );
+    expect(getIndexNames(answerRecord)).toContain(
+      "udx_answer_record_practice_question_attempt",
+    );
+    expect(getIndexNames(mistakeBook)).toContain(
+      "udx_mistake_book_user_id_question_public_id",
+    );
+  });
+
   it("uses contract index names for public lookup, ownership, and status filters", () => {
     expect(getIndexNames(practice)).toEqual(
       expect.arrayContaining([

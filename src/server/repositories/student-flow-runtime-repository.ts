@@ -15,6 +15,7 @@ import {
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
+import { listPublishedPaperSnapshotQuestionEntries } from "@/lib/published-paper-snapshot";
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
 import type { AnswerRecordStatus } from "../models/student-experience";
 import type {
@@ -53,6 +54,7 @@ import type {
 type StudentFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
 const ACTIVE_ANSWER_SESSION_CLAIM_LOCK_NAMESPACE = 200115;
+const PRACTICE_ANSWER_ATTEMPT_LOCK_NAMESPACE = 200127;
 
 export type StudentFlowRuntimeRepositoryOptions = {
   createDatabase?: () => StudentFlowRuntimeDatabase;
@@ -529,153 +531,359 @@ function createPostgresPracticeRepository(
 
       return rows.map(mapPracticeAnswerRecordRow);
     },
-    async createPracticeAnswerRecord(input) {
+    async submitPracticeAnswer(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
-      const practiceLink = await getRequiredPracticeLink(
-        database,
-        input.practicePublicId,
-      );
-      const paperQuestionId = await getRequiredPaperQuestionId(
-        database,
-        input.paperQuestionPublicId,
-      );
-      const [row] = await database
-        .insert(answerRecord)
-        .values({
-          public_id: input.publicId,
-          user_id: userId,
-          exam_mode: "practice",
-          practice_id: practiceLink.id,
-          mock_exam_id: null,
-          paper_id: practiceLink.paper_id,
-          paper_question_id: paperQuestionId,
-          paper_question_public_id: input.paperQuestionPublicId,
-          question_public_id: input.questionPublicId,
-          question_snapshot: input.questionSnapshot,
-          answer_snapshot: input.answerSnapshot,
-          answer_record_status: input.answerRecordStatus,
-          is_correct: input.isCorrect,
-          score: input.score,
-          max_score: input.maxScore,
-          answered_at: input.answeredAt,
-          submitted_at: input.submittedAt,
-        })
-        .returning();
 
-      if (row === undefined) {
-        throw new Error("Practice answer insert did not return a row.");
-      }
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase = transaction as StudentFlowRuntimeDatabase;
 
-      return mapPracticeAnswerRecordRow(row);
-    },
-    async updatePracticeLastAnsweredAt(input) {
-      await getDatabase()
-        .update(practice)
-        .set({
-          last_answered_at: input.lastAnsweredAt,
-          updated_at: input.lastAnsweredAt,
-        })
-        .where(eq(practice.public_id, input.publicId));
-    },
-    async upsertMistakeBookFromWrongAnswer(input) {
-      const database = getDatabase();
-      const userId = await getRequiredUserId(database, input.userPublicId);
-      const [existingRow] = await database
-        .select({
-          public_id: mistakeBook.public_id,
-          wrong_count: mistakeBook.wrong_count,
-        })
-        .from(mistakeBook)
-        .where(
-          and(
-            eq(mistakeBook.user_id, userId),
-            eq(mistakeBook.question_public_id, input.questionPublicId),
-          ),
-        )
-        .limit(1);
+        if (input.authorizationLineage === null) {
+          await lockOrganizationScopeMutation(transactionalDatabase);
+          const scopes = await listEffectiveAuthorizationScopes(
+            transactionalDatabase,
+            input.userPublicId,
+            input.answeredAt,
+          );
 
-      if (existingRow !== undefined) {
-        const [updatedRow] = await database
-          .update(mistakeBook)
-          .set({
-            latest_answer_snapshot: input.latestAnswerSnapshot,
-            latest_wrong_at: input.latestWrongAt,
-            mistake_book_status: "unmastered",
-            is_removed: false,
-            wrong_count: existingRow.wrong_count + 1,
-            updated_at: input.latestWrongAt,
+          if (
+            !scopes.some(
+              (scope) =>
+                scope.profession === input.profession &&
+                scope.level === input.level &&
+                scope.expires_at > input.answeredAt,
+            )
+          ) {
+            return { status: "authoritative_state_conflict" as const };
+          }
+        } else {
+          try {
+            await validateAndLockAuthorizationLineageForStart(
+              transactionalDatabase,
+              input.userPublicId,
+              input.profession,
+              input.level,
+              input.answeredAt,
+              input.authorizationLineage,
+            );
+          } catch (error) {
+            if (error instanceof AuthorizationStartConflictError) {
+              return { status: "authoritative_state_conflict" as const };
+            }
+            throw error;
+          }
+        }
+
+        const practiceRows = await transaction
+          .select()
+          .from(practice)
+          .where(
+            and(
+              eq(practice.user_id, userId),
+              eq(practice.public_id, input.practicePublicId),
+              eq(practice.practice_status, "in_progress"),
+            ),
+          )
+          .for("update");
+
+        if (practiceRows.length !== 1) {
+          return { status: "authoritative_state_conflict" as const };
+        }
+
+        const practiceRow = practiceRows[0]!;
+        const hasExpectedLineage =
+          input.authorizationLineage === null
+            ? hasLegacyAuthorizationLineage(practiceRow)
+            : hasCompatibleAuthorizationLineage(
+                practiceRow,
+                input.authorizationLineage,
+              );
+
+        if (
+          practiceRow.expires_at <= input.answeredAt ||
+          practiceRow.profession !== input.profession ||
+          practiceRow.level !== input.level ||
+          practiceRow.subject !== input.subject ||
+          !hasExpectedLineage ||
+          JSON.stringify(canonicalizeJson(practiceRow.paper_snapshot)) !==
+            JSON.stringify(canonicalizeJson(input.expectedPracticeSnapshot))
+        ) {
+          return { status: "authoritative_state_conflict" as const };
+        }
+
+        const questionEntries = listPublishedPaperSnapshotQuestionEntries(
+          asRecord(practiceRow.paper_snapshot),
+        ).filter(
+          ({ paperQuestion: candidate }) =>
+            candidate.paperQuestionPublicId === input.paperQuestionPublicId,
+        );
+
+        if (questionEntries.length !== 1) {
+          return { status: "authoritative_state_conflict" as const };
+        }
+
+        const questionSnapshot = questionEntries[0]!.paperQuestion;
+        const authoritativeMaxAttemptCount =
+          questionSnapshot.scoringMethod === "auto_match"
+            ? 1
+            : questionSnapshot.scoringMethod === "ai_scoring"
+              ? 2
+              : null;
+
+        if (
+          authoritativeMaxAttemptCount !== input.maxAttemptCount ||
+          questionSnapshot.questionPublicId !== input.questionPublicId ||
+          JSON.stringify(canonicalizeJson(questionSnapshot)) !==
+            JSON.stringify(canonicalizeJson(input.questionSnapshot))
+        ) {
+          return { status: "authoritative_state_conflict" as const };
+        }
+
+        const isCoherentPreparedAnswer =
+          input.maxAttemptCount === 1
+            ? input.answerRecordStatus === "scored" &&
+              input.isCorrect !== null &&
+              input.score !== null
+            : input.answerRecordStatus === "submitted" &&
+              input.isCorrect === null &&
+              input.score === null;
+        const requiresMistakeBook =
+          input.maxAttemptCount === 1 && input.isCorrect === false;
+
+        if (
+          !isCoherentPreparedAnswer ||
+          (input.mistakeBook !== null) !== requiresMistakeBook
+        ) {
+          return { status: "authoritative_state_conflict" as const };
+        }
+
+        await lockPracticeAnswerAttempt(
+          transactionalDatabase,
+          practiceRow.id,
+          input.paperQuestionPublicId,
+        );
+
+        const attemptRows = await transaction
+          .select({
+            exam_mode: answerRecord.exam_mode,
+            practice_id: answerRecord.practice_id,
+            mock_exam_id: answerRecord.mock_exam_id,
+            paper_id: answerRecord.paper_id,
+            paper_question_public_id: answerRecord.paper_question_public_id,
+            question_public_id: answerRecord.question_public_id,
+            practice_attempt_number: answerRecord.practice_attempt_number,
+            practice_max_attempt_count: answerRecord.practice_max_attempt_count,
           })
-          .where(eq(mistakeBook.public_id, existingRow.public_id))
-          .returning({ public_id: mistakeBook.public_id });
+          .from(answerRecord)
+          .where(
+            and(
+              eq(answerRecord.user_id, userId),
+              eq(answerRecord.practice_id, practiceRow.id),
+              eq(
+                answerRecord.paper_question_public_id,
+                input.paperQuestionPublicId,
+              ),
+            ),
+          )
+          .for("update");
 
-        return updatedRow ?? { public_id: existingRow.public_id };
-      }
+        const legacyAttemptRows = attemptRows.filter(
+          (row) =>
+            row.practice_attempt_number === null &&
+            row.practice_max_attempt_count === null,
+        );
+        const numberedAttemptRows = attemptRows.filter(
+          (row) =>
+            row.practice_attempt_number !== null &&
+            row.practice_max_attempt_count !== null,
+        );
+        const hasCoherentAttemptIdentity = attemptRows.every(
+          (row) =>
+            row.exam_mode === "practice" &&
+            row.practice_id === practiceRow.id &&
+            row.mock_exam_id === null &&
+            row.paper_id === practiceRow.paper_id &&
+            row.paper_question_public_id === input.paperQuestionPublicId &&
+            row.question_public_id === input.questionPublicId,
+        );
 
-      const [row] = await database
-        .insert(mistakeBook)
-        .values({
-          public_id: input.publicId,
-          user_id: userId,
-          question_public_id: input.questionPublicId,
-          paper_question_public_id: input.paperQuestionPublicId,
-          profession: input.profession,
-          level: input.level,
-          subject: input.subject,
-          question_snapshot: input.questionSnapshot,
-          latest_answer_snapshot: input.latestAnswerSnapshot,
-          mistake_book_source: "wrong_answer",
-          mistake_book_status: "unmastered",
-          wrong_count: 1,
-          is_favorite: false,
-          is_removed: false,
-          mastered_at: null,
-          latest_wrong_at: input.latestWrongAt,
-        })
-        .returning({ public_id: mistakeBook.public_id });
+        if (
+          !hasCoherentAttemptIdentity ||
+          legacyAttemptRows.length + numberedAttemptRows.length !==
+            attemptRows.length ||
+          (legacyAttemptRows.length > 0 && numberedAttemptRows.length > 0) ||
+          legacyAttemptRows.length > 1
+        ) {
+          return { status: "authoritative_state_conflict" as const };
+        }
 
-      if (row === undefined) {
-        throw new Error("Mistake book insert did not return a row.");
-      }
+        if (legacyAttemptRows.length === 1) {
+          return {
+            status:
+              input.maxAttemptCount === 1
+                ? ("objective_already_answered" as const)
+                : ("authoritative_state_conflict" as const),
+          };
+        }
 
-      return row;
+        const attemptNumbers = numberedAttemptRows
+          .map((row) => row.practice_attempt_number!)
+          .sort((left, right) => left - right);
+        const hasCoherentNumberedHistory = numberedAttemptRows.every(
+          (row) =>
+            row.practice_max_attempt_count === input.maxAttemptCount &&
+            Number.isSafeInteger(row.practice_attempt_number) &&
+            row.practice_attempt_number! >= 1 &&
+            row.practice_attempt_number! <= input.maxAttemptCount,
+        );
+
+        if (
+          !hasCoherentNumberedHistory ||
+          attemptNumbers.some(
+            (attemptNumber, index) => attemptNumber !== index + 1,
+          )
+        ) {
+          return { status: "authoritative_state_conflict" as const };
+        }
+
+        if (attemptNumbers.length >= input.maxAttemptCount) {
+          return {
+            status:
+              input.maxAttemptCount === 1
+                ? ("objective_already_answered" as const)
+                : ("subjective_retry_exhausted" as const),
+          };
+        }
+
+        const paperQuestionId = await getRequiredPaperQuestionId(
+          transactionalDatabase,
+          input.paperQuestionPublicId,
+          practiceRow.paper_id,
+        );
+        const [answerRow] = await transaction
+          .insert(answerRecord)
+          .values({
+            public_id: input.publicId,
+            user_id: userId,
+            exam_mode: "practice",
+            practice_id: practiceRow.id,
+            mock_exam_id: null,
+            paper_id: practiceRow.paper_id,
+            paper_question_id: paperQuestionId,
+            paper_question_public_id: input.paperQuestionPublicId,
+            question_public_id: input.questionPublicId,
+            question_snapshot: input.questionSnapshot,
+            answer_snapshot: input.answerSnapshot,
+            answer_record_status: input.answerRecordStatus,
+            is_correct: input.isCorrect,
+            score: input.score,
+            max_score: input.maxScore,
+            practice_attempt_number: attemptNumbers.length + 1,
+            practice_max_attempt_count: input.maxAttemptCount,
+            answered_at: input.answeredAt,
+            submitted_at: input.submittedAt,
+          })
+          .returning();
+
+        if (answerRow === undefined) {
+          throw new Error("Practice answer insert did not return a row.");
+        }
+
+        const [updatedPractice] = await transaction
+          .update(practice)
+          .set({
+            last_answered_at: sql`greatest(coalesce(${practice.last_answered_at}, ${input.answeredAt}), ${input.answeredAt})`,
+            updated_at: sql`greatest(${practice.updated_at}, ${input.answeredAt})`,
+          })
+          .where(
+            and(
+              eq(practice.id, practiceRow.id),
+              eq(practice.practice_status, "in_progress"),
+            ),
+          )
+          .returning({ id: practice.id });
+
+        if (updatedPractice === undefined) {
+          throw new Error("Practice progress update did not affect one row.");
+        }
+
+        let mistakeBookPublicId: string | null = null;
+
+        if (input.mistakeBook !== null) {
+          const mistakeInput = input.mistakeBook;
+
+          if (
+            mistakeInput.userPublicId !== input.userPublicId ||
+            mistakeInput.questionPublicId !== input.questionPublicId ||
+            mistakeInput.paperQuestionPublicId !==
+              input.paperQuestionPublicId ||
+            mistakeInput.profession !== input.profession ||
+            mistakeInput.level !== input.level ||
+            mistakeInput.subject !== input.subject ||
+            mistakeInput.latestWrongAt.getTime() !==
+              input.answeredAt.getTime() ||
+            JSON.stringify(canonicalizeJson(mistakeInput.questionSnapshot)) !==
+              JSON.stringify(canonicalizeJson(input.questionSnapshot)) ||
+            JSON.stringify(
+              canonicalizeJson(mistakeInput.latestAnswerSnapshot),
+            ) !== JSON.stringify(canonicalizeJson(input.answerSnapshot))
+          ) {
+            throw new Error(
+              "Mistake book input conflicts with answer identity.",
+            );
+          }
+
+          const [mistakeRow] = await transaction
+            .insert(mistakeBook)
+            .values({
+              public_id: mistakeInput.publicId,
+              user_id: userId,
+              question_public_id: mistakeInput.questionPublicId,
+              paper_question_public_id: mistakeInput.paperQuestionPublicId,
+              profession: mistakeInput.profession,
+              level: mistakeInput.level,
+              subject: mistakeInput.subject,
+              question_snapshot: mistakeInput.questionSnapshot,
+              latest_answer_snapshot: mistakeInput.latestAnswerSnapshot,
+              mistake_book_source: "wrong_answer",
+              mistake_book_status: "unmastered",
+              wrong_count: 1,
+              is_favorite: false,
+              is_removed: false,
+              mastered_at: null,
+              latest_wrong_at: mistakeInput.latestWrongAt,
+              updated_at: mistakeInput.latestWrongAt,
+            })
+            .onConflictDoUpdate({
+              target: [mistakeBook.user_id, mistakeBook.question_public_id],
+              set: {
+                latest_answer_snapshot: mistakeInput.latestAnswerSnapshot,
+                mistake_book_status: "unmastered",
+                wrong_count: sql`${mistakeBook.wrong_count} + 1`,
+                is_removed: false,
+                mastered_at: null,
+                latest_wrong_at: mistakeInput.latestWrongAt,
+                updated_at: mistakeInput.latestWrongAt,
+              },
+            })
+            .returning({ public_id: mistakeBook.public_id });
+
+          if (mistakeRow === undefined) {
+            throw new Error("Mistake book upsert did not return a row.");
+          }
+          mistakeBookPublicId = mistakeRow.public_id;
+        }
+
+        return {
+          status: "created" as const,
+          answerRecord: mapPracticeAnswerRecordRow(answerRow),
+          mistakeBookPublicId,
+        };
+      });
     },
     async upsertMistakeBookFromFavorite(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
-      const [existingRow] = await database
-        .select({
-          public_id: mistakeBook.public_id,
-          mistake_book_status: mistakeBook.mistake_book_status,
-        })
-        .from(mistakeBook)
-        .where(
-          and(
-            eq(mistakeBook.user_id, userId),
-            eq(mistakeBook.question_public_id, input.questionPublicId),
-          ),
-        )
-        .limit(1);
-
-      if (existingRow !== undefined) {
-        const nextStatus =
-          existingRow.mistake_book_status === "removed"
-            ? "unmastered"
-            : existingRow.mistake_book_status;
-        const [updatedRow] = await database
-          .update(mistakeBook)
-          .set({
-            mistake_book_status: nextStatus,
-            is_favorite: true,
-            is_removed: false,
-            updated_at: input.favoritedAt,
-          })
-          .where(eq(mistakeBook.public_id, existingRow.public_id))
-          .returning({ public_id: mistakeBook.public_id });
-
-        return updatedRow ?? { public_id: existingRow.public_id };
-      }
-
       const [row] = await database
         .insert(mistakeBook)
         .values({
@@ -697,6 +905,15 @@ function createPostgresPracticeRepository(
           latest_wrong_at: null,
           created_at: input.favoritedAt,
           updated_at: input.favoritedAt,
+        })
+        .onConflictDoUpdate({
+          target: [mistakeBook.user_id, mistakeBook.question_public_id],
+          set: {
+            mistake_book_status: sql`case when ${mistakeBook.mistake_book_status} = 'removed' then 'unmastered'::mistake_book_status else ${mistakeBook.mistake_book_status} end`,
+            is_favorite: true,
+            is_removed: false,
+            updated_at: input.favoritedAt,
+          },
         })
         .returning({ public_id: mistakeBook.public_id });
 
@@ -2173,6 +2390,18 @@ async function lockActiveAnswerSessionClaim(
   );
 }
 
+async function lockPracticeAnswerAttempt(
+  database: StudentFlowRuntimeDatabase,
+  practiceId: number,
+  paperQuestionPublicId: string,
+): Promise<void> {
+  const attemptIdentity = `${practiceId}:${paperQuestionPublicId}`;
+
+  await database.execute(
+    sql`select pg_advisory_xact_lock(${PRACTICE_ANSWER_ATTEMPT_LOCK_NAMESPACE}, hashtext(${attemptIdentity}))`,
+  );
+}
+
 function canonicalizeJson(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(canonicalizeJson);
@@ -2214,6 +2443,22 @@ function hasCompatibleAuthorizationLineage(
     row.authorization_organization_public_id === lineage.organizationPublicId &&
     row.quota_owner_type === lineage.quotaOwnerType &&
     row.quota_owner_public_id === lineage.quotaOwnerPublicId
+  );
+}
+
+function hasLegacyAuthorizationLineage(row: {
+  authorization_source: string | null;
+  authorization_public_id: string | null;
+  authorization_organization_public_id: string | null;
+  quota_owner_type: string | null;
+  quota_owner_public_id: string | null;
+}): boolean {
+  return (
+    row.authorization_source === null &&
+    row.authorization_public_id === null &&
+    row.authorization_organization_public_id === null &&
+    row.quota_owner_type === null &&
+    row.quota_owner_public_id === null
   );
 }
 
@@ -2768,11 +3013,19 @@ async function getRequiredPublishedPaperIdForStart(
 async function getRequiredPaperQuestionId(
   database: StudentFlowRuntimeDatabase,
   publicId: string,
+  expectedPaperId?: number,
 ): Promise<number> {
   const [row] = await database
     .select({ id: paperQuestion.id })
     .from(paperQuestion)
-    .where(eq(paperQuestion.public_id, publicId))
+    .where(
+      expectedPaperId === undefined
+        ? eq(paperQuestion.public_id, publicId)
+        : and(
+            eq(paperQuestion.public_id, publicId),
+            eq(paperQuestion.paper_id, expectedPaperId),
+          ),
+    )
     .limit(1);
 
   if (row === undefined) {
@@ -2780,23 +3033,6 @@ async function getRequiredPaperQuestionId(
   }
 
   return row.id;
-}
-
-async function getRequiredPracticeLink(
-  database: StudentFlowRuntimeDatabase,
-  publicId: string,
-): Promise<{ id: number; paper_id: number }> {
-  const [row] = await database
-    .select({ id: practice.id, paper_id: practice.paper_id })
-    .from(practice)
-    .where(eq(practice.public_id, publicId))
-    .limit(1);
-
-  if (row === undefined) {
-    throw new Error("Practice does not exist.");
-  }
-
-  return row;
 }
 
 function isAnswerOperationIdConflict(error: unknown): boolean {
@@ -3025,6 +3261,8 @@ function mapPracticeAnswerRecordRow(
     is_correct: row.is_correct,
     score: row.score,
     max_score: row.max_score,
+    practice_attempt_number: row.practice_attempt_number,
+    practice_max_attempt_count: row.practice_max_attempt_count,
     answered_at: row.answered_at,
     submitted_at: row.submitted_at,
   };

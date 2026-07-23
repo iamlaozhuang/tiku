@@ -427,25 +427,25 @@ function createRepository(
     async listAnswerRecordsByPractice() {
       return [];
     },
-    async createPracticeAnswerRecord(input) {
+    async submitPracticeAnswer(input) {
       return {
-        public_id: input.publicId,
-        exam_mode: "practice",
-        paper_question_public_id: input.paperQuestionPublicId,
-        question_public_id: input.questionPublicId,
-        answer_snapshot: input.answerSnapshot,
-        answer_record_status: input.answerRecordStatus,
-        is_correct: input.isCorrect,
-        score: input.score,
-        max_score: input.maxScore,
-        answered_at: input.answeredAt,
-        submitted_at: input.submittedAt,
-      };
-    },
-    async updatePracticeLastAnsweredAt() {},
-    async upsertMistakeBookFromWrongAnswer(input) {
-      return {
-        public_id: input.publicId,
+        status: "created",
+        answerRecord: {
+          public_id: input.publicId,
+          exam_mode: "practice",
+          paper_question_public_id: input.paperQuestionPublicId,
+          question_public_id: input.questionPublicId,
+          answer_snapshot: input.answerSnapshot,
+          answer_record_status: input.answerRecordStatus,
+          is_correct: input.isCorrect,
+          score: input.score,
+          max_score: input.maxScore,
+          practice_attempt_number: 1,
+          practice_max_attempt_count: input.maxAttemptCount,
+          answered_at: input.answeredAt,
+          submitted_at: input.submittedAt,
+        },
+        mistakeBookPublicId: input.mistakeBook?.publicId ?? null,
       };
     },
     async upsertMistakeBookFromFavorite(input) {
@@ -563,6 +563,8 @@ describe("practice service", () => {
               is_correct: true,
               score: "1.0",
               max_score: "1.0",
+              practice_attempt_number: 1,
+              practice_max_attempt_count: 1,
               answered_at: now,
               submitted_at: now,
             },
@@ -1095,24 +1097,8 @@ describe("practice service", () => {
 
     const duplicateService = createPracticeService(
       createRepository({
-        async findAnswerRecordByPracticeAndQuestion() {
-          return {
-            public_id: "answer_record_public_existing",
-            exam_mode: "practice",
-            paper_question_public_id: "paper_question_public_123",
-            question_public_id: "question_public_123",
-            answer_snapshot: {
-              selectedLabels: ["A"],
-              textAnswer: null,
-              savedFromClientAt: null,
-            },
-            answer_record_status: "scored",
-            is_correct: true,
-            score: "1.0",
-            max_score: "1.0",
-            answered_at: now,
-            submitted_at: now,
-          };
+        async submitPracticeAnswer() {
+          return { status: "objective_already_answered" };
         },
       }),
       clock,
@@ -1132,6 +1118,70 @@ describe("practice service", () => {
       code: 409301,
       message: "Practice objective question has already been answered.",
       data: null,
+    });
+  });
+
+  it("delegates practice answer limits and all writes to one authoritative repository command", async () => {
+    const commandInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findAnswerRecordByPracticeAndQuestion() {
+          throw new Error("submit must not pre-read one answer");
+        },
+        async listAnswerRecordsByPractice() {
+          throw new Error("submit must not pre-read attempt counts");
+        },
+        async submitPracticeAnswer(input) {
+          commandInputs.push(input);
+          return {
+            status: "created" as const,
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice" as const,
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 1,
+              practice_max_attempt_count: 1,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: null,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_public_123",
+        selectedLabels: ["A"],
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          answerRecordPublicId: "answer_record_public_1",
+          isCorrect: true,
+        },
+      },
+    });
+    expect(commandInputs).toHaveLength(1);
+    expect(commandInputs[0]).toMatchObject({
+      userPublicId: "user_public_123",
+      practicePublicId: "practice_public_123",
+      paperQuestionPublicId: "paper_question_public_123",
+      maxAttemptCount: 1,
+      authorizationLineage: {
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal_auth_public_123",
+      },
     });
   });
 
@@ -1248,28 +1298,30 @@ describe("practice service", () => {
     const mistakeBookInputs: unknown[] = [];
     const service = createPracticeService(
       createRepository({
-        async createPracticeAnswerRecord(input) {
+        async submitPracticeAnswer(input) {
           answerInputs.push(input);
+          if (input.mistakeBook !== null) {
+            mistakeBookInputs.push(input.mistakeBook);
+          }
 
           return {
-            public_id: input.publicId,
-            exam_mode: "practice",
-            paper_question_public_id: input.paperQuestionPublicId,
-            question_public_id: input.questionPublicId,
-            answer_snapshot: input.answerSnapshot,
-            answer_record_status: input.answerRecordStatus,
-            is_correct: input.isCorrect,
-            score: input.score,
-            max_score: input.maxScore,
-            answered_at: input.answeredAt,
-            submitted_at: input.submittedAt,
-          };
-        },
-        async upsertMistakeBookFromWrongAnswer(input) {
-          mistakeBookInputs.push(input);
-
-          return {
-            public_id: "mistake_book_public_2",
+            status: "created",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 1,
+              practice_max_attempt_count: input.maxAttemptCount,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: "mistake_book_public_2",
           };
         },
       }),
@@ -1332,21 +1384,27 @@ describe("practice service", () => {
     const answerInputs: unknown[] = [];
     const service = createPracticeService(
       createRepository({
-        async createPracticeAnswerRecord(input) {
+        async submitPracticeAnswer(input) {
           answerInputs.push(input);
 
           return {
-            public_id: input.publicId,
-            exam_mode: "practice",
-            paper_question_public_id: input.paperQuestionPublicId,
-            question_public_id: input.questionPublicId,
-            answer_snapshot: input.answerSnapshot,
-            answer_record_status: input.answerRecordStatus,
-            is_correct: input.isCorrect,
-            score: input.score,
-            max_score: input.maxScore,
-            answered_at: input.answeredAt,
-            submitted_at: input.submittedAt,
+            status: "created",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 1,
+              practice_max_attempt_count: input.maxAttemptCount,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: null,
           };
         },
       }),
@@ -1389,12 +1447,14 @@ describe("practice service", () => {
             is_correct: true,
             score: "1.0",
             max_score: "1.0",
+            practice_attempt_number: 1,
+            practice_max_attempt_count: 1,
             answered_at: now,
             submitted_at: now,
           };
         },
-        async createPracticeAnswerRecord() {
-          throw new Error("manual ai_explanation must not create an answer");
+        async submitPracticeAnswer() {
+          throw new Error("manual ai_explanation must not submit an answer");
         },
       }),
       clock,
@@ -1548,6 +1608,8 @@ describe("practice service", () => {
               is_correct: true,
               score: "1.0",
               max_score: "1.0",
+              practice_attempt_number: null,
+              practice_max_attempt_count: null,
               answered_at: now,
               submitted_at: now,
             },
@@ -1587,26 +1649,28 @@ describe("practice service", () => {
             paper_snapshot: createTwoQuestionPaperSnapshot(),
           });
         },
-        async createPracticeAnswerRecord(input) {
+        async submitPracticeAnswer(input) {
+          if (input.mistakeBook !== null) {
+            mistakeBookInputs.push(input.mistakeBook);
+          }
           return {
-            public_id: input.publicId,
-            exam_mode: "practice",
-            paper_question_public_id: input.paperQuestionPublicId,
-            question_public_id: input.questionPublicId,
-            answer_snapshot: input.answerSnapshot,
-            answer_record_status: input.answerRecordStatus,
-            is_correct: input.isCorrect,
-            score: input.score,
-            max_score: input.maxScore,
-            answered_at: input.answeredAt,
-            submitted_at: input.submittedAt,
-          };
-        },
-        async upsertMistakeBookFromWrongAnswer(input) {
-          mistakeBookInputs.push(input);
-
-          return {
-            public_id: input.publicId,
+            status: "created",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 1,
+              practice_max_attempt_count: input.maxAttemptCount,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: input.mistakeBook?.publicId ?? null,
           };
         },
       }),
@@ -1642,11 +1706,28 @@ describe("practice service", () => {
             paper_snapshot: createFillBlankPaperSnapshot(),
           });
         },
-        async upsertMistakeBookFromWrongAnswer(input) {
-          mistakeBookInputs.push(input);
-
+        async submitPracticeAnswer(input) {
+          if (input.mistakeBook !== null) {
+            mistakeBookInputs.push(input.mistakeBook);
+          }
           return {
-            public_id: input.publicId,
+            status: "created",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 1,
+              practice_max_attempt_count: input.maxAttemptCount,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: input.mistakeBook?.publicId ?? null,
           };
         },
       }),
@@ -1683,11 +1764,28 @@ describe("practice service", () => {
             paper_snapshot: createFillBlankPerBlankPaperSnapshot(),
           });
         },
-        async upsertMistakeBookFromWrongAnswer(input) {
-          mistakeBookInputs.push(input);
-
+        async submitPracticeAnswer(input) {
+          if (input.mistakeBook !== null) {
+            mistakeBookInputs.push(input.mistakeBook);
+          }
           return {
-            public_id: input.publicId,
+            status: "created",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 1,
+              practice_max_attempt_count: input.maxAttemptCount,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: input.mistakeBook?.publicId ?? null,
           };
         },
       }),
@@ -1797,27 +1895,6 @@ describe("practice service", () => {
             paper_snapshot: createSubjectivePaperSnapshot(),
           });
         },
-        async listAnswerRecordsByPractice() {
-          return [
-            {
-              public_id: "answer_record_public_existing",
-              exam_mode: "practice",
-              paper_question_public_id: "paper_question_subjective_123",
-              question_public_id: "question_subjective_123",
-              answer_snapshot: {
-                selectedLabels: [],
-                textAnswer: "first answer",
-                savedFromClientAt: null,
-              },
-              answer_record_status: "submitted",
-              is_correct: null,
-              score: null,
-              max_score: "10.0",
-              answered_at: now,
-              submitted_at: now,
-            },
-          ];
-        },
       }),
       clock,
       createIdFactory(),
@@ -1847,43 +1924,8 @@ describe("practice service", () => {
             paper_snapshot: createSubjectivePaperSnapshot(),
           });
         },
-        async listAnswerRecordsByPractice() {
-          return [
-            {
-              public_id: "answer_record_public_first",
-              exam_mode: "practice",
-              paper_question_public_id: "paper_question_subjective_123",
-              question_public_id: "question_subjective_123",
-              answer_snapshot: {
-                selectedLabels: [],
-                textAnswer: "first answer",
-                savedFromClientAt: null,
-              },
-              answer_record_status: "submitted",
-              is_correct: null,
-              score: null,
-              max_score: "10.0",
-              answered_at: now,
-              submitted_at: now,
-            },
-            {
-              public_id: "answer_record_public_second",
-              exam_mode: "practice",
-              paper_question_public_id: "paper_question_subjective_123",
-              question_public_id: "question_subjective_123",
-              answer_snapshot: {
-                selectedLabels: [],
-                textAnswer: "second answer",
-                savedFromClientAt: null,
-              },
-              answer_record_status: "submitted",
-              is_correct: null,
-              score: null,
-              max_score: "10.0",
-              answered_at: now,
-              submitted_at: now,
-            },
-          ];
+        async submitPracticeAnswer() {
+          return { status: "subjective_retry_exhausted" };
         },
       }),
       clock,
@@ -1916,42 +1958,27 @@ describe("practice service", () => {
             paper_snapshot: createSubjectivePaperSnapshot(),
           });
         },
-        async listAnswerRecordsByPractice() {
-          return [
-            {
-              public_id: "answer_record_public_first",
-              exam_mode: "practice",
-              paper_question_public_id: "paper_question_subjective_123",
-              question_public_id: "question_subjective_123",
-              answer_snapshot: {
-                selectedLabels: [],
-                textAnswer: "first answer",
-                savedFromClientAt: null,
-              },
-              answer_record_status: "submitted",
-              is_correct: null,
-              score: null,
-              max_score: "10.0",
-              answered_at: now,
-              submitted_at: now,
-            },
-          ];
-        },
-        async createPracticeAnswerRecord(input) {
+        async submitPracticeAnswer(input) {
           createdAnswerInputs.push(input);
 
           return {
-            public_id: input.publicId,
-            exam_mode: "practice",
-            paper_question_public_id: input.paperQuestionPublicId,
-            question_public_id: input.questionPublicId,
-            answer_snapshot: input.answerSnapshot,
-            answer_record_status: input.answerRecordStatus,
-            is_correct: input.isCorrect,
-            score: input.score,
-            max_score: input.maxScore,
-            answered_at: input.answeredAt,
-            submitted_at: input.submittedAt,
+            status: "created",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "practice",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              practice_attempt_number: 2,
+              practice_max_attempt_count: input.maxAttemptCount,
+              answered_at: input.answeredAt,
+              submitted_at: input.submittedAt,
+            },
+            mistakeBookPublicId: null,
           };
         },
       }),
@@ -1993,27 +2020,6 @@ describe("practice service", () => {
             subject: "skill",
             paper_snapshot: createSubjectivePaperSnapshot(),
           });
-        },
-        async listAnswerRecordsByPractice() {
-          return [
-            {
-              public_id: "answer_record_public_first",
-              exam_mode: "practice",
-              paper_question_public_id: "paper_question_subjective_123",
-              question_public_id: "question_subjective_123",
-              answer_snapshot: {
-                selectedLabels: [],
-                textAnswer: "first answer",
-                savedFromClientAt: null,
-              },
-              answer_record_status: "submitted",
-              is_correct: null,
-              score: null,
-              max_score: "10.0",
-              answered_at: now,
-              submitted_at: now,
-            },
-          ];
         },
       }),
       clock,
