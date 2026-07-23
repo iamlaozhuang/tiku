@@ -1,79 +1,94 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22",
-  "objective": "Close F-0148 by making every authorized content, organization, and personal AI generation command fail closed with the existing quota_insufficient category before task persistence, lifecycle claim, Provider or RAG execution, result or ai_call_log writes, success audit, or formal and training materialization while Cost Calibration and a durable quota ledger remain unapproved. Existing read, detail, review, history, and cancellation flows remain available.",
-  "findingIds": ["F-0148"],
+  "taskId": "p1-remediation-rc-07-residual-static-disposition-2026-07-22",
+  "objective": "Perform the RC-07 residual JIT disposition after F-0148 closeout: independently verify that F-0154 and F-0158 no longer have a static product failure path on current master, classify only legacy-data backfill and browser/runtime acceptance as explicit runtime holds outside the static P1 queue, close the RC-07 static queue, and preserve RC-08 as the next product anchor without changing product code.",
+  "findingIds": ["F-0154", "F-0158"],
   "candidateRootCauseCluster": "P1-RC-07",
-  "baseSha": "f76553aa132c4087aac95bf7512ccf609dfe4874",
-  "branch": "fix/ai-generation-quota-fail-closed-gate",
-  "riskCategory": "permission_quota_semantics_contraction",
+  "baseSha": "3fcd499db02c28fbc362b1921f8ddea40293a531",
+  "branch": "fix/rc07-residual-static-disposition",
+  "riskCategory": "low_risk_state_only_static_disposition",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/services/personal-ai-generation-request-route.ts",
-    "src/server/services/personal-ai-generation-request-route.test.ts",
-    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
-    "src/server/models/ai-generation-task-request.test.ts",
-    "src/server/services/ai-generation-task-request-service.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-    "tests/unit/student-personal-ai-generation-ui.test.ts"
+    "src/db/schema/paper.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
+    "src/features/admin/organization-training/organization-training-list-url.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-review-draft-service.test.ts",
+    "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+    "src/server/validators/question.test.ts",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
     "docs/04-agent-system/sop/**",
     "scripts/**",
     ".githooks/**",
-    "src/db/**",
-    "drizzle/**",
-    "package.json",
-    "pnpm-lock.yaml",
-    "quota values, pricing, Cost Calibration, balance or reservation/deduction ledger, schema/migration, real database/data, Provider/external call or configuration, secret/env, capability/role/entitlement/default quota expansion, dependency, deployment, PR, force-push, non-canonical remote, Minimal Safety Kernel, guard/smoke, Subagent, UI expansion, or any other finding"
+    "all product source and product test edits",
+    "schema/migration source or execution, real database/data, permission/authorization, Provider/external service, dependency, secret/env, deployment, PR, force-push, non-canonical remote, Minimal Safety Kernel, guard/smoke, Subagent, or any finding outside F-0154 and F-0158"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/services/personal-ai-generation-request-route.ts",
-    "src/server/services/personal-ai-generation-request-route.test.ts",
-    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "contingencyFiles": [
-    "src/server/models/ai-generation-task-request.test.ts",
-    "src/server/services/ai-generation-task-request-service.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-    "tests/unit/student-personal-ai-generation-ui.test.ts"
+    "src/db/schema/paper.test.ts",
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
+    "src/features/admin/organization-training/organization-training-list-url.test.ts",
+    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+    "src/server/services/admin-ai-generation-review-draft-service.test.ts",
+    "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+    "src/server/validators/question.test.ts",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "authorized content or organization admin route and authorized personal or employee route -> server-owned AI generation request policy -> task persistence and lifecycle claim -> Provider/RAG execution -> result, ai_call_log and success audit -> formal, organization-training or learning consumer",
-    "coreFileCount": 10,
-    "contingencyFileCount": 4,
+    "authoritativeChain": "current RC-07 state and completed task evidence -> F-0154 formal metadata, generated-label confirmation and source resolution tests -> F-0158 server-owned revision, citation and organization handoff tests -> independent runtime-hold disposition -> RC-08 resume anchor",
+    "coreFileCount": 3,
+    "contingencyFileCount": 10,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "Production request construction hard-codes isQuotaAvailable=true for platform, organization, and personal generation, and the admin persistence adapter records true as a database fact. The shared request policy already rejects false with quota_insufficient, but both route paths persist or execute before a trustworthy quota fact exists.",
-    "bundleDisposition": "one_F0148_fail_closed_bundle_because_content_organization_and_personal_generation_share_the_same_quota_fact_invariant_and_zero_side_effect_boundary"
+    "productCodeChangeRequired": false,
+    "bundleDisposition": "one state-only RC residual review with independent F-0154 and F-0158 acceptance evidence; no shared product implementation or combined finding closure"
   },
+  "independentDispositions": [
+    {
+      "findingId": "F-0154",
+      "staticDisposition": "covered_on_current_master",
+      "evidence": [
+        "formal question difficulty is canonical and legacy-nullable, selected public ids are preserved, generated labels require exact server-authorized confirmation, immutable paper and training snapshots retain hierarchy, and production source resolution no longer accepts caller-supplied metadata maps",
+        "legacy null metadata is explicit unavailable or observable same-scope degradation and cannot masquerade as exact, descendant, or nearby"
+      ],
+      "runtimeHold": "legacy production data backfill or acceptance against migrated real data requires separately authorized migration execution and real-data decision",
+      "runtimeHoldReason": "the original finding's static failure path is removed; the remaining question is external deployment/data state, not missing product code"
+    },
+    {
+      "findingId": "F-0158",
+      "staticDisposition": "covered_on_current_master",
+      "evidence": [
+        "authorized content history reopens a server-owned append-only current revision, supports optimistic edit and exact revision-bound adoption, and exposes only a bounded citation projection",
+        "authorized organization history renders the persisted full draft before identity-only copy and opens the exact returned draft through the existing scoped training editor"
+      ],
+      "runtimeHold": "browser and cross-device runtime acceptance remains outside the static P1 program and requires an explicitly authorized runtime session",
+      "runtimeHoldReason": "the original blind-adoption and static-label product paths are removed in code and direct tests; only environment runtime proof remains"
+    }
+  ],
   "acceptance": [
-    "authentication, role, edition, object scope and request shape are validated before the quota gate so unauthorized callers cannot probe generation capability",
-    "new content, organization and personal or employee generation commands expose the existing quota_insufficient machine category and a safe unavailable message without inventing balance, pricing, deduction or quota facts",
-    "quota-unavailable generation performs zero task create/reuse writes, lifecycle claims, Provider or RAG execution, result or ai_call_log writes, success audit and formal, training or learning materialization",
-    "retry, reclaim, active, failed, cancelled, stale and exhausted task commands cannot trigger another Provider attempt while quota facts remain unavailable",
-    "existing terminal success is either returned only through an exact immutable read path or the POST command fails closed without persistence or Provider replay",
-    "GET, history, detail, review and authorized cancellation paths remain available and retain existing authorization and redaction boundaries",
-    "admin persistence defensive insert values store is_quota_available=false and no production isQuotaAvailable=true default remains",
-    "F-0148 closes only because the unlimited Provider-call failure mode becomes statically unreachable; Cost Calibration and a durable quota ledger remain unimplemented and require future fresh approval"
+    "F-0148 closeout is recorded with commit 3fcd499db02c28fbc362b1921f8ddea40293a531 and clean synchronized master evidence",
+    "F-0154 and F-0158 each retain independent evidence and an explicit non-product runtime hold; neither is closed merely because it shares RC-07",
+    "no current-master static product path reproduces the original F-0154 metadata-loss or F-0158 blind-review failure mode",
+    "legacy data is never fabricated or silently backfilled and runtime acceptance is not misrepresented as executed",
+    "RC-07 static queue completes and RC-08 becomes the next JIT product anchor",
+    "no product source, product test, schema, dependency, permission, Provider, mechanism, historical evidence or audit file changes"
   ],
   "validationCommands": [
     {
-      "name": "ai-generation-quota-fail-closed-focused",
+      "name": "rc07-residual-static-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -81,48 +96,21 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
-        "src/server/services/ai-generation-task-request-service.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts"
+        "src/db/schema/paper.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
+        "src/features/admin/organization-training/organization-training-list-url.test.ts",
+        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
+        "src/server/services/admin-ai-generation-review-draft-service.test.ts",
+        "src/server/services/ai-paper-route-source-resolution-service.test.ts",
+        "src/server/validators/question.test.ts",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
+        "--maxWorkers=1"
       ]
     },
     {
-      "name": "ai-generation-quota-fail-closed-lint",
-      "kind": "lint",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@10.15.1",
-        "exec",
-        "eslint",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/personal-ai-generation-request-route.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
-        "src/server/services/ai-generation-task-request-service.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts"
-      ]
-    },
-    {
-      "name": "ai-generation-quota-fail-closed-typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "ai-generation-quota-fail-closed-build",
-      "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@10.15.1", "run", "build"]
-    },
-    {
-      "name": "ai-generation-quota-fail-closed-format",
+      "name": "rc07-residual-static-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -132,21 +120,11 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/personal-ai-generation-request-route.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts",
-        "src/server/services/ai-generation-task-request-service.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts"
+        "docs/04-agent-system/state/task-safety.json"
       ]
     },
     {
-      "name": "ai-generation-quota-fail-closed-diff-check",
+      "name": "rc07-residual-static-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -155,69 +133,35 @@
   "approvalSources": {
     "dependency": null,
     "database": null,
-    "permission": "guardian-f0148-ai-generation-quota-fail-closed-gate-2026-07-22",
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "standingApprovals": [
-    "guardian-f0148-ai-generation-quota-fail-closed-gate-2026-07-22",
-    "guardian-f0148-test-harness-amendment-01-2026-07-22",
-    "guardian-f0148-student-ui-production-false-amendment-02-2026-07-22",
+    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
-  "approvalAmendments": [
-    {
-      "approvalId": "guardian-f0148-test-harness-amendment-01-2026-07-22",
-      "approvedFingerprint": "f0148-test-contract-conflict-f76553aa-054b6dfb-2026-07-22",
-      "files": [
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts"
-      ],
-      "scope": "explicit per-test Vitest mock that changes only isQuotaAvailable from false to true at the shared request-policy boundary for pre-existing after-admission pipeline regressions",
-      "restoreDiscipline": "each opted-in test calls the named harness and afterEach resets it to false",
-      "productionUnreachable": "no production export, factory option, runtime configuration, environment variable, request field, token, globalThis value, or source-file quota override",
-      "evidenceClassification": "mocked tests prove only the dormant after-admission pipeline; F-0148 closure relies on unmocked production quota-gate tests, zero-side-effect assertions, and production source scans"
-    },
-    {
-      "approvalId": "guardian-f0148-student-ui-production-false-amendment-02-2026-07-22",
-      "approvedFingerprint": "f0148-student-ui-final-production-true-f76553aa-30af6735-2026-07-22",
-      "files": [
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts"
-      ],
-      "scope": "change the canonical student personal generation request draft quota fact from true to false and prove the submitted payload remains fail-closed without altering UI behavior",
-      "authorityBoundary": "the client-side false value is not an independent quota authority; server admission remains the only production authority",
-      "productionScan": "exclude tests and fixtures and require no isQuotaAvailable true or is_quota_available true production default"
-    }
   ],
   "conditionalCloseout": {
     "approved": true,
-    "approvalId": "guardian-f0148-ai-generation-quota-fail-closed-gate-2026-07-22",
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "conditions": [
-      "actual diff is an allowedFiles subset and no untracked or extra changes exist",
-      "base, origin, permission contraction and fail-closed semantics do not drift",
-      "no quota values, ledger, schema/migration, real database, Provider, dependency, external side effect, capability expansion or mechanism change",
-      "focused regression, lint, typecheck, build, format/diff and main-thread adversarial review are GREEN",
-      "the test-only quota harness is explicit opt-in, restored after each test, production-unreachable, and excluded from F-0148 closure evidence",
-      "single commit, ff-only merge, canonical origin/master ordinary push, sync check and short branch cleanup"
+      "actual diff is limited to the three state files",
+      "focused characterization, state parse, format, diff and main-thread adversarial review are GREEN",
+      "no product, schema, database, permission, Provider, dependency, mechanism or runtime action occurs",
+      "single state-only commit, ff-only merge, canonical origin/master ordinary push, sync check and branch cleanup"
     ]
   },
   "freshValidation": {
-    "focused": "exit_0_6_files_202_tests_passed",
-    "lint": "exit_0_10_files",
-    "typecheck": "exit_0",
-    "build": "exit_0_100_static_pages_generated_with_pre_existing_NFT_trace_warning",
-    "format": "exit_0_13_validation_paths",
+    "focused": "exit_0_10_files_133_tests_passed",
+    "format": "exit_0_three_state_files",
     "stateParse": "exit_0_JSON_and_two_YAML_documents",
-    "productionBypassScan": "no_production_isQuotaAvailable_true_is_quota_available_true_or_quota_override_surface_tests_and_fixtures_excluded",
-    "mainThreadAdversarialReview": "pass_authorization_precedes_gate_all_non_create_policy_outcomes_fail_closed_zero_side_effect_tests_unmocked_student_payload_false_server_remains_authoritative_test_harness_explicit_and_restored_existing_pipeline_assertions_preserved",
-    "evidenceBoundary": "mocked after-admission tests are regression-only and are not F-0148 quota-availability evidence"
+    "diffCheck": "exit_0",
+    "mainThreadAdversarialReview": "pass_independent_F0154_metadata_and_resolution_chain_no_optional_map_F0158_revision_citation_and_organization_handoff_chain_present_runtime_and_real_data_not_claimed"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22",
-    "findingIds": ["F-0169"],
-    "commit": "f76553aa132c4087aac95bf7512ccf609dfe4874",
+    "taskId": "p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22",
+    "findingIds": ["F-0148"],
+    "commit": "3fcd499db02c28fbc362b1921f8ddea40293a531",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "closed",
     "masterOriginSync": true,
@@ -225,14 +169,14 @@
     "shortBranchCleanup": true
   },
   "resumeAnchor": {
-    "candidateRootCauseCluster": "P1-RC-07",
-    "currentFindings": ["F-0148"],
-    "currentPartition": "ai_generation_quota_fail_closed_gate",
-    "nextResidualReview": "RC07_residual_JIT_after_F0148_closeout"
+    "completedCandidateRootCauseCluster": "P1-RC-07",
+    "runtimeHoldFindingIds": ["F-0154", "F-0158"],
+    "nextCandidateRootCauseCluster": "P1-RC-08",
+    "nextAction": "perform_RC08_residual_JIT_before_next_product_RED"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0148-ai-generation-quota-fail-closed-gate-2026-07-22"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }
