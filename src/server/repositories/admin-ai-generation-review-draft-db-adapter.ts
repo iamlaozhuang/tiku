@@ -22,6 +22,7 @@ import {
   resolveNextAdminAiGenerationReviewDraftRevision,
 } from "./admin-ai-generation-review-draft-repository";
 import { normalizeAdminAiGenerationReviewedDraft } from "../validators/admin-ai-generation-review-draft";
+import { resolveAdminAiGenerationCitationProjection } from "../models/admin-ai-generation-citation";
 
 const resultSelection = {
   id: adminAiGenerationResult.id,
@@ -33,6 +34,8 @@ const resultSelection = {
   organizationPublicId: adminAiGenerationResult.organization_public_id,
   resultStatus: adminAiGenerationResult.result_status,
   sourceContentDigest: adminAiGenerationResult.content_digest,
+  citationRedactedSnapshot: adminAiGenerationResult.citation_redacted_snapshot,
+  citationCount: adminAiGenerationResult.citation_count,
   currentDraftPublicId: adminAiGenerationResult.current_review_draft_public_id,
   currentRevision: adminAiGenerationResult.current_review_draft_revision,
   currentDraftDigest: adminAiGenerationResult.current_review_draft_digest,
@@ -65,6 +68,8 @@ type ResultRow = {
   organizationPublicId: string | null;
   resultStatus: string;
   sourceContentDigest: string;
+  citationRedactedSnapshot: unknown;
+  citationCount: number;
   currentDraftPublicId: string | null;
   currentRevision: number | null;
   currentDraftDigest: string | null;
@@ -128,6 +133,10 @@ function mapVersionedDraft(row: ResultRow, draft: DraftRow) {
     throw new Error("admin AI generation review draft identity conflict");
   }
 
+  const citationProjection = resolveAdminAiGenerationCitationProjection(
+    row.citationRedactedSnapshot,
+    row.citationCount,
+  );
   return {
     status: "versioned" as const,
     resultPublicId: row.resultPublicId,
@@ -137,6 +146,8 @@ function mapVersionedDraft(row: ResultRow, draft: DraftRow) {
     currentDraftPublicId: draft.publicId,
     currentDraftDigest: draft.draftDigest,
     reviewedDraft,
+    citationStatus: citationProjection.status,
+    citationSources: citationProjection.sources,
     redactionStatus: "redacted" as const,
   };
 }
@@ -179,12 +190,18 @@ async function findCurrentDraft(
     row.currentDraftDigest === null &&
     row.draft === null
   ) {
+    const citationProjection = resolveAdminAiGenerationCitationProjection(
+      row.citationRedactedSnapshot,
+      row.citationCount,
+    );
     return {
       status: "legacy_unversioned",
       resultPublicId: row.resultPublicId,
       sourceContentDigest: row.sourceContentDigest,
       targetType,
       currentRevision: null,
+      citationStatus: citationProjection.status,
+      citationSources: citationProjection.sources,
       redactionStatus: "redacted",
     };
   }

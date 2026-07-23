@@ -78,6 +78,13 @@ describe("AdminAiGenerationReviewDraftEditor", () => {
               ...questionDraft,
               stemRichText: "修订后的题干",
             },
+            citationStatus: "available",
+            citationSources: [
+              {
+                resourceTitle: "营销教材",
+                headingPath: ["第三章", "客户分析"],
+              },
+            ],
             redactionStatus: "redacted",
           },
         });
@@ -97,6 +104,13 @@ describe("AdminAiGenerationReviewDraftEditor", () => {
           currentDraftDigest:
             "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           reviewedDraft: questionDraft,
+          citationStatus: "available",
+          citationSources: [
+            {
+              resourceTitle: "营销教材",
+              headingPath: ["第三章", "客户分析"],
+            },
+          ],
           redactionStatus: "redacted",
         },
       });
@@ -117,6 +131,8 @@ describe("AdminAiGenerationReviewDraftEditor", () => {
     const stem = await screen.findByRole("textbox", { name: "题干" });
     expect(stem).toHaveValue("原始题干");
     expect(screen.getByText("当前修订：1")).toBeInTheDocument();
+    expect(screen.getByText("营销教材")).toBeInTheDocument();
+    expect(screen.getByText("第三章 > 客户分析")).toBeInTheDocument();
     fireEvent.change(stem, { target: { value: "修订后的题干" } });
     expect(onRevisionChange).toHaveBeenLastCalledWith(null);
     fireEvent.click(screen.getByRole("button", { name: "保存新修订" }));
@@ -135,6 +151,47 @@ describe("AdminAiGenerationReviewDraftEditor", () => {
           "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       }),
     );
+  });
+
+  it("reports legacy citation detail unavailable without inventing a source", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            status: "versioned",
+            resultPublicId,
+            sourceContentDigest:
+              "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            targetType: "question",
+            currentRevision: 1,
+            currentDraftPublicId: "review-draft-public-001",
+            currentDraftDigest:
+              "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            reviewedDraft: questionDraft,
+            citationStatus: "legacy_unavailable",
+            citationSources: null,
+            redactionStatus: "redacted",
+          },
+        }),
+      ),
+    );
+
+    render(
+      <AdminAiGenerationReviewDraftEditor
+        resultPublicId={resultPublicId}
+        targetType="question"
+        onRevisionChange={() => undefined}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "打开评审草稿" }));
+
+    expect(
+      await screen.findByText("该历史结果没有可验证的引用来源快照。"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("营销教材")).not.toBeInTheDocument();
   });
 
   it("fails closed on a stale revision and requires an explicit reload", async () => {

@@ -1,25 +1,26 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-content-ai-review-editor-2026-07-22",
-  "objective": "Partially close F-0158 by replacing blind hidden-draft adoption with a keyboard-accessible cross-session content review editor that loads the current server-owned revision, saves strict structured edits with optimistic concurrency, and binds formal adoption or rejection to that exact revision without submitting a client-owned full draft. Citation detail, organization review workbench and browser/runtime acceptance remain explicit residuals.",
+  "taskId": "p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22",
+  "objective": "Partially close F-0158 by snapshotting only bounded resource titles and heading paths from the exact authorized grounding context used by a successful content AI generation attempt, returning that immutable safe projection only through the existing authorization-first review-draft detail, and rendering it beside the server-owned review revision. Legacy results remain explicitly unavailable; organization workbench and browser/runtime acceptance remain residuals.",
   "findingIds": ["F-0158"],
   "candidateRootCauseCluster": "P1-RC-07",
-  "baseSha": "c623447c20e56ad564f34d5df9e8bd233ec8f8b1",
-  "branch": "fix/content-ai-review-editor",
+  "baseSha": "d0864f92cd001ba6f555a33bb728c0720f3797b2",
+  "branch": "fix/content-ai-safe-citation-projection",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts",
-    "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+    "src/server/models/admin-ai-generation-citation.ts",
+    "src/server/models/admin-ai-generation-citation.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
+    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
+    "src/server/services/admin-ai-generation-review-draft-service.test.ts",
     "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
-    "src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts",
-    "src/server/contracts/admin-ai-generation-review-draft-contract.ts"
+    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
+    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -30,51 +31,50 @@
     "pnpm-lock.yaml",
     "src/db/**",
     "drizzle/**",
-    "src/app/api/**",
-    "src/server/repositories/**",
-    "src/server/services/** except the two unchanged regression tests explicitly allowed above",
-    "permission or entitlement changes, Provider or external calls/configuration, dependency, secret/env, deployment, PR, force-push, non-canonical remote, organization review UI, citation-detail persistence, F-0169, or any other finding"
+    "new API routes",
+    "permission or entitlement changes, Provider execution/configuration, dependency, secret/env, deployment, PR, force-push, non-canonical remote, raw chunk text or internal citation identity exposure, organization review workbench, F-0169, or any other finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+    "src/server/models/admin-ai-generation-citation.ts",
+    "src/server/models/admin-ai-generation-citation.test.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.ts",
+    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+    "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
+    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
+    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
     "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts"
+    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
   ],
   "contingencyFiles": [
-    "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
-    "src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts",
-    "src/server/contracts/admin-ai-generation-review-draft-contract.ts"
+    "src/server/services/admin-ai-generation-review-draft-service.test.ts",
+    "src/server/services/admin-ai-generation-review-draft-runtime.test.ts"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "content history card -> authorized review-draft GET -> structured editor -> revision-bound PUT -> exact revision formal-adoption POST",
+    "authoritativeChain": "authorized grounding context -> successful content result transaction -> citation_redacted_snapshot -> authorization-first review-draft GET -> review editor citation panel",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 8,
-    "contingencyFileCount": 5,
+    "coreFileCount": 12,
+    "contingencyFileCount": 2,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "The UI reads a hidden result snapshot and offers blind adoption without loading, saving or binding the current server-owned review revision.",
-    "findingDisposition": "F-0158_open_partitioned_content_editor_partition",
-    "residualDisposition": "Safe citation detail, organization review workbench and browser/runtime acceptance remain separate residuals; F-0169 remains separate."
+    "confirmedRootCause": "The detailed authorized grounding context is discarded before result persistence, citation_redacted_snapshot is always null, and the review detail cannot reconstruct safe source names or heading paths.",
+    "findingDisposition": "F-0158_open_partitioned_safe_content_citation_projection",
+    "residualDisposition": "Organization review workbench and browser/runtime acceptance remain separate residuals; F-0169 remains separate."
   },
   "acceptance": [
-    "an authorized content reviewer can open the full server-owned current question or paper revision after refresh",
-    "the editor uses keyboard-accessible structured fields and preserves the complete formal contract without accepting client-owned provenance",
-    "save sends the exact expected revision and digest; stale or conflicting saves require reload and never overwrite server state",
-    "adoption and rejection send the exact current server revision and digest and never submit the full reviewed draft",
-    "formal adoption is unavailable until an authorized current revision is loaded, and successful save advances the local revision binding",
-    "static edit labels are replaced by real accessible controls while unrelated organization and citation flows remain unchanged",
-    "F-0158 remains open_partitioned and F-0169 remains untouched"
+    "a successful grounded content result atomically persists an immutable bounded snapshot containing only resourceTitle and headingPath",
+    "chunk text, score, chunk index, internal public ids, Provider data and storage paths never enter the persisted projection or review DTO",
+    "the review-draft detail validates the snapshot against the persisted citation count and fails closed on malformed snapshots",
+    "legacy null snapshots are returned explicitly as unavailable and are never reconstructed from count, prompt or current RAG state",
+    "authorization remains before result and citation lookup through the existing review-draft service and route",
+    "the content editor renders at most three source names and heading paths with complete loading, unavailable and error boundaries inherited from the review detail",
+    "F-0158 remains open_partitioned for organization workbench and browser/runtime acceptance"
   ],
   "validationCommands": [
     {
-      "name": "content-ai-review-editor-test",
+      "name": "content-ai-safe-citation-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -82,45 +82,48 @@
         "exec",
         "vitest",
         "run",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts",
-        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
+        "src/server/models/admin-ai-generation-citation.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
+        "src/server/services/admin-ai-generation-review-draft-service.test.ts",
         "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
+        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "content-ai-review-editor-lint",
+      "name": "content-ai-safe-citation-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "src/server/models/admin-ai-generation-citation.ts",
+        "src/server/models/admin-ai-generation-citation.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
+        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
         "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts",
-        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts"
+        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
       ]
     },
     {
-      "name": "content-ai-review-editor-typecheck",
+      "name": "content-ai-safe-citation-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "content-ai-review-editor-build",
+      "name": "content-ai-safe-citation-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "content-ai-review-editor-format",
+      "name": "content-ai-safe-citation-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -131,16 +134,21 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
+        "src/server/models/admin-ai-generation-citation.ts",
+        "src/server/models/admin-ai-generation-citation.test.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.ts",
+        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
+        "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
+        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
+        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
+        "src/server/services/admin-ai-generation-review-draft-service.test.ts",
+        "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
         "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts",
-        "tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts"
+        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
       ]
     },
     {
-      "name": "content-ai-review-editor-diff-check",
+      "name": "content-ai-safe-citation-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -148,17 +156,17 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": null,
+    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
   "standingApprovals": [
-    "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
     "standing-test-only-allowlist-expansion-2026-07-21"
   ],
   "riskClassification": {
-    "category": "low_risk_content_UI_application_logic",
+    "category": "database_application_logic_and_safe_admin_read_projection",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -168,19 +176,19 @@
   "conditionalCloseout": true,
   "executionStage": "validated_reviewed_conditional_closeout_ready",
   "validationEvidence": {
-    "red": "1_new_focused_file_failed_on_missing_editor_module_with_0_tests_collected",
-    "focused": "6_files_80_tests_passed",
+    "red": "1_new_focused_file_failed_on_missing_projection_module_with_0_tests_collected",
+    "focused": "6_files_70_tests_passed",
     "targetedLint": "pass_zero_warnings",
     "typecheck": "pass",
     "productionBuild": "pass_with_existing_NFT_trace_warning_from_paper_asset_path",
     "formatAndDiff": "pass",
     "stateParse": "pass",
-    "mainThreadAdversarialReview": "pass_no_blocker_server_revision_only_dirty_and_conflict_fail_closed_exact_adoption_and_rejection_binding_no_full_draft_submission"
+    "mainThreadAdversarialReview": "pass_no_blocker_exact_grounding_capture_content_only_atomic_result_snapshot_strict_three_source_projection_legacy_unavailable_authorization_before_lookup_malformed_fail_closed_no_raw_chunk_or_internal_identity"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22",
+    "taskId": "p1-remediation-rc-07-content-ai-review-editor-2026-07-22",
     "findingIds": ["F-0158"],
-    "commit": "c623447c20e56ad564f34d5df9e8bd233ec8f8b1",
+    "commit": "d0864f92cd001ba6f555a33bb728c0720f3797b2",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "open_partitioned",
     "masterOriginSync": true,
@@ -190,12 +198,12 @@
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
     "currentFindings": ["F-0158"],
-    "currentPartition": "content_cross_session_review_editor_and_exact_adoption_command",
-    "nextResidualReview": "F-0158_safe_citation_projection_then_organization_workbench_then_F-0169"
+    "currentPartition": "content_safe_citation_projection",
+    "nextResidualReview": "F-0158_organization_review_workbench_then_browser_runtime_acceptance_then_F-0169"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
   }
 }

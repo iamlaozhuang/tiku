@@ -28,10 +28,16 @@ import type {
   AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
+import type { RedactedJsonObject } from "../models/ai-rag";
+import { createAdminAiGenerationCitationSnapshot } from "../models/admin-ai-generation-citation";
 
 type AdminAiGenerationLocalContractRuntimeBridgeWithLog =
   AdminAiGenerationLocalContractRuntimeBridgeDto & {
     aiCallLogPublicId: string | null;
+  };
+type AdminAiGenerationLocalContractRuntimeBridgeWithCitation =
+  AdminAiGenerationLocalContractRuntimeBridgeWithLog & {
+    citationRedactedSnapshot: RedactedJsonObject | null;
   };
 import type {
   AdminAiGenerationResultDto,
@@ -770,12 +776,13 @@ function resolveAdminAiGenerationTaskHistoryQuery(input: {
 
 function createDefaultAdminAiGenerationRuntimeBridge(
   input: AdminAiGenerationRuntimeBridgeInput,
-): AdminAiGenerationLocalContractRuntimeBridgeWithLog {
+): AdminAiGenerationLocalContractRuntimeBridgeWithCitation {
   const runtimeBridge = buildAdminAiGenerationRuntimeBridgeReadModel(input);
 
-  return mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
-    runtimeBridge,
-  );
+  return {
+    ...mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(runtimeBridge),
+    citationRedactedSnapshot: null,
+  };
 }
 
 function mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
@@ -798,6 +805,23 @@ function mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
             ? "provider_error"
             : runtimeBridge.providerExecutionSummary.failureCategory,
     },
+    aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
+    visibleGeneratedContent: runtimeBridge.visibleGeneratedContent,
+    redactionStatus: runtimeBridge.redactionStatus,
+    blockedReasons: runtimeBridge.blockedReasons,
+  };
+}
+
+function createPublicAdminAiGenerationRuntimeBridge(
+  runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeWithCitation,
+): AdminAiGenerationLocalContractRuntimeBridgeWithLog {
+  return {
+    bridgeStatus: runtimeBridge.bridgeStatus,
+    providerCallExecuted: runtimeBridge.providerCallExecuted,
+    envSecretAccessed: runtimeBridge.envSecretAccessed,
+    providerConfigurationRead: runtimeBridge.providerConfigurationRead,
+    costCalibrationExecuted: runtimeBridge.costCalibrationExecuted,
+    executionSummary: runtimeBridge.executionSummary,
     aiCallLogPublicId: runtimeBridge.aiCallLogPublicId,
     visibleGeneratedContent: runtimeBridge.visibleGeneratedContent,
     redactionStatus: runtimeBridge.redactionStatus,
@@ -875,13 +899,16 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   runtimeBridgeInput: AdminAiGenerationRuntimeBridgeInput;
   attempt: AiGenerationTaskAttemptIdentity;
-}): Promise<AdminAiGenerationLocalContractRuntimeBridgeWithLog> {
+}): Promise<AdminAiGenerationLocalContractRuntimeBridgeWithCitation> {
   if (
     input.runtimeBridgeControl?.bridgeMode === "controlled_runner" &&
     input.runtimeBridgeControl.explicitLocalSwitchPresent === true &&
     input.runtimeBridgeControl.providerExecution !== undefined
   ) {
-    return mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
+    const providerExecution = input.runtimeBridgeControl.providerExecution;
+    const resolveGroundingContext = providerExecution.resolveGroundingContext;
+    let citationRedactedSnapshot: RedactedJsonObject | null = null;
+    const runtimeBridge =
       await buildAdminAiGenerationRuntimeBridgeReadModelForRoute(
         input.runtimeBridgeInput,
         {
@@ -889,13 +916,33 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
             bridgeMode: "controlled_runner",
             explicitLocalSwitchPresent: true,
             providerExecution: {
-              ...input.runtimeBridgeControl.providerExecution,
+              ...providerExecution,
               attempt: input.attempt,
+              ...(resolveGroundingContext === undefined
+                ? {}
+                : {
+                    resolveGroundingContext: async (requestContextInput) => {
+                      const groundingContext =
+                        await resolveGroundingContext(requestContextInput);
+                      citationRedactedSnapshot =
+                        groundingContext.evidenceStatus === "sufficient"
+                          ? createAdminAiGenerationCitationSnapshot(
+                              groundingContext,
+                            )
+                          : null;
+                      return groundingContext;
+                    },
+                  }),
             },
           },
         },
+      );
+    return {
+      ...mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
+        runtimeBridge,
       ),
-    );
+      citationRedactedSnapshot,
+    };
   }
 
   const defaultRuntimeBridge = createDefaultAdminAiGenerationRuntimeBridge(
@@ -1100,7 +1147,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   }
   const attempt = claimResult.attempt;
 
-  let runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeWithLog;
+  let runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeWithCitation;
 
   try {
     runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
@@ -1196,6 +1243,8 @@ async function buildAdminAiGenerationLocalContract(input: {
     return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
   }
 
+  const publicRuntimeBridge =
+    createPublicAdminAiGenerationRuntimeBridge(runtimeBridge);
   const localContract = {
     runtimeStatus: "local_contract_only",
     workspace: input.workspace,
@@ -1212,7 +1261,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       citationCount: taskRequest.resultReference.citationCount,
       redactionStatus: "redacted",
     },
-    runtimeBridge,
+    runtimeBridge: publicRuntimeBridge,
     formalContentBoundary: {
       questionWriteStatus: "blocked_without_follow_up_task",
       paperWriteStatus: "blocked_without_follow_up_task",
@@ -1243,6 +1292,10 @@ async function buildAdminAiGenerationLocalContract(input: {
           taskPersistence,
           createdAt: requestedAt,
           generationParameters: input.generationParameters,
+          citationRedactedSnapshot:
+            input.workspace === "content"
+              ? runtimeBridge.citationRedactedSnapshot
+              : null,
           organizationTrainingPaperDraftDetail,
         }),
       );
@@ -1500,6 +1553,7 @@ function createAdminAiGenerationResolvedLocalContract(input: {
 
 function createAdminAiGenerationLocalContractResultInput(input: {
   attempt: AiGenerationTaskAttemptIdentity;
+  citationRedactedSnapshot: RedactedJsonObject | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   localContract: AdminAiGenerationLocalContractBaseDto & {
     runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeWithLog;
@@ -1540,7 +1594,7 @@ function createAdminAiGenerationLocalContractResultInput(input: {
       contentRedactedSnapshot,
     ),
     contentPreviewMasked: ADMIN_AI_GENERATION_RESULT_PREVIEW_MASKED,
-    citationRedactedSnapshot: null,
+    citationRedactedSnapshot: input.citationRedactedSnapshot,
     evidenceStatus:
       input.localContract.runtimeBridge.visibleGeneratedContent
         ?.groundingSummary?.evidenceStatus ?? "none",

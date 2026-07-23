@@ -1,6 +1,10 @@
 import type { ApiResponse } from "./api-response";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
 import type { AdminAiGenerationReviewDraftTargetType } from "../models/admin-ai-generation-review-draft";
+import type {
+  AdminAiGenerationCitationProjection,
+  AdminAiGenerationCitationSource,
+} from "../models/admin-ai-generation-citation";
 
 export const ADMIN_AI_GENERATION_REVIEW_DRAFT_ERROR_CODES = {
   invalidInput: 400018,
@@ -31,6 +35,8 @@ export type AdminAiGenerationReviewDraftDto = {
   currentDraftPublicId?: string;
   currentDraftDigest?: string;
   reviewedDraft?: AdminAiGenerationFormalReviewedDraftPayload;
+  citationStatus: AdminAiGenerationCitationProjection["status"];
+  citationSources: AdminAiGenerationCitationSource[] | null;
   redactionStatus: "redacted";
 };
 

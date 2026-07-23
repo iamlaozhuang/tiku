@@ -5,7 +5,10 @@ import {
   createAdminAiGenerationReviewDraftDigest,
   createAdminAiGenerationReviewDraftPublicId,
 } from "./admin-ai-generation-review-draft-repository";
-import { saveAdminAiGenerationReviewDraft } from "./admin-ai-generation-review-draft-db-adapter";
+import {
+  createPostgresAdminAiGenerationReviewDraftRepository,
+  saveAdminAiGenerationReviewDraft,
+} from "./admin-ai-generation-review-draft-db-adapter";
 import type { RuntimeDatabase } from "./runtime-database";
 
 function createReviewedDraft() {
@@ -44,6 +47,89 @@ function createInput(): SaveAdminAiGenerationReviewDraftInput {
 }
 
 describe("admin AI generation review draft DB adapter", () => {
+  it("returns only the validated safe citation projection with the current revision", async () => {
+    const reviewedDraft = createReviewedDraft();
+    const sourceContentDigest =
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const identity = {
+      resultPublicId: "admin_ai_generation_result_public_1",
+      sourceContentDigest,
+      targetType: "question" as const,
+      revision: 1,
+      reviewedDraft,
+    };
+    const draftPublicId = createAdminAiGenerationReviewDraftPublicId(identity);
+    const draftDigest = createAdminAiGenerationReviewDraftDigest(identity);
+    const row = {
+      id: 10,
+      resultPublicId: identity.resultPublicId,
+      taskPublicId: "admin_ai_generation_task_public_1",
+      workspace: "content",
+      generationKind: "question",
+      ownerType: "platform",
+      organizationPublicId: null,
+      resultStatus: "draft",
+      sourceContentDigest,
+      citationRedactedSnapshot: {
+        schemaVersion: 1,
+        sourceCitationCount: 1,
+        citations: [
+          {
+            resourceTitle: "营销教材",
+            headingPath: ["第三章", "客户分析"],
+          },
+        ],
+      },
+      citationCount: 1,
+      currentDraftPublicId: draftPublicId,
+      currentRevision: 1,
+      currentDraftDigest: draftDigest,
+      draft: {
+        publicId: draftPublicId,
+        resultId: 10,
+        sourceResultPublicId: identity.resultPublicId,
+        sourceTaskPublicId: "admin_ai_generation_task_public_1",
+        targetType: "question",
+        revision: 1,
+        revisionOrigin: "initial_result",
+        predecessorPublicId: null,
+        predecessorDigest: null,
+        sourceContentDigest,
+        reviewedDraft,
+        draftDigest,
+        editorPublicId: null,
+        createdAt: new Date("2026-07-22T20:00:00.000Z"),
+      },
+    };
+    const database = {
+      select: () => ({
+        from: () => ({
+          leftJoin: () => ({
+            where: () => ({ limit: async () => [row] }),
+          }),
+        }),
+      }),
+    } as unknown as RuntimeDatabase;
+    const repository = createPostgresAdminAiGenerationReviewDraftRepository({
+      createDatabase: () => database,
+    });
+
+    await expect(
+      repository.findCurrentReviewDraft({
+        actorPublicId: "content_admin_public_1",
+        resultPublicId: identity.resultPublicId,
+      }),
+    ).resolves.toMatchObject({
+      citationStatus: "available",
+      citationSources: [
+        {
+          resourceTitle: "营销教材",
+          headingPath: ["第三章", "客户分析"],
+        },
+      ],
+    });
+  });
+
   it("locks the result, appends the first legacy revision, advances the pointer and writes redacted audit in one transaction", async () => {
     const insertedValues: Array<Record<string, unknown>> = [];
     let insertCount = 0;
@@ -58,6 +144,8 @@ describe("admin AI generation review draft DB adapter", () => {
       resultStatus: "draft",
       sourceContentDigest:
         "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      citationRedactedSnapshot: null,
+      citationCount: 0,
       currentDraftPublicId: null,
       currentRevision: null,
       currentDraftDigest: null,
@@ -149,6 +237,8 @@ describe("admin AI generation review draft DB adapter", () => {
       resultStatus: "draft",
       sourceContentDigest:
         "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      citationRedactedSnapshot: null,
+      citationCount: 0,
       currentDraftPublicId: "admin_ai_review_draft_current",
       currentRevision: 2,
       currentDraftDigest:
@@ -204,6 +294,8 @@ describe("admin AI generation review draft DB adapter", () => {
       organizationPublicId: null,
       resultStatus: "draft",
       sourceContentDigest,
+      citationRedactedSnapshot: null,
+      citationCount: 0,
       currentDraftPublicId: draftPublicId,
       currentRevision: 0,
       currentDraftDigest: draftDigest,
@@ -274,6 +366,8 @@ describe("admin AI generation review draft DB adapter", () => {
       resultStatus: "draft",
       sourceContentDigest:
         "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      citationRedactedSnapshot: null,
+      citationCount: 0,
       currentDraftPublicId: null,
       currentRevision: null,
       currentDraftDigest: null,

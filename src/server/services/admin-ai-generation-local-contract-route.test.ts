@@ -1547,6 +1547,63 @@ describe("admin AI generation local contract route handlers", () => {
     expect(providerInputs).toHaveLength(1);
   });
 
+  it("persists only a safe citation projection from the exact grounding context", async () => {
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl([], {
+        groundingContext: {
+          ...sufficientAdminGroundingContext,
+          citationCount: 2,
+          citations: [
+            {
+              resourceTitle: "营销教材",
+              headingPath: ["第三章", "客户分析"],
+              chunkIndex: 7,
+              chunkText: "PRIVATE_CHUNK_TEXT",
+              score: 0.98,
+            },
+            {
+              resourceTitle: "服务规范",
+              headingPath: ["第一节"],
+              chunkIndex: 3,
+              chunkText: "PRIVATE_SECOND_CHUNK",
+              score: 0.92,
+            },
+          ],
+        },
+      }),
+      body: {
+        generationKind: "question",
+        requestedRuntimeMode: "route_integrated_provider",
+      },
+    });
+
+    expect(response.status).toBe(200);
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
+    expect(
+      generatedResultPersistenceRecorder.calls[0].citationRedactedSnapshot,
+    ).toEqual({
+      schemaVersion: 1,
+      sourceCitationCount: 2,
+      citations: [
+        {
+          resourceTitle: "营销教材",
+          headingPath: ["第三章", "客户分析"],
+        },
+        { resourceTitle: "服务规范", headingPath: ["第一节"] },
+      ],
+    });
+    const serializedResponse = JSON.stringify(await response.json());
+    expect(serializedResponse).not.toMatch(
+      /PRIVATE_CHUNK_TEXT|PRIVATE_SECOND_CHUNK|chunkIndex|score/u,
+    );
+  });
+
   it("persists a server-owned unresolved generated-label candidate for balanced content questions", async () => {
     const generatedResultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();

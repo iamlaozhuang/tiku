@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-07-content-ai-review-editor-2026-07-22
+currentPhase: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
 updatedAt: "2026-07-22T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-content-ai-review-editor-2026-07-22
+  currentTaskId: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -559,7 +559,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22
     - p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22
     - p1-remediation-rc-07-content-ai-review-editor-2026-07-22
+    - p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-content-ai-review-editor-2026-07-22
     - p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22
     - p1-remediation-rc-07-ai-paper-plan-constraint-lineage-2026-07-22
     - p1-remediation-rc-07-ai-generation-prompt-provenance-call-log-2026-07-22
@@ -711,7 +713,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-formal-question-ai-paper-metadata-foundation-2026-07-22: closed
     p1-remediation-rc-07-ai-paper-plan-constraint-lineage-2026-07-22: closed
     p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22: closed
-    p1-remediation-rc-07-content-ai-review-editor-2026-07-22: in_progress
+    p1-remediation-rc-07-content-ai-review-editor-2026-07-22: closed
+    p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -900,26 +903,26 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-07-content-ai-review-editor-2026-07-22
-  title: Content AI cross-session review editor
-  phase: p1-remediation-rc-07-content-ai-review-editor-2026-07-22
+  id: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
+  title: Content AI safe citation projection
+  phase: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: low_risk_content_UI_application_logic
-  productClosureContribution: partial_F0158_content_cross_session_editor_and_exact_adoption_command
-  branch: fix/content-ai-review-editor
+  taskKind: database_application_logic_and_safe_admin_read_projection
+  productClosureContribution: partial_F0158_content_safe_citation_projection
+  branch: fix/content-ai-safe-citation-projection
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0158
   candidateRootCauseCluster: P1-RC-07
-  objective: replace blind hidden-draft adoption with a keyboard-accessible cross-session content review editor that loads and saves the current server revision and binds adoption to that exact revision
+  objective: persist only bounded source names and heading paths from the exact authorized grounding context and return them through the authorization-first content review detail
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: open_partitioned
-  findingDisposition: F0158_content_editor_partition_citation_organization_and_browser_runtime_residual
+  findingDisposition: F0158_safe_content_citation_projection_organization_and_browser_runtime_residual
   riskBoundary:
-    category: low_risk_content_UI_application_logic
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    approvedBaseSha: c623447c20e56ad564f34d5df9e8bd233ec8f8b1
+    category: database_application_logic_and_safe_admin_read_projection
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    approvedBaseSha: d0864f92cd001ba6f555a33bb728c0720f3797b2
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
@@ -927,47 +930,47 @@ currentTask:
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: content_history_card_to_review_open_GET_to_structured_editor_to_revision_bound_PUT_to_exact_revision_formal_adoption_POST
-    coreFiles: 8
-    contingencyFiles: 5
+    chain: authorized_grounding_context_to_result_snapshot_to_authorization_first_review_detail_to_editor_source_panel
+    coreFiles: 12
+    contingencyFiles: 2
     preflightTestFiles: 6
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: UI_reads_hidden_history_snapshot_and_offers_blind_adoption_without_loading_saving_or_binding_the_current_server_revision
-    bundleDisposition: content_editor_only_citation_projection_and_organization_workbench_separate
+    confirmedRootCause: detailed_grounding_context_is_discarded_before_result_persistence_and_review_detail_cannot_reconstruct_safe_sources
+    bundleDisposition: content_safe_citation_projection_only_organization_workbench_separate
   expectedAcceptance:
-    - content_reviewer_can_open_full_server_owned_question_or_paper_revision_after_refresh
-    - editor_uses_structured_fields_and_preserves_complete_formal_contract_without_client_owned_provenance
-    - save_uses_expected_revision_and_digest_and_conflict_requires_reload_without_overwrite
-    - adoption_and_rejection_send_exact_current_server_revision_and_never_send_full_draft
-    - static_edit_labels_are_replaced_by_real_keyboard_accessible_controls
-    - F0158_remains_open_partitioned_for_citation_organization_and_browser_runtime_residuals
+    - successful_content_result_persists_only_bounded_resource_title_and_heading_path_projection
+    - chunk_text_score_index_internal_identity_provider_data_and_storage_path_never_enter_projection_or_DTO
+    - review_detail_validates_snapshot_against_persisted_count_and_malformed_snapshot_fails_closed
+    - legacy_null_snapshot_is_explicitly_unavailable_and_never_reconstructed
+    - existing_authorization_first_review_detail_boundary_is_preserved
+    - editor_renders_at_most_three_safe_sources_and_F0158_remains_open_partitioned
   closeoutProjection:
-    current: validated_reviewed_conditional_closeout_ready
+    current: pre_red_scope_frozen
     triggers: TDD_focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0158_content_editor_partition_closed_then_continue_citation_projection_JIT
+    successProjection: F0158_content_citation_partition_closed_then_continue_organization_workbench_JIT
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_low_risk_standing_approval_applies
+    mandatoryFreshApprovals: 0_bounded_medium_risk_standing_approval_applies
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: JIT_root_cause_UI_API_test_chain_freeze_TDD_editor_revision_binding_and_adversarial_hardening
+    productValueTime: JIT_root_cause_grounding_result_review_projection_chain_freeze
     mechanismOverhead: previous_closeout_fact_transition_task_contract_validation_and_conditional_closeout_preparation
     guardSmokeChanges: 0
   validationEvidence:
-    red: 1_new_focused_file_failed_on_missing_editor_module_with_0_tests_collected
-    focused: 6_files_80_tests_passed
+    red: 1_new_focused_file_failed_on_missing_projection_module_with_0_tests_collected
+    focused: 6_files_70_tests_passed
     targetedLint: pass_zero_warnings
     typecheck: pass
     productionBuild: pass_with_existing_NFT_trace_warning_from_paper_asset_path
     formatAndDiff: pass
     stateParse: pass
-    mainThreadAdversarialReview: pass_no_blocker_server_revision_only_dirty_and_conflict_fail_closed_exact_adoption_and_rejection_binding_no_full_draft_submission
+    mainThreadAdversarialReview: pass_no_blocker_exact_grounding_capture_content_only_atomic_result_snapshot_strict_three_source_projection_legacy_unavailable_authorization_before_lookup_malformed_fail_closed_no_raw_chunk_or_internal_identity
   previousTaskCloseout:
-    taskId: p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22
+    taskId: p1-remediation-rc-07-content-ai-review-editor-2026-07-22
     findingIds:
       - F-0158
-    commit: c623447c20e56ad564f34d5df9e8bd233ec8f8b1
+    commit: d0864f92cd001ba6f555a33bb728c0720f3797b2
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: open_partitioned
     masterOriginSync: pass

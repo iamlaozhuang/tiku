@@ -242,6 +242,8 @@ export function AdminAiGenerationReviewDraftEditor({
         </button>
       </div>
 
+      <ReviewCitationSources revision={revision} />
+
       <fieldset disabled={state === "saving"}>
         {isQuestionDraft(draft) ? (
           <QuestionDraftFields draft={draft} onChange={handleDraftChange} />
@@ -266,6 +268,45 @@ export function AdminAiGenerationReviewDraftEditor({
         ) : null}
       </div>
     </section>
+  );
+}
+
+function ReviewCitationSources({
+  revision,
+}: {
+  revision: AdminAiGenerationReviewDraftDto;
+}) {
+  if (
+    revision.citationStatus !== "available" ||
+    revision.citationSources === null
+  ) {
+    return (
+      <p className="text-text-secondary mt-3 text-xs">
+        该历史结果没有可验证的引用来源快照。
+      </p>
+    );
+  }
+
+  return (
+    <aside
+      aria-label="引用来源"
+      className="border-border bg-background mt-3 rounded-md border p-3"
+    >
+      <h6 className="text-text-primary text-xs font-semibold">引用来源</h6>
+      <ul className="mt-2 space-y-2">
+        {revision.citationSources.map((source) => (
+          <li
+            className="text-text-secondary text-xs"
+            key={`${source.resourceTitle}:${source.headingPath.join("/")}`}
+          >
+            <strong className="text-text-primary block font-medium">
+              {source.resourceTitle}
+            </strong>
+            <span>{source.headingPath.join(" > ")}</span>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }
 

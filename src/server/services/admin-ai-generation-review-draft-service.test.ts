@@ -27,6 +27,8 @@ describe("admin AI generation review draft service", () => {
       sourceContentDigest: "sha256:source-content-1",
       targetType: "question" as const,
       currentRevision: null,
+      citationStatus: "legacy_unavailable" as const,
+      citationSources: null,
       redactionStatus: "redacted" as const,
     };
     const repository: AdminAiGenerationReviewDraftRepository = {
