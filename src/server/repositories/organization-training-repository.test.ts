@@ -17,6 +17,8 @@ import type {
   OrganizationTrainingSourceContextAttachmentDto,
 } from "../contracts/organization-training-contract";
 import {
+  createOrganizationTrainingRecipientSnapshot,
+  createOrganizationTrainingRecipientSnapshotFromCandidates,
   createOrganizationTrainingRepository,
   createOrganizationTrainingAdminLifecyclePageSql,
   createOrganizationTrainingVisibleOrganizationPublicIdArraySql,
@@ -184,6 +186,211 @@ describe("organization training visible organization SQL", () => {
   });
 });
 
+describe("organization training recipient snapshot canonicalizer", () => {
+  const capturedAt = "2026-07-23T10:00:00.000Z";
+
+  it("sorts exact recipient tuples ordinally and creates a stable versioned digest", () => {
+    const first = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients: [
+        {
+          employeePublicId: "employee_public_b",
+          organizationPublicId: "organization_public_b",
+          authorizationPublicId: "org_auth_public_b",
+        },
+        {
+          employeePublicId: "employee_public_A",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_a",
+        },
+      ],
+    });
+    const replay = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients: [...(first?.recipients ?? [])].reverse(),
+    });
+
+    expect(first).toEqual({
+      schemaVersion: 1,
+      capturedAt,
+      count: 2,
+      digest: expect.stringMatching(/^[0-9a-f]{64}$/u),
+      recipients: [
+        {
+          employeePublicId: "employee_public_A",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_a",
+        },
+        {
+          employeePublicId: "employee_public_b",
+          organizationPublicId: "organization_public_b",
+          authorizationPublicId: "org_auth_public_b",
+        },
+      ],
+    });
+    expect(replay).toEqual(first);
+  });
+
+  it.each([
+    [
+      "duplicate employee",
+      [
+        {
+          employeePublicId: "employee_public_a",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_a",
+        },
+        {
+          employeePublicId: "employee_public_a",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_b",
+        },
+      ],
+    ],
+    [
+      "case-conflicting employee",
+      [
+        {
+          employeePublicId: "employee_public_a",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_a",
+        },
+        {
+          employeePublicId: "EMPLOYEE_PUBLIC_A",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_a",
+        },
+      ],
+    ],
+    [
+      "non-canonical public id",
+      [
+        {
+          employeePublicId: " employee_public_a ",
+          organizationPublicId: "organization_public_a",
+          authorizationPublicId: "org_auth_public_a",
+        },
+      ],
+    ],
+  ])("rejects %s", (_label, recipients) => {
+    expect(
+      createOrganizationTrainingRecipientSnapshot({ capturedAt, recipients }),
+    ).toBeNull();
+  });
+
+  it("represents a valid zero-recipient snapshot without treating it as legacy", () => {
+    expect(
+      createOrganizationTrainingRecipientSnapshot({
+        capturedAt,
+        recipients: [],
+      }),
+    ).toEqual({
+      schemaVersion: 1,
+      capturedAt,
+      count: 0,
+      digest: expect.stringMatching(/^[0-9a-f]{64}$/u),
+      recipients: [],
+    });
+  });
+
+  it("rejects out-of-scope and ambiguous multi-authorization publish candidates", () => {
+    expect(
+      createOrganizationTrainingRecipientSnapshotFromCandidates({
+        capturedAt,
+        publishScopeOrganizationPublicIds: ["organization_public_a"],
+        candidates: [
+          {
+            employeePublicId: "employee_public_a",
+            organizationPublicId: "organization_public_outside",
+            authorizationPublicId: "org_auth_public_a",
+          },
+        ],
+      }),
+    ).toBeNull();
+    expect(
+      createOrganizationTrainingRecipientSnapshotFromCandidates({
+        capturedAt,
+        publishScopeOrganizationPublicIds: ["organization_public_a"],
+        candidates: [
+          {
+            employeePublicId: "employee_public_a",
+            organizationPublicId: "organization_public_a",
+            authorizationPublicId: "org_auth_public_a",
+          },
+          {
+            employeePublicId: "employee_public_a",
+            organizationPublicId: "organization_public_a",
+            authorizationPublicId: "org_auth_public_b",
+          },
+        ],
+      }),
+    ).toBeNull();
+  });
+
+  it("keeps recipient capture, version markers, recipient rows and draft consumption in the canonical transaction", () => {
+    const source = readFileSync(
+      resolve(
+        process.cwd(),
+        "src/server/repositories/organization-training-repository.ts",
+      ),
+      "utf8",
+    );
+    const transaction = source.slice(
+      source.indexOf("async publishCanonicalDraftTransaction(input)"),
+      source.indexOf("async insertManualDraft(input)"),
+    );
+    const transactionStart = transaction.indexOf(
+      "return getDatabase().transaction",
+    );
+    const serializationLock = transaction.indexOf(
+      "await lockOrganizationScopeMutation(transaction)",
+    );
+    const recipientCapture = transaction.indexOf(
+      "createOrganizationTrainingRecipientSnapshotFromCandidates",
+    );
+    const versionInsert = transaction.indexOf(
+      ".insert(organizationTrainingVersion)",
+    );
+    const recipientInsert = transaction.indexOf(
+      ".insert(organizationTrainingVersionRecipient)",
+    );
+    const draftConsume = transaction.indexOf(
+      ".update(organizationTrainingDraft)",
+    );
+
+    const sequence = [
+      transactionStart,
+      serializationLock,
+      recipientCapture,
+      versionInsert,
+      recipientInsert,
+      draftConsume,
+    ];
+
+    expect(sequence.every((position) => position >= 0)).toBe(true);
+    expect(transactionStart).toBeLessThan(serializationLock);
+    expect(serializationLock).toBeLessThan(recipientCapture);
+    expect(recipientCapture).toBeLessThan(versionInsert);
+    expect(versionInsert).toBeLessThan(recipientInsert);
+    expect(recipientInsert).toBeLessThan(draftConsume);
+    expect(transaction).toContain(
+      "recipient_snapshot_schema_version: recipientSnapshot.schemaVersion",
+    );
+    expect(transaction).toContain(
+      "authorization_public_id: recipient.authorizationPublicId",
+    );
+    expect(transaction).toContain(
+      "readAndValidateOrganizationTrainingRecipientSnapshot",
+    );
+    expect(transaction).toContain(
+      "insertedRecipients.length !== recipientSnapshot.count",
+    );
+    expect(transaction).toContain(
+      "OrganizationTrainingPersistenceConflictError",
+    );
+  });
+});
+
 type EmployeeAnswerRepositoryContract = {
   saveEmployeeAnswerDraft(
     answerDraftWrite: OrganizationTrainingEmployeeAnswerDraftWrite,
@@ -225,6 +432,9 @@ function createRevokedMembershipPersistenceDatabase() {
         return builder;
       },
       innerJoin() {
+        return builder;
+      },
+      leftJoin() {
         return builder;
       },
       limit() {
@@ -2897,3 +3107,5 @@ describe("organization training repository", () => {
     ).not.toHaveBeenCalled();
   });
 });
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";

@@ -22,6 +22,10 @@ function getForeignKeyNames(
   );
 }
 
+function getCheckNames(table: Parameters<typeof getTableConfig>[0]): string[] {
+  return getTableConfig(table).checks.map((tableCheck) => tableCheck.name);
+}
+
 describe("organization training publish-version persistence schema", () => {
   const schemaExports = schemaIndex as Record<string, unknown>;
   const organizationTrainingVersion =
@@ -37,6 +41,10 @@ describe("organization training publish-version persistence schema", () => {
     | undefined;
   const organizationTrainingSourceContext =
     schemaExports.organizationTrainingSourceContext as
+      | Parameters<typeof getTableConfig>[0]
+      | undefined;
+  const organizationTrainingVersionRecipient =
+    schemaExports.organizationTrainingVersionRecipient as
       | Parameters<typeof getTableConfig>[0]
       | undefined;
 
@@ -83,6 +91,10 @@ describe("organization training publish-version persistence schema", () => {
         "quota_owner_type",
         "quota_owner_public_id",
         "publish_scope_snapshot",
+        "recipient_snapshot_schema_version",
+        "recipient_snapshot_captured_at",
+        "recipient_snapshot_count",
+        "recipient_snapshot_digest",
         "profession",
         "level",
         "subject",
@@ -100,6 +112,49 @@ describe("organization training publish-version persistence schema", () => {
         "updated_at",
       ]),
     );
+  });
+
+  it("defines a legacy-safe immutable recipient snapshot schema", () => {
+    expect(organizationTrainingVersionRecipient).toBeDefined();
+
+    if (
+      organizationTrainingVersion === undefined ||
+      organizationTrainingVersionRecipient === undefined
+    ) {
+      return;
+    }
+
+    expect(getTableName(organizationTrainingVersionRecipient)).toBe(
+      "organization_training_version_recipient",
+    );
+    expect(getColumnNames(organizationTrainingVersionRecipient)).toEqual([
+      "id",
+      "organization_training_version_id",
+      "employee_public_id",
+      "organization_public_id",
+      "authorization_public_id",
+      "created_at",
+    ]);
+    expect(getCheckNames(organizationTrainingVersion)).toContain(
+      "chk_organization_training_version_recipient_snapshot",
+    );
+    expect(getForeignKeyNames(organizationTrainingVersionRecipient)).toEqual([
+      "fk_organization_training_version_recipient_version",
+    ]);
+    expect(getIndexNames(organizationTrainingVersionRecipient)).toEqual(
+      expect.arrayContaining([
+        "udx_organization_training_version_recipient_version_employee",
+        "idx_organization_training_version_recipient_version_id",
+        "idx_organization_training_version_recipient_org_employee",
+      ]),
+    );
+    expect(
+      [
+        ...getCheckNames(organizationTrainingVersion),
+        ...getForeignKeyNames(organizationTrainingVersionRecipient),
+        ...getIndexNames(organizationTrainingVersionRecipient),
+      ].every((identifierName) => identifierName.length <= 63),
+    ).toBe(true);
   });
 
   it("keeps organization training persistence away from formal and provider columns", () => {

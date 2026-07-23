@@ -14,7 +14,7 @@ import {
 import {
   createOrganizationAnalyticsEmployeeTrainingSummaryPageReader,
   createOrganizationAnalyticsPostgresGateway,
-  createOrganizationAnalyticsTrainingAnswerSourceReader,
+  createOrganizationAnalyticsTrainingEligibilitySourceReader,
   createOrganizationAnalyticsVisibleOrganizationScopeReader,
   createPostgresOrganizationAnalyticsRepository,
 } from "../repositories/organization-analytics-repository";
@@ -311,8 +311,8 @@ function createRuntimePostgresOrganizationAnalyticsRepository(
         getDatabase(),
       )(input);
     },
-    async readTrainingAnswerSourceRows(input) {
-      return createOrganizationAnalyticsTrainingAnswerSourceReader(
+    async readTrainingEligibilitySource(input) {
+      return createOrganizationAnalyticsTrainingEligibilitySourceReader(
         getDatabase(),
       )(input);
     },

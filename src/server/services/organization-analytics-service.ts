@@ -33,6 +33,9 @@ import type { OrganizationAnalyticsRepository } from "../repositories/organizati
 const ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE = 403185;
 const ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE =
   "Organization analytics summary access denied.";
+const ORGANIZATION_ANALYTICS_SNAPSHOT_UNAVAILABLE_CODE = 503126;
+const ORGANIZATION_ANALYTICS_SNAPSHOT_UNAVAILABLE_MESSAGE =
+  "Organization analytics recipient snapshot is temporarily unavailable.";
 
 export type OrganizationAnalyticsAdminContext = {
   effectiveEdition: "advanced" | "standard";
@@ -167,6 +170,13 @@ function createOrganizationAnalyticsAccessDeniedResponse() {
   );
 }
 
+function createOrganizationAnalyticsSnapshotUnavailableResponse() {
+  return createErrorResponse(
+    ORGANIZATION_ANALYTICS_SNAPSHOT_UNAVAILABLE_CODE,
+    ORGANIZATION_ANALYTICS_SNAPSHOT_UNAVAILABLE_MESSAGE,
+  );
+}
+
 function createFormalLearningSummary(
   summary: OrganizationAnalyticsFormalLearningSummaryDto | null,
 ): OrganizationAnalyticsFormalLearningSummaryDto | null {
@@ -234,7 +244,7 @@ export async function buildOrganizationAnalyticsDashboardSummaryFromRepository(
     );
 
   if (trainingMetricsInput === null) {
-    return createOrganizationAnalyticsAccessDeniedResponse();
+    return createOrganizationAnalyticsSnapshotUnavailableResponse();
   }
 
   const [formalLearningSummary, knowledgeWeakPointSummary] = await Promise.all([
@@ -419,6 +429,10 @@ export async function buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRep
       dateRange: command.dateRange,
       pagination: command.pagination,
     });
+
+  if (employeeTrainingSummaryPage.availability === "unavailable") {
+    return createOrganizationAnalyticsSnapshotUnavailableResponse();
+  }
 
   return createOrganizationAnalyticsEmployeeStatisticsPageResponse({
     dateRange: command.dateRange,

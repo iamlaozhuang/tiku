@@ -4,6 +4,8 @@ import {
   employee,
   organization,
   organizationTrainingAnswer,
+  organizationTrainingVersion,
+  organizationTrainingVersionRecipient,
   user,
 } from "@/db/schema";
 import {
@@ -14,8 +16,9 @@ import {
   gte,
   inArray,
   isNotNull,
+  or,
   lte,
-  type SQL,
+  sql,
 } from "drizzle-orm";
 
 import type {
@@ -30,6 +33,11 @@ import type {
   OrganizationTrainingOfficialSubmission,
 } from "../models/organization-analytics";
 import type { RuntimeDatabase } from "./runtime-database";
+import {
+  createOrganizationTrainingVisibleOrganizationPublicIdArraySql,
+  validateOrganizationTrainingRecipientSnapshot,
+  type OrganizationTrainingRecipientSnapshotEntry,
+} from "./organization-training-repository";
 
 export type OrganizationAnalyticsVisibleOrganizationScopeLookupInput = {
   adminPublicId: string;
@@ -57,9 +65,427 @@ export type OrganizationAnalyticsEmployeeTrainingSummaryPageInput =
   };
 
 export type OrganizationAnalyticsEmployeeTrainingSummaryPage = {
+  availability: "available" | "unavailable";
   employeeTrainingSummaryInputs: readonly OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[];
   total: number;
 };
+
+export type OrganizationAnalyticsTrainingEligibilitySource = {
+  availability: "available" | "unavailable";
+  eligibleEmployeePublicIds: readonly string[];
+  officialSubmissions: readonly OrganizationTrainingOfficialSubmission[];
+  employeeTrainingSummaryInputs: readonly OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[];
+  relevantVersionPublicIds: readonly string[];
+};
+
+export type OrganizationAnalyticsTrainingVersionSourceRow = {
+  id: number;
+  publicId: string;
+  organizationPublicId: string;
+  publishScopeSnapshot: unknown;
+  publishedAt: Date | string | null;
+  answerDeadlineAt: Date | string | null;
+  takenDownAt: Date | string | null;
+  recipientSnapshotSchemaVersion: number | null;
+  recipientSnapshotCapturedAt: Date | string | null;
+  recipientSnapshotCount: number | null;
+  recipientSnapshotDigest: string | null;
+};
+
+export type OrganizationAnalyticsTrainingRecipientSourceRow =
+  OrganizationTrainingRecipientSnapshotEntry & {
+    versionId: number;
+    employeeDisplayName: string | null;
+    organizationName: string | null;
+  };
+
+export type OrganizationAnalyticsTrainingSubmissionSourceRow = {
+  versionId: number;
+  versionPublicId: string;
+  employeePublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string | null;
+  score: number | string | null;
+  totalScore: number | string | null;
+  submittedAt: Date | string | null;
+  answerOrganizationSnapshot: OrganizationAnalyticsAnswerOrganizationSnapshot | null;
+};
+
+export type OrganizationAnalyticsTrainingEligibilitySourceReader = (
+  input: OrganizationAnalyticsScopeReadInput,
+) => Promise<OrganizationAnalyticsTrainingEligibilitySource>;
+
+export function createOrganizationAnalyticsTrainingEligibilitySource(input: {
+  scopeInput: OrganizationAnalyticsScopeReadInput;
+  versionRows: readonly OrganizationAnalyticsTrainingVersionSourceRow[];
+  recipientRows: readonly OrganizationAnalyticsTrainingRecipientSourceRow[];
+  submissionRows: readonly OrganizationAnalyticsTrainingSubmissionSourceRow[];
+}): OrganizationAnalyticsTrainingEligibilitySource {
+  const unavailable = createUnavailableTrainingEligibilitySource();
+  const dateRange = normalizeDateRange(input.scopeInput.dateRange);
+
+  if (dateRange === null) {
+    return unavailable;
+  }
+
+  const relevantVersions: Array<
+    OrganizationAnalyticsTrainingVersionSourceRow & {
+      publishedAtIso: string;
+      effectiveEndAtIso: string | null;
+      publishScopeOrganizationPublicIds: string[];
+    }
+  > = [];
+  const versionIds = new Set<number>();
+  const versionPublicIds = new Map<string, string>();
+
+  for (const version of input.versionRows) {
+    const publicId = normalizeExactPublicId(version.publicId);
+    const organizationPublicId = normalizeExactPublicId(
+      version.organizationPublicId,
+    );
+    const publishedAtIso = normalizeSourceTimestamp(version.publishedAt);
+    const answerDeadlineAtIso = normalizeNullableSourceTimestamp(
+      version.answerDeadlineAt,
+    );
+    const takenDownAtIso = normalizeNullableSourceTimestamp(
+      version.takenDownAt,
+    );
+    const publishScope = normalizePublishScopeSnapshot(
+      version.publishScopeSnapshot,
+    );
+
+    if (
+      !Number.isSafeInteger(version.id) ||
+      version.id < 1 ||
+      publicId === null ||
+      organizationPublicId === null ||
+      publishedAtIso === null ||
+      answerDeadlineAtIso === undefined ||
+      takenDownAtIso === undefined ||
+      publishScope === null ||
+      publishScope.capturedAt !== publishedAtIso ||
+      !publishScope.organizationPublicIds.includes(organizationPublicId) ||
+      versionIds.has(version.id) ||
+      !registerExactPublicId(versionPublicIds, publicId)
+    ) {
+      return unavailable;
+    }
+
+    versionIds.add(version.id);
+    const effectiveEndAtIso = selectEarliestTimestamp(
+      answerDeadlineAtIso,
+      takenDownAtIso,
+    );
+
+    if (
+      effectiveEndAtIso !== null &&
+      Date.parse(effectiveEndAtIso) < Date.parse(publishedAtIso)
+    ) {
+      return unavailable;
+    }
+
+    if (
+      Date.parse(publishedAtIso) > dateRange.endAt.getTime() ||
+      (effectiveEndAtIso !== null &&
+        Date.parse(effectiveEndAtIso) < dateRange.startAt.getTime()) ||
+      !publishScope.organizationPublicIds.some((scopePublicId) =>
+        input.scopeInput.scopeOrganizationPublicIds.includes(scopePublicId),
+      )
+    ) {
+      continue;
+    }
+
+    relevantVersions.push({
+      ...version,
+      publicId,
+      organizationPublicId,
+      publishedAtIso,
+      effectiveEndAtIso,
+      publishScopeOrganizationPublicIds: publishScope.organizationPublicIds,
+    });
+  }
+
+  if (relevantVersions.length === 0) {
+    return createAvailableTrainingEligibilitySource([], [], []);
+  }
+
+  const canonicalRecipientRows: Array<
+    OrganizationTrainingRecipientSnapshotEntry & {
+      versionId: number;
+      employeeDisplayName: string;
+      organizationName: string;
+    }
+  > = [];
+
+  for (const version of relevantVersions) {
+    if (
+      normalizeSourceTimestamp(version.recipientSnapshotCapturedAt) !==
+      version.publishedAtIso
+    ) {
+      return unavailable;
+    }
+
+    const versionRecipients = input.recipientRows.filter(
+      (recipient) => recipient.versionId === version.id,
+    );
+    const snapshot = validateOrganizationTrainingRecipientSnapshot({
+      schemaVersion: version.recipientSnapshotSchemaVersion,
+      capturedAt: version.recipientSnapshotCapturedAt,
+      count: version.recipientSnapshotCount,
+      digest: version.recipientSnapshotDigest,
+      recipients: versionRecipients,
+    });
+
+    if (snapshot === null) {
+      return unavailable;
+    }
+
+    for (const recipient of versionRecipients) {
+      const employeeDisplayName = normalizeRequiredText(
+        recipient.employeeDisplayName ?? "",
+      );
+      const organizationName = normalizeRequiredText(
+        recipient.organizationName ?? "",
+      );
+
+      if (
+        employeeDisplayName === null ||
+        organizationName === null ||
+        !version.publishScopeOrganizationPublicIds.includes(
+          recipient.organizationPublicId,
+        )
+      ) {
+        return unavailable;
+      }
+
+      canonicalRecipientRows.push({
+        versionId: version.id,
+        employeePublicId: recipient.employeePublicId,
+        employeeDisplayName,
+        organizationPublicId: recipient.organizationPublicId,
+        organizationName,
+        authorizationPublicId: recipient.authorizationPublicId,
+      });
+    }
+  }
+
+  const visibleRecipients = canonicalRecipientRows.filter((recipient) =>
+    input.scopeInput.scopeOrganizationPublicIds.includes(
+      recipient.organizationPublicId,
+    ),
+  );
+  const recipientByKey = new Map<
+    string,
+    (typeof canonicalRecipientRows)[number]
+  >();
+
+  for (const recipient of canonicalRecipientRows) {
+    const key = createRecipientKey(
+      recipient.versionId,
+      recipient.employeePublicId,
+      recipient.organizationPublicId,
+    );
+
+    if (recipientByKey.has(key)) {
+      return unavailable;
+    }
+
+    recipientByKey.set(key, recipient);
+  }
+
+  const normalizedSubmissions: Array<{
+    versionId: number;
+    versionPublicId: string;
+    employeePublicId: string;
+    organizationPublicId: string;
+    authorizationPublicId: string;
+    score: number;
+    totalScore: number;
+    submittedAtIso: string;
+    answerOrganizationSnapshot: OrganizationAnalyticsAnswerOrganizationSnapshot;
+  }> = [];
+  const submissionKeys = new Set<string>();
+
+  for (const submission of input.submissionRows) {
+    const employeePublicId = normalizeExactPublicId(
+      submission.employeePublicId,
+    );
+    const organizationPublicId = normalizeExactPublicId(
+      submission.organizationPublicId,
+    );
+    const versionPublicId = normalizeExactPublicId(submission.versionPublicId);
+    const authorizationPublicId = normalizeExactPublicId(
+      submission.authorizationPublicId,
+    );
+    const submittedAtIso = normalizeSourceTimestamp(submission.submittedAt);
+    const answerOrganizationSnapshot = normalizeAnswerOrganizationSnapshot(
+      submission.answerOrganizationSnapshot,
+    );
+    const version = relevantVersions.find(
+      (candidate) => candidate.id === submission.versionId,
+    );
+
+    if (version === undefined && versionIds.has(submission.versionId)) {
+      continue;
+    }
+
+    if (
+      version === undefined ||
+      employeePublicId === null ||
+      organizationPublicId === null ||
+      versionPublicId !== version.publicId ||
+      authorizationPublicId === null ||
+      submittedAtIso === null ||
+      answerOrganizationSnapshot === null ||
+      answerOrganizationSnapshot.organizationPublicId !== organizationPublicId
+    ) {
+      return unavailable;
+    }
+
+    const recipient = recipientByKey.get(
+      createRecipientKey(
+        submission.versionId,
+        employeePublicId,
+        organizationPublicId,
+      ),
+    );
+    const score = normalizeScoreValue(submission.score);
+    const totalScore = normalizeScoreValue(submission.totalScore);
+    const submissionKey = `${submission.versionId}\u0000${employeePublicId}`;
+
+    if (
+      recipient === undefined ||
+      recipient.authorizationPublicId !== authorizationPublicId ||
+      score === null ||
+      totalScore === null ||
+      totalScore <= 0 ||
+      submissionKeys.has(submissionKey)
+    ) {
+      return unavailable;
+    }
+
+    submissionKeys.add(submissionKey);
+
+    if (
+      Date.parse(submittedAtIso) < Date.parse(version.publishedAtIso) ||
+      (version.effectiveEndAtIso !== null &&
+        Date.parse(submittedAtIso) > Date.parse(version.effectiveEndAtIso)) ||
+      !isSubmittedAtWithinDateRange(submittedAtIso, input.scopeInput.dateRange)
+    ) {
+      continue;
+    }
+
+    normalizedSubmissions.push({
+      versionId: submission.versionId,
+      employeePublicId,
+      organizationPublicId,
+      versionPublicId,
+      authorizationPublicId,
+      score,
+      totalScore,
+      submittedAtIso,
+      answerOrganizationSnapshot,
+    });
+  }
+
+  const eligibleEmployeePublicIds = normalizeExactPublicIdSet(
+    visibleRecipients.map((recipient) => recipient.employeePublicId),
+  );
+
+  if (eligibleEmployeePublicIds === null) {
+    return unavailable;
+  }
+
+  const officialSubmissions = normalizedSubmissions
+    .filter((submission) =>
+      input.scopeInput.scopeOrganizationPublicIds.includes(
+        submission.organizationPublicId,
+      ),
+    )
+    .map((submission) => ({
+      employeePublicId: submission.employeePublicId,
+      score: submission.score,
+      totalScore: submission.totalScore,
+      submittedAt: submission.submittedAtIso,
+    }));
+  const relevantVersionPublicIdById = new Map(
+    relevantVersions.map((version) => [version.id, version.publicId]),
+  );
+  const employeeTrainingSummaryInputs: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[] =
+    [];
+
+  for (const employeePublicId of eligibleEmployeePublicIds) {
+    const employeeRecipients = visibleRecipients.filter(
+      (recipient) => recipient.employeePublicId === employeePublicId,
+    );
+    const identity = employeeRecipients[0];
+
+    if (
+      identity === undefined ||
+      employeeRecipients.some(
+        (recipient) =>
+          recipient.employeeDisplayName !== identity.employeeDisplayName ||
+          recipient.organizationPublicId !== identity.organizationPublicId ||
+          recipient.organizationName !== identity.organizationName,
+      )
+    ) {
+      return unavailable;
+    }
+
+    const visibleTrainingVersionPublicIds: string[] = [];
+
+    for (const recipient of employeeRecipients) {
+      const versionPublicId = relevantVersionPublicIdById.get(
+        recipient.versionId,
+      );
+
+      if (versionPublicId === undefined) {
+        return unavailable;
+      }
+
+      visibleTrainingVersionPublicIds.push(versionPublicId);
+    }
+
+    const employeeSubmissions = normalizedSubmissions.filter(
+      (submission) =>
+        submission.employeePublicId === employeePublicId &&
+        input.scopeInput.scopeOrganizationPublicIds.includes(
+          submission.organizationPublicId,
+        ),
+    );
+
+    employeeTrainingSummaryInputs.push({
+      employeePublicId,
+      employeeDisplayName: identity.employeeDisplayName,
+      organizationPublicId: identity.organizationPublicId,
+      organizationName: identity.organizationName,
+      visibleTrainingVersionPublicIds: sortOrdinal(
+        visibleTrainingVersionPublicIds,
+      ),
+      officialSubmissions: employeeSubmissions.map((submission) => ({
+        employeePublicId: submission.employeePublicId,
+        trainingVersionPublicId: submission.versionPublicId,
+        score: submission.score,
+        totalScore: submission.totalScore,
+        submittedAt: submission.submittedAtIso,
+        answerOrganizationSnapshot: {
+          organizationPublicId:
+            submission.answerOrganizationSnapshot.organizationPublicId,
+          organizationName:
+            submission.answerOrganizationSnapshot.organizationName,
+          capturedAt: submission.answerOrganizationSnapshot.capturedAt,
+        },
+      })),
+    });
+  }
+
+  return createAvailableTrainingEligibilitySource(
+    eligibleEmployeePublicIds,
+    officialSubmissions,
+    employeeTrainingSummaryInputs,
+    sortOrdinal(relevantVersions.map((version) => version.publicId)),
+  );
+}
 
 export type OrganizationAnalyticsFormalLearningSummary = {
   formalPracticeCount: number;
@@ -136,37 +562,22 @@ export type OrganizationAnalyticsPostgresRepositoryFactoryOptions = {
   gateway?: OrganizationAnalyticsRepositoryGateway | null;
 };
 
-export type OrganizationAnalyticsTrainingAnswerSourceRow = {
-  employeePublicId: string;
-  employeeDisplayName?: string | null;
-  organizationPublicId: string;
-  organizationTrainingVersionPublicId: string;
-  score: number | string | null;
-  totalScore: number | string | null;
-  submittedAt: Date | string | null;
-  answerOrganizationSnapshot?: OrganizationAnalyticsAnswerOrganizationSnapshot | null;
-};
-
 export type OrganizationAnalyticsAnswerOrganizationSnapshot = {
   organizationPublicId: string;
   organizationName: string;
   capturedAt: string;
 };
 
-export type OrganizationAnalyticsTrainingAnswerSourceReader = (
-  input: OrganizationAnalyticsScopeReadInput,
-) => Promise<readonly OrganizationAnalyticsTrainingAnswerSourceRow[]>;
-
 export type OrganizationAnalyticsVisibleOrganizationScopeReader = (
   input: OrganizationAnalyticsVisibleOrganizationScopeLookupInput,
 ) => Promise<readonly string[] | null>;
 
-export type OrganizationAnalyticsTrainingAnswerSourceGatewayOptions = {
-  readTrainingAnswerSourceRows: OrganizationAnalyticsTrainingAnswerSourceReader;
+export type OrganizationAnalyticsTrainingEligibilitySourceGatewayOptions = {
+  readTrainingEligibilitySource: OrganizationAnalyticsTrainingEligibilitySourceReader;
 };
 
 export type OrganizationAnalyticsPostgresGatewayOptions =
-  OrganizationAnalyticsTrainingAnswerSourceGatewayOptions & {
+  OrganizationAnalyticsTrainingEligibilitySourceGatewayOptions & {
     findVisibleOrganizationScopeByAdminPublicId: OrganizationAnalyticsVisibleOrganizationScopeReader;
     readEmployeeTrainingSummaryPage?: OrganizationAnalyticsEmployeeTrainingSummaryPageReader;
   };
@@ -236,12 +647,17 @@ export function createOrganizationAnalyticsRepository(
       const readInput = normalizeEmployeeTrainingSummaryPageInput(input);
 
       if (readInput === null) {
-        return { employeeTrainingSummaryInputs: [], total: 0 };
+        return {
+          availability: "unavailable",
+          employeeTrainingSummaryInputs: [],
+          total: 0,
+        };
       }
 
       const page = await gateway.readEmployeeTrainingSummaryPage(readInput);
 
       return {
+        availability: page.availability,
         employeeTrainingSummaryInputs: page.employeeTrainingSummaryInputs.map(
           copyEmployeeTrainingSummaryInput,
         ),
@@ -313,8 +729,8 @@ export function createOrganizationAnalyticsPostgresGateway(
   options: OrganizationAnalyticsPostgresGatewayOptions,
 ): OrganizationAnalyticsRepositoryGateway {
   const trainingAnswerSourceGateway =
-    createOrganizationAnalyticsTrainingAnswerSourceGateway({
-      readTrainingAnswerSourceRows: options.readTrainingAnswerSourceRows,
+    createOrganizationAnalyticsTrainingEligibilitySourceGateway({
+      readTrainingEligibilitySource: options.readTrainingEligibilitySource,
     });
 
   return {
@@ -396,24 +812,106 @@ export function createOrganizationAnalyticsVisibleOrganizationScopeReader(
   };
 }
 
-export function createOrganizationAnalyticsTrainingAnswerSourceReader(
+export function createOrganizationAnalyticsTrainingEligibilitySourceReader(
   database: RuntimeDatabase,
-): OrganizationAnalyticsTrainingAnswerSourceReader {
+): OrganizationAnalyticsTrainingEligibilitySourceReader {
   return async (input) => {
     const readInput = normalizeScopeReadInput(input);
-    const submittedAtRange = normalizeDateRange(input.dateRange);
+    const dateRange = normalizeDateRange(input.dateRange);
 
-    if (readInput === null || submittedAtRange === null) {
-      return [];
+    if (readInput === null || dateRange === null) {
+      return createUnavailableTrainingEligibilitySource();
     }
 
-    const trainingAnswerSourceRows = await database
+    const versionRows = await database
       .select({
-        employeePublicId: organizationTrainingAnswer.employee_public_id,
+        id: organizationTrainingVersion.id,
+        publicId: organizationTrainingVersion.public_id,
+        organizationPublicId:
+          organizationTrainingVersion.organization_public_id,
+        publishScopeSnapshot:
+          organizationTrainingVersion.publish_scope_snapshot,
+        publishedAt: organizationTrainingVersion.published_at,
+        answerDeadlineAt: organizationTrainingVersion.answer_deadline_at,
+        takenDownAt: organizationTrainingVersion.taken_down_at,
+        recipientSnapshotSchemaVersion:
+          organizationTrainingVersion.recipient_snapshot_schema_version,
+        recipientSnapshotCapturedAt:
+          organizationTrainingVersion.recipient_snapshot_captured_at,
+        recipientSnapshotCount:
+          organizationTrainingVersion.recipient_snapshot_count,
+        recipientSnapshotDigest:
+          organizationTrainingVersion.recipient_snapshot_digest,
+      })
+      .from(organizationTrainingVersion)
+      .where(
+        and(
+          or(
+            eq(organizationTrainingVersion.version_status, "published"),
+            eq(organizationTrainingVersion.version_status, "taken_down"),
+          ),
+          isNotNull(organizationTrainingVersion.published_at),
+          lte(organizationTrainingVersion.published_at, dateRange.endAt),
+          sql`${organizationTrainingVersion.publish_scope_snapshot}->'organizationPublicIds' ?| ${createOrganizationTrainingVisibleOrganizationPublicIdArraySql(readInput.scopeOrganizationPublicIds)}`,
+        ),
+      )
+      .orderBy(asc(organizationTrainingVersion.public_id));
+
+    if (versionRows.length === 0) {
+      return createAvailableTrainingEligibilitySource([], [], []);
+    }
+
+    const versionIds = versionRows.map((version) => version.id);
+    const recipientRows = await database
+      .select({
+        versionId:
+          organizationTrainingVersionRecipient.organization_training_version_id,
+        employeePublicId:
+          organizationTrainingVersionRecipient.employee_public_id,
         employeeDisplayName: user.name,
-        organizationPublicId: organizationTrainingAnswer.organization_public_id,
-        organizationTrainingVersionPublicId:
+        organizationPublicId:
+          organizationTrainingVersionRecipient.organization_public_id,
+        organizationName: organization.name,
+        authorizationPublicId:
+          organizationTrainingVersionRecipient.authorization_public_id,
+      })
+      .from(organizationTrainingVersionRecipient)
+      .leftJoin(
+        employee,
+        eq(
+          employee.public_id,
+          organizationTrainingVersionRecipient.employee_public_id,
+        ),
+      )
+      .leftJoin(user, eq(user.id, employee.user_id))
+      .leftJoin(
+        organization,
+        eq(
+          organization.public_id,
+          organizationTrainingVersionRecipient.organization_public_id,
+        ),
+      )
+      .where(
+        inArray(
+          organizationTrainingVersionRecipient.organization_training_version_id,
+          versionIds,
+        ),
+      )
+      .orderBy(
+        asc(
+          organizationTrainingVersionRecipient.organization_training_version_id,
+        ),
+        asc(organizationTrainingVersionRecipient.employee_public_id),
+      );
+    const submissionRows = await database
+      .select({
+        versionId: organizationTrainingAnswer.organization_training_version_id,
+        versionPublicId:
           organizationTrainingAnswer.organization_training_version_public_id,
+        employeePublicId: organizationTrainingAnswer.employee_public_id,
+        organizationPublicId: organizationTrainingAnswer.organization_public_id,
+        authorizationPublicId:
+          organizationTrainingVersionRecipient.authorization_public_id,
         score: organizationTrainingAnswer.score,
         totalScore: organizationTrainingAnswer.total_score,
         submittedAt: organizationTrainingAnswer.submitted_at,
@@ -421,54 +919,50 @@ export function createOrganizationAnalyticsTrainingAnswerSourceReader(
           organizationTrainingAnswer.answer_organization_snapshot,
       })
       .from(organizationTrainingAnswer)
-      .innerJoin(
-        employee,
-        eq(organizationTrainingAnswer.employee_id, employee.id),
+      .leftJoin(
+        organizationTrainingVersionRecipient,
+        and(
+          eq(
+            organizationTrainingVersionRecipient.organization_training_version_id,
+            organizationTrainingAnswer.organization_training_version_id,
+          ),
+          eq(
+            organizationTrainingVersionRecipient.employee_public_id,
+            organizationTrainingAnswer.employee_public_id,
+          ),
+          eq(
+            organizationTrainingVersionRecipient.organization_public_id,
+            organizationTrainingAnswer.organization_public_id,
+          ),
+        ),
       )
-      .innerJoin(user, eq(employee.user_id, user.id))
       .where(
         and(
+          inArray(
+            organizationTrainingAnswer.organization_training_version_id,
+            versionIds,
+          ),
           eq(
             organizationTrainingAnswer.organization_training_answer_status,
             "submitted",
           ),
-          inArray(organizationTrainingAnswer.organization_public_id, [
-            ...readInput.scopeOrganizationPublicIds,
-          ]),
           isNotNull(organizationTrainingAnswer.submitted_at),
-          gte(
-            organizationTrainingAnswer.submitted_at,
-            submittedAtRange.startAt,
-          ),
-          lte(organizationTrainingAnswer.submitted_at, submittedAtRange.endAt),
+          gte(organizationTrainingAnswer.submitted_at, dateRange.startAt),
+          lte(organizationTrainingAnswer.submitted_at, dateRange.endAt),
         ),
+      )
+      .orderBy(
+        asc(organizationTrainingAnswer.organization_training_version_id),
+        asc(organizationTrainingAnswer.employee_public_id),
       );
 
-    return trainingAnswerSourceRows.flatMap(copyTrainingAnswerSourceRow);
+    return createOrganizationAnalyticsTrainingEligibilitySource({
+      scopeInput: readInput,
+      versionRows,
+      recipientRows,
+      submissionRows,
+    });
   };
-}
-
-function createSubmittedTrainingAnswerCondition(
-  input: OrganizationAnalyticsScopeReadInput,
-): SQL | null {
-  const submittedAtRange = normalizeDateRange(input.dateRange);
-
-  if (submittedAtRange === null) {
-    return null;
-  }
-
-  return and(
-    eq(
-      organizationTrainingAnswer.organization_training_answer_status,
-      "submitted",
-    ),
-    inArray(organizationTrainingAnswer.organization_public_id, [
-      ...input.scopeOrganizationPublicIds,
-    ]),
-    isNotNull(organizationTrainingAnswer.submitted_at),
-    gte(organizationTrainingAnswer.submitted_at, submittedAtRange.startAt),
-    lte(organizationTrainingAnswer.submitted_at, submittedAtRange.endAt),
-  )!;
 }
 
 export function createOrganizationAnalyticsEmployeeTrainingSummaryPageReader(
@@ -478,14 +972,42 @@ export function createOrganizationAnalyticsEmployeeTrainingSummaryPageReader(
     const readInput = normalizeEmployeeTrainingSummaryPageInput(input);
 
     if (readInput === null) {
-      return { employeeTrainingSummaryInputs: [], total: 0 };
+      return {
+        availability: "unavailable",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      };
     }
 
-    const whereCondition = createSubmittedTrainingAnswerCondition(readInput);
+    const source =
+      await createOrganizationAnalyticsTrainingEligibilitySourceReader(
+        database,
+      )(readInput);
 
-    if (whereCondition === null) {
-      return { employeeTrainingSummaryInputs: [], total: 0 };
+    if (source.availability === "unavailable") {
+      return {
+        availability: "unavailable",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      };
     }
+
+    if (source.eligibleEmployeePublicIds.length === 0) {
+      return {
+        availability: "available",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      };
+    }
+
+    const recipientPredicate = and(
+      inArray(organizationTrainingVersion.public_id, [
+        ...source.relevantVersionPublicIds,
+      ]),
+      inArray(organizationTrainingVersionRecipient.organization_public_id, [
+        ...readInput.scopeOrganizationPublicIds,
+      ]),
+    )!;
 
     const offset =
       (readInput.pagination.page - 1) * readInput.pagination.pageSize;
@@ -494,85 +1016,99 @@ export function createOrganizationAnalyticsEmployeeTrainingSummaryPageReader(
         employeeDisplayName: user.name,
         employeePublicId: employee.public_id,
       })
-      .from(organizationTrainingAnswer)
+      .from(organizationTrainingVersionRecipient)
+      .innerJoin(
+        organizationTrainingVersion,
+        eq(
+          organizationTrainingVersion.id,
+          organizationTrainingVersionRecipient.organization_training_version_id,
+        ),
+      )
       .innerJoin(
         employee,
-        eq(organizationTrainingAnswer.employee_id, employee.id),
+        eq(
+          organizationTrainingVersionRecipient.employee_public_id,
+          employee.public_id,
+        ),
       )
       .innerJoin(user, eq(employee.user_id, user.id))
-      .where(whereCondition)
+      .where(recipientPredicate)
       .groupBy(user.name, employee.public_id)
       .orderBy(asc(user.name), asc(employee.public_id))
       .limit(readInput.pagination.pageSize)
       .offset(offset);
     const [totalRow] = await database
       .select({ value: countDistinct(employee.public_id) })
-      .from(organizationTrainingAnswer)
+      .from(organizationTrainingVersionRecipient)
+      .innerJoin(
+        organizationTrainingVersion,
+        eq(
+          organizationTrainingVersion.id,
+          organizationTrainingVersionRecipient.organization_training_version_id,
+        ),
+      )
       .innerJoin(
         employee,
-        eq(organizationTrainingAnswer.employee_id, employee.id),
+        eq(
+          organizationTrainingVersionRecipient.employee_public_id,
+          employee.public_id,
+        ),
       )
       .innerJoin(user, eq(employee.user_id, user.id))
-      .where(whereCondition);
+      .where(recipientPredicate);
     const employeePublicIds = employeePageRows.map(
       (employeePageRow) => employeePageRow.employeePublicId,
     );
 
     if (employeePublicIds.length === 0) {
       return {
+        availability: "available",
         employeeTrainingSummaryInputs: [],
         total: normalizeTotal(totalRow?.value),
       };
     }
 
-    const trainingAnswerSourceRows = await database
-      .select({
-        employeePublicId: organizationTrainingAnswer.employee_public_id,
-        employeeDisplayName: user.name,
-        organizationPublicId: organizationTrainingAnswer.organization_public_id,
-        organizationTrainingVersionPublicId:
-          organizationTrainingAnswer.organization_training_version_public_id,
-        score: organizationTrainingAnswer.score,
-        totalScore: organizationTrainingAnswer.total_score,
-        submittedAt: organizationTrainingAnswer.submitted_at,
-        answerOrganizationSnapshot:
-          organizationTrainingAnswer.answer_organization_snapshot,
-      })
-      .from(organizationTrainingAnswer)
-      .innerJoin(
-        employee,
-        eq(organizationTrainingAnswer.employee_id, employee.id),
-      )
-      .innerJoin(user, eq(employee.user_id, user.id))
-      .where(
-        and(
-          whereCondition,
-          inArray(
-            organizationTrainingAnswer.employee_public_id,
-            employeePublicIds,
-          ),
-        ),
-      )
-      .orderBy(
-        asc(user.name),
-        asc(employee.public_id),
-        asc(organizationTrainingAnswer.submitted_at),
-        asc(organizationTrainingAnswer.public_id),
+    if (new Set(employeePublicIds).size !== employeePublicIds.length) {
+      return {
+        availability: "unavailable",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      };
+    }
+
+    const employeeTrainingSummaryInputs: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[] =
+      [];
+
+    for (const employeePageRow of employeePageRows) {
+      const summary = source.employeeTrainingSummaryInputs.find(
+        (candidate) =>
+          candidate.employeePublicId === employeePageRow.employeePublicId &&
+          candidate.employeeDisplayName === employeePageRow.employeeDisplayName,
       );
 
+      if (summary === undefined) {
+        return {
+          availability: "unavailable",
+          employeeTrainingSummaryInputs: [],
+          total: 0,
+        };
+      }
+
+      employeeTrainingSummaryInputs.push(
+        copyEmployeeTrainingSummaryInput(summary),
+      );
+    }
+
     return {
-      employeeTrainingSummaryInputs:
-        createEmployeeTrainingSummaryInputsFromSourceRows(
-          trainingAnswerSourceRows.flatMap(copyTrainingAnswerSourceRow),
-          readInput,
-        ).sort(compareEmployeeTrainingSummaryInputs),
+      availability: "available",
+      employeeTrainingSummaryInputs,
       total: normalizeTotal(totalRow?.value),
     };
   };
 }
 
-export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
-  options: OrganizationAnalyticsTrainingAnswerSourceGatewayOptions,
+export function createOrganizationAnalyticsTrainingEligibilitySourceGateway(
+  options: OrganizationAnalyticsTrainingEligibilitySourceGatewayOptions,
 ): OrganizationAnalyticsRepositoryGateway {
   return {
     async findVisibleOrganizationScopeByAdminPublicId() {
@@ -586,27 +1122,17 @@ export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
         return null;
       }
 
-      const trainingAnswerSourceRows =
-        await options.readTrainingAnswerSourceRows(readInput);
-      const officialSubmissions = trainingAnswerSourceRows.flatMap(
-        (trainingAnswerSourceRow) =>
-          copyTrainingAnswerSourceSubmission(
-            trainingAnswerSourceRow,
-            readInput,
-          ),
-      );
+      const source = await options.readTrainingEligibilitySource(readInput);
 
-      if (officialSubmissions.length === 0) {
+      if (source.availability === "unavailable") {
         return null;
       }
 
       return {
-        eligibleEmployeePublicIds: normalizePublicIdList(
-          officialSubmissions.map(
-            (officialSubmission) => officialSubmission.employeePublicId,
-          ),
-        ),
-        officialSubmissions,
+        eligibleEmployeePublicIds: [...source.eligibleEmployeePublicIds],
+        officialSubmissions: source.officialSubmissions.map((submission) => ({
+          ...submission,
+        })),
       };
     },
 
@@ -617,38 +1143,30 @@ export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
         return [];
       }
 
-      const trainingAnswerSourceRows =
-        await options.readTrainingAnswerSourceRows(readInput);
+      const source = await options.readTrainingEligibilitySource(readInput);
 
-      return createEmployeeTrainingSummaryInputsFromSourceRows(
-        trainingAnswerSourceRows,
-        readInput,
-      );
+      return source.availability === "available"
+        ? source.employeeTrainingSummaryInputs.map(
+            copyEmployeeTrainingSummaryInput,
+          )
+        : [];
     },
 
     async readEmployeeTrainingSummaryPage(input) {
       const readInput = normalizeEmployeeTrainingSummaryPageInput(input);
 
       if (readInput === null) {
-        return { employeeTrainingSummaryInputs: [], total: 0 };
+        return {
+          availability: "unavailable",
+          employeeTrainingSummaryInputs: [],
+          total: 0,
+        };
       }
 
-      const trainingAnswerSourceRows =
-        await options.readTrainingAnswerSourceRows(readInput);
-      const employeeTrainingSummaryInputs =
-        createEmployeeTrainingSummaryInputsFromSourceRows(
-          trainingAnswerSourceRows,
-          readInput,
-        ).sort(compareEmployeeTrainingSummaryInputs);
-      const offset =
-        (readInput.pagination.page - 1) * readInput.pagination.pageSize;
-
       return {
-        employeeTrainingSummaryInputs: employeeTrainingSummaryInputs.slice(
-          offset,
-          offset + readInput.pagination.pageSize,
-        ),
-        total: employeeTrainingSummaryInputs.length,
+        availability: "unavailable",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
       };
     },
 
@@ -678,7 +1196,11 @@ function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyti
       return [];
     },
     async readEmployeeTrainingSummaryPage() {
-      return { employeeTrainingSummaryInputs: [], total: 0 };
+      return {
+        availability: "unavailable",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      };
     },
     async readFormalLearningSummary() {
       return null;
@@ -690,217 +1212,6 @@ function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyti
       return [];
     },
   };
-}
-
-function copyTrainingAnswerSourceSubmission(
-  sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
-  input: OrganizationAnalyticsScopeReadInput,
-): OrganizationTrainingOfficialSubmission[] {
-  const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
-  const organizationPublicId = normalizeRequiredText(
-    sourceRow.organizationPublicId,
-  );
-  const score = normalizeScoreValue(sourceRow.score);
-  const totalScore = normalizeScoreValue(sourceRow.totalScore);
-  const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
-
-  if (
-    employeePublicId === null ||
-    organizationPublicId === null ||
-    score === null ||
-    totalScore === null ||
-    submittedAt === null ||
-    totalScore <= 0 ||
-    !input.scopeOrganizationPublicIds.includes(organizationPublicId) ||
-    !isSubmittedAtWithinDateRange(submittedAt, input.dateRange)
-  ) {
-    return [];
-  }
-
-  return [
-    {
-      employeePublicId,
-      score,
-      totalScore,
-      submittedAt,
-    },
-  ];
-}
-
-function copyTrainingAnswerSourceRow(
-  sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
-): OrganizationAnalyticsTrainingAnswerSourceRow[] {
-  const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
-  const employeeDisplayName = normalizeRequiredText(
-    sourceRow.employeeDisplayName ?? "",
-  );
-  const organizationPublicId = normalizeRequiredText(
-    sourceRow.organizationPublicId,
-  );
-  const organizationTrainingVersionPublicId = normalizeRequiredText(
-    sourceRow.organizationTrainingVersionPublicId,
-  );
-  const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
-  const answerOrganizationSnapshot = normalizeAnswerOrganizationSnapshot(
-    sourceRow.answerOrganizationSnapshot,
-  );
-
-  if (
-    employeePublicId === null ||
-    employeeDisplayName === null ||
-    organizationPublicId === null ||
-    organizationTrainingVersionPublicId === null ||
-    submittedAt === null ||
-    answerOrganizationSnapshot === null
-  ) {
-    return [];
-  }
-
-  return [
-    {
-      employeePublicId,
-      employeeDisplayName,
-      organizationPublicId,
-      organizationTrainingVersionPublicId,
-      score: sourceRow.score,
-      totalScore: sourceRow.totalScore,
-      submittedAt,
-      answerOrganizationSnapshot,
-    },
-  ];
-}
-
-type OrganizationAnalyticsEmployeeSummarySourceSubmission =
-  OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput["officialSubmissions"][number] & {
-    employeeDisplayName: string;
-    organizationPublicId: string;
-    organizationName: string;
-  };
-
-function createEmployeeTrainingSummaryInputsFromSourceRows(
-  sourceRows: readonly OrganizationAnalyticsTrainingAnswerSourceRow[],
-  input: OrganizationAnalyticsScopeReadInput,
-): OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[] {
-  const sourceSubmissions = sourceRows.flatMap((sourceRow) =>
-    copyTrainingAnswerSourceEmployeeSummarySubmission(sourceRow, input),
-  );
-
-  return normalizePublicIdList(
-    sourceSubmissions.map((submission) => submission.employeePublicId),
-  ).flatMap((employeePublicId) => {
-    const employeeSubmissions = sourceSubmissions.filter(
-      (submission) => submission.employeePublicId === employeePublicId,
-    );
-    const latestSubmission =
-      selectLatestEmployeeSummarySourceSubmission(employeeSubmissions);
-
-    if (latestSubmission === null) {
-      return [];
-    }
-
-    return [
-      {
-        employeePublicId,
-        employeeDisplayName: latestSubmission.employeeDisplayName,
-        organizationPublicId: latestSubmission.organizationPublicId,
-        organizationName: latestSubmission.organizationName,
-        visibleTrainingVersionPublicIds: normalizePublicIdList(
-          employeeSubmissions.map(
-            (submission) => submission.trainingVersionPublicId,
-          ),
-        ),
-        officialSubmissions: employeeSubmissions.map((submission) => ({
-          employeePublicId: submission.employeePublicId,
-          trainingVersionPublicId: submission.trainingVersionPublicId,
-          score: submission.score,
-          totalScore: submission.totalScore,
-          submittedAt: submission.submittedAt,
-          answerOrganizationSnapshot: {
-            organizationPublicId:
-              submission.answerOrganizationSnapshot.organizationPublicId,
-            organizationName:
-              submission.answerOrganizationSnapshot.organizationName,
-            capturedAt: submission.answerOrganizationSnapshot.capturedAt,
-          },
-        })),
-      },
-    ];
-  });
-}
-
-function copyTrainingAnswerSourceEmployeeSummarySubmission(
-  sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
-  input: OrganizationAnalyticsScopeReadInput,
-): OrganizationAnalyticsEmployeeSummarySourceSubmission[] {
-  const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
-  const employeeDisplayName = normalizeRequiredText(
-    sourceRow.employeeDisplayName ?? "",
-  );
-  const organizationPublicId = normalizeRequiredText(
-    sourceRow.organizationPublicId,
-  );
-  const trainingVersionPublicId = normalizeRequiredText(
-    sourceRow.organizationTrainingVersionPublicId,
-  );
-  const score = normalizeScoreValue(sourceRow.score);
-  const totalScore = normalizeScoreValue(sourceRow.totalScore);
-  const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
-  const answerOrganizationSnapshot = normalizeAnswerOrganizationSnapshot(
-    sourceRow.answerOrganizationSnapshot,
-  );
-
-  if (
-    employeePublicId === null ||
-    employeeDisplayName === null ||
-    organizationPublicId === null ||
-    trainingVersionPublicId === null ||
-    score === null ||
-    totalScore === null ||
-    submittedAt === null ||
-    answerOrganizationSnapshot === null ||
-    totalScore <= 0 ||
-    !input.scopeOrganizationPublicIds.includes(organizationPublicId) ||
-    !isSubmittedAtWithinDateRange(submittedAt, input.dateRange)
-  ) {
-    return [];
-  }
-
-  return [
-    {
-      employeePublicId,
-      employeeDisplayName,
-      organizationPublicId,
-      organizationName: answerOrganizationSnapshot.organizationName,
-      trainingVersionPublicId,
-      score,
-      totalScore,
-      submittedAt,
-      answerOrganizationSnapshot,
-    },
-  ];
-}
-
-function selectLatestEmployeeSummarySourceSubmission(
-  submissions: readonly OrganizationAnalyticsEmployeeSummarySourceSubmission[],
-): OrganizationAnalyticsEmployeeSummarySourceSubmission | null {
-  return (
-    [...submissions].sort(
-      (leftSubmission, rightSubmission) =>
-        Date.parse(rightSubmission.submittedAt) -
-        Date.parse(leftSubmission.submittedAt),
-    )[0] ?? null
-  );
-}
-
-function compareEmployeeTrainingSummaryInputs(
-  leftInput: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput,
-  rightInput: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput,
-): number {
-  return (
-    leftInput.employeeDisplayName.localeCompare(
-      rightInput.employeeDisplayName,
-    ) || leftInput.employeePublicId.localeCompare(rightInput.employeePublicId)
-  );
 }
 
 function resolveVisibleOrganizationPublicIds(input: {
@@ -1094,6 +1405,162 @@ function normalizeRequiredText(value: string): string | null {
   const trimmedValue = value.trim();
 
   return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function normalizeExactPublicId(value: unknown): string | null {
+  return typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 200 &&
+    value === value.trim() &&
+    !/[\u0000-\u001f\u007f-\u009f]/u.test(value)
+    ? value
+    : null;
+}
+
+function registerExactPublicId(
+  registry: Map<string, string>,
+  value: string,
+): boolean {
+  const key = value.toLowerCase();
+  const existing = registry.get(key);
+
+  if (existing !== undefined) {
+    return false;
+  }
+
+  registry.set(key, value);
+  return true;
+}
+
+function normalizeExactPublicIdSet(values: readonly string[]): string[] | null {
+  const registry = new Map<string, string>();
+
+  for (const value of values) {
+    const normalized = normalizeExactPublicId(value);
+
+    if (normalized === null) {
+      return null;
+    }
+
+    const folded = normalized.toLowerCase();
+    const existing = registry.get(folded);
+
+    if (existing !== undefined && existing !== normalized) {
+      return null;
+    }
+
+    registry.set(folded, normalized);
+  }
+
+  return sortOrdinal([...registry.values()]);
+}
+
+function normalizeSourceTimestamp(value: unknown): string | null {
+  if (typeof value !== "string" && !(value instanceof Date)) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (!Number.isFinite(date.getTime())) {
+    return null;
+  }
+
+  const isoTimestamp = date.toISOString();
+
+  return value instanceof Date || value === isoTimestamp ? isoTimestamp : null;
+}
+
+function normalizeNullableSourceTimestamp(
+  value: unknown,
+): string | null | undefined {
+  return value === null ? null : (normalizeSourceTimestamp(value) ?? undefined);
+}
+
+function selectEarliestTimestamp(
+  left: string | null,
+  right: string | null,
+): string | null {
+  if (left === null) return right;
+  if (right === null) return left;
+  return Date.parse(left) <= Date.parse(right) ? left : right;
+}
+
+function normalizePublishScopeSnapshot(value: unknown): {
+  organizationPublicIds: string[];
+  capturedAt: string;
+} | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+
+  if (
+    Object.keys(record).length !== 2 ||
+    !("organizationPublicIds" in record) ||
+    !("capturedAt" in record) ||
+    !Array.isArray(record.organizationPublicIds)
+  ) {
+    return null;
+  }
+
+  const organizationPublicIds = normalizeExactPublicIdSet(
+    record.organizationPublicIds.filter(
+      (publicId): publicId is string => typeof publicId === "string",
+    ),
+  );
+  const capturedAt = normalizeSourceTimestamp(record.capturedAt);
+
+  return organizationPublicIds !== null &&
+    organizationPublicIds.length === record.organizationPublicIds.length &&
+    organizationPublicIds.length > 0 &&
+    capturedAt !== null
+    ? { organizationPublicIds, capturedAt }
+    : null;
+}
+
+function createRecipientKey(
+  versionId: number,
+  employeePublicId: string,
+  organizationPublicId: string,
+): string {
+  return JSON.stringify([versionId, employeePublicId, organizationPublicId]);
+}
+
+function sortOrdinal(values: readonly string[]): string[] {
+  return [...new Set(values)].sort((left, right) =>
+    left < right ? -1 : left > right ? 1 : 0,
+  );
+}
+
+function createUnavailableTrainingEligibilitySource(): OrganizationAnalyticsTrainingEligibilitySource {
+  return {
+    availability: "unavailable",
+    eligibleEmployeePublicIds: [],
+    officialSubmissions: [],
+    employeeTrainingSummaryInputs: [],
+    relevantVersionPublicIds: [],
+  };
+}
+
+function createAvailableTrainingEligibilitySource(
+  eligibleEmployeePublicIds: readonly string[],
+  officialSubmissions: readonly OrganizationTrainingOfficialSubmission[],
+  employeeTrainingSummaryInputs: readonly OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[],
+  relevantVersionPublicIds: readonly string[] = [],
+): OrganizationAnalyticsTrainingEligibilitySource {
+  return {
+    availability: "available",
+    eligibleEmployeePublicIds: [...eligibleEmployeePublicIds],
+    officialSubmissions: officialSubmissions.map((submission) => ({
+      ...submission,
+    })),
+    employeeTrainingSummaryInputs: employeeTrainingSummaryInputs.map(
+      copyEmployeeTrainingSummaryInput,
+    ),
+    relevantVersionPublicIds: [...relevantVersionPublicIds],
+  };
 }
 
 function normalizePublicIdList(values: readonly string[]): string[] {

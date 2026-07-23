@@ -11,6 +11,47 @@ import {
 } from "./organization-analytics";
 
 describe("organization analytics aggregate metrics", () => {
+  it.each([
+    { eligibleCount: 0, submittedCount: 0 },
+    { eligibleCount: 2, submittedCount: 0 },
+    { eligibleCount: 4, submittedCount: 2 },
+    { eligibleCount: 5, submittedCount: 5 },
+    { eligibleCount: 10, submittedCount: 4 },
+  ])(
+    "uses the captured recipient denominator for $eligibleCount eligible and $submittedCount submitted employees",
+    ({ eligibleCount, submittedCount }) => {
+      const eligibleEmployeePublicIds = Array.from(
+        { length: eligibleCount },
+        (_unused, index) => `employee_public_${index + 1}`,
+      );
+      const officialSubmissions = eligibleEmployeePublicIds
+        .slice(0, submittedCount)
+        .map((employeePublicId) => ({
+          employeePublicId,
+          score: 80,
+          totalScore: 100,
+          submittedAt: "2026-06-10T09:30:00Z",
+        }));
+
+      expect(
+        createOrganizationTrainingAggregateMetrics({
+          eligibleEmployeePublicIds,
+          officialSubmissions,
+          dateRange: {
+            startAt: "2026-06-10T00:00:00Z",
+            endAt: "2026-06-12T23:59:59Z",
+          },
+        }),
+      ).toMatchObject({
+        eligibleEmployeeCount: eligibleCount,
+        submittedEmployeeCount: submittedCount,
+        unfinishedEmployeeCount: eligibleCount - submittedCount,
+        completionRate:
+          eligibleCount === 0 ? 0 : submittedCount / eligibleCount,
+      });
+    },
+  );
+
   it("calculates completion, score, and submitted trend from official submissions", () => {
     const metrics = createOrganizationTrainingAggregateMetrics({
       eligibleEmployeePublicIds: [

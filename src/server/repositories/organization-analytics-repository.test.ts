@@ -1,15 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  createOrganizationAnalyticsTrainingAnswerSourceReader,
+  createOrganizationAnalyticsTrainingEligibilitySource,
   createOrganizationAnalyticsPostgresGateway,
   createOrganizationAnalyticsVisibleOrganizationScopeReader,
-  createOrganizationAnalyticsTrainingAnswerSourceGateway,
   createOrganizationAnalyticsRepository,
   createPostgresOrganizationAnalyticsRepository,
-  type OrganizationAnalyticsScopeReadInput,
   type OrganizationAnalyticsRepositoryGateway,
 } from "./organization-analytics-repository";
+import { createOrganizationTrainingRecipientSnapshot } from "./organization-training-repository";
 import type { RuntimeDatabase } from "./runtime-database";
 
 function createGateway(
@@ -119,6 +118,7 @@ function createGateway(
     },
   ]);
   const readEmployeeTrainingSummaryPage = vi.fn(async () => ({
+    availability: "available" as const,
     employeeTrainingSummaryInputs: await readEmployeeTrainingSummaryInputs(),
     total: 1,
   }));
@@ -195,6 +195,307 @@ function createFakeRuntimeDatabase(selectRowsByCall: readonly unknown[][]) {
 }
 
 describe("organization analytics repository", () => {
+  it("derives eligible employees from the immutable recipient snapshot before left joining submissions", () => {
+    const capturedAt = "2026-06-01T00:00:00.000Z";
+    const recipients = [
+      {
+        versionId: 101,
+        employeePublicId: "employee_public_001",
+        employeeDisplayName: "Employee One",
+        organizationPublicId: "organization_child_public",
+        organizationName: "Child Organization",
+        authorizationPublicId: "org_auth_recipient_001",
+      },
+      {
+        versionId: 101,
+        employeePublicId: "employee_public_002",
+        employeeDisplayName: "Employee Two",
+        organizationPublicId: "organization_child_public",
+        organizationName: "Child Organization",
+        authorizationPublicId: "org_auth_recipient_002",
+      },
+    ];
+    const snapshot = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients,
+    })!;
+    const result = createOrganizationAnalyticsTrainingEligibilitySource({
+      scopeInput: createScopeInput(),
+      versionRows: [
+        {
+          id: 101,
+          publicId: "training_version_public_001",
+          organizationPublicId: "organization_root_public",
+          publishScopeSnapshot: {
+            organizationPublicIds: [
+              "organization_root_public",
+              "organization_child_public",
+            ],
+            capturedAt,
+          },
+          publishedAt: capturedAt,
+          answerDeadlineAt: null,
+          takenDownAt: null,
+          recipientSnapshotSchemaVersion: snapshot.schemaVersion,
+          recipientSnapshotCapturedAt: snapshot.capturedAt,
+          recipientSnapshotCount: snapshot.count,
+          recipientSnapshotDigest: snapshot.digest,
+        },
+      ],
+      recipientRows: recipients,
+      submissionRows: [
+        {
+          versionId: 101,
+          versionPublicId: "training_version_public_001",
+          employeePublicId: "employee_public_001",
+          organizationPublicId: "organization_child_public",
+          authorizationPublicId: "org_auth_recipient_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+          answerOrganizationSnapshot: {
+            organizationPublicId: "organization_child_public",
+            organizationName: "Child Organization",
+            capturedAt: "2026-06-16T01:59:00.000Z",
+          },
+        },
+      ],
+    });
+
+    expect(result.availability).toBe("available");
+    expect(result.eligibleEmployeePublicIds).toEqual([
+      "employee_public_001",
+      "employee_public_002",
+    ]);
+    expect(result.officialSubmissions).toHaveLength(1);
+    expect(result.employeeTrainingSummaryInputs).toEqual([
+      expect.objectContaining({
+        employeePublicId: "employee_public_001",
+        visibleTrainingVersionPublicIds: ["training_version_public_001"],
+        officialSubmissions: [expect.any(Object)],
+      }),
+      expect.objectContaining({
+        employeePublicId: "employee_public_002",
+        visibleTrainingVersionPublicIds: ["training_version_public_001"],
+        officialSubmissions: [],
+      }),
+    ]);
+  });
+
+  it("distinguishes valid zero-recipient snapshots from legacy and corrupt lineage", () => {
+    const capturedAt = "2026-06-01T00:00:00.000Z";
+    const zero = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients: [],
+    })!;
+    const baseVersion = {
+      id: 101,
+      publicId: "training_version_public_001",
+      organizationPublicId: "organization_root_public",
+      publishScopeSnapshot: {
+        organizationPublicIds: ["organization_root_public"],
+        capturedAt,
+      },
+      publishedAt: capturedAt,
+      answerDeadlineAt: null,
+      takenDownAt: null,
+    };
+    const available = createOrganizationAnalyticsTrainingEligibilitySource({
+      scopeInput: createScopeInput(),
+      versionRows: [
+        {
+          ...baseVersion,
+          recipientSnapshotSchemaVersion: 1,
+          recipientSnapshotCapturedAt: capturedAt,
+          recipientSnapshotCount: 0,
+          recipientSnapshotDigest: zero.digest,
+        },
+      ],
+      recipientRows: [],
+      submissionRows: [],
+    });
+    const legacy = createOrganizationAnalyticsTrainingEligibilitySource({
+      scopeInput: createScopeInput(),
+      versionRows: [
+        {
+          ...baseVersion,
+          recipientSnapshotSchemaVersion: null,
+          recipientSnapshotCapturedAt: null,
+          recipientSnapshotCount: null,
+          recipientSnapshotDigest: null,
+        },
+      ],
+      recipientRows: [],
+      submissionRows: [],
+    });
+
+    expect(available).toEqual({
+      availability: "available",
+      eligibleEmployeePublicIds: [],
+      officialSubmissions: [],
+      employeeTrainingSummaryInputs: [],
+      relevantVersionPublicIds: ["training_version_public_001"],
+    });
+    expect(legacy.availability).toBe("unavailable");
+  });
+
+  it("returns a successful empty source when no relevant version exists", () => {
+    expect(
+      createOrganizationAnalyticsTrainingEligibilitySource({
+        scopeInput: createScopeInput(),
+        versionRows: [],
+        recipientRows: [],
+        submissionRows: [],
+      }),
+    ).toEqual({
+      availability: "available",
+      eligibleEmployeePublicIds: [],
+      officialSubmissions: [],
+      employeeTrainingSummaryInputs: [],
+      relevantVersionPublicIds: [],
+    });
+  });
+
+  it("applies the earliest deadline or takedown inclusively and rejects cross-authorization answer lineage", () => {
+    const capturedAt = "2026-06-16T00:00:00.000Z";
+    const recipients = [
+      "at_publish",
+      "at_takedown",
+      "before_publish",
+      "after_takedown",
+    ].map((suffix) => ({
+      versionId: 101,
+      employeePublicId: `employee_public_${suffix}`,
+      employeeDisplayName: `Employee ${suffix}`,
+      organizationPublicId: "organization_child_public",
+      organizationName: "Child Organization",
+      authorizationPublicId: `org_auth_${suffix}`,
+    }));
+    const snapshot = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients,
+    })!;
+    const versionRows = [
+      {
+        id: 101,
+        publicId: "training_version_public_001",
+        organizationPublicId: "organization_root_public",
+        publishScopeSnapshot: {
+          organizationPublicIds: [
+            "organization_root_public",
+            "organization_child_public",
+          ],
+          capturedAt,
+        },
+        publishedAt: capturedAt,
+        answerDeadlineAt: "2026-06-16T18:00:00.000Z",
+        takenDownAt: "2026-06-16T12:00:00.000Z",
+        recipientSnapshotSchemaVersion: snapshot.schemaVersion,
+        recipientSnapshotCapturedAt: snapshot.capturedAt,
+        recipientSnapshotCount: snapshot.count,
+        recipientSnapshotDigest: snapshot.digest,
+      },
+    ];
+    const createSubmission = (
+      suffix: string,
+      submittedAt: string,
+      authorizationPublicId = `org_auth_${suffix}`,
+    ) => ({
+      versionId: 101,
+      versionPublicId: "training_version_public_001",
+      employeePublicId: `employee_public_${suffix}`,
+      organizationPublicId: "organization_child_public",
+      authorizationPublicId,
+      score: 80,
+      totalScore: 100,
+      submittedAt,
+      answerOrganizationSnapshot: {
+        organizationPublicId: "organization_child_public",
+        organizationName: "Child Organization",
+        capturedAt: submittedAt,
+      },
+    });
+    const result = createOrganizationAnalyticsTrainingEligibilitySource({
+      scopeInput: createScopeInput(),
+      versionRows,
+      recipientRows: recipients,
+      submissionRows: [
+        createSubmission("at_publish", capturedAt),
+        createSubmission("at_takedown", "2026-06-16T12:00:00.000Z"),
+        createSubmission("before_publish", "2026-06-15T23:59:59.999Z"),
+        createSubmission("after_takedown", "2026-06-16T12:00:00.001Z"),
+      ],
+    });
+
+    expect(result.availability).toBe("available");
+    expect(
+      result.officialSubmissions.map(
+        (submission) => submission.employeePublicId,
+      ),
+    ).toEqual(["employee_public_at_publish", "employee_public_at_takedown"]);
+    expect(
+      createOrganizationAnalyticsTrainingEligibilitySource({
+        scopeInput: createScopeInput(),
+        versionRows,
+        recipientRows: recipients,
+        submissionRows: [
+          createSubmission(
+            "at_publish",
+            capturedAt,
+            "org_auth_different_lineage",
+          ),
+        ],
+      }).availability,
+    ).toBe("unavailable");
+  });
+
+  it("fails closed for partial markers and recipient count or digest drift", () => {
+    const capturedAt = "2026-06-01T00:00:00.000Z";
+    const recipient = {
+      versionId: 101,
+      employeePublicId: "employee_public_001",
+      employeeDisplayName: "Employee One",
+      organizationPublicId: "organization_root_public",
+      organizationName: "Root Organization",
+      authorizationPublicId: "org_auth_public_001",
+    };
+    const snapshot = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients: [recipient],
+    })!;
+    const baseVersion = {
+      id: 101,
+      publicId: "training_version_public_001",
+      organizationPublicId: "organization_root_public",
+      publishScopeSnapshot: {
+        organizationPublicIds: ["organization_root_public"],
+        capturedAt,
+      },
+      publishedAt: capturedAt,
+      answerDeadlineAt: null,
+      takenDownAt: null,
+      recipientSnapshotSchemaVersion: snapshot.schemaVersion,
+      recipientSnapshotCapturedAt: snapshot.capturedAt,
+      recipientSnapshotCount: snapshot.count,
+      recipientSnapshotDigest: snapshot.digest,
+    };
+
+    for (const version of [
+      { ...baseVersion, recipientSnapshotDigest: null },
+      { ...baseVersion, recipientSnapshotCount: 2 },
+      { ...baseVersion, recipientSnapshotDigest: "0".repeat(64) },
+    ]) {
+      expect(
+        createOrganizationAnalyticsTrainingEligibilitySource({
+          scopeInput: createScopeInput(),
+          versionRows: [version],
+          recipientRows: [recipient],
+          submissionRows: [],
+        }).availability,
+      ).toBe("unavailable");
+    }
+  });
+
   it("looks up visible organization scope only for a nonblank admin public id", async () => {
     const { gateway, findVisibleOrganizationScopeByAdminPublicId } =
       createGateway();
@@ -447,19 +748,23 @@ describe("organization analytics repository", () => {
       "organization_child_public",
       " ",
     ]);
-    const readTrainingAnswerSourceRows = vi.fn(async () => [
-      {
-        employeePublicId: "employee_public_001",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_001",
-        score: 86,
-        totalScore: 100,
-        submittedAt: "2026-06-16T02:00:00.000Z",
-      },
-    ]);
+    const readTrainingEligibilitySource = vi.fn(async () => ({
+      availability: "available" as const,
+      eligibleEmployeePublicIds: ["employee_public_001"],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+        },
+      ],
+      employeeTrainingSummaryInputs: [],
+      relevantVersionPublicIds: ["training_version_public_001"],
+    }));
     const gateway = createOrganizationAnalyticsPostgresGateway({
       findVisibleOrganizationScopeByAdminPublicId,
-      readTrainingAnswerSourceRows,
+      readTrainingEligibilitySource,
     });
     const repository = createPostgresOrganizationAnalyticsRepository({
       gateway,
@@ -486,7 +791,7 @@ describe("organization analytics repository", () => {
       "organization_root_public",
       "organization_child_public",
     ]);
-    expect(readTrainingAnswerSourceRows).toHaveBeenCalledWith({
+    expect(readTrainingEligibilitySource).toHaveBeenCalledWith({
       organizationPublicId: "organization_root_public",
       scopeOrganizationPublicIds: [
         "organization_root_public",
@@ -508,276 +813,6 @@ describe("organization analytics repository", () => {
         },
       ],
     });
-  });
-
-  it("maps organization training answer source rows into aggregate metrics input", async () => {
-    const readTrainingAnswerSourceRows = vi.fn(async () => [
-      {
-        employeePublicId: " employee_public_001 ",
-        employeeDisplayName: " Employee One ",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_001",
-        score: "86.0",
-        totalScore: "100.0",
-        submittedAt: new Date("2026-06-16T02:00:00.000Z"),
-        answerPublicId: "answer_public_hidden_001",
-        detailFieldA: "hidden detail",
-        sourceRowId: 901,
-      },
-      {
-        employeePublicId: "employee_public_002",
-        organizationPublicId: "organization_root_public",
-        organizationTrainingVersionPublicId: "training_version_public_002",
-        score: 73,
-        totalScore: 100,
-        submittedAt: "2026-06-16T03:00:00.000Z",
-        hiddenFieldA: "hidden marker",
-      },
-      {
-        employeePublicId: "employee_public_outside_scope",
-        organizationPublicId: "organization_other_public",
-        organizationTrainingVersionPublicId: "training_version_public_003",
-        score: 99,
-        totalScore: 100,
-        submittedAt: "2026-06-16T04:00:00.000Z",
-      },
-      {
-        employeePublicId: "employee_public_outside_range",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_004",
-        score: 92,
-        totalScore: 100,
-        submittedAt: "2026-06-17T04:00:00.000Z",
-      },
-      {
-        employeePublicId: " ",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_005",
-        score: 88,
-        totalScore: 100,
-        submittedAt: "2026-06-16T05:00:00.000Z",
-      },
-      {
-        employeePublicId: "employee_public_invalid_score",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_006",
-        score: null,
-        totalScore: 100,
-        submittedAt: "2026-06-16T06:00:00.000Z",
-      },
-    ]);
-    const gateway = createOrganizationAnalyticsTrainingAnswerSourceGateway({
-      readTrainingAnswerSourceRows,
-    });
-
-    const result =
-      await gateway.readTrainingAggregateMetricsInput(createScopeInput());
-
-    expect(readTrainingAnswerSourceRows).toHaveBeenCalledWith({
-      organizationPublicId: "organization_root_public",
-      scopeOrganizationPublicIds: [
-        "organization_root_public",
-        "organization_child_public",
-      ],
-      dateRange: {
-        startAt: "2026-06-16T00:00:00.000Z",
-        endAt: "2026-06-16T23:59:59.000Z",
-      },
-    });
-    expect(result).toEqual({
-      eligibleEmployeePublicIds: ["employee_public_001", "employee_public_002"],
-      officialSubmissions: [
-        {
-          employeePublicId: "employee_public_001",
-          score: 86,
-          totalScore: 100,
-          submittedAt: "2026-06-16T02:00:00.000Z",
-        },
-        {
-          employeePublicId: "employee_public_002",
-          score: 73,
-          totalScore: 100,
-          submittedAt: "2026-06-16T03:00:00.000Z",
-        },
-      ],
-    });
-    expect(JSON.stringify(result)).not.toMatch(
-      /answer_public_hidden|training_version_public|hidden|detailField|sourceRowId/u,
-    );
-    await expect(
-      gateway.readEmployeeTrainingSummaryInputs(createScopeInput()),
-    ).resolves.toEqual([]);
-  });
-
-  it("maps organization training answer source rows into employee summary inputs", async () => {
-    const readTrainingAnswerSourceRows = vi.fn(async () => [
-      {
-        employeePublicId: " employee_public_001 ",
-        employeeDisplayName: " Employee One ",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_001",
-        score: "86.0",
-        totalScore: "100.0",
-        submittedAt: new Date("2026-06-16T02:00:00.000Z"),
-        answerOrganizationSnapshot: {
-          organizationPublicId: "organization_child_public",
-          organizationName: "Child Organization",
-          capturedAt: "2026-06-16T01:59:00.000Z",
-          hiddenSnapshotField: "hidden snapshot detail",
-        },
-        hiddenAnswerPublicId: "answer_public_hidden_001",
-      },
-      {
-        employeePublicId: "employee_public_001",
-        employeeDisplayName: "Employee One",
-        organizationPublicId: "organization_root_public",
-        organizationTrainingVersionPublicId: "training_version_public_002",
-        score: 91,
-        totalScore: 100,
-        submittedAt: "2026-06-16T05:00:00.000Z",
-        answerOrganizationSnapshot: {
-          organizationPublicId: "organization_root_public",
-          organizationName: "Root Organization",
-          capturedAt: "2026-06-16T04:59:00.000Z",
-        },
-      },
-      {
-        employeePublicId: "employee_public_002",
-        employeeDisplayName: "Employee Two",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_003",
-        score: "77.5",
-        totalScore: "100.0",
-        submittedAt: "2026-06-16T06:00:00.000Z",
-        answerOrganizationSnapshot: {
-          organizationPublicId: "organization_child_public",
-          organizationName: "Child Organization",
-          capturedAt: "2026-06-16T05:59:00.000Z",
-        },
-      },
-      {
-        employeePublicId: "employee_public_outside_scope",
-        employeeDisplayName: "Employee Outside Scope",
-        organizationPublicId: "organization_other_public",
-        organizationTrainingVersionPublicId: "training_version_public_004",
-        score: 99,
-        totalScore: 100,
-        submittedAt: "2026-06-16T07:00:00.000Z",
-        answerOrganizationSnapshot: {
-          organizationPublicId: "organization_other_public",
-          organizationName: "Other Organization",
-          capturedAt: "2026-06-16T06:59:00.000Z",
-        },
-      },
-      {
-        employeePublicId: "employee_public_invalid_score",
-        employeeDisplayName: "Employee Invalid Score",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_005",
-        score: null,
-        totalScore: 100,
-        submittedAt: "2026-06-16T08:00:00.000Z",
-        answerOrganizationSnapshot: {
-          organizationPublicId: "organization_child_public",
-          organizationName: "Child Organization",
-          capturedAt: "2026-06-16T07:59:00.000Z",
-        },
-      },
-      {
-        employeePublicId: "employee_public_invalid_snapshot",
-        employeeDisplayName: "Employee Invalid Snapshot",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_006",
-        score: 81,
-        totalScore: 100,
-        submittedAt: "2026-06-16T09:00:00.000Z",
-        answerOrganizationSnapshot: {
-          organizationPublicId: " ",
-          organizationName: "Child Organization",
-          capturedAt: "2026-06-16T08:59:00.000Z",
-        },
-      },
-    ]);
-    const gateway = createOrganizationAnalyticsTrainingAnswerSourceGateway({
-      readTrainingAnswerSourceRows,
-    });
-
-    const result =
-      await gateway.readEmployeeTrainingSummaryInputs(createScopeInput());
-
-    expect(readTrainingAnswerSourceRows).toHaveBeenCalledWith({
-      organizationPublicId: "organization_root_public",
-      scopeOrganizationPublicIds: [
-        "organization_root_public",
-        "organization_child_public",
-      ],
-      dateRange: {
-        startAt: "2026-06-16T00:00:00.000Z",
-        endAt: "2026-06-16T23:59:59.000Z",
-      },
-    });
-    expect(result).toEqual([
-      {
-        employeePublicId: "employee_public_001",
-        employeeDisplayName: "Employee One",
-        organizationPublicId: "organization_root_public",
-        organizationName: "Root Organization",
-        visibleTrainingVersionPublicIds: [
-          "training_version_public_001",
-          "training_version_public_002",
-        ],
-        officialSubmissions: [
-          {
-            employeePublicId: "employee_public_001",
-            trainingVersionPublicId: "training_version_public_001",
-            score: 86,
-            totalScore: 100,
-            submittedAt: "2026-06-16T02:00:00.000Z",
-            answerOrganizationSnapshot: {
-              organizationPublicId: "organization_child_public",
-              organizationName: "Child Organization",
-              capturedAt: "2026-06-16T01:59:00.000Z",
-            },
-          },
-          {
-            employeePublicId: "employee_public_001",
-            trainingVersionPublicId: "training_version_public_002",
-            score: 91,
-            totalScore: 100,
-            submittedAt: "2026-06-16T05:00:00.000Z",
-            answerOrganizationSnapshot: {
-              organizationPublicId: "organization_root_public",
-              organizationName: "Root Organization",
-              capturedAt: "2026-06-16T04:59:00.000Z",
-            },
-          },
-        ],
-      },
-      {
-        employeePublicId: "employee_public_002",
-        employeeDisplayName: "Employee Two",
-        organizationPublicId: "organization_child_public",
-        organizationName: "Child Organization",
-        visibleTrainingVersionPublicIds: ["training_version_public_003"],
-        officialSubmissions: [
-          {
-            employeePublicId: "employee_public_002",
-            trainingVersionPublicId: "training_version_public_003",
-            score: 77.5,
-            totalScore: 100,
-            submittedAt: "2026-06-16T06:00:00.000Z",
-            answerOrganizationSnapshot: {
-              organizationPublicId: "organization_child_public",
-              organizationName: "Child Organization",
-              capturedAt: "2026-06-16T05:59:00.000Z",
-            },
-          },
-        ],
-      },
-    ]);
-    expect(JSON.stringify(result)).not.toMatch(
-      /answer_public_hidden|hidden|detailField|sourceRowId/u,
-    );
   });
 
   it("creates a RuntimeDatabase visible organization scope reader from active admin organization assignments", async () => {
@@ -833,71 +868,5 @@ describe("organization analytics repository", () => {
     ]);
     expect(blankResult).toBeNull();
     expect(JSON.stringify(result)).not.toMatch(/hidden|organizationId/u);
-  });
-
-  it("creates a RuntimeDatabase training answer reader with aggregate-only source rows", async () => {
-    const { database, select, selectCalls } = createFakeRuntimeDatabase([
-      [
-        {
-          employeePublicId: " employee_public_001 ",
-          employeeDisplayName: " Employee One ",
-          organizationPublicId: "organization_child_public",
-          organizationTrainingVersionPublicId: "training_version_public_001",
-          score: "86.0",
-          totalScore: "100.0",
-          submittedAt: new Date("2026-06-16T02:00:00.000Z"),
-          answerOrganizationSnapshot: {
-            organizationPublicId: "organization_child_public",
-            organizationName: "Child Organization",
-            capturedAt: "2026-06-16T01:59:00.000Z",
-          },
-          answerPublicId: "answer_public_hidden_001",
-          detailField: "hidden answer detail",
-          sourceRowId: 901,
-        },
-      ],
-    ]);
-    const readTrainingAnswerSourceRows =
-      createOrganizationAnalyticsTrainingAnswerSourceReader(database);
-
-    const result = await readTrainingAnswerSourceRows(
-      createScopeInput() as OrganizationAnalyticsScopeReadInput,
-    );
-    const blankScopeResult = await readTrainingAnswerSourceRows({
-      ...(createScopeInput() as OrganizationAnalyticsScopeReadInput),
-      organizationPublicId: " ",
-    });
-
-    expect(select).toHaveBeenCalledTimes(1);
-    expect(selectCalls[0]?.selectionKeys).toEqual([
-      "employeePublicId",
-      "employeeDisplayName",
-      "organizationPublicId",
-      "organizationTrainingVersionPublicId",
-      "score",
-      "totalScore",
-      "submittedAt",
-      "answerOrganizationSnapshot",
-    ]);
-    expect(result).toEqual([
-      {
-        employeePublicId: "employee_public_001",
-        employeeDisplayName: "Employee One",
-        organizationPublicId: "organization_child_public",
-        organizationTrainingVersionPublicId: "training_version_public_001",
-        score: "86.0",
-        totalScore: "100.0",
-        submittedAt: "2026-06-16T02:00:00.000Z",
-        answerOrganizationSnapshot: {
-          organizationPublicId: "organization_child_public",
-          organizationName: "Child Organization",
-          capturedAt: "2026-06-16T01:59:00.000Z",
-        },
-      },
-    ]);
-    expect(blankScopeResult).toEqual([]);
-    expect(JSON.stringify(result)).not.toMatch(
-      /answer_public_hidden|hidden|detailField|sourceRowId/u,
-    );
   });
 });

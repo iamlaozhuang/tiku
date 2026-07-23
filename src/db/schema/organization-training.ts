@@ -398,6 +398,14 @@ export const organizationTrainingVersion = pgTable(
     publish_scope_snapshot: jsonb("publish_scope_snapshot")
       .$type<OrganizationTrainingPublishScopeSnapshotValue>()
       .notNull(),
+    recipient_snapshot_schema_version: integer(
+      "recipient_snapshot_schema_version",
+    ),
+    recipient_snapshot_captured_at: nullableTimestampColumn(
+      "recipient_snapshot_captured_at",
+    ),
+    recipient_snapshot_count: integer("recipient_snapshot_count"),
+    recipient_snapshot_digest: text("recipient_snapshot_digest"),
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
     subject: subjectEnum("subject").notNull(),
@@ -468,6 +476,53 @@ export const organizationTrainingVersion = pgTable(
       table.profession,
       table.level,
       table.subject,
+    ),
+    check(
+      "chk_organization_training_version_recipient_snapshot",
+      sql`(
+        ${table.recipient_snapshot_schema_version} is null
+        and ${table.recipient_snapshot_captured_at} is null
+        and ${table.recipient_snapshot_count} is null
+        and ${table.recipient_snapshot_digest} is null
+      ) or (
+        ${table.recipient_snapshot_schema_version} = 1
+        and ${table.recipient_snapshot_captured_at} is not null
+        and ${table.recipient_snapshot_count} is not null
+        and ${table.recipient_snapshot_count} >= 0
+        and ${table.recipient_snapshot_digest} ~ '^[0-9a-f]{64}$'
+      )`,
+    ),
+  ],
+);
+
+export const organizationTrainingVersionRecipient = pgTable(
+  "organization_training_version_recipient",
+  {
+    id: idColumn(),
+    organization_training_version_id: bigint(
+      "organization_training_version_id",
+      { mode: "number" },
+    ).notNull(),
+    employee_public_id: text("employee_public_id").notNull(),
+    organization_public_id: text("organization_public_id").notNull(),
+    authorization_public_id: text("authorization_public_id").notNull(),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.organization_training_version_id],
+      foreignColumns: [organizationTrainingVersion.id],
+      name: "fk_organization_training_version_recipient_version",
+    }).onDelete("restrict"),
+    uniqueIndex(
+      "udx_organization_training_version_recipient_version_employee",
+    ).on(table.organization_training_version_id, table.employee_public_id),
+    index("idx_organization_training_version_recipient_version_id").on(
+      table.organization_training_version_id,
+    ),
+    index("idx_organization_training_version_recipient_org_employee").on(
+      table.organization_public_id,
+      table.employee_public_id,
     ),
   ],
 );

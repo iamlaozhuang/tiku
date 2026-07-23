@@ -20,6 +20,7 @@ import {
   organizationTrainingScoringTask,
   organizationTrainingSourceContext,
   organizationTrainingVersion,
+  organizationTrainingVersionRecipient,
   paper,
   paperQuestion,
   user,
@@ -36,7 +37,10 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
-import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
+import {
+  createOrgAuthCoversOrganizationCondition,
+  lockOrganizationScopeMutation,
+} from "./organization-scope-query";
 import { lockEmployeeIdentity } from "./employee-org-auth-quota-repository";
 
 import type {
@@ -102,6 +106,180 @@ export type {
 
 export type OrganizationTrainingPublishedVersionPersistenceInput =
   OrganizationTrainingPublishedVersionPersistenceWrite;
+
+type OrganizationTrainingVersionPersistenceRow =
+  OrganizationTrainingVersionRow & {
+    id: number;
+    recipient_snapshot_schema_version: number | null;
+    recipient_snapshot_captured_at: Date | null;
+    recipient_snapshot_count: number | null;
+    recipient_snapshot_digest: string | null;
+  };
+
+export const ORGANIZATION_TRAINING_RECIPIENT_SNAPSHOT_SCHEMA_VERSION = 1;
+const ORGANIZATION_TRAINING_RECIPIENT_PUBLIC_ID_MAX_LENGTH = 200;
+const UNSAFE_RECIPIENT_PUBLIC_ID_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
+
+export type OrganizationTrainingRecipientSnapshotEntry = {
+  employeePublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+};
+
+export type OrganizationTrainingRecipientSnapshot = {
+  schemaVersion: typeof ORGANIZATION_TRAINING_RECIPIENT_SNAPSHOT_SCHEMA_VERSION;
+  capturedAt: string;
+  count: number;
+  digest: string;
+  recipients: OrganizationTrainingRecipientSnapshotEntry[];
+};
+
+export function createOrganizationTrainingRecipientSnapshot(input: {
+  capturedAt: string;
+  recipients: readonly OrganizationTrainingRecipientSnapshotEntry[];
+}): OrganizationTrainingRecipientSnapshot | null {
+  if (
+    typeof input.capturedAt !== "string" ||
+    normalizeCanonicalIsoTimestamp(input.capturedAt) === null ||
+    !Array.isArray(input.recipients)
+  ) {
+    return null;
+  }
+
+  const recipients: OrganizationTrainingRecipientSnapshotEntry[] = [];
+  const employeePublicIds = new Set<string>();
+  const canonicalPublicIds = new Map<string, string>();
+
+  for (const candidate of input.recipients) {
+    const employeePublicId = normalizeRecipientPublicId(
+      candidate?.employeePublicId,
+    );
+    const organizationPublicId = normalizeRecipientPublicId(
+      candidate?.organizationPublicId,
+    );
+    const authorizationPublicId = normalizeRecipientPublicId(
+      candidate?.authorizationPublicId,
+    );
+
+    if (
+      employeePublicId === null ||
+      organizationPublicId === null ||
+      authorizationPublicId === null ||
+      employeePublicIds.has(employeePublicId) ||
+      !registerCanonicalPublicId(canonicalPublicIds, employeePublicId) ||
+      !registerCanonicalPublicId(canonicalPublicIds, organizationPublicId) ||
+      !registerCanonicalPublicId(canonicalPublicIds, authorizationPublicId)
+    ) {
+      return null;
+    }
+
+    employeePublicIds.add(employeePublicId);
+    recipients.push({
+      employeePublicId,
+      organizationPublicId,
+      authorizationPublicId,
+    });
+  }
+
+  recipients.sort((left, right) =>
+    compareOrdinal(left.employeePublicId, right.employeePublicId),
+  );
+  const canonicalBytes = JSON.stringify([
+    ORGANIZATION_TRAINING_RECIPIENT_SNAPSHOT_SCHEMA_VERSION,
+    recipients.map((recipient) => [
+      recipient.employeePublicId,
+      recipient.organizationPublicId,
+      recipient.authorizationPublicId,
+    ]),
+  ]);
+
+  return {
+    schemaVersion: ORGANIZATION_TRAINING_RECIPIENT_SNAPSHOT_SCHEMA_VERSION,
+    capturedAt: input.capturedAt,
+    count: recipients.length,
+    digest: createHash("sha256").update(canonicalBytes).digest("hex"),
+    recipients: recipients.map((recipient) => ({ ...recipient })),
+  };
+}
+
+export function validateOrganizationTrainingRecipientSnapshot(input: {
+  schemaVersion: number | null;
+  capturedAt: Date | string | null;
+  count: number | null;
+  digest: string | null;
+  recipients: readonly OrganizationTrainingRecipientSnapshotEntry[];
+}): OrganizationTrainingRecipientSnapshot | null {
+  const capturedAt = normalizeCanonicalIsoTimestamp(input.capturedAt);
+
+  if (
+    input.schemaVersion !==
+      ORGANIZATION_TRAINING_RECIPIENT_SNAPSHOT_SCHEMA_VERSION ||
+    capturedAt === null ||
+    !Number.isSafeInteger(input.count) ||
+    input.count === null ||
+    input.count < 0 ||
+    typeof input.digest !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(input.digest)
+  ) {
+    return null;
+  }
+
+  const snapshot = createOrganizationTrainingRecipientSnapshot({
+    capturedAt,
+    recipients: input.recipients,
+  });
+
+  return snapshot !== null &&
+    snapshot.count === input.count &&
+    snapshot.digest === input.digest
+    ? snapshot
+    : null;
+}
+
+function normalizeRecipientPublicId(value: unknown): string | null {
+  return typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= ORGANIZATION_TRAINING_RECIPIENT_PUBLIC_ID_MAX_LENGTH &&
+    value === value.trim() &&
+    !UNSAFE_RECIPIENT_PUBLIC_ID_PATTERN.test(value)
+    ? value
+    : null;
+}
+
+function registerCanonicalPublicId(
+  registry: Map<string, string>,
+  publicId: string,
+): boolean {
+  const folded = publicId.toLowerCase();
+  const existing = registry.get(folded);
+
+  if (existing !== undefined && existing !== publicId) {
+    return false;
+  }
+
+  registry.set(folded, publicId);
+  return true;
+}
+
+function normalizeCanonicalIsoTimestamp(value: unknown): string | null {
+  if (typeof value !== "string" && !(value instanceof Date)) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (!Number.isFinite(date.getTime())) {
+    return null;
+  }
+
+  const isoTimestamp = date.toISOString();
+
+  return value instanceof Date || value === isoTimestamp ? isoTimestamp : null;
+}
+
+function compareOrdinal(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
 
 export type OrganizationTrainingManualDraftPersistenceInput =
   OrganizationTrainingManualDraftWrite;
@@ -565,6 +743,14 @@ const organizationTrainingVersionSelection = {
   quota_owner_type: organizationTrainingVersion.quota_owner_type,
   quota_owner_public_id: organizationTrainingVersion.quota_owner_public_id,
   publish_scope_snapshot: organizationTrainingVersion.publish_scope_snapshot,
+  recipient_snapshot_schema_version:
+    organizationTrainingVersion.recipient_snapshot_schema_version,
+  recipient_snapshot_captured_at:
+    organizationTrainingVersion.recipient_snapshot_captured_at,
+  recipient_snapshot_count:
+    organizationTrainingVersion.recipient_snapshot_count,
+  recipient_snapshot_digest:
+    organizationTrainingVersion.recipient_snapshot_digest,
   profession: organizationTrainingVersion.profession,
   level: organizationTrainingVersion.level,
   subject: organizationTrainingVersion.subject,
@@ -1892,6 +2078,8 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async publishCanonicalDraftTransaction(input) {
       return getDatabase().transaction(async (transaction) => {
+        await lockOrganizationScopeMutation(transaction);
+
         // SQL invariant: canonical publish owns one draft row for update.
         const [draft] = await transaction
           .select(organizationTrainingDraftSelection)
@@ -1938,10 +2126,23 @@ export function createPostgresOrganizationTrainingRepository(
             )
             .limit(1);
 
-          return (
-            (existingVersion as OrganizationTrainingVersionRow | undefined) ??
-            null
-          );
+          if (existingVersion === undefined) {
+            return null;
+          }
+
+          const replaySnapshot =
+            await readAndValidateOrganizationTrainingRecipientSnapshot(
+              transaction,
+              existingVersion as OrganizationTrainingVersionPersistenceRow,
+            );
+
+          if (replaySnapshot === null) {
+            throw new OrganizationTrainingPersistenceConflictError(
+              "publish_conflict",
+            );
+          }
+
+          return existingVersion as OrganizationTrainingVersionRow;
         }
 
         if (
@@ -1954,6 +2155,98 @@ export function createPostgresOrganizationTrainingRepository(
         }
 
         const publishedAt = new Date(input.publishedAt);
+        const publishScopeOrganizationPublicIds =
+          normalizeOrganizationTrainingRecipientPublishScope({
+            organizationPublicId: draft.organization_public_id,
+            publishedAt: input.publishedAt,
+            publishScopeSnapshot: input.publishScopeSnapshot,
+          });
+
+        if (publishScopeOrganizationPublicIds === null) {
+          return null;
+        }
+
+        const publisherAuthorizationRows = await transaction
+          .select({ id: orgAuth.id })
+          .from(orgAuth)
+          .where(
+            and(
+              eq(orgAuth.id, draft.org_auth_id),
+              eq(orgAuth.public_id, draft.authorization_public_id),
+              eq(orgAuth.status, "active"),
+              lte(orgAuth.starts_at, publishedAt),
+              gt(orgAuth.expires_at, publishedAt),
+              eq(orgAuth.profession, draft.profession),
+              eq(orgAuth.level, draft.level),
+              or(
+                eq(orgAuth.edition, "advanced"),
+                createActiveAdvancedOrgAuthUpgradeExistsSql(publishedAt),
+              ),
+              createOrgAuthCoversOrganizationCondition({
+                authScopeType: orgAuth.auth_scope_type,
+                orgAuthId: orgAuth.id,
+                organizationId: draft.organization_id,
+                purchaserOrganizationId: orgAuth.purchaser_organization_id,
+              }),
+            ),
+          );
+
+        if (publisherAuthorizationRows.length !== 1) {
+          return null;
+        }
+
+        const recipientCandidateRows = await transaction
+          .select({
+            employeePublicId: employee.public_id,
+            organizationPublicId: organization.public_id,
+            authorizationPublicId: orgAuth.public_id,
+          })
+          .from(employeeOrgAuth)
+          .innerJoin(employee, eq(employee.id, employeeOrgAuth.employee_id))
+          .innerJoin(user, eq(user.id, employee.user_id))
+          .innerJoin(
+            organization,
+            eq(organization.id, employee.organization_id),
+          )
+          .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
+          .where(
+            and(
+              inArray(
+                organization.public_id,
+                publishScopeOrganizationPublicIds,
+              ),
+              eq(organization.status, "active"),
+              eq(user.user_type, "employee"),
+              eq(user.status, "active"),
+              eq(orgAuth.status, "active"),
+              lte(orgAuth.starts_at, publishedAt),
+              gt(orgAuth.expires_at, publishedAt),
+              eq(orgAuth.profession, draft.profession),
+              eq(orgAuth.level, draft.level),
+              or(
+                eq(orgAuth.edition, "advanced"),
+                createActiveAdvancedOrgAuthUpgradeExistsSql(publishedAt),
+              ),
+              createOrgAuthCoversOrganizationCondition({
+                authScopeType: orgAuth.auth_scope_type,
+                orgAuthId: orgAuth.id,
+                organizationId: employee.organization_id,
+                purchaserOrganizationId: orgAuth.purchaser_organization_id,
+              }),
+            ),
+          )
+          .orderBy(asc(employee.public_id), asc(orgAuth.public_id));
+        const recipientSnapshot =
+          createOrganizationTrainingRecipientSnapshotFromCandidates({
+            capturedAt: input.publishedAt,
+            publishScopeOrganizationPublicIds,
+            candidates: recipientCandidateRows,
+          });
+
+        if (recipientSnapshot === null) {
+          return null;
+        }
+
         const [version] = await transaction
           .insert(organizationTrainingVersion)
           .values({
@@ -1973,6 +2266,10 @@ export function createPostgresOrganizationTrainingRepository(
             quota_owner_type: draft.quota_owner_type,
             quota_owner_public_id: draft.quota_owner_public_id,
             publish_scope_snapshot: input.publishScopeSnapshot,
+            recipient_snapshot_schema_version: recipientSnapshot.schemaVersion,
+            recipient_snapshot_captured_at: publishedAt,
+            recipient_snapshot_count: recipientSnapshot.count,
+            recipient_snapshot_digest: recipientSnapshot.digest,
             profession: draft.profession,
             level: draft.level,
             subject: draft.subject,
@@ -1997,6 +2294,27 @@ export function createPostgresOrganizationTrainingRepository(
 
         if (version === undefined) {
           return null;
+        }
+
+        if (recipientSnapshot.recipients.length > 0) {
+          const insertedRecipients = await transaction
+            .insert(organizationTrainingVersionRecipient)
+            .values(
+              recipientSnapshot.recipients.map((recipient) => ({
+                organization_training_version_id: version.id,
+                employee_public_id: recipient.employeePublicId,
+                organization_public_id: recipient.organizationPublicId,
+                authorization_public_id: recipient.authorizationPublicId,
+                created_at: publishedAt,
+              })),
+            )
+            .returning({ id: organizationTrainingVersionRecipient.id });
+
+          if (insertedRecipients.length !== recipientSnapshot.count) {
+            throw new OrganizationTrainingPersistenceConflictError(
+              "publish_conflict",
+            );
+          }
         }
 
         const [consumedDraft] = await transaction
@@ -4269,6 +4587,119 @@ function createActiveAdvancedOrgAuthUpgradeExistsSql(now: Date): SQL {
   )`;
 }
 
+function createOrganizationTrainingRecipientOrLegacyAuthorizationCondition(): SQL<boolean> {
+  return sql<boolean>`(
+    (
+      ${organizationTrainingVersion.recipient_snapshot_schema_version} = ${ORGANIZATION_TRAINING_RECIPIENT_SNAPSHOT_SCHEMA_VERSION}
+      and ${organizationTrainingVersion.recipient_snapshot_captured_at} is not null
+      and ${organizationTrainingVersion.recipient_snapshot_count} is not null
+      and ${organizationTrainingVersion.recipient_snapshot_digest} is not null
+      and ${organizationTrainingVersionRecipient.employee_public_id} = ${employee.public_id}
+      and ${organizationTrainingVersionRecipient.organization_public_id} = ${organization.public_id}
+      and ${organizationTrainingVersionRecipient.authorization_public_id} = ${orgAuth.public_id}
+    )
+    or
+    (
+      ${organizationTrainingVersion.recipient_snapshot_schema_version} is null
+      and ${organizationTrainingVersion.recipient_snapshot_captured_at} is null
+      and ${organizationTrainingVersion.recipient_snapshot_count} is null
+      and ${organizationTrainingVersion.recipient_snapshot_digest} is null
+      and ${employee.organization_id} = ${organizationTrainingVersion.organization_id}
+      and ${employeeOrgAuth.org_auth_id} = ${organizationTrainingVersion.org_auth_id}
+    )
+  )`;
+}
+
+export function createOrganizationTrainingRecipientSnapshotFromCandidates(input: {
+  capturedAt: string;
+  publishScopeOrganizationPublicIds: readonly string[];
+  candidates: readonly OrganizationTrainingRecipientSnapshotEntry[];
+}): OrganizationTrainingRecipientSnapshot | null {
+  const scopePublicIds = new Set(input.publishScopeOrganizationPublicIds);
+
+  if (
+    scopePublicIds.size !== input.publishScopeOrganizationPublicIds.length ||
+    input.candidates.some(
+      (candidate) => !scopePublicIds.has(candidate.organizationPublicId),
+    )
+  ) {
+    return null;
+  }
+
+  return createOrganizationTrainingRecipientSnapshot({
+    capturedAt: input.capturedAt,
+    recipients: input.candidates,
+  });
+}
+
+function normalizeOrganizationTrainingRecipientPublishScope(input: {
+  organizationPublicId: string;
+  publishedAt: string;
+  publishScopeSnapshot: {
+    organizationPublicIds: readonly string[];
+    capturedAt: string;
+  };
+}): string[] | null {
+  if (
+    normalizeCanonicalIsoTimestamp(input.publishedAt) === null ||
+    input.publishScopeSnapshot.capturedAt !== input.publishedAt ||
+    !Array.isArray(input.publishScopeSnapshot.organizationPublicIds)
+  ) {
+    return null;
+  }
+
+  const publicIds: string[] = [];
+  const canonicalPublicIds = new Map<string, string>();
+
+  for (const candidate of input.publishScopeSnapshot.organizationPublicIds) {
+    const publicId = normalizeRecipientPublicId(candidate);
+
+    if (
+      publicId === null ||
+      publicIds.includes(publicId) ||
+      !registerCanonicalPublicId(canonicalPublicIds, publicId)
+    ) {
+      return null;
+    }
+
+    publicIds.push(publicId);
+  }
+
+  return publicIds.length > 0 && publicIds.includes(input.organizationPublicId)
+    ? publicIds
+    : null;
+}
+
+async function readAndValidateOrganizationTrainingRecipientSnapshot(
+  database: RuntimeDatabase,
+  version: OrganizationTrainingVersionPersistenceRow,
+): Promise<OrganizationTrainingRecipientSnapshot | null> {
+  const recipientRows = await database
+    .select({
+      employeePublicId: organizationTrainingVersionRecipient.employee_public_id,
+      organizationPublicId:
+        organizationTrainingVersionRecipient.organization_public_id,
+      authorizationPublicId:
+        organizationTrainingVersionRecipient.authorization_public_id,
+    })
+    .from(organizationTrainingVersionRecipient)
+    .where(
+      eq(
+        organizationTrainingVersionRecipient.organization_training_version_id,
+        version.id,
+      ),
+    )
+    .orderBy(asc(organizationTrainingVersionRecipient.employee_public_id));
+
+  return validateOrganizationTrainingRecipientSnapshot({
+    schemaVersion: version.recipient_snapshot_schema_version,
+    capturedAt: version.recipient_snapshot_captured_at,
+    count: version.recipient_snapshot_count,
+    digest: version.recipient_snapshot_digest,
+    recipients: recipientRows,
+  });
+}
+
 async function findDraftPersistenceLineageByPublicIds(
   database: RuntimeDatabase,
   input: OrganizationTrainingDraftPersistenceLineageLookupInput,
@@ -4397,23 +4828,31 @@ async function listPublishedVersionsForEmployeeOrganization(
       employee_answer_total_score: organizationTrainingAnswer.total_score,
     })
     .from(organizationTrainingVersion)
-    .innerJoin(
-      employee,
-      eq(employee.organization_id, organizationTrainingVersion.organization_id),
-    )
+    .innerJoin(employee, eq(employee.public_id, input.employeePublicId))
     .innerJoin(user, eq(user.id, employee.user_id))
     .innerJoin(
       employeeOrgAuth,
-      and(
-        eq(employeeOrgAuth.employee_id, employee.id),
-        eq(
-          employeeOrgAuth.org_auth_id,
-          organizationTrainingVersion.org_auth_id,
-        ),
-      ),
+      and(eq(employeeOrgAuth.employee_id, employee.id)),
     )
     .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
     .innerJoin(organization, eq(employee.organization_id, organization.id))
+    .leftJoin(
+      organizationTrainingVersionRecipient,
+      and(
+        eq(
+          organizationTrainingVersionRecipient.organization_training_version_id,
+          organizationTrainingVersion.id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.employee_public_id,
+          employee.public_id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.organization_public_id,
+          organization.public_id,
+        ),
+      ),
+    )
     .leftJoin(
       organizationTrainingAnswer,
       and(
@@ -4435,10 +4874,7 @@ async function listPublishedVersionsForEmployeeOrganization(
         lte(orgAuth.starts_at, now),
         gt(orgAuth.expires_at, now),
         or(eq(orgAuth.edition, "advanced"), activeUpgradeExists),
-        eq(
-          organizationTrainingVersion.authorization_public_id,
-          orgAuth.public_id,
-        ),
+        createOrganizationTrainingRecipientOrLegacyAuthorizationCondition(),
         eq(organizationTrainingVersion.profession, orgAuth.profession),
         eq(organizationTrainingVersion.level, orgAuth.level),
         eq(organizationTrainingVersion.version_status, "published"),
@@ -5006,16 +5442,27 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
     .innerJoin(user, eq(user.id, employee.user_id))
     .innerJoin(
       employeeOrgAuth,
-      and(
-        eq(employeeOrgAuth.employee_id, employee.id),
-        eq(
-          employeeOrgAuth.org_auth_id,
-          organizationTrainingVersion.org_auth_id,
-        ),
-      ),
+      and(eq(employeeOrgAuth.employee_id, employee.id)),
     )
     .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
     .innerJoin(organization, eq(employee.organization_id, organization.id))
+    .leftJoin(
+      organizationTrainingVersionRecipient,
+      and(
+        eq(
+          organizationTrainingVersionRecipient.organization_training_version_id,
+          organizationTrainingVersion.id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.employee_public_id,
+          employee.public_id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.organization_public_id,
+          organization.public_id,
+        ),
+      ),
+    )
     .where(
       and(
         eq(
@@ -5030,10 +5477,7 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
         lte(orgAuth.starts_at, now),
         gt(orgAuth.expires_at, now),
         or(eq(orgAuth.edition, "advanced"), activeUpgradeExists),
-        eq(
-          organizationTrainingVersion.authorization_public_id,
-          orgAuth.public_id,
-        ),
+        createOrganizationTrainingRecipientOrLegacyAuthorizationCondition(),
         eq(organizationTrainingVersion.profession, orgAuth.profession),
         eq(organizationTrainingVersion.level, orgAuth.level),
         eq(organizationTrainingVersion.version_status, "published"),
@@ -5076,11 +5520,27 @@ async function hasCurrentEmployeeMembership(
     )
     .innerJoin(
       organizationTrainingVersion,
+      eq(organizationTrainingVersion.id, input.organizationTrainingVersionId),
+    )
+    .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
+    .leftJoin(
+      organizationTrainingVersionRecipient,
       and(
-        eq(organizationTrainingVersion.id, input.organizationTrainingVersionId),
         eq(
-          organizationTrainingVersion.org_auth_id,
-          employeeOrgAuth.org_auth_id,
+          organizationTrainingVersionRecipient.organization_training_version_id,
+          organizationTrainingVersion.id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.employee_public_id,
+          employee.public_id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.organization_public_id,
+          organization.public_id,
+        ),
+        eq(
+          organizationTrainingVersionRecipient.authorization_public_id,
+          orgAuth.public_id,
         ),
       ),
     )
@@ -5093,6 +5553,7 @@ async function hasCurrentEmployeeMembership(
         eq(organization.status, "active"),
         eq(user.user_type, "employee"),
         eq(user.status, "active"),
+        createOrganizationTrainingRecipientOrLegacyAuthorizationCondition(),
       ),
     )
     .limit(1);

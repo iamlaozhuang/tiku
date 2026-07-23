@@ -25,6 +25,7 @@ import {
   type OrganizationAnalyticsDashboardSummaryRouteAdminContext,
   type OrganizationAnalyticsEmployeeStatisticsRouteAdminContext,
 } from "./organization-analytics-route";
+import { createOrganizationTrainingRecipientSnapshot } from "../repositories/organization-training-repository";
 
 function createDashboardSummaryRequest(
   query = "",
@@ -251,7 +252,11 @@ function createRepositoryBackedDashboardSummaryRepository(
       return [];
     },
     async readEmployeeTrainingSummaryPage() {
-      return { employeeTrainingSummaryInputs: [], total: 0 };
+      return {
+        availability: "available",
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      };
     },
     async readFormalLearningSummary(input) {
       observedReads.push({
@@ -341,6 +346,7 @@ function createRepositoryBackedEmployeeStatisticsRepository(
         await this.readEmployeeTrainingSummaryInputs(input);
 
       return {
+        availability: "available",
         employeeTrainingSummaryInputs,
         total: employeeTrainingSummaryInputs.length,
       };
@@ -427,6 +433,7 @@ function createFakeRuntimeDatabase(selectRowsByCall: readonly unknown[][]) {
       from: vi.fn(() => queryBuilder),
       groupBy: vi.fn(() => queryBuilder),
       innerJoin: vi.fn(() => queryBuilder),
+      leftJoin: vi.fn(() => queryBuilder),
       limit: vi.fn(() => queryBuilder),
       offset: vi.fn(() => queryBuilder),
       orderBy: vi.fn(() => queryBuilder),
@@ -767,6 +774,29 @@ describe("organization analytics dashboard summary route handlers", () => {
   });
 
   it("wires injected runtime database and session through Postgres source readers", async () => {
+    const capturedAt = "2026-06-01T00:00:00.000Z";
+    const recipientRows = [
+      {
+        versionId: 201,
+        employeePublicId: "organization_analytics_employee_public_001",
+        employeeDisplayName: "Employee 001",
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        organizationName: "Organization Analytics Route Org",
+        authorizationPublicId: "recipient_org_auth_public_001",
+      },
+      {
+        versionId: 201,
+        employeePublicId: "organization_analytics_employee_public_002",
+        employeeDisplayName: "Employee 002",
+        organizationPublicId: "organization_analytics_route_child_public_002",
+        organizationName: "Organization Analytics Route Child",
+        authorizationPublicId: "recipient_org_auth_public_002",
+      },
+    ];
+    const recipientSnapshot = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients: recipientRows,
+    })!;
     const { database, select, selectCalls } = createFakeRuntimeDatabase([
       [{ organizationId: 101 }],
       [
@@ -783,11 +813,33 @@ describe("organization analytics dashboard summary route handlers", () => {
       ],
       [
         {
-          employeePublicId: "organization_analytics_employee_public_001",
-          employeeDisplayName: "Employee 001",
+          id: 201,
+          publicId: "organization_analytics_training_version_public_001",
           organizationPublicId: "organization_analytics_route_org_public_001",
-          organizationTrainingVersionPublicId:
-            "organization_analytics_training_version_public_001",
+          publishScopeSnapshot: {
+            organizationPublicIds: [
+              "organization_analytics_route_org_public_001",
+              "organization_analytics_route_child_public_002",
+            ],
+            capturedAt,
+          },
+          publishedAt: new Date(capturedAt),
+          answerDeadlineAt: null,
+          takenDownAt: null,
+          recipientSnapshotSchemaVersion: recipientSnapshot.schemaVersion,
+          recipientSnapshotCapturedAt: new Date(capturedAt),
+          recipientSnapshotCount: recipientSnapshot.count,
+          recipientSnapshotDigest: recipientSnapshot.digest,
+        },
+      ],
+      recipientRows,
+      [
+        {
+          versionId: 201,
+          versionPublicId: "organization_analytics_training_version_public_001",
+          employeePublicId: "organization_analytics_employee_public_001",
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          authorizationPublicId: "recipient_org_auth_public_001",
           score: "90.0",
           totalScore: "100.0",
           submittedAt: new Date("2026-06-02T08:00:00.000Z"),
@@ -799,11 +851,11 @@ describe("organization analytics dashboard summary route handlers", () => {
           hiddenSourceMarker: "hidden answer detail",
         },
         {
+          versionId: 201,
+          versionPublicId: "organization_analytics_training_version_public_001",
           employeePublicId: "organization_analytics_employee_public_002",
-          employeeDisplayName: "Employee 002",
           organizationPublicId: "organization_analytics_route_child_public_002",
-          organizationTrainingVersionPublicId:
-            "organization_analytics_training_version_public_002",
+          authorizationPublicId: "recipient_org_auth_public_002",
           score: "70.0",
           totalScore: "100.0",
           submittedAt: new Date("2026-06-03T08:00:00.000Z"),
@@ -877,15 +929,37 @@ describe("organization analytics dashboard summary route handlers", () => {
       },
     });
     expect(sessionService.requests).toHaveLength(1);
-    expect(select).toHaveBeenCalledTimes(3);
+    expect(select).toHaveBeenCalledTimes(5);
     expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
       ["organizationId"],
       ["organizationId", "organizationPublicId", "parentOrganizationId"],
       [
+        "id",
+        "publicId",
+        "organizationPublicId",
+        "publishScopeSnapshot",
+        "publishedAt",
+        "answerDeadlineAt",
+        "takenDownAt",
+        "recipientSnapshotSchemaVersion",
+        "recipientSnapshotCapturedAt",
+        "recipientSnapshotCount",
+        "recipientSnapshotDigest",
+      ],
+      [
+        "versionId",
         "employeePublicId",
         "employeeDisplayName",
         "organizationPublicId",
-        "organizationTrainingVersionPublicId",
+        "organizationName",
+        "authorizationPublicId",
+      ],
+      [
+        "versionId",
+        "versionPublicId",
+        "employeePublicId",
+        "organizationPublicId",
+        "authorizationPublicId",
         "score",
         "totalScore",
         "submittedAt",
@@ -894,7 +968,9 @@ describe("organization analytics dashboard summary route handlers", () => {
     ]);
     expect(selectCalls[0]?.innerJoin).toHaveBeenCalledTimes(2);
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
-    expect(JSON.stringify(payload)).not.toMatch(/hidden|SourceMarker/u);
+    expect(JSON.stringify(payload)).not.toMatch(
+      /hidden|SourceMarker|recipientSnapshot|recipient_org_auth/u,
+    );
   });
 
   it("rejects standard organization admins before dashboard summary reads", async () => {
@@ -1278,6 +1354,21 @@ describe("organization analytics employee statistics route handlers", () => {
   });
 
   it("wires injected runtime database and session through Postgres visible-scope source reader", async () => {
+    const capturedAt = "2026-06-01T00:00:00.000Z";
+    const recipientRows = [
+      {
+        versionId: 201,
+        employeePublicId: "organization_analytics_employee_public_001",
+        employeeDisplayName: "Employee 001",
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        organizationName: "Organization Analytics Route Org",
+        authorizationPublicId: "recipient_org_auth_public_001",
+      },
+    ];
+    const recipientSnapshot = createOrganizationTrainingRecipientSnapshot({
+      capturedAt,
+      recipients: recipientRows,
+    })!;
     const { database, select, selectCalls } = createFakeRuntimeDatabase([
       [{ organizationId: 101 }],
       [
@@ -1294,18 +1385,32 @@ describe("organization analytics employee statistics route handlers", () => {
       ],
       [
         {
-          employeeDisplayName: "Employee 001",
-          employeePublicId: "organization_analytics_employee_public_001",
+          id: 201,
+          publicId: "organization_analytics_training_version_public_001",
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          publishScopeSnapshot: {
+            organizationPublicIds: [
+              "organization_analytics_route_org_public_001",
+            ],
+            capturedAt,
+          },
+          publishedAt: new Date(capturedAt),
+          answerDeadlineAt: null,
+          takenDownAt: null,
+          recipientSnapshotSchemaVersion: recipientSnapshot.schemaVersion,
+          recipientSnapshotCapturedAt: new Date(capturedAt),
+          recipientSnapshotCount: recipientSnapshot.count,
+          recipientSnapshotDigest: recipientSnapshot.digest,
         },
       ],
-      [{ value: 1 }],
+      recipientRows,
       [
         {
+          versionId: 201,
+          versionPublicId: "organization_analytics_training_version_public_001",
           employeePublicId: "organization_analytics_employee_public_001",
-          employeeDisplayName: "Employee 001",
           organizationPublicId: "organization_analytics_route_org_public_001",
-          organizationTrainingVersionPublicId:
-            "organization_analytics_training_version_public_001",
+          authorizationPublicId: "recipient_org_auth_public_001",
           score: "86.0",
           totalScore: "100.0",
           submittedAt: new Date("2026-06-10T09:00:00.000Z"),
@@ -1314,9 +1419,15 @@ describe("organization analytics employee statistics route handlers", () => {
             organizationName: "Organization Analytics Route Org",
             capturedAt: "2026-06-10T08:59:00.000Z",
           },
-          hiddenSourceMarker: "hidden answer detail",
         },
       ],
+      [
+        {
+          employeeDisplayName: "Employee 001",
+          employeePublicId: "organization_analytics_employee_public_001",
+        },
+      ],
+      [{ value: 1 }],
     ]);
     const sessionService = createCurrentSessionService(
       createSuccessResponse(createAdminAuthContext()),
@@ -1385,25 +1496,49 @@ describe("organization analytics employee statistics route handlers", () => {
       },
     });
     expect(sessionService.requests).toHaveLength(1);
-    expect(select).toHaveBeenCalledTimes(5);
+    expect(select).toHaveBeenCalledTimes(7);
     expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
       ["organizationId"],
       ["organizationId", "organizationPublicId", "parentOrganizationId"],
-      ["employeeDisplayName", "employeePublicId"],
-      ["value"],
       [
+        "id",
+        "publicId",
+        "organizationPublicId",
+        "publishScopeSnapshot",
+        "publishedAt",
+        "answerDeadlineAt",
+        "takenDownAt",
+        "recipientSnapshotSchemaVersion",
+        "recipientSnapshotCapturedAt",
+        "recipientSnapshotCount",
+        "recipientSnapshotDigest",
+      ],
+      [
+        "versionId",
         "employeePublicId",
         "employeeDisplayName",
         "organizationPublicId",
-        "organizationTrainingVersionPublicId",
+        "organizationName",
+        "authorizationPublicId",
+      ],
+      [
+        "versionId",
+        "versionPublicId",
+        "employeePublicId",
+        "organizationPublicId",
+        "authorizationPublicId",
         "score",
         "totalScore",
         "submittedAt",
         "answerOrganizationSnapshot",
       ],
+      ["employeeDisplayName", "employeePublicId"],
+      ["value"],
     ]);
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
-    expect(JSON.stringify(payload)).not.toMatch(/hidden|SourceMarker/u);
+    expect(JSON.stringify(payload)).not.toMatch(
+      /hidden|SourceMarker|recipientSnapshot|recipient_org_auth/u,
+    );
   });
 
   it("rejects advanced role sessions with false service-computed capability before employee statistics reads", async () => {

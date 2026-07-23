@@ -274,6 +274,7 @@ function createOrganizationAnalyticsServiceRepositoryFake(
         createValidEmployeeStatisticsCommand().employeeTrainingSummaryInputs,
     ),
     readEmployeeTrainingSummaryPage: vi.fn(async () => ({
+      availability: "available" as const,
       employeeTrainingSummaryInputs:
         createValidEmployeeStatisticsCommand().employeeTrainingSummaryInputs,
       total: 1,
@@ -470,6 +471,40 @@ describe("organization analytics repository-backed service", () => {
     expect(result).toEqual(
       buildOrganizationAnalyticsDashboardSummary(createValidCommand()),
     );
+  });
+
+  it("returns a stable temporary-unavailable response distinct from permission denial for legacy recipient snapshots", async () => {
+    const repository = createOrganizationAnalyticsServiceRepositoryFake({
+      readTrainingAggregateMetricsInput: vi.fn(async () => null),
+      readEmployeeTrainingSummaryPage: vi.fn(async () => ({
+        availability: "unavailable" as const,
+        employeeTrainingSummaryInputs: [],
+        total: 0,
+      })),
+    });
+    const command = createRepositoryBackedSummaryCommand(repository);
+
+    await expect(
+      buildOrganizationAnalyticsDashboardSummaryFromRepository(command),
+    ).resolves.toEqual({
+      code: 503126,
+      message:
+        "Organization analytics recipient snapshot is temporarily unavailable.",
+      data: null,
+    });
+    await expect(
+      buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository({
+        ...command,
+        pagination: { page: 1, pageSize: 20 },
+      }),
+    ).resolves.toEqual({
+      code: 503126,
+      message:
+        "Organization analytics recipient snapshot is temporarily unavailable.",
+      data: null,
+    });
+    expect(repository.readFormalLearningSummary).not.toHaveBeenCalled();
+    expect(repository.readKnowledgeWeakPointSummary).not.toHaveBeenCalled();
   });
 
   it("stops repository reads when visible organization scope excludes the target", async () => {
