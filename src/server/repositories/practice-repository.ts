@@ -85,6 +85,10 @@ export type PracticeAnswerRecordRow = {
   submitted_at: Date | null;
 };
 
+export type PracticeAnswerResumeRow = PracticeAnswerRecordRow & {
+  mistake_book_public_id: string | null;
+};
+
 export type PracticeAnswerFeedbackRow = {
   answer_record_public_id: string;
   is_correct: boolean | null;
@@ -220,7 +224,7 @@ export type PracticeRepository = {
   listAnswerRecordsByPractice(input: {
     userPublicId: string;
     practicePublicId: string;
-  }): Promise<PracticeAnswerRecordRow[]>;
+  }): Promise<PracticeAnswerResumeRow[]>;
   submitPracticeAnswer(
     input: SubmitPracticeAnswerInput,
   ): Promise<SubmitPracticeAnswerResult>;

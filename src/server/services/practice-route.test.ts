@@ -36,6 +36,7 @@ function createService(): PracticeService {
             },
           },
           answerRecords: [],
+          questionProgress: [],
         },
       };
     },
@@ -62,6 +63,7 @@ function createService(): PracticeService {
             },
           },
           answerRecords: [],
+          questionProgress: [],
         },
       };
     },

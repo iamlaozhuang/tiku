@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildPracticeResumeProjection,
   mapPracticeAnswerFeedbackToApi,
   mapPracticeToApi,
 } from "./practice-mapper";
 import type {
   PracticeAnswerFeedbackRow,
+  PracticeAnswerResumeRow,
   PracticeRow,
 } from "../repositories/practice-repository";
 
@@ -72,6 +74,32 @@ function createFeedbackRow(
     ai_hint_citations: [],
     retry_remaining_count: 0,
     answered_at: answeredAt,
+    ...overrides,
+  };
+}
+
+function createAnswerResumeRow(
+  overrides: Partial<PracticeAnswerResumeRow> = {},
+): PracticeAnswerResumeRow {
+  return {
+    public_id: "answer_record_public_123",
+    exam_mode: "practice",
+    paper_question_public_id: "paper_question_public_123",
+    question_public_id: "question_public_123",
+    answer_snapshot: {
+      selectedLabels: ["A"],
+      textAnswer: null,
+      savedFromClientAt: "2026-05-19T08:05:00.000Z",
+    },
+    answer_record_status: "scored",
+    is_correct: true,
+    score: "1.0",
+    max_score: "1.0",
+    practice_attempt_number: 1,
+    practice_max_attempt_count: 1,
+    mistake_book_public_id: null,
+    answered_at: answeredAt,
+    submitted_at: answeredAt,
     ...overrides,
   };
 }
@@ -189,6 +217,176 @@ describe("practice mapper", () => {
       aiHintCitations: [],
       retryRemainingCount: 0,
       answeredAt: "2026-05-19T08:05:00.000Z",
+    });
+  });
+
+  it("builds deterministic answer and feedback progress from persisted attempts", () => {
+    const projection = buildPracticeResumeProjection(
+      createPracticeRow({
+        paper_snapshot: {
+          paperSections: [
+            {
+              paperQuestions: [
+                {
+                  paperQuestionPublicId: "paper_question_public_123",
+                  questionPublicId: "question_public_123",
+                  questionType: "single_choice",
+                  scoringMethod: "auto_match",
+                  standardAnswerRichText: "<p>A</p>",
+                  analysisRichText: "<p>解析</p>",
+                  score: "1.0",
+                },
+                {
+                  paperQuestionPublicId: "paper_question_public_456",
+                  questionPublicId: "question_public_456",
+                  questionType: "single_choice",
+                  scoringMethod: "auto_match",
+                  standardAnswerRichText: "<p>B</p>",
+                  analysisRichText: "<p>第二题解析</p>",
+                  score: "2.0",
+                },
+              ],
+            },
+          ],
+        },
+      }).paper_snapshot,
+      [createAnswerResumeRow()],
+    );
+
+    expect(projection).toEqual({
+      currentQuestionIndex: 1,
+      questionProgress: [
+        {
+          paperQuestionPublicId: "paper_question_public_123",
+          answerRecord: expect.objectContaining({
+            publicId: "answer_record_public_123",
+            answerSnapshot: expect.objectContaining({ selectedLabels: ["A"] }),
+          }),
+          feedback: expect.objectContaining({
+            answerRecordPublicId: "answer_record_public_123",
+            isCorrect: true,
+            standardAnswerRichText: "<p>A</p>",
+            analysisRichText: "<p>解析</p>",
+            aiExplanationStatus: "unavailable",
+            retryRemainingCount: 0,
+          }),
+          attemptNumber: 1,
+          maxAttemptCount: 1,
+          stage: "terminal",
+          nextAction: "continue",
+        },
+      ],
+    });
+  });
+
+  it("fails closed for ambiguous legacy and numbered attempt history", () => {
+    const paperSnapshot = createPracticeRow({
+      paper_snapshot: {
+        paperSections: [
+          {
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper_question_public_123",
+                questionPublicId: "question_public_123",
+                questionType: "single_choice",
+                scoringMethod: "auto_match",
+                standardAnswerRichText: "<p>A</p>",
+                analysisRichText: "<p>解析</p>",
+              },
+            ],
+          },
+        ],
+      },
+    }).paper_snapshot;
+
+    expect(
+      buildPracticeResumeProjection(paperSnapshot, [
+        createAnswerResumeRow({
+          practice_attempt_number: null,
+          practice_max_attempt_count: null,
+        }),
+        createAnswerResumeRow({
+          public_id: "answer_record_public_456",
+          practice_attempt_number: 1,
+          practice_max_attempt_count: 1,
+        }),
+      ]),
+    ).toBeNull();
+  });
+
+  it("restores the latest subjective fill_blank attempt from its scoring contract", () => {
+    const paperSnapshot = createPracticeRow({
+      paper_snapshot: {
+        paperSections: [
+          {
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper_question_public_123",
+                questionPublicId: "question_public_123",
+                questionType: "fill_blank",
+                scoringMethod: "ai_scoring",
+                standardAnswerRichText: "<p>权威答案</p>",
+                analysisRichText: "<p>权威解析</p>",
+              },
+            ],
+          },
+        ],
+      },
+    }).paper_snapshot;
+    const firstAttempt = createAnswerResumeRow({
+      public_id: "answer_record_public_1",
+      answer_snapshot: {
+        selectedLabels: [],
+        textAnswer: "第一次回答",
+        savedFromClientAt: null,
+      },
+      answer_record_status: "submitted",
+      is_correct: null,
+      score: null,
+      max_score: "2.0",
+      practice_attempt_number: 1,
+      practice_max_attempt_count: 2,
+    });
+    const secondAttempt = createAnswerResumeRow({
+      public_id: "answer_record_public_2",
+      answer_snapshot: {
+        selectedLabels: [],
+        textAnswer: "第二次回答",
+        savedFromClientAt: null,
+      },
+      answer_record_status: "submitted",
+      is_correct: null,
+      score: null,
+      max_score: "2.0",
+      practice_attempt_number: 2,
+      practice_max_attempt_count: 2,
+    });
+
+    expect(
+      buildPracticeResumeProjection(paperSnapshot, [
+        firstAttempt,
+        secondAttempt,
+      ]),
+    ).toEqual({
+      currentQuestionIndex: 0,
+      questionProgress: [
+        expect.objectContaining({
+          paperQuestionPublicId: "paper_question_public_123",
+          answerRecord: expect.objectContaining({
+            publicId: "answer_record_public_2",
+            answerSnapshot: expect.objectContaining({
+              textAnswer: "第二次回答",
+            }),
+          }),
+          feedback: expect.objectContaining({
+            aiHintStatus: "unavailable",
+            retryRemainingCount: 0,
+          }),
+          attemptNumber: 2,
+          maxAttemptCount: 2,
+          nextAction: "complete",
+        }),
+      ],
     });
   });
 });

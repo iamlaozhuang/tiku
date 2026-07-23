@@ -63,9 +63,20 @@ export type PracticeAnswerRecordDto = {
   submittedAt: string | null;
 };
 
+export type PracticeQuestionProgressDto = {
+  paperQuestionPublicId: string;
+  answerRecord: PracticeAnswerRecordDto;
+  feedback: PracticeAnswerFeedbackDto;
+  attemptNumber: number | null;
+  maxAttemptCount: number | null;
+  stage: "terminal";
+  nextAction: "continue" | "complete";
+};
+
 export type PracticeResultDto = {
   practice: PracticeDto;
   answerRecords: PracticeAnswerRecordDto[];
+  questionProgress: PracticeQuestionProgressDto[];
 };
 
 export type PracticeAnswerFeedbackResultDto = {

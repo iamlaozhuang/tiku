@@ -10,6 +10,7 @@ import type {
   PracticeResultDto,
 } from "../contracts/practice-contract";
 import {
+  buildPracticeResumeProjection,
   mapPracticeAnswerRecordToApi,
   mapPracticeAnswerFeedbackToApi,
   mapPracticeToApi,
@@ -835,10 +836,19 @@ async function createPracticeResult(
     userPublicId: userContext.userPublicId,
     practicePublicId: practice.public_id,
   });
+  const resumeProjection = buildPracticeResumeProjection(
+    practice.paper_snapshot,
+    answerRecords,
+  );
+
+  if (resumeProjection === null) {
+    throw new Error("Practice resume progress is inconsistent.");
+  }
 
   return {
-    practice: mapPracticeToApi(practice, answerRecords),
+    practice: mapPracticeToApi(practice, resumeProjection.currentQuestionIndex),
     answerRecords: answerRecords.map(mapPracticeAnswerRecordToApi),
+    questionProgress: resumeProjection.questionProgress,
   };
 }
 

@@ -547,10 +547,10 @@ function getPracticeScopeLabel(practice: PracticeDto): string {
 
 function hasPracticeResumeProgress(
   practice: PracticeDto,
-  answerRecordCount: number,
+  questionProgressCount: number,
 ): boolean {
   return (
-    answerRecordCount > 0 ||
+    questionProgressCount > 0 ||
     practice.currentQuestionIndex > 0 ||
     practice.lastAnsweredAt !== null
   );
@@ -1307,16 +1307,40 @@ export function StudentPracticePage({
           return;
         }
 
+        const authoritativeQuestionProgress =
+          practicePayload.data.questionProgress ?? [];
+        const restoredSelectedLabelsByQuestion = Object.fromEntries(
+          authoritativeQuestionProgress.map((progress) => [
+            progress.paperQuestionPublicId,
+            progress.answerRecord.answerSnapshot.selectedLabels,
+          ]),
+        );
+        const restoredTextAnswerByQuestion = Object.fromEntries(
+          authoritativeQuestionProgress.map((progress) => [
+            progress.paperQuestionPublicId,
+            progress.answerRecord.answerSnapshot.textAnswer ?? "",
+          ]),
+        );
+        const restoredFeedbackByQuestion = Object.fromEntries(
+          authoritativeQuestionProgress.map((progress) => [
+            progress.paperQuestionPublicId,
+            progress.feedback,
+          ]),
+        );
+
         setRuntimePractices([
           {
             practice: practicePayload.data.practice,
-            feedbackByPaperQuestionPublicId: {},
+            feedbackByPaperQuestionPublicId: restoredFeedbackByQuestion,
           },
         ]);
+        setSelectedLabelsByQuestion(restoredSelectedLabelsByQuestion);
+        setTextAnswerByQuestion(restoredTextAnswerByQuestion);
+        setFeedbackByQuestion(restoredFeedbackByQuestion);
         setIsResumeChoiceVisible(
           hasPracticeResumeProgress(
             practicePayload.data.practice,
-            practicePayload.data.answerRecords.length,
+            authoritativeQuestionProgress.length,
           ),
         );
         setCurrentQuestionIndex(

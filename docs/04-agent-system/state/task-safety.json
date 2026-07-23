@@ -1,90 +1,84 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23",
-  "findingIds": ["F-0067"],
+  "taskId": "p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23",
+  "findingIds": ["F-0135"],
   "candidateRootCauseCluster": "P1-RC-08",
   "status": "validated_reviewed_conditional_closeout_ready",
-  "branch": "fix/exam-report-scoring-finalization",
-  "baseSha": "770daa8dac130931f8faddb57a2d25082bb2b77b",
-  "objective": "Close F-0067 by making successful durable AI scoring finalization atomically rebuild any existing partial exam_report from the same authoritative mock_exam, answer_record and ai_scoring_task facts, increment report_revision and invalidate stale learning suggestions before the completed report becomes immutable.",
-  "riskCategory": "database_application_logic",
+  "branch": "fix/practice-resume-authoritative-progress",
+  "baseSha": "f3d165b06282dca6e049cdfe2ff8a63bf208f99a",
+  "objective": "Close F-0135 statically by returning one server-owned, deterministic per-question practice resume projection and restoring saved answers, feedback stage, retry budget and the next usable question across refresh or device changes without trusting client-derived progress.",
+  "riskCategory": "low_risk_api_ui_application_logic",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/ai-scoring-task-repository.ts",
-    "src/server/repositories/exam-report-repository.ts",
+    "src/server/contracts/practice-contract.ts",
+    "src/server/repositories/practice-repository.ts",
     "src/server/repositories/student-flow-runtime-repository.ts",
-    "src/server/services/exam-report-service.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "tests/unit/p1-exam-report-scoring-finalization.test.ts",
-    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-    "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
-    "src/server/services/ai-scoring-task-runtime.test.ts",
-    "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "src/server/services/mock-exam-service.test.ts"
+    "src/server/mappers/practice-mapper.ts",
+    "src/server/mappers/practice-mapper.test.ts",
+    "src/server/services/practice-service.ts",
+    "src/server/services/practice-service.test.ts",
+    "src/features/student/practice/StudentPracticePage.tsx",
+    "tests/unit/student-practice-ui.test.ts",
+    "tests/unit/p1-practice-resume-authoritative-progress.test.ts",
+    "src/server/services/practice-route.test.ts",
+    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/ai-scoring-task-repository.ts",
-    "src/server/repositories/exam-report-repository.ts",
+    "src/server/contracts/practice-contract.ts",
+    "src/server/repositories/practice-repository.ts",
     "src/server/repositories/student-flow-runtime-repository.ts",
-    "src/server/services/exam-report-service.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "tests/unit/p1-exam-report-scoring-finalization.test.ts",
-    "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts"
+    "src/server/mappers/practice-mapper.ts",
+    "src/server/mappers/practice-mapper.test.ts",
+    "src/server/services/practice-service.ts",
+    "src/server/services/practice-service.test.ts",
+    "src/features/student/practice/StudentPracticePage.tsx",
+    "tests/unit/student-practice-ui.test.ts",
+    "tests/unit/p1-practice-resume-authoritative-progress.test.ts"
   ],
   "contingencyFiles": [
-    "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
-    "src/server/services/ai-scoring-task-runtime.test.ts",
-    "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "src/server/services/mock-exam-service.test.ts"
+    "src/server/services/practice-route.test.ts",
+    "tests/unit/phase-7-student-flow-runtime-smoke.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
     "docs/04-agent-system/sop/**",
     "scripts/**",
     ".husky/**",
+    "docs/05-execution-logs/**",
     "src/db/schema/**",
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
-    "all UI files, API routes, provider adapters, credentials, secret/env, deployment and historical evidence/audit files"
+    "any permission, authorization, Provider, quota, deployment or external-service configuration"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "durable ai_scoring_task worker -> ai-scoring-task repository leased completion transaction -> mock_exam and answer_record final facts -> existing exam_report partial snapshot/revision -> exam-report detail/history consumers and direct transaction/service regressions",
-    "coreFileCount": 10,
-    "contingencyFileCount": 5,
+    "authoritativeChain": "student practice page -> POST/GET practice route -> practice service -> practice mapper and repository -> answer_record rows plus immutable paper snapshot -> per-question resume projection -> direct mapper/service/UI/runtime fixtures",
+    "coreFileCount": 13,
+    "contingencyFileCount": 2,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
-    "currentMasterEvidence": "A partial report can be rebuilt only by a later explicit generate command. Durable scoring completion updates ai_scoring_task, answer_record and mock_exam but not an already persisted exam_report; detail/history reads return the stale partial snapshot after retry success.",
-    "findingDispositionReview": {
-      "F-0063": "not_actionable_on_current_master because the durable task path persists attempt_count/max_attempt_count, atomically claims below max and production no longer consumes the old direct runtime",
-      "F-0065": "confirmed_but_not_eligible_here because learning-suggestion generation remains blocked by the approved F-0148 quota/Cost Calibration gate and requires a separate future decision",
-      "F-0067": "confirmed_high_confidence_and_currently_eligible"
-    },
     "schemaMigrationRequired": false,
-    "permissionSemantics": "unchanged; owner and authorization checks remain in existing report generation/read paths",
-    "providerSemantics": "unchanged; no Provider call, prompt, model, retry or worker execution behavior is added"
+    "permissionSemantics": "unchanged; existing authenticated owner-scoped practice lookup remains the only source",
+    "providerSemantics": "unchanged; unavailable AI hint, explanation and scoring facts remain unavailable rather than being reconstructed",
+    "currentMasterEvidence": "PracticeResultDto returns answerRecords, but StudentPracticePage discards their snapshots and initializes answer and feedback maps empty; mapPracticeToApi advances on any row without a server-owned phase projection."
   },
-  "examReportFinalizationContract": {
-    "transaction": "if a partial exam_report exists, successful leased task completion must rebuild it before the same database transaction commits; task/log/answer/mock/report failure rolls back together",
-    "authoritativeFacts": "the rebuilt snapshot must be produced by the one canonical report projector from the locked mock_exam, complete answer set and persisted scoring evidence after the current result is applied",
-    "cardinality": "exam report 0/1, answer set and scoring evidence cardinality must be exact; duplicate, missing, mismatched or corrupt facts fail closed",
-    "revision": "a materially changed partial report increments report_revision exactly once, preserves public_id and generated history identity, and becomes completed only when the authoritative mock_exam is completed",
-    "learningSuggestion": "any pre-existing suggestion derived from partial facts is cleared atomically when report scoring facts change; this task does not generate a new suggestion",
-    "replay": "worker response loss or duplicate completion reads the existing terminal task/report without a second report revision; late/stale lease cannot mutate the report",
-    "absence": "if no report exists, scoring completion does not create one; the existing authorized explicit generation path remains authoritative",
-    "failure": "terminal or retryable scoring failure must not falsely finalize a report; partial report behavior remains explicit and recoverable",
-    "findingDisposition": "F-0067 may close statically only after partial-to-completed, multi-task, concurrency, rollback and replay matrices are GREEN; no real database or Provider proof is claimed"
+  "resumeContract": {
+    "authority": "the server derives each question state from the immutable practice paper snapshot and the complete persisted answer_record set; the client never infers completion from array length",
+    "cardinality": "unknown questions, duplicate public identities, mixed legacy and numbered attempts, gaps, duplicate attempt numbers or conflicting max counts fail closed",
+    "answer": "selected labels or text answer are restored only from the authoritative current answer record",
+    "feedback": "objective feedback and current unavailable subjective AI state are reconstructed from persisted answer facts and the immutable question snapshot without inventing Provider output",
+    "navigation": "currentQuestionIndex points to the first server-projected actionable question; when all questions are terminal it stays on the final question with restored feedback",
+    "legacy": "one coherent legacy all-null attempt may be projected explicitly; ambiguous legacy history is rejected rather than guessed",
+    "privacy": "only the already authorized practice owner receives the existing learner-safe paper projection and answer feedback; no internal id or new answer visibility is added"
   },
   "validationCommands": [
     {
-      "name": "exam-report-scoring-finalization-focused",
+      "name": "practice-resume-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -92,37 +86,50 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-exam-report-scoring-finalization.test.ts",
-        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-        "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "src/server/services/ai-scoring-task-runtime.test.ts",
-        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
+        "src/server/mappers/practice-mapper.test.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/practice-route.test.ts",
+        "tests/unit/student-practice-ui.test.ts",
         "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "src/server/services/mock-exam-service.test.ts",
+        "tests/unit/p1-practice-resume-authoritative-progress.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "exam-report-scoring-finalization-lint",
+      "name": "practice-atomic-direct-regression",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@11.9.0",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/p1-practice-answer-atomic-command.test.ts",
+        "-t",
+        "allows only the additive practice-attempt and mistake-book uniqueness migration|uses one authoritative transaction command and atomic mistake-book upserts",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "name": "repository-lint",
       "kind": "lint",
       "executable": "npm.cmd",
       "arguments": ["run", "lint"]
     },
     {
-      "name": "exam-report-scoring-finalization-typecheck",
+      "name": "typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@11.9.0", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "exam-report-scoring-finalization-build",
+      "name": "build",
       "kind": "other",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@11.9.0", "run", "build"]
+      "executable": "npm.cmd",
+      "arguments": ["run", "build"]
     },
     {
-      "name": "exam-report-scoring-finalization-format",
+      "name": "format",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -133,28 +140,21 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/repositories/ai-scoring-task-repository.ts",
-        "src/server/repositories/exam-report-repository.ts",
+        "src/server/contracts/practice-contract.ts",
+        "src/server/repositories/practice-repository.ts",
         "src/server/repositories/student-flow-runtime-repository.ts",
-        "src/server/services/exam-report-service.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "tests/unit/p1-exam-report-scoring-finalization.test.ts",
-        "tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts",
-        "tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts",
-        "src/server/services/ai-scoring-task-runtime.test.ts",
-        "tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts",
-        "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "src/server/services/mock-exam-service.test.ts"
+        "src/server/mappers/practice-mapper.ts",
+        "src/server/mappers/practice-mapper.test.ts",
+        "src/server/services/practice-service.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/practice-route.test.ts",
+        "src/features/student/practice/StudentPracticePage.tsx",
+        "tests/unit/student-practice-ui.test.ts",
+        "tests/unit/p1-practice-resume-authoritative-progress.test.ts"
       ]
     },
     {
-      "name": "exam-report-scoring-finalization-diff-check",
-      "kind": "other",
-      "executable": "git",
-      "arguments": ["diff", "--check"]
-    },
-    {
-      "name": "exam-report-scoring-finalization-state-contract",
+      "name": "state-parse",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -162,61 +162,57 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-exam-report-scoring-finalization.test.ts",
+        "tests/unit/p1-practice-resume-authoritative-progress.test.ts",
         "-t",
-        "strictly parses the F-0067 contract and WIP state",
+        "strictly parses the F-0135 task contract and WIP state",
         "--maxWorkers=1"
       ]
     }
   ],
   "approvalSources": {
-    "dependency": null,
-    "database": "guardian-f0067-exam-report-scoring-finalization-2026-07-23",
+    "lowRiskCloseout": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
+    "testOnlyAllowlistExpansion": "standing-test-only-allowlist-expansion-2026-07-21",
+    "database": null,
     "permission": null,
-    "provider": null,
-    "deployment": null,
-    "secretEnv": null
-  },
-  "pendingApproval": {
-    "status": "approved_conditional_closeout",
-    "proposedApprovalId": "guardian-f0067-exam-report-scoring-finalization-2026-07-23",
-    "approvalFingerprint": "105f762fbb87f75d7b551b04343c9d87078474984779717a18a85bd2ba58dfba",
-    "riskCategory": "database_application_logic",
-    "baseSha": "770daa8dac130931f8faddb57a2d25082bb2b77b",
-    "requestedOperations": [
-      "TDD database application transaction logic without schema or real database execution",
-      "validation and adversarial review",
-      "one reviewable commit",
-      "ff-only merge",
-      "one canonical origin/master ordinary push",
-      "sync verification and branch cleanup"
-    ],
-    "conditionalCloseoutRequested": true,
-    "approved": true
+    "dependency": null,
+    "provider": null
   },
   "conditionalCloseout": true,
   "validationEvidence": {
-    "tddRed": "expected_3_of_4_F0067_contract_failures_before_implementation",
-    "focused": "GREEN_8_files_85_tests",
-    "lint": "GREEN_exit_0_with_3_pre_existing_unrelated_warnings",
-    "typecheck": "GREEN_tsc_noEmit_exit_0",
-    "build": "GREEN_Next_16_2_6_exit_0_with_pre_existing_NFT_trace_warning",
-    "adversarialReview": "GREEN_single_low_level_projector_shared_mock_advisory_lock_transactional_post_update_projection_exact_cardinality_partial_revision_suggestion_invalidation_no_report_insert_strict_terminal_replay_no_schema_permission_provider_or_real_DB_change",
-    "evidenceBoundary": "static_and_synthetic_only_no_real_database_provider_or_runtime_acceptance"
+    "red": "4_files_67_tests_6_failed_61_passed_before_implementation",
+    "focused": "6_files_76_tests_passed",
+    "practiceAtomicDirectRegression": "1_file_2_selected_tests_passed_1_state_only_test_filtered_out",
+    "typecheck": "exit_0",
+    "lint": "exit_0_with_3_preexisting_unrelated_warnings",
+    "build": "exit_0_100_static_and_dynamic_routes_generated",
+    "format": "preapplied_to_all_actual_changed_files_final_check_pending_kernel",
+    "adversarialReview": "GREEN_complete_owner_scoped_answer_set_batched_once_snapshot_identity_and_attempt_cardinality_fail_closed_no_provider_fact_invented_standard_answer_only_for_answered_questions_final_terminal_question_restored_and_no_schema_permission_or_provider_change",
+    "validationCorrections": [
+      "made_missing_questionProgress_runtime_compatible_without_reintroducing_client_answer-count_inference",
+      "bound_fill_blank_objective_or_subjective_resume_semantics_to_persisted_scoringMethod",
+      "split_prior_F0027_product_regression_from_its_stale_active-task_state assertion",
+      "reran_pnpm_validations_sequentially_after_one_parallel_node_modules_EPERM_contention"
+    ]
   },
-  "metrics": {
-    "mandatoryFreshApprovals": 1,
+  "closeoutProjection": {
+    "current": "validated_reviewed_conditional_closeout_ready",
+    "triggers": "focused_lint_typecheck_build_format_diff_state_parse_and_main_thread_adversarial_review_GREEN_with_unchanged_base_origin_and_envelope",
+    "successProjection": "F0135_closed_static_without_browser_or_runtime_database_proof",
+    "terminalEvidence": "only actual commit push sync and cleanup evidence may prove closeout"
+  },
+  "executionMetrics": {
+    "mandatoryFreshApprovals": 0,
     "preventableScopeMissApprovals": 0,
     "candidateReapprovals": 0,
-    "approvalWaitTurns": 1,
-    "productValueTime": "includes_JIT_root_cause_TDD_transaction_implementation_and_main_thread_adversarial_review_exact_clock_not_reconstructed",
-    "mechanismOverhead": "includes_contract_state_approval_wait_validation_and_closeout_preparation_exact_clock_not_reconstructed",
+    "approvalWaitTurns": 0,
+    "productValueTime": "includes_JIT_TDD_implementation_and_adversarial_review_exact_clock_not_reconstructed",
+    "mechanismOverhead": "includes_contract_materialization_and_validation_exact_clock_not_reconstructed",
     "guardSmokeChanges": 0
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23",
-    "findingIds": ["F-0027"],
-    "commit": "770daa8dac130931f8faddb57a2d25082bb2b77b",
+    "taskId": "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23",
+    "findingIds": ["F-0067"],
+    "commit": "f3d165b06282dca6e049cdfe2ff8a63bf208f99a",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "closed_static_product_without_runtime_database_or_provider_proof",
     "masterOriginSync": true,
@@ -225,20 +221,20 @@
   },
   "residualDisposition": {
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
-    "F-0027": "closed_static_product_without_runtime_database_or_provider_proof",
     "F-0063": "not_actionable_on_current_durable_path_static_only",
     "F-0065": "confirmed_deferred_by_F0148_quota_and_Cost_Calibration_gate",
-    "F-0067": "validated_reviewed_static_candidate_pending_kernel_commit_closeout"
+    "F-0067": "closed_static_product_without_runtime_database_or_provider_proof",
+    "F-0135": "validated_static_candidate_conditional_closeout_ready"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0067",
-    "currentPartition": "exam_report_scoring_finalization",
-    "nextReviewHints": ["continue_RC08_residual_JIT_after_F0067_closeout"]
+    "currentFindingId": "F-0135",
+    "currentPartition": "practice_resume_authoritative_progress",
+    "nextReviewHints": ["continue_RC08_residual_JIT_after_F0135_closeout"]
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0067-exam-report-scoring-finalization-2026-07-23"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }

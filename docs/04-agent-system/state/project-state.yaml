@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
+currentPhase: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
 updatedAt: "2026-07-23T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
+  currentTaskId: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -569,7 +569,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
     - p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
     - p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
+    - p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
     - p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
     - p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
     - p1-remediation-rc-08-active-answer-session-claim-2026-07-23
@@ -741,7 +743,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-active-answer-session-claim-2026-07-23: closed
     p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23: closed
     p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23: closed
-    p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23: in_progress
+    p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23: closed
+    p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -942,28 +945,26 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
-  title: Exam report scoring finalization
-  phase: p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
+  id: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
+  title: Practice resume authoritative progress
+  phase: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: database_application_logic
-  productClosureContribution: closes_F0067_static_partial_report_finalization_gap
-  branch: fix/exam-report-scoring-finalization
+  taskKind: low_risk_api_ui_application_logic
+  productClosureContribution: closes_F0135_static_cross_device_practice_resume_gap
+  branch: fix/practice-resume-authoritative-progress
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0067
+    - F-0135
   candidateRootCauseCluster: P1-RC-08
-  objective: atomically rebuild any existing partial exam_report from authoritative scoring facts inside durable task completion, preserving report identity and invalidating stale learning suggestions
+  objective: return one server-owned per-question resume projection and restore saved practice answers, feedback stage, retry budget and the next usable question across refresh or device changes
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: confirmed
-  findingDisposition: confirmed_high_confidence_currently_eligible
+  findingDisposition: validated_static_candidate_conditional_closeout_ready
   riskBoundary:
-    category: database_application_logic
-    approvalId: guardian-f0067-exam-report-scoring-finalization-2026-07-23
-    requestedApprovalId: guardian-f0067-exam-report-scoring-finalization-2026-07-23
-    approvedBaseSha: 770daa8dac130931f8faddb57a2d25082bb2b77b
-    requestBaseSha: 770daa8dac130931f8faddb57a2d25082bb2b77b
+    category: low_risk_api_ui_application_logic
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    approvedBaseSha: f3d165b06282dca6e049cdfe2ff8a63bf208f99a
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
@@ -971,39 +972,34 @@ currentTask:
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: durable_ai_scoring_worker_to_leased_repository_transaction_to_mock_answer_task_facts_to_existing_partial_exam_report_to_history_detail_consumers
-    coreFiles: 10
-    contingencyFiles: 5
+    chain: student_practice_page_to_practice_route_to_service_to_mapper_repository_to_answer_records_and_immutable_paper_snapshot_to_resume_projection
+    coreFiles: 13
+    contingencyFiles: 2
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0063_not_actionable_current_durable_path_F0065_deferred_by_F0148_gate_F0067_confirmed_current
+    bundleDisposition: F0135_confirmed_current_other_RC08_findings_remain_separate_JIT
   requiredSemantics:
-    transaction: task_log_answer_mock_and_existing_report_finalization_commit_or_rollback_together
-    facts: one_canonical_snapshot_projector_over_authoritative_complete_locked_facts
-    report: stable_public_identity_exact_revision_and_partial_to_completed_transition
-    learningSuggestion: clear_stale_partial_derived_snapshot_without_generating_a_new_one
-    replay: duplicate_or_late_worker_completion_cannot_increment_revision_or_rewrite_report
-  pendingApproval:
-    status: approved_conditional_closeout
-    proposedApprovalId: guardian-f0067-exam-report-scoring-finalization-2026-07-23
-    approvalFingerprint: 105f762fbb87f75d7b551b04343c9d87078474984779717a18a85bd2ba58dfba
-    conditionalCloseoutRequested: true
-    approved: true
+    authority: complete_persisted_answer_set_plus_immutable_practice_snapshot
+    cardinality: ambiguous_or_corrupt_attempt_history_fails_closed
+    restore: answer_feedback_phase_retry_budget_and_next_action_are_server_projected
+    navigation: first_actionable_question_or_final_terminal_question_with_feedback
+    privacy: existing_owner_authorization_and_learner_safe_projection_unchanged
   conditionalCloseoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    trigger: final_tree_external_database_token_then_kernel_commit_ff_only_push_sync_cleanup
-    projected: F0067_static_closed_without_real_database_or_provider_proof
+    trigger: focused_lint_typecheck_build_format_diff_state_parse_and_adversarial_review_GREEN
+    projected: F0135_static_closed_without_browser_or_runtime_database_proof
   validationEvidence:
-    focused: GREEN_8_files_85_tests
-    lint: GREEN_exit_0_with_3_pre_existing_unrelated_warnings
-    typecheck: GREEN_tsc_noEmit_exit_0
-    build: GREEN_Next_16_2_6_exit_0_with_pre_existing_NFT_trace_warning
-    adversarialReview: GREEN_shared_mock_lock_authoritative_post_update_projection_exact_cardinality_revision_and_strict_replay
-    evidenceBoundary: static_and_synthetic_only_no_real_database_provider_or_runtime_acceptance
+    red: 4_files_67_tests_6_failed_61_passed
+    focused: 6_files_76_tests_passed
+    practiceAtomicDirectRegression: 1_file_2_selected_tests_passed
+    typecheck: pass
+    lint: pass_with_3_preexisting_unrelated_warnings
+    build: pass
+    adversarialReview: pass_fail_closed_cardinality_owner_scope_no_provider_invention_and_final_terminal_restore
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
+    taskId: p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23
     findingIds:
-      - F-0027
-    commit: 770daa8dac130931f8faddb57a2d25082bb2b77b
+      - F-0067
+    commit: f3d165b06282dca6e049cdfe2ff8a63bf208f99a
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: closed_static_product_without_runtime_database_or_provider_proof
     masterOriginSync: pass
@@ -1018,9 +1014,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
-  lastKnownOriginMasterSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
-  lastKnownRemoteMasterSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
+  lastKnownMasterSha: f3d165b06282dca6e049cdfe2ff8a63bf208f99a
+  lastKnownOriginMasterSha: f3d165b06282dca6e049cdfe2ff8a63bf208f99a
+  lastKnownRemoteMasterSha: f3d165b06282dca6e049cdfe2ff8a63bf208f99a
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

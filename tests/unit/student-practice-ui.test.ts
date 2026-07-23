@@ -1493,10 +1493,10 @@ describe("StudentPracticePage", () => {
                   {
                     publicId: "answer-practice-resume-001",
                     examMode: "practice",
-                    paperQuestionPublicId: "paper-question-marketing-001",
-                    questionPublicId: "question-marketing-001",
+                    paperQuestionPublicId: "paper-question-marketing-002",
+                    questionPublicId: "question-marketing-002",
                     answerSnapshot: {
-                      selectedLabels: ["B"],
+                      selectedLabels: ["A"],
                       textAnswer: null,
                       savedFromClientAt: "2026-05-19T08:20:00.000Z",
                     },
@@ -1506,6 +1506,55 @@ describe("StudentPracticePage", () => {
                     maxScore: "2.0",
                     answeredAt: "2026-05-19T08:20:00.000Z",
                     submittedAt: "2026-05-19T08:20:00.000Z",
+                  },
+                ],
+                questionProgress: [
+                  {
+                    paperQuestionPublicId: "paper-question-marketing-002",
+                    answerRecord: {
+                      publicId: "answer-practice-resume-001",
+                      examMode: "practice",
+                      paperQuestionPublicId: "paper-question-marketing-002",
+                      questionPublicId: "question-marketing-002",
+                      answerSnapshot: {
+                        selectedLabels: ["A"],
+                        textAnswer: null,
+                        savedFromClientAt: "2026-05-19T08:20:00.000Z",
+                      },
+                      answerRecordStatus: "scored",
+                      isCorrect: true,
+                      score: "2.0",
+                      maxScore: "2.0",
+                      answeredAt: "2026-05-19T08:20:00.000Z",
+                      submittedAt: "2026-05-19T08:20:00.000Z",
+                    },
+                    feedback: {
+                      answerRecordPublicId: "answer-practice-resume-001",
+                      isCorrect: true,
+                      score: "2.0",
+                      maxScore: "2.0",
+                      standardAnswerRichText:
+                        "正确答案：A. 记录客户反馈并形成改进清单",
+                      analysisRichText:
+                        "解析：复盘需要沉淀问题、责任和改进动作。",
+                      mistakeBookPublicId: null,
+                      aiExplanationStatus: "unavailable",
+                      aiExplanationText: null,
+                      aiExplanationLearningSuggestion: null,
+                      aiExplanationEvidenceStatus: null,
+                      aiExplanationCitations: [],
+                      aiHintStatus: null,
+                      aiHintText: null,
+                      aiHintImprovementDirections: [],
+                      aiHintEvidenceStatus: null,
+                      aiHintCitations: [],
+                      retryRemainingCount: 0,
+                      answeredAt: "2026-05-19T08:20:00.000Z",
+                    },
+                    attemptNumber: 1,
+                    maxAttemptCount: 1,
+                    stage: "terminal",
+                    nextAction: "complete",
                   },
                 ],
               },
@@ -1554,6 +1603,13 @@ describe("StudentPracticePage", () => {
       screen.getByTestId("practice-surface-practice-marketing-theory-001"),
     ).toBeInTheDocument();
     expect(screen.queryByTestId("practice-resume-choice")).toBeNull();
+    expect(screen.getByText("回答正确")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "A. 记录客户反馈并形成改进清单",
+      }),
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "已到最后一题" })).toBeDisabled();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });

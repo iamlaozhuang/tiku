@@ -40,6 +40,7 @@ import type {
   AnswerSessionAuthorizationLineage,
   PracticeAuthorizationScopeRow,
   PracticeAnswerRecordRow,
+  PracticeAnswerResumeRow,
   PracticeRepository,
   PracticeRow,
 } from "./practice-repository";
@@ -526,17 +527,32 @@ function createPostgresPracticeRepository(
       }
 
       const rows = await database
-        .select()
+        .select({
+          answer_record: answerRecord,
+          mistake_book_public_id: mistakeBook.public_id,
+        })
         .from(answerRecord)
+        .leftJoin(
+          mistakeBook,
+          and(
+            eq(mistakeBook.user_id, userId),
+            eq(mistakeBook.question_public_id, answerRecord.question_public_id),
+          ),
+        )
         .where(
           and(
             eq(answerRecord.user_id, userId),
             eq(answerRecord.practice_id, practiceRow.id),
           ),
         )
-        .orderBy(asc(answerRecord.answered_at));
+        .orderBy(asc(answerRecord.answered_at), asc(answerRecord.public_id));
 
-      return rows.map(mapPracticeAnswerRecordRow);
+      return rows.map(
+        (row): PracticeAnswerResumeRow => ({
+          ...mapPracticeAnswerRecordRow(row.answer_record),
+          mistake_book_public_id: row.mistake_book_public_id,
+        }),
+      );
     },
     async submitPracticeAnswer(input) {
       const database = getDatabase();
