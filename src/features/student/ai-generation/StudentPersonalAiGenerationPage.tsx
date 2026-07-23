@@ -2347,6 +2347,12 @@ function StudentAiPaperAssemblySummary({
                 container.matchQuality
               }
             />
+            {container.constraintLineage === undefined ? null : (
+              <StudentAiPaperAssemblyMetric
+                label="约束血缘"
+                value={`请求难度 ${container.constraintLineage.request.difficulty ?? "未指定"} · 计划难度 ${container.constraintLineage.plan.difficulty ?? "未指定"} · 请求知识点 ${container.constraintLineage.request.knowledgeNodePublicIds.length} 个 · 计划知识点 ${container.constraintLineage.plan.knowledgeNodePublicIds.length} 个`}
+              />
+            )}
             {paperAssembly.sourceDiagnostics.role ===
             "org_advanced_employee" ? (
               <StudentAiPaperAssemblyMetric

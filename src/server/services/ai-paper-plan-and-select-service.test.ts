@@ -164,7 +164,7 @@ describe("AI组卷 plan-and-select 后端合同", () => {
       platformFormalQuestionCount: 1,
       enterpriseTrainingSnapshotCount: 0,
     });
-    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+    expect(result.container.sections[0]?.selectedQuestions).toMatchObject([
       {
         questionPublicId: "platform_question_public_a",
         sourceKind: "platform_formal_question",
@@ -172,6 +172,26 @@ describe("AI组卷 plan-and-select 后端合同", () => {
         score: 2,
       },
     ]);
+    expect(result.container.constraintLineage).toEqual({
+      request: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_a",
+          "knowledge_node_public_b",
+        ],
+      },
+      plan: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_a",
+          "knowledge_node_public_b",
+        ],
+        parentKnowledgeNodePublicIds: [
+          "knowledge_node_parent_public_a",
+          "knowledge_node_parent_public_b",
+        ],
+      },
+    });
     expect(JSON.stringify(result)).not.toContain("redacted synthetic stem");
     expect(JSON.stringify(result)).not.toContain("redacted synthetic answer");
   });
@@ -199,7 +219,7 @@ describe("AI组卷 plan-and-select 后端合同", () => {
       platformFormalQuestionCount: 1,
       enterpriseTrainingSnapshotCount: 0,
     });
-    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+    expect(result.container.sections[0]?.selectedQuestions).toMatchObject([
       {
         questionPublicId: "platform_question_public_a",
         sourceKind: "platform_formal_question",
@@ -483,7 +503,7 @@ describe("AI组卷 plan-and-select 后端合同", () => {
       }),
     );
 
-    expect(result.container.sections[1]?.selectedQuestions).toEqual([
+    expect(result.container.sections[1]?.selectedQuestions).toMatchObject([
       {
         questionPublicId: "platform_question_b_exact",
         sourceKind: "platform_formal_question",
@@ -589,7 +609,7 @@ describe("AI组卷 plan-and-select 后端合同", () => {
       nearbyKnowledgeCount: 0,
       sameScopeCount: 1,
     });
-    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+    expect(result.container.sections[0]?.selectedQuestions).toMatchObject([
       {
         questionPublicId: "question_same_scope_only",
         sourceKind: "platform_formal_question",
@@ -597,6 +617,15 @@ describe("AI组卷 plan-and-select 后端合同", () => {
         score: 2,
       },
     ]);
+    expect(
+      result.container.sections[0]?.selectedQuestions[0]?.constraintMatchBasis,
+    ).toEqual({
+      difficulty: "medium",
+      knowledgeNodePublicIds: ["knowledge_node_public_a"],
+      parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
+      ancestorKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
+      matchTier: "same_scope",
+    });
   });
 
   it("legacy difficulty 缺失时即使知识元数据匹配也只能显式降级为 same scope", () => {
@@ -623,7 +652,7 @@ describe("AI组卷 plan-and-select 后端合同", () => {
 
     expect(result.status).toBe("assembled");
     expect(result.container.matchQuality).toBe("supplemented_from_same_scope");
-    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+    expect(result.container.sections[0]?.selectedQuestions).toMatchObject([
       {
         questionPublicId: "question_legacy_difficulty_unavailable",
         sourceKind: "platform_formal_question",

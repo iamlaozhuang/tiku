@@ -22,6 +22,7 @@ import type {
   OrganizationTrainingAdminQuestionDetailDto,
 } from "./organization-training-contract";
 import type {
+  AiPaperConstraintLineageDto,
   AiPaperMatchQuality,
   AiPaperSelectedQuestionDto,
 } from "./ai-paper-plan-and-select-contract";
@@ -49,6 +50,7 @@ export type AdminAiGenerationOrganizationTrainingPaperDraftPayload = {
     enterpriseTrainingSnapshotCount: number;
   };
   matchQuality: AiPaperMatchQuality;
+  constraintLineage?: AiPaperConstraintLineageDto;
   assemblySections?: AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload[];
   paperSections?: OrganizationTrainingAdminPaperSectionDetailDto[];
   questions?: OrganizationTrainingAdminQuestionDetailDto[];

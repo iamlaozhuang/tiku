@@ -143,9 +143,19 @@ function normalizeRoutePlan(
     return null;
   }
 
+  const knowledgeCoverage = readKnowledgeCoverage(
+    planContent,
+    generationParameters,
+  );
+
   const normalizedSections = sections
     .map((section, index) =>
-      normalizeRoutePlanSection(section, index, generationParameters),
+      normalizeRoutePlanSection(
+        section,
+        index,
+        generationParameters,
+        knowledgeCoverage.targetKnowledgeNodePublicIds,
+      ),
     )
     .filter(
       (section): section is AiPaperAssemblyPlanSectionDto => section !== null,
@@ -166,14 +176,16 @@ function normalizeRoutePlan(
         "totalQuestionCount",
         "questionCount",
       ]) ?? generationParameters.questionCount,
-    difficultyGoal:
-      readNonEmptyString(planContent, ["difficultyGoal", "difficulty"]) ??
-      generationParameters.difficulty,
+    difficultyGoal: generationParameters.difficulty,
     sourcePreference:
       readSourcePreference(planContent) ??
       generationParameters.sourcePreference,
     sections: normalizedSections,
-    knowledgeCoverage: readKnowledgeCoverage(planContent, generationParameters),
+    knowledgeCoverage,
+    requestConstraints: {
+      difficulty: generationParameters.difficulty,
+      knowledgeNodePublicIds: [...generationParameters.knowledgeNodePublicIds],
+    },
   };
 }
 
@@ -181,6 +193,7 @@ function normalizeRoutePlanSection(
   section: unknown,
   index: number,
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+  planKnowledgeNodePublicIds: readonly string[],
 ): AiPaperAssemblyPlanSectionDto | null {
   if (!isRecord(section)) {
     return null;
@@ -225,14 +238,9 @@ function normalizeRoutePlanSection(
     knowledgeNodePublicIds:
       knowledgeNodePublicIds.length > 0
         ? knowledgeNodePublicIds
-        : [...generationParameters.knowledgeNodePublicIds],
-    parentKnowledgeNodePublicIds: readStringArray(section, [
-      "parentKnowledgeNodePublicIds",
-      "parent_knowledge_node_public_ids",
-    ]),
-    difficulty:
-      readNonEmptyString(section, ["difficulty"]) ??
-      generationParameters.difficulty,
+        : [...planKnowledgeNodePublicIds],
+    parentKnowledgeNodePublicIds: [],
+    difficulty: generationParameters.difficulty,
   };
 }
 
@@ -258,6 +266,11 @@ function isRoutePlanSectionContractCompatible(
     ]) ?? generationParameters.questionCount;
 
   return (
+    isRoutePlanConstraintCompatible(
+      sections,
+      planContent,
+      generationParameters,
+    ) &&
     areRoutePlanSectionsCompatibleWithStructure(
       sections,
       generationParameters.paperStructure ?? null,
@@ -268,6 +281,72 @@ function isRoutePlanSectionContractCompatible(
       targetQuestionCount,
     )
   );
+}
+
+function isRoutePlanConstraintCompatible(
+  sections: readonly unknown[],
+  planContent: Record<string, unknown>,
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+): boolean {
+  const planDifficulty = readOptionalNonEmptyString(planContent, [
+    "difficultyGoal",
+    "difficulty_goal",
+    "difficulty",
+  ]);
+  if (
+    !planDifficulty.valid ||
+    (planDifficulty.present &&
+      planDifficulty.value !== generationParameters.difficulty)
+  ) {
+    return false;
+  }
+
+  const coverage = readStrictKnowledgeCoverage(planContent);
+  if (
+    !coverage.valid ||
+    coverage.parentKnowledgeNodePublicIds.length > 0 ||
+    !isKnowledgeScopeSubset(
+      coverage.knowledgeNodePublicIds,
+      generationParameters.knowledgeNodePublicIds,
+    )
+  ) {
+    return false;
+  }
+  const effectivePlanKnowledgeNodePublicIds =
+    coverage.knowledgeNodePublicIds.length > 0
+      ? coverage.knowledgeNodePublicIds
+      : generationParameters.knowledgeNodePublicIds;
+
+  return sections.every((section) => {
+    if (!isRecord(section)) {
+      return false;
+    }
+
+    const sectionDifficulty = readOptionalNonEmptyString(section, [
+      "difficulty",
+    ]);
+    const sectionScope = readStrictStringArrayProperty(section, [
+      "knowledgeNodePublicIds",
+      "knowledge_node_public_ids",
+    ]);
+    const sectionParentScope = readStrictStringArrayProperty(section, [
+      "parentKnowledgeNodePublicIds",
+      "parent_knowledge_node_public_ids",
+    ]);
+
+    return (
+      sectionDifficulty.valid &&
+      (!sectionDifficulty.present ||
+        sectionDifficulty.value === generationParameters.difficulty) &&
+      sectionScope.valid &&
+      sectionParentScope.valid &&
+      sectionParentScope.values.length === 0 &&
+      isKnowledgeScopeSubset(
+        sectionScope.values,
+        effectivePlanKnowledgeNodePublicIds,
+      )
+    );
+  });
 }
 
 function areRoutePlanSectionsCompatibleWithQuestionTypeDistribution(
@@ -504,12 +583,128 @@ function readKnowledgeCoverage(
       targetKnowledgeNodePublicIds.length > 0
         ? targetKnowledgeNodePublicIds
         : [...generationParameters.knowledgeNodePublicIds],
-    targetParentKnowledgeNodePublicIds: readStringArray(knowledgeCoverage, [
-      "targetParentKnowledgeNodePublicIds",
-      "parentKnowledgeNodePublicIds",
-      "parent_knowledge_node_public_ids",
-    ]),
+    targetParentKnowledgeNodePublicIds: [],
   };
+}
+
+function readOptionalNonEmptyString(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): { present: boolean; valid: boolean; value: string | null } {
+  for (const key of keys) {
+    if (!(key in source)) {
+      continue;
+    }
+
+    const value = source[key];
+    if (typeof value !== "string") {
+      return { present: true, valid: false, value: null };
+    }
+
+    const normalizedValue = value.trim();
+    return {
+      present: true,
+      valid: normalizedValue.length > 0,
+      value: normalizedValue.length > 0 ? normalizedValue : null,
+    };
+  }
+
+  return { present: false, valid: true, value: null };
+}
+
+function readStrictStringArrayProperty(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): { present: boolean; valid: boolean; values: string[] } {
+  for (const key of keys) {
+    if (!(key in source)) {
+      continue;
+    }
+
+    const value = source[key];
+    if (!Array.isArray(value)) {
+      return { present: true, valid: false, values: [] };
+    }
+
+    const values: string[] = [];
+    const canonicalValues = new Set<string>();
+    for (const item of value) {
+      if (typeof item !== "string") {
+        return { present: true, valid: false, values: [] };
+      }
+
+      const normalizedValue = item.trim();
+      const canonicalValue = normalizedValue.normalize("NFKC").toLowerCase();
+      if (normalizedValue.length === 0 || canonicalValues.has(canonicalValue)) {
+        return { present: true, valid: false, values: [] };
+      }
+      canonicalValues.add(canonicalValue);
+      values.push(normalizedValue);
+    }
+
+    return { present: true, valid: true, values };
+  }
+
+  return { present: false, valid: true, values: [] };
+}
+
+function readStrictKnowledgeCoverage(planContent: Record<string, unknown>): {
+  valid: boolean;
+  knowledgeNodePublicIds: string[];
+  parentKnowledgeNodePublicIds: string[];
+} {
+  const coverage =
+    planContent.knowledgeCoverage ?? planContent.knowledge_coverage;
+  if (coverage === undefined) {
+    return {
+      valid: true,
+      knowledgeNodePublicIds: [],
+      parentKnowledgeNodePublicIds: [],
+    };
+  }
+
+  if (Array.isArray(coverage)) {
+    const scope = readStrictStringArrayProperty({ values: coverage }, [
+      "values",
+    ]);
+    return {
+      valid: scope.valid,
+      knowledgeNodePublicIds: scope.values,
+      parentKnowledgeNodePublicIds: [],
+    };
+  }
+
+  if (!isRecord(coverage)) {
+    return {
+      valid: false,
+      knowledgeNodePublicIds: [],
+      parentKnowledgeNodePublicIds: [],
+    };
+  }
+
+  const scope = readStrictStringArrayProperty(coverage, [
+    "targetKnowledgeNodePublicIds",
+    "knowledgeNodePublicIds",
+    "knowledge_node_public_ids",
+  ]);
+  const parentScope = readStrictStringArrayProperty(coverage, [
+    "targetParentKnowledgeNodePublicIds",
+    "parentKnowledgeNodePublicIds",
+    "parent_knowledge_node_public_ids",
+  ]);
+  return {
+    valid: scope.valid && parentScope.valid,
+    knowledgeNodePublicIds: scope.values,
+    parentKnowledgeNodePublicIds: parentScope.values,
+  };
+}
+
+function isKnowledgeScopeSubset(
+  candidatePublicIds: readonly string[],
+  requestedPublicIds: readonly string[],
+): boolean {
+  const requested = new Set(requestedPublicIds);
+  return candidatePublicIds.every((publicId) => requested.has(publicId));
 }
 
 function readSourcePreference(

@@ -18,6 +18,10 @@ import type {
   ListAdminAiGenerationResultsByTaskPublicIdsQuery,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
+import type {
+  AiPaperConstraintLineageDto,
+  AiPaperSelectedConstraintMatchBasisDto,
+} from "../contracts/ai-paper-plan-and-select-contract";
 import type { AdminAiGenerationResultFormalAdoptionStatus } from "../models/admin-ai-generation-result";
 import type {
   OrganizationTrainingAdminPaperSectionDetailDto,
@@ -287,6 +291,12 @@ const paperSourceKinds = [
   "platform_formal_question",
   "enterprise_training_snapshot",
 ] as const;
+const paperMatchTiers = [
+  "exact",
+  "descendant",
+  "nearby_knowledge",
+  "same_scope",
+] as const;
 
 const generationProfessions = ["monopoly", "marketing", "logistics"] as const;
 const generationSubjects = ["theory", "skill"] as const;
@@ -408,6 +418,14 @@ function isPaperSourceKind(
 ): value is AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"][number]["sourceKind"] {
   return paperSourceKinds.includes(
     value as AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"][number]["sourceKind"],
+  );
+}
+
+function isPaperMatchTier(
+  value: unknown,
+): value is AiPaperSelectedConstraintMatchBasisDto["matchTier"] {
+  return paperMatchTiers.includes(
+    value as AiPaperSelectedConstraintMatchBasisDto["matchTier"],
   );
 }
 
@@ -545,8 +563,18 @@ function normalizeSelectedPaperQuestion(
   if (
     typeof value.questionPublicId !== "string" ||
     !isPaperSourceKind(value.sourceKind) ||
-    typeof value.matchTier !== "string" ||
+    !isPaperMatchTier(value.matchTier) ||
     typeof value.score !== "number"
+  ) {
+    return null;
+  }
+
+  const constraintMatchBasis = normalizePaperConstraintMatchBasis(
+    value.constraintMatchBasis,
+  );
+  if (
+    value.constraintMatchBasis !== undefined &&
+    constraintMatchBasis === null
   ) {
     return null;
   }
@@ -554,11 +582,46 @@ function normalizeSelectedPaperQuestion(
   return {
     questionPublicId: value.questionPublicId,
     sourceKind: value.sourceKind,
-    matchTier:
-      value.matchTier === "nearby_knowledge" || value.matchTier === "same_scope"
-        ? value.matchTier
-        : "exact",
+    matchTier: value.matchTier,
     score: value.score,
+    ...(constraintMatchBasis === null ? {} : { constraintMatchBasis }),
+  };
+}
+
+function normalizePaperConstraintMatchBasis(
+  value: unknown,
+): AiPaperSelectedConstraintMatchBasisDto | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const difficulty = normalizeNullableNonEmptyString(value.difficulty);
+  const knowledgeNodePublicIds = normalizeUniqueStringArray(
+    value.knowledgeNodePublicIds,
+  );
+  const parentKnowledgeNodePublicIds = normalizeUniqueStringArray(
+    value.parentKnowledgeNodePublicIds,
+  );
+  const ancestorKnowledgeNodePublicIds = normalizeUniqueStringArray(
+    value.ancestorKnowledgeNodePublicIds,
+  );
+
+  if (
+    difficulty === undefined ||
+    knowledgeNodePublicIds === null ||
+    parentKnowledgeNodePublicIds === null ||
+    ancestorKnowledgeNodePublicIds === null ||
+    !isPaperMatchTier(value.matchTier)
+  ) {
+    return null;
+  }
+
+  return {
+    difficulty,
+    knowledgeNodePublicIds,
+    parentKnowledgeNodePublicIds,
+    ancestorKnowledgeNodePublicIds,
+    matchTier: value.matchTier,
   };
 }
 
@@ -665,6 +728,9 @@ export function resolveOrganizationTrainingPaperDraftSnapshot(
   }
 
   const sourceComposition = paperDraftSnapshot.sourceComposition;
+  const constraintLineage = normalizePaperConstraintLineage(
+    paperDraftSnapshot.constraintLineage,
+  );
 
   if (
     typeof paperDraftSnapshot.paperTitle !== "string" ||
@@ -678,7 +744,9 @@ export function resolveOrganizationTrainingPaperDraftSnapshot(
     typeof sourceComposition.platformFormalQuestionCount !== "number" ||
     typeof sourceComposition.enterpriseTrainingSnapshotCount !== "number" ||
     !isPaperMatchQuality(paperDraftSnapshot.matchQuality) ||
-    paperDraftSnapshot.redactionStatus !== "admin_safe_detail"
+    paperDraftSnapshot.redactionStatus !== "admin_safe_detail" ||
+    (paperDraftSnapshot.constraintLineage !== undefined &&
+      constraintLineage === null)
   ) {
     return null;
   }
@@ -728,6 +796,7 @@ export function resolveOrganizationTrainingPaperDraftSnapshot(
         sourceComposition.enterpriseTrainingSnapshotCount,
     },
     matchQuality: paperDraftSnapshot.matchQuality,
+    ...(constraintLineage === null ? {} : { constraintLineage }),
     ...(assemblySections.length === 0
       ? {}
       : {
@@ -747,6 +816,88 @@ export function resolveOrganizationTrainingPaperDraftSnapshot(
         }),
     redactionStatus: "admin_safe_detail",
   };
+}
+
+function normalizePaperConstraintLineage(
+  value: unknown,
+): AiPaperConstraintLineageDto | null {
+  if (!isRecord(value) || !isRecord(value.request) || !isRecord(value.plan)) {
+    return null;
+  }
+
+  const requestKnowledgeNodePublicIds = normalizeUniqueStringArray(
+    value.request.knowledgeNodePublicIds,
+  );
+  const planKnowledgeNodePublicIds = normalizeUniqueStringArray(
+    value.plan.knowledgeNodePublicIds,
+  );
+  const planParentKnowledgeNodePublicIds = normalizeUniqueStringArray(
+    value.plan.parentKnowledgeNodePublicIds,
+  );
+  const requestDifficulty = normalizeNullableNonEmptyString(
+    value.request.difficulty,
+  );
+  const planDifficulty = normalizeNullableNonEmptyString(value.plan.difficulty);
+
+  if (
+    requestKnowledgeNodePublicIds === null ||
+    planKnowledgeNodePublicIds === null ||
+    planParentKnowledgeNodePublicIds === null ||
+    requestDifficulty === undefined ||
+    planDifficulty === undefined
+  ) {
+    return null;
+  }
+
+  return {
+    request: {
+      difficulty: requestDifficulty,
+      knowledgeNodePublicIds: requestKnowledgeNodePublicIds,
+    },
+    plan: {
+      difficulty: planDifficulty,
+      knowledgeNodePublicIds: planKnowledgeNodePublicIds,
+      parentKnowledgeNodePublicIds: planParentKnowledgeNodePublicIds,
+    },
+  };
+}
+
+function normalizeNullableNonEmptyString(
+  value: unknown,
+): string | null | undefined {
+  if (value === null) {
+    return null;
+  }
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return undefined;
+  }
+
+  return value.trim();
+}
+
+function normalizeUniqueStringArray(value: unknown): string[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const normalizedValues: string[] = [];
+  const canonicalValues = new Set<string>();
+  for (const item of value) {
+    if (typeof item !== "string" || item.trim().length === 0) {
+      return null;
+    }
+
+    const normalizedValue = item.trim();
+    const canonicalValue = normalizedValue.normalize("NFKC").toLowerCase();
+    if (canonicalValues.has(canonicalValue)) {
+      return null;
+    }
+    canonicalValues.add(canonicalValue);
+    normalizedValues.push(normalizedValue);
+  }
+
+  return normalizedValues;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

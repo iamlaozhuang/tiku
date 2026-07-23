@@ -422,7 +422,11 @@ export type AiGenerationRouteIntegratedStructuredPreviewOptions =
       generationParameters?: Partial<
         Pick<
           AiGenerationRouteIntegratedGenerationParameters,
-          "sourcePreference" | "questionTypeDistribution" | "paperStructure"
+          | "sourcePreference"
+          | "questionTypeDistribution"
+          | "paperStructure"
+          | "difficulty"
+          | "knowledgeNodePublicIds"
         >
       > | null;
     };
@@ -513,6 +517,8 @@ export type AiGenerationRouteIntegratedStructuredPreview =
         | "source_preference_mismatch"
         | "question_type_distribution_mismatch"
         | "paper_structure_mismatch"
+        | "difficulty_mismatch"
+        | "knowledge_scope_mismatch"
         | "provider_question_content_forbidden";
       requestedQuestionCount?: number | null;
       paperSectionCount: number;

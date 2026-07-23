@@ -893,27 +893,27 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-07-student-ai-generation-parameter-lineage-2026-07-22
-  title: Student AI generation parameter lineage
-  phase: p1-remediation-rc-07-student-ai-generation-parameter-lineage-2026-07-22
+  id: p1-remediation-rc-07-ai-paper-plan-constraint-lineage-2026-07-22
+  title: AI paper plan constraint lineage
+  phase: p1-remediation-rc-07-ai-paper-plan-constraint-lineage-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: low_risk_UI_parameter_lineage
-  productClosureContribution: closes_F0159
-  branch: fix/student-ai-generation-parameter-lineage
+  taskKind: bounded_Provider_adapter_pure_logic_and_application_result_lineage
+  productClosureContribution: closes_F0168
+  branch: fix/ai-paper-plan-constraint-lineage
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0159
+    - F-0168
   candidateRootCauseCluster: P1-RC-07
-  objective: bind every editable learner AI question and paper parameter to typed state and the exact submitted generationParameters while removing unsupported duration pseudo-input
-  executionStage: validated_and_adversarially_reviewed_ready_for_conditional_closeout
+  objective: reject Provider paper-plan difficulty and knowledge drift before local selection and preserve request/plan/actual constraint lineage through new admin and learner results
+  executionStage: candidate_frozen_validation_green_and_main_thread_adversarial_review_green
   findingStatus: in_progress
-  findingDisposition: F0159_current_UI_to_request_parameter_lineage_root_cause
+  findingDisposition: F0168_single_shared_request_plan_selector_lineage_root_cause
   riskBoundary:
-    category: low_risk_UI_parameter_lineage
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    approvedBaseSha: b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56
-    requestedBaseSha: b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56
+    category: bounded_Provider_adapter_pure_logic_and_application_result_lineage
+    approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+    approvedBaseSha: dde9d3ce9322bcdd7fd8a905dbfdaf7c01078786
+    requestedBaseSha: dde9d3ce9322bcdd7fd8a905dbfdaf7c01078786
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
@@ -922,49 +922,57 @@ currentTask:
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: learner_detail_controls_to_typed_form_state_to_generationParameters_to_existing_validator_route_snapshot_Provider_context_and_history
-    coreFiles: 4
-    contingencyFiles: 5
-    preflightTestFiles: 5
+    chain: server_generationParameters_to_Provider_plan_to_structured_preview_to_route_normalization_to_local_selector_to_constraint_lineage_to_admin_and_learner_results
+    coreFiles: 14
+    contingencyFiles: 14
+    preflightTestFiles: 13
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: editable_static_control_descriptors_do_not_own_state_while_request_builder_hardcodes_different_values_and_duration_has_no_contract_field
-    bundleDisposition: F0159_single_UI_parameter_lineage_task
+    confirmedRootCause: Provider_plan_is_treated_as_free_target_specification_and_result_omits_request_plan_actual_constraint_lineage
+    bundleDisposition: F0158_and_F0169_separate_authoritative_paths
+    standingCallChainExpansion: ai_generation_task_spec_contract_directly_projects_the_generationParameters_subset_into_structured_preview_options
   expectedAcceptance:
-    - all_editable_question_and_paper_parameters_are_controlled_and_submitted_exactly_as_displayed
-    - unsupported_paper_duration_pseudo_control_is_removed
-    - authorization_owned_profession_level_and_knowledge_scope_are_unchanged
-    - existing_validator_snapshot_Provider_context_and_history_lineage_remain_green
-    - F0159_closes_without_schema_permission_Provider_dependency_or_mechanism_change
+    - difficulty_and_knowledge_scope_drift_fail_closed_before_local_selection
+    - omission_inherits_server_request_and_explicit_knowledge_subset_never_escapes_request_scope
+    - new_results_preserve_request_plan_actual_constraint_lineage_and_selected_question_match_basis
+    - admin_and_learner_persistence_and_UI_expose_safe_lineage
+    - no_schema_permission_real_Provider_dependency_mechanism_or_external_change
   validationEvidence:
-    red: 3_expected_failures_proved_default_difficulty_display_request_divergence_unbound_parameters_and_unsupported_duration_control
-    focused: 5_files_153_tests_passed_exit_0_22s
-    lint: targeted_student_page_exit_0_after_formatter
-    typecheck: tsc_noEmit_exit_0_9s
-    build: next_build_exit_0_70s_with_preexisting_NFT_trace_warning
-    formatAndDiff: scoped_prettier_and_git_diff_check_exit_0
-    stateContractParse: strict_JSON_and_YAML_parse_exit_0
-    adversarialReview: pass_all_editable_parameters_controlled_explicit_mapping_invalid_option_ignored_auth_and_knowledge_scope_unchanged_no_duration_pseudo_contract
-    testOnlyFixtureUpdate: current_question_prompt_v2_and_strict_question_set_fixture_restored_existing_Provider_boundary_regression_without_weakened_assertions
+    red: 3_files_71_tests_with_4_expected_constraint_drift_and_missing_lineage_failures
+    focused: 13_files_357_tests_GREEN
+    lint: targeted_12_product_files_GREEN_zero_warnings
+    typecheck: tsc_noEmit_GREEN
+    build: next_build_GREEN_with_pre_existing_NFT_trace_warning_only
+    formatDiffState: prettier_diff_check_and_strict_JSON_YAML_parse_GREEN
+  adversarialReview:
+    status: GREEN_no_blocker
+    checks:
+      - explicit_difficulty_knowledge_parent_and_section_scope_drift_rejected_before_local_selection
+      - omitted_constraints_inherit_request_and_explicit_subset_constrains_sections_and_actual_selection
+      - duplicate_case_Unicode_identity_collisions_and_out_of_scope_values_fail_closed
+      - every_new_selected_question_has_actual_match_basis_and_new_admin_personal_snapshots_preserve_lineage
+      - legacy_snapshot_absence_remains_read_compatible_but_malformed_new_lineage_fails_closed
+      - no_schema_database_permission_dependency_Provider_execution_configuration_mechanism_or_external_change
+      - F0158_and_F0169_remain_separate_and_untouched
   closeoutProjection:
-    current: focused_build_and_adversarial_review_GREEN_ready_for_kernel_commit
-    triggers: focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0159_closed_then_resume_F0158_F0168_F0169_residual_review
+    current: candidate_frozen_validation_green_and_main_thread_adversarial_review_green
+    triggers: TDD_focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0168_closed_then_resume_F0158_and_F0169_residual_review
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_low_risk_standing_closeout
+    mandatoryFreshApprovals: 0_bounded_medium_risk_standing_authorization
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 0
-    productValueTime: JIT_UI_parameter_lineage_analysis_and_TDD
-    mechanismOverhead: task_contract_materialization
+    productValueTime: JIT_constraint_lineage_analysis_TDD_implementation_and_adversarial_review
+    mechanismOverhead: task_contract_state_updates_and_single_kernel_closeout
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22
+    taskId: p1-remediation-rc-07-student-ai-generation-parameter-lineage-2026-07-22
     findingIds:
-      - F-0154
-    commit: b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56
+      - F-0159
+    commit: dde9d3ce9322bcdd7fd8a905dbfdaf7c01078786
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: open_partitioned
+    findingStatus: closed
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass

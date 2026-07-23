@@ -112,6 +112,26 @@ export function assembleAiPaperFromPlan(
       selectedQuestions,
       input.plan.targetQuestionCount,
     ),
+    constraintLineage: {
+      request: {
+        difficulty:
+          input.plan.requestConstraints?.difficulty ??
+          input.plan.difficultyGoal,
+        knowledgeNodePublicIds: [
+          ...(input.plan.requestConstraints?.knowledgeNodePublicIds ??
+            input.plan.knowledgeCoverage.targetKnowledgeNodePublicIds),
+        ],
+      },
+      plan: {
+        difficulty: input.plan.difficultyGoal,
+        knowledgeNodePublicIds: [
+          ...input.plan.knowledgeCoverage.targetKnowledgeNodePublicIds,
+        ],
+        parentKnowledgeNodePublicIds: [
+          ...input.plan.knowledgeCoverage.targetParentKnowledgeNodePublicIds,
+        ],
+      },
+    },
     sections,
   };
   const missingQuestionCount = Math.max(
@@ -245,6 +265,17 @@ function selectQuestionsForSection(
         >,
         matchTier,
         score: section.targetScore,
+        constraintMatchBasis: {
+          difficulty: candidate.difficulty,
+          knowledgeNodePublicIds: [...candidate.knowledgeNodePublicIds],
+          parentKnowledgeNodePublicIds: [
+            ...candidate.parentKnowledgeNodePublicIds,
+          ],
+          ancestorKnowledgeNodePublicIds: [
+            ...(candidate.ancestorKnowledgeNodePublicIds ?? []),
+          ],
+          matchTier,
+        },
       });
     }
   }

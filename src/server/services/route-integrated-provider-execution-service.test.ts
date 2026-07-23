@@ -945,6 +945,146 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
+  it("rejects paper structured previews when Provider difficulty or knowledge scope drifts from the server request", () => {
+    const createPlan = (override: Record<string, unknown>) =>
+      JSON.stringify({
+        title: "synthetic constrained paper plan",
+        targetQuestionCount: 1,
+        difficultyGoal: "medium",
+        sections: [
+          {
+            paperSectionType: "single_choice",
+            questionCount: 1,
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+          },
+        ],
+        knowledgeCoverage: {
+          targetKnowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+          targetParentKnowledgeNodePublicIds: [],
+        },
+        ...override,
+      });
+    const options = {
+      structuredPreview: {
+        kind: "paper_draft" as const,
+        requestedQuestionCount: 1,
+        generationParameters: {
+          difficulty: "medium",
+          knowledgeNodePublicIds: [
+            "knowledge_node_public_allowed",
+            "knowledge_node_public_second",
+          ],
+        },
+      },
+    };
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(createPlan({}), options),
+    ).toMatchObject({
+      structuredPreview: {
+        parseStatus: "parsed",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        createPlan({ difficultyGoal: "hard" }),
+        options,
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        parseStatus: "failed",
+        failureCategory: "difficulty_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        createPlan({
+          knowledgeCoverage: {
+            targetKnowledgeNodePublicIds: ["knowledge_node_public_other"],
+          },
+        }),
+        options,
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        parseStatus: "failed",
+        failureCategory: "knowledge_scope_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        createPlan({
+          sections: [
+            {
+              paperSectionType: "single_choice",
+              questionCount: 1,
+              difficulty: "medium",
+              knowledgeNodePublicIds: ["knowledge_node_public_other"],
+            },
+          ],
+        }),
+        options,
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        parseStatus: "failed",
+        failureCategory: "knowledge_scope_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        createPlan({
+          sections: [
+            {
+              paperSectionType: "single_choice",
+              questionCount: 1,
+              difficulty: "medium",
+              knowledgeNodePublicIds: ["knowledge_node_public_second"],
+            },
+          ],
+        }),
+        options,
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        parseStatus: "failed",
+        failureCategory: "knowledge_scope_mismatch",
+      },
+    });
+
+    for (const knowledgeCoverage of [
+      {
+        targetKnowledgeNodePublicIds: [
+          "knowledge_node_public_allowed",
+          "knowledge_node_public_allowed",
+        ],
+      },
+      {
+        targetKnowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+        targetParentKnowledgeNodePublicIds: [
+          "knowledge_node_parent_public_injected",
+        ],
+      },
+    ]) {
+      expect(
+        createRouteIntegratedVisibleGeneratedContent(
+          createPlan({ knowledgeCoverage }),
+          options,
+        ),
+      ).toMatchObject({
+        structuredPreview: {
+          parseStatus: "failed",
+          failureCategory: "knowledge_scope_mismatch",
+        },
+      });
+    }
+  });
+
   it("rejects paper structured previews when section counts do not match the requested question type distribution", () => {
     const content = JSON.stringify({
       title: "synthetic paper plan title",

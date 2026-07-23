@@ -1100,6 +1100,8 @@ function findPaperDraftContractFailure(
   | "source_preference_mismatch"
   | "question_type_distribution_mismatch"
   | "paper_structure_mismatch"
+  | "difficulty_mismatch"
+  | "knowledge_scope_mismatch"
   | null {
   const expectedSourcePreference = generationParameters?.sourcePreference;
   const actualSourcePreference = readSafeLabel(parsedContent, [
@@ -1144,6 +1146,83 @@ function findPaperDraftContractFailure(
     return "paper_structure_mismatch";
   }
 
+  const hasExpectedDifficulty = generationParameters?.difficulty !== undefined;
+  const expectedDifficulty = generationParameters?.difficulty ?? null;
+  const actualDifficulty = readOptionalSafeLabel(parsedContent, [
+    "difficultyGoal",
+    "difficulty_goal",
+    "difficulty",
+  ]);
+
+  if (
+    hasExpectedDifficulty &&
+    actualDifficulty.present &&
+    (!actualDifficulty.valid || actualDifficulty.value !== expectedDifficulty)
+  ) {
+    return "difficulty_mismatch";
+  }
+
+  const hasExpectedKnowledgeScope =
+    generationParameters?.knowledgeNodePublicIds !== undefined;
+  const expectedKnowledgeNodePublicIds =
+    generationParameters?.knowledgeNodePublicIds ?? [];
+  const knowledgeCoverage = readPaperPlanKnowledgeCoverage(parsedContent);
+
+  if (
+    hasExpectedKnowledgeScope &&
+    (!knowledgeCoverage.valid ||
+      !isKnowledgeScopeSubset(
+        knowledgeCoverage.knowledgeNodePublicIds,
+        expectedKnowledgeNodePublicIds,
+      ) ||
+      knowledgeCoverage.parentKnowledgeNodePublicIds.length > 0)
+  ) {
+    return "knowledge_scope_mismatch";
+  }
+  const effectivePlanKnowledgeNodePublicIds =
+    knowledgeCoverage.knowledgeNodePublicIds.length > 0
+      ? knowledgeCoverage.knowledgeNodePublicIds
+      : expectedKnowledgeNodePublicIds;
+
+  for (const paperSection of paperSections) {
+    if (!isRecord(paperSection)) {
+      return "paper_structure_mismatch";
+    }
+
+    const sectionDifficulty = readOptionalSafeLabel(paperSection, [
+      "difficulty",
+    ]);
+    if (
+      hasExpectedDifficulty &&
+      sectionDifficulty.present &&
+      (!sectionDifficulty.valid ||
+        sectionDifficulty.value !== expectedDifficulty)
+    ) {
+      return "difficulty_mismatch";
+    }
+
+    const sectionKnowledgeScope = readStrictStringArrayProperty(paperSection, [
+      "knowledgeNodePublicIds",
+      "knowledge_node_public_ids",
+    ]);
+    const sectionParentKnowledgeScope = readStrictStringArrayProperty(
+      paperSection,
+      ["parentKnowledgeNodePublicIds", "parent_knowledge_node_public_ids"],
+    );
+    if (
+      hasExpectedKnowledgeScope &&
+      (!sectionKnowledgeScope.valid ||
+        !sectionParentKnowledgeScope.valid ||
+        !isKnowledgeScopeSubset(
+          sectionKnowledgeScope.values,
+          effectivePlanKnowledgeNodePublicIds,
+        ) ||
+        sectionParentKnowledgeScope.values.length > 0)
+    ) {
+      return "knowledge_scope_mismatch";
+    }
+  }
+
   if (
     expectedPaperStructure !== null &&
     expectedPaperStructure !== undefined &&
@@ -1168,6 +1247,129 @@ function findPaperDraftContractFailure(
   }
 
   return null;
+}
+
+function readOptionalSafeLabel(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): { present: boolean; valid: boolean; value: string | null } {
+  for (const key of keys) {
+    if (!(key in source)) {
+      continue;
+    }
+
+    const value = source[key];
+    if (typeof value !== "string") {
+      return { present: true, valid: false, value: null };
+    }
+
+    const normalizedValue = value.trim();
+    return {
+      present: true,
+      valid: normalizedValue.length > 0 && normalizedValue.length <= 40,
+      value: normalizedValue.length > 0 ? normalizedValue : null,
+    };
+  }
+
+  return { present: false, valid: true, value: null };
+}
+
+function readStrictStringArrayProperty(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): { present: boolean; valid: boolean; values: string[] } {
+  for (const key of keys) {
+    if (!(key in source)) {
+      continue;
+    }
+
+    const value = source[key];
+    if (!Array.isArray(value)) {
+      return { present: true, valid: false, values: [] };
+    }
+
+    const values: string[] = [];
+    const canonicalValues = new Set<string>();
+    for (const item of value) {
+      if (typeof item !== "string") {
+        return { present: true, valid: false, values: [] };
+      }
+
+      const normalizedValue = item.trim();
+      const canonicalValue = normalizedValue.normalize("NFKC").toLowerCase();
+      if (normalizedValue.length === 0 || canonicalValues.has(canonicalValue)) {
+        return { present: true, valid: false, values: [] };
+      }
+
+      canonicalValues.add(canonicalValue);
+      values.push(normalizedValue);
+    }
+
+    return { present: true, valid: true, values };
+  }
+
+  return { present: false, valid: true, values: [] };
+}
+
+function readPaperPlanKnowledgeCoverage(
+  parsedContent: Record<string, unknown>,
+): {
+  valid: boolean;
+  knowledgeNodePublicIds: string[];
+  parentKnowledgeNodePublicIds: string[];
+} {
+  const coverageValue =
+    parsedContent.knowledgeCoverage ?? parsedContent.knowledge_coverage;
+
+  if (coverageValue === undefined) {
+    return {
+      valid: true,
+      knowledgeNodePublicIds: [],
+      parentKnowledgeNodePublicIds: [],
+    };
+  }
+
+  if (Array.isArray(coverageValue)) {
+    const wrapper = { values: coverageValue };
+    const scope = readStrictStringArrayProperty(wrapper, ["values"]);
+    return {
+      valid: scope.valid,
+      knowledgeNodePublicIds: scope.values,
+      parentKnowledgeNodePublicIds: [],
+    };
+  }
+
+  if (!isRecord(coverageValue)) {
+    return {
+      valid: false,
+      knowledgeNodePublicIds: [],
+      parentKnowledgeNodePublicIds: [],
+    };
+  }
+
+  const scope = readStrictStringArrayProperty(coverageValue, [
+    "targetKnowledgeNodePublicIds",
+    "knowledgeNodePublicIds",
+    "knowledge_node_public_ids",
+  ]);
+  const parentScope = readStrictStringArrayProperty(coverageValue, [
+    "targetParentKnowledgeNodePublicIds",
+    "parentKnowledgeNodePublicIds",
+    "parent_knowledge_node_public_ids",
+  ]);
+  return {
+    valid: scope.valid && parentScope.valid,
+    knowledgeNodePublicIds: scope.values,
+    parentKnowledgeNodePublicIds: parentScope.values,
+  };
+}
+
+function isKnowledgeScopeSubset(
+  candidatePublicIds: readonly string[],
+  requestedPublicIds: readonly string[],
+): boolean {
+  const requested = new Set(requestedPublicIds);
+  return candidatePublicIds.every((publicId) => requested.has(publicId));
 }
 
 function arePaperSectionsCompatibleWithQuestionTypeDistribution(

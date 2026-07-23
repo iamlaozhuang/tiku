@@ -10,6 +10,7 @@ import {
   createAdminAiGenerationResultPersistenceRepository,
   createAdminAiGenerationResultsByTaskPublicIdsCondition,
   resolveGenerationParametersSnapshot,
+  resolveOrganizationTrainingPaperDraftSnapshot,
 } from "./admin-ai-generation-result-persistence-repository";
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
@@ -645,6 +646,45 @@ describe("admin AI generation result persistence repository", () => {
                 enterpriseTrainingSnapshotCount: 0,
               },
               matchQuality: "fully_matched",
+              constraintLineage: {
+                request: {
+                  difficulty: "medium",
+                  knowledgeNodePublicIds: ["knowledge_node_public_a"],
+                },
+                plan: {
+                  difficulty: "medium",
+                  knowledgeNodePublicIds: ["knowledge_node_public_a"],
+                  parentKnowledgeNodePublicIds: [],
+                },
+              },
+              assemblySections: [
+                {
+                  sectionKey: "single_choice",
+                  title: "Single choice section",
+                  questionType: "single_choice",
+                  targetQuestionCount: 1,
+                  selectedQuestionCount: 1,
+                  selectedQuestions: [
+                    {
+                      questionPublicId: "question_public_a",
+                      sourceKind: "platform_formal_question",
+                      matchTier: "descendant",
+                      score: 5,
+                      constraintMatchBasis: {
+                        difficulty: "medium",
+                        knowledgeNodePublicIds: ["knowledge_node_public_child"],
+                        parentKnowledgeNodePublicIds: [
+                          "knowledge_node_public_a",
+                        ],
+                        ancestorKnowledgeNodePublicIds: [
+                          "knowledge_node_public_a",
+                        ],
+                        matchTier: "descendant",
+                      },
+                    },
+                  ],
+                },
+              ],
               paperSections: [
                 {
                   sectionKey: "single_choice",
@@ -736,6 +776,34 @@ describe("admin AI generation result persistence repository", () => {
     ).toMatchObject({
       paperTitle: "Synthetic enterprise training paper",
       selectedQuestionCount: 1,
+      constraintLineage: {
+        request: {
+          difficulty: "medium",
+          knowledgeNodePublicIds: ["knowledge_node_public_a"],
+        },
+        plan: {
+          difficulty: "medium",
+          knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          parentKnowledgeNodePublicIds: [],
+        },
+      },
+      assemblySections: [
+        {
+          selectedQuestions: [
+            {
+              questionPublicId: "question_public_a",
+              matchTier: "descendant",
+              constraintMatchBasis: {
+                difficulty: "medium",
+                knowledgeNodePublicIds: ["knowledge_node_public_child"],
+                parentKnowledgeNodePublicIds: ["knowledge_node_public_a"],
+                ancestorKnowledgeNodePublicIds: ["knowledge_node_public_a"],
+                matchTier: "descendant",
+              },
+            },
+          ],
+        },
+      ],
       paperSections: [
         {
           title: "Single choice section",
@@ -755,6 +823,59 @@ describe("admin AI generation result persistence repository", () => {
     expect(JSON.stringify(draftResults)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput|"id":/u,
     );
+  });
+
+  it("fails closed when a persisted paper lineage contains duplicate canonical knowledge identities", () => {
+    expect(
+      resolveOrganizationTrainingPaperDraftSnapshot({
+        workspace: "organization",
+        generation_kind: "paper",
+        content_redacted_snapshot: {
+          organizationTrainingPaperDraft: {
+            paperTitle: "Synthetic paper",
+            requestedQuestionCount: 1,
+            selectedQuestionCount: 1,
+            sourceComposition: {
+              platformFormalQuestionCount: 1,
+              enterpriseTrainingSnapshotCount: 0,
+            },
+            matchQuality: "fully_matched",
+            constraintLineage: {
+              request: {
+                difficulty: "medium",
+                knowledgeNodePublicIds: [
+                  "knowledge_node_public_a",
+                  "KNOWLEDGE_NODE_PUBLIC_A",
+                ],
+              },
+              plan: {
+                difficulty: "medium",
+                knowledgeNodePublicIds: ["knowledge_node_public_a"],
+                parentKnowledgeNodePublicIds: [],
+              },
+            },
+            assemblySections: [
+              {
+                sectionKey: "single_choice",
+                title: "Single choice section",
+                questionType: "single_choice",
+                targetQuestionCount: 1,
+                selectedQuestionCount: 1,
+                selectedQuestions: [
+                  {
+                    questionPublicId: "question_public_a",
+                    sourceKind: "platform_formal_question",
+                    matchTier: "exact",
+                    score: 1,
+                  },
+                ],
+              },
+            ],
+            redactionStatus: "admin_safe_detail",
+          },
+        },
+      }),
+    ).toBeNull();
   });
 
   it("filters draft result history by generation kind before pagination", async () => {

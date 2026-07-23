@@ -39,6 +39,7 @@ export type AiGenerationSharedTaskPreviewOptionsInput = {
       | "questionCount"
       | "questionType"
       | "difficulty"
+      | "knowledgeNodePublicIds"
       | "sourcePreference"
       | "questionTypeDistribution"
       | "paperStructure"

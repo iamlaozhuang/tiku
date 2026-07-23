@@ -2133,6 +2133,32 @@ function createOrganizationTrainingPaperDraftSnapshot(input: {
     selectedQuestionCount: paperAssembly.container.selectedQuestionCount,
     sourceComposition: paperAssembly.container.sourceComposition,
     matchQuality: paperAssembly.container.matchQuality,
+    ...(paperAssembly.container.constraintLineage === undefined
+      ? {}
+      : {
+          constraintLineage: {
+            request: {
+              difficulty:
+                paperAssembly.container.constraintLineage.request.difficulty,
+              knowledgeNodePublicIds: [
+                ...paperAssembly.container.constraintLineage.request
+                  .knowledgeNodePublicIds,
+              ],
+            },
+            plan: {
+              difficulty:
+                paperAssembly.container.constraintLineage.plan.difficulty,
+              knowledgeNodePublicIds: [
+                ...paperAssembly.container.constraintLineage.plan
+                  .knowledgeNodePublicIds,
+              ],
+              parentKnowledgeNodePublicIds: [
+                ...paperAssembly.container.constraintLineage.plan
+                  .parentKnowledgeNodePublicIds,
+              ],
+            },
+          },
+        }),
     assemblySections: paperAssembly.container.sections.map((paperSection) => ({
       sectionKey: paperSection.sectionKey,
       title: paperSection.title,
@@ -2145,6 +2171,26 @@ function createOrganizationTrainingPaperDraftSnapshot(input: {
           sourceKind: selectedQuestion.sourceKind,
           matchTier: selectedQuestion.matchTier,
           score: selectedQuestion.score,
+          ...(selectedQuestion.constraintMatchBasis === undefined
+            ? {}
+            : {
+                constraintMatchBasis: {
+                  difficulty: selectedQuestion.constraintMatchBasis.difficulty,
+                  knowledgeNodePublicIds: [
+                    ...selectedQuestion.constraintMatchBasis
+                      .knowledgeNodePublicIds,
+                  ],
+                  parentKnowledgeNodePublicIds: [
+                    ...selectedQuestion.constraintMatchBasis
+                      .parentKnowledgeNodePublicIds,
+                  ],
+                  ancestorKnowledgeNodePublicIds: [
+                    ...selectedQuestion.constraintMatchBasis
+                      .ancestorKnowledgeNodePublicIds,
+                  ],
+                  matchTier: selectedQuestion.constraintMatchBasis.matchTier,
+                },
+              }),
         }),
       ),
     })),
@@ -2168,6 +2214,7 @@ function createAdminAiGenerationPaperAssemblyRedactedSnapshot(
     selectedQuestionCount: paperAssembly.container.selectedQuestionCount,
     sourceComposition: paperAssembly.container.sourceComposition,
     matchQuality: paperAssembly.container.matchQuality,
+    constraintLineage: paperAssembly.container.constraintLineage ?? null,
     sectionCount: paperAssembly.container.sections.length,
     insufficiency: paperAssembly.insufficiency,
   };

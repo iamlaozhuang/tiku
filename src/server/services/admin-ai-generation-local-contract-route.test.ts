@@ -227,6 +227,7 @@ function createStructuredAdminProviderContent(
 
   return JSON.stringify({
     totalQuestionCount: resolvedGenerationParameters.questionCount,
+    difficultyGoal: resolvedGenerationParameters.difficulty,
     sourcePreference:
       resolvedGenerationParameters.sourcePreference ?? "balanced",
     questionTypeDistribution,
@@ -236,7 +237,7 @@ function createStructuredAdminProviderContent(
       questionTypeDistribution,
       paperStructure,
     ),
-    knowledgeCoverage: ["redacted_knowledge_node"],
+    knowledgeCoverage: resolvedGenerationParameters.knowledgeNodePublicIds,
   });
 }
 
@@ -253,15 +254,13 @@ function createStructuredAdminProviderPaperSections(
     questionTypeDistribution,
     generationParameters.questionCount,
   );
-  const knowledgeNodePublicIds =
-    generationParameters.knowledgeNodePublicIds.length > 0
-      ? generationParameters.knowledgeNodePublicIds
-      : ["knowledge_node_public_default"];
+  const knowledgeNodePublicIds = generationParameters.knowledgeNodePublicIds;
 
   return Array.from(questionTypeCounts.entries()).map(
     ([paperSectionType, questionCount], index) => ({
       paperSectionType,
       questionCount,
+      difficulty: generationParameters.difficulty,
       ...(paperStructure === "by_knowledge_node"
         ? {
             knowledgeNodePublicIds,
@@ -1274,6 +1273,17 @@ function createAssembledPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
           enterpriseTrainingSnapshotCount: 1,
         },
         matchQuality: "fully_matched",
+        constraintLineage: {
+          request: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+          plan: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+            parentKnowledgeNodePublicIds: [],
+          },
+        },
         sections: [
           {
             sectionKey: "single_choice",
@@ -1287,6 +1297,13 @@ function createAssembledPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
                 sourceKind: "platform_formal_question",
                 matchTier: "exact",
                 score: 1,
+                constraintMatchBasis: {
+                  difficulty: "medium",
+                  knowledgeNodePublicIds: ["knowledge_node_public_a"],
+                  parentKnowledgeNodePublicIds: [],
+                  ancestorKnowledgeNodePublicIds: [],
+                  matchTier: "exact",
+                },
               },
               {
                 questionPublicId: "platform_question_public_b",
@@ -2341,6 +2358,17 @@ describe("admin AI generation local contract route handlers", () => {
           platformFormalQuestionCount: 2,
           enterpriseTrainingSnapshotCount: 1,
         },
+        constraintLineage: {
+          request: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+          plan: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+            parentKnowledgeNodePublicIds: [],
+          },
+        },
       },
       organizationTrainingPaperDraft: {
         paperTitle: "redacted paper container",
@@ -2350,6 +2378,17 @@ describe("admin AI generation local contract route handlers", () => {
           enterpriseTrainingSnapshotCount: 1,
         },
         matchQuality: "fully_matched",
+        constraintLineage: {
+          request: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+          plan: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+            parentKnowledgeNodePublicIds: [],
+          },
+        },
         assemblySections: [
           {
             sectionKey: "single_choice",
@@ -2361,6 +2400,13 @@ describe("admin AI generation local contract route handlers", () => {
                 questionPublicId: "platform_question_public_a",
                 sourceKind: "platform_formal_question",
                 score: 1,
+                constraintMatchBasis: {
+                  difficulty: "medium",
+                  knowledgeNodePublicIds: ["knowledge_node_public_a"],
+                  parentKnowledgeNodePublicIds: [],
+                  ancestorKnowledgeNodePublicIds: [],
+                  matchTier: "exact",
+                },
               },
               {
                 questionPublicId: "platform_question_public_b",
@@ -3470,6 +3516,9 @@ describe("admin AI generation local contract route handlers", () => {
         generationParameters: {
           ...defaultAdminGenerationParameters,
           questionCount: 30,
+          knowledgeNode: "脱敏知识点",
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: ["knowledge_node_public_selected"],
           sourcePreference: "prefer_platform",
           questionTypeDistribution: "single_50_multi_25_true_false_25",
           paperStructure: "by_knowledge_node",

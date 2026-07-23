@@ -734,6 +734,17 @@ function createLearnerAiPaperAssemblyContainer(input: {
     },
     matchQuality:
       input.selectedQuestionCount > 0 ? "fully_matched" : "insufficient",
+    constraintLineage: {
+      request: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_a"],
+      },
+      plan: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_a"],
+        parentKnowledgeNodePublicIds: [],
+      },
+    },
     sections: [
       {
         sectionKey: "single_choice",
@@ -1683,6 +1694,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       "student-ai-paper-assembly-summary",
     );
     expect(historyPaperSummary).toHaveTextContent("企业自测试卷预览");
+    expect(historyPaperSummary).toHaveTextContent(
+      "请求难度 medium · 计划难度 medium · 请求知识点 1 个 · 计划知识点 1 个",
+    );
     expect(historyPaperSummary).toHaveTextContent("2/2 题");
     expect(historyPaperSummary).toHaveTextContent("企业训练题 2 题");
     expect(historyPaperSummary).toHaveTextContent("完全匹配");

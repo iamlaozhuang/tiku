@@ -11,7 +11,10 @@ const generationParameters: AiGenerationRouteIntegratedGenerationParameters = {
   subject: "theory",
   knowledgeNode: null,
   knowledgeNodeMode: "balanced",
-  knowledgeNodePublicIds: [],
+  knowledgeNodePublicIds: [
+    "knowledge_node_public_a",
+    "knowledge_node_public_b",
+  ],
   includeDescendants: false,
   knowledgeNodeSupplement: null,
   sourcePreference: null,
@@ -27,7 +30,7 @@ const routePlanContent = JSON.stringify({
   level: 5,
   subject: "skill",
   targetQuestionCount: 3,
-  difficultyGoal: "hard",
+  difficultyGoal: "medium",
   sourcePreference: "prefer_enterprise",
   sections: [
     {
@@ -37,7 +40,7 @@ const routePlanContent = JSON.stringify({
       targetQuestionCount: 2,
       targetScore: 2,
       knowledgeNodePublicIds: ["knowledge_node_public_a"],
-      parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
+      parentKnowledgeNodePublicIds: [],
       difficulty: "medium",
     },
     {
@@ -47,7 +50,7 @@ const routePlanContent = JSON.stringify({
       targetQuestionCount: 1,
       targetScore: 1,
       knowledgeNodePublicIds: ["knowledge_node_public_b"],
-      parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_b"],
+      parentKnowledgeNodePublicIds: [],
       difficulty: "medium",
     },
   ],
@@ -56,10 +59,7 @@ const routePlanContent = JSON.stringify({
       "knowledge_node_public_a",
       "knowledge_node_public_b",
     ],
-    targetParentKnowledgeNodePublicIds: [
-      "knowledge_node_parent_public_a",
-      "knowledge_node_parent_public_b",
-    ],
+    targetParentKnowledgeNodePublicIds: [],
   },
 });
 
@@ -92,6 +92,248 @@ function createParsedVisiblePlan() {
 }
 
 describe("AI组卷 route-visible plan local assembly", () => {
+  it("rejects explicit Provider difficulty and knowledge drift before selecting local questions", () => {
+    const driftedPlan = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        title: "越界组卷方案",
+        targetQuestionCount: 1,
+        difficultyGoal: "hard",
+        sections: [
+          {
+            sectionKey: "single-choice",
+            title: "单选题",
+            questionType: "single_choice",
+            targetQuestionCount: 1,
+            targetScore: 2,
+            difficulty: "hard",
+            knowledgeNodePublicIds: ["knowledge_node_public_other"],
+          },
+        ],
+        knowledgeCoverage: {
+          targetKnowledgeNodePublicIds: ["knowledge_node_public_other"],
+        },
+      }),
+      {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 1,
+        },
+      },
+    );
+    const result = assembleAiPaperFromRouteVisiblePlan({
+      role: "personal_advanced_student",
+      organizationPublicId: null,
+      generationParameters: {
+        ...generationParameters,
+        questionCount: 1,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+      },
+      visibleGeneratedContent: driftedPlan,
+      platformQuestions: [
+        createQuestion({
+          publicId: "question_public_other",
+          difficulty: "hard",
+          knowledgeNodePublicIds: ["knowledge_node_public_other"],
+        }),
+      ],
+      enterpriseQuestions: [],
+    });
+
+    expect(result).toEqual({
+      status: "rejected",
+      assembly: null,
+      rejection: { failureCategory: "invalid_plan_shape" },
+    });
+  });
+
+  it("inherits omitted Provider constraints from the server request without widening knowledge scope", () => {
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          title: "省略约束的组卷方案",
+          targetQuestionCount: 1,
+          sections: [
+            {
+              sectionKey: "single-choice",
+              title: "单选题",
+              questionType: "single_choice",
+              targetQuestionCount: 1,
+              targetScore: 2,
+            },
+          ],
+        }),
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+          },
+        },
+      );
+
+    const result = assembleAiPaperFromRouteVisiblePlan({
+      role: "personal_advanced_student",
+      organizationPublicId: null,
+      generationParameters: {
+        ...generationParameters,
+        questionCount: 1,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+      },
+      visibleGeneratedContent,
+      platformQuestions: [
+        createQuestion({
+          publicId: "question_public_allowed",
+          knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+        }),
+      ],
+      enterpriseQuestions: [],
+    });
+
+    expect(result.status).toBe("assembled");
+    expect(result.assembly?.container.constraintLineage).toEqual({
+      request: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+      },
+      plan: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+        parentKnowledgeNodePublicIds: [],
+      },
+    });
+  });
+
+  it("keeps an explicit Provider knowledge subset as the section fallback and actual selection boundary", () => {
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          title: "知识点子集组卷方案",
+          targetQuestionCount: 1,
+          knowledgeCoverage: {
+            targetKnowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+          },
+          sections: [
+            {
+              sectionKey: "single-choice",
+              title: "单选题",
+              questionType: "single_choice",
+              targetQuestionCount: 1,
+              targetScore: 2,
+            },
+          ],
+        }),
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+            generationParameters: {
+              difficulty: "medium",
+              knowledgeNodePublicIds: [
+                "knowledge_node_public_allowed",
+                "knowledge_node_public_second",
+              ],
+            },
+          },
+        },
+      );
+
+    const result = assembleAiPaperFromRouteVisiblePlan({
+      role: "personal_advanced_student",
+      organizationPublicId: null,
+      generationParameters: {
+        ...generationParameters,
+        questionCount: 1,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_allowed",
+          "knowledge_node_public_second",
+        ],
+      },
+      visibleGeneratedContent,
+      platformQuestions: [
+        createQuestion({
+          publicId: "question_public_second",
+          knowledgeNodePublicIds: ["knowledge_node_public_second"],
+        }),
+        createQuestion({
+          publicId: "question_public_allowed",
+          knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+        }),
+      ],
+      enterpriseQuestions: [],
+    });
+
+    expect(result.status).toBe("assembled");
+    expect(
+      result.assembly?.container.sections[0]?.selectedQuestions[0]
+        ?.questionPublicId,
+    ).toBe("question_public_allowed");
+    expect(result.assembly?.container.constraintLineage).toMatchObject({
+      request: {
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_allowed",
+          "knowledge_node_public_second",
+        ],
+      },
+      plan: {
+        knowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+      },
+    });
+  });
+
+  it("rejects a section that escapes an explicit Provider plan subset even when it remains inside the request", () => {
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          title: "分区越出计划子集",
+          targetQuestionCount: 1,
+          knowledgeCoverage: {
+            targetKnowledgeNodePublicIds: ["knowledge_node_public_allowed"],
+          },
+          sections: [
+            {
+              sectionKey: "single-choice",
+              title: "单选题",
+              questionType: "single_choice",
+              targetQuestionCount: 1,
+              targetScore: 2,
+              knowledgeNodePublicIds: ["knowledge_node_public_second"],
+            },
+          ],
+        }),
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+          },
+        },
+      );
+
+    const result = assembleAiPaperFromRouteVisiblePlan({
+      role: "personal_advanced_student",
+      organizationPublicId: null,
+      generationParameters: {
+        ...generationParameters,
+        questionCount: 1,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_allowed",
+          "knowledge_node_public_second",
+        ],
+      },
+      visibleGeneratedContent,
+      platformQuestions: [],
+      enterpriseQuestions: [],
+    });
+
+    expect(result).toEqual({
+      status: "rejected",
+      assembly: null,
+      rejection: { failureCategory: "invalid_plan_shape" },
+    });
+  });
+
   it("uses route generation parameters as scope truth and assembles personal paper from platform formal sources", () => {
     const result = assembleAiPaperFromRouteVisiblePlan({
       role: "personal_advanced_student",
@@ -471,7 +713,9 @@ describe("AI组卷 route-visible plan local assembly", () => {
 
     expect(result.status).toBe("assembled");
     expect(result.assembly?.container.matchQuality).toBe("fully_matched");
-    expect(result.assembly?.container.sections[0]?.selectedQuestions).toEqual([
+    expect(
+      result.assembly?.container.sections[0]?.selectedQuestions,
+    ).toMatchObject([
       {
         questionPublicId: "platform_question_selected_scope",
         sourceKind: "platform_formal_question",
@@ -479,5 +723,26 @@ describe("AI组卷 route-visible plan local assembly", () => {
         score: 2,
       },
     ]);
+    expect(result.assembly?.container.constraintLineage).toEqual({
+      request: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_selected"],
+      },
+      plan: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_selected"],
+        parentKnowledgeNodePublicIds: [],
+      },
+    });
+    expect(
+      result.assembly?.container.sections[0]?.selectedQuestions[0]
+        ?.constraintMatchBasis,
+    ).toEqual({
+      difficulty: "medium",
+      knowledgeNodePublicIds: ["knowledge_node_public_selected"],
+      parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_a"],
+      ancestorKnowledgeNodePublicIds: [],
+      matchTier: "exact",
+    });
   });
 });

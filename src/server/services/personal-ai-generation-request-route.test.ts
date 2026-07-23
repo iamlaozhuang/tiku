@@ -667,9 +667,7 @@ function createPaperPlanProviderContent(questionCount: number) {
     questionTypeDistribution: {
       single_choice: questionCount,
     },
-    knowledgeCoverage: {
-      knowledgeNodePublicIds: ["knowledge_node_public_default"],
-    },
+    knowledgeCoverage: { knowledgeNodePublicIds: [] },
   });
 }
 
@@ -745,12 +743,26 @@ function createAssembledPaperRouteResult(
       sourceKind: "platform_formal_question" as const,
       matchTier: "exact" as const,
       score: 1,
+      constraintMatchBasis: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_a"],
+        parentKnowledgeNodePublicIds: [],
+        ancestorKnowledgeNodePublicIds: [],
+        matchTier: "exact" as const,
+      },
     })),
     ...Array.from({ length: input.enterpriseQuestionCount }, (_, index) => ({
       questionPublicId: `enterprise_question_public_${index + 1}`,
       sourceKind: "enterprise_training_snapshot" as const,
       matchTier: "same_scope" as const,
       score: 1,
+      constraintMatchBasis: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: ["knowledge_node_public_a"],
+        parentKnowledgeNodePublicIds: [],
+        ancestorKnowledgeNodePublicIds: [],
+        matchTier: "same_scope" as const,
+      },
     })),
   ];
   const selectedQuestionCount = selectedQuestions.length;
@@ -780,6 +792,17 @@ function createAssembledPaperRouteResult(
           enterpriseTrainingSnapshotCount: input.enterpriseQuestionCount,
         },
         matchQuality: "fully_matched",
+        constraintLineage: {
+          request: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+          plan: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+            parentKnowledgeNodePublicIds: [],
+          },
+        },
         sections: [
           {
             sectionKey: "single_choice",
@@ -2874,7 +2897,7 @@ describe("personal AI generation request route handlers", () => {
                   questionTypeDistribution: {
                     single_choice: 50,
                   },
-                  knowledgeCoverage: ["redacted_knowledge_node"],
+                  knowledgeCoverage: [],
                 }),
                 contentVisibility: "transient_response_only",
                 persistenceStatus: "not_persisted",
@@ -3111,6 +3134,44 @@ describe("personal AI generation request route handlers", () => {
       redactionStatus: "redacted",
       container: {
         selectedQuestionCount: 3,
+        constraintLineage: {
+          request: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+          plan: {
+            difficulty: "medium",
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+            parentKnowledgeNodePublicIds: [],
+          },
+        },
+      },
+    });
+    expect(
+      resultRepository.createCalls[0]?.contentRedactedSnapshot.paperAssembly,
+    ).toMatchObject({
+      container: {
+        sections: [
+          {
+            selectedQuestions: [
+              {
+                constraintMatchBasis: {
+                  difficulty: "medium",
+                  knowledgeNodePublicIds: ["knowledge_node_public_a"],
+                  parentKnowledgeNodePublicIds: [],
+                  ancestorKnowledgeNodePublicIds: [],
+                  matchTier: "exact",
+                },
+              },
+              {
+                constraintMatchBasis: { matchTier: "exact" },
+              },
+              {
+                constraintMatchBasis: { matchTier: "same_scope" },
+              },
+            ],
+          },
+        ],
       },
     });
     expect(serializedPayload).not.toContain("synthetic-test-credential");

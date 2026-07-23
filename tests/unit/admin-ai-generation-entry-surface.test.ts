@@ -243,6 +243,17 @@ function createContentPaperAssembly(
         enterpriseTrainingSnapshotCount: 0,
       },
       matchQuality,
+      constraintLineage: {
+        request: {
+          difficulty: "medium",
+          knowledgeNodePublicIds: ["knowledge_node_public_a"],
+        },
+        plan: {
+          difficulty: "medium",
+          knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          parentKnowledgeNodePublicIds: [],
+        },
+      },
       sections: [
         {
           sectionKey: "single_choice",
@@ -1614,6 +1625,11 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("待审试卷草稿");
+    expect(
+      screen.getByTestId("admin-ai-paper-constraint-lineage"),
+    ).toHaveTextContent(
+      "请求难度：medium；计划难度：medium；请求知识点 1个；计划知识点 1个。",
+    );
     expect(
       screen.getByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("平台正式题库");

@@ -751,10 +751,57 @@ function createPersonalAiGenerationPaperAssemblyRedactedSnapshot(
     container: {
       ...paperAssembly.container,
       sourceComposition: { ...paperAssembly.container.sourceComposition },
+      ...(paperAssembly.container.constraintLineage === undefined
+        ? {}
+        : {
+            constraintLineage: {
+              request: {
+                difficulty:
+                  paperAssembly.container.constraintLineage.request.difficulty,
+                knowledgeNodePublicIds: [
+                  ...paperAssembly.container.constraintLineage.request
+                    .knowledgeNodePublicIds,
+                ],
+              },
+              plan: {
+                difficulty:
+                  paperAssembly.container.constraintLineage.plan.difficulty,
+                knowledgeNodePublicIds: [
+                  ...paperAssembly.container.constraintLineage.plan
+                    .knowledgeNodePublicIds,
+                ],
+                parentKnowledgeNodePublicIds: [
+                  ...paperAssembly.container.constraintLineage.plan
+                    .parentKnowledgeNodePublicIds,
+                ],
+              },
+            },
+          }),
       sections: paperAssembly.container.sections.map((paperSection) => ({
         ...paperSection,
         selectedQuestions: paperSection.selectedQuestions.map(
-          (selectedQuestion) => ({ ...selectedQuestion }),
+          (selectedQuestion) => ({
+            ...selectedQuestion,
+            ...(selectedQuestion.constraintMatchBasis === undefined
+              ? {}
+              : {
+                  constraintMatchBasis: {
+                    ...selectedQuestion.constraintMatchBasis,
+                    knowledgeNodePublicIds: [
+                      ...selectedQuestion.constraintMatchBasis
+                        .knowledgeNodePublicIds,
+                    ],
+                    parentKnowledgeNodePublicIds: [
+                      ...selectedQuestion.constraintMatchBasis
+                        .parentKnowledgeNodePublicIds,
+                    ],
+                    ancestorKnowledgeNodePublicIds: [
+                      ...selectedQuestion.constraintMatchBasis
+                        .ancestorKnowledgeNodePublicIds,
+                    ],
+                  },
+                }),
+          }),
         ),
         degradationSummary: { ...paperSection.degradationSummary },
       })),

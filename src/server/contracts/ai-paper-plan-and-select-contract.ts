@@ -50,6 +50,26 @@ export type AiPaperKnowledgeCoverageDto = {
   targetParentKnowledgeNodePublicIds: string[];
 };
 
+export type AiPaperConstraintLineageDto = {
+  request: {
+    difficulty: string | null;
+    knowledgeNodePublicIds: string[];
+  };
+  plan: {
+    difficulty: string | null;
+    knowledgeNodePublicIds: string[];
+    parentKnowledgeNodePublicIds: string[];
+  };
+};
+
+export type AiPaperSelectedConstraintMatchBasisDto = {
+  difficulty: string | null;
+  knowledgeNodePublicIds: string[];
+  parentKnowledgeNodePublicIds: string[];
+  ancestorKnowledgeNodePublicIds: string[];
+  matchTier: AiPaperMatchTier;
+};
+
 export type AiPaperAssemblyPlanSectionDto = {
   sectionKey: string;
   title: string;
@@ -71,6 +91,8 @@ export type AiPaperAssemblyPlanDto = {
   sourcePreference: AiPaperSourcePreference | null;
   sections: AiPaperAssemblyPlanSectionDto[];
   knowledgeCoverage: AiPaperKnowledgeCoverageDto;
+  /** Present for newly normalized route plans; omitted only by legacy/direct callers. */
+  requestConstraints?: AiPaperConstraintLineageDto["request"];
 };
 
 export type AiPaperAssemblyPlanValidationResult =
@@ -114,6 +136,8 @@ export type AiPaperSelectedQuestionDto = {
   sourceKind: Exclude<AiPaperQuestionSourceKind, "ai_generated_draft">;
   matchTier: AiPaperMatchTier;
   score: number;
+  /** Absent only in legacy persisted snapshots. New assemblies always populate it. */
+  constraintMatchBasis?: AiPaperSelectedConstraintMatchBasisDto;
 };
 
 export type AiPaperPlanAndSelectSectionDto = {
@@ -143,6 +167,8 @@ export type AiPaperPlanAndSelectContainerDto = {
     enterpriseTrainingSnapshotCount: number;
   };
   matchQuality: AiPaperMatchQuality;
+  /** Absent only in legacy persisted snapshots. New assemblies always populate it. */
+  constraintLineage?: AiPaperConstraintLineageDto;
   sections: AiPaperPlanAndSelectSectionDto[];
 };
 

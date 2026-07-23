@@ -1668,6 +1668,21 @@ function AdminPaperAssemblyContainer({
         </div>
       </dl>
 
+      {container.constraintLineage === undefined ? null : (
+        <p
+          className="text-text-secondary text-sm leading-6"
+          data-testid="admin-ai-paper-constraint-lineage"
+        >
+          请求难度：{container.constraintLineage.request.difficulty ?? "未指定"}
+          ；计划难度：{container.constraintLineage.plan.difficulty ?? "未指定"}
+          ；请求知识点{" "}
+          {container.constraintLineage.request.knowledgeNodePublicIds.length}
+          个；计划知识点{" "}
+          {container.constraintLineage.plan.knowledgeNodePublicIds.length}
+          个。
+        </p>
+      )}
+
       {paperAssembly.insufficiency !== null ? (
         <p className="text-destructive text-sm leading-6">
           仍缺 {paperAssembly.insufficiency.missingQuestionCount}{" "}
