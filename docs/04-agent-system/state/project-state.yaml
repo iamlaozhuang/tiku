@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
+currentPhase: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
 updatedAt: "2026-07-23T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
+  currentTaskId: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -574,7 +574,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
     - p1-remediation-rc-08-learner-citation-redaction-2026-07-23
     - p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
+    - p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
     - p1-remediation-rc-08-learner-citation-redaction-2026-07-23
     - p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
     - p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
@@ -755,7 +757,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23: closed
     p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23: closed
     p1-remediation-rc-08-learner-citation-redaction-2026-07-23: closed
-    p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23: in_progress
+    p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23: closed
+    p1-remediation-rc-08-student-answer-input-bounds-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -956,66 +959,64 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
-  title: AI scoring point result integrity
-  phase: p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
+  id: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
+  title: Student answer input bounds
+  phase: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: provider_adapter_pure_logic_and_bounded_scoring_result_validation
-  productClosureContribution: closes_F0173_static_scoring_point_exact_set_gap
-  branch: fix/ai-scoring-point-result-integrity
+  taskKind: bounded_student_answer_validation_contraction
+  productClosureContribution: closes_F0174_static_application_amplification_gap
+  branch: fix/student-answer-input-bounds
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0173
+    - F-0174
   candidateRootCauseCluster: P1-RC-08
-  objective: enforce one shared runtime contract requiring an exact one-to-one result for every persisted scoring_point before any direct or durable AI scoring result becomes scored
-  executionStage: validated_ready_for_conditional_closeout
-  findingStatus: static_fix_validated_pending_commit_closeout
-  findingDisposition: exact_set_contract_green_pending_commit_merge_push_sync
+  objective: enforce one shared bounded answer input contract before practice, mock_exam and organization training values can reach persistence, RAG or AI scoring
+  executionStage: ready_for_closeout
+  findingStatus: closed_static_product
+  findingDisposition: application_input_amplification_closed_without_real_database_provider_or_browser_runtime_proof
   riskBoundary:
-    category: provider_adapter_pure_logic_and_bounded_scoring_result_validation
-    approvalId: guardian-f0173-ai-scoring-point-result-integrity-2026-07-23
-    approvalFingerprint: f0173-scoring-point-exact-set-05d92119-envelope-v1-2026-07-23
-    approvedBaseSha: 05d9211927542f39f42526ae3d7b60bcc92507d6
-    requestedBaseSha: 05d9211927542f39f42526ae3d7b60bcc92507d6
+    category: bounded_student_answer_validation_contraction
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    approvedBaseSha: 32cd5469ffcda797ad6750029a2db3aaedfafd37
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
-    providerAdapterPureLogicOnly: true
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: mock_exam_scoring_point_snapshot_to_durable_task_input_to_executor_result_to_completion_and_direct_scoring_service
-    coreFiles: 9
+    chain: practice_and_mock_services_plus_organization_training_route_to_shared_validators_to_answer_snapshot_RAG_and_AI_scoring
+    coreFiles: 11
     contingencyFiles: 3
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0173_independent_current_F0013_runtime_hold_F0063_and_F0137_already_covered
+    bundleDisposition: F0174_independent_current_F0013_runtime_hold_F0063_and_F0137_already_covered
   requiredSemantics:
-    exactSet: expected_and_actual_scoring_point_public_ids_must_be_unique_and_exactly_equal
-    runtimeValidation: malformed_unknown_duplicate_missing_or_non_finite_results_fail_before_scored_persistence
-    normalization: one_shared_contract_preserves_half_point_rounding_and_per_point_caps
+    textLimit: text_answer_max_4000_UTF16_code_units
+    selectionLimit: max_20_unique_labels_each_max_200_UTF16_code_units
+    batchLimit: max_200_dense_answer_items
+    atomicFailure: malformed_or_over_limit_input_rejects_whole_command_without_filter_or_truncation
     unchanged: no_schema_permission_quota_prompt_provider_execution_or_real_external_call
   validationEvidence:
-    tddRed: 9_expected_failures_before_shared_contract_implementation
-    focused: 5_files_72_tests_green
-    lint: exit_0_with_3_pre_existing_unrelated_warnings
-    typecheck: tsc_no_emit_exit_0
-    build: next_build_exit_0
-    scope: 9_actual_changed_files_all_within_12_file_approved_envelope
-    adversarialReview: passed_after_sparse_array_fail_closed_gap_was_fixed
-    runtimeBoundary: static_and_synthetic_only_no_real_provider_or_runtime_data_proof
+    tddRed: shared_contract_missing_4_suites_failed
+    focused: pass_7_files_165_tests
+    lint: pass_0_errors_3_preexisting_unrelated_warnings
+    typecheck: pass
+    build: pass_with_preexisting_Next_output_tracing_warning
+    adversarialReview: pass_dense_sparse_duplicate_atomic_failure_and_all_production_validator_sinks
+    runtimeBoundary: static_and_synthetic_only_no_real_database_provider_or_browser_runtime_proof
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-learner-citation-redaction-2026-07-23
+    taskId: p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
     findingIds:
-      - F-0150
-    commit: 05d9211927542f39f42526ae3d7b60bcc92507d6
-    tree: 493a1cfc00e790a793b53bc7dce993331e337f57
+      - F-0173
+    commit: 32cd5469ffcda797ad6750029a2db3aaedfafd37
+    tree: 0d5c7b29f3647d24676d5aa4020c100530395dc1
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_product_without_browser_or_runtime_network_proof
+    findingStatus: closed_static_product_without_real_provider_or_runtime_data_proof
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
+    closeoutKernel: pass
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active

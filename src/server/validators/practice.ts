@@ -1,3 +1,8 @@
+import {
+  normalizeStudentAnswerSelections,
+  normalizeStudentAnswerText,
+} from "./student-answer";
+
 export type NormalizedStartPracticeInput = {
   paperPublicId: string;
   authorizationSource: "personal_auth" | "org_auth" | null;
@@ -38,17 +43,6 @@ function normalizeOptionalString(value: unknown): string | null {
   const trimmedValue = value.trim();
 
   return trimmedValue.length > 0 ? trimmedValue : null;
-}
-
-function normalizeSelectedLabels(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .filter((label): label is string => typeof label === "string")
-    .map((label) => label.trim())
-    .filter((label) => label.length > 0);
 }
 
 export function normalizeStartPracticeInput(
@@ -98,8 +92,10 @@ export function normalizePracticeAnswerInput(
   const paperQuestionPublicId = normalizeRequiredString(
     input.paperQuestionPublicId,
   );
-  const selectedLabels = normalizeSelectedLabels(input.selectedLabels);
-  const textAnswer = normalizeOptionalString(input.textAnswer);
+  const selectedLabelsResult = normalizeStudentAnswerSelections(
+    input.selectedLabels,
+  );
+  const textAnswerResult = normalizeStudentAnswerText(input.textAnswer);
   const aiExplanationTrigger =
     input.aiExplanationTrigger === "manual_request" ? "manual_request" : null;
   const aiScoringTrigger =
@@ -108,15 +104,17 @@ export function normalizePracticeAnswerInput(
 
   if (
     paperQuestionPublicId === null ||
-    (selectedLabels.length === 0 && textAnswer === null)
+    !selectedLabelsResult.success ||
+    !textAnswerResult.success ||
+    (selectedLabelsResult.value.length === 0 && textAnswerResult.value === null)
   ) {
     return null;
   }
 
   return {
     paperQuestionPublicId,
-    selectedLabels,
-    textAnswer,
+    selectedLabels: selectedLabelsResult.value,
+    textAnswer: textAnswerResult.value,
     aiExplanationTrigger,
     aiScoringTrigger,
     savedFromClientAt,
@@ -138,10 +136,19 @@ export function normalizePracticeQuestionFavoriteInput(
     return null;
   }
 
+  const selectedLabelsResult = normalizeStudentAnswerSelections(
+    input.selectedLabels,
+  );
+  const textAnswerResult = normalizeStudentAnswerText(input.textAnswer);
+
+  if (!selectedLabelsResult.success || !textAnswerResult.success) {
+    return null;
+  }
+
   return {
     paperQuestionPublicId,
-    selectedLabels: normalizeSelectedLabels(input.selectedLabels),
-    textAnswer: normalizeOptionalString(input.textAnswer),
+    selectedLabels: selectedLabelsResult.value,
+    textAnswer: textAnswerResult.value,
     aiExplanationTrigger: null,
     aiScoringTrigger: null,
     savedFromClientAt: normalizeOptionalString(input.savedFromClientAt),

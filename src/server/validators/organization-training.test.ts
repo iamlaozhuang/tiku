@@ -23,6 +23,12 @@ import {
   normalizeOrganizationTrainingSourceContextInput,
   normalizeOrganizationTrainingTakedownInput,
 } from "./organization-training";
+import {
+  STUDENT_ANSWER_ITEM_MAX_COUNT,
+  STUDENT_ANSWER_SELECTION_MAX_COUNT,
+  STUDENT_ANSWER_SELECTION_MAX_LENGTH,
+  STUDENT_ANSWER_TEXT_MAX_LENGTH,
+} from "./student-answer";
 
 describe("organization training contract and validator scaffold", () => {
   it("accepts only the server-owned organization AI result copy identity", () => {
@@ -857,7 +863,7 @@ describe("organization training contract and validator scaffold", () => {
         answerItems: [
           {
             questionPublicId: " training_question_public_123 ",
-            selectedOptionPublicIds: [" option_public_a ", "option_public_a"],
+            selectedOptionPublicIds: [" option_public_a "],
             textAnswer: "",
           },
           {
@@ -945,6 +951,79 @@ describe("organization training contract and validator scaffold", () => {
     });
     expect(JSON.stringify(invalidDraftResult)).not.toContain(rawAnswer);
     expect(JSON.stringify(invalidSubmitResult)).not.toContain(rawAnswer);
+  });
+
+  it("rejects oversized, malformed, duplicate, and sparse employee answer payloads", () => {
+    const answerItem = {
+      questionPublicId: "training_question_public_123",
+      selectedOptionPublicIds: ["option_public_a"],
+      textAnswer: null,
+    };
+    const draftInput = {
+      trainingVersionPublicId: "training_version_public_123",
+      expectedRevision: 0,
+      operationId: "answer_draft_operation_123",
+      answerItems: [answerItem],
+    };
+
+    for (const invalidAnswerItem of [
+      {
+        ...answerItem,
+        textAnswer: "x".repeat(STUDENT_ANSWER_TEXT_MAX_LENGTH + 1),
+      },
+      {
+        ...answerItem,
+        selectedOptionPublicIds: Array.from(
+          { length: STUDENT_ANSWER_SELECTION_MAX_COUNT + 1 },
+          (_, index) => `option_public_${index}`,
+        ),
+      },
+      {
+        ...answerItem,
+        selectedOptionPublicIds: [
+          "x".repeat(STUDENT_ANSWER_SELECTION_MAX_LENGTH + 1),
+        ],
+      },
+      {
+        ...answerItem,
+        selectedOptionPublicIds: ["option_public_a", " option_public_a "],
+      },
+      {
+        ...answerItem,
+        selectedOptionPublicIds: ["option_public_a", 7],
+      },
+    ]) {
+      expect(
+        normalizeOrganizationTrainingEmployeeAnswerDraftInput({
+          ...draftInput,
+          answerItems: [invalidAnswerItem],
+        }).success,
+      ).toBe(false);
+    }
+
+    expect(
+      normalizeOrganizationTrainingEmployeeAnswerSubmitInput({
+        ...draftInput,
+        expectedRevision: 1,
+        operationId: "answer_submit_operation_123",
+        answerItems: Array.from(
+          { length: STUDENT_ANSWER_ITEM_MAX_COUNT + 1 },
+          (_, index) => ({
+            ...answerItem,
+            questionPublicId: `training_question_public_${index}`,
+          }),
+        ),
+      }).success,
+    ).toBe(false);
+
+    const sparseAnswerItems = Array(STUDENT_ANSWER_ITEM_MAX_COUNT);
+    sparseAnswerItems[0] = answerItem;
+    expect(
+      normalizeOrganizationTrainingEmployeeAnswerDraftInput({
+        ...draftInput,
+        answerItems: sparseAnswerItems,
+      }).success,
+    ).toBe(false);
   });
 
   it("keeps DTO shapes public-id based and summary-only for admin visibility", () => {

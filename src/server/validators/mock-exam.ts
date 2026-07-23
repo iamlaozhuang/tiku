@@ -1,3 +1,9 @@
+import {
+  normalizeStudentAnswerItemList,
+  normalizeStudentAnswerSelections,
+  normalizeStudentAnswerText,
+} from "./student-answer";
+
 export type NormalizedStartMockExamInput = {
   paperPublicId: string;
   authorizationSource: "personal_auth" | "org_auth" | null;
@@ -20,8 +26,6 @@ export type NormalizedSubmitMockExamInput = {
 export type NormalizedSupplementMockExamAnswersInput = {
   answers: NormalizedMockExamAnswerInput[];
 };
-
-const MAX_TERMINAL_SUPPLEMENT_ANSWER_COUNT = 200;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -61,17 +65,6 @@ function normalizeOptionalTimestamp(value: unknown): string | null | undefined {
   return Number.isFinite(parsedTimestamp)
     ? new Date(parsedTimestamp).toISOString()
     : undefined;
-}
-
-function normalizeSelectedLabels(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .filter((label): label is string => typeof label === "string")
-    .map((label) => label.trim())
-    .filter((label) => label.length > 0);
 }
 
 function normalizeNonnegativeInteger(value: unknown): number | null {
@@ -127,8 +120,10 @@ export function normalizeMockExamAnswerInput(
   const paperQuestionPublicId = normalizeRequiredString(
     input.paperQuestionPublicId,
   );
-  const selectedLabels = normalizeSelectedLabels(input.selectedLabels);
-  const textAnswer = normalizeOptionalString(input.textAnswer);
+  const selectedLabelsResult = normalizeStudentAnswerSelections(
+    input.selectedLabels,
+  );
+  const textAnswerResult = normalizeStudentAnswerText(input.textAnswer);
   const operationId = normalizeRequiredString(input.operationId);
   const expectedRevision = normalizeNonnegativeInteger(input.expectedRevision);
   const savedFromClientAt = normalizeOptionalTimestamp(input.savedFromClientAt);
@@ -138,15 +133,17 @@ export function normalizeMockExamAnswerInput(
     operationId === null ||
     expectedRevision === null ||
     savedFromClientAt === undefined ||
-    (selectedLabels.length === 0 && textAnswer === null)
+    !selectedLabelsResult.success ||
+    !textAnswerResult.success ||
+    (selectedLabelsResult.value.length === 0 && textAnswerResult.value === null)
   ) {
     return null;
   }
 
   return {
     paperQuestionPublicId,
-    selectedLabels,
-    textAnswer,
+    selectedLabels: selectedLabelsResult.value,
+    textAnswer: textAnswerResult.value,
     operationId,
     expectedRevision,
     savedFromClientAt,
@@ -168,18 +165,16 @@ export function normalizeSubmitMockExamInput(
 export function normalizeSupplementMockExamAnswersInput(
   input: unknown,
 ): NormalizedSupplementMockExamAnswersInput | null {
-  if (!isRecord(input) || !Array.isArray(input.answers)) {
+  if (!isRecord(input)) {
     return null;
   }
 
-  if (
-    input.answers.length === 0 ||
-    input.answers.length > MAX_TERMINAL_SUPPLEMENT_ANSWER_COUNT
-  ) {
+  const answerItems = normalizeStudentAnswerItemList(input.answers);
+  if (answerItems === null || answerItems.length === 0) {
     return null;
   }
 
-  const answers = input.answers.map(normalizeMockExamAnswerInput);
+  const answers = answerItems.map(normalizeMockExamAnswerInput);
 
   if (
     answers.some(

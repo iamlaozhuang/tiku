@@ -2,8 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   normalizePracticeAnswerInput,
+  normalizePracticeQuestionFavoriteInput,
   normalizeStartPracticeInput,
 } from "./practice";
+import {
+  STUDENT_ANSWER_SELECTION_MAX_COUNT,
+  STUDENT_ANSWER_SELECTION_MAX_LENGTH,
+  STUDENT_ANSWER_TEXT_MAX_LENGTH,
+} from "./student-answer";
 
 describe("practice validators", () => {
   it("normalizes valid start practice input", () => {
@@ -109,5 +115,48 @@ describe("practice validators", () => {
       }),
     ).toBeNull();
     expect(normalizePracticeAnswerInput({})).toBeNull();
+  });
+
+  it("rejects over-limit or partially malformed answer values", () => {
+    const baseInput = {
+      paperQuestionPublicId: "paper_question_public_123",
+    };
+
+    expect(
+      normalizePracticeAnswerInput({
+        ...baseInput,
+        textAnswer: "x".repeat(STUDENT_ANSWER_TEXT_MAX_LENGTH + 1),
+      }),
+    ).toBeNull();
+    expect(
+      normalizePracticeAnswerInput({
+        ...baseInput,
+        selectedLabels: Array.from(
+          { length: STUDENT_ANSWER_SELECTION_MAX_COUNT + 1 },
+          (_unused, index) => `${index}`,
+        ),
+      }),
+    ).toBeNull();
+    expect(
+      normalizePracticeAnswerInput({
+        ...baseInput,
+        selectedLabels: [
+          "A",
+          "x".repeat(STUDENT_ANSWER_SELECTION_MAX_LENGTH + 1),
+        ],
+      }),
+    ).toBeNull();
+    expect(
+      normalizePracticeAnswerInput({
+        ...baseInput,
+        selectedLabels: ["A", 2],
+      }),
+    ).toBeNull();
+    expect(
+      normalizePracticeQuestionFavoriteInput({
+        ...baseInput,
+        textAnswer: "x".repeat(STUDENT_ANSWER_TEXT_MAX_LENGTH + 1),
+      }),
+    ).toBeNull();
   });
 });

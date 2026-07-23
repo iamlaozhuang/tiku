@@ -6,6 +6,11 @@ import {
   normalizeStartMockExamInput,
   normalizeSubmitMockExamInput,
 } from "./mock-exam";
+import {
+  STUDENT_ANSWER_ITEM_MAX_COUNT,
+  STUDENT_ANSWER_SELECTION_MAX_COUNT,
+  STUDENT_ANSWER_TEXT_MAX_LENGTH,
+} from "./student-answer";
 
 describe("mock exam validators", () => {
   it("normalizes valid start mock exam input", () => {
@@ -98,6 +103,37 @@ describe("mock exam validators", () => {
     ).toBeNull();
   });
 
+  it("rejects over-limit or partially malformed answer values", () => {
+    const baseInput = {
+      paperQuestionPublicId: "paper_question_public_123",
+      operationId: "answer_operation_public_1",
+      expectedRevision: 0,
+      savedFromClientAt: null,
+    };
+
+    expect(
+      normalizeMockExamAnswerInput({
+        ...baseInput,
+        textAnswer: "x".repeat(STUDENT_ANSWER_TEXT_MAX_LENGTH + 1),
+      }),
+    ).toBeNull();
+    expect(
+      normalizeMockExamAnswerInput({
+        ...baseInput,
+        selectedLabels: Array.from(
+          { length: STUDENT_ANSWER_SELECTION_MAX_COUNT + 1 },
+          (_unused, index) => `${index}`,
+        ),
+      }),
+    ).toBeNull();
+    expect(
+      normalizeMockExamAnswerInput({
+        ...baseInput,
+        selectedLabels: ["A", false],
+      }),
+    ).toBeNull();
+  });
+
   it("normalizes optional submit input", () => {
     expect(
       normalizeSubmitMockExamInput({
@@ -143,6 +179,28 @@ describe("mock exam validators", () => {
       },
     ])("rejects an unsafe payload %#", (input) => {
       expect(normalizeSupplementMockExamAnswersInput(input)).toBeNull();
+    });
+
+    it("rejects oversized and sparse terminal supplement batches", () => {
+      const oversizedAnswers = Array.from(
+        { length: STUDENT_ANSWER_ITEM_MAX_COUNT + 1 },
+        (_unused, index) => ({
+          ...answer,
+          paperQuestionPublicId: `paper_question_public_${index}`,
+          operationId: `answer_operation_public_${index}`,
+        }),
+      );
+      const sparseAnswers = new Array(2);
+      sparseAnswers[0] = answer;
+
+      expect(
+        normalizeSupplementMockExamAnswersInput({
+          answers: oversizedAnswers,
+        }),
+      ).toBeNull();
+      expect(
+        normalizeSupplementMockExamAnswersInput({ answers: sparseAnswers }),
+      ).toBeNull();
     });
   });
 });

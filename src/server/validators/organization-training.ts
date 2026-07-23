@@ -18,6 +18,11 @@ import {
   organizationTrainingSourceContextTypeValues,
 } from "../models/organization-training";
 import { subjectValues } from "../models/paper";
+import {
+  normalizeStudentAnswerItemList,
+  normalizeStudentAnswerSelections,
+  normalizeStudentAnswerText,
+} from "./student-answer";
 
 export const invalidOrganizationTrainingPublishInputMessage =
   "Invalid organization training publish input.";
@@ -368,20 +373,6 @@ function normalizePublicIdList(value: unknown): string[] | null {
   return uniqueValues.length > 0 ? uniqueValues : null;
 }
 
-function normalizePublicIdArray(value: unknown): string[] | null {
-  if (!Array.isArray(value)) {
-    return null;
-  }
-
-  return Array.from(
-    new Set(
-      value
-        .map((item) => normalizeRequiredText(item))
-        .filter((item): item is string => item !== null),
-    ),
-  );
-}
-
 function normalizeQuestionOption(value: unknown) {
   if (!isRecord(value)) {
     return null;
@@ -426,30 +417,39 @@ function normalizeAnswerItem(
   }
 
   const questionPublicId = normalizeRequiredText(value.questionPublicId);
-  const selectedOptionPublicIds = normalizePublicIdArray(
+  const selectedOptionPublicIdsResult = normalizeStudentAnswerSelections(
     value.selectedOptionPublicIds,
   );
-  const textAnswer = normalizeOptionalText(value.textAnswer);
+  const textAnswerResult = normalizeStudentAnswerText(value.textAnswer);
 
-  if (questionPublicId === null || selectedOptionPublicIds === null) {
+  if (
+    questionPublicId === null ||
+    !selectedOptionPublicIdsResult.success ||
+    !textAnswerResult.success
+  ) {
     return null;
   }
 
   return {
     questionPublicId,
-    selectedOptionPublicIds,
-    textAnswer,
+    selectedOptionPublicIds: selectedOptionPublicIdsResult.value,
+    textAnswer: textAnswerResult.value,
   };
 }
 
 function normalizeAnswerItems(
   value: unknown,
 ): EmployeeOrganizationTrainingAnswerItemDto[] | null {
-  if (!Array.isArray(value)) {
+  if (value === undefined || value === null) {
     return [];
   }
 
-  const normalizedAnswerItems = value.map(normalizeAnswerItem);
+  const answerItems = normalizeStudentAnswerItemList(value);
+  if (answerItems === null) {
+    return null;
+  }
+
+  const normalizedAnswerItems = answerItems.map(normalizeAnswerItem);
 
   if (normalizedAnswerItems.some((answerItem) => answerItem === null)) {
     return null;

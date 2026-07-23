@@ -1,42 +1,46 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23",
-  "findingIds": ["F-0173"],
+  "taskId": "p1-remediation-rc-08-student-answer-input-bounds-2026-07-23",
+  "findingIds": ["F-0174"],
   "candidateRootCauseCluster": "P1-RC-08",
-  "status": "validated_ready_for_conditional_closeout",
-  "branch": "fix/ai-scoring-point-result-integrity",
-  "baseSha": "05d9211927542f39f42526ae3d7b60bcc92507d6",
-  "objective": "Close F-0173 statically by enforcing one shared runtime scoring-point result contract at both the direct AI scoring service boundary and the durable scoring-task completion boundary, so only an exact one-to-one result for every persisted scoring_point can become scored.",
-  "riskCategory": "provider_adapter_pure_logic_and_bounded_scoring_result_validation",
+  "status": "ready_for_closeout",
+  "branch": "fix/student-answer-input-bounds",
+  "baseSha": "32cd5469ffcda797ad6750029a2db3aaedfafd37",
+  "objective": "Close F-0174 statically by enforcing one shared bounded student answer input contract across practice, mock_exam, terminal supplement and organization training before any answer snapshot, RAG query or AI scoring boundary can consume unbounded text or selection arrays.",
+  "riskCategory": "bounded_student_answer_validation_contraction",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/ai-scoring-result-contract.ts",
-    "src/server/services/ai-scoring-result-contract.test.ts",
-    "src/server/services/ai-scoring-service.ts",
-    "src/server/services/ai-scoring-service.test.ts",
-    "src/server/services/ai-scoring-task-runtime.ts",
-    "src/server/services/ai-scoring-task-runtime.test.ts",
-    "src/server/services/student-flow-runtime.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "src/server/services/mock-exam-service.test.ts"
+    "src/server/validators/student-answer.ts",
+    "src/server/validators/student-answer.test.ts",
+    "src/server/validators/practice.ts",
+    "src/server/validators/practice.test.ts",
+    "src/server/validators/mock-exam.ts",
+    "src/server/validators/mock-exam.test.ts",
+    "src/server/validators/organization-training.ts",
+    "src/server/validators/organization-training.test.ts",
+    "src/server/services/practice-service.test.ts",
+    "src/server/services/mock-exam-service.test.ts",
+    "src/server/services/organization-training-route.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/services/ai-scoring-result-contract.ts",
-    "src/server/services/ai-scoring-result-contract.test.ts",
-    "src/server/services/ai-scoring-service.ts",
-    "src/server/services/ai-scoring-service.test.ts",
-    "src/server/services/ai-scoring-task-runtime.ts",
-    "src/server/services/ai-scoring-task-runtime.test.ts"
+    "src/server/validators/student-answer.ts",
+    "src/server/validators/student-answer.test.ts",
+    "src/server/validators/practice.ts",
+    "src/server/validators/practice.test.ts",
+    "src/server/validators/mock-exam.ts",
+    "src/server/validators/mock-exam.test.ts",
+    "src/server/validators/organization-training.ts",
+    "src/server/validators/organization-training.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/student-flow-runtime.ts",
-    "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-    "src/server/services/mock-exam-service.test.ts"
+    "src/server/services/practice-service.test.ts",
+    "src/server/services/mock-exam-service.test.ts",
+    "src/server/services/organization-training-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -51,11 +55,11 @@
     "any schema or migration source, real database/data access, Provider call/configuration/prompt change, permission or quota change, dependency, deployment, secret/env, external service, PR or force-push"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "mock_exam immutable scoring_point snapshot -> durable ai_scoring_task inputSnapshot -> governed executor resultSnapshot -> ai-scoring-task-runtime completion gate -> transactional repository finalization; direct ai-scoring-service runner result -> student-flow runtime adapter",
-    "currentVulnerableSink": "ai-scoring-service accepts duplicate, missing and unknown scoringPointPublicId values while ai-scoring-task-runtime validates only scalar score/status before durable completion",
-    "securityInvariant": "the returned scoring-point ids are unique and exactly equal to the persisted expected set; every point is normalized once against its own max score; unknown, duplicate, missing, malformed or non-finite results fail closed before scored persistence",
-    "legitimateBehavior": "valid one-to-one results retain 0.5 rounding, per-point caps, whole-question cap, durable provenance and retry/failure lifecycle semantics",
-    "coreFileCount": 9,
+    "authoritativeChain": "practice and mock_exam service input plus organization training employee route input -> shared validators -> answer snapshot persistence -> mock_exam RAG and durable AI scoring input",
+    "currentVulnerableSink": "practice, mock_exam and organization training validators trim/filter unbounded text and selection arrays, permitting large payloads to persist and later amplify RAG and AI scoring work",
+    "securityInvariant": "every learner answer is rejected before persistence unless text and selection arrays satisfy one explicit shared size, density, type and uniqueness contract; batch answer commands also have a fixed count ceiling",
+    "legitimateBehavior": "normal objective, subjective, fill_blank, autosave, terminal supplement and organization training submissions retain their existing response and scoring semantics",
+    "coreFileCount": 11,
     "contingencyFileCount": 3,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
@@ -64,21 +68,26 @@
     "authorizationSemantics": "unchanged"
   },
   "requiredSemantics": {
-    "singleContract": "one runtime validator/normalizer shared by direct scoring and durable task completion; no duplicate acceptance algorithm",
-    "setEquality": "expected and actual scoringPointPublicId sets must be non-ambiguous, unique and exactly equal; order cannot hide mismatch",
-    "runtimeValidation": "do not trust TypeScript or executor output shape; reject malformed arrays, ids, booleans, scores, reasons and non-finite values",
-    "scoring": "preserve half-point rounding and per-point max; total is the sum of exactly one normalized result per expected point and remains capped by authoritative question max",
-    "expectedFacts": "direct uses context scoringPoints/maxScore; durable uses persisted task inputSnapshot scoringPoints/maxScore and validates it before executor execution",
-    "determinism": "actual order is untrusted; canonical output follows authoritative expected order with ordinal case-sensitive identity matching",
-    "durableScalar": "executor scalar score, max and scored status must equal the canonical point result and cannot replace point validation",
-    "durablePersistence": "persist only an explicit allowlist result snapshot plus unchanged provenance; never spread unvalidated executor output",
-    "failure": "invalid Provider/executor structure is a stable failed attempt, never scored, never completed and never persisted as a success result",
-    "replay": "existing successful immutable result behavior remains read-only; no second Provider call or mutation",
-    "scope": "no material context, answer-input limits, usage accounting, schema, permission, quota, prompt or Provider execution changes"
+    "singleContract": "practice, mock_exam, supplement and organization training consume one shared runtime answer value validator; no divergent limits or filter-based partial acceptance",
+    "textLimit": "textAnswer is null/absent/empty or a trimmed non-empty string of at most 4000 UTF-16 code units; larger or wrong-typed values fail closed before persistence",
+    "selectionLimit": "selection arrays are dense and contain at most 20 unique non-empty strings, each at most 200 UTF-16 code units; malformed, duplicate, sparse or over-limit arrays fail closed",
+    "batchLimit": "terminal supplement and organization training answer item lists contain at most 200 dense valid items",
+    "atomicFailure": "one invalid item or selection rejects the whole command; no filter, truncation or partial persistence",
+    "downstream": "bounded canonical values are the only answer facts that may reach answer snapshots, RAG queries or AI scoring input",
+    "scope": "no answer meaning, scoring, authorization, schema, Provider execution, quota, UI or API envelope change"
+  },
+  "validationEvidence": {
+    "tddRed": "4 suites failed before implementation because the shared student-answer contract did not exist",
+    "focused": "7 files / 165 tests passed",
+    "lint": "passed with 3 pre-existing unrelated warnings and 0 errors",
+    "typecheck": "passed",
+    "build": "passed with the pre-existing Next output-tracing warning",
+    "adversarialReview": "passed: dense-array checks do not skip holes; duplicate values are rejected after trim; oversized and malformed values reject the entire command; practice favorite, terminal supplement, and organization training use the same contract; no schema, permission, quota, Provider, UI, or API expansion",
+    "runtimeBoundary": "static and synthetic validation only; no real database, Provider, or browser runtime proof"
   },
   "validationCommands": [
     {
-      "name": "ai-scoring-point-integrity-focused",
+      "name": "student-answer-input-bounds-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -86,11 +95,13 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/ai-scoring-result-contract.test.ts",
-        "src/server/services/ai-scoring-service.test.ts",
-        "src/server/services/ai-scoring-task-runtime.test.ts",
-        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
+        "src/server/validators/student-answer.test.ts",
+        "src/server/validators/practice.test.ts",
+        "src/server/validators/mock-exam.test.ts",
+        "src/server/validators/organization-training.test.ts",
+        "src/server/services/practice-service.test.ts",
         "src/server/services/mock-exam-service.test.ts",
+        "src/server/services/organization-training-route.test.ts",
         "--maxWorkers=1"
       ]
     },
@@ -124,72 +135,55 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/services/ai-scoring-result-contract.ts",
-        "src/server/services/ai-scoring-result-contract.test.ts",
-        "src/server/services/ai-scoring-service.ts",
-        "src/server/services/ai-scoring-service.test.ts",
-        "src/server/services/ai-scoring-task-runtime.ts",
-        "src/server/services/ai-scoring-task-runtime.test.ts",
-        "src/server/services/student-flow-runtime.ts",
-        "tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts",
-        "src/server/services/mock-exam-service.test.ts"
+        "src/server/validators/student-answer.ts",
+        "src/server/validators/student-answer.test.ts",
+        "src/server/validators/practice.ts",
+        "src/server/validators/practice.test.ts",
+        "src/server/validators/mock-exam.ts",
+        "src/server/validators/mock-exam.test.ts",
+        "src/server/validators/organization-training.ts",
+        "src/server/validators/organization-training.test.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/mock-exam-service.test.ts",
+        "src/server/services/organization-training-route.test.ts"
       ]
     }
   ],
-  "freshApprovalRequest": {
-    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
-    "approvalId": "guardian-f0173-ai-scoring-point-result-integrity-2026-07-23",
-    "approvalFingerprint": "f0173-scoring-point-exact-set-05d92119-envelope-v1-2026-07-23",
-    "riskCategory": "provider_adapter_pure_logic_and_bounded_scoring_result_validation",
-    "requestStatus": "approved_for_pre_RED_and_conditional_closeout",
-    "conditionalCloseoutRequested": true,
-    "requestedBaseSha": "05d9211927542f39f42526ae3d7b60bcc92507d6"
-  },
   "approvalSources": {
     "lowRiskCloseout": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "testOnlyAllowlistExpansion": "standing-test-only-allowlist-expansion-2026-07-21",
     "database": null,
     "permission": null,
     "dependency": null,
-    "provider": "guardian-f0173-ai-scoring-point-result-integrity-2026-07-23"
+    "provider": null
   },
   "conditionalCloseout": true,
-  "validationEvidence": {
-    "tddRed": "9_expected_failures_before_shared_contract_implementation",
-    "focused": "5_files_72_tests_green",
-    "lint": "exit_0_with_3_pre_existing_unrelated_warnings",
-    "typecheck": "tsc_no_emit_exit_0",
-    "build": "next_build_exit_0",
-    "format": "prettier_applied_then_final_check_required_on_frozen_candidate",
-    "scope": "9_actual_changed_files_all_within_12_file_approved_envelope",
-    "review": "main_thread_adversarial_review_passed_after_fixing_sparse_array_fail_closed_gap",
-    "runtimeBoundary": "static_and_synthetic_only_no_real_provider_or_runtime_data_proof"
-  },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-learner-citation-redaction-2026-07-23",
-    "findingIds": ["F-0150"],
-    "commit": "05d9211927542f39f42526ae3d7b60bcc92507d6",
-    "tree": "493a1cfc00e790a793b53bc7dce993331e337f57",
+    "taskId": "p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23",
+    "findingIds": ["F-0173"],
+    "commit": "32cd5469ffcda797ad6750029a2db3aaedfafd37",
+    "tree": "0d5c7b29f3647d24676d5aa4020c100530395dc1",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "findingStatus": "closed_static_product_without_browser_or_runtime_network_proof",
+    "findingStatus": "closed_static_product_without_real_provider_or_runtime_data_proof",
     "masterOriginSync": true,
-    "shortBranchCleanup": true
+    "shortBranchCleanup": true,
+    "closeoutKernel": true
   },
   "jitRevalidation": {
+    "F-0013": "runtime_hold",
     "F-0063": "covered_by_durable_ai_scoring_task_attempt_count_atomic_claim_max_three_retry_and_terminal_replay",
     "F-0137": "covered_by_F0027_database_unique_key_and_atomic_mistake_book_upsert",
-    "F-0013": "runtime_hold",
-    "F-0173": "confirmed_current_independent_root_cause"
+    "F-0174": "confirmed_current_independent_root_cause"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0173",
-    "currentPartition": "scoring_point_result_exact_set_validation",
-    "nextReviewHints": ["after_F0173_closeout_continue_RC08_residual_JIT"]
+    "currentFindingId": "F-0174",
+    "currentPartition": "student_answer_payload_application_bounds",
+    "nextReviewHints": ["after_F0174_closeout_continue_RC08_residual_JIT"]
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0173-ai-scoring-point-result-integrity-2026-07-23"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }
