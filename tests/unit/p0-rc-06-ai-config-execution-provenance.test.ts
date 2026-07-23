@@ -168,9 +168,30 @@ describe("P0 RC-06 governed model execution provenance", () => {
       async execute(query: CapturedSql) {
         capturedQueries.push(query);
         executionCount += 1;
+        const queryText = flattenSqlQuery(query);
 
         if (executionCount === 2) {
           return [{ recovered_count: 1 }];
+        }
+
+        if (queryText.includes("select mock_exam_public_id")) {
+          return [{ mock_exam_public_id: taskRow.mock_exam_public_id }];
+        }
+
+        if (queryText.includes("pg_advisory_xact_lock")) {
+          return [];
+        }
+
+        if (
+          queryText.includes("select owned_mock_exam.id") &&
+          queryText.includes("join ai_scoring_task task")
+        ) {
+          return [
+            {
+              id: 1,
+              public_id: taskRow.mock_exam_public_id,
+            },
+          ];
         }
 
         return [taskRow];
@@ -223,8 +244,12 @@ describe("P0 RC-06 governed model execution provenance", () => {
     const enqueueSql = flattenSqlQuery(capturedQueries[0]!);
     const recoverySql = flattenSqlQuery(capturedQueries[1]!);
     const claimSql = flattenSqlQuery(capturedQueries[2]!);
-    const failureLockSql = flattenSqlQuery(capturedQueries[3]!);
-    const failureSql = flattenSqlQuery(capturedQueries[4]!);
+    const failureLockSql = capturedQueries
+      .map(flattenSqlQuery)
+      .find((query) => query.includes("for update of owned_mock_exam, task"))!;
+    const failureSql = capturedQueries
+      .map(flattenSqlQuery)
+      .find((query) => query.includes("with leased_task as"))!;
 
     expect(enqueueSql).toContain(
       "on conflict (answer_record_id, idempotency_key_hash) do nothing",
@@ -265,7 +290,7 @@ describe("P0 RC-06 governed model execution provenance", () => {
     expect(failureSql).toContain(
       "task_status = 'failed'::ai_scoring_task_status",
     );
-    expect(failureLockSql).toContain("for update of owned_mock_exam");
+    expect(failureLockSql).toContain("for update of owned_mock_exam, task");
     expect(failureSql).toContain("then 'pending'::ai_scoring_task_status");
     expect(failureSql).toContain("terminal_answer_record_update as");
     expect(recoverySql).not.toContain("then 'pending'::ai_scoring_task_status");
@@ -273,38 +298,124 @@ describe("P0 RC-06 governed model execution provenance", () => {
 
   it("updates answer state and appends an attempt in the same completion statement", async () => {
     const capturedQueries: CapturedSql[] = [];
+    const taskRow = {
+      public_id: "ai_scoring_task_public_001",
+      answer_record_public_id: "answer_record_public_001",
+      mock_exam_public_id: "mock_exam_public_001",
+      actor_public_id: "user_public_001",
+      idempotency_key_hash: "a".repeat(64),
+      task_status: "succeeded",
+      attempt_count: 1,
+      max_attempt_count: 3,
+      timeout_second: 60,
+      model_config_snapshot: {},
+      prompt_template_key: "ai_scoring_v1",
+      prompt_template_version: 7,
+      prompt_template_hash: "sha256:prompt-v7",
+      input_snapshot: {},
+      authorization_snapshot: {},
+      rag_snapshot: null,
+      result_snapshot: { scoringStatus: "scored" },
+      ai_call_log_public_id: "ai_call_log_public_001",
+      failure_code: null,
+      failure_message_digest: null,
+      scheduled_at: new Date("2026-07-15T20:20:00.000Z"),
+      claimed_at: new Date("2026-07-15T20:20:01.000Z"),
+      lease_expires_at: null,
+      worker_public_id: "worker_public_001",
+      completed_at: new Date("2026-07-15T20:20:02.000Z"),
+    };
     const database: TransactionalSqlExecutor = {
       async execute(query: CapturedSql) {
         capturedQueries.push(query);
-        return [
-          {
-            public_id: "ai_scoring_task_public_001",
-            answer_record_public_id: "answer_record_public_001",
-            mock_exam_public_id: "mock_exam_public_001",
-            actor_public_id: "user_public_001",
-            idempotency_key_hash: "a".repeat(64),
-            task_status: "succeeded",
-            attempt_count: 1,
-            max_attempt_count: 3,
-            timeout_second: 60,
-            model_config_snapshot: {},
-            prompt_template_key: "ai_scoring_v1",
-            prompt_template_version: 7,
-            prompt_template_hash: "sha256:prompt-v7",
-            input_snapshot: {},
-            authorization_snapshot: {},
-            rag_snapshot: null,
-            result_snapshot: { scoringStatus: "scored" },
-            ai_call_log_public_id: "ai_call_log_public_001",
-            failure_code: null,
-            failure_message_digest: null,
-            scheduled_at: new Date("2026-07-15T20:20:00.000Z"),
-            claimed_at: new Date("2026-07-15T20:20:01.000Z"),
-            lease_expires_at: null,
-            worker_public_id: "worker_public_001",
-            completed_at: new Date("2026-07-15T20:20:02.000Z"),
-          },
-        ];
+        const queryText = flattenSqlQuery(query);
+
+        if (queryText.includes("select mock_exam_public_id")) {
+          return [{ mock_exam_public_id: taskRow.mock_exam_public_id }];
+        }
+        if (queryText.includes("pg_advisory_xact_lock")) {
+          return [];
+        }
+        if (
+          queryText.includes("select owned_mock_exam.id") &&
+          queryText.includes("join ai_scoring_task task")
+        ) {
+          return [{ id: 1, public_id: taskRow.mock_exam_public_id }];
+        }
+        if (queryText.includes("attempt_call_log.public_id")) {
+          return [
+            {
+              ...taskRow,
+              task_status: "running",
+              result_snapshot: null,
+              ai_call_log_public_id: null,
+              completed_at: null,
+              answer_record_status: "pending_scoring",
+              answer_score: null,
+              attempt_status: null,
+              attempt_ai_call_log_public_id: null,
+            },
+          ];
+        }
+        if (queryText.includes("from exam_report report")) {
+          return [];
+        }
+        if (queryText.includes("with ai_call_log_link as")) {
+          return [taskRow];
+        }
+        if (queryText.includes("from mock_exam owned_mock_exam")) {
+          return [
+            {
+              id: 1,
+              public_id: taskRow.mock_exam_public_id,
+              paper_public_id: "paper_public_001",
+              paper_snapshot: { name: "Paper", paperSections: [] },
+              profession: "monopoly",
+              level: 3,
+              subject: "theory",
+              exam_status: "completed",
+              started_at: new Date("2026-07-15T20:00:00.000Z"),
+              submitted_at: new Date("2026-07-15T20:20:02.000Z"),
+              objective_score: "0.0",
+              subjective_score: "4.0",
+              total_score: "4.0",
+              actor_public_id: taskRow.actor_public_id,
+            },
+          ];
+        }
+        if (queryText.includes("from answer_record left join")) {
+          return [
+            {
+              id: 1,
+              public_id: taskRow.answer_record_public_id,
+              paper_question_public_id: "paper_question_public_001",
+              question_public_id: "question_public_001",
+              question_snapshot: {},
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "scored",
+              is_correct: null,
+              score: "4.0",
+              max_score: "5.0",
+              answered_at: new Date("2026-07-15T20:10:00.000Z"),
+              submitted_at: new Date("2026-07-15T20:20:00.000Z"),
+              task_public_id: taskRow.public_id,
+              task_status: taskRow.task_status,
+              attempt_number: taskRow.attempt_count,
+              attempt_status: "succeeded",
+              model_config_snapshot: taskRow.model_config_snapshot,
+              prompt_template_key: taskRow.prompt_template_key,
+              prompt_template_version: taskRow.prompt_template_version,
+              prompt_template_hash: taskRow.prompt_template_hash,
+              result_snapshot: taskRow.result_snapshot,
+            },
+          ];
+        }
+
+        return [];
       },
       async transaction<T>(
         callback: (transaction: TransactionalSqlExecutor) => Promise<T>,
@@ -325,10 +436,14 @@ describe("P0 RC-06 governed model execution provenance", () => {
       completedAt: new Date("2026-07-15T20:20:02.000Z"),
     });
 
-    const completionLockSql = flattenSqlQuery(capturedQueries[0]!);
-    const completionSql = flattenSqlQuery(capturedQueries[1]!);
+    const completionLockSql = capturedQueries
+      .map(flattenSqlQuery)
+      .find((query) => query.includes("for update of owned_mock_exam, task"))!;
+    const completionSql = capturedQueries
+      .map(flattenSqlQuery)
+      .find((query) => query.includes("with ai_call_log_link as"))!;
 
-    expect(completionLockSql).toContain("for update of owned_mock_exam");
+    expect(completionLockSql).toContain("for update of owned_mock_exam, task");
     expect(completionSql).toContain("update ai_scoring_task task");
     expect(completionSql).toContain("update answer_record");
     expect(completionSql).toContain("insert into ai_scoring_attempt");

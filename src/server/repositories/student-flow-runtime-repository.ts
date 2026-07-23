@@ -21,8 +21,15 @@ import type { AnswerRecordStatus } from "../models/student-experience";
 import type {
   ExamReportAnswerRecordRow,
   ExamReportAiScoringEvidenceRow,
+  ExamReportMockExamRow,
   ExamReportRepository,
   ExamReportRow,
+} from "./exam-report-repository";
+import {
+  buildExamReportSnapshot,
+  calculateDurationSecond,
+  getPaperName,
+  lockExamReportScoringFinalization,
 } from "./exam-report-repository";
 import type {
   MockExamAnswerRecordRow,
@@ -2346,143 +2353,189 @@ function createPostgresExamReportRepository(
     },
     async createExamReport(input) {
       const database = getDatabase();
-      const userId = await getRequiredUserId(database, input.userPublicId);
-      const ownedMockExam = await findOwnedMockExamTableRow(
-        database,
-        input.userPublicId,
-        input.mockExamPublicId,
-      );
 
-      if (
-        ownedMockExam === null ||
-        ownedMockExam.paper_public_id !== input.paperPublicId
-      ) {
-        throw new Error("Exam report mock_exam scope is invalid.");
-      }
+      return database.transaction(async (transaction) => {
+        await lockExamReportScoringFinalization(
+          transaction,
+          input.mockExamPublicId,
+        );
+        const userId = await getRequiredUserId(transaction, input.userPublicId);
+        const ownedMockExam = await findOwnedMockExamTableRow(
+          transaction,
+          input.userPublicId,
+          input.mockExamPublicId,
+        );
 
-      const [row] = await database
-        .insert(examReport)
-        .values({
-          public_id: input.publicId,
-          user_id: userId,
-          mock_exam_id: ownedMockExam.id,
-          paper_id: ownedMockExam.paper_id,
-          paper_public_id: input.paperPublicId,
-          report_snapshot: input.reportSnapshot,
-          exam_status: input.examStatus,
-          profession: input.profession,
-          level: input.level,
-          subject: input.subject,
-          objective_score: input.objectiveScore,
-          subjective_score: input.subjectiveScore,
-          total_score: input.totalScore,
-          duration_second: input.durationSecond,
-          learning_suggestion_snapshot: input.learningSuggestionSnapshot,
-          generated_at: input.generatedAt,
-        })
-        .onConflictDoNothing({ target: examReport.mock_exam_id })
-        .returning();
+        if (
+          ownedMockExam === null ||
+          !["completed", "scoring_partial_failed"].includes(
+            ownedMockExam.exam_status,
+          )
+        ) {
+          throw new Error("Exam report mock_exam scope is invalid.");
+        }
 
-      const persistedRow =
-        row ??
-        (
-          await database
-            .select()
-            .from(examReport)
-            .where(
-              and(
-                eq(examReport.user_id, userId),
-                eq(examReport.mock_exam_id, ownedMockExam.id),
-              ),
-            )
-            .limit(1)
-        )[0];
+        const answerRecords = await listMockExamAnswerRecords(
+          transaction,
+          input.userPublicId,
+          input.mockExamPublicId,
+        );
+        const reportSnapshot = buildExamReportSnapshot(
+          mapExamReportMockExamRow(ownedMockExam),
+          answerRecords,
+        );
+        const insertedRows = await transaction
+          .insert(examReport)
+          .values({
+            public_id: input.publicId,
+            user_id: userId,
+            mock_exam_id: ownedMockExam.id,
+            paper_id: ownedMockExam.paper_id,
+            paper_public_id: ownedMockExam.paper_public_id,
+            report_snapshot: reportSnapshot,
+            exam_status: ownedMockExam.exam_status,
+            profession: ownedMockExam.profession,
+            level: ownedMockExam.level,
+            subject: ownedMockExam.subject,
+            objective_score: ownedMockExam.objective_score,
+            subjective_score: ownedMockExam.subjective_score,
+            total_score: ownedMockExam.total_score,
+            duration_second: calculateDurationSecond(
+              mapExamReportMockExamRow(ownedMockExam),
+            ),
+            learning_suggestion_snapshot: null,
+            generated_at: input.generatedAt,
+          })
+          .onConflictDoNothing({ target: examReport.mock_exam_id })
+          .returning();
+        const existingRows = await transaction
+          .select()
+          .from(examReport)
+          .where(
+            and(
+              eq(examReport.user_id, userId),
+              eq(examReport.mock_exam_id, ownedMockExam.id),
+            ),
+          );
 
-      if (persistedRow === undefined) {
-        throw new Error("Exam report insert did not return a row.");
-      }
+        if (
+          insertedRows.length > 1 ||
+          existingRows.length !== 1 ||
+          (insertedRows.length === 1 &&
+            existingRows[0]?.public_id !== input.publicId)
+        ) {
+          throw new Error("Exam report insert cardinality is invalid.");
+        }
 
-      return mapExamReportRow(
-        persistedRow,
-        input.mockExamPublicId,
-        input.paperName,
-        ownedMockExam.started_at,
-      );
+        return mapExamReportRow(
+          existingRows[0],
+          input.mockExamPublicId,
+          getPaperName(ownedMockExam.paper_snapshot as Record<string, unknown>),
+          ownedMockExam.started_at,
+        );
+      });
     },
     async rebuildExamReport(input) {
       const database = getDatabase();
-      const userId = await getRequiredUserId(database, input.userPublicId);
-      const ownedMockExam = await findOwnedMockExamTableRow(
-        database,
-        input.userPublicId,
-        input.mockExamPublicId,
-      );
 
-      if (
-        ownedMockExam === null ||
-        ownedMockExam.paper_public_id !== input.paperPublicId
-      ) {
-        throw new Error("Exam report mock_exam scope is invalid.");
-      }
+      return database.transaction(async (transaction) => {
+        await lockExamReportScoringFinalization(
+          transaction,
+          input.mockExamPublicId,
+        );
+        const userId = await getRequiredUserId(transaction, input.userPublicId);
+        const ownedMockExam = await findOwnedMockExamTableRow(
+          transaction,
+          input.userPublicId,
+          input.mockExamPublicId,
+        );
 
-      const changedReportCondition = or(
-        sql`${examReport.report_snapshot} is distinct from ${JSON.stringify(input.reportSnapshot)}::jsonb`,
-        sql`${examReport.exam_status} is distinct from ${input.examStatus}::exam_status`,
-        sql`${examReport.objective_score} is distinct from ${input.objectiveScore}::numeric`,
-        sql`${examReport.subjective_score} is distinct from ${input.subjectiveScore}::numeric`,
-        sql`${examReport.total_score} is distinct from ${input.totalScore}::numeric`,
-        sql`${examReport.duration_second} is distinct from ${input.durationSecond}`,
-        sql`${examReport.learning_suggestion_snapshot} is not null`,
-      );
-      const [rebuiltRow] = await database
-        .update(examReport)
-        .set({
-          report_snapshot: input.reportSnapshot,
-          report_revision: sql`${examReport.report_revision} + 1`,
-          exam_status: input.examStatus,
-          objective_score: input.objectiveScore,
-          subjective_score: input.subjectiveScore,
-          total_score: input.totalScore,
-          duration_second: input.durationSecond,
-          learning_suggestion_snapshot: null,
-          generated_at: input.generatedAt,
-          updated_at: input.generatedAt,
-        })
-        .where(
-          and(
-            eq(examReport.user_id, userId),
-            eq(examReport.public_id, input.publicId),
-            eq(examReport.mock_exam_id, ownedMockExam.id),
-            changedReportCondition,
-          ),
-        )
-        .returning();
-      const persistedRow =
-        rebuiltRow ??
-        (
-          await database
-            .select()
-            .from(examReport)
-            .where(
-              and(
-                eq(examReport.user_id, userId),
-                eq(examReport.public_id, input.publicId),
-                eq(examReport.mock_exam_id, ownedMockExam.id),
-              ),
-            )
-            .limit(1)
-        )[0];
+        if (
+          ownedMockExam === null ||
+          !["completed", "scoring_partial_failed"].includes(
+            ownedMockExam.exam_status,
+          )
+        ) {
+          throw new Error("Exam report mock_exam scope is invalid.");
+        }
 
-      if (persistedRow === undefined) {
-        throw new Error("Exam report rebuild lost its owned report.");
-      }
+        const existingRows = await transaction
+          .select()
+          .from(examReport)
+          .where(
+            and(
+              eq(examReport.user_id, userId),
+              eq(examReport.public_id, input.publicId),
+              eq(examReport.mock_exam_id, ownedMockExam.id),
+            ),
+          );
 
-      return mapExamReportRow(
-        persistedRow,
-        input.mockExamPublicId,
-        input.paperName,
-        ownedMockExam.started_at,
-      );
+        if (existingRows.length !== 1) {
+          throw new Error("Exam report rebuild cardinality is invalid.");
+        }
+
+        if (
+          existingRows[0]?.exam_status === "completed" &&
+          ownedMockExam.exam_status !== "completed"
+        ) {
+          throw new Error("Completed exam report cannot regress.");
+        }
+
+        const answerRecords = await listMockExamAnswerRecords(
+          transaction,
+          input.userPublicId,
+          input.mockExamPublicId,
+        );
+        const mockExamProjection = mapExamReportMockExamRow(ownedMockExam);
+        const reportSnapshot = buildExamReportSnapshot(
+          mockExamProjection,
+          answerRecords,
+        );
+        const durationSecond = calculateDurationSecond(mockExamProjection);
+        const changedReportCondition = or(
+          sql`${examReport.report_snapshot} is distinct from ${JSON.stringify(reportSnapshot)}::jsonb`,
+          sql`${examReport.exam_status} is distinct from ${ownedMockExam.exam_status}::exam_status`,
+          sql`${examReport.objective_score} is distinct from ${ownedMockExam.objective_score}::numeric`,
+          sql`${examReport.subjective_score} is distinct from ${ownedMockExam.subjective_score}::numeric`,
+          sql`${examReport.total_score} is distinct from ${ownedMockExam.total_score}::numeric`,
+          sql`${examReport.duration_second} is distinct from ${durationSecond}`,
+        );
+        const rebuiltRows = await transaction
+          .update(examReport)
+          .set({
+            report_snapshot: reportSnapshot,
+            report_revision: sql`${examReport.report_revision} + 1`,
+            exam_status: ownedMockExam.exam_status,
+            objective_score: ownedMockExam.objective_score,
+            subjective_score: ownedMockExam.subjective_score,
+            total_score: ownedMockExam.total_score,
+            duration_second: durationSecond,
+            learning_suggestion_snapshot: null,
+            updated_at: input.generatedAt,
+          })
+          .where(
+            and(
+              eq(examReport.user_id, userId),
+              eq(examReport.public_id, input.publicId),
+              eq(examReport.mock_exam_id, ownedMockExam.id),
+              changedReportCondition,
+            ),
+          )
+          .returning();
+
+        if (rebuiltRows.length > 1) {
+          throw new Error("Exam report rebuild updated multiple rows.");
+        }
+
+        const persistedRow = rebuiltRows[0] ?? existingRows[0];
+
+        return mapExamReportRow(
+          persistedRow,
+          input.mockExamPublicId,
+          getPaperName(ownedMockExam.paper_snapshot as Record<string, unknown>),
+          ownedMockExam.started_at,
+        );
+      });
     },
     async updateExamReportLearningSuggestionSnapshot(input) {
       const database = getDatabase();
@@ -3239,6 +3292,25 @@ async function findOwnedMockExamTableRow(
   return row ?? null;
 }
 
+function mapExamReportMockExamRow(
+  row: typeof mockExam.$inferSelect,
+): ExamReportMockExamRow {
+  return {
+    public_id: row.public_id,
+    paper_public_id: row.paper_public_id,
+    paper_snapshot: asRecord(row.paper_snapshot),
+    profession: row.profession,
+    level: row.level,
+    subject: row.subject,
+    exam_status: row.exam_status,
+    started_at: row.started_at,
+    submitted_at: row.submitted_at,
+    objective_score: row.objective_score,
+    subjective_score: row.subjective_score,
+    total_score: row.total_score,
+  };
+}
+
 async function findOwnedMockExamRow(
   database: StudentFlowRuntimeDatabase,
   userPublicId: string,
@@ -3274,15 +3346,25 @@ async function listMockExamAnswerRecords(
     return [];
   }
 
-  const [mockExamRow] = await database
+  const mockExamRows = await database
     .select({ id: mockExam.id })
     .from(mockExam)
-    .where(eq(mockExam.public_id, mockExamPublicId))
-    .limit(1);
+    .where(
+      and(
+        eq(mockExam.public_id, mockExamPublicId),
+        eq(mockExam.user_id, userId),
+      ),
+    );
 
-  if (mockExamRow === undefined) {
+  if (mockExamRows.length === 0) {
     return [];
   }
+
+  if (mockExamRows.length !== 1) {
+    throw new Error("Mock exam report projection cardinality is invalid.");
+  }
+
+  const mockExamRow = mockExamRows[0]!;
 
   const rows = await database
     .select()
@@ -3331,30 +3413,45 @@ async function listMockExamAnswerRecords(
   const scoringEvidenceByAnswerRecordId = new Map<
     number,
     ExamReportAiScoringEvidenceRow
-  >(
-    scoringEvidenceRows.map((row) => [
-      row.answer_record_id,
-      {
-        taskPublicId: row.task_public_id,
-        taskStatus: row.task_status,
-        attemptNumber: row.attempt_number,
-        attemptStatus: row.attempt_status,
-        modelConfigSnapshot: asRecord(row.model_config_snapshot),
-        promptTemplateKey: row.prompt_template_key,
-        promptTemplateVersion: row.prompt_template_version,
-        promptTemplateHash: row.prompt_template_hash,
-        resultSnapshot:
-          row.result_snapshot === null ? null : asRecord(row.result_snapshot),
-      },
-    ]),
-  );
+  >();
 
-  return rows.map((row) =>
+  for (const row of scoringEvidenceRows) {
+    if (scoringEvidenceByAnswerRecordId.has(row.answer_record_id)) {
+      throw new Error("AI scoring evidence cardinality is invalid.");
+    }
+
+    scoringEvidenceByAnswerRecordId.set(row.answer_record_id, {
+      taskPublicId: row.task_public_id,
+      taskStatus: row.task_status,
+      attemptNumber: row.attempt_number,
+      attemptStatus: row.attempt_status,
+      modelConfigSnapshot: asRecord(row.model_config_snapshot),
+      promptTemplateKey: row.prompt_template_key,
+      promptTemplateVersion: row.prompt_template_version,
+      promptTemplateHash: row.prompt_template_hash,
+      resultSnapshot:
+        row.result_snapshot === null ? null : asRecord(row.result_snapshot),
+    });
+  }
+
+  const mappedRows = rows.map((row) =>
     mapMockExamAnswerRecordRow(
       row,
       scoringEvidenceByAnswerRecordId.get(row.id) ?? null,
     ),
   ) as MockExamAnswerRecordRow[] & ExamReportAnswerRecordRow[];
+
+  for (const row of mappedRows) {
+    if (row.is_correct === null && row.ai_scoring_evidence === null) {
+      throw new Error("Subjective answer is missing durable scoring evidence.");
+    }
+
+    if (row.is_correct !== null && row.ai_scoring_evidence !== null) {
+      throw new Error("Objective answer cannot own AI scoring evidence.");
+    }
+  }
+
+  return mappedRows;
 }
 
 function mapPracticeRow(row: typeof practice.$inferSelect): PracticeRow {

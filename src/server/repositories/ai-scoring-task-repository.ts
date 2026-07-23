@@ -6,6 +6,14 @@ import {
   createLazyRuntimeDatabaseGetter,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import {
+  buildExamReportSnapshot,
+  calculateDurationSecond,
+  lockExamReportScoringFinalization,
+  type ExamReportAiScoringEvidenceRow,
+  type ExamReportAnswerRecordRow,
+  type ExamReportMockExamRow,
+} from "./exam-report-repository";
 
 export type AiScoringTaskStatus =
   | "pending"
@@ -137,6 +145,62 @@ type AiScoringTaskRow = {
   lease_expires_at: Date | string | null;
   worker_public_id: string | null;
   completed_at: Date | string | null;
+};
+
+type ExamReportProjectionMockRow = ExamReportMockExamRow & {
+  id: number;
+  actor_public_id: string;
+};
+
+type ExamReportProjectionAnswerSqlRow = {
+  id: number;
+  public_id: string;
+  paper_question_public_id: string;
+  question_public_id: string;
+  question_snapshot: Record<string, unknown>;
+  answer_snapshot: ExamReportAnswerRecordRow["answer_snapshot"];
+  answer_record_status: ExamReportAnswerRecordRow["answer_record_status"];
+  is_correct: boolean | null;
+  score: string | null;
+  max_score: string;
+  answered_at: Date | string | null;
+  submitted_at: Date | string | null;
+  task_public_id: string | null;
+  task_status: string | null;
+  attempt_number: number | null;
+  attempt_status: string | null;
+  model_config_snapshot: Record<string, unknown> | null;
+  prompt_template_key: string | null;
+  prompt_template_version: number | null;
+  prompt_template_hash: string | null;
+  result_snapshot: Record<string, unknown> | null;
+};
+
+type ExistingExamReportRow = {
+  id: number;
+  public_id: string;
+  actor_public_id: string;
+  mock_exam_public_id: string;
+  paper_public_id: string;
+  exam_status: "scoring" | "scoring_partial_failed" | "completed";
+  report_snapshot: Record<string, unknown>;
+  objective_score: string | null;
+  subjective_score: string | null;
+  total_score: string | null;
+  duration_second: number;
+};
+
+type ExamReportProjectionFacts = {
+  mockExam: ExamReportProjectionMockRow;
+  answerRecords: ExamReportAnswerRecordRow[];
+  existingReport: ExistingExamReportRow | null;
+};
+
+type CompletionTaskStateRow = AiScoringTaskRow & {
+  answer_record_status: string;
+  answer_score: string | null;
+  attempt_status: string | null;
+  attempt_ai_call_log_public_id: string | null;
 };
 
 const scoringTaskSelection = sql`
@@ -418,11 +482,63 @@ export function createPostgresAiScoringTaskRepository(
       const database = getDatabase();
 
       return database.transaction(async (transaction) => {
+        const mockExamPublicId = await resolveAiScoringTaskMockExamIdentity(
+          transaction,
+          input.taskPublicId,
+        );
+        await lockExamReportScoringFinalization(transaction, mockExamPublicId);
         await lockAiScoringTaskMockExam(
           transaction,
           input.taskPublicId,
           input.workerPublicId,
+          mockExamPublicId,
+          true,
         );
+
+        const completionStateRows = await loadCompletionTaskState(
+          transaction,
+          input.taskPublicId,
+        );
+
+        if (completionStateRows.length !== 1) {
+          throw new Error("AI scoring task completion cardinality is invalid.");
+        }
+
+        const completionState = completionStateRows[0]!;
+
+        if (completionState.task_status === "succeeded") {
+          await assertTerminalCompletionReplay(
+            transaction,
+            completionState,
+            input,
+          );
+
+          return mapTaskRow(completionState);
+        }
+
+        if (
+          completionState.task_status !== "running" ||
+          completionState.worker_public_id !== input.workerPublicId
+        ) {
+          throw new Error("AI scoring task completion lost its lease.");
+        }
+
+        const existingReportRows = await loadExistingExamReportRows(
+          transaction,
+          mockExamPublicId,
+          completionState.actor_public_id,
+        );
+
+        if (existingReportRows.length > 1) {
+          throw new Error("Exam report cardinality is invalid.");
+        }
+
+        if (existingReportRows[0]?.exam_status === "completed") {
+          throw new Error(
+            "Completed exam report cannot coexist with a running scoring task.",
+          );
+        }
+
         const rows = await executeSql<AiScoringTaskRow>(
           transaction,
           sql`
@@ -439,7 +555,6 @@ export function createPostgresAiScoringTaskRepository(
             where public_id = ${input.aiCallLogPublicId}
               and call_status = 'success'::ai_call_status
               and ai_func_type = 'scoring'::ai_func_type
-            limit 1
           ),
           completed_task as (
             update ai_scoring_task task
@@ -455,6 +570,7 @@ export function createPostgresAiScoringTaskRepository(
             where task.public_id = ${input.taskPublicId}
               and task.task_status = 'running'::ai_scoring_task_status
               and task.worker_public_id = ${input.workerPublicId}
+              and (select count(*) from ai_call_log_link) = 1
               and exists (
                 select 1
                 from ai_call_log_link
@@ -477,6 +593,12 @@ export function createPostgresAiScoringTaskRepository(
               updated_at = ${input.completedAt.toISOString()}
             from completed_task
             where answer_record.id = completed_task.answer_record_id
+              and answer_record.mock_exam_id = (
+                select id
+                from mock_exam
+                where public_id = completed_task.mock_exam_public_id
+              )
+              and answer_record.answer_record_status = 'pending_scoring'::answer_record_status
             returning answer_record.id
           ),
           attempt_insert as (
@@ -564,18 +686,39 @@ export function createPostgresAiScoringTaskRepository(
           selected_task as (
             select completed_task.*
             from completed_task
-            where exists (select 1 from answer_record_update)
-              and exists (select 1 from attempt_insert)
-              and exists (select 1 from mock_exam_update)
+            where (select count(*) from answer_record_update) = 1
+              and (select count(*) from attempt_insert) = 1
+              and (select count(*) from mock_exam_update) = 1
           )
           ${scoringTaskSelection}
           `,
         );
 
-        return requireTaskRow(
-          rows[0],
-          "AI scoring task completion lost its lease.",
+        if (rows.length !== 1) {
+          throw new Error("AI scoring task completion lost its lease.");
+        }
+
+        const projectionFacts = await loadExamReportProjectionFacts(
+          transaction,
+          mockExamPublicId,
+          completionState.actor_public_id,
         );
+        assertCompleteAiScoringEvidenceSet(projectionFacts);
+
+        if (projectionFacts.existingReport !== null) {
+          const reportSnapshot = buildExamReportSnapshot(
+            projectionFacts.mockExam,
+            projectionFacts.answerRecords,
+          );
+          await finalizeExistingExamReport(
+            transaction,
+            projectionFacts,
+            reportSnapshot,
+            input.completedAt,
+          );
+        }
+
+        return mapTaskRow(rows[0]!);
       });
     },
 
@@ -590,10 +733,16 @@ export function createPostgresAiScoringTaskRepository(
       const database = getDatabase();
 
       return database.transaction(async (transaction) => {
+        const mockExamPublicId = await resolveAiScoringTaskMockExamIdentity(
+          transaction,
+          input.taskPublicId,
+        );
+        await lockExamReportScoringFinalization(transaction, mockExamPublicId);
         await lockAiScoringTaskMockExam(
           transaction,
           input.taskPublicId,
           input.workerPublicId,
+          mockExamPublicId,
         );
         const rows = await executeSql<AiScoringTaskRow>(
           transaction,
@@ -798,26 +947,449 @@ async function executeSql<TRow extends Record<string, unknown>>(
   return (database as unknown as DrizzleSqlExecutor).execute<TRow>(query);
 }
 
-async function lockAiScoringTaskMockExam(
+async function resolveAiScoringTaskMockExamIdentity(
   database: unknown,
   taskPublicId: string,
-  workerPublicId: string,
-): Promise<void> {
-  const rows = await executeSql<{ id: number }>(
+): Promise<string> {
+  const rows = await executeSql<{ mock_exam_public_id: string }>(
     database,
     sql`
-      select owned_mock_exam.id
-      from mock_exam owned_mock_exam
-      join ai_scoring_task task
-        on task.mock_exam_public_id = owned_mock_exam.public_id
+      select mock_exam_public_id
+      from ai_scoring_task
+      where public_id = ${taskPublicId}
+    `,
+  );
+
+  if (rows.length !== 1) {
+    throw new Error("AI scoring task mock_exam identity is ambiguous.");
+  }
+
+  return rows[0]!.mock_exam_public_id;
+}
+
+async function loadCompletionTaskState(
+  database: unknown,
+  taskPublicId: string,
+): Promise<CompletionTaskStateRow[]> {
+  return executeSql<CompletionTaskStateRow>(
+    database,
+    sql`
+      select
+        task.public_id,
+        answer_record.public_id as answer_record_public_id,
+        task.mock_exam_public_id,
+        task.actor_public_id,
+        task.idempotency_key_hash,
+        task.task_status,
+        task.attempt_count,
+        task.max_attempt_count,
+        task.timeout_second,
+        task.model_config_snapshot,
+        task.prompt_template_key,
+        task.prompt_template_version,
+        task.prompt_template_hash,
+        task.input_snapshot,
+        task.authorization_snapshot,
+        task.rag_snapshot,
+        task.result_snapshot,
+        ai_call_log.public_id as ai_call_log_public_id,
+        task.failure_code,
+        task.failure_message_digest,
+        task.scheduled_at,
+        task.claimed_at,
+        task.lease_expires_at,
+        task.worker_public_id,
+        task.completed_at,
+        answer_record.answer_record_status,
+        answer_record.score as answer_score,
+        attempt.status as attempt_status,
+        attempt_call_log.public_id as attempt_ai_call_log_public_id
+      from ai_scoring_task task
+      join answer_record on answer_record.id = task.answer_record_id
+      left join ai_call_log on ai_call_log.id = task.ai_call_log_id
+      left join ai_scoring_attempt attempt
+        on attempt.answer_record_id = task.answer_record_id
+       and attempt.attempt_number = task.attempt_count
+      left join ai_call_log attempt_call_log
+        on attempt_call_log.id = attempt.ai_call_log_id
       where task.public_id = ${taskPublicId}
-        and task.task_status = 'running'::ai_scoring_task_status
-        and task.worker_public_id = ${workerPublicId}
+      for update of task, answer_record
+    `,
+  );
+}
+
+async function loadExistingExamReportRows(
+  database: unknown,
+  mockExamPublicId: string,
+  actorPublicId: string,
+): Promise<ExistingExamReportRow[]> {
+  const rows = await executeSql<ExistingExamReportRow>(
+    database,
+    sql`
+      select
+        report.id,
+        report.public_id,
+        actor.public_id as actor_public_id,
+        owned_mock_exam.public_id as mock_exam_public_id,
+        report.paper_public_id,
+        report.exam_status,
+        report.report_snapshot,
+        report.objective_score,
+        report.subjective_score,
+        report.total_score,
+        report.duration_second
+      from exam_report report
+      join mock_exam owned_mock_exam on owned_mock_exam.id = report.mock_exam_id
+      join user_account actor on actor.id = report.user_id
+      where owned_mock_exam.public_id = ${mockExamPublicId}
+      for update of report
+    `,
+  );
+
+  if (
+    rows.some(
+      (row) =>
+        row.actor_public_id !== actorPublicId ||
+        row.mock_exam_public_id !== mockExamPublicId,
+    )
+  ) {
+    throw new Error("Exam report ownership identity is inconsistent.");
+  }
+
+  return rows;
+}
+
+async function loadExamReportProjectionFacts(
+  database: unknown,
+  mockExamPublicId: string,
+  actorPublicId: string,
+): Promise<ExamReportProjectionFacts> {
+  const mockExamRows = await executeSql<ExamReportProjectionMockRow>(
+    database,
+    sql`
+      select
+        owned_mock_exam.id,
+        owned_mock_exam.public_id,
+        owned_mock_exam.paper_public_id,
+        owned_mock_exam.paper_snapshot,
+        owned_mock_exam.profession,
+        owned_mock_exam.level,
+        owned_mock_exam.subject,
+        owned_mock_exam.exam_status,
+        owned_mock_exam.started_at,
+        owned_mock_exam.submitted_at,
+        owned_mock_exam.objective_score,
+        owned_mock_exam.subjective_score,
+        owned_mock_exam.total_score,
+        actor.public_id as actor_public_id
+      from mock_exam owned_mock_exam
+      join user_account actor on actor.id = owned_mock_exam.user_id
+      where owned_mock_exam.public_id = ${mockExamPublicId}
+        and actor.public_id = ${actorPublicId}
       for update of owned_mock_exam
     `,
   );
 
-  if (rows[0] === undefined) {
+  if (mockExamRows.length !== 1) {
+    throw new Error("Mock exam report projection cardinality is invalid.");
+  }
+
+  const mockExamRow = mockExamRows[0]!;
+  const answerRows = await executeSql<ExamReportProjectionAnswerSqlRow>(
+    database,
+    sql`
+      select
+        answer_record.id,
+        answer_record.public_id,
+        answer_record.paper_question_public_id,
+        answer_record.question_public_id,
+        answer_record.question_snapshot,
+        answer_record.answer_snapshot,
+        answer_record.answer_record_status,
+        answer_record.is_correct,
+        answer_record.score,
+        answer_record.max_score,
+        answer_record.answered_at,
+        answer_record.submitted_at,
+        task.public_id as task_public_id,
+        task.task_status,
+        task.attempt_count as attempt_number,
+        attempt.status as attempt_status,
+        task.model_config_snapshot,
+        task.prompt_template_key,
+        task.prompt_template_version,
+        task.prompt_template_hash,
+        task.result_snapshot
+      from answer_record
+      left join ai_scoring_task task
+        on task.answer_record_id = answer_record.id
+      left join ai_scoring_attempt attempt
+        on attempt.answer_record_id = answer_record.id
+       and attempt.attempt_number = task.attempt_count
+      where answer_record.mock_exam_id = ${mockExamRow.id}
+        and answer_record.exam_mode = 'mock_exam'::exam_mode
+      order by answer_record.id asc, task.id asc, attempt.id asc
+    `,
+  );
+  const seenAnswerRecordIds = new Set<number>();
+  const answerRecords = answerRows.map((row) => {
+    if (seenAnswerRecordIds.has(row.id)) {
+      throw new Error("AI scoring evidence cardinality is invalid.");
+    }
+    seenAnswerRecordIds.add(row.id);
+
+    let aiScoringEvidence: ExamReportAiScoringEvidenceRow | null = null;
+
+    if (row.task_public_id !== null) {
+      if (
+        row.task_status === null ||
+        row.attempt_number === null ||
+        row.model_config_snapshot === null ||
+        row.prompt_template_key === null ||
+        row.prompt_template_version === null ||
+        row.prompt_template_hash === null
+      ) {
+        throw new Error("AI scoring evidence identity is incomplete.");
+      }
+
+      aiScoringEvidence = {
+        taskPublicId: row.task_public_id,
+        taskStatus: row.task_status,
+        attemptNumber: row.attempt_number,
+        attemptStatus: row.attempt_status,
+        modelConfigSnapshot: row.model_config_snapshot,
+        promptTemplateKey: row.prompt_template_key,
+        promptTemplateVersion: row.prompt_template_version,
+        promptTemplateHash: row.prompt_template_hash,
+        resultSnapshot: row.result_snapshot,
+      };
+    }
+
+    return {
+      public_id: row.public_id,
+      paper_question_public_id: row.paper_question_public_id,
+      question_public_id: row.question_public_id,
+      question_snapshot: row.question_snapshot,
+      answer_snapshot: row.answer_snapshot,
+      ai_scoring_evidence: aiScoringEvidence,
+      answer_record_status: row.answer_record_status,
+      is_correct: row.is_correct,
+      score: row.score,
+      max_score: row.max_score,
+      answered_at: toNullableDate(row.answered_at),
+      submitted_at: toNullableDate(row.submitted_at),
+    } satisfies ExamReportAnswerRecordRow;
+  });
+  const existingReportRows = await loadExistingExamReportRows(
+    database,
+    mockExamPublicId,
+    actorPublicId,
+  );
+
+  if (existingReportRows.length > 1) {
+    throw new Error("Exam report cardinality is invalid.");
+  }
+
+  return {
+    mockExam: {
+      ...mockExamRow,
+      started_at: toDate(mockExamRow.started_at),
+      submitted_at: toNullableDate(mockExamRow.submitted_at),
+    },
+    answerRecords,
+    existingReport: existingReportRows[0] ?? null,
+  };
+}
+
+function assertCompleteAiScoringEvidenceSet(
+  facts: ExamReportProjectionFacts,
+): void {
+  const taskPublicIds = new Set<string>();
+
+  for (const answerRecord of facts.answerRecords) {
+    const evidence = answerRecord.ai_scoring_evidence;
+
+    if (answerRecord.is_correct === null && evidence === null) {
+      throw new Error("Subjective answer is missing durable scoring evidence.");
+    }
+
+    if (answerRecord.is_correct !== null && evidence !== null) {
+      throw new Error("Objective answer cannot own AI scoring evidence.");
+    }
+
+    if (evidence !== null) {
+      if (taskPublicIds.has(evidence.taskPublicId)) {
+        throw new Error("AI scoring task identity is duplicated.");
+      }
+      taskPublicIds.add(evidence.taskPublicId);
+
+      if (
+        evidence.taskStatus === "succeeded" &&
+        (evidence.attemptStatus !== "succeeded" ||
+          evidence.resultSnapshot === null)
+      ) {
+        throw new Error("Succeeded scoring evidence is incomplete.");
+      }
+    }
+  }
+}
+
+async function finalizeExistingExamReport(
+  database: unknown,
+  facts: ExamReportProjectionFacts,
+  reportSnapshot: Record<string, unknown>,
+  completedAt: Date,
+): Promise<void> {
+  const existingReport = facts.existingReport;
+
+  if (existingReport === null) {
+    return;
+  }
+
+  if (
+    !["scoring", "scoring_partial_failed"].includes(
+      existingReport.exam_status,
+    ) ||
+    existingReport.paper_public_id !== facts.mockExam.paper_public_id
+  ) {
+    throw new Error("Exam report cannot be finalized from its current state.");
+  }
+
+  const updatedReportRows = await executeSql<{ id: number }>(
+    database,
+    sql`
+      update exam_report
+      set
+        report_snapshot = ${JSON.stringify(reportSnapshot)}::jsonb,
+        report_revision = report_revision + 1,
+        exam_status = ${facts.mockExam.exam_status}::exam_status,
+        objective_score = ${facts.mockExam.objective_score}::numeric,
+        subjective_score = ${facts.mockExam.subjective_score}::numeric,
+        total_score = ${facts.mockExam.total_score}::numeric,
+        duration_second = ${calculateDurationSecond(facts.mockExam)},
+        learning_suggestion_snapshot = null,
+        updated_at = ${completedAt.toISOString()}
+      where id = ${existingReport.id}
+        and exam_status in (
+          'scoring'::exam_status,
+          'scoring_partial_failed'::exam_status
+        )
+        and (
+          report_snapshot is distinct from ${JSON.stringify(reportSnapshot)}::jsonb
+          or exam_status is distinct from ${facts.mockExam.exam_status}::exam_status
+          or objective_score is distinct from ${facts.mockExam.objective_score}::numeric
+          or subjective_score is distinct from ${facts.mockExam.subjective_score}::numeric
+          or total_score is distinct from ${facts.mockExam.total_score}::numeric
+          or duration_second is distinct from ${calculateDurationSecond(facts.mockExam)}
+        )
+      returning id
+    `,
+  );
+
+  if (updatedReportRows.length !== 1) {
+    throw new Error("Exam report finalization lost its conditional update.");
+  }
+}
+
+async function assertTerminalCompletionReplay(
+  database: unknown,
+  taskState: CompletionTaskStateRow,
+  input: CompleteAiScoringTaskInput,
+): Promise<void> {
+  if (
+    taskState.worker_public_id !== input.workerPublicId ||
+    taskState.ai_call_log_public_id !== input.aiCallLogPublicId ||
+    taskState.attempt_ai_call_log_public_id !== input.aiCallLogPublicId ||
+    taskState.answer_record_status !== "scored" ||
+    taskState.answer_score !== input.score ||
+    taskState.attempt_status !== "succeeded" ||
+    canonicalizeJson(taskState.result_snapshot) !==
+      canonicalizeJson(input.resultSnapshot)
+  ) {
+    throw new Error("AI scoring task completion replay does not match.");
+  }
+
+  const projectionFacts = await loadExamReportProjectionFacts(
+    database,
+    taskState.mock_exam_public_id,
+    taskState.actor_public_id,
+  );
+  assertCompleteAiScoringEvidenceSet(projectionFacts);
+
+  if (projectionFacts.existingReport !== null) {
+    const expectedSnapshot = buildExamReportSnapshot(
+      projectionFacts.mockExam,
+      projectionFacts.answerRecords,
+    );
+
+    if (
+      projectionFacts.existingReport.exam_status !==
+        projectionFacts.mockExam.exam_status ||
+      canonicalizeJson(projectionFacts.existingReport.report_snapshot) !==
+        canonicalizeJson(expectedSnapshot)
+    ) {
+      throw new Error("Exam report terminal replay is inconsistent.");
+    }
+  }
+}
+
+function canonicalizeJson(value: unknown): string {
+  if (value === undefined) {
+    return "undefined";
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalizeJson).join(",")}]`;
+  }
+
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).sort(
+      ([left], [right]) => left.localeCompare(right),
+    );
+
+    return `{${entries
+      .map(
+        ([key, entryValue]) =>
+          `${JSON.stringify(key)}:${canonicalizeJson(entryValue)}`,
+      )
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+async function lockAiScoringTaskMockExam(
+  database: unknown,
+  taskPublicId: string,
+  workerPublicId: string,
+  expectedMockExamPublicId?: string,
+  allowSucceeded = false,
+): Promise<void> {
+  const rows = await executeSql<{ id: number; public_id: string }>(
+    database,
+    sql`
+      select owned_mock_exam.id, owned_mock_exam.public_id
+      from mock_exam owned_mock_exam
+      join ai_scoring_task task
+        on task.mock_exam_public_id = owned_mock_exam.public_id
+      where task.public_id = ${taskPublicId}
+        and (
+          task.task_status = 'running'::ai_scoring_task_status
+          or (
+            ${allowSucceeded}
+            and task.task_status = 'succeeded'::ai_scoring_task_status
+          )
+        )
+        and task.worker_public_id = ${workerPublicId}
+      for update of owned_mock_exam, task
+    `,
+  );
+
+  if (
+    rows.length !== 1 ||
+    (expectedMockExamPublicId !== undefined &&
+      rows[0]?.public_id !== expectedMockExamPublicId)
+  ) {
     throw new Error("AI scoring task lost its mock_exam lease boundary.");
   }
 }
