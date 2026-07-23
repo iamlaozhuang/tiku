@@ -14,6 +14,7 @@ import type {
   ExamReportRepository,
   ExamReportRow,
 } from "../repositories/exam-report-repository";
+import { ExamReportKnowledgeSnapshotIntegrityError } from "../repositories/exam-report-repository";
 import type { LearningSuggestionMockContext } from "./ai-mock-provider-runtime";
 
 const now = new Date("2026-05-19T09:00:00.000Z");
@@ -515,8 +516,9 @@ describe("exam report service", () => {
             questionTypeSummaryText: "question_type analytics: single_choice 2",
             paperSectionSummaryText:
               "paper_section analytics: 一、单项选择题 2",
-            knowledgeNodeSummaryText:
-              "knowledge_node analytics: knowledge_node_public_123 1, knowledge_node_public_456 1",
+            knowledgeNodeAnalyticsStatus: "unavailable",
+            knowledgeNodeSummaryText: null,
+            knowledgeNodeAnalysis: [],
             questionResults: [
               {
                 paperQuestionPublicId: "paper_question_public_123",
@@ -856,6 +858,19 @@ describe("exam report service", () => {
                       standardAnswerLabels: ["A"],
                       score: "2.0",
                       knowledgeNodePublicIds: ["knowledge_node_public_shared"],
+                      knowledgeNodeSnapshot: {
+                        schemaVersion: 1,
+                        bindings: [
+                          {
+                            knowledgeNodePublicId:
+                              "knowledge_node_public_shared",
+                            name: "共享知识点",
+                            pathName: "营销/共享知识点",
+                            confirmationStatus: "confirmed",
+                            bindingSource: "formal_question_binding",
+                          },
+                        ],
+                      },
                     },
                     {
                       paperQuestionPublicId: "paper_question_shared_unanswered",
@@ -868,6 +883,26 @@ describe("exam report service", () => {
                         "knowledge_node_public_shared",
                         "knowledge_node_public_weak",
                       ],
+                      knowledgeNodeSnapshot: {
+                        schemaVersion: 1,
+                        bindings: [
+                          {
+                            knowledgeNodePublicId:
+                              "knowledge_node_public_shared",
+                            name: "共享知识点",
+                            pathName: "营销/共享知识点",
+                            confirmationStatus: "confirmed",
+                            bindingSource: "formal_question_binding",
+                          },
+                          {
+                            knowledgeNodePublicId: "knowledge_node_public_weak",
+                            name: "薄弱知识点",
+                            pathName: "营销/薄弱知识点",
+                            confirmationStatus: "confirmed",
+                            bindingSource: "formal_question_binding",
+                          },
+                        ],
+                      },
                     },
                     {
                       paperQuestionPublicId: "paper_question_strong_correct",
@@ -877,6 +912,19 @@ describe("exam report service", () => {
                       standardAnswerLabels: ["C"],
                       score: "2.0",
                       knowledgeNodePublicIds: ["knowledge_node_public_strong"],
+                      knowledgeNodeSnapshot: {
+                        schemaVersion: 1,
+                        bindings: [
+                          {
+                            knowledgeNodePublicId:
+                              "knowledge_node_public_strong",
+                            name: "优势知识点",
+                            pathName: "营销/优势知识点",
+                            confirmationStatus: "confirmed",
+                            bindingSource: "formal_question_binding",
+                          },
+                        ],
+                      },
                     },
                   ],
                 },
@@ -922,11 +970,18 @@ describe("exam report service", () => {
       data: {
         examReport: {
           reportSnapshot: {
+            knowledgeNodeAnalyticsStatus: "available",
+            knowledgeNodeSummaryText:
+              "knowledge_node analytics: 营销/共享知识点 2, 营销/优势知识点 1, 营销/薄弱知识点 1",
             knowledgeNodeWeaknessSummaryText:
-              "knowledge_node weakness: knowledge_node_public_weak score_rate 0% accuracy 0% score 0.0/2.0; knowledge_node_public_shared score_rate 25% accuracy 50% score 1.0/4.0; knowledge_node_public_strong score_rate 100% accuracy 100% score 2.0/2.0",
+              "知识点薄弱项：营销/薄弱知识点 得分率 0% 正确率 0% 得分 0.0/2.0；营销/共享知识点 得分率 25% 正确率 50% 得分 1.0/4.0；营销/优势知识点 得分率 100% 正确率 100% 得分 2.0/2.0",
             knowledgeNodeAnalysis: [
               {
                 knowledgeNodePublicId: "knowledge_node_public_weak",
+                name: "薄弱知识点",
+                pathName: "营销/薄弱知识点",
+                confirmationStatus: "confirmed",
+                bindingSource: "formal_question_binding",
                 questionCount: 1,
                 answeredCount: 0,
                 correctCount: 0,
@@ -939,6 +994,10 @@ describe("exam report service", () => {
               },
               {
                 knowledgeNodePublicId: "knowledge_node_public_shared",
+                name: "共享知识点",
+                pathName: "营销/共享知识点",
+                confirmationStatus: "confirmed",
+                bindingSource: "formal_question_binding",
                 questionCount: 2,
                 answeredCount: 1,
                 correctCount: 1,
@@ -954,6 +1013,10 @@ describe("exam report service", () => {
               },
               {
                 knowledgeNodePublicId: "knowledge_node_public_strong",
+                name: "优势知识点",
+                pathName: "营销/优势知识点",
+                confirmationStatus: "confirmed",
+                bindingSource: "formal_question_binding",
                 questionCount: 1,
                 answeredCount: 1,
                 correctCount: 1,
@@ -969,6 +1032,152 @@ describe("exam report service", () => {
         },
       },
     });
+  });
+
+  it("distinguishes valid empty knowledge facts from mixed legacy snapshots", async () => {
+    const createService = (paperQuestions: Record<string, unknown>[]) =>
+      createExamReportService(
+        createRepository({
+          async findSubmittedMockExamByPublicId() {
+            return createMockExamRow({
+              paper_snapshot: {
+                paperPublicId: "paper_public_knowledge_state",
+                name: "knowledge state paper",
+                paperSections: [
+                  { paperSectionTitle: "section", paperQuestions },
+                ],
+              },
+            });
+          },
+          async listMockExamAnswerRecords() {
+            return [];
+          },
+        }),
+        clock,
+        createIdFactory(),
+      );
+    const validEmptyQuestion = {
+      paperQuestionPublicId: "paper_question_empty",
+      questionPublicId: "question_empty",
+      questionType: "single_choice",
+      standardAnswerLabels: ["A"],
+      score: "1.0",
+      knowledgeNodePublicIds: [],
+      knowledgeNodeSnapshot: { schemaVersion: 1, bindings: [] },
+    };
+
+    await expect(
+      createService(
+        validEmptyQuestion ? [validEmptyQuestion] : [],
+      ).generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).resolves.toMatchObject({
+      data: {
+        examReport: {
+          reportSnapshot: {
+            knowledgeNodeAnalyticsStatus: "available",
+            knowledgeNodeAnalysis: [],
+            knowledgeNodeSummaryText: null,
+          },
+        },
+      },
+    });
+
+    await expect(
+      createService([
+        validEmptyQuestion,
+        {
+          ...validEmptyQuestion,
+          paperQuestionPublicId: "paper_question_legacy",
+          questionPublicId: "question_legacy",
+          knowledgeNodePublicIds: ["knowledge_node_legacy"],
+          knowledgeNodeSnapshot: undefined,
+        },
+      ]).generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).rejects.toThrow(ExamReportKnowledgeSnapshotIntegrityError);
+
+    const legacyQuestion = {
+      ...validEmptyQuestion,
+      paperQuestionPublicId: "paper_question_legacy",
+      questionPublicId: "question_legacy",
+      knowledgeNodePublicIds: ["knowledge_node_legacy"],
+    };
+    delete (legacyQuestion as { knowledgeNodeSnapshot?: unknown })
+      .knowledgeNodeSnapshot;
+    await expect(
+      createService([validEmptyQuestion, legacyQuestion]).generateExamReport(
+        userContext,
+        { mockExamPublicId: "mock_exam_public_123" },
+      ),
+    ).resolves.toMatchObject({
+      data: {
+        examReport: {
+          reportSnapshot: {
+            knowledgeNodeAnalyticsStatus: "unavailable",
+            knowledgeNodeAnalysis: [],
+            knowledgeNodeSummaryText: null,
+          },
+        },
+      },
+    });
+  });
+
+  it("fails closed when the same knowledge identity has conflicting captured facts", async () => {
+    const service = createExamReportService(
+      createRepository({
+        async findSubmittedMockExamByPublicId() {
+          const createQuestion = (suffix: string, pathName: string) => ({
+            paperQuestionPublicId: `paper_question_${suffix}`,
+            questionPublicId: `question_${suffix}`,
+            questionType: "single_choice",
+            standardAnswerLabels: ["A"],
+            score: "1.0",
+            knowledgeNodePublicIds: ["knowledge_node_same"],
+            knowledgeNodeSnapshot: {
+              schemaVersion: 1,
+              bindings: [
+                {
+                  knowledgeNodePublicId: "knowledge_node_same",
+                  name: pathName.split("/").at(-1),
+                  pathName,
+                  confirmationStatus: "confirmed",
+                  bindingSource: "formal_question_binding",
+                },
+              ],
+            },
+          });
+          return createMockExamRow({
+            paper_snapshot: {
+              paperPublicId: "paper_public_conflict",
+              name: "conflict paper",
+              paperSections: [
+                {
+                  paperSectionTitle: "section",
+                  paperQuestions: [
+                    createQuestion("a", "营销/事实 A"),
+                    createQuestion("b", "营销/事实 B"),
+                  ],
+                },
+              ],
+            },
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).rejects.toThrow(ExamReportKnowledgeSnapshotIntegrityError);
   });
 
   it("keeps fill_blank scoring method and per-blank answers in report results", async () => {

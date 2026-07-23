@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
+  currentTaskId: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -570,28 +570,30 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23: closed
     p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23: closed
     p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23: closed
-    p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23: in_progress
+    p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23: closed
+    p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23: in_progress
 activeTasks:
-  - id: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
-    title: Personal AI learning subjective answer
-    phase: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
+  - id: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
+    title: Paper question knowledge snapshot
+    phase: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
     status: in_progress
     priority: p1
-    taskKind: low_risk_api_ui_validation_logic
-    productClosureContribution: closes_F0161_static_blank_subjective_submission_gap
-    branch: fix/personal-ai-learning-subjective-answer
-    objective: require and persist a bounded nonblank answer for personal AI learning subjective questions, restore it from server progress and exclude blank submissions from progress statistics
+    taskKind: database_application_logic_and_low_risk_report_projection_ui
+    productClosureContribution: closes_F0079_static_knowledge_snapshot_and_report_history_gap
+    branch: fix/paper-question-knowledge-snapshot
+    objective: preserve immutable knowledge_node identity, name, path and confirmed binding facts in paper question snapshots and consume them in historical exam reports
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-08
     findingIds:
-      - F-0161
+      - F-0079
     executionStage: validated_reviewed_conditional_closeout_ready
-    findingStatus: confirmed
-    findingDisposition: validated_static_candidate_conditional_closeout_ready
+    findingStatus: validated_static_candidate
+    findingDisposition: conditional_closeout_ready_without_real_database_or_browser_runtime_proof
     riskBoundary:
-      category: low_risk_api_ui_validation_logic
-      approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-      approvedBaseSha: ecfe6a1e1a36492d05d2547609f5d4fb99b82362
+      category: database_application_logic_and_low_risk_report_projection_ui
+      approvalId: guardian-f0079-paper-question-knowledge-snapshot-2026-07-23
+      approvalFingerprint: 106e307181c5f326d4778813ce3458c81c10bffdf0c5f683d0515dc7dcb8d143
+      approvedBaseSha: 1f4b953f015ad125db42add291cd41288424bd53
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
@@ -599,38 +601,45 @@ activeTasks:
       dependencyChange: false
       conditionalCloseout: true
     preRedImpactScan:
-      chain: student_personal_ai_learning_ui_to_answer_route_to_learning_session_service_to_feedback_repository_and_progress_statistics
-      coreFiles: 9
-      contingencyFiles: 2
+      chain: formal_question_binding_to_question_repository_to_paper_question_snapshot_to_practice_mock_snapshot_to_exam_report_projector_to_learner_UI
+      coreFiles: 13
+      contingencyFiles: 3
       directCallerCalleeMocksFixturesReviewed: true
-      bundleDisposition: F0161_current_F0174_and_other_RC08_findings_remain_separate_JIT
+      bundleDisposition: F0079_current_F0013_runtime_hold_F0065_quota_deferred
     requiredSemantics:
-      authority: server_owned_learning_question_type_and_persisted_answer_feedback
-      validation: subjective_text_must_be_trimmed_nonblank_and_within_4000_characters_before_persistence
-      restore: persisted_text_answer_is_restored_after_refresh_or_device_change
-      progress: blank_or_rejected_answers_create_no_feedback_and_do_not_increment_submitted_count
-      privacy: existing_owner_authorization_and_private_snapshot_redaction_unchanged
+      authority: formal_question_knowledge_binding_and_current_node_facts_at_paper_composition
+      immutability: captured_name_path_and_binding_status_never_requery_mutable_tree_for_history
+      integrity: exact_deterministic_direct_binding_set_and_malformed_present_snapshot_fail_closed
+      legacy: missing_structured_metadata_explicitly_legacy_unavailable_without_backfill
+      report: aggregate_by_public_id_and_display_captured_name_path
     conditionalCloseoutProjection:
       current: validated_reviewed_conditional_closeout_ready
-      trigger: focused_lint_typecheck_build_format_diff_state_parse_and_adversarial_review_GREEN
-      projected: F0161_static_closed_without_browser_or_runtime_database_proof
-    validationEvidence:
-      red: 4_files_78_tests_3_failed_75_passed
-      focused: 4_files_79_tests_passed
-      typecheck: pass
-      lint: pass_with_3_preexisting_unrelated_warnings
-      build: pass_with_preexisting_next_output_tracing_warning
-      adversarialReview: pass_server_owned_question_type_nonblank_4000_character_bound_zero_rejected_persistence_objective_text_substitution_rejected_and_server_progress_restore
+      trigger: TDD_and_full_declared_validation_GREEN
+      projected: F0079_static_closed_without_real_database_or_browser_runtime_proof
     previousTaskCloseout:
-      taskId: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
+      taskId: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
       findingIds:
-        - F-0135
-      commit: ecfe6a1e1a36492d05d2547609f5d4fb99b82362
+        - F-0161
+      commit: 1f4b953f015ad125db42add291cd41288424bd53
+      tree: 70c3306633b305a61e7d9f0bbc8f72553021743b
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       findingStatus: closed_static_product_without_browser_or_runtime_database_proof
       masterOriginSync: pass
       worktreeCleanBeforeBranch: true
       shortBranchCleanup: pass
+  - id: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
+    title: Personal AI learning subjective answer
+    phase: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
+    status: closed
+    priority: p1
+    taskKind: low_risk_api_ui_validation_logic
+    productClosureContribution: closes_F0161_static_blank_subjective_submission_gap
+    branch: fix/personal-ai-learning-subjective-answer
+    findingIds:
+      - F-0161
+    commit: 1f4b953f015ad125db42add291cd41288424bd53
+    findingDisposition: closed_static_product_without_browser_or_runtime_database_proof
+    closeout: committed_ff_only_merged_pushed_synced_clean_and_branch_removed
   - id: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23
     title: Practice resume authoritative progress
     phase: p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23

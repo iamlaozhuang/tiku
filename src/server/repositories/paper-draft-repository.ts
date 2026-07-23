@@ -2327,6 +2327,7 @@ async function buildQuestionSnapshot(
     knowledgeNodePublicIds: [],
     parentKnowledgeNodePublicIds: [],
     ancestorKnowledgeNodePublicIds: [],
+    knowledgeNodeSnapshot: { schemaVersion: 1, bindings: [] },
   };
 
   return {
@@ -2360,18 +2361,44 @@ export function copyQuestionSourceMetadataToSnapshot(input: {
   knowledgeNodePublicIds: readonly string[];
   parentKnowledgeNodePublicIds: readonly string[];
   ancestorKnowledgeNodePublicIds: readonly string[];
+  knowledgeNodeSnapshot: NonNullable<
+    QuestionSnapshotDto["knowledgeNodeSnapshot"]
+  >;
 }): Pick<
   QuestionSnapshotDto,
   | "difficulty"
   | "knowledgeNodePublicIds"
   | "parentKnowledgeNodePublicIds"
   | "ancestorKnowledgeNodePublicIds"
+  | "knowledgeNodeSnapshot"
 > {
+  const bindingPublicIds = input.knowledgeNodeSnapshot.bindings.map(
+    (binding) => binding.knowledgeNodePublicId,
+  );
+
+  if (
+    input.knowledgeNodeSnapshot.schemaVersion !== 1 ||
+    bindingPublicIds.length !== input.knowledgeNodePublicIds.length ||
+    bindingPublicIds.some(
+      (publicId, index) => publicId !== input.knowledgeNodePublicIds[index],
+    )
+  ) {
+    throw new Error(
+      "Question knowledge snapshot does not match direct bindings.",
+    );
+  }
+
   return {
     difficulty: input.difficulty,
     knowledgeNodePublicIds: [...input.knowledgeNodePublicIds],
     parentKnowledgeNodePublicIds: [...input.parentKnowledgeNodePublicIds],
     ancestorKnowledgeNodePublicIds: [...input.ancestorKnowledgeNodePublicIds],
+    knowledgeNodeSnapshot: {
+      schemaVersion: input.knowledgeNodeSnapshot.schemaVersion,
+      bindings: input.knowledgeNodeSnapshot.bindings.map((binding) => ({
+        ...binding,
+      })),
+    },
   };
 }
 

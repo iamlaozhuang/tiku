@@ -121,6 +121,8 @@ export type QuestionListResult = {
 export type QuestionKnowledgeHierarchyRow = {
   id: number;
   public_id: string;
+  name: string;
+  path_name: string;
   knowledge_base_id: number;
   parent_knowledge_node_id: number | null;
   profession: Profession;
@@ -136,6 +138,16 @@ export type QuestionKnowledgeMetadata = {
   knowledgeNodePublicIds: string[];
   parentKnowledgeNodePublicIds: string[];
   ancestorKnowledgeNodePublicIds: string[];
+  knowledgeNodeSnapshot: {
+    schemaVersion: 1;
+    bindings: Array<{
+      knowledgeNodePublicId: string;
+      name: string;
+      pathName: string;
+      confirmationStatus: "confirmed";
+      bindingSource: "formal_question_binding";
+    }>;
+  };
 };
 
 export class QuestionKnowledgeHierarchyIntegrityError extends Error {
@@ -143,6 +155,19 @@ export class QuestionKnowledgeHierarchyIntegrityError extends Error {
     super("Question knowledge hierarchy is not internally consistent.");
     this.name = "QuestionKnowledgeHierarchyIntegrityError";
   }
+}
+
+function compareOrdinal(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function isCanonicalKnowledgeText(value: string): boolean {
+  return (
+    value.length > 0 &&
+    value === value.trim() &&
+    value === value.normalize("NFC") &&
+    !/[\u0000-\u001f\u007f-\u009f]/u.test(value)
+  );
 }
 
 export function buildQuestionKnowledgeMetadata(
@@ -157,6 +182,8 @@ export function buildQuestionKnowledgeMetadata(
     if (
       existing !== undefined &&
       (existing.public_id !== row.public_id ||
+        existing.name !== row.name ||
+        existing.path_name !== row.path_name ||
         existing.knowledge_base_id !== row.knowledge_base_id ||
         existing.parent_knowledge_node_id !== row.parent_knowledge_node_id ||
         existing.profession !== row.profession)
@@ -165,6 +192,30 @@ export function buildQuestionKnowledgeMetadata(
     }
 
     hierarchyRowsById.set(row.id, row);
+  }
+
+  const hierarchyRowsByFoldedPublicId = new Map<
+    string,
+    QuestionKnowledgeHierarchyRow
+  >();
+
+  for (const row of hierarchyRowsById.values()) {
+    if (
+      !isCanonicalKnowledgeText(row.public_id) ||
+      !isCanonicalKnowledgeText(row.name) ||
+      !isCanonicalKnowledgeText(row.path_name)
+    ) {
+      throw new QuestionKnowledgeHierarchyIntegrityError();
+    }
+
+    const foldedPublicId = row.public_id.toLowerCase();
+    const existing = hierarchyRowsByFoldedPublicId.get(foldedPublicId);
+
+    if (existing !== undefined && existing.id !== row.id) {
+      throw new QuestionKnowledgeHierarchyIntegrityError();
+    }
+
+    hierarchyRowsByFoldedPublicId.set(foldedPublicId, row);
   }
 
   const directRowsByQuestionId = new Map<
@@ -184,6 +235,8 @@ export function buildQuestionKnowledgeMetadata(
       const knowledgeNodePublicIds: string[] = [];
       const parentKnowledgeNodePublicIds: string[] = [];
       const ancestorKnowledgeNodePublicIds: string[] = [];
+      const bindings: QuestionKnowledgeMetadata["knowledgeNodeSnapshot"]["bindings"] =
+        [];
       const directPublicIds = new Set<string>();
       const [firstDirectRow] = rows;
 
@@ -200,7 +253,7 @@ export function buildQuestionKnowledgeMetadata(
       }
 
       for (const directRow of [...rows].sort((left, right) =>
-        left.public_id.localeCompare(right.public_id),
+        compareOrdinal(left.public_id, right.public_id),
       )) {
         if (directPublicIds.has(directRow.public_id)) {
           throw new QuestionKnowledgeHierarchyIntegrityError();
@@ -211,6 +264,7 @@ export function buildQuestionKnowledgeMetadata(
         const visitedIds = new Set<number>([directRow.id]);
         let parentId = directRow.parent_knowledge_node_id;
         let isDirectParent = true;
+        const hierarchyPath: QuestionKnowledgeHierarchyRow[] = [directRow];
 
         while (parentId !== null) {
           if (visitedIds.has(parentId)) {
@@ -228,6 +282,7 @@ export function buildQuestionKnowledgeMetadata(
           }
 
           visitedIds.add(parentId);
+          hierarchyPath.push(parentRow);
           if (
             isDirectParent &&
             !parentKnowledgeNodePublicIds.includes(parentRow.public_id)
@@ -240,6 +295,27 @@ export function buildQuestionKnowledgeMetadata(
           isDirectParent = false;
           parentId = parentRow.parent_knowledge_node_id;
         }
+
+        const rootToDirect = [...hierarchyPath].reverse();
+        for (let index = 0; index < rootToDirect.length; index += 1) {
+          const hierarchyRow = rootToDirect[index];
+          const expectedPathName = rootToDirect
+            .slice(0, index + 1)
+            .map((row) => row.name)
+            .join("/");
+
+          if (hierarchyRow.path_name !== expectedPathName) {
+            throw new QuestionKnowledgeHierarchyIntegrityError();
+          }
+        }
+
+        bindings.push({
+          knowledgeNodePublicId: directRow.public_id,
+          name: directRow.name,
+          pathName: directRow.path_name,
+          confirmationStatus: "confirmed",
+          bindingSource: "formal_question_binding",
+        });
       }
 
       return [
@@ -248,6 +324,7 @@ export function buildQuestionKnowledgeMetadata(
           knowledgeNodePublicIds,
           parentKnowledgeNodePublicIds,
           ancestorKnowledgeNodePublicIds,
+          knowledgeNodeSnapshot: { schemaVersion: 1, bindings },
         },
       ];
     }),
@@ -1217,6 +1294,8 @@ export async function loadQuestionKnowledgeMetadata(
       question_profession: question.profession,
       id: knowledgeNode.id,
       public_id: knowledgeNode.public_id,
+      name: knowledgeNode.name,
+      path_name: knowledgeNode.path_name,
       knowledge_base_id: knowledgeNode.knowledge_base_id,
       parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
       profession: knowledgeNode.profession,
@@ -1228,7 +1307,8 @@ export async function loadQuestionKnowledgeMetadata(
       eq(knowledgeNode.id, questionKnowledgeNode.knowledge_node_id),
     )
     .where(inArray(questionKnowledgeNode.question_id, questionIds))
-    .orderBy(asc(knowledgeNode.public_id));
+    .orderBy(asc(knowledgeNode.public_id))
+    .for("share");
   const knownIds = new Set(directRows.map((row) => row.id));
   const ancestorRows: QuestionKnowledgeHierarchyRow[] = [];
   let pendingParentIds = [
@@ -1247,13 +1327,16 @@ export async function loadQuestionKnowledgeMetadata(
       .select({
         id: knowledgeNode.id,
         public_id: knowledgeNode.public_id,
+        name: knowledgeNode.name,
+        path_name: knowledgeNode.path_name,
         knowledge_base_id: knowledgeNode.knowledge_base_id,
         parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
         profession: knowledgeNode.profession,
       })
       .from(knowledgeNode)
       .where(inArray(knowledgeNode.id, pendingParentIds))
-      .orderBy(asc(knowledgeNode.public_id));
+      .orderBy(asc(knowledgeNode.public_id))
+      .for("share");
 
     if (rows.length === 0) {
       break;

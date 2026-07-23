@@ -1,40 +1,50 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23",
-  "findingIds": ["F-0161"],
+  "taskId": "p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23",
+  "findingIds": ["F-0079"],
   "candidateRootCauseCluster": "P1-RC-08",
   "status": "validated_reviewed_conditional_closeout_ready",
-  "branch": "fix/personal-ai-learning-subjective-answer",
-  "baseSha": "ecfe6a1e1a36492d05d2547609f5d4fb99b82362",
-  "objective": "Close F-0161 statically by requiring a bounded nonblank text answer for subjective personal AI learning questions, restoring that text across progress reads, and preventing unanswered questions from being persisted or counted as submitted.",
-  "riskCategory": "low_risk_api_ui_validation_logic",
+  "branch": "fix/paper-question-knowledge-snapshot",
+  "baseSha": "1f4b953f015ad125db42add291cd41288424bd53",
+  "objective": "Close F-0079 statically by preserving deterministic immutable knowledge_node identity, name, full path and confirmed formal-binding status in every newly composed paper question snapshot, and by making exam_report analytics and learner UI consume only those historical facts without mutable-tree lookups.",
+  "riskCategory": "database_application_logic_and_low_risk_report_projection_ui",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/personal-ai-generation-learning-session.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-    "tests/unit/student-personal-ai-generation-ui.test.ts",
-    "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
-    "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
-    "src/server/services/personal-ai-generation-learning-session-route.test.ts"
+    "src/server/contracts/paper-draft-contract.ts",
+    "src/server/repositories/question-repository.ts",
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/repositories/paper-draft-repository.ts",
+    "src/server/repositories/paper-draft-repository.test.ts",
+    "src/server/repositories/exam-report-repository.ts",
+    "src/server/services/exam-report-service.test.ts",
+    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
+    "tests/unit/student-mock-exam-report-ui.test.ts",
+    "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
+    "src/lib/published-paper-snapshot.ts",
+    "src/lib/published-paper-snapshot.test.ts",
+    "tests/unit/p1-exam-report-scoring-finalization.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/personal-ai-generation-learning-session.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-    "tests/unit/student-personal-ai-generation-ui.test.ts",
-    "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts"
+    "src/server/contracts/paper-draft-contract.ts",
+    "src/server/repositories/question-repository.ts",
+    "src/server/repositories/question-repository.test.ts",
+    "src/server/repositories/paper-draft-repository.ts",
+    "src/server/repositories/paper-draft-repository.test.ts",
+    "src/server/repositories/exam-report-repository.ts",
+    "src/server/services/exam-report-service.test.ts",
+    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
+    "tests/unit/student-mock-exam-report-ui.test.ts",
+    "tests/unit/p1-paper-question-knowledge-snapshot.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
-    "src/server/services/personal-ai-generation-learning-session-route.test.ts"
+    "src/lib/published-paper-snapshot.ts",
+    "src/lib/published-paper-snapshot.test.ts",
+    "tests/unit/p1-exam-report-scoring-finalization.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -46,37 +56,41 @@
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
-    "any permission, authorization, quota, Provider, deployment or external-service configuration"
+    "any migration apply, real database/data access, permission expansion, quota, Provider, deployment or external-service configuration"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "student personal AI generation learning panel -> answer POST route -> learning session service -> existing answer feedback repository -> progress service -> restored UI answer state and statistics",
-    "coreFileCount": 9,
-    "contingencyFileCount": 2,
+    "authoritativeChain": "formal question question_knowledge_node binding -> question repository hierarchy read -> paper draft repository immutable question snapshot -> published paper snapshot -> practice/mock_exam snapshot -> canonical exam report projector -> report detail -> learner knowledge weakness UI",
+    "coreFileCount": 13,
+    "contingencyFileCount": 3,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
     "schemaMigrationRequired": false,
-    "permissionSemantics": "unchanged; existing session, owner and current authorization checks remain authoritative and precede answer persistence",
-    "providerSemantics": "unchanged; subjective answers remain submitted_review_required with AI scoring blocked",
-    "currentMasterEvidence": "The UI renders no text input for optionless subjective questions and submits textAnswer null for every question; the service persists blank subjective feedback and statistics count every feedback row as submitted."
+    "permissionSemantics": "unchanged; existing paper composition and learner report authorization remains authoritative",
+    "providerSemantics": "unchanged; no Provider or learning_suggestion execution",
+    "currentMasterEvidence": "F-0154 now copies only direct/parent/ancestor public-id arrays; the immutable paper snapshot still omits knowledge_node name, full path and confirmation status, while report analytics and UI display only public ids."
   },
-  "subjectiveAnswerContract": {
-    "questionTypes": [
-      "fill_blank",
-      "short_answer",
-      "case_analysis",
-      "calculation"
+  "knowledgeSnapshotContract": {
+    "container": "knowledgeNodeSnapshot={schemaVersion:1,bindings:[...]} where absence means legacy, present malformed means corrupt and must fail closed",
+    "sourceAuthority": "question_knowledge_node joined to the current formal knowledge_node row inside paper composition; unresolved recommendation candidates are excluded until formally confirmed",
+    "snapshotFacts": [
+      "knowledgeNodePublicId",
+      "name",
+      "pathName",
+      "confirmationStatus=confirmed",
+      "bindingSource=formal_question_binding"
     ],
-    "serverValidation": "subjective questions require a trimmed nonblank bounded text answer and reject selected-option substitution before saveAnswerFeedback",
-    "objectiveValidation": "single_choice, multi_choice and true_false continue to require their existing option semantics and do not consume text as an answer",
-    "ui": "the learner receives a controlled textarea for subjective questions; submit remains disabled until every question has an answer of the correct shape",
-    "resume": "progress restores the persisted subjective text answer and never reconstructs it from generated preview or client cache",
-    "statistics": "only successfully persisted scored or submitted_review_required feedback counts toward submittedCount and completionRate",
-    "bounds": "a focused conservative text limit is enforced before persistence without expanding into the separate cross-domain F-0174 answer-budget finding",
-    "formalBoundary": "formal question, paper, practice, mock_exam, exam_report and mistake_book writes remain blocked"
+    "determinism": "all direct bindings appear exactly once in ordinal case-sensitive public-id order and remain exactly consistent in count, order and case with existing direct public-id metadata; localeCompare is forbidden",
+    "integrity": "unknown fields, missing/duplicate/case-conflicting identities, cross-profession, cross-knowledge-base, cyclic or malformed hierarchy/name/path facts fail closed before paper question persistence",
+    "pathProof": "captured pathName must equal the complete root-to-direct node name chain from one transactionally consistent hierarchy read; names and paths are nonempty normalized strings without control characters",
+    "transactionConsistency": "binding, question and complete node hierarchy are read as one consistent transaction fact through one recursive statement or explicit locks plus final revalidation",
+    "legacy": "existing snapshots without structured knowledge facts remain readable as explicitly legacy/unavailable and are never repaired from the mutable current tree",
+    "report": "new report analysis groups by snapshot public id while preserving and displaying the captured name/path; valid empty, legacy unavailable and corrupt present are distinct; mixed legacy/current analytics are unavailable rather than partial",
+    "immutability": "knowledge_node rename, move or disable after paper composition cannot alter paper, practice, mock_exam or exam_report history",
+    "noSchema": "the change only strengthens existing JSON snapshot application logic; no schema or migration source is modified"
   },
   "validationCommands": [
     {
-      "name": "personal-ai-subjective-answer-focused",
+      "name": "paper-knowledge-snapshot-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -84,10 +98,13 @@
         "exec",
         "vitest",
         "run",
-        "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-route.test.ts",
-        "tests/unit/student-personal-ai-generation-ui.test.ts",
-        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/repositories/paper-draft-repository.test.ts",
+        "src/server/services/exam-report-service.test.ts",
+        "src/lib/published-paper-snapshot.test.ts",
+        "tests/unit/p1-exam-report-scoring-finalization.test.ts",
+        "tests/unit/student-mock-exam-report-ui.test.ts",
+        "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
         "--maxWorkers=1"
       ]
     },
@@ -121,14 +138,19 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/models/personal-ai-generation-learning-session.ts",
-        "src/server/services/personal-ai-generation-learning-session-service.ts",
-        "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts",
-        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
-        "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
-        "src/server/services/personal-ai-generation-learning-session-route.test.ts"
+        "src/server/contracts/paper-draft-contract.ts",
+        "src/server/repositories/question-repository.ts",
+        "src/server/repositories/question-repository.test.ts",
+        "src/server/repositories/paper-draft-repository.ts",
+        "src/server/repositories/paper-draft-repository.test.ts",
+        "src/server/repositories/exam-report-repository.ts",
+        "src/server/services/exam-report-service.test.ts",
+        "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
+        "tests/unit/student-mock-exam-report-ui.test.ts",
+        "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
+        "src/lib/published-paper-snapshot.ts",
+        "src/lib/published-paper-snapshot.test.ts",
+        "tests/unit/p1-exam-report-scoring-finalization.test.ts"
       ]
     },
     {
@@ -140,17 +162,37 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
+        "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
         "-t",
-        "strictly parses the F-0161 task contract and WIP state",
+        "strictly parses the F-0079 task contract and WIP state",
         "--maxWorkers=1"
       ]
     }
   ],
+  "consumedPreRedApproval": {
+    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
+    "approvalFingerprint": "106e307181c5f326d4778813ce3458c81c10bffdf0c5f683d0515dc7dcb8d143",
+    "riskCategory": "database_application_logic_and_low_risk_report_projection_ui",
+    "requestedOperations": [
+      "TDD",
+      "database application snapshot read/write logic",
+      "report projection and UI",
+      "validation",
+      "single commit",
+      "ff-only master merge",
+      "canonical origin/master push",
+      "sync and cleanup"
+    ],
+    "baseSha": "1f4b953f015ad125db42add291cd41288424bd53",
+    "approvalId": "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23",
+    "decision": "APPROVED",
+    "requestStatus": "approved_and_consumed_for_pre_RED",
+    "conditionalCloseout": true
+  },
   "approvalSources": {
     "lowRiskCloseout": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "testOnlyAllowlistExpansion": "standing-test-only-allowlist-expansion-2026-07-21",
-    "database": null,
+    "database": "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23",
     "permission": null,
     "dependency": null,
     "provider": null
@@ -159,31 +201,35 @@
   "closeoutProjection": {
     "current": "validated_reviewed_conditional_closeout_ready",
     "triggers": "focused_lint_typecheck_build_format_diff_state_parse_and_main_thread_adversarial_review_GREEN_with_unchanged_base_origin_and_envelope",
-    "successProjection": "F0161_closed_static_without_browser_or_runtime_database_proof",
+    "successProjection": "F0079_closed_static_without_real_database_or_browser_runtime_proof",
     "terminalEvidence": "only actual commit push sync and cleanup evidence may prove closeout"
   },
   "validationEvidence": {
-    "red": "4_files_78_tests_3_failed_75_passed",
-    "focused": "4_files_79_tests_passed",
-    "lint": "pass_with_3_preexisting_unrelated_warnings",
-    "typecheck": "pass",
-    "build": "pass_with_preexisting_next_output_tracing_warning",
-    "formatDiffState": "pass",
-    "adversarialReview": "pass_server_owned_question_type_nonblank_4000_character_bound_zero_rejected_persistence_objective_text_substitution_rejected_and_server_progress_restore"
+    "tddRed": "5_files_89_tests_10_expected_product_failures_plus_1_missing_new_test_dependency_before_implementation",
+    "focused": "7_files_106_tests_GREEN",
+    "lint": "exit_0_with_3_pre_existing_unrelated_warnings",
+    "typecheck": "tsc_noEmit_exit_0",
+    "build": "next_build_exit_0_with_existing_NFT_trace_warning",
+    "format": "approved_changed_files_prettier_formatted",
+    "diff": "git_diff_check_exit_0",
+    "stateParse": "JSON_parse_and_strict_unique_key_YAML_parse_GREEN",
+    "adversarialReview": "GREEN_unique_builder_transactional_share_locks_exact_identity_set_legacy_current_corrupt_tristate_no_mutable_tree_report_lookup_no_partial_UI_filtering",
+    "runtimeBoundary": "static_and_synthetic_only_no_real_database_or_browser_runtime_proof"
   },
   "executionMetrics": {
-    "mandatoryFreshApprovals": 0,
+    "mandatoryFreshApprovals": 1,
     "preventableScopeMissApprovals": 0,
     "candidateReapprovals": 0,
-    "approvalWaitTurns": 0,
-    "productValueTime": "includes_JIT_TDD_implementation_and_adversarial_review_exact_clock_not_reconstructed",
-    "mechanismOverhead": "includes_contract_materialization_and_validation_exact_clock_not_reconstructed",
+    "approvalWaitTurns": 1,
+    "productValueTime": "JIT_and_pre_RED_chain_scan_completed_exact_clock_not_reconstructed",
+    "mechanismOverhead": "includes_contract_materialization_and_guardian_request_exact_clock_not_reconstructed",
     "guardSmokeChanges": 0
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-practice-resume-authoritative-progress-2026-07-23",
-    "findingIds": ["F-0135"],
-    "commit": "ecfe6a1e1a36492d05d2547609f5d4fb99b82362",
+    "taskId": "p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23",
+    "findingIds": ["F-0161"],
+    "commit": "1f4b953f015ad125db42add291cd41288424bd53",
+    "tree": "70c3306633b305a61e7d9f0bbc8f72553021743b",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "closed_static_product_without_browser_or_runtime_database_proof",
     "masterOriginSync": true,
@@ -193,19 +239,18 @@
   "residualDisposition": {
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
     "F-0065": "confirmed_deferred_by_F0148_quota_and_Cost_Calibration_gate",
-    "F-0079": "confirmed_high_confidence_but_requires_separate_database_application_snapshot_task",
-    "F-0135": "closed_static_product_without_browser_or_runtime_database_proof",
-    "F-0161": "confirmed_high_confidence_and_currently_eligible"
+    "F-0079": "validated_static_candidate_ready_for_conditional_closeout",
+    "F-0161": "closed_static_product_without_browser_or_runtime_database_proof"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0161",
-    "currentPartition": "personal_ai_learning_subjective_answer",
-    "nextReviewHints": ["continue_RC08_residual_JIT_after_F0161_closeout"]
+    "currentFindingId": "F-0079",
+    "currentPartition": "paper_question_knowledge_snapshot_and_report_history",
+    "nextReviewHints": ["after_F0079_closeout_continue_RC08_residual_JIT"]
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
+    "approvalId": "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23"
   }
 }

@@ -471,6 +471,10 @@ type FillBlankReportAnswer = {
 
 type KnowledgeNodeAnalysisResult = {
   knowledgeNodePublicId: string;
+  name: string;
+  pathName: string;
+  confirmationStatus: "confirmed";
+  bindingSource: "formal_question_binding";
   questionCount: number;
   answeredCount: number;
   correctCount: number;
@@ -492,6 +496,7 @@ type ParsedReportSnapshot = {
   knowledgeNodeSummaryText: string | null;
   knowledgeNodeWeaknessSummaryText: string | null;
   knowledgeNodeAnalysis: KnowledgeNodeAnalysisResult[];
+  knowledgeNodeAnalyticsStatus: "available" | "unavailable";
   questionResults: ReportQuestionResult[];
 };
 
@@ -837,7 +842,7 @@ function getFillBlankReportAnswers(value: unknown): FillBlankReportAnswer[] {
 function formatKnowledgeNodeWeaknessLabel(
   analysisItem: KnowledgeNodeAnalysisResult,
 ): string {
-  return `薄弱项 ${analysisItem.weaknessRank}`;
+  return analysisItem.pathName;
 }
 
 function formatKnowledgeNodeWeaknessSummaryText(
@@ -864,15 +869,20 @@ function getStringArray(value: unknown): string[] {
 
 function getKnowledgeNodeAnalysis(
   value: unknown,
-): KnowledgeNodeAnalysisResult[] {
+): KnowledgeNodeAnalysisResult[] | null {
   if (!Array.isArray(value)) {
-    return [];
+    return null;
   }
 
-  return value.flatMap((analysisItem): KnowledgeNodeAnalysisResult[] => {
+  const analysisItems: KnowledgeNodeAnalysisResult[] = [];
+  for (const analysisItem of value) {
     if (
       !isRecord(analysisItem) ||
       typeof analysisItem.knowledgeNodePublicId !== "string" ||
+      typeof analysisItem.name !== "string" ||
+      typeof analysisItem.pathName !== "string" ||
+      analysisItem.confirmationStatus !== "confirmed" ||
+      analysisItem.bindingSource !== "formal_question_binding" ||
       typeof analysisItem.questionCount !== "number" ||
       typeof analysisItem.answeredCount !== "number" ||
       typeof analysisItem.correctCount !== "number" ||
@@ -880,26 +890,35 @@ function getKnowledgeNodeAnalysis(
       typeof analysisItem.maxScore !== "string" ||
       typeof analysisItem.scoreRate !== "number" ||
       typeof analysisItem.accuracyRate !== "number" ||
-      typeof analysisItem.weaknessRank !== "number"
+      typeof analysisItem.weaknessRank !== "number" ||
+      !Array.isArray(analysisItem.questionPublicIds) ||
+      !analysisItem.questionPublicIds.every(
+        (publicId): publicId is string =>
+          typeof publicId === "string" && publicId.length > 0,
+      )
     ) {
-      return [];
+      return null;
     }
 
-    return [
-      {
-        knowledgeNodePublicId: analysisItem.knowledgeNodePublicId,
-        questionCount: analysisItem.questionCount,
-        answeredCount: analysisItem.answeredCount,
-        correctCount: analysisItem.correctCount,
-        score: analysisItem.score,
-        maxScore: analysisItem.maxScore,
-        scoreRate: analysisItem.scoreRate,
-        accuracyRate: analysisItem.accuracyRate,
-        weaknessRank: analysisItem.weaknessRank,
-        questionPublicIds: getStringArray(analysisItem.questionPublicIds),
-      },
-    ];
-  });
+    analysisItems.push({
+      knowledgeNodePublicId: analysisItem.knowledgeNodePublicId,
+      name: analysisItem.name,
+      pathName: analysisItem.pathName,
+      confirmationStatus: analysisItem.confirmationStatus,
+      bindingSource: analysisItem.bindingSource,
+      questionCount: analysisItem.questionCount,
+      answeredCount: analysisItem.answeredCount,
+      correctCount: analysisItem.correctCount,
+      score: analysisItem.score,
+      maxScore: analysisItem.maxScore,
+      scoreRate: analysisItem.scoreRate,
+      accuracyRate: analysisItem.accuracyRate,
+      weaknessRank: analysisItem.weaknessRank,
+      questionPublicIds: analysisItem.questionPublicIds,
+    });
+  }
+
+  return analysisItems;
 }
 
 function isOptionMockExamQuestion(questionType: MockExamQuestionType): boolean {
@@ -1352,6 +1371,14 @@ function parseReportSnapshot(
   const questionResults = Array.isArray(reportSnapshot.questionResults)
     ? reportSnapshot.questionResults
     : [];
+  const parsedKnowledgeNodeAnalysis = getKnowledgeNodeAnalysis(
+    reportSnapshot.knowledgeNodeAnalysis,
+  );
+  const knowledgeNodeAnalyticsStatus =
+    reportSnapshot.knowledgeNodeAnalyticsStatus === "available" &&
+    parsedKnowledgeNodeAnalysis !== null
+      ? "available"
+      : "unavailable";
 
   return {
     totalScoreText:
@@ -1386,9 +1413,11 @@ function parseReportSnapshot(
       typeof reportSnapshot.knowledgeNodeWeaknessSummaryText === "string"
         ? reportSnapshot.knowledgeNodeWeaknessSummaryText
         : null,
-    knowledgeNodeAnalysis: getKnowledgeNodeAnalysis(
-      reportSnapshot.knowledgeNodeAnalysis,
-    ),
+    knowledgeNodeAnalyticsStatus,
+    knowledgeNodeAnalysis:
+      knowledgeNodeAnalyticsStatus === "available"
+        ? (parsedKnowledgeNodeAnalysis ?? [])
+        : [],
     questionResults: questionResults.flatMap(
       (questionResult): ReportQuestionResult[] => {
         if (
@@ -3813,7 +3842,11 @@ export function StudentExamReportPage({
         </div>
       )}
 
-      {parsedReportSnapshot.knowledgeNodeAnalysis.length === 0 ? null : (
+      {parsedReportSnapshot.knowledgeNodeAnalyticsStatus === "unavailable" ? (
+        <div className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1">
+          <p className="text-text-secondary text-sm">知识点分析暂不可用</p>
+        </div>
+      ) : parsedReportSnapshot.knowledgeNodeAnalysis.length === 0 ? null : (
         <div className="bg-surface ring-border space-y-3 rounded-xl p-4 shadow-sm ring-1">
           <div className="flex items-center gap-2">
             <BarChart3

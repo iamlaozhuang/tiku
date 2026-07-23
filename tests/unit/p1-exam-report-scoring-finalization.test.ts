@@ -9,11 +9,13 @@ import { createPostgresAiScoringTaskRepository } from "@/server/repositories/ai-
 import type { RuntimeDatabase } from "@/server/repositories/runtime-database";
 
 const TASK_ID =
-  "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23";
-const BASE_SHA = "770daa8dac130931f8faddb57a2d25082bb2b77b";
-const BRANCH = "fix/exam-report-scoring-finalization";
+  "p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23";
+const BASE_SHA = "1f4b953f015ad125db42add291cd41288424bd53";
+const BRANCH = "fix/paper-question-knowledge-snapshot";
 const APPROVAL_ID =
-  "guardian-f0067-exam-report-scoring-finalization-2026-07-23";
+  "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23";
+const CLOSED_TASK_ID =
+  "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23";
 
 type TaskSafetyContract = {
   taskId: string;
@@ -94,7 +96,7 @@ function parseRepositoryYaml(path: string): unknown {
 }
 
 describe("F-0067 exam report scoring finalization", () => {
-  it("strictly parses the F-0067 contract and WIP state", () => {
+  it("strictly parses current WIP state and preserves F-0067 closeout", () => {
     const contract = JSON.parse(
       readRepositoryFile("docs/04-agent-system/state/task-safety.json"),
     ) as TaskSafetyContract;
@@ -112,22 +114,24 @@ describe("F-0067 exam report scoring finalization", () => {
       taskId: TASK_ID,
       baseSha: BASE_SHA,
       branch: BRANCH,
-      status: "validated_reviewed_conditional_closeout_ready",
       approvalSources: { database: APPROVAL_ID },
       conditionalCloseout: true,
     });
-    expect(contract.allowedFiles).toHaveLength(15);
-    expect(contract.coreFiles).toHaveLength(10);
-    expect(contract.contingencyFiles).toHaveLength(5);
+    expect(contract.allowedFiles).toHaveLength(16);
+    expect(contract.coreFiles).toHaveLength(13);
+    expect(contract.contingencyFiles).toHaveLength(3);
     expect(projectState.currentTask).toMatchObject({
       id: TASK_ID,
       status: "in_progress",
-      executionStage: "validated_reviewed_conditional_closeout_ready",
     });
     expect(projectState.p1RemediationSerialProgram.currentTaskId).toBe(TASK_ID);
     expect(
       queue.activeTasks.filter((task) => task.status === "in_progress"),
     ).toEqual([expect.objectContaining({ id: TASK_ID })]);
+    expect(JSON.stringify(projectState)).toContain(
+      `"${CLOSED_TASK_ID}":"closed"`,
+    );
+    expect(JSON.stringify(queue)).toContain(`"${CLOSED_TASK_ID}":"closed"`);
 
     for (const command of contract.validationCommands) {
       expect(command.executable).not.toMatch(/[<>]/u);

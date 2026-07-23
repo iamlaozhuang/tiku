@@ -18,16 +18,30 @@ describe("paper question metadata snapshot", () => {
       "knowledge_node_parent",
       "knowledge_node_root",
     ];
+    const knowledgeNodeSnapshot = {
+      schemaVersion: 1 as const,
+      bindings: [
+        {
+          knowledgeNodePublicId: "knowledge_node_child",
+          name: "抽样方法",
+          pathName: "营销/市场调研/抽样方法",
+          confirmationStatus: "confirmed" as const,
+          bindingSource: "formal_question_binding" as const,
+        },
+      ],
+    };
     const snapshot = copyQuestionSourceMetadataToSnapshot({
       difficulty: "hard",
       knowledgeNodePublicIds,
       parentKnowledgeNodePublicIds,
       ancestorKnowledgeNodePublicIds,
+      knowledgeNodeSnapshot,
     });
 
     knowledgeNodePublicIds.push("knowledge_node_mutated");
     parentKnowledgeNodePublicIds.push("knowledge_node_mutated_parent");
     ancestorKnowledgeNodePublicIds.push("knowledge_node_mutated_ancestor");
+    knowledgeNodeSnapshot.bindings[0].name = "被修改";
 
     expect(snapshot).toEqual({
       difficulty: "hard",
@@ -37,7 +51,34 @@ describe("paper question metadata snapshot", () => {
         "knowledge_node_parent",
         "knowledge_node_root",
       ],
+      knowledgeNodeSnapshot: {
+        schemaVersion: 1,
+        bindings: [
+          {
+            knowledgeNodePublicId: "knowledge_node_child",
+            name: "抽样方法",
+            pathName: "营销/市场调研/抽样方法",
+            confirmationStatus: "confirmed",
+            bindingSource: "formal_question_binding",
+          },
+        ],
+      },
     });
+  });
+
+  it("fails closed when structured bindings drift from the direct public-id set", () => {
+    expect(() =>
+      copyQuestionSourceMetadataToSnapshot({
+        difficulty: "easy",
+        knowledgeNodePublicIds: ["knowledge_node_direct"],
+        parentKnowledgeNodePublicIds: [],
+        ancestorKnowledgeNodePublicIds: [],
+        knowledgeNodeSnapshot: {
+          schemaVersion: 1,
+          bindings: [],
+        },
+      }),
+    ).toThrow();
   });
 });
 

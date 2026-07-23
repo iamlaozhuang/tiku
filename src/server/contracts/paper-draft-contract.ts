@@ -21,6 +21,21 @@ export type MaterialSnapshotDto = {
   subject: Subject;
 };
 
+export const QUESTION_KNOWLEDGE_SNAPSHOT_SCHEMA_VERSION = 1 as const;
+
+export type QuestionKnowledgeNodeBindingSnapshotDto = {
+  knowledgeNodePublicId: string;
+  name: string;
+  pathName: string;
+  confirmationStatus: "confirmed";
+  bindingSource: "formal_question_binding";
+};
+
+export type QuestionKnowledgeNodeSnapshotDto = {
+  schemaVersion: typeof QUESTION_KNOWLEDGE_SNAPSHOT_SCHEMA_VERSION;
+  bindings: QuestionKnowledgeNodeBindingSnapshotDto[];
+};
+
 export type QuestionSnapshotDto = {
   questionPublicId: string;
   questionStatus: QuestionStatus;
@@ -32,6 +47,7 @@ export type QuestionSnapshotDto = {
   knowledgeNodePublicIds?: string[];
   parentKnowledgeNodePublicIds?: string[];
   ancestorKnowledgeNodePublicIds?: string[];
+  knowledgeNodeSnapshot?: QuestionKnowledgeNodeSnapshotDto;
   stemRichText: string;
   questionOptions: {
     label: string;

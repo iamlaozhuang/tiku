@@ -17,6 +17,8 @@ describe("question knowledge hierarchy snapshot", () => {
   const root = {
     id: 1,
     public_id: "knowledge_node_root",
+    name: "营销",
+    path_name: "营销",
     knowledge_base_id: 10,
     parent_knowledge_node_id: null,
     profession: "marketing" as const,
@@ -25,12 +27,16 @@ describe("question knowledge hierarchy snapshot", () => {
     ...root,
     id: 2,
     public_id: "knowledge_node_parent",
+    name: "市场调研",
+    path_name: "营销/市场调研",
     parent_knowledge_node_id: 1,
   };
   const child = {
     ...root,
     id: 3,
     public_id: "knowledge_node_child",
+    name: "抽样方法",
+    path_name: "营销/市场调研/抽样方法",
     parent_knowledge_node_id: 2,
   };
 
@@ -51,10 +57,82 @@ describe("question knowledge hierarchy snapshot", () => {
               "knowledge_node_parent",
               "knowledge_node_root",
             ],
+            knowledgeNodeSnapshot: {
+              schemaVersion: 1,
+              bindings: [
+                {
+                  knowledgeNodePublicId: "knowledge_node_child",
+                  name: "抽样方法",
+                  pathName: "营销/市场调研/抽样方法",
+                  confirmationStatus: "confirmed",
+                  bindingSource: "formal_question_binding",
+                },
+              ],
+            },
           },
         ],
       ]),
     );
+  });
+
+  it("uses ordinal public-id ordering and rejects case-variant identities", () => {
+    const ordinalRows = [
+      {
+        ...root,
+        id: 11,
+        public_id: "knowledge_node_b",
+        name: "B",
+        path_name: "B",
+        question_id: 101,
+        question_profession: "marketing" as const,
+      },
+      {
+        ...root,
+        id: 12,
+        public_id: "knowledge_node_A",
+        name: "A",
+        path_name: "A",
+        question_id: 101,
+        question_profession: "marketing" as const,
+      },
+    ];
+
+    expect(
+      buildQuestionKnowledgeMetadata(ordinalRows, []).get(101)
+        ?.knowledgeNodePublicIds,
+    ).toEqual(["knowledge_node_A", "knowledge_node_b"]);
+    expect(() =>
+      buildQuestionKnowledgeMetadata(
+        [
+          ordinalRows[0],
+          {
+            ...ordinalRows[0],
+            id: 13,
+            public_id: "KNOWLEDGE_NODE_B",
+          },
+        ],
+        [],
+      ),
+    ).toThrow(QuestionKnowledgeHierarchyIntegrityError);
+  });
+
+  it.each([
+    { name: "empty captured name", row: { ...child, name: "" } },
+    {
+      name: "captured control character",
+      row: { ...child, name: "抽样\u0000方法" },
+    },
+    {
+      name: "captured path does not match the full hierarchy",
+      row: { ...child, path_name: "营销/错误路径/抽样方法" },
+    },
+  ])("fails closed for $name", ({ row }) => {
+    expect(() =>
+      buildQuestionKnowledgeMetadata(
+        [{ ...row, question_id: 101, question_profession: "marketing" }],
+        [parent, root],
+      ),
+    ).toThrow(QuestionKnowledgeHierarchyIntegrityError);
   });
 
   it.each([
@@ -149,6 +227,10 @@ function createSelectQueue(
       },
       orderBy() {
         captured.calls.push("orderBy");
+        return query;
+      },
+      for() {
+        captured.calls.push("for");
         return query;
       },
       limit() {
@@ -380,6 +462,8 @@ describe("question detail repository read model", () => {
             question_profession: "marketing",
             id: 101,
             public_id: "knowledge-node-public-001",
+            name: "抽样方法",
+            path_name: "抽样方法",
             knowledge_base_id: 201,
             parent_knowledge_node_id: null,
             profession: "marketing",

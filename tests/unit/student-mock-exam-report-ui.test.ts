@@ -2058,11 +2058,16 @@ describe("StudentExamReportPage", () => {
         totalScoreText: "total score 3.0",
         accuracyText: "accuracy 67%",
         scoreSummaryText: "score 3.0 / 6.0",
+        knowledgeNodeAnalyticsStatus: "available",
         knowledgeNodeWeaknessSummaryText:
-          "knowledge_node weakness: knowledge_node_public_weak score_rate 0% accuracy 0% score 0.0/2.0",
+          "知识点薄弱项：营销/薄弱知识点 得分率 0% 正确率 0% 得分 0.0/2.0",
         knowledgeNodeAnalysis: [
           {
             knowledgeNodePublicId: "knowledge_node_public_weak",
+            name: "薄弱知识点",
+            pathName: "营销/薄弱知识点",
+            confirmationStatus: "confirmed",
+            bindingSource: "formal_question_binding",
             questionCount: 1,
             answeredCount: 0,
             correctCount: 0,
@@ -2075,6 +2080,10 @@ describe("StudentExamReportPage", () => {
           },
           {
             knowledgeNodePublicId: "knowledge_node_public_shared",
+            name: "共享知识点",
+            pathName: "营销/共享知识点",
+            confirmationStatus: "confirmed",
+            bindingSource: "formal_question_binding",
             questionCount: 2,
             answeredCount: 1,
             correctCount: 1,
@@ -2101,14 +2110,14 @@ describe("StudentExamReportPage", () => {
     );
 
     expect(screen.getByText("知识点薄弱项")).toBeInTheDocument();
-    expect(screen.getByText("薄弱项 1")).toBeInTheDocument();
+    expect(screen.getByText("营销/薄弱知识点")).toBeInTheDocument();
     expect(screen.getByText("得分率 0%")).toBeInTheDocument();
     expect(screen.getByText("正确率 0%")).toBeInTheDocument();
     expect(screen.getByText("0.0 / 2.0")).toBeInTheDocument();
     expect(
       screen.getByText("覆盖 1 题，已答 0 题，正确 0 题"),
     ).toBeInTheDocument();
-    expect(screen.getByText("薄弱项 2")).toBeInTheDocument();
+    expect(screen.getByText("营销/共享知识点")).toBeInTheDocument();
     expect(screen.getByText("得分率 25%")).toBeInTheDocument();
     expect(screen.getByText("正确率 50%")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain(
@@ -2117,6 +2126,49 @@ describe("StudentExamReportPage", () => {
     expect(document.body.textContent).not.toContain(
       "knowledge_node_public_shared",
     );
+  });
+
+  it("treats a malformed present knowledge analysis as unavailable instead of filtering it", () => {
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-corrupt-knowledge-analysis",
+      reportSnapshot: {
+        totalScoreText: "total score 3.0",
+        accuracyText: "accuracy 67%",
+        scoreSummaryText: "score 3.0 / 6.0",
+        knowledgeNodeAnalyticsStatus: "available",
+        knowledgeNodeAnalysis: [
+          {
+            knowledgeNodePublicId: "knowledge_node_valid_but_mixed",
+            name: "不应部分显示",
+            pathName: "营销/不应部分显示",
+            confirmationStatus: "confirmed",
+            bindingSource: "formal_question_binding",
+            questionCount: 1,
+            answeredCount: 1,
+            correctCount: 1,
+            score: "1.0",
+            maxScore: "1.0",
+            scoreRate: 100,
+            accuracyRate: 100,
+            weaknessRank: 1,
+            questionPublicIds: ["question_valid"],
+          },
+          { malformed: true },
+        ],
+        questionResults: [],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-corrupt-knowledge-analysis",
+        examReports: [report],
+      }),
+    );
+
+    expect(screen.queryByText("不应部分显示")).toBeNull();
+    expect(screen.getByText("知识点分析暂不可用")).toBeInTheDocument();
   });
 
   it("renders fill_blank scoring method and per-blank report details", () => {

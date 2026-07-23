@@ -38,6 +38,16 @@ type ReportPaperQuestionSnapshot = {
   questionGroupPublicId: string | null;
   questionGroupTitle: string | null;
   knowledgeNodePublicIds: string[];
+  knowledgeNodeSnapshotState: "current" | "legacy";
+  knowledgeNodeBindings: KnowledgeNodeBindingSnapshot[];
+};
+
+type KnowledgeNodeBindingSnapshot = {
+  knowledgeNodePublicId: string;
+  name: string;
+  pathName: string;
+  confirmationStatus: "confirmed";
+  bindingSource: "formal_question_binding";
 };
 
 type ReportFillBlankAnswer = {
@@ -49,6 +59,10 @@ type ReportFillBlankAnswer = {
 
 type KnowledgeNodeAnalysisAccumulator = {
   knowledgeNodePublicId: string;
+  name: string;
+  pathName: string;
+  confirmationStatus: "confirmed";
+  bindingSource: "formal_question_binding";
   questionPublicIds: string[];
   questionCount: number;
   answeredCount: number;
@@ -98,6 +112,121 @@ function formatRate(numerator: number, denominator: number): number {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+export class ExamReportKnowledgeSnapshotIntegrityError extends Error {
+  constructor() {
+    super("Paper question knowledge snapshot is invalid.");
+    this.name = "ExamReportKnowledgeSnapshotIntegrityError";
+  }
+}
+
+function compareOrdinal(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function hasExactKeys(
+  value: Record<string, unknown>,
+  expectedKeys: readonly string[],
+): boolean {
+  const actualKeys = Object.keys(value).sort(compareOrdinal);
+  const sortedExpectedKeys = [...expectedKeys].sort(compareOrdinal);
+  return (
+    actualKeys.length === sortedExpectedKeys.length &&
+    actualKeys.every((key, index) => key === sortedExpectedKeys[index])
+  );
+}
+
+function isCanonicalSnapshotText(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value === value.trim() &&
+    value === value.normalize("NFC") &&
+    !/[\u0000-\u001f\u007f-\u009f]/u.test(value)
+  );
+}
+
+function parseKnowledgeNodeSnapshot(paperQuestion: Record<string, unknown>): {
+  state: "current" | "legacy";
+  publicIds: string[];
+  bindings: KnowledgeNodeBindingSnapshot[];
+} {
+  if (!Object.hasOwn(paperQuestion, "knowledgeNodeSnapshot")) {
+    return {
+      state: "legacy",
+      publicIds: getStringArrayField(paperQuestion, "knowledgeNodePublicIds"),
+      bindings: [],
+    };
+  }
+
+  const snapshot = paperQuestion.knowledgeNodeSnapshot;
+  const publicIds = paperQuestion.knowledgeNodePublicIds;
+  if (
+    !isRecord(snapshot) ||
+    !hasExactKeys(snapshot, ["schemaVersion", "bindings"]) ||
+    snapshot.schemaVersion !== 1 ||
+    !Array.isArray(snapshot.bindings) ||
+    !Array.isArray(publicIds) ||
+    !publicIds.every(isCanonicalSnapshotText)
+  ) {
+    throw new ExamReportKnowledgeSnapshotIntegrityError();
+  }
+
+  const bindings: KnowledgeNodeBindingSnapshot[] = snapshot.bindings.map(
+    (value): KnowledgeNodeBindingSnapshot => {
+      if (
+        !isRecord(value) ||
+        !hasExactKeys(value, [
+          "knowledgeNodePublicId",
+          "name",
+          "pathName",
+          "confirmationStatus",
+          "bindingSource",
+        ]) ||
+        !isCanonicalSnapshotText(value.knowledgeNodePublicId) ||
+        !isCanonicalSnapshotText(value.name) ||
+        !isCanonicalSnapshotText(value.pathName) ||
+        value.confirmationStatus !== "confirmed" ||
+        value.bindingSource !== "formal_question_binding" ||
+        value.pathName.split("/").some((part) => part.length === 0) ||
+        value.pathName.split("/").at(-1) !== value.name
+      ) {
+        throw new ExamReportKnowledgeSnapshotIntegrityError();
+      }
+
+      return {
+        knowledgeNodePublicId: value.knowledgeNodePublicId,
+        name: value.name,
+        pathName: value.pathName,
+        confirmationStatus: value.confirmationStatus,
+        bindingSource: value.bindingSource,
+      };
+    },
+  );
+  const foldedPublicIds = new Set<string>();
+  for (let index = 0; index < bindings.length; index += 1) {
+    const binding = bindings[index];
+    const foldedPublicId = binding.knowledgeNodePublicId.toLowerCase();
+    if (
+      foldedPublicIds.has(foldedPublicId) ||
+      binding.knowledgeNodePublicId !== publicIds[index] ||
+      (index > 0 &&
+        compareOrdinal(
+          bindings[index - 1].knowledgeNodePublicId,
+          binding.knowledgeNodePublicId,
+        ) >= 0)
+    ) {
+      throw new ExamReportKnowledgeSnapshotIntegrityError();
+    }
+    foldedPublicIds.add(foldedPublicId);
+  }
+
+  if (bindings.length !== publicIds.length) {
+    throw new ExamReportKnowledgeSnapshotIntegrityError();
+  }
+
+  return { state: "current", publicIds: [...publicIds], bindings };
 }
 
 function getStandardAnswerLabels(value: Record<string, unknown>): string[] {
@@ -219,6 +348,8 @@ function listReportPaperQuestions(
         return [];
       }
 
+      const knowledgeNodeSnapshot = parseKnowledgeNodeSnapshot(paperQuestion);
+
       return [
         {
           paperQuestionPublicId,
@@ -236,10 +367,9 @@ function listReportPaperQuestions(
             questionGroup === null
               ? null
               : getStringField(questionGroup, "title"),
-          knowledgeNodePublicIds: getStringArrayField(
-            paperQuestion,
-            "knowledgeNodePublicIds",
-          ),
+          knowledgeNodePublicIds: knowledgeNodeSnapshot.publicIds,
+          knowledgeNodeSnapshotState: knowledgeNodeSnapshot.state,
+          knowledgeNodeBindings: knowledgeNodeSnapshot.bindings,
         },
       ];
     },
@@ -324,19 +454,65 @@ function incrementCount(counts: Map<string, number>, key: string | null) {
   counts.set(key, (counts.get(key) ?? 0) + 1);
 }
 
+function isSameKnowledgeBinding(
+  left: KnowledgeNodeBindingSnapshot,
+  right: KnowledgeNodeBindingSnapshot,
+): boolean {
+  return (
+    left.knowledgeNodePublicId === right.knowledgeNodePublicId &&
+    left.name === right.name &&
+    left.pathName === right.pathName &&
+    left.confirmationStatus === right.confirmationStatus &&
+    left.bindingSource === right.bindingSource
+  );
+}
+
+function formatKnowledgeNodeCountSummary(
+  counts: Map<string, { binding: KnowledgeNodeBindingSnapshot; count: number }>,
+): string | null {
+  if (counts.size === 0) {
+    return null;
+  }
+
+  const summary = [...counts.entries()]
+    .sort(([left], [right]) => compareOrdinal(left, right))
+    .map(([, value]) => `${value.binding.pathName} ${value.count}`)
+    .join(", ");
+
+  return `knowledge_node analytics: ${summary}`;
+}
+
 function buildAnalyticsSummary(questions: ReportPaperQuestionSnapshot[]) {
   const questionTypeCounts = new Map<string, number>();
   const paperSectionCounts = new Map<string, number>();
   const questionGroupCounts = new Map<string, number>();
-  const knowledgeNodeCounts = new Map<string, number>();
+  const knowledgeNodeCounts = new Map<
+    string,
+    { binding: KnowledgeNodeBindingSnapshot; count: number }
+  >();
+  const knowledgeNodeAnalyticsAvailable = questions.every(
+    (question) => question.knowledgeNodeSnapshotState === "current",
+  );
 
   questions.forEach((question) => {
     incrementCount(questionTypeCounts, question.questionType);
     incrementCount(paperSectionCounts, question.paperSectionTitle);
     incrementCount(questionGroupCounts, question.questionGroupTitle);
-    question.knowledgeNodePublicIds.forEach((knowledgeNodePublicId) => {
-      incrementCount(knowledgeNodeCounts, knowledgeNodePublicId);
-    });
+    if (knowledgeNodeAnalyticsAvailable) {
+      question.knowledgeNodeBindings.forEach((binding) => {
+        const existing = knowledgeNodeCounts.get(binding.knowledgeNodePublicId);
+        if (
+          existing !== undefined &&
+          !isSameKnowledgeBinding(existing.binding, binding)
+        ) {
+          throw new ExamReportKnowledgeSnapshotIntegrityError();
+        }
+        knowledgeNodeCounts.set(binding.knowledgeNodePublicId, {
+          binding,
+          count: (existing?.count ?? 0) + 1,
+        });
+      });
+    }
   });
 
   return {
@@ -352,10 +528,11 @@ function buildAnalyticsSummary(questions: ReportPaperQuestionSnapshot[]) {
       "question_group analytics",
       questionGroupCounts,
     ),
-    knowledgeNodeSummaryText: formatCountSummary(
-      "knowledge_node analytics",
-      knowledgeNodeCounts,
-    ),
+    knowledgeNodeSummaryText:
+      formatKnowledgeNodeCountSummary(knowledgeNodeCounts),
+    knowledgeNodeAnalyticsStatus: knowledgeNodeAnalyticsAvailable
+      ? "available"
+      : "unavailable",
   };
 }
 
@@ -363,6 +540,17 @@ function buildKnowledgeNodeAnalysis(
   questions: ReportPaperQuestionSnapshot[],
   answerRecords: ExamReportAnswerRecordRow[],
 ) {
+  if (
+    questions.some(
+      (question) => question.knowledgeNodeSnapshotState === "legacy",
+    )
+  ) {
+    return {
+      knowledgeNodeAnalysis: [],
+      knowledgeNodeWeaknessSummaryText: null,
+    };
+  }
+
   const answerByPaperQuestion = new Map(
     answerRecords.map((answerRecord) => [
       answerRecord.paper_question_public_id,
@@ -385,11 +573,16 @@ function buildKnowledgeNodeAnalysis(
     const isAnswered = answerRecord !== undefined;
     const isCorrect = answerRecord?.is_correct === true;
 
-    question.knowledgeNodePublicIds.forEach((knowledgeNodePublicId) => {
+    question.knowledgeNodeBindings.forEach((binding) => {
+      const knowledgeNodePublicId = binding.knowledgeNodePublicId;
       const accumulator = accumulatorByKnowledgeNodePublicId.get(
         knowledgeNodePublicId,
       ) ?? {
         knowledgeNodePublicId,
+        name: binding.name,
+        pathName: binding.pathName,
+        confirmationStatus: binding.confirmationStatus,
+        bindingSource: binding.bindingSource,
         questionPublicIds: [],
         questionCount: 0,
         answeredCount: 0,
@@ -397,6 +590,10 @@ function buildKnowledgeNodeAnalysis(
         score: 0,
         maxScore: 0,
       };
+
+      if (!isSameKnowledgeBinding(accumulator, binding)) {
+        throw new ExamReportKnowledgeSnapshotIntegrityError();
+      }
 
       accumulator.questionPublicIds.push(question.questionPublicId);
       accumulator.questionCount += 1;
@@ -414,6 +611,10 @@ function buildKnowledgeNodeAnalysis(
   const knowledgeNodeAnalysis = [...accumulatorByKnowledgeNodePublicId.values()]
     .map((accumulator) => ({
       knowledgeNodePublicId: accumulator.knowledgeNodePublicId,
+      name: accumulator.name,
+      pathName: accumulator.pathName,
+      confirmationStatus: accumulator.confirmationStatus,
+      bindingSource: accumulator.bindingSource,
       questionCount: accumulator.questionCount,
       answeredCount: accumulator.answeredCount,
       correctCount: accumulator.correctCount,
@@ -430,7 +631,7 @@ function buildKnowledgeNodeAnalysis(
       (left, right) =>
         left.scoreRate - right.scoreRate ||
         left.accuracyRate - right.accuracyRate ||
-        left.knowledgeNodePublicId.localeCompare(right.knowledgeNodePublicId),
+        compareOrdinal(left.knowledgeNodePublicId, right.knowledgeNodePublicId),
     )
     .map((analysisItem, index) => ({
       ...analysisItem,
@@ -442,12 +643,12 @@ function buildKnowledgeNodeAnalysis(
     knowledgeNodeWeaknessSummaryText:
       knowledgeNodeAnalysis.length === 0
         ? null
-        : `knowledge_node weakness: ${knowledgeNodeAnalysis
+        : `知识点薄弱项：${knowledgeNodeAnalysis
             .map(
               (analysisItem) =>
-                `${analysisItem.knowledgeNodePublicId} score_rate ${analysisItem.scoreRate}% accuracy ${analysisItem.accuracyRate}% score ${analysisItem.score}/${analysisItem.maxScore}`,
+                `${analysisItem.pathName} 得分率 ${analysisItem.scoreRate}% 正确率 ${analysisItem.accuracyRate}% 得分 ${analysisItem.score}/${analysisItem.maxScore}`,
             )
-            .join("; ")}`,
+            .join("；")}`,
   };
 }
 
