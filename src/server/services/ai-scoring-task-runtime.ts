@@ -11,6 +11,11 @@ import {
   validateAiScoringExpectedFacts,
   type AiScoringCanonicalResult,
 } from "./ai-scoring-result-contract";
+import {
+  normalizeAiScoringQuestionContext,
+  type AiScoringQuestionContext,
+  type AiScoringQuestionContextExpectations,
+} from "./ai-scoring-question-context";
 
 export type EnqueueAiScoringTaskCommand = {
   answerRecordPublicId: string;
@@ -102,6 +107,14 @@ function readString(value: unknown): string {
 
 function readNullableString(value: unknown): string | null {
   return value === null ? null : readString(value);
+}
+
+function readStringValue(value: unknown): string {
+  if (typeof value !== "string") {
+    return invalidScoringResult();
+  }
+
+  return value;
 }
 
 function readStringArray(value: unknown): string[] {
@@ -227,6 +240,84 @@ function createCanonicalDurableResultSnapshot(
   return canonicalSnapshot;
 }
 
+function createCanonicalExpectedScoringPoints(value: unknown): unknown[] {
+  if (!Array.isArray(value)) {
+    return invalidScoringResult();
+  }
+
+  return value.map((scoringPoint) => {
+    if (!isRecord(scoringPoint)) {
+      return invalidScoringResult();
+    }
+
+    const maxScore = scoringPoint.maxScore;
+    if (typeof maxScore !== "number" || !Number.isFinite(maxScore)) {
+      return invalidScoringResult();
+    }
+
+    return {
+      scoringPointPublicId: readString(scoringPoint.scoringPointPublicId),
+      label: readString(scoringPoint.label),
+      maxScore,
+    };
+  });
+}
+
+function createCanonicalExecutionInputSnapshot(
+  value: Record<string, unknown>,
+  questionContext: AiScoringQuestionContext,
+): Record<string, unknown> {
+  if (!isRecord(value.questionSnapshot) || !isRecord(value.answerSnapshot)) {
+    return invalidScoringResult();
+  }
+
+  return {
+    questionPublicId: readString(value.questionPublicId),
+    paperQuestionPublicId: readString(value.paperQuestionPublicId),
+    questionContext,
+    questionSnapshot: structuredClone(value.questionSnapshot),
+    answerSnapshot: structuredClone(value.answerSnapshot),
+    questionText: readString(value.questionText),
+    standardAnswer: readString(value.standardAnswer),
+    studentAnswer: readStringValue(value.studentAnswer),
+    maxScore: value.maxScore,
+    scoringPoints: createCanonicalExpectedScoringPoints(value.scoringPoints),
+  };
+}
+
+function readQuestionContextExpectations(input: {
+  inputSnapshot: Record<string, unknown>;
+  authorizationSnapshot: Record<string, unknown>;
+}): AiScoringQuestionContextExpectations | null {
+  const paperQuestionPublicId = input.inputSnapshot.paperQuestionPublicId;
+  const questionPublicId = input.inputSnapshot.questionPublicId;
+  const profession = input.authorizationSnapshot.profession;
+  const level = input.authorizationSnapshot.level;
+  const subject = input.authorizationSnapshot.subject;
+
+  if (
+    typeof paperQuestionPublicId !== "string" ||
+    typeof questionPublicId !== "string" ||
+    (profession !== "monopoly" &&
+      profession !== "marketing" &&
+      profession !== "logistics") ||
+    typeof level !== "number" ||
+    !Number.isSafeInteger(level) ||
+    level <= 0 ||
+    (subject !== "theory" && subject !== "skill")
+  ) {
+    return null;
+  }
+
+  return {
+    paperQuestionPublicId,
+    questionPublicId,
+    profession,
+    level,
+    subject,
+  };
+}
+
 export type AiScoringTaskProcessResult =
   | { status: "empty" }
   | {
@@ -288,6 +379,28 @@ export function createAiScoringTaskRuntime(
         );
       }
 
+      const contextExpectations = readQuestionContextExpectations({
+        inputSnapshot: task.inputSnapshot,
+        authorizationSnapshot: task.authorizationSnapshot,
+      });
+      const questionContext = normalizeAiScoringQuestionContext(
+        task.inputSnapshot.questionContext,
+        contextExpectations ?? undefined,
+      );
+
+      if (contextExpectations === null || questionContext === null) {
+        return failTask(
+          task,
+          new AiScoringTaskExecutionError(
+            "invalid_scoring_question_context",
+            false,
+          ),
+          input.workerPublicId,
+          now(),
+          options.repository,
+        );
+      }
+
       try {
         validateAiScoringExpectedFacts({
           expectedScoringPoints: task.inputSnapshot.scoringPoints,
@@ -310,6 +423,10 @@ export function createAiScoringTaskRuntime(
       const abortController = new AbortController();
 
       try {
+        const canonicalInputSnapshot = createCanonicalExecutionInputSnapshot(
+          task.inputSnapshot,
+          questionContext,
+        );
         const executionResult = await executeWithTimeout(
           () =>
             options.executor.execute({
@@ -322,7 +439,7 @@ export function createAiScoringTaskRuntime(
               promptTemplateKey: task.promptTemplateKey,
               promptTemplateVersion: task.promptTemplateVersion,
               promptTemplateHash: task.promptTemplateHash,
-              inputSnapshot: task.inputSnapshot,
+              inputSnapshot: canonicalInputSnapshot,
               authorizationSnapshot: task.authorizationSnapshot,
               ragSnapshot: task.ragSnapshot,
               timeoutSecond: 60,
@@ -423,19 +540,44 @@ export function createAiScoringTaskEnqueueInputFactory(
 
   return {
     create(command: EnqueueAiScoringTaskCommand): EnqueueAiScoringTaskInput {
+      if (!isRecord(command.inputSnapshot)) {
+        throw new AiScoringTaskExecutionError(
+          "invalid_scoring_question_context",
+          false,
+        );
+      }
+
+      const contextExpectations = readQuestionContextExpectations(command);
+      const questionContext = normalizeAiScoringQuestionContext(
+        command.inputSnapshot.questionContext,
+        contextExpectations ?? undefined,
+      );
+
+      if (contextExpectations === null || questionContext === null) {
+        throw new AiScoringTaskExecutionError(
+          "invalid_scoring_question_context",
+          false,
+        );
+      }
+
+      const inputSnapshot = structuredClone(command.inputSnapshot);
+      inputSnapshot.questionContext = questionContext;
+
       return {
         publicId: createPublicId(),
         answerRecordPublicId: command.answerRecordPublicId,
         mockExamPublicId: command.mockExamPublicId,
         actorPublicId: command.actorPublicId,
-        idempotencyKeyHash: digest(command.idempotencyKey),
+        idempotencyKeyHash: digest(
+          `${command.idempotencyKey}:${JSON.stringify(questionContext)}`,
+        ),
         maxAttemptCount: 3,
         timeoutSecond: 60,
         modelConfigSnapshot: command.modelConfigSnapshot,
         promptTemplateKey: command.promptTemplateKey,
         promptTemplateVersion: command.promptTemplateVersion,
         promptTemplateHash: command.promptTemplateHash,
-        inputSnapshot: command.inputSnapshot,
+        inputSnapshot,
         authorizationSnapshot: command.authorizationSnapshot,
         ragSnapshot: command.ragSnapshot,
         scheduledAt: now(),

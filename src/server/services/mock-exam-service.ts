@@ -40,6 +40,10 @@ import { buildExamReportSnapshot } from "./exam-report-service";
 import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
 import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
 import { listPublishedPaperSnapshotQuestionEntries } from "../../lib/published-paper-snapshot";
+import {
+  buildAiScoringQuestionContext,
+  type AiScoringQuestionContext,
+} from "./ai-scoring-question-context";
 
 export type MockExamUserContext = {
   userPublicId: string;
@@ -100,6 +104,7 @@ export type MockExamAiScoringRuntimeContext = {
   answerRecordPublicId: string;
   paperQuestionPublicId: string;
   questionPublicId: string;
+  questionContext: AiScoringQuestionContext;
   questionSnapshot: Record<string, unknown>;
   answerSnapshot: MockExamAnswerSnapshotDto;
   questionText: string;
@@ -818,8 +823,27 @@ function buildAiScoringRuntimeContext(input: {
   question: MockExamQuestionSnapshot;
   answerRecord: MockExamAnswerRecordRow;
 }): MockExamAiScoringRuntimeContext {
+  if (
+    input.answerRecord.paper_question_public_id !==
+      input.question.paperQuestionPublicId ||
+    input.answerRecord.question_public_id !== input.question.questionPublicId
+  ) {
+    throw new Error("Invalid AI scoring question identity.");
+  }
+
   const questionSnapshot =
     input.answerRecord.question_snapshot ?? input.question.snapshot;
+  const questionContext = buildAiScoringQuestionContext({
+    paperSnapshot: input.mockExam.paper_snapshot,
+    paperQuestionPublicId: input.question.paperQuestionPublicId,
+    profession: input.mockExam.profession,
+    level: input.mockExam.level,
+    subject: input.mockExam.subject,
+  });
+
+  if (questionContext === null) {
+    throw new Error("Invalid AI scoring question context.");
+  }
 
   return {
     userPublicId: input.userContext.userPublicId,
@@ -831,6 +855,7 @@ function buildAiScoringRuntimeContext(input: {
     answerRecordPublicId: input.answerRecord.public_id,
     paperQuestionPublicId: input.question.paperQuestionPublicId,
     questionPublicId: input.question.questionPublicId,
+    questionContext,
     questionSnapshot,
     answerSnapshot: input.answerRecord.answer_snapshot,
     questionText: getRichTextField(questionSnapshot, "stemRichText"),

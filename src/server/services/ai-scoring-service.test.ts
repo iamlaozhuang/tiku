@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createModelConfigSnapshot } from "../models/ai-rag";
+import type { AiScoringQuestionContext } from "./ai-scoring-question-context";
 import {
   createAiScoringService,
   type AiScoringContext,
@@ -24,11 +25,41 @@ const modelConfigSnapshot = createModelConfigSnapshot({
   promptTemplateVersion: 1,
 });
 
+const questionContext: AiScoringQuestionContext = {
+  schemaVersion: 1,
+  paperQuestionPublicId: "paper_question_public_123",
+  questionPublicId: "question_public_123",
+  paperSection: {
+    publicId: "paper_section_public_123",
+    title: "案例分析",
+    sortOrder: 1,
+  },
+  questionGroup: {
+    publicId: "question_group_public_123",
+    title: "处罚案例",
+    sortOrder: 1,
+    paperQuestionPublicIds: ["paper_question_public_123"],
+    material: {
+      materialPublicId: "material_public_123",
+      title: "处罚事实",
+      contentRichText: "<p>当事人存在违法事实。</p>",
+      profession: "monopoly",
+      level: 3,
+      subject: "skill",
+    },
+  },
+};
+
 const context: AiScoringContext = {
   userPublicId: "user_public_123",
   mockExamPublicId: "mock_exam_public_123",
+  profession: "monopoly",
+  level: 3,
+  subject: "skill",
   answerRecordPublicId: "answer_record_public_123",
+  paperQuestionPublicId: "paper_question_public_123",
   questionPublicId: "question_public_123",
+  questionContext,
   questionText: "说明烟草专卖行政处罚裁量的基本要求。",
   standardAnswer: "应当事实清楚、证据充分、裁量适当。",
   studentAnswer: "需要事实清楚，证据充分，并且处罚幅度适当。",
@@ -102,6 +133,31 @@ function expectNoSensitiveMarkerLeaks(
 }
 
 describe("ai scoring service", () => {
+  it("fails closed before the runner when the scoring question context is malformed", async () => {
+    const runner = createRunner({
+      scoringPoints: [],
+      overallComment: "must not run",
+      improvementSuggestion: null,
+      providerRequestPayload: null,
+      providerResponsePayload: null,
+    });
+    const service = createAiScoringService({ runner });
+
+    const result = await service.scoreSubjectiveAnswer({
+      ...context,
+      questionContext: {
+        ...questionContext,
+        questionPublicId: "question_public_other",
+      },
+    });
+
+    expect(result).toMatchObject({
+      scoringStatus: "scoring_failed",
+      failureReason: "invalid_scoring_question_context",
+    });
+    expect(runner).not.toHaveBeenCalled();
+  });
+
   it("returns zero for unanswered subjective answers without calling the runner", async () => {
     const runner = createRunner({
       scoringPoints: [],
@@ -269,6 +325,12 @@ describe("ai scoring service", () => {
     );
     expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
       "raw model output must be redacted",
+    );
+    expect(runner).toHaveBeenCalledWith(
+      expect.objectContaining({ questionContext }),
+    );
+    expect(vi.mocked(runner).mock.calls[0]?.[0].questionContext).not.toBe(
+      questionContext,
     );
   });
 

@@ -183,6 +183,17 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
       answerRecordPublicId: "answer-record-public-001",
       paperQuestionPublicId: "paper-question-public-001",
       questionPublicId: "question-public-001",
+      questionContext: {
+        schemaVersion: 1,
+        paperQuestionPublicId: "paper-question-public-001",
+        questionPublicId: "question-public-001",
+        paperSection: {
+          publicId: "paper-section-public-001",
+          title: "Compliance section",
+          sortOrder: 1,
+        },
+        questionGroup: null,
+      },
       questionSnapshot: { profession: "marketing", level: 3 },
       answerSnapshot: {
         selectedLabels: [],

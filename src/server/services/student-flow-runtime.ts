@@ -29,6 +29,7 @@ import {
   type AiScoringRunner,
 } from "./ai-scoring-service";
 import { createAiScoringTaskEnqueueInputFactory } from "./ai-scoring-task-runtime";
+import { normalizeAiScoringQuestionContext } from "./ai-scoring-question-context";
 import {
   createExamReportRouteHandlers,
   type ExamReportUserResolver,
@@ -220,17 +221,63 @@ function readSnapshotLevel(
   return null;
 }
 
-function createAiScoringRetrievalQuery(
+export function createAiScoringRetrievalQuery(
   context: MockExamAiScoringRuntimeContext,
 ): string {
+  const questionContext = normalizeAiScoringQuestionContext(
+    context.questionContext,
+    {
+      paperQuestionPublicId: context.paperQuestionPublicId,
+      questionPublicId: context.questionPublicId,
+      profession: context.profession,
+      level: context.level,
+      subject: context.subject,
+    },
+  );
+
+  if (questionContext === null) {
+    throw new Error("Invalid AI scoring question context.");
+  }
+
+  const questionGroup = questionContext.questionGroup;
+  const createUntrustedSegment = (name: string, value: string) =>
+    `${name}:${JSON.stringify(value)}`;
+  const contextSegments =
+    questionGroup === null
+      ? [
+          createUntrustedSegment(
+            "untrusted_paper_section_title",
+            questionContext.paperSection.title,
+          ),
+        ]
+      : [
+          createUntrustedSegment(
+            "untrusted_material_title",
+            questionGroup.material.title,
+          ),
+          createUntrustedSegment(
+            "untrusted_material_content",
+            questionGroup.material.contentRichText,
+          ),
+          createUntrustedSegment(
+            "untrusted_paper_section_title",
+            questionContext.paperSection.title,
+          ),
+          createUntrustedSegment(
+            "untrusted_question_group_title",
+            questionGroup.title,
+          ),
+        ];
+
   return [
-    context.questionText,
-    context.standardAnswer,
-    context.studentAnswer,
-    ...context.scoringPoints.map((scoringPoint) => scoringPoint.label),
-  ]
-    .join(" ")
-    .trim();
+    ...contextSegments,
+    createUntrustedSegment("question", context.questionText),
+    createUntrustedSegment("standard_answer", context.standardAnswer),
+    createUntrustedSegment("student_answer", context.studentAnswer),
+    ...context.scoringPoints.map((scoringPoint) =>
+      createUntrustedSegment("scoring_point", scoringPoint.label),
+    ),
+  ].join("\n");
 }
 
 function createDefaultStudentFlowRagRetrievalRuntime(
@@ -300,11 +347,26 @@ export function createDefaultAiScoringRuntime(
       const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
       const promptTemplate = modelConfigSelection.promptTemplate;
       const startedAt = new Date();
+      const questionContext = normalizeAiScoringQuestionContext(
+        context.questionContext,
+        {
+          paperQuestionPublicId: context.paperQuestionPublicId,
+          questionPublicId: context.questionPublicId,
+          profession: context.profession,
+          level: context.level,
+          subject: context.subject,
+        },
+      );
       const result = await aiScoringService.scoreSubjectiveAnswer({
         userPublicId: context.userPublicId,
         mockExamPublicId: context.mockExamPublicId,
+        profession: context.profession,
+        level: context.level,
+        subject: context.subject,
         answerRecordPublicId: context.answerRecordPublicId,
+        paperQuestionPublicId: context.paperQuestionPublicId,
         questionPublicId: context.questionPublicId,
+        questionContext: questionContext ?? context.questionContext,
         questionText: context.questionText,
         standardAnswer: context.standardAnswer,
         studentAnswer: context.studentAnswer,
@@ -313,7 +375,12 @@ export function createDefaultAiScoringRuntime(
         modelConfigSnapshot,
         promptTemplate,
         ragRetrievalResult:
-          await ragRetrievalRuntime.retrieveForAiScoring(context),
+          questionContext === null
+            ? createEmptyRagRetrievalResult()
+            : await ragRetrievalRuntime.retrieveForAiScoring({
+                ...context,
+                questionContext,
+              }),
         existingResult: null,
         retryCount: 0,
       });
@@ -411,6 +478,21 @@ export function createDefaultAiScoringTaskPreparer(
 
   return {
     async prepareTask(context) {
+      const questionContext = normalizeAiScoringQuestionContext(
+        context.questionContext,
+        {
+          paperQuestionPublicId: context.paperQuestionPublicId,
+          questionPublicId: context.questionPublicId,
+          profession: context.profession,
+          level: context.level,
+          subject: context.subject,
+        },
+      );
+
+      if (questionContext === null) {
+        throw new Error("Invalid AI scoring question context.");
+      }
+
       const selection = createModelConfigRuntimeResolver(
         await resolveModelConfigRuntimeCatalog(
           modelConfigRuntimeCatalog,
@@ -428,8 +510,12 @@ export function createDefaultAiScoringTaskPreparer(
         throw new Error("Governed AI scoring model_config is unavailable.");
       }
 
-      const ragRetrievalResult =
-        await ragRetrievalRuntime.retrieveForAiScoring(context);
+      const ragRetrievalResult = await ragRetrievalRuntime.retrieveForAiScoring(
+        {
+          ...context,
+          questionContext,
+        },
+      );
 
       return enqueueInputFactory.create({
         answerRecordPublicId: context.answerRecordPublicId,
@@ -446,6 +532,7 @@ export function createDefaultAiScoringTaskPreparer(
         inputSnapshot: {
           questionPublicId: context.questionPublicId,
           paperQuestionPublicId: context.paperQuestionPublicId,
+          questionContext,
           questionSnapshot: context.questionSnapshot,
           answerSnapshot: context.answerSnapshot,
           questionText: context.questionText,

@@ -183,6 +183,16 @@ function listVersionedQuestionEntries(
   return entries;
 }
 
+export function listVersionedPublishedPaperSnapshotQuestionEntries(
+  paperSnapshot: Record<string, unknown>,
+): PublishedPaperSnapshotQuestionEntry[] | null {
+  if (paperSnapshot.snapshotVersion !== 2) {
+    return null;
+  }
+
+  return listVersionedQuestionEntries(paperSnapshot);
+}
+
 function listLegacyQuestionEntries(
   paperSnapshot: Record<string, unknown>,
 ): PublishedPaperSnapshotQuestionEntry[] {
@@ -242,5 +252,7 @@ export function listPublishedPaperSnapshotQuestionEntries(
     return listLegacyQuestionEntries(paperSnapshot);
   }
 
-  return listVersionedQuestionEntries(paperSnapshot) ?? [];
+  return (
+    listVersionedPublishedPaperSnapshotQuestionEntries(paperSnapshot) ?? []
+  );
 }

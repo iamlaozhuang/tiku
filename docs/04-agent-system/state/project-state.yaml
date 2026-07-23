@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
+currentPhase: p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
 updatedAt: "2026-07-23T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
+  currentTaskId: p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -575,7 +575,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-learner-citation-redaction-2026-07-23
     - p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
     - p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
+    - p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
     - p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
     - p1-remediation-rc-08-learner-citation-redaction-2026-07-23
     - p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
@@ -758,7 +760,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23: closed
     p1-remediation-rc-08-learner-citation-redaction-2026-07-23: closed
     p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23: closed
-    p1-remediation-rc-08-student-answer-input-bounds-2026-07-23: in_progress
+    p1-remediation-rc-08-student-answer-input-bounds-2026-07-23: closed
+    p1-remediation-rc-08-ai-scoring-question-context-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -959,26 +962,26 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
-  title: Student answer input bounds
-  phase: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
+  id: p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
+  title: AI scoring question context
+  phase: p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: bounded_student_answer_validation_contraction
-  productClosureContribution: closes_F0174_static_application_amplification_gap
-  branch: fix/student-answer-input-bounds
+  taskKind: provider_adapter_pure_logic_and_persisted_scoring_input_contract
+  productClosureContribution: closes_F0172_static_material_and_question_group_context_gap
+  branch: fix/ai-scoring-question-context
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0174
+    - F-0172
   candidateRootCauseCluster: P1-RC-08
-  objective: enforce one shared bounded answer input contract before practice, mock_exam and organization training values can reach persistence, RAG or AI scoring
+  objective: derive one versioned bounded immutable AI scoring question context from the authoritative published paper snapshot and preserve it through RAG, durable task input and governed scoring
   executionStage: ready_for_closeout
   findingStatus: closed_static_product
-  findingDisposition: application_input_amplification_closed_without_real_database_provider_or_browser_runtime_proof
+  findingDisposition: scoring_question_material_context_closed_without_real_provider_database_or_browser_runtime_proof
   riskBoundary:
-    category: bounded_student_answer_validation_contraction
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    approvedBaseSha: 32cd5469ffcda797ad6750029a2db3aaedfafd37
+    category: provider_adapter_pure_logic_and_persisted_scoring_input_contract
+    approvalId: guardian-f0172-ai-scoring-question-context-2026-07-23
+    approvedBaseSha: a6232e336261ec2b14e96106cfe94edcb746badb
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
@@ -986,33 +989,36 @@ currentTask:
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: practice_and_mock_services_plus_organization_training_route_to_shared_validators_to_answer_snapshot_RAG_and_AI_scoring
-    coreFiles: 11
-    contingencyFiles: 3
+    chain: published_paper_snapshot_to_mock_exam_snapshot_to_scoring_context_to_RAG_durable_task_and_governed_runner
+    coreFiles: 14
+    contingencyFiles: 5
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0174_independent_current_F0013_runtime_hold_F0063_and_F0137_already_covered
+    bundleDisposition: F0172_independent_after_F0079_F0173_and_F0174
   requiredSemantics:
-    textLimit: text_answer_max_4000_UTF16_code_units
-    selectionLimit: max_20_unique_labels_each_max_200_UTF16_code_units
-    batchLimit: max_200_dense_answer_items
-    atomicFailure: malformed_or_over_limit_input_rejects_whole_command_without_filter_or_truncation
-    unchanged: no_schema_permission_quota_prompt_provider_execution_or_real_external_call
+    contextVersion: schemaVersion_1_single_builder_and_validator
+    contextBounds: public_id_200_title_2000_material_30000_group_questions_100
+    groupedQuestion: exact_question_group_and_complete_immutable_material_required
+    standaloneQuestion: explicit_null_question_group_without_synthetic_material
+    failure: malformed_or_legacy_incomplete_context_fails_closed_before_provider_or_executor
+    unchanged: no_schema_database_permission_quota_prompt_provider_network_dependency_or_UI_API_change
   validationEvidence:
-    tddRed: shared_contract_missing_4_suites_failed
-    focused: pass_7_files_165_tests
+    tddRed: pass_8_expected_failures_across_5_suites
+    focused: pass_declared_10_path_command_9_existing_files_118_tests
     lint: pass_0_errors_3_preexisting_unrelated_warnings
     typecheck: pass
     build: pass_with_preexisting_Next_output_tracing_warning
-    adversarialReview: pass_dense_sparse_duplicate_atomic_failure_and_all_production_validator_sinks
-    runtimeBoundary: static_and_synthetic_only_no_real_database_provider_or_browser_runtime_proof
+    formatAndDiff: pass
+    stateParse: pass_WIP_1_and_15_actual_paths_inside_19_file_envelope
+    adversarialReview: pass_strict_versioned_source_scope_bounds_deep_copy_context_idempotency_explicit_executor_allowlist_and_zero_execution_on_invalid_context
+    runtimeBoundary: static_and_synthetic_only_no_real_provider_database_or_browser_runtime_proof
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-ai-scoring-point-result-integrity-2026-07-23
+    taskId: p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
     findingIds:
-      - F-0173
-    commit: 32cd5469ffcda797ad6750029a2db3aaedfafd37
-    tree: 0d5c7b29f3647d24676d5aa4020c100530395dc1
+      - F-0174
+    commit: a6232e336261ec2b14e96106cfe94edcb746badb
+    tree: 51cc84ed60963bd7b70ba70a8a40c2c8fadea464
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_product_without_real_provider_or_runtime_data_proof
+    findingStatus: closed_static_product_without_real_database_provider_or_browser_runtime_proof
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
@@ -1026,9 +1032,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 05d9211927542f39f42526ae3d7b60bcc92507d6
-  lastKnownOriginMasterSha: 05d9211927542f39f42526ae3d7b60bcc92507d6
-  lastKnownRemoteMasterSha: 05d9211927542f39f42526ae3d7b60bcc92507d6
+  lastKnownMasterSha: a6232e336261ec2b14e96106cfe94edcb746badb
+  lastKnownOriginMasterSha: a6232e336261ec2b14e96106cfe94edcb746badb
+  lastKnownRemoteMasterSha: a6232e336261ec2b14e96106cfe94edcb746badb
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

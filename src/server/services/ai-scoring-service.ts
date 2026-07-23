@@ -19,6 +19,11 @@ import {
   normalizeAiScoringPointResults,
   validateAiScoringExpectedFacts,
 } from "./ai-scoring-result-contract";
+import {
+  normalizeAiScoringQuestionContext,
+  type AiScoringQuestionContext,
+  type AiScoringQuestionContextScope,
+} from "./ai-scoring-question-context";
 
 export type AiScoringStatus =
   | "scored"
@@ -57,6 +62,7 @@ export type AiScoringRunner = (
 ) => Promise<AiScoringRunnerResult>;
 
 export type AiScoringRunnerInput = {
+  questionContext: AiScoringQuestionContext;
   questionText: string;
   standardAnswer: string;
   studentAnswer: string;
@@ -106,8 +112,13 @@ export type ExistingAiScoringResult = {
 export type AiScoringContext = {
   userPublicId: string;
   mockExamPublicId: string;
+  profession: AiScoringQuestionContextScope["profession"];
+  level: number;
+  subject: AiScoringQuestionContextScope["subject"];
   answerRecordPublicId: string;
+  paperQuestionPublicId: string;
   questionPublicId: string;
+  questionContext: unknown;
   questionText: string;
   standardAnswer: string;
   studentAnswer: string;
@@ -134,6 +145,7 @@ const scoringMaxRetryCount = 3;
 const scoringFallbackNotAllowedReason = "scoring_fallback_not_allowed";
 const scoringRunnerFailedReason = "scoring_runner_failed";
 const invalidScoringResultReason = "invalid_scoring_result";
+const invalidScoringQuestionContextReason = "invalid_scoring_question_context";
 
 function createRequestSnapshot(context: AiScoringContext): unknown {
   return {
@@ -306,6 +318,25 @@ function createInvalidScoringResult(
   });
 }
 
+function createInvalidScoringQuestionContextResult(
+  context: AiScoringContext,
+  retryCount: number,
+): ExistingAiScoringResult {
+  return createBaseResult(context, {
+    scoringStatus: "scoring_failed",
+    retryCount: retryCount + 1,
+    citations: [],
+    failureReason: invalidScoringQuestionContextReason,
+    aiScoringAttemptDraft: createAiScoringAttemptDraft({
+      context,
+      status: "failed",
+      scoringStatus: "scoring_failed",
+      failureCode: invalidScoringQuestionContextReason,
+      failureMessage: null,
+    }),
+  });
+}
+
 function isUnanswered(studentAnswer: string): boolean {
   return studentAnswer.trim().length === 0;
 }
@@ -398,8 +429,24 @@ export function createAiScoringService(
         });
       }
 
+      const questionContext = normalizeAiScoringQuestionContext(
+        context.questionContext,
+        {
+          paperQuestionPublicId: context.paperQuestionPublicId,
+          questionPublicId: context.questionPublicId,
+          profession: context.profession,
+          level: context.level,
+          subject: context.subject,
+        },
+      );
+
+      if (questionContext === null) {
+        return createInvalidScoringQuestionContextResult(context, retryCount);
+      }
+
       try {
         const runnerResult = await dependencies.runner({
+          questionContext,
           questionText: context.questionText,
           standardAnswer: context.standardAnswer,
           studentAnswer: context.studentAnswer,

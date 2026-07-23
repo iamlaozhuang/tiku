@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createDeterministicMockExamAiScoringQueue,
@@ -43,12 +43,15 @@ function createPaperSnapshot(
   questionType = "short_answer",
 ): Record<string, unknown> {
   return {
+    snapshotVersion: 2,
     paperPublicId: "paper_public_123",
     name: "2024年专卖三级理论真题",
     durationMinute: 120,
     paperSections: [
       {
-        paperSectionTitle: "一、单项选择题",
+        publicId: "paper_section_public_123",
+        title: "一、单项选择题",
+        sortOrder: 1,
         paperQuestions: [
           {
             paperQuestionPublicId: "paper_question_public_123",
@@ -87,12 +90,13 @@ function createPaperSnapshot(
             ],
           },
         ],
+        questionGroups: [],
       },
     ],
   };
 }
 
-function createNestedQuestionGroupPaperSnapshot(): Record<string, unknown> {
+function createNestedQuestionGroupPaperSnapshot() {
   const createQuestion = (index: number) => ({
     paperQuestionPublicId: `paper_question_group_${index}`,
     questionPublicId: `question_group_${index}`,
@@ -134,6 +138,10 @@ function createNestedQuestionGroupPaperSnapshot(): Record<string, unknown> {
             materialSnapshot: {
               materialPublicId: "material_public_123",
               title: "客户异议材料",
+              contentRichText: "<p>客户提出异议，需要结合材料作答。</p>",
+              profession: "monopoly",
+              level: 3,
+              subject: "theory",
             },
             paperQuestions: [createQuestion(1), createQuestion(2)],
           },
@@ -400,6 +408,155 @@ describe("mock exam service", () => {
         },
       },
     });
+  });
+
+  it("derives the complete immutable question_group material context for subjective scoring", async () => {
+    const nestedSnapshot = createNestedQuestionGroupPaperSnapshot();
+    const preparedContexts: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({ paper_snapshot: nestedSnapshot });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_group_1",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_group_1",
+              question_public_id: "question_group_1",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "结合材料作答",
+                savedFromClientAt: null,
+              },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringTaskPreparer: {
+          async prepareTask(context) {
+            preparedContexts.push(context);
+            return {
+              publicId: "ai_scoring_task_group_1",
+              answerRecordPublicId: context.answerRecordPublicId,
+              mockExamPublicId: context.mockExamPublicId,
+              actorPublicId: context.userPublicId,
+              idempotencyKeyHash: "a".repeat(64),
+              maxAttemptCount: 3,
+              timeoutSecond: 60,
+              modelConfigSnapshot: {},
+              promptTemplateKey: "ai_scoring_v1",
+              promptTemplateVersion: 1,
+              promptTemplateHash: "prompt_hash_1",
+              inputSnapshot: {},
+              authorizationSnapshot: {},
+              ragSnapshot: null,
+              scheduledAt: now,
+            };
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+    ).resolves.toMatchObject({ code: 0 });
+    expect(preparedContexts).toEqual([
+      expect.objectContaining({
+        paperQuestionPublicId: "paper_question_group_1",
+        questionPublicId: "question_group_1",
+        questionContext: {
+          schemaVersion: 1,
+          paperQuestionPublicId: "paper_question_group_1",
+          questionPublicId: "question_group_1",
+          paperSection: {
+            publicId: "paper_section_public_123",
+            title: "一、案例分析题",
+            sortOrder: 1,
+          },
+          questionGroup: {
+            publicId: "qgroup_public_123",
+            title: "客户异议处理案例",
+            sortOrder: 1,
+            paperQuestionPublicIds: [
+              "paper_question_group_1",
+              "paper_question_group_2",
+            ],
+            material: {
+              materialPublicId: "material_public_123",
+              title: "客户异议材料",
+              contentRichText: "<p>客户提出异议，需要结合材料作答。</p>",
+              profession: "monopoly",
+              level: 3,
+              subject: "theory",
+            },
+          },
+        },
+      }),
+    ]);
+  });
+
+  it("fails closed before durable preparation for an incomplete grouped material snapshot", async () => {
+    const nestedSnapshot = createNestedQuestionGroupPaperSnapshot();
+    const group = nestedSnapshot.paperSections[0]!.questionGroups[0]!;
+    Reflect.deleteProperty(group.materialSnapshot, "contentRichText");
+    const prepareTask = vi.fn();
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({ paper_snapshot: nestedSnapshot });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_group_1",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_group_1",
+              question_public_id: "question_group_1",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "结合材料作答",
+                savedFromClientAt: null,
+              },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+      { aiScoringTaskPreparer: { prepareTask } },
+    );
+
+    await expect(
+      service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+    ).resolves.toEqual({
+      code: 503318,
+      message: "AI scoring configuration is unavailable.",
+      data: null,
+    });
+    expect(prepareTask).not.toHaveBeenCalled();
   });
 
   it("returns authoritative existing progress when the repository claim loses a concurrent start", async () => {
@@ -937,6 +1094,7 @@ describe("mock exam service", () => {
     ],
   ])("fails closed before start when %s", async (_caseName, mutateSnapshot) => {
     const invalidSnapshot = structuredClone(createPaperSnapshot());
+    delete invalidSnapshot.snapshotVersion;
     const paperSections = invalidSnapshot.paperSections as Array<{
       paperQuestions: Array<Record<string, unknown>>;
     }>;
@@ -1840,6 +1998,17 @@ describe("mock exam service", () => {
         questionPublicId: "question_public_456",
         studentAnswer: "主观题作答",
         maxScore: "5.0",
+        questionContext: {
+          schemaVersion: 1,
+          paperQuestionPublicId: "paper_question_public_456",
+          questionPublicId: "question_public_456",
+          paperSection: {
+            publicId: "paper_section_public_123",
+            title: "一、单项选择题",
+            sortOrder: 1,
+          },
+          questionGroup: null,
+        },
       }),
     ]);
     expect(submitInputs).toEqual([
