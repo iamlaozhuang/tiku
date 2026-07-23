@@ -250,6 +250,7 @@ const ADMIN_AI_GENERATION_PERMISSION_DENIED_CODE = 403011;
 const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
 const ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE = 409015;
 const ADMIN_AI_GENERATION_IDEMPOTENCY_CONFLICT_CODE = 409016;
+const ADMIN_AI_GENERATION_HISTORY_UNAVAILABLE_CODE = 409018;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
 const ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
@@ -266,6 +267,10 @@ const adminAiGenerationPermissionDeniedResponse = createErrorResponse(
 const invalidAdminAiGenerationRequestResponse = createErrorResponse(
   ADMIN_AI_GENERATION_INVALID_INPUT_CODE,
   "Invalid admin AI generation request input.",
+);
+const adminAiGenerationHistoryUnavailableResponse = createErrorResponse(
+  ADMIN_AI_GENERATION_HISTORY_UNAVAILABLE_CODE,
+  "AI generation history is unavailable.",
 );
 
 type AdminAiGenerationLocalContractRouteResponseData =
@@ -2282,9 +2287,98 @@ function createAdminAiGenerationContentDigest(
     .digest("hex")}`;
 }
 
-function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
+function resolveOrganizationTrainingReviewDraft(
+  task: AdminAiGenerationTaskPersistenceDto,
   result: AdminAiGenerationResultDto,
-): AdminAiGenerationTaskHistoryGeneratedResultDto {
+):
+  | AdminAiGenerationTaskHistoryGeneratedResultDto["organizationTrainingReviewDraft"]
+  | undefined {
+  const hasMatchingIdentity =
+    result.taskPublicId === task.taskPublicId &&
+    result.requestPublicId === task.requestPublicId &&
+    result.workspace === task.workspace &&
+    result.generationKind === task.generationKind &&
+    result.ownerPublicId === task.ownerPublicId &&
+    result.organizationPublicId === task.organizationPublicId &&
+    result.taskType === task.taskType &&
+    result.resultPublicId === task.resultPublicId;
+
+  if (!hasMatchingIdentity) {
+    return undefined;
+  }
+
+  const questionDraft = result.contentReference.organizationTrainingDraft;
+  const paperDraft = result.contentReference.organizationTrainingPaperDraft;
+
+  if (task.workspace === "content") {
+    return questionDraft === null && paperDraft === null ? null : undefined;
+  }
+
+  if (
+    result.ownerType !== "organization" ||
+    task.organizationPublicId === null ||
+    task.ownerPublicId !== task.organizationPublicId
+  ) {
+    return undefined;
+  }
+
+  if (task.generationKind === "question") {
+    const questionPublicIds = questionDraft?.questions.map(
+      (question) => question.publicId,
+    );
+    return questionDraft !== null &&
+      paperDraft === null &&
+      Array.isArray(questionDraft.questions) &&
+      questionDraft.questions.length > 0 &&
+      questionPublicIds !== undefined &&
+      new Set(questionPublicIds).size === questionPublicIds.length
+      ? {
+          kind: "question_draft",
+          questionDraft,
+          redactionStatus: "admin_safe_detail",
+        }
+      : undefined;
+  }
+
+  const paperSectionQuestions =
+    paperDraft?.paperSections?.flatMap((section) => section.questions) ?? [];
+  const paperQuestions =
+    paperSectionQuestions.length > 0
+      ? paperSectionQuestions
+      : (paperDraft?.questions ?? []);
+  const paperQuestionPublicIds = paperQuestions.map(
+    (question) => question.publicId,
+  );
+  const hasCompletePaperQuestions =
+    paperDraft !== null &&
+    paperQuestions.length === paperDraft.selectedQuestionCount &&
+    new Set(paperQuestionPublicIds).size === paperQuestionPublicIds.length;
+
+  return questionDraft === null &&
+    paperDraft !== null &&
+    paperDraft.redactionStatus === "admin_safe_detail" &&
+    paperDraft.selectedQuestionCount > 0 &&
+    paperDraft.requestedQuestionCount >= paperDraft.selectedQuestionCount &&
+    hasCompletePaperQuestions
+    ? {
+        kind: "paper_draft",
+        paperDraft,
+        redactionStatus: "admin_safe_detail",
+      }
+    : undefined;
+}
+
+function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
+  task: AdminAiGenerationTaskPersistenceDto,
+  result: AdminAiGenerationResultDto,
+): AdminAiGenerationTaskHistoryGeneratedResultDto | null {
+  const organizationTrainingReviewDraft =
+    resolveOrganizationTrainingReviewDraft(task, result);
+
+  if (organizationTrainingReviewDraft === undefined) {
+    return null;
+  }
+
   return {
     resultPublicId: result.resultPublicId,
     persistedAt: result.persistedAt,
@@ -2301,6 +2395,7 @@ function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
     formalPaperPublicId: result.formalAdoption.formalPaperPublicId,
     formalAdoptionReviewedAt: result.formalAdoption.reviewedAt,
     reviewedDraft: result.contentReference.reviewedDraft,
+    organizationTrainingReviewDraft,
     redactionStatus: result.contentReference.redactionStatus,
   };
 }
@@ -2308,16 +2403,30 @@ function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
 function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
   task: AdminAiGenerationTaskPersistenceDto,
   generatedResult: AdminAiGenerationResultDto | null,
-): AdminAiGenerationTaskHistoryItemDto &
-  Pick<
-    AdminAiGenerationTaskPersistenceDto,
-    | "retryCount"
-    | "failureCategory"
-    | "startedAt"
-    | "finishedAt"
-    | "canRetry"
-    | "canCancel"
-  > {
+):
+  | (AdminAiGenerationTaskHistoryItemDto &
+      Pick<
+        AdminAiGenerationTaskPersistenceDto,
+        | "retryCount"
+        | "failureCategory"
+        | "startedAt"
+        | "finishedAt"
+        | "canRetry"
+        | "canCancel"
+      >)
+  | null {
+  const mappedGeneratedResult =
+    generatedResult === null
+      ? null
+      : mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
+          task,
+          generatedResult,
+        );
+
+  if (generatedResult !== null && mappedGeneratedResult === null) {
+    return null;
+  }
+
   return {
     requestPublicId: task.requestPublicId,
     taskPublicId: task.taskPublicId,
@@ -2351,12 +2460,7 @@ function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
         ownerPublicId: task.ownerPublicId,
         organizationPublicId: task.organizationPublicId,
       }),
-    generatedResult:
-      generatedResult === null
-        ? null
-        : mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
-            generatedResult,
-          ),
+    generatedResult: mappedGeneratedResult,
     redactionStatus: task.redactionStatus,
   };
 }
@@ -2407,6 +2511,25 @@ async function listAdminAiGenerationTaskHistory(input: {
       ? Promise.resolve(taskHistoryItems.length)
       : input.taskPersistenceRepository.countTaskHistory(historyQuery),
   ]);
+  const requestedTaskPublicIds = new Set(
+    taskHistoryItems.map((task) => task.taskPublicId),
+  );
+  const generatedResultTaskPublicIds = new Set<string>();
+  const hasInvalidGeneratedResultSet = generatedResults.some((result) => {
+    if (
+      !requestedTaskPublicIds.has(result.taskPublicId) ||
+      generatedResultTaskPublicIds.has(result.taskPublicId)
+    ) {
+      return true;
+    }
+
+    generatedResultTaskPublicIds.add(result.taskPublicId);
+    return false;
+  });
+
+  if (hasInvalidGeneratedResultSet) {
+    return adminAiGenerationHistoryUnavailableResponse;
+  }
   const generatedResultsByTaskPublicId = new Map(
     generatedResults.map((result) => [result.taskPublicId, result]),
   );
@@ -2416,11 +2539,18 @@ async function listAdminAiGenerationTaskHistory(input: {
       generatedResultsByTaskPublicId.get(task.taskPublicId) ?? null,
     ),
   );
+  if (historyItems.some((historyItem) => historyItem === null)) {
+    return adminAiGenerationHistoryUnavailableResponse;
+  }
+  const availableHistoryItems = historyItems.filter(
+    (historyItem): historyItem is NonNullable<typeof historyItem> =>
+      historyItem !== null,
+  );
   return createPaginatedResponse(
     {
       workspace: input.workspace,
-      latestTask: historyItems[0] ?? null,
-      items: historyItems,
+      latestTask: availableHistoryItems[0] ?? null,
+      items: availableHistoryItems,
       redactionStatus: "redacted",
     },
     {

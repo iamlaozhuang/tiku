@@ -2466,4 +2466,200 @@ describe("AdminOrganizationTrainingPage", () => {
       "企业训练草稿已创建",
     );
   });
+
+  it("opens the exact copied AI question draft through authorized detail lookup without list discovery", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/organization/organization-training?draftPublicId=organization-training-draft-ai-review-001&generationKind=question",
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = getRequestPath(url);
+
+        if (String(url) === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (isOrganizationTrainingListGet(url, init)) {
+          return createCompleteOrganizationTrainingListResponse();
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-review-001" &&
+          (init?.method ?? "GET") === "GET"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              publicId: "organization-training-draft-ai-review-001",
+              resourceType: "organization_training_draft",
+              detailAvailability: "available",
+              organizationPublicId: "organization-admin-scope-001",
+              title: "AI 复核训练题",
+              description: "来自已审核的组织 AI 结果",
+              revision: 1,
+              profession: "marketing",
+              level: 3,
+              subject: "theory",
+              status: "draft",
+              sourceKind: "ai_question",
+              contentKind: "question_training",
+              structure: {
+                questionCount: 1,
+                totalScore: 5,
+                questionTypeSummary: persistedAiDraft.questionTypeSummary,
+              },
+              questions: [
+                {
+                  publicId: "organization-training-question-ai-review-001",
+                  sequenceNumber: 1,
+                  questionType: "single_choice",
+                  materialTitle: null,
+                  materialContent: null,
+                  stem: "exact selector authorized question stem",
+                  options: [
+                    {
+                      publicId:
+                        "organization-training-question-ai-review-001-option-a",
+                      label: "A",
+                      content: "authorized option A",
+                    },
+                  ],
+                  score: 5,
+                  evidenceSummary: {
+                    evidenceStatus: "sufficient",
+                    citationCount: 1,
+                  },
+                  answerAndAnalysis: {
+                    visibility: "collapsed_by_default",
+                    standardAnswer: "A",
+                    analysis: "authorized analysis",
+                  },
+                },
+              ],
+              redactionStatus: "admin_safe_detail",
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const publishForm = within(
+      await screen.findByRole("form", { name: "企业训练发布表单" }),
+    );
+    await waitFor(() =>
+      expect(publishForm.getByLabelText("第 1 题题干")).toHaveValue(
+        "exact selector authorized question stem",
+      ),
+    );
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, init]) =>
+          getRequestPath(url) ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-review-001" &&
+          (init?.method ?? "GET") === "GET",
+      ),
+    ).toBe(true);
+    expect(
+      fetchMock.mock.calls.some(
+        ([, init]) => (init?.method ?? "GET") !== "GET",
+      ),
+    ).toBe(false);
+    await waitFor(() => {
+      expect(window.location.search).not.toContain("draftPublicId");
+      expect(window.location.search).not.toContain("generationKind");
+    });
+  });
+
+  it("fails closed when an exact draft selector resolves outside the authorized organization", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/organization/organization-training?draftPublicId=organization-training-draft-ai-review-002&generationKind=paper",
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = getRequestPath(url);
+
+        if (String(url) === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (isOrganizationTrainingListGet(url, init)) {
+          return createCompleteOrganizationTrainingListResponse();
+        }
+
+        if (
+          path ===
+          "/api/v1/organization-trainings/organization-training-draft-ai-review-002"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              publicId: "organization-training-draft-ai-review-002",
+              resourceType: "organization_training_draft",
+              detailAvailability: "available",
+              organizationPublicId: "organization-out-of-scope-001",
+              title: "越权草稿",
+              description: null,
+              revision: 1,
+              profession: "marketing",
+              level: 3,
+              subject: "theory",
+              status: "draft",
+              sourceKind: "ai_paper",
+              contentKind: "paper_training",
+              structure: {
+                questionCount: 0,
+                totalScore: 0,
+                questionTypeSummary: createdDraft.questionTypeSummary,
+              },
+              questions: [],
+              redactionStatus: "admin_safe_detail",
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(
+      await screen.findByText(
+        "指定的企业训练草稿不可用，请从当前组织训练列表重新选择。",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "企业训练发布表单" })).toBeNull();
+    expect(
+      fetchMock.mock.calls.some(
+        ([, init]) => (init?.method ?? "GET") !== "GET",
+      ),
+    ).toBe(false);
+    await waitFor(() => {
+      expect(window.location.search).not.toContain("draftPublicId");
+      expect(window.location.search).not.toContain("generationKind");
+    });
+  });
 });

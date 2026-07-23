@@ -47,6 +47,7 @@ import {
   createOrganizationTrainingListSearch,
   parseOrganizationTrainingListSearch,
   type OrganizationTrainingLifecycleContentKindFilter,
+  type OrganizationTrainingDraftGenerationKind,
   type OrganizationTrainingLifecyclePageSize,
   type OrganizationTrainingLifecycleSourceKindFilter,
   type OrganizationTrainingLifecycleStatusFilter,
@@ -131,6 +132,21 @@ type PublishFormValues = {
   questions: PublishQuestionFormValue[];
   weakEvidenceConfirmed: boolean;
 };
+
+type OrganizationTrainingEditableDraftReference = Pick<
+  OrganizationTrainingAdminLifecycleItemDto,
+  | "publicId"
+  | "organizationPublicId"
+  | "profession"
+  | "level"
+  | "subject"
+  | "title"
+  | "description"
+  | "revision"
+  | "questionCount"
+  | "totalScore"
+  | "questionTypeSummary"
+>;
 
 const defaultDraftFormValues: DraftFormValues = {
   authorizationPublicId: "",
@@ -579,7 +595,7 @@ function createDefaultPublishQuestionFormValue(
 }
 
 function createPublishFormValuesForDraft(
-  draft: OrganizationTrainingAdminLifecycleItemDto,
+  draft: OrganizationTrainingEditableDraftReference,
 ): PublishFormValues {
   const questionCount = Math.max(1, draft.questionCount ?? 1);
   const averageScore =
@@ -667,6 +683,33 @@ function createPublishFormValuesFromAdminDetail(
     answerDeadlineAt: "",
     questions,
     weakEvidenceConfirmed: false,
+  };
+}
+
+function createEditableDraftReferenceFromAdminDetail(
+  detail: OrganizationTrainingAdminDetailDto,
+): OrganizationTrainingEditableDraftReference | null {
+  if (
+    detail.detailAvailability !== "available" ||
+    detail.resourceType !== "organization_training_draft" ||
+    detail.status !== "draft" ||
+    detail.redactionStatus !== "admin_safe_detail"
+  ) {
+    return null;
+  }
+
+  return {
+    publicId: detail.publicId,
+    organizationPublicId: detail.organizationPublicId,
+    profession: detail.profession,
+    level: detail.level,
+    subject: detail.subject,
+    title: detail.title,
+    description: detail.description,
+    revision: detail.revision,
+    questionCount: detail.structure.questionCount,
+    totalScore: detail.structure.totalScore,
+    questionTypeSummary: detail.structure.questionTypeSummary,
   };
 }
 
@@ -866,7 +909,7 @@ function createDraftSaveTrainingInput({
   operationId,
   values,
 }: {
-  draft: OrganizationTrainingAdminLifecycleItemDto;
+  draft: OrganizationTrainingEditableDraftReference;
   operationId: string;
   values: PublishFormValues;
 }): OrganizationTrainingDraftSaveInput | null {
@@ -892,7 +935,7 @@ function createPublishTrainingInput({
   operationId,
   values,
 }: {
-  draft: OrganizationTrainingAdminLifecycleItemDto;
+  draft: OrganizationTrainingEditableDraftReference;
   expectedRevision: number;
   operationId: string;
   values: PublishFormValues;
@@ -967,8 +1010,18 @@ export function AdminOrganizationTrainingPage() {
   const [selectedLifecyclePageSize, setSelectedLifecyclePageSize] = useState(
     initialLifecycleUrlState.pageSize,
   );
+  const [draftPublicIdSelector, setDraftPublicIdSelector] = useState(
+    initialLifecycleUrlState.draftPublicId,
+  );
+  const [draftGenerationKindSelector, setDraftGenerationKindSelector] =
+    useState<OrganizationTrainingDraftGenerationKind | null>(
+      initialLifecycleUrlState.draftGenerationKind,
+    );
+  const [draftSelectorStatus, setDraftSelectorStatus] = useState(
+    initialLifecycleUrlState.draftSelectorStatus,
+  );
   const [selectedPublishDraft, setSelectedPublishDraft] =
-    useState<OrganizationTrainingAdminLifecycleItemDto | null>(null);
+    useState<OrganizationTrainingEditableDraftReference | null>(null);
   const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const pendingMutationOperationsRef = useRef(
@@ -994,6 +1047,9 @@ export function AdminOrganizationTrainingPage() {
 
     const search = createOrganizationTrainingListSearch({
       contentKind: selectedLifecycleContentKindFilter,
+      draftGenerationKind: draftGenerationKindSelector,
+      draftPublicId: draftPublicIdSelector,
+      draftSelectorStatus,
       page: selectedLifecyclePage,
       pageSize: selectedLifecyclePageSize,
       sourceKind: selectedLifecycleSourceKindFilter,
@@ -1006,6 +1062,9 @@ export function AdminOrganizationTrainingPage() {
     window.history.replaceState(window.history.state, "", nextUrl);
   }, [
     selectedLifecycleContentKindFilter,
+    draftGenerationKindSelector,
+    draftPublicIdSelector,
+    draftSelectorStatus,
     selectedLifecyclePage,
     selectedLifecyclePageSize,
     selectedLifecycleSourceKindFilter,
@@ -1019,6 +1078,9 @@ export function AdminOrganizationTrainingPage() {
       );
 
       setSelectedLifecycleContentKindFilter(restoredState.contentKind);
+      setDraftGenerationKindSelector(restoredState.draftGenerationKind);
+      setDraftPublicIdSelector(restoredState.draftPublicId);
+      setDraftSelectorStatus(restoredState.draftSelectorStatus);
       setSelectedLifecyclePage(restoredState.page);
       setSelectedLifecyclePageSize(restoredState.pageSize);
       setSelectedLifecycleSourceKindFilter(restoredState.sourceKind);
@@ -1029,6 +1091,127 @@ export function AdminOrganizationTrainingPage() {
 
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  useEffect(() => {
+    if (loadState !== "ready" || capabilitySummary === null) {
+      return;
+    }
+
+    const clearDraftSelector = () => {
+      setDraftGenerationKindSelector(null);
+      setDraftPublicIdSelector(null);
+      setDraftSelectorStatus("absent");
+    };
+    const failDraftSelector = () => {
+      setIsCreateWizardOpen(false);
+      setSelectedPublishDraft(null);
+      setPublishFormValues(defaultPublishFormValues);
+      setFeedback({
+        message: "指定的企业训练草稿不可用，请从当前组织训练列表重新选择。",
+        title: "企业训练操作失败",
+        tone: "error",
+      });
+      clearDraftSelector();
+    };
+
+    if (draftSelectorStatus === "invalid") {
+      failDraftSelector();
+      return;
+    }
+
+    if (
+      draftSelectorStatus !== "valid" ||
+      draftPublicIdSelector === null ||
+      draftGenerationKindSelector === null
+    ) {
+      return;
+    }
+
+    const selectedDraftPublicId = draftPublicIdSelector;
+    const selectedDraftGenerationKind = draftGenerationKindSelector;
+    const authorizedOrganizationPublicId =
+      capabilitySummary.organizationPublicId;
+    let isActive = true;
+
+    async function openSelectedDraft() {
+      try {
+        const response =
+          await fetchAdminOrganizationTrainingApi<OrganizationTrainingAdminDetailDto>(
+            createAdminTrainingDetailPath(selectedDraftPublicId),
+            getStoredSessionToken(),
+          );
+
+        if (!isActive) {
+          return;
+        }
+
+        const detail = response.data;
+        const expectedSourceKind =
+          selectedDraftGenerationKind === "question"
+            ? "ai_question"
+            : "ai_paper";
+        const expectedContentKind =
+          selectedDraftGenerationKind === "question"
+            ? "question_training"
+            : "paper_training";
+        const editableDraft =
+          detail === null
+            ? null
+            : createEditableDraftReferenceFromAdminDetail(detail);
+        const publishValues =
+          detail === null
+            ? null
+            : createPublishFormValuesFromAdminDetail(detail);
+        const hasCompleteQuestionStructure =
+          detail !== null &&
+          detail.detailAvailability === "available" &&
+          publishValues !== null &&
+          publishValues.questions.length > 0 &&
+          publishValues.questions.length === detail.structure.questionCount &&
+          new Set(publishValues.questions.map((question) => question.publicId))
+            .size === publishValues.questions.length &&
+          (selectedDraftGenerationKind === "question" ||
+            (Array.isArray(detail.paperSections) &&
+              detail.paperSections.length > 0));
+
+        if (
+          response.code !== 0 ||
+          detail === null ||
+          editableDraft === null ||
+          publishValues === null ||
+          !hasCompleteQuestionStructure ||
+          detail.publicId !== selectedDraftPublicId ||
+          detail.organizationPublicId !== authorizedOrganizationPublicId ||
+          detail.sourceKind !== expectedSourceKind ||
+          detail.contentKind !== expectedContentKind
+        ) {
+          failDraftSelector();
+          return;
+        }
+
+        setSelectedPublishDraft(editableDraft);
+        setPublishFormValues(publishValues);
+        setIsCreateWizardOpen(true);
+        clearDraftSelector();
+      } catch {
+        if (isActive) {
+          failDraftSelector();
+        }
+      }
+    }
+
+    void openSelectedDraft();
+
+    return () => {
+      isActive = false;
+    };
+  }, [
+    capabilitySummary,
+    draftGenerationKindSelector,
+    draftPublicIdSelector,
+    draftSelectorStatus,
+    loadState,
+  ]);
 
   useEffect(() => {
     let isActive = true;
@@ -2684,7 +2867,7 @@ function PublishTrainingForm({
   onChange,
   onSubmit,
 }: {
-  draft: OrganizationTrainingAdminLifecycleItemDto;
+  draft: OrganizationTrainingEditableDraftReference;
   isSubmitting: boolean;
   values: PublishFormValues;
   onChange: (values: PublishFormValues) => void;

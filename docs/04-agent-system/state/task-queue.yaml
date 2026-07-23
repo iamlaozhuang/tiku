@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
+  currentTaskId: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -315,7 +315,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22
     - p1-remediation-rc-07-content-ai-review-editor-2026-07-22
     - p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
+    - p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
     - p1-remediation-rc-07-content-ai-review-editor-2026-07-22
     - p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22
     - p1-remediation-rc-07-ai-paper-plan-constraint-lineage-2026-07-22
@@ -541,76 +543,77 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-ai-paper-plan-constraint-lineage-2026-07-22: closed
     p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22: closed
     p1-remediation-rc-07-content-ai-review-editor-2026-07-22: closed
-    p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22: in_progress
+    p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22: closed
+    p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22: in_progress
 activeTasks:
-  - id: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
-    title: Content AI safe citation projection
-    phase: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
+  - id: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
+    title: Organization AI review workbench handoff
+    phase: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
     status: in_progress
     priority: p1
-    taskKind: database_application_logic_and_safe_admin_read_projection
-    productClosureContribution: partial_F0158_content_safe_citation_projection
-    branch: fix/content-ai-safe-citation-projection
-    objective: persist only bounded source names and heading paths from the exact authorized grounding context and return them through the authorization-first content review detail
+    taskKind: permission_scoped_existing_organization_draft_read_projection_and_ui_handoff
+    productClosureContribution: partial_F0158_organization_review_and_exact_training_workbench_handoff
+    branch: fix/organization-ai-review-workbench-handoff
+    objective: render the already persisted server-owned organization draft snapshot before copy and hand the exact copied draft identity to the existing organization training editor
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-07
     findingIds:
       - F-0158
     executionStage: validated_reviewed_conditional_closeout_ready
     findingStatus: open_partitioned
-    findingDisposition: F0158_safe_content_citation_projection_organization_and_browser_runtime_residual
+    findingDisposition: F0158_organization_review_and_exact_training_workbench_handoff_browser_runtime_residual
     riskBoundary:
-      category: database_application_logic_and_safe_admin_read_projection
-      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
-      approvedBaseSha: d0864f92cd001ba6f555a33bb728c0720f3797b2
+      category: permission_scoped_existing_organization_draft_read_projection_and_ui_handoff
+      approvalId: guardian-f0158-organization-ai-review-workbench-handoff-2026-07-22
+      approvalFingerprint: bb97363f8fc484f582474fb006c37426f39d1825933acdcb287a593578118bcc
+      approvedBaseSha: 6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       providerOrRealExternalCall: false
       dependencyChange: false
       conditionalCloseout: true
+      hardConditions: authorization_first_exact_kind_projection_identity_only_copy_strict_selector_authorized_exact_detail_existing_editor_only
     preRedImpactScan:
-      chain: authorized_grounding_context_to_result_snapshot_to_authorization_first_review_detail_to_editor_source_panel
+      chain: authorized_organization_history_to_server_owned_snapshot_to_review_panel_to_atomic_copy_to_exact_training_draft_selector_to_existing_editor
       coreFiles: 12
-      contingencyFiles: 2
-      preflightTestFiles: 6
+      contingencyFiles: 0
+      preflightTestFiles: 4
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedRootCause: detailed_grounding_context_is_discarded_before_result_persistence_and_review_detail_cannot_reconstruct_safe_sources
-      bundleDisposition: content_safe_citation_projection_only_organization_workbench_separate
+      confirmedRootCause: history_drops_existing_organization_draft_snapshots_and_copy_UI_discards_exact_draft_identity_instead_of_reusing_existing_editor
+      bundleDisposition: organization_review_and_exact_existing_workbench_handoff_only_browser_runtime_separate
     expectedAcceptance:
-      - successful_content_result_persists_only_bounded_resource_title_and_heading_path_projection
-      - chunk_text_score_index_internal_identity_provider_data_and_storage_path_never_enter_projection_or_DTO
-      - review_detail_validates_snapshot_against_persisted_count_and_malformed_snapshot_fails_closed
-      - legacy_null_snapshot_is_explicitly_unavailable_and_never_reconstructed
-      - existing_authorization_first_review_detail_boundary_is_preserved
-      - editor_renders_at_most_three_safe_sources_and_F0158_remains_open_partitioned
+      - organization_history_returns_only_the_matching_server_owned_admin_safe_question_or_paper_snapshot
+      - organization_admin_reviews_full_persisted_stem_options_answer_analysis_evidence_and_paper_structure_before_copy
+      - content_cross_organization_employee_and_raw_provider_boundaries_do_not_expand
+      - copy_body_remains_identity_only_and_UI_retains_only_validated_returned_draft_public_id
+      - exact_draft_link_opens_existing_authorization_scoped_training_editor_independent_of_list_pagination
+      - invalid_missing_unavailable_or_out_of_scope_selector_fails_closed_and_F0158_remains_open_partitioned_for_browser_runtime
     closeoutProjection:
-      current: pre_red_scope_frozen
+      current: validated_reviewed_conditional_closeout_ready
       triggers: TDD_focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0158_content_citation_partition_closed_then_continue_organization_workbench_JIT
+      successProjection: F0158_organization_workbench_partition_closed_then_continue_browser_runtime_boundary_JIT
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
     executionMetrics:
-      mandatoryFreshApprovals: 0_bounded_medium_risk_standing_approval_applies
+      mandatoryFreshApprovals: 1_task_bound_guardian_permission_projection_approved
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: JIT_root_cause_grounding_result_review_projection_chain_freeze
-      mechanismOverhead: previous_closeout_fact_transition_task_contract_validation_and_conditional_closeout_preparation
+      productValueTime: 25m_TDD_history_projection_full_review_identity_handoff_and_adversarial_correction
+      mechanismOverhead: 8m_contract_state_guardian_validation_and_closeout_preparation
       guardSmokeChanges: 0
     validationEvidence:
-      red: 1_new_focused_file_failed_on_missing_projection_module_with_0_tests_collected
-      focused: 6_files_70_tests_passed
-      targetedLint: pass_zero_warnings
-      typecheck: pass
-      productionBuild: pass_with_existing_NFT_trace_warning_from_paper_asset_path
-      formatAndDiff: pass
-      stateParse: pass
-      mainThreadAdversarialReview: pass_no_blocker_exact_grounding_capture_content_only_atomic_result_snapshot_strict_three_source_projection_legacy_unavailable_authorization_before_lookup_malformed_fail_closed_no_raw_chunk_or_internal_identity
+      tddRed: exit_1_9_expected_failures_114_existing_passed
+      focused: exit_0_4_files_123_tests_passed
+      targetedLint: exit_0_9_product_and_test_files
+      typecheck: exit_0_tsc_noEmit
+      build: exit_0_next_build_100_static_pages_preexisting_NFT_warning_only
+      mainThreadAdversarialReview: pass_authorization_first_exact_identity_unique_kind_projection_strict_selector_detail_scope_and_zero_mutation_handoff
     previousTaskCloseout:
-      taskId: p1-remediation-rc-07-content-ai-review-editor-2026-07-22
+      taskId: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
       findingIds:
         - F-0158
-      commit: d0864f92cd001ba6f555a33bb728c0720f3797b2
+      commit: 6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       findingStatus: open_partitioned
       masterOriginSync: pass

@@ -963,6 +963,8 @@ function createGeneratedResultHistoryItem(input: {
     reviewedAt?: string | null;
   };
   reviewedDraft?: AdminAiGenerationResultDto["contentReference"]["reviewedDraft"];
+  organizationTrainingDraft?: AdminAiGenerationResultDto["contentReference"]["organizationTrainingDraft"];
+  organizationTrainingPaperDraft?: AdminAiGenerationResultDto["contentReference"]["organizationTrainingPaperDraft"];
 }): AdminAiGenerationResultDto {
   const isContent = input.workspace === "content";
   const ownerPublicId = isContent
@@ -989,8 +991,95 @@ function createGeneratedResultHistoryItem(input: {
       contentPreviewMasked: `redacted generated result summary for ${input.workspace} ${input.generationKind}`,
       contentVisibility: "redacted_snapshot",
       reviewedDraft: input.reviewedDraft ?? null,
-      organizationTrainingDraft: null,
-      organizationTrainingPaperDraft: null,
+      organizationTrainingDraft:
+        input.organizationTrainingDraft ??
+        (!isContent && input.generationKind === "question"
+          ? {
+              questions: [
+                {
+                  publicId: "organization_training_question_history_001",
+                  sequenceNumber: 1,
+                  questionType: "single_choice",
+                  materialTitle: null,
+                  materialContent: null,
+                  stem: "组织历史中的服务端题干",
+                  options: [
+                    {
+                      publicId:
+                        "organization_training_question_history_option_a",
+                      label: "A",
+                      content: "服务端选项 A",
+                    },
+                  ],
+                  score: 1,
+                  evidenceSummary: {
+                    evidenceStatus: "sufficient",
+                    citationCount: 1,
+                  },
+                  answerAndAnalysis: {
+                    visibility: "collapsed_by_default",
+                    standardAnswer: "A",
+                    analysis: "组织历史中的服务端解析",
+                  },
+                },
+              ],
+            }
+          : null),
+      organizationTrainingPaperDraft:
+        input.organizationTrainingPaperDraft ??
+        (!isContent && input.generationKind === "paper"
+          ? {
+              paperTitle: "组织历史中的服务端试卷",
+              requestedQuestionCount: 1,
+              selectedQuestionCount: 1,
+              sourceComposition: {
+                platformFormalQuestionCount: 1,
+                enterpriseTrainingSnapshotCount: 0,
+              },
+              matchQuality: "fully_matched",
+              paperSections: [
+                {
+                  sectionKey: "single_choice",
+                  title: "单选题",
+                  questionType: "single_choice",
+                  targetQuestionCount: 1,
+                  selectedQuestionCount: 1,
+                  totalScore: 1,
+                  questions: [
+                    {
+                      publicId:
+                        "organization_training_paper_question_history_001",
+                      sequenceNumber: 1,
+                      questionType: "single_choice",
+                      materialTitle: null,
+                      materialContent: null,
+                      stem: "组织历史试卷中的服务端题干",
+                      options: [
+                        {
+                          publicId:
+                            "organization_training_paper_question_history_option_a",
+                          label: "A",
+                          content: "试卷服务端选项 A",
+                        },
+                      ],
+                      score: 1,
+                      evidenceSummary: {
+                        evidenceStatus: "sufficient",
+                        citationCount: 1,
+                      },
+                      answerAndAnalysis: {
+                        visibility: "collapsed_by_default",
+                        standardAnswer: "A",
+                        analysis: "组织历史试卷中的服务端解析",
+                      },
+                    },
+                  ],
+                },
+              ],
+              questions: [],
+              redactionStatus: "admin_safe_detail",
+            }
+          : null),
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -4122,6 +4211,28 @@ describe("admin AI generation local contract route handlers", () => {
               "redacted generated result summary for organization paper",
             contentVisibility: "redacted_snapshot",
             formalAdoptionStatus: "blocked",
+            organizationTrainingReviewDraft: {
+              kind: "paper_draft",
+              redactionStatus: "admin_safe_detail",
+              paperDraft: {
+                paperTitle: "组织历史中的服务端试卷",
+                selectedQuestionCount: 1,
+                paperSections: [
+                  {
+                    title: "单选题",
+                    questions: [
+                      {
+                        stem: "组织历史试卷中的服务端题干",
+                        answerAndAnalysis: {
+                          standardAnswer: "A",
+                          analysis: "组织历史试卷中的服务端解析",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
             redactionStatus: "redacted",
           },
         },
@@ -4132,6 +4243,71 @@ describe("admin AI generation local contract route handlers", () => {
     );
     expect(serializedPayload).not.toContain("ai_call_log_public_omitted");
     expect(serializedPayload).not.toContain("providerPayload");
+  });
+
+  it("fails closed when organization history contains both question and paper draft projections", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_organization_question_mismatched_history";
+    const resultPublicId =
+      "admin_ai_generation_result_organization_question_mismatched_history";
+    const taskPersistenceRecorder = createTaskPersistenceRecorder({
+      taskHistoryItems: [
+        createTaskHistoryItem({
+          workspace: "organization",
+          generationKind: "question",
+          taskPublicId,
+          resultPublicId,
+          status: "succeeded",
+          requestedAt: "2026-06-26T20:50:00.000Z",
+        }),
+      ],
+    });
+    const validQuestionResult = createGeneratedResultHistoryItem({
+      workspace: "organization",
+      generationKind: "question",
+      taskPublicId,
+      resultPublicId,
+      persistedAt: "2026-06-26T20:51:00.000Z",
+    });
+    const mismatchedResult: AdminAiGenerationResultDto = {
+      ...validQuestionResult,
+      contentReference: {
+        ...validQuestionResult.contentReference,
+        organizationTrainingPaperDraft: {
+          paperTitle: "不应同时出现的试卷",
+          requestedQuestionCount: 1,
+          selectedQuestionCount: 1,
+          sourceComposition: {
+            platformFormalQuestionCount: 1,
+            enterpriseTrainingSnapshotCount: 0,
+          },
+          matchQuality: "fully_matched",
+          paperSections: [],
+          questions: [],
+          redactionStatus: "admin_safe_detail",
+        },
+      },
+    };
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder({
+        draftResults: [mismatchedResult],
+      });
+
+    const response = await getLocalContractHistory({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      searchParams: "?generationKind=question&page=1&pageSize=10",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+    });
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409018,
+      message: "AI generation history is unavailable.",
+      data: null,
+    });
   });
 
   it("denies organization standard admin direct GET without listing task history", async () => {

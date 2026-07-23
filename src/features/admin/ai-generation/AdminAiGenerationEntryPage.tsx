@@ -62,6 +62,7 @@ import {
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
 import { resolveOrganizationWorkspacePageAccess } from "../organization-workspace/admin-organization-workspace-access";
+import { isCanonicalOrganizationTrainingDraftPublicId } from "../organization-training/organization-training-list-url";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-payload";
 import { AdminAiGenerationReviewDraftEditor } from "./AdminAiGenerationReviewDraftEditor";
 
@@ -154,6 +155,10 @@ type OrganizationAiTrainingDraftCopyState =
 type OrganizationAiTrainingDraftCopyInput = {
   taskItem: AdminAiGenerationTaskHistoryItemDto;
   confirmation: "not_required" | "weak_confirmed";
+};
+type OrganizationAiTrainingDraftReference = {
+  draftPublicId: string;
+  generationKind: AdminAiGenerationKind;
 };
 type AdminAiGenerationDetailControl = {
   inputMode: "select" | "number" | "text";
@@ -2326,6 +2331,7 @@ function readAdminTaskLifecycle(task: AdminAiGenerationTaskHistoryItemDto) {
 
 function AdminAiGenerationTaskHistoryPanel({
   adminWorkspaceCapabilitySummary,
+  copiedTrainingDraftByResultPublicId,
   copyActionStateByResultPublicId,
   currentLocalContractSummary,
   generationParameters,
@@ -2341,6 +2347,10 @@ function AdminAiGenerationTaskHistoryPanel({
   workspace,
 }: {
   adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
+  copiedTrainingDraftByResultPublicId: Record<
+    string,
+    OrganizationAiTrainingDraftReference
+  >;
   copyActionStateByResultPublicId: Record<
     string,
     OrganizationAiTrainingDraftCopyState
@@ -2632,6 +2642,11 @@ function AdminAiGenerationTaskHistoryPanel({
                         adminWorkspaceCapabilitySummary={
                           adminWorkspaceCapabilitySummary
                         }
+                        copiedTrainingDraft={
+                          copiedTrainingDraftByResultPublicId[
+                            taskItem.generatedResult.resultPublicId
+                          ] ?? null
+                        }
                         generationParameters={generationParameters}
                         taskItem={taskItem}
                         onCopyToTrainingDraft={onCopyToTrainingDraft}
@@ -2663,12 +2678,14 @@ function AdminAiGenerationTaskHistoryPanel({
 function OrganizationAiGenerationDraftNextStepPanel({
   actionState,
   adminWorkspaceCapabilitySummary,
+  copiedTrainingDraft,
   generationParameters,
   taskItem,
   onCopyToTrainingDraft,
 }: {
   actionState: OrganizationAiTrainingDraftCopyState;
   adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
+  copiedTrainingDraft: OrganizationAiTrainingDraftReference | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   taskItem: AdminAiGenerationTaskHistoryItemDto;
   onCopyToTrainingDraft: (input: OrganizationAiTrainingDraftCopyInput) => void;
@@ -2679,6 +2696,12 @@ function OrganizationAiGenerationDraftNextStepPanel({
 
   const boundary = taskItem.organizationOwnedDraftBoundary;
   const generatedResult = taskItem.generatedResult;
+  const reviewDraft = generatedResult.organizationTrainingReviewDraft;
+  const hasMatchingReviewDraft =
+    (taskItem.generationKind === "question" &&
+      reviewDraft?.kind === "question_draft") ||
+    (taskItem.generationKind === "paper" &&
+      reviewDraft?.kind === "paper_draft");
   const copyReadiness = getOrganizationAiTrainingCopyReadiness(generatedResult);
   const isOrganizationPrivateDraft =
     boundary.generatedResultScope === "organization_private" &&
@@ -2694,7 +2717,8 @@ function OrganizationAiGenerationDraftNextStepPanel({
     boundary.organizationTrainingSourceStatus ===
       "allowed_as_organization_private_training_source" &&
     copyReadiness !== "blocked" &&
-    hasSameOrganizationTarget;
+    hasSameOrganizationTarget &&
+    hasMatchingReviewDraft;
   const trainingSourceStatus =
     copyReadiness === "ready" && isTrainingSourceAllowed
       ? "可作为组织训练素材"
@@ -2719,12 +2743,22 @@ function OrganizationAiGenerationDraftNextStepPanel({
     taskItem.generationKind === "paper"
       ? ["编辑试卷", "调整题目", "预览员工视角", "保存草稿", "发布训练"]
       : ["编辑题目", "移除题目", "加入训练草稿", "保存草稿", "发布训练"];
+  const trainingDraftHref =
+    copiedTrainingDraft === null
+      ? "/organization/organization-training"
+      : `/organization/organization-training?draftPublicId=${encodeURIComponent(
+          copiedTrainingDraft.draftPublicId,
+        )}&generationKind=${copiedTrainingDraft.generationKind}`;
 
   return (
     <section
       className="border-border bg-background mt-3 rounded-md border p-3"
       data-testid="organization-ai-generation-draft-next-step"
     >
+      <OrganizationAiGenerationDraftReview
+        generationKind={taskItem.generationKind}
+        reviewDraft={reviewDraft}
+      />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-brand-primary text-xs font-medium">
@@ -2756,9 +2790,11 @@ function OrganizationAiGenerationDraftNextStepPanel({
           </button>
           <a
             className="border-border text-text-secondary hover:bg-muted inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98]"
-            href="/organization/organization-training"
+            href={trainingDraftHref}
           >
-            进入企业训练配置
+            {copiedTrainingDraft === null
+              ? "进入企业训练配置"
+              : "继续编辑已创建草稿"}
           </a>
         </div>
       </div>
@@ -2812,6 +2848,100 @@ function OrganizationAiGenerationDraftNextStepPanel({
           {actionMessage}
         </p>
       )}
+    </section>
+  );
+}
+
+function OrganizationAiGenerationDraftReview({
+  generationKind,
+  reviewDraft,
+}: {
+  generationKind: AdminAiGenerationKind;
+  reviewDraft: AdminAiGenerationTaskHistoryGeneratedResultDto["organizationTrainingReviewDraft"];
+}) {
+  const paperSectionQuestions =
+    reviewDraft?.kind === "paper_draft"
+      ? (reviewDraft.paperDraft.paperSections?.flatMap(
+          (paperSection) => paperSection.questions,
+        ) ?? [])
+      : [];
+  const questions =
+    reviewDraft?.kind === "question_draft"
+      ? reviewDraft.questionDraft.questions
+      : reviewDraft?.kind === "paper_draft"
+        ? paperSectionQuestions.length > 0
+          ? paperSectionQuestions
+          : (reviewDraft.paperDraft.questions ?? [])
+        : [];
+
+  if (
+    reviewDraft === null ||
+    (generationKind === "question" && reviewDraft.kind !== "question_draft") ||
+    (generationKind === "paper" && reviewDraft.kind !== "paper_draft")
+  ) {
+    return (
+      <p className="text-destructive mb-3 text-xs" role="alert">
+        完整训练草稿不可用，无法创建企业训练草稿。
+      </p>
+    );
+  }
+
+  return (
+    <section
+      className="border-border mb-3 rounded-md border p-3"
+      data-testid="organization-ai-generation-draft-review"
+    >
+      <h4 className="text-text-primary text-sm font-semibold">
+        {reviewDraft.kind === "paper_draft"
+          ? reviewDraft.paperDraft.paperTitle
+          : "完整训练题草稿"}
+      </h4>
+      <div className="mt-3 space-y-3">
+        {questions.map((question) => (
+          <article
+            className="bg-muted/40 rounded-md p-3"
+            key={question.publicId}
+          >
+            <p className="text-text-primary text-sm font-medium">
+              {question.sequenceNumber}. {question.stem}
+            </p>
+            {question.options.length === 0 ? null : (
+              <ul className="text-text-secondary mt-2 space-y-1 text-xs">
+                {question.options.map((option) => (
+                  <li key={option.publicId}>
+                    {option.label}. {option.content}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <dl className="mt-2 grid gap-1 text-xs sm:grid-cols-3">
+              <div>
+                <dt className="text-text-secondary">标准答案</dt>
+                <dd className="text-text-primary">
+                  {question.answerAndAnalysis.standardAnswer ?? "待人工评审"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-secondary">解析</dt>
+                <dd className="text-text-primary">
+                  {question.answerAndAnalysis.analysis ?? "待人工评审"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-secondary">依据：</dt>
+                <dd className="text-text-primary">
+                  {question.evidenceSummary.evidenceStatus === "sufficient"
+                    ? "充分"
+                    : question.evidenceSummary.evidenceStatus === "weak"
+                      ? "较少"
+                      : "不足"}
+                  （{question.evidenceSummary.citationCount} 条）
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -3412,6 +3542,10 @@ export function AdminAiGenerationEntryPage({
   ] = useState<Record<string, ContentAdminReviewActionState>>({});
   const [copyActionStateByResultPublicId, setCopyActionStateByResultPublicId] =
     useState<Record<string, OrganizationAiTrainingDraftCopyState>>({});
+  const [
+    copiedTrainingDraftByResultPublicId,
+    setCopiedTrainingDraftByResultPublicId,
+  ] = useState<Record<string, OrganizationAiTrainingDraftReference>>({});
   const [organizationTrainingFeedback, setOrganizationTrainingFeedback] =
     useState<AdminFeedback | null>(null);
   const [adminWorkspaceCapabilitySummary, setAdminWorkspaceCapabilitySummary] =
@@ -4039,6 +4173,11 @@ export function AdminAiGenerationEntryPage({
 
     const resultPublicId = generatedResult.resultPublicId;
     const setCopyActionError = (message: string) => {
+      setCopiedTrainingDraftByResultPublicId((currentState) => {
+        const nextState = { ...currentState };
+        delete nextState[resultPublicId];
+        return nextState;
+      });
       setCopyActionStateByResultPublicId((currentState) => ({
         ...currentState,
         [resultPublicId]: "error",
@@ -4100,14 +4239,33 @@ export function AdminAiGenerationEntryPage({
       }
 
       const copy = copyResponse.data ?? null;
+      const reviewDraft = generatedResult.organizationTrainingReviewDraft;
+      const expectedReviewKind =
+        input.taskItem.generationKind === "question"
+          ? "question_draft"
+          : "paper_draft";
+      const sourceContext = copy?.context.sourceContexts[0] ?? null;
 
       if (
         copyResponse.code !== 0 ||
         copy === null ||
+        reviewDraft?.kind !== expectedReviewKind ||
+        !isCanonicalOrganizationTrainingDraftPublicId(copy.draft.publicId) ||
         copy.draft.organizationPublicId !== organizationPublicId ||
         copy.draft.sourceTaskPublicId !== input.taskItem.taskPublicId ||
         copy.context.draftPublicId !== copy.draft.publicId ||
-        copy.context.organizationPublicId !== organizationPublicId
+        copy.context.organizationPublicId !== organizationPublicId ||
+        copy.context.redactionStatus !== "metadata_only" ||
+        copy.context.sourceContexts.length !== 1 ||
+        sourceContext === null ||
+        sourceContext.sourceType !== "organization_ai_result" ||
+        sourceContext.sourcePublicId !== resultPublicId ||
+        sourceContext.redactionStatus !== "metadata_only" ||
+        sourceContext.profession !== copy.draft.profession ||
+        sourceContext.level !== copy.draft.level ||
+        sourceContext.subject !== copy.draft.subject ||
+        sourceContext.questionCount !== copy.draft.questionCount ||
+        sourceContext.totalScore !== copy.draft.totalScore
       ) {
         setCopyActionError(
           copyResponse.code === 0
@@ -4120,6 +4278,13 @@ export function AdminAiGenerationEntryPage({
       setCopyActionStateByResultPublicId((currentState) => ({
         ...currentState,
         [resultPublicId]: "copied",
+      }));
+      setCopiedTrainingDraftByResultPublicId((currentState) => ({
+        ...currentState,
+        [resultPublicId]: {
+          draftPublicId: copy.draft.publicId,
+          generationKind: input.taskItem.generationKind,
+        },
       }));
       setOrganizationTrainingFeedback({
         message:
@@ -4435,6 +4600,9 @@ export function AdminAiGenerationEntryPage({
           </div>
           <AdminAiGenerationTaskHistoryPanel
             adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
+            copiedTrainingDraftByResultPublicId={
+              copiedTrainingDraftByResultPublicId
+            }
             copyActionStateByResultPublicId={copyActionStateByResultPublicId}
             currentLocalContractSummary={localContractSummary}
             generationParameters={generationParameters}

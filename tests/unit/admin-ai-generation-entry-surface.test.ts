@@ -295,6 +295,73 @@ function createContentPaperAssembly(
   };
 }
 
+function createOrganizationQuestionReviewDraft() {
+  return {
+    kind: "question_draft" as const,
+    redactionStatus: "admin_safe_detail" as const,
+    questionDraft: {
+      questions: [
+        {
+          publicId: "organization-training-question-review-001",
+          sequenceNumber: 1,
+          questionType: "single_choice" as const,
+          materialTitle: null,
+          materialContent: null,
+          stem: "组织历史中的完整题干",
+          options: [
+            {
+              publicId: "organization-training-question-review-option-a",
+              label: "A",
+              content: "组织历史中的完整选项",
+            },
+          ],
+          score: 1,
+          evidenceSummary: {
+            evidenceStatus: "sufficient" as const,
+            citationCount: 1,
+          },
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default" as const,
+            standardAnswer: "A",
+            analysis: "组织历史中的完整解析",
+          },
+        },
+      ],
+    },
+  };
+}
+
+function createOrganizationPaperReviewDraft() {
+  return {
+    kind: "paper_draft" as const,
+    redactionStatus: "admin_safe_detail" as const,
+    paperDraft: {
+      paperTitle: "组织历史中的完整试卷",
+      requestedQuestionCount: 1,
+      selectedQuestionCount: 1,
+      sourceComposition: {
+        platformFormalQuestionCount: 1,
+        enterpriseTrainingSnapshotCount: 0,
+      },
+      matchQuality: "fully_matched" as const,
+      paperSections: [
+        {
+          sectionKey: "single_choice",
+          title: "单选题",
+          questionType: "single_choice" as const,
+          targetQuestionCount: 1,
+          selectedQuestionCount: 1,
+          totalScore: 1,
+          questions:
+            createOrganizationQuestionReviewDraft().questionDraft.questions,
+        },
+      ],
+      questions: [],
+      redactionStatus: "admin_safe_detail" as const,
+    },
+  };
+}
+
 function createTaskHistoryResponse(input: {
   workspace: "content" | "organization";
   generationKind: "question" | "paper";
@@ -322,6 +389,7 @@ function createTaskHistoryResponse(input: {
     formalAdoptionReviewedAt?: string | null;
     resultPublicId: string;
     reviewedDraft?: unknown;
+    organizationTrainingReviewDraft?: unknown;
   } | null;
   taskPublicId?: string;
 }) {
@@ -358,6 +426,13 @@ function createTaskHistoryResponse(input: {
           formalAdoptionReviewedAt:
             input.generatedResult.formalAdoptionReviewedAt ?? null,
           reviewedDraft: input.generatedResult.reviewedDraft ?? null,
+          organizationTrainingReviewDraft:
+            input.generatedResult.organizationTrainingReviewDraft ??
+            (input.workspace === "organization"
+              ? input.generationKind === "question"
+                ? createOrganizationQuestionReviewDraft()
+                : createOrganizationPaperReviewDraft()
+              : null),
           redactionStatus: "redacted",
         };
 
@@ -4189,6 +4264,64 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain(resultPublicId);
   });
 
+  it("renders the persisted server-owned organization question draft before copy", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "organization",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId:
+                "admin_ai_generation_result_organization_question_review_001",
+              contentPreviewMasked: "MASKED_PREVIEW_MUST_NOT_BE_FACT_SOURCE",
+              evidenceStatus: "sufficient",
+              citationCount: 1,
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    const review = await screen.findByTestId(
+      "organization-ai-generation-draft-review",
+    );
+    expect(review).toHaveTextContent("组织历史中的完整题干");
+    expect(review).toHaveTextContent("组织历史中的完整选项");
+    expect(review).toHaveTextContent("A");
+    expect(review).toHaveTextContent("组织历史中的完整解析");
+    expect(review).toHaveTextContent("依据：充分（1 条）");
+    expect(review).not.toHaveTextContent(
+      "MASKED_PREVIEW_MUST_NOT_BE_FACT_SOURCE",
+    );
+  });
+
   it("creates an organization training draft with source task attribution for a sufficiently grounded organization AI result", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const resultPublicId =
@@ -4323,6 +4456,12 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("organization-ai-training-copy-action"),
     ).toBeDisabled();
+    expect(
+      screen.getByRole("link", { name: "继续编辑已创建草稿" }),
+    ).toHaveAttribute(
+      "href",
+      "/organization/organization-training?draftPublicId=organization-training-draft-ai-copy-001&generationKind=question",
+    );
 
     const copyBody = JSON.parse(
       String(

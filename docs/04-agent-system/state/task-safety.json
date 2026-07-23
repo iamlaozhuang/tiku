@@ -1,26 +1,24 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22",
-  "objective": "Partially close F-0158 by snapshotting only bounded resource titles and heading paths from the exact authorized grounding context used by a successful content AI generation attempt, returning that immutable safe projection only through the existing authorization-first review-draft detail, and rendering it beside the server-owned review revision. Legacy results remain explicitly unavailable; organization workbench and browser/runtime acceptance remain residuals.",
+  "taskId": "p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22",
+  "objective": "Partially close F-0158 by returning the already persisted server-owned organization question or paper draft snapshot through the authorization-scoped organization AI history, rendering the complete reviewable draft before copy, and carrying the exact copied training draft public identity into the existing organization training editor without duplicating its edit, preview, save, or publish workflow. Content review, role entitlements, Provider behavior, schema, and training mutations remain unchanged.",
   "findingIds": ["F-0158"],
   "candidateRootCauseCluster": "P1-RC-07",
-  "baseSha": "d0864f92cd001ba6f555a33bb728c0720f3797b2",
-  "branch": "fix/content-ai-safe-citation-projection",
+  "baseSha": "6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6",
+  "branch": "fix/organization-ai-review-workbench-handoff",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/admin-ai-generation-citation.ts",
-    "src/server/models/admin-ai-generation-citation.test.ts",
+    "src/server/contracts/admin-ai-generation-local-contract.ts",
     "src/server/services/admin-ai-generation-local-contract-route.ts",
     "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
-    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-review-draft-service.test.ts",
-    "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/features/admin/organization-training/organization-training-list-url.ts",
+    "src/features/admin/organization-training/organization-training-list-url.test.ts",
+    "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
+    "tests/unit/organization-training-admin-entry-surface.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -31,50 +29,48 @@
     "pnpm-lock.yaml",
     "src/db/**",
     "drizzle/**",
-    "new API routes",
-    "permission or entitlement changes, Provider execution/configuration, dependency, secret/env, deployment, PR, force-push, non-canonical remote, raw chunk text or internal citation identity exposure, organization review workbench, F-0169, or any other finding"
+    "new API routes, repositories, services, or training editors",
+    "role, entitlement, organization-scope, Provider, dependency, secret/env, deployment, PR, force-push, non-canonical remote, raw Prompt or Provider payload exposure, cross-organization generated content, employee visibility, F-0169, or any other finding"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/models/admin-ai-generation-citation.ts",
-    "src/server/models/admin-ai-generation-citation.test.ts",
+    "src/server/contracts/admin-ai-generation-local-contract.ts",
     "src/server/services/admin-ai-generation-local-contract-route.ts",
     "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
-    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
+    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+    "tests/unit/admin-ai-generation-entry-surface.test.ts",
+    "src/features/admin/organization-training/organization-training-list-url.ts",
+    "src/features/admin/organization-training/organization-training-list-url.test.ts",
+    "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
+    "tests/unit/organization-training-admin-entry-surface.test.ts"
   ],
-  "contingencyFiles": [
-    "src/server/services/admin-ai-generation-review-draft-service.test.ts",
-    "src/server/services/admin-ai-generation-review-draft-runtime.test.ts"
-  ],
+  "contingencyFiles": [],
   "preRedImpactScan": {
-    "authoritativeChain": "authorized grounding context -> successful content result transaction -> citation_redacted_snapshot -> authorization-first review-draft GET -> review editor citation panel",
+    "authoritativeChain": "authorized organization AI history route -> persisted admin-safe organization question or paper snapshot -> history review panel -> existing atomic copy command -> returned training draft publicId -> organization training URL selector -> authorization-scoped draft detail -> existing editor",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
     "coreFileCount": 12,
-    "contingencyFileCount": 2,
+    "contingencyFileCount": 0,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "The detailed authorized grounding context is discarded before result persistence, citation_redacted_snapshot is always null, and the review detail cannot reconstruct safe source names or heading paths.",
-    "findingDisposition": "F-0158_open_partitioned_safe_content_citation_projection",
-    "residualDisposition": "Organization review workbench and browser/runtime acceptance remain separate residuals; F-0169 remains separate."
+    "confirmedRootCause": "The history mapper drops the already validated organization draft snapshots, the organization panel renders only a masked summary and static future-action labels, and the copy handler discards the authoritative draft publicId instead of handing it to the existing training editor.",
+    "findingDisposition": "F-0158_open_partitioned_organization_review_and_exact_training_workbench_handoff",
+    "residualDisposition": "Browser/runtime acceptance remains; F-0169 and content review remain separate."
   },
   "acceptance": [
-    "a successful grounded content result atomically persists an immutable bounded snapshot containing only resourceTitle and headingPath",
-    "chunk text, score, chunk index, internal public ids, Provider data and storage paths never enter the persisted projection or review DTO",
-    "the review-draft detail validates the snapshot against the persisted citation count and fails closed on malformed snapshots",
-    "legacy null snapshots are returned explicitly as unavailable and are never reconstructed from count, prompt or current RAG state",
-    "authorization remains before result and citation lookup through the existing review-draft service and route",
-    "the content editor renders at most three source names and heading paths with complete loading, unavailable and error boundaries inherited from the review detail",
-    "F-0158 remains open_partitioned for organization workbench and browser/runtime acceptance"
+    "organization history returns exactly one server-owned admin-safe question or paper draft snapshot for the matching generation kind and never both",
+    "content workspace history and unauthorized or cross-organization callers gain no organization draft visibility",
+    "the organization history panel renders the full persisted question or paper review snapshot including stem, options, answer, analysis, evidence and paper structure before copy",
+    "masked preview, raw Prompt, Provider payload, internal ids and client-authored full draft never become the review fact source",
+    "the copy command body remains identity-only and the UI retains only the validated returned training draft publicId",
+    "after copy the exact draft link opens the existing organization training editor through authorization-scoped detail lookup without relying on list pagination or filters",
+    "invalid, missing, unavailable or out-of-scope draft selectors fail closed without opening an editor",
+    "F-0158 remains open_partitioned only for browser/runtime acceptance"
   ],
   "validationCommands": [
     {
-      "name": "content-ai-safe-citation-test",
+      "name": "organization-ai-review-workbench-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -82,48 +78,46 @@
         "exec",
         "vitest",
         "run",
-        "src/server/models/admin-ai-generation-citation.test.ts",
         "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-review-draft-service.test.ts",
-        "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "src/features/admin/organization-training/organization-training-list-url.test.ts",
+        "tests/unit/organization-training-admin-entry-surface.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "content-ai-safe-citation-lint",
+      "name": "organization-ai-review-workbench-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/server/models/admin-ai-generation-citation.ts",
-        "src/server/models/admin-ai-generation-citation.test.ts",
+        "src/server/contracts/admin-ai-generation-local-contract.ts",
         "src/server/services/admin-ai-generation-local-contract-route.ts",
         "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
-        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "src/features/admin/organization-training/organization-training-list-url.ts",
+        "src/features/admin/organization-training/organization-training-list-url.test.ts",
+        "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
+        "tests/unit/organization-training-admin-entry-surface.test.ts"
       ]
     },
     {
-      "name": "content-ai-safe-citation-typecheck",
+      "name": "organization-ai-review-workbench-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "content-ai-safe-citation-build",
+      "name": "organization-ai-review-workbench-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "content-ai-safe-citation-format",
+      "name": "organization-ai-review-workbench-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -134,21 +128,19 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/models/admin-ai-generation-citation.ts",
-        "src/server/models/admin-ai-generation-citation.test.ts",
+        "src/server/contracts/admin-ai-generation-local-contract.ts",
         "src/server/services/admin-ai-generation-local-contract-route.ts",
         "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/server/contracts/admin-ai-generation-review-draft-contract.ts",
-        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-review-draft-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-review-draft-service.test.ts",
-        "src/server/services/admin-ai-generation-review-draft-runtime.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationReviewDraftEditor.test.tsx"
+        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "src/features/admin/organization-training/organization-training-list-url.ts",
+        "src/features/admin/organization-training/organization-training-list-url.test.ts",
+        "src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx",
+        "tests/unit/organization-training-admin-entry-surface.test.ts"
       ]
     },
     {
-      "name": "content-ai-safe-citation-diff-check",
+      "name": "organization-ai-review-workbench-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -156,17 +148,36 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "permission": null,
+    "database": null,
+    "permission": "guardian-f0158-organization-ai-review-workbench-handoff-2026-07-22",
     "deployment": null,
     "secretEnv": null
   },
-  "standingApprovals": [
-    "standing-bounded-medium-risk-closeout-approval-2026-07-20",
-    "standing-test-only-allowlist-expansion-2026-07-21"
-  ],
+  "standingApprovals": ["standing-test-only-allowlist-expansion-2026-07-21"],
+  "guardianApproval": {
+    "approvalId": "guardian-f0158-organization-ai-review-workbench-handoff-2026-07-22",
+    "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
+    "approvedBaseSha": "6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6",
+    "approvedFingerprint": "bb97363f8fc484f582474fb006c37426f39d1825933acdcb287a593578118bcc",
+    "conditionalCloseout": true,
+    "hardConditions": [
+      "authorization and organization scope precede history result projection",
+      "question history returns only organizationTrainingDraft and paper history returns only organizationTrainingPaperDraft; mismatch or malformed projection fails closed",
+      "content, cross-organization, employee, standard-edition and invalid authorization callers gain no projection",
+      "copy remains identity-only and returned task, result, organization, generation, content and draft identities are cross-checked before navigation",
+      "draftPublicId is a strict untrusted single selector and exact detail authorization must succeed before opening the existing editor",
+      "no second editor, new route, repository, service, permission, schema, Provider, dependency or other finding"
+    ],
+    "invalidatesOn": [
+      "base or origin drift",
+      "thirteenth changed file",
+      "permission or organization scope expansion",
+      "new route repository service schema dependency Provider or mechanism need",
+      "validation or review failure followed by semantic drift"
+    ]
+  },
   "riskClassification": {
-    "category": "database_application_logic_and_safe_admin_read_projection",
+    "category": "permission_scoped_existing_organization_draft_read_projection_and_ui_handoff",
     "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
@@ -176,19 +187,18 @@
   "conditionalCloseout": true,
   "executionStage": "validated_reviewed_conditional_closeout_ready",
   "validationEvidence": {
-    "red": "1_new_focused_file_failed_on_missing_projection_module_with_0_tests_collected",
-    "focused": "6_files_70_tests_passed",
-    "targetedLint": "pass_zero_warnings",
-    "typecheck": "pass",
-    "productionBuild": "pass_with_existing_NFT_trace_warning_from_paper_asset_path",
-    "formatAndDiff": "pass",
-    "stateParse": "pass",
-    "mainThreadAdversarialReview": "pass_no_blocker_exact_grounding_capture_content_only_atomic_result_snapshot_strict_three_source_projection_legacy_unavailable_authorization_before_lookup_malformed_fail_closed_no_raw_chunk_or_internal_identity"
+    "tddRed": "exit_1_9_expected_failures_114_existing_passed",
+    "focused": "exit_0_4_files_123_tests_passed",
+    "targetedLint": "exit_0_9_product_and_test_files",
+    "typecheck": "exit_0_tsc_noEmit",
+    "build": "exit_0_next_build_100_static_pages_preexisting_NFT_warning_only",
+    "formatAndDiff": "prettier_applied_before_freeze_then_check_and_git_diff_check_required",
+    "mainThreadAdversarialReview": "pass_authorization_first_exact_identity_unique_kind_projection_strict_selector_detail_scope_and_zero_mutation_handoff"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-content-ai-review-editor-2026-07-22",
+    "taskId": "p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22",
     "findingIds": ["F-0158"],
-    "commit": "d0864f92cd001ba6f555a33bb728c0720f3797b2",
+    "commit": "6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "open_partitioned",
     "masterOriginSync": true,
@@ -198,12 +208,12 @@
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
     "currentFindings": ["F-0158"],
-    "currentPartition": "content_safe_citation_projection",
-    "nextResidualReview": "F-0158_organization_review_workbench_then_browser_runtime_acceptance_then_F-0169"
+    "currentPartition": "organization_review_workbench_handoff",
+    "nextResidualReview": "F-0158_browser_runtime_acceptance_then_F-0169"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "standing-bounded-medium-risk-closeout-approval-2026-07-20"
+    "approvalId": "guardian-f0158-organization-ai-review-workbench-handoff-2026-07-22"
   }
 }

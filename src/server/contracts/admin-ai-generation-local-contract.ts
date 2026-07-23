@@ -22,6 +22,10 @@ import type {
   AdminAiGenerationFormalAdoptionReviewStatus,
   AdminAiGenerationFormalTargetWriteStatus,
 } from "../models/admin-ai-generation-formal-adoption";
+import type {
+  AdminAiGenerationOrganizationTrainingPaperDraftPayload,
+  AdminAiGenerationOrganizationTrainingQuestionDraftPayload,
+} from "./admin-ai-generation-result-persistence-contract";
 
 export type AdminAiGenerationWorkspace = "content" | "organization";
 
@@ -208,6 +212,18 @@ export type AdminAiGenerationTaskHistoryGeneratedResultDto = {
   formalPaperPublicId: string | null;
   formalAdoptionReviewedAt: string | null;
   reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
+  organizationTrainingReviewDraft:
+    | {
+        kind: "question_draft";
+        questionDraft: AdminAiGenerationOrganizationTrainingQuestionDraftPayload;
+        redactionStatus: "admin_safe_detail";
+      }
+    | {
+        kind: "paper_draft";
+        paperDraft: AdminAiGenerationOrganizationTrainingPaperDraftPayload;
+        redactionStatus: "admin_safe_detail";
+      }
+    | null;
   redactionStatus: "redacted";
 };
 

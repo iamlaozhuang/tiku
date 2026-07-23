@@ -19,8 +19,18 @@ export type OrganizationTrainingLifecycleContentKindFilter =
 
 export type OrganizationTrainingLifecyclePageSize = 20 | 50 | 100;
 
+export type OrganizationTrainingDraftGenerationKind = "question" | "paper";
+
+export type OrganizationTrainingDraftSelectorStatus =
+  | "absent"
+  | "valid"
+  | "invalid";
+
 export type OrganizationTrainingListUrlState = {
   contentKind: OrganizationTrainingLifecycleContentKindFilter;
+  draftGenerationKind: OrganizationTrainingDraftGenerationKind | null;
+  draftPublicId: string | null;
+  draftSelectorStatus: OrganizationTrainingDraftSelectorStatus;
   page: number;
   pageSize: OrganizationTrainingLifecyclePageSize;
   sourceKind: OrganizationTrainingLifecycleSourceKindFilter;
@@ -43,6 +53,13 @@ const allowedContentKinds = [
   "unknown",
 ] as const;
 const allowedPageSizes = [20, 50, 100] as const;
+const allowedDraftGenerationKinds = ["question", "paper"] as const;
+const canonicalDraftPublicIdPattern =
+  /^organization-training-draft-[a-z0-9](?:[a-z0-9_-]{0,95})$/u;
+
+export function isCanonicalOrganizationTrainingDraftPublicId(value: string) {
+  return canonicalDraftPublicIdPattern.test(value);
+}
 
 function parsePageSize(
   value: string | null,
@@ -69,6 +86,17 @@ export function parseOrganizationTrainingListSearch(
 ): OrganizationTrainingListUrlState {
   const searchParams = new URLSearchParams(search);
   const parsedPage = Number(searchParams.get("page"));
+  const draftPublicIds = searchParams.getAll("draftPublicId");
+  const draftGenerationKinds = searchParams.getAll("generationKind");
+  const hasDraftSelector =
+    draftPublicIds.length > 0 || draftGenerationKinds.length > 0;
+  const hasValidDraftSelector =
+    draftPublicIds.length === 1 &&
+    draftGenerationKinds.length === 1 &&
+    isCanonicalOrganizationTrainingDraftPublicId(draftPublicIds[0] ?? "") &&
+    allowedDraftGenerationKinds.includes(
+      draftGenerationKinds[0] as OrganizationTrainingDraftGenerationKind,
+    );
 
   return {
     contentKind: parseAllowedValue(
@@ -76,6 +104,15 @@ export function parseOrganizationTrainingListSearch(
       allowedContentKinds,
       "all",
     ),
+    draftGenerationKind: hasValidDraftSelector
+      ? (draftGenerationKinds[0] as OrganizationTrainingDraftGenerationKind)
+      : null,
+    draftPublicId: hasValidDraftSelector ? (draftPublicIds[0] ?? null) : null,
+    draftSelectorStatus: !hasDraftSelector
+      ? "absent"
+      : hasValidDraftSelector
+        ? "valid"
+        : "invalid",
     page: Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1,
     pageSize: parsePageSize(searchParams.get("pageSize")),
     sourceKind: parseAllowedValue(
@@ -93,6 +130,9 @@ export function parseOrganizationTrainingListSearch(
 
 export function createOrganizationTrainingListSearch({
   contentKind,
+  draftGenerationKind,
+  draftPublicId,
+  draftSelectorStatus,
   page,
   pageSize,
   sourceKind,
@@ -105,6 +145,14 @@ export function createOrganizationTrainingListSearch({
   if (contentKind !== "all") searchParams.set("contentKind", contentKind);
   if (pageSize !== 20) searchParams.set("pageSize", String(pageSize));
   if (page > 1) searchParams.set("page", String(page));
+  if (
+    draftSelectorStatus === "valid" &&
+    draftPublicId !== null &&
+    draftGenerationKind !== null
+  ) {
+    searchParams.set("draftPublicId", draftPublicId);
+    searchParams.set("generationKind", draftGenerationKind);
+  }
 
   return searchParams.toString();
 }
