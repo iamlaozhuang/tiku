@@ -1167,6 +1167,15 @@ function copyAdminDetailQuestions(
     publicId: question.publicId,
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
+    ...(question.questionGroupPublicId === undefined
+      ? {}
+      : {
+          questionGroupPublicId: question.questionGroupPublicId,
+          questionGroupTitle: question.questionGroupTitle,
+          questionGroupQuestionSortOrder:
+            question.questionGroupQuestionSortOrder,
+          questionGroupQuestionCount: question.questionGroupQuestionCount,
+        }),
     materialTitle: question.materialTitle,
     materialContent: question.materialContent,
     stem: question.stem,
@@ -1398,6 +1407,11 @@ function createDraftQuestionIntegrityPayload(
     paperSectionTitle: question.paperSectionTitle ?? null,
     paperSectionSortOrder: question.paperSectionSortOrder ?? null,
     questionSortOrder: question.questionSortOrder ?? null,
+    questionGroupPublicId: question.questionGroupPublicId ?? null,
+    questionGroupTitle: question.questionGroupTitle ?? null,
+    questionGroupQuestionSortOrder:
+      question.questionGroupQuestionSortOrder ?? null,
+    questionGroupQuestionCount: question.questionGroupQuestionCount ?? null,
     materialTitle: question.materialTitle,
     materialContent: question.materialContent,
     stem: question.stem,
@@ -2272,6 +2286,15 @@ function copyPublishQuestionSnapshot(
     publicId: question.publicId,
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
+    ...(question.questionGroupPublicId === undefined
+      ? {}
+      : {
+          questionGroupPublicId: question.questionGroupPublicId,
+          questionGroupTitle: question.questionGroupTitle,
+          questionGroupQuestionSortOrder:
+            question.questionGroupQuestionSortOrder,
+          questionGroupQuestionCount: question.questionGroupQuestionCount,
+        }),
     ...(question.paperSectionKey !== undefined &&
     question.paperSectionTitle !== undefined &&
     question.paperSectionSortOrder !== undefined &&

@@ -351,6 +351,124 @@ function createPaperAssemblySourceQuestions(): PersonalAiGenerationLearningPaper
 }
 
 describe("personal AI generation learning session service", () => {
+  it("persists a complete material question_group into the learner session without flattening or content reconstruction", async () => {
+    const container = createPaperAssemblyContainer();
+    const group = {
+      publicId: "qgroup_learning_material_001",
+      title: "learning material group",
+      materialSnapshot: {
+        materialPublicId: "material_learning_public_001",
+        title: "learning material title",
+        contentRichText: "learning material body",
+      },
+      memberQuestionPublicIds: [
+        "platform_formal_question_public_001",
+        "enterprise_training_snapshot_public_001",
+      ],
+      questionSortOrder: 1,
+    };
+    container.sections = [
+      {
+        ...container.sections[0]!,
+        selectedQuestions: [
+          Object.assign(container.sections[0]!.selectedQuestions[0]!, {
+            questionGroup: group,
+          }),
+          Object.assign(container.sections[0]!.selectedQuestions[1]!, {
+            questionGroup: { ...group, questionSortOrder: 2 },
+          }),
+        ],
+      },
+    ];
+    container.requestedQuestionCount = 2;
+    container.selectedQuestionCount = 2;
+    const sourceQuestions = createPaperAssemblySourceQuestions().slice(0, 2);
+    Object.assign(sourceQuestions[0]!, { questionGroup: group });
+    Object.assign(sourceQuestions[1]!, {
+      questionGroup: { ...group, questionSortOrder: 2 },
+    });
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    }) as PaperAssemblyLearningSessionService;
+
+    const result = await service.createLearningSessionFromPaperAssembly({
+      sessionPublicId: "ai_learning_group_session_001",
+      sourceResultPublicId: "ai_learning_group_result_001",
+      sourceTaskPublicId: "ai_learning_group_task_001",
+      ownerType: "organization",
+      ownerPublicId: "organization_learning_group_001",
+      actorPublicId: "employee_learning_group_001",
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      paperAssemblyContainer: container,
+      sourceQuestions,
+      createdAt: new Date("2026-07-22T12:00:00.000Z"),
+    });
+
+    expect(result.status).toBe("created");
+    expect(
+      result.session?.questions.map((question) => question.questionGroup),
+    ).toEqual([group, { ...group, questionSortOrder: 2 }]);
+  });
+
+  it("fails closed when selected material group membership and resolved source content are incomplete", async () => {
+    const container = createPaperAssemblyContainer();
+    const group = {
+      publicId: "qgroup_learning_incomplete_001",
+      title: "incomplete material group",
+      materialSnapshot: {
+        materialPublicId: "material_learning_incomplete_001",
+        title: "incomplete material",
+        contentRichText: "incomplete body",
+      },
+      memberQuestionPublicIds: [
+        "platform_formal_question_public_001",
+        "enterprise_training_snapshot_public_001",
+      ],
+      questionSortOrder: 1,
+    };
+    container.sections = [
+      {
+        ...container.sections[0]!,
+        selectedQuestions: [
+          Object.assign(container.sections[0]!.selectedQuestions[0]!, {
+            questionGroup: group,
+          }),
+          Object.assign(container.sections[0]!.selectedQuestions[1]!, {
+            questionGroup: { ...group, questionSortOrder: 2 },
+          }),
+        ],
+      },
+    ];
+    container.requestedQuestionCount = 2;
+    container.selectedQuestionCount = 2;
+    const sourceQuestions = createPaperAssemblySourceQuestions().slice(0, 1);
+    Object.assign(sourceQuestions[0]!, { questionGroup: group });
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    }) as PaperAssemblyLearningSessionService;
+
+    const result = await service.createLearningSessionFromPaperAssembly({
+      sessionPublicId: "ai_learning_group_session_incomplete",
+      sourceResultPublicId: "ai_learning_group_result_incomplete",
+      sourceTaskPublicId: "ai_learning_group_task_incomplete",
+      ownerType: "organization",
+      ownerPublicId: "organization_learning_group_incomplete",
+      actorPublicId: "employee_learning_group_incomplete",
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      paperAssemblyContainer: container,
+      sourceQuestions,
+      createdAt: new Date("2026-07-22T12:00:00.000Z"),
+    });
+
+    expect(result).toEqual({
+      status: "blocked",
+      blockReason: "selected_question_source_missing",
+      session: null,
+    });
+  });
+
   it("preserves all seven types and keeps fill, case, and calculation under review", async () => {
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),

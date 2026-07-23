@@ -82,6 +82,20 @@ function createVisibleGeneratedContent(): AiGenerationRouteIntegratedVisibleGene
 }
 
 function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
+  const questionGroupBase = {
+    publicId: "question_group_route_public_001",
+    title: "synthetic route material group",
+    materialSnapshot: {
+      materialPublicId: "material_route_public_001",
+      title: "synthetic route material",
+      contentRichText: "server-owned frozen material content",
+    },
+    memberQuestionPublicIds: [
+      "platform_formal_question_route_public_001",
+      "enterprise_training_snapshot_route_public_001",
+    ],
+  };
+
   return {
     title: "synthetic assembled paper",
     profession: "marketing",
@@ -90,8 +104,8 @@ function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
     requestedQuestionCount: 2,
     selectedQuestionCount: 2,
     sourceComposition: {
-      platformFormalQuestionCount: 1,
-      enterpriseTrainingSnapshotCount: 1,
+      platformFormalQuestionCount: 2,
+      enterpriseTrainingSnapshotCount: 0,
     },
     matchQuality: "fully_matched",
     sections: [
@@ -107,12 +121,14 @@ function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
             sourceKind: "platform_formal_question",
             matchTier: "exact",
             score: 2,
+            questionGroup: { ...questionGroupBase, questionSortOrder: 1 },
           },
           {
             questionPublicId: "enterprise_training_snapshot_route_public_001",
-            sourceKind: "enterprise_training_snapshot",
+            sourceKind: "platform_formal_question",
             matchTier: "exact",
             score: 2,
+            questionGroup: { ...questionGroupBase, questionSortOrder: 2 },
           },
         ],
         degradationSummary: {
@@ -149,10 +165,24 @@ function createPaperSourceQuestions(): PersonalAiGenerationLearningPaperSourceQu
       standardAnswerLabels: ["A"],
       standardAnswerText: "A",
       analysis: "synthetic route platform analysis",
+      questionGroup: {
+        publicId: "question_group_route_public_001",
+        title: "synthetic route material group",
+        materialSnapshot: {
+          materialPublicId: "material_route_public_001",
+          title: "synthetic route material",
+          contentRichText: "server-owned frozen material content",
+        },
+        memberQuestionPublicIds: [
+          "platform_formal_question_route_public_001",
+          "enterprise_training_snapshot_route_public_001",
+        ],
+        questionSortOrder: 1,
+      },
     },
     {
       questionPublicId: "enterprise_training_snapshot_route_public_001",
-      sourceKind: "enterprise_training_snapshot",
+      sourceKind: "platform_formal_question",
       questionType: "single_choice",
       difficulty: "medium",
       knowledgeNodeLabels: ["knowledge_node_route_b"],
@@ -172,6 +202,20 @@ function createPaperSourceQuestions(): PersonalAiGenerationLearningPaperSourceQu
       standardAnswerLabels: ["B"],
       standardAnswerText: "B",
       analysis: "synthetic route enterprise analysis",
+      questionGroup: {
+        publicId: "question_group_route_public_001",
+        title: "synthetic route material group",
+        materialSnapshot: {
+          materialPublicId: "material_route_public_001",
+          title: "synthetic route material",
+          contentRichText: "server-owned frozen material content",
+        },
+        memberQuestionPublicIds: [
+          "platform_formal_question_route_public_001",
+          "enterprise_training_snapshot_route_public_001",
+        ],
+        questionSortOrder: 2,
+      },
     },
   ];
 }
@@ -1036,6 +1080,27 @@ describe("personal AI generation learning session route handlers", () => {
         maxScore: "2.0",
       }),
     ]);
+    expect(payload.data.session.questions).toEqual([
+      expect.objectContaining({
+        questionGroup: expect.objectContaining({
+          publicId: "question_group_route_public_001",
+          questionSortOrder: 1,
+          materialSnapshot: {
+            materialPublicId: "material_route_public_001",
+            title: "synthetic route material",
+            contentRichText: "server-owned frozen material content",
+          },
+        }),
+      }),
+      expect.objectContaining({
+        questionGroup: expect.objectContaining({
+          publicId: "question_group_route_public_001",
+          questionSortOrder: 2,
+        }),
+      }),
+    ]);
+    expect(JSON.stringify(payload)).not.toContain("standardAnswer");
+    expect(JSON.stringify(payload)).not.toContain("synthetic route analysis");
     expect(JSON.stringify(payload)).not.toContain(
       "client supplied source content must be ignored",
     );

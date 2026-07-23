@@ -121,6 +121,21 @@ export type AiPaperSelectableQuestionDto = {
   knowledgeNodePublicIds: string[];
   parentKnowledgeNodePublicIds: string[];
   ancestorKnowledgeNodePublicIds?: string[];
+  questionGroup?: AiPaperQuestionGroupSnapshotDto | null;
+};
+
+export type AiPaperQuestionGroupMaterialSnapshotDto = {
+  materialPublicId: string | null;
+  title: string;
+  contentRichText: string;
+};
+
+export type AiPaperQuestionGroupSnapshotDto = {
+  publicId: string;
+  title: string;
+  materialSnapshot: AiPaperQuestionGroupMaterialSnapshotDto;
+  memberQuestionPublicIds: string[];
+  questionSortOrder: number;
 };
 
 export type AiPaperPlanAndSelectInput = {
@@ -138,6 +153,7 @@ export type AiPaperSelectedQuestionDto = {
   score: number;
   /** Absent only in legacy persisted snapshots. New assemblies always populate it. */
   constraintMatchBasis?: AiPaperSelectedConstraintMatchBasisDto;
+  questionGroup?: AiPaperQuestionGroupSnapshotDto | null;
 };
 
 export type AiPaperPlanAndSelectSectionDto = {

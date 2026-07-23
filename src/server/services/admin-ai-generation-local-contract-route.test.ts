@@ -777,6 +777,10 @@ function createTrainingQuestion(
     publicId,
     sequenceNumber: 1,
     questionType: "single_choice",
+    questionGroupPublicId: `qgroup_${publicId}`,
+    questionGroupTitle: "SENSITIVE_ENTERPRISE_MATERIAL_TITLE",
+    questionGroupQuestionSortOrder: 1,
+    questionGroupQuestionCount: 1,
     materialTitle: "SENSITIVE_ENTERPRISE_MATERIAL_TITLE",
     materialContent: "SENSITIVE_ENTERPRISE_MATERIAL_CONTENT",
     stem: "SENSITIVE_ENTERPRISE_STEM",
@@ -2771,6 +2775,118 @@ describe("admin AI generation local contract route handlers", () => {
     expect(JSON.stringify(payload)).not.toContain("SENSITIVE_STEM_MARKER");
     expect(JSON.stringify(payload)).not.toContain("SENSITIVE_ENTERPRISE_STEM");
     expect(providerInputs).toHaveLength(1);
+  });
+
+  it("preserves one immutable material question_group in the organization paper draft and rejects current source identity drift", async () => {
+    const createGroupedRouteResult = () => {
+      const routeResult = createAssembledPaperRouteResult();
+      const section = routeResult.assembly?.container.sections[0];
+
+      if (routeResult.assembly === null || section === undefined) {
+        throw new Error("grouped route fixture requires an assembled section");
+      }
+
+      const group = {
+        publicId: "qgroup_admin_route_material_001",
+        title: "管理员材料题组",
+        materialSnapshot: {
+          materialPublicId: "material_admin_route_001",
+          title: "管理员不可变材料",
+          contentRichText: "管理员不可变材料正文",
+        },
+        memberQuestionPublicIds: [
+          "platform_question_public_a",
+          "platform_question_public_b",
+        ],
+        questionSortOrder: 1,
+      };
+      section.selectedQuestions = [
+        { ...section.selectedQuestions[0]!, questionGroup: group },
+        {
+          ...section.selectedQuestions[1]!,
+          questionGroup: { ...group, questionSortOrder: 2 },
+        },
+      ];
+      section.targetQuestionCount = 2;
+      section.selectedQuestionCount = 2;
+      routeResult.assembly.container.requestedQuestionCount = 2;
+      routeResult.assembly.container.selectedQuestionCount = 2;
+      routeResult.assembly.container.sourceComposition = {
+        platformFormalQuestionCount: 2,
+        enterpriseTrainingSnapshotCount: 0,
+      };
+
+      return routeResult;
+    };
+    const createGroupedQuestionRows = (secondMaterialPublicId: string) =>
+      ["a", "b"].map((suffix, index) =>
+        Object.assign(
+          createQuestionRow({
+            id: 101 + index,
+            public_id: `platform_question_public_${suffix}`,
+            material_id: 901,
+            material_public_id:
+              suffix === "b"
+                ? secondMaterialPublicId
+                : "material_admin_route_001",
+          }),
+          {
+            material_status: "available" as const,
+            material_title: "current mutable material title",
+            material_content_rich_text: "current mutable material body",
+          },
+        ),
+      );
+    const execute = async (secondMaterialPublicId: string) => {
+      const recorder = createGeneratedResultPersistenceRecorder();
+      await postLocalContractRequest({
+        workspace: "organization",
+        adminRoles: ["org_advanced_admin"],
+        organizationPublicId: "organization_public_123",
+        paperAssemblyResolver: createGroupedRouteResult,
+        questionRepository: createQuestionRepository(
+          createGroupedQuestionRows(secondMaterialPublicId),
+        ),
+        organizationTrainingRepository: createOrganizationTrainingRepository({
+          organizationPublicId: "organization_public_123",
+        }),
+        resultPersistenceRepository: recorder.repository,
+        runtimeBridgeControl: createFakeProviderRuntimeBridgeControl([]),
+        body: {
+          generationKind: "paper",
+          generationParameters: {
+            ...defaultAdminGenerationParameters,
+            questionCount: 2,
+          },
+        },
+      });
+
+      return recorder.calls[0]?.contentRedactedSnapshot as
+        | { organizationTrainingPaperDraft?: { questions?: unknown[] } }
+        | undefined;
+    };
+
+    const stableSnapshot = await execute("material_admin_route_001");
+    expect(stableSnapshot?.organizationTrainingPaperDraft?.questions).toEqual([
+      expect.objectContaining({
+        questionGroupPublicId: "qgroup_admin_route_material_001",
+        questionGroupTitle: "管理员材料题组",
+        questionGroupQuestionSortOrder: 1,
+        questionGroupQuestionCount: 2,
+        materialTitle: "管理员不可变材料",
+        materialContent: "管理员不可变材料正文",
+      }),
+      expect.objectContaining({
+        questionGroupPublicId: "qgroup_admin_route_material_001",
+        questionGroupQuestionSortOrder: 2,
+      }),
+    ]);
+    expect(JSON.stringify(stableSnapshot)).not.toContain("current mutable");
+
+    const driftedSnapshot = await execute("material_admin_route_other");
+    expect(
+      driftedSnapshot?.organizationTrainingPaperDraft?.questions,
+    ).toBeUndefined();
   });
 
   it("does not invoke AI paper assembly for admin AI question local contracts", async () => {

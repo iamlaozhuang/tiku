@@ -1412,6 +1412,30 @@ describe("StudentPersonalAiGenerationPage", () => {
         analysis: null,
         maxScore: "2.0",
         reviewStatus: "draft_review_required",
+        questionGroup: {
+          publicId: "question_group_public_ui_501",
+          title: "供应链案例题组",
+          materialSnapshot: {
+            materialPublicId: "material_public_ui_501",
+            title: "供应链案例材料",
+            contentRichText: "服务端冻结的供应链材料正文",
+          },
+          memberQuestionPublicIds: [
+            "platform_formal_question_ui_501",
+            "platform_formal_question_ui_502",
+          ],
+          questionSortOrder: 1,
+        },
+      };
+      const secondSessionQuestion = {
+        ...sessionQuestion,
+        sessionQuestionPublicId: `${sessionPublicId}_q_2`,
+        sourceDraftNumber: 2,
+        questionStem: "服务端恢复的自测题目二",
+        questionGroup: {
+          ...sessionQuestion.questionGroup,
+          questionSortOrder: 2,
+        },
       };
       const postBodies: unknown[] = [];
 
@@ -1471,8 +1495,8 @@ describe("StudentPersonalAiGenerationPage", () => {
                   actorPublicId: "student_public_ui_501",
                   evidenceStatus: "sufficient",
                   citationCount: 2,
-                  questionCount: 1,
-                  questions: [sessionQuestion],
+                  questionCount: 2,
+                  questions: [sessionQuestion, secondSessionQuestion],
                   formalWriteBoundary: {
                     questionWriteStatus: "blocked",
                     paperWriteStatus: "blocked",
@@ -1518,6 +1542,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       expect(
         await screen.findByText("服务端恢复的自测题目"),
       ).toBeInTheDocument();
+      expect(screen.getByText("服务端恢复的自测题目二")).toBeInTheDocument();
+      expect(screen.getAllByText("供应链案例题组")).toHaveLength(1);
+      expect(screen.getAllByText("服务端冻结的供应链材料正文")).toHaveLength(1);
       expect(postBodies).toEqual([
         {
           authorizationPublicId: "authorization_context_ui_501",

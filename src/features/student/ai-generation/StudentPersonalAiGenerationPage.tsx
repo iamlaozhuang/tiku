@@ -2750,7 +2750,7 @@ function StudentAiLearningSessionPanel({
       ) : null}
 
       <div className="mt-3 space-y-3">
-        {questions.map((question) => {
+        {questions.map((question, questionIndex) => {
           const selectedOptionLabels =
             selectedOptionLabelsByQuestion[question.sessionQuestionPublicId] ??
             [];
@@ -2758,92 +2758,115 @@ function StudentAiLearningSessionPanel({
             answerFeedbackByQuestion[question.sessionQuestionPublicId] ?? null;
           const inputType =
             question.questionType === "multi_choice" ? "checkbox" : "radio";
+          const questionGroup = question.questionGroup ?? null;
+          const previousQuestionGroupPublicId =
+            questionIndex > 0
+              ? (questions[questionIndex - 1]?.questionGroup?.publicId ?? null)
+              : null;
+          const showQuestionGroup =
+            questionGroup !== null &&
+            questionGroup.publicId !== previousQuestionGroupPublicId;
 
           return (
-            <div
-              className="border-border bg-muted/40 rounded-lg border p-3"
-              key={question.sessionQuestionPublicId}
-            >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <h3 className="text-text-primary text-sm font-semibold">
-                  题目 {question.sourceDraftNumber}
-                </h3>
-                <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
-                  {question.questionType}
-                </span>
-              </div>
-              <p className="text-text-primary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
-                {question.questionStem}
-              </p>
-              {question.questionOptions.length > 0 ? (
-                <fieldset className="mt-3 space-y-2">
-                  <legend className="text-text-secondary text-xs font-medium">
-                    选择答案
-                  </legend>
-                  {question.questionOptions.map((option) => (
-                    <label
-                      className="border-border bg-background flex cursor-pointer items-start gap-2 rounded-md border px-2 py-2 text-sm"
-                      key={`${question.sessionQuestionPublicId}-${option.optionLabel}`}
-                    >
-                      <input
-                        aria-label={`${option.optionLabel} ${option.optionText}`}
-                        checked={selectedOptionLabels.includes(
-                          option.optionLabel,
-                        )}
-                        className="mt-1 size-4 accent-current"
-                        name={`student-ai-learning-answer-${question.sessionQuestionPublicId}`}
-                        onChange={() =>
-                          onSelectOptionLabel(question, option.optionLabel)
-                        }
-                        type={inputType}
-                        value={option.optionLabel}
-                      />
-                      <span className="text-text-primary leading-6">
-                        <span className="text-brand-primary mr-2 font-medium">
-                          {option.optionLabel}
-                        </span>
-                        {option.optionText}
-                      </span>
-                    </label>
-                  ))}
-                </fieldset>
-              ) : (
-                <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm">
-                  当前题型需人工评阅，本次不写入 AI 评分。
-                </p>
-              )}
-
-              {answerFeedback !== null ? (
-                <div
-                  className="border-border bg-background mt-3 rounded-lg border p-3"
-                  aria-live="polite"
+            <div className="space-y-3" key={question.sessionQuestionPublicId}>
+              {showQuestionGroup ? (
+                <section
+                  className="border-border bg-background rounded-lg border p-3"
+                  data-testid={`student-ai-question-group-${questionGroup.publicId}`}
                 >
-                  <p className="text-text-primary text-sm font-semibold">
-                    {answerFeedback.isCorrect === true
-                      ? "回答正确"
-                      : answerFeedback.isCorrect === false
-                        ? "回答错误"
-                        : "已提交，待人工评阅"}
+                  <h3 className="text-text-primary text-sm font-semibold">
+                    {questionGroup.title}
+                  </h3>
+                  <p className="text-text-secondary mt-1 text-xs font-medium">
+                    {questionGroup.materialSnapshot.title}
                   </p>
-                  <div className="text-text-secondary mt-2 flex flex-wrap gap-2 text-xs">
-                    <span className="bg-muted rounded-md px-2 py-1">
-                      得分 {answerFeedback.score ?? "待评阅"}/
-                      {answerFeedback.maxScore}
-                    </span>
-                    <span className="bg-muted rounded-md px-2 py-1">
-                      正确答案{" "}
-                      {answerFeedback.standardAnswerLabels.length > 0
-                        ? answerFeedback.standardAnswerLabels.join("、")
-                        : (answerFeedback.standardAnswerText ?? "待评阅")}
-                    </span>
-                  </div>
-                  {answerFeedback.analysis !== null ? (
-                    <p className="text-text-primary bg-muted mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
-                      {answerFeedback.analysis}
-                    </p>
-                  ) : null}
-                </div>
+                  <p className="text-text-primary mt-2 text-sm leading-6 whitespace-pre-wrap">
+                    {questionGroup.materialSnapshot.contentRichText}
+                  </p>
+                </section>
               ) : null}
+              <div className="border-border bg-muted/40 rounded-lg border p-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <h3 className="text-text-primary text-sm font-semibold">
+                    题目 {question.sourceDraftNumber}
+                  </h3>
+                  <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+                    {question.questionType}
+                  </span>
+                </div>
+                <p className="text-text-primary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+                  {question.questionStem}
+                </p>
+                {question.questionOptions.length > 0 ? (
+                  <fieldset className="mt-3 space-y-2">
+                    <legend className="text-text-secondary text-xs font-medium">
+                      选择答案
+                    </legend>
+                    {question.questionOptions.map((option) => (
+                      <label
+                        className="border-border bg-background flex cursor-pointer items-start gap-2 rounded-md border px-2 py-2 text-sm"
+                        key={`${question.sessionQuestionPublicId}-${option.optionLabel}`}
+                      >
+                        <input
+                          aria-label={`${option.optionLabel} ${option.optionText}`}
+                          checked={selectedOptionLabels.includes(
+                            option.optionLabel,
+                          )}
+                          className="mt-1 size-4 accent-current"
+                          name={`student-ai-learning-answer-${question.sessionQuestionPublicId}`}
+                          onChange={() =>
+                            onSelectOptionLabel(question, option.optionLabel)
+                          }
+                          type={inputType}
+                          value={option.optionLabel}
+                        />
+                        <span className="text-text-primary leading-6">
+                          <span className="text-brand-primary mr-2 font-medium">
+                            {option.optionLabel}
+                          </span>
+                          {option.optionText}
+                        </span>
+                      </label>
+                    ))}
+                  </fieldset>
+                ) : (
+                  <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm">
+                    当前题型需人工评阅，本次不写入 AI 评分。
+                  </p>
+                )}
+
+                {answerFeedback !== null ? (
+                  <div
+                    className="border-border bg-background mt-3 rounded-lg border p-3"
+                    aria-live="polite"
+                  >
+                    <p className="text-text-primary text-sm font-semibold">
+                      {answerFeedback.isCorrect === true
+                        ? "回答正确"
+                        : answerFeedback.isCorrect === false
+                          ? "回答错误"
+                          : "已提交，待人工评阅"}
+                    </p>
+                    <div className="text-text-secondary mt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="bg-muted rounded-md px-2 py-1">
+                        得分 {answerFeedback.score ?? "待评阅"}/
+                        {answerFeedback.maxScore}
+                      </span>
+                      <span className="bg-muted rounded-md px-2 py-1">
+                        正确答案{" "}
+                        {answerFeedback.standardAnswerLabels.length > 0
+                          ? answerFeedback.standardAnswerLabels.join("、")
+                          : (answerFeedback.standardAnswerText ?? "待评阅")}
+                      </span>
+                    </div>
+                    {answerFeedback.analysis !== null ? (
+                      <p className="text-text-primary bg-muted mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+                        {answerFeedback.analysis}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             </div>
           );
         })}

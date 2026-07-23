@@ -57,6 +57,10 @@ export type OrganizationTrainingQuestionSnapshotDto = {
   knowledgeNodePublicIds?: string[];
   parentKnowledgeNodePublicIds?: string[];
   ancestorKnowledgeNodePublicIds?: string[];
+  questionGroupPublicId?: string;
+  questionGroupTitle?: string;
+  questionGroupQuestionSortOrder?: number;
+  questionGroupQuestionCount?: number;
   materialTitle: string | null;
   materialContent: string | null;
   stem: string;
@@ -240,6 +244,10 @@ export type OrganizationTrainingAdminQuestionDetailDto = {
   publicId: string;
   sequenceNumber: number;
   questionType: OrganizationTrainingQuestionType;
+  questionGroupPublicId?: string;
+  questionGroupTitle?: string;
+  questionGroupQuestionSortOrder?: number;
+  questionGroupQuestionCount?: number;
   materialTitle: string | null;
   materialContent: string | null;
   stem: string;

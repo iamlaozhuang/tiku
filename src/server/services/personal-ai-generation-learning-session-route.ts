@@ -113,6 +113,20 @@ function projectLearningSessionCreationForApi(
         })),
         maxScore: question.maxScore,
         reviewStatus: question.reviewStatus,
+        ...(question.questionGroup === null ||
+        question.questionGroup === undefined
+          ? {}
+          : {
+              questionGroup: {
+                ...question.questionGroup,
+                materialSnapshot: {
+                  ...question.questionGroup.materialSnapshot,
+                },
+                memberQuestionPublicIds: [
+                  ...question.questionGroup.memberQuestionPublicIds,
+                ],
+              },
+            }),
       })),
     },
   };

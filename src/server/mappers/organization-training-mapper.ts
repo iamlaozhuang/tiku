@@ -255,6 +255,7 @@ function copyCanonicalQuestionSnapshots(
       : {}),
     materialTitle: snapshot.materialTitle,
     materialContent: snapshot.materialContent,
+    ...copyQuestionGroupSnapshotFields(snapshot),
     stem: snapshot.stem,
     options: Array.isArray(snapshot.options)
       ? snapshot.options.map((option) => ({ ...option }))
@@ -332,6 +333,7 @@ function mapQuestionSnapshots(
       questionType: snapshot.questionType,
       materialTitle: snapshot.materialTitle,
       materialContent: snapshot.materialContent,
+      ...copyQuestionGroupSnapshotFields(snapshot),
       stem: snapshot.stem,
       options: Array.isArray(snapshot.options)
         ? snapshot.options.map((option) => ({
@@ -348,6 +350,54 @@ function mapQuestionSnapshots(
         Number.isInteger(question.sequenceNumber) &&
         typeof question.stem === "string",
     );
+}
+
+type QuestionGroupSnapshotFields = {
+  questionGroupPublicId: string;
+  questionGroupTitle: string;
+  questionGroupQuestionSortOrder: number;
+  questionGroupQuestionCount: number;
+};
+
+function copyQuestionGroupSnapshotFields(
+  snapshot: OrganizationTrainingQuestionSnapshotValue,
+): QuestionGroupSnapshotFields | Record<string, never> {
+  const candidate = snapshot as OrganizationTrainingQuestionSnapshotValue &
+    Partial<QuestionGroupSnapshotFields>;
+  const questionGroupQuestionSortOrder =
+    candidate.questionGroupQuestionSortOrder;
+  const questionGroupQuestionCount = candidate.questionGroupQuestionCount;
+  const values = [
+    candidate.questionGroupPublicId,
+    candidate.questionGroupTitle,
+    candidate.questionGroupQuestionSortOrder,
+    candidate.questionGroupQuestionCount,
+  ];
+  if (values.every((value) => value === undefined)) {
+    return {};
+  }
+  if (
+    typeof candidate.questionGroupPublicId !== "string" ||
+    candidate.questionGroupPublicId.trim().length === 0 ||
+    typeof candidate.questionGroupTitle !== "string" ||
+    candidate.questionGroupTitle.trim().length === 0 ||
+    typeof questionGroupQuestionSortOrder !== "number" ||
+    !Number.isInteger(questionGroupQuestionSortOrder) ||
+    questionGroupQuestionSortOrder <= 0 ||
+    typeof questionGroupQuestionCount !== "number" ||
+    !Number.isInteger(questionGroupQuestionCount) ||
+    questionGroupQuestionCount <= 0 ||
+    questionGroupQuestionSortOrder > questionGroupQuestionCount
+  ) {
+    throw new Error("Invalid organization training question-group snapshot");
+  }
+
+  return {
+    questionGroupPublicId: candidate.questionGroupPublicId,
+    questionGroupTitle: candidate.questionGroupTitle,
+    questionGroupQuestionSortOrder,
+    questionGroupQuestionCount,
+  };
 }
 
 function mapAnswerItemSnapshots(

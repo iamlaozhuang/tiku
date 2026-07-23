@@ -2,6 +2,7 @@ import type { EvidenceStatus } from "../models/ai-rag";
 import type { PersonalAiGenerationPrivateQuestionDraftSnapshotDto } from "./personal-ai-generation-result-persistence-contract";
 import type {
   AiPaperPlanAndSelectContainerDto,
+  AiPaperQuestionGroupSnapshotDto,
   AiPaperQuestionSourceKind,
 } from "./ai-paper-plan-and-select-contract";
 import type {
@@ -51,6 +52,7 @@ export type PersonalAiGenerationLearningSessionQuestionDto = {
   analysis: string | null;
   maxScore: string;
   reviewStatus: "draft_review_required";
+  questionGroup?: AiPaperQuestionGroupSnapshotDto | null;
 };
 
 export type PersonalAiGenerationLearningPaperSourceQuestionDto = {
@@ -64,6 +66,7 @@ export type PersonalAiGenerationLearningPaperSourceQuestionDto = {
   standardAnswerLabels: string[];
   standardAnswerText: string | null;
   analysis: string | null;
+  questionGroup?: AiPaperQuestionGroupSnapshotDto | null;
 };
 
 export type PersonalAiGenerationLearningSessionDto = {

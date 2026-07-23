@@ -136,6 +136,80 @@ function createSourceContextRow(
 }
 
 describe("organization training mapper", () => {
+  it("preserves immutable question-group identity in draft and published projections", () => {
+    const groupedQuestion = {
+      publicId: "question_public_group_child_1",
+      sequenceNumber: 1,
+      questionType: "single_choice" as const,
+      paperSectionKey: "paper_section_1",
+      paperSectionTitle: "材料题",
+      paperSectionSortOrder: 1,
+      questionSortOrder: 1,
+      questionGroupPublicId: "question_group_public_1",
+      questionGroupTitle: "供应链材料",
+      questionGroupQuestionSortOrder: 1,
+      questionGroupQuestionCount: 2,
+      materialTitle: "供应链背景",
+      materialContent: "冻结的材料正文",
+      stem: "第一问",
+      options: [],
+      score: 2,
+      standardAnswer: "答案",
+      analysisSummary: "解析",
+      evidenceStatus: "sufficient" as const,
+      citationCount: 1,
+    };
+
+    expect(
+      mapOrganizationTrainingDraftRowToDto(
+        createDraftRow({ question_snapshot: [groupedQuestion] }),
+      ).questions,
+    ).toEqual([
+      expect.objectContaining({
+        questionGroupPublicId: "question_group_public_1",
+        questionGroupTitle: "供应链材料",
+        questionGroupQuestionSortOrder: 1,
+        questionGroupQuestionCount: 2,
+      }),
+    ]);
+    expect(
+      mapOrganizationTrainingVersionRowToDto(
+        createVersionRow({ question_snapshot: [groupedQuestion] }),
+      ).questions,
+    ).toEqual([
+      expect.objectContaining({
+        questionGroupPublicId: "question_group_public_1",
+        questionGroupTitle: "供应链材料",
+        questionGroupQuestionSortOrder: 1,
+        questionGroupQuestionCount: 2,
+      }),
+    ]);
+  });
+
+  it("fails closed instead of flattening a partial question-group snapshot", () => {
+    const partialGroupQuestion = {
+      publicId: "question_public_partial_group",
+      sequenceNumber: 1,
+      questionType: "single_choice" as const,
+      questionGroupPublicId: "question_group_partial",
+      materialTitle: "材料",
+      materialContent: "正文",
+      stem: "题干",
+      options: [],
+      score: 2,
+      standardAnswer: "答案",
+      analysisSummary: "解析",
+      evidenceStatus: "sufficient" as const,
+      citationCount: 1,
+    };
+
+    expect(() =>
+      mapOrganizationTrainingVersionRowToDto(
+        createVersionRow({ question_snapshot: [partialGroupQuestion] }),
+      ),
+    ).toThrow("Invalid organization training question-group snapshot");
+  });
+
   it("maps a manual draft row to the public metadata-only DTO", () => {
     const dto = mapOrganizationTrainingDraftRowToDto(createDraftRow());
     const serializedDto = JSON.stringify(dto);

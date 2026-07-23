@@ -12,6 +12,7 @@ import type {
   PersonalAiGenerationLearningSessionService,
   PersonalAiGenerationLearningSessionStatisticsDto,
 } from "../contracts/personal-ai-generation-learning-session-contract";
+import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import {
   createBlockedPersonalAiLearningFormalWriteBoundary,
   createPersonalAiLearningSessionQuestion,
@@ -208,6 +209,10 @@ async function reuseExistingLearningSession(
 function createPaperAssemblySessionQuestions(
   input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
 ): PersonalAiGenerationLearningSessionQuestionDto[] | null {
+  if (!hasCompletePaperAssemblyQuestionGroups(input)) {
+    return null;
+  }
+
   const sourceQuestionByKey = new Map(
     input.sourceQuestions.map((sourceQuestion) => [
       createPaperSourceQuestionKey(sourceQuestion),
@@ -227,6 +232,13 @@ function createPaperAssemblySessionQuestions(
       return null;
     }
 
+    if (
+      JSON.stringify(selectedQuestion.questionGroup ?? null) !==
+      JSON.stringify(sourceQuestion.questionGroup ?? null)
+    ) {
+      return null;
+    }
+
     const sessionQuestion =
       createPersonalAiLearningSessionQuestionFromPaperSource({
         sessionPublicId: input.sessionPublicId,
@@ -239,10 +251,105 @@ function createPaperAssemblySessionQuestions(
       return null;
     }
 
-    questions.push(sessionQuestion);
+    questions.push({
+      ...sessionQuestion,
+      questionGroup:
+        selectedQuestion.questionGroup === null ||
+        selectedQuestion.questionGroup === undefined
+          ? null
+          : {
+              ...selectedQuestion.questionGroup,
+              materialSnapshot: {
+                ...selectedQuestion.questionGroup.materialSnapshot,
+              },
+              memberQuestionPublicIds: [
+                ...selectedQuestion.questionGroup.memberQuestionPublicIds,
+              ],
+            },
+    });
   }
 
   return questions;
+}
+
+function hasCompletePaperAssemblyQuestionGroups(
+  input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+): boolean {
+  const selectedByGroupPublicId = new Map<
+    string,
+    Array<{
+      sectionKey: string;
+      question: AiPaperPlanAndSelectContainerDto["sections"][number]["selectedQuestions"][number];
+    }>
+  >();
+
+  for (const section of input.paperAssemblyContainer.sections) {
+    for (const question of section.selectedQuestions) {
+      const groupPublicId = question.questionGroup?.publicId;
+
+      if (groupPublicId === undefined) {
+        continue;
+      }
+
+      const groupedQuestions = selectedByGroupPublicId.get(groupPublicId) ?? [];
+      groupedQuestions.push({ sectionKey: section.sectionKey, question });
+      selectedByGroupPublicId.set(groupPublicId, groupedQuestions);
+    }
+  }
+
+  const sourceByKey = new Map(
+    input.sourceQuestions.map((question) => [
+      createPaperSourceQuestionKey(question),
+      question,
+    ]),
+  );
+
+  for (const groupedQuestions of selectedByGroupPublicId.values()) {
+    const first = groupedQuestions[0];
+    const firstGroup = first?.question.questionGroup;
+
+    if (
+      first === undefined ||
+      firstGroup === null ||
+      firstGroup === undefined ||
+      new Set(groupedQuestions.map((item) => item.sectionKey)).size !== 1 ||
+      firstGroup.memberQuestionPublicIds.length !== groupedQuestions.length
+    ) {
+      return false;
+    }
+
+    const groupedQuestionByPublicId = new Map(
+      groupedQuestions.map((item) => [item.question.questionPublicId, item]),
+    );
+
+    for (const [
+      index,
+      questionPublicId,
+    ] of firstGroup.memberQuestionPublicIds.entries()) {
+      const item = groupedQuestionByPublicId.get(questionPublicId);
+      const questionGroup = item?.question.questionGroup;
+      const sourceQuestion =
+        item === undefined
+          ? undefined
+          : sourceByKey.get(createPaperSourceQuestionKey(item.question));
+
+      if (
+        item === undefined ||
+        questionGroup === null ||
+        questionGroup === undefined ||
+        questionGroup.questionSortOrder !== index + 1 ||
+        JSON.stringify(questionGroup) !==
+          JSON.stringify({ ...firstGroup, questionSortOrder: index + 1 }) ||
+        sourceQuestion === undefined ||
+        JSON.stringify(sourceQuestion.questionGroup ?? null) !==
+          JSON.stringify(questionGroup)
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 function createPaperSourceQuestionKey(input: {

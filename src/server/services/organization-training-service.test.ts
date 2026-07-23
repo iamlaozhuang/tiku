@@ -20,6 +20,7 @@ import {
   buildOrganizationTrainingAuditLogReferenceReadModel,
   buildOrganizationTrainingAuditLogRedactedReferencePolicyReadModel,
   buildOrganizationTrainingSourceContextUsageReadModel,
+  createCanonicalOrganizationTrainingDraftQuestions,
   createOrganizationTrainingService,
   type OrganizationTrainingAdminDetailReadModelInput,
   type OrganizationTrainingStore,
@@ -658,6 +659,57 @@ function createSubmittedEmployeeAnswer(
 }
 
 describe("organization training service", () => {
+  it("keeps immutable material question_group metadata inside the canonical draft and includes it in evidence integrity", () => {
+    const trustedQuestion: OrganizationTrainingPublishQuestionInput = {
+      ...createPublishInput().questions[0]!,
+      questionGroupPublicId: "qgroup_training_service_001",
+      questionGroupTitle: "服务端材料题组",
+      questionGroupQuestionSortOrder: 1,
+      questionGroupQuestionCount: 1,
+      materialTitle: "服务端材料",
+      materialContent: "服务端不可变材料正文",
+    };
+    const draftQuestion = {
+      ...trustedQuestion,
+      evidenceStatus: undefined,
+      citationCount: undefined,
+    };
+    const {
+      evidenceStatus: _evidenceStatus,
+      citationCount: _citationCount,
+      ...draft
+    } = draftQuestion;
+    expect(_evidenceStatus).toBeUndefined();
+    expect(_citationCount).toBeUndefined();
+
+    expect(
+      createCanonicalOrganizationTrainingDraftQuestions(
+        [draft],
+        [trustedQuestion],
+      )[0],
+    ).toMatchObject({
+      questionGroupPublicId: "qgroup_training_service_001",
+      questionGroupTitle: "服务端材料题组",
+      questionGroupQuestionSortOrder: 1,
+      questionGroupQuestionCount: 1,
+      materialTitle: "服务端材料",
+      materialContent: "服务端不可变材料正文",
+      evidenceStatus: trustedQuestion.evidenceStatus,
+      citationCount: trustedQuestion.citationCount,
+    });
+
+    expect(
+      createCanonicalOrganizationTrainingDraftQuestions(
+        [{ ...draft, questionGroupTitle: "客户端改写题组" }],
+        [trustedQuestion],
+      )[0],
+    ).toMatchObject({
+      questionGroupTitle: "客户端改写题组",
+      evidenceStatus: "weak",
+      citationCount: 0,
+    });
+  });
+
   it("delegates one server-owned AI result copy command and blocks out-of-scope organizations", async () => {
     const { draftStore } = createDraftStore();
     const writes: unknown[] = [];

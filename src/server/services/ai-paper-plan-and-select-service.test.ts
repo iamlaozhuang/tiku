@@ -88,6 +88,234 @@ function createInput(
 }
 
 describe("AI组卷 plan-and-select 后端合同", () => {
+  it("将完整材料题组作为单一选择单元并保留稳定身份、材料快照、成员顺序和子题分值", () => {
+    const groupedQuestions = [
+      Object.assign(createQuestion({ publicId: "question_group_child_a" }), {
+        questionGroup: {
+          publicId: "qgroup_source_a",
+          title: "客户异议材料题组",
+          materialSnapshot: {
+            materialPublicId: "material_public_a",
+            title: "客户异议材料",
+            contentRichText: "不可变材料正文",
+          },
+          memberQuestionPublicIds: [
+            "question_group_child_a",
+            "question_group_child_b",
+          ],
+          questionSortOrder: 1,
+        },
+      }),
+      Object.assign(createQuestion({ publicId: "question_group_child_b" }), {
+        questionGroup: {
+          publicId: "qgroup_source_a",
+          title: "客户异议材料题组",
+          materialSnapshot: {
+            materialPublicId: "material_public_a",
+            title: "客户异议材料",
+            contentRichText: "不可变材料正文",
+          },
+          memberQuestionPublicIds: [
+            "question_group_child_a",
+            "question_group_child_b",
+          ],
+          questionSortOrder: 2,
+        },
+      }),
+    ];
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 2,
+          sections: [
+            {
+              ...basePlan.sections[0],
+              targetQuestionCount: 2,
+              targetScore: 3,
+            },
+          ],
+        },
+        platformQuestions: groupedQuestions,
+      }),
+    );
+
+    expect(result.status).toBe("assembled");
+    expect(result.container.selectedQuestionCount).toBe(2);
+    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+      expect.objectContaining({
+        questionPublicId: "question_group_child_a",
+        score: 3,
+        questionGroup: expect.objectContaining({
+          publicId: "qgroup_source_a",
+          memberQuestionPublicIds: [
+            "question_group_child_a",
+            "question_group_child_b",
+          ],
+          questionSortOrder: 1,
+          materialSnapshot: {
+            materialPublicId: "material_public_a",
+            title: "客户异议材料",
+            contentRichText: "不可变材料正文",
+          },
+        }),
+      }),
+      expect.objectContaining({
+        questionPublicId: "question_group_child_b",
+        score: 3,
+        questionGroup: expect.objectContaining({
+          publicId: "qgroup_source_a",
+          questionSortOrder: 2,
+        }),
+      }),
+    ]);
+  });
+
+  it("题组无法完整放入同一大题时整组拒绝，不跨大题拆分也不掩盖题源不足", () => {
+    const groupedQuestions = ["a", "b"].map((suffix, index) =>
+      Object.assign(
+        createQuestion({ publicId: `question_group_child_${suffix}` }),
+        {
+          questionGroup: {
+            publicId: "qgroup_source_a",
+            title: "不可拆分材料题组",
+            materialSnapshot: {
+              materialPublicId: "material_public_a",
+              title: "不可拆分材料",
+              contentRichText: "不可拆分材料正文",
+            },
+            memberQuestionPublicIds: [
+              "question_group_child_a",
+              "question_group_child_b",
+            ],
+            questionSortOrder: index + 1,
+          },
+        },
+      ),
+    );
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 2,
+          sections: [
+            {
+              ...basePlan.sections[0],
+              sectionKey: "section-a",
+              targetQuestionCount: 1,
+            },
+            {
+              ...basePlan.sections[0],
+              sectionKey: "section-b",
+              targetQuestionCount: 1,
+            },
+          ],
+        },
+        platformQuestions: groupedQuestions,
+      }),
+    );
+
+    expect(result.status).toBe("insufficient");
+    expect(result.container.selectedQuestionCount).toBe(0);
+    expect(
+      result.container.sections.flatMap((section) => section.selectedQuestions),
+    ).toEqual([]);
+    expect(result.insufficiency?.missingQuestionCount).toBe(2);
+  });
+
+  it("成员缺失、顺序重复或题型不一致的材料题组全部 fail closed", () => {
+    const malformedGroups = [
+      Object.assign(createQuestion({ publicId: "question_missing_member" }), {
+        questionGroup: {
+          publicId: "qgroup_missing_member",
+          title: "缺成员",
+          materialSnapshot: {
+            materialPublicId: "material_missing",
+            title: "缺成员材料",
+            contentRichText: "正文",
+          },
+          memberQuestionPublicIds: [
+            "question_missing_member",
+            "question_absent",
+          ],
+          questionSortOrder: 1,
+        },
+      }),
+      ...["a", "b"].map((suffix) =>
+        Object.assign(
+          createQuestion({ publicId: `question_duplicate_order_${suffix}` }),
+          {
+            questionGroup: {
+              publicId: "qgroup_duplicate_order",
+              title: "重复顺序",
+              materialSnapshot: {
+                materialPublicId: "material_duplicate_order",
+                title: "重复顺序材料",
+                contentRichText: "正文",
+              },
+              memberQuestionPublicIds: [
+                "question_duplicate_order_a",
+                "question_duplicate_order_b",
+              ],
+              questionSortOrder: 1,
+            },
+          },
+        ),
+      ),
+      Object.assign(createQuestion({ publicId: "question_mixed_type_a" }), {
+        questionGroup: {
+          publicId: "qgroup_mixed_type",
+          title: "混合题型",
+          materialSnapshot: {
+            materialPublicId: "material_mixed_type",
+            title: "混合题型材料",
+            contentRichText: "正文",
+          },
+          memberQuestionPublicIds: [
+            "question_mixed_type_a",
+            "question_mixed_type_b",
+          ],
+          questionSortOrder: 1,
+        },
+      }),
+      Object.assign(
+        createQuestion({
+          publicId: "question_mixed_type_b",
+          questionType: "true_false",
+        }),
+        {
+          questionGroup: {
+            publicId: "qgroup_mixed_type",
+            title: "混合题型",
+            materialSnapshot: {
+              materialPublicId: "material_mixed_type",
+              title: "混合题型材料",
+              contentRichText: "正文",
+            },
+            memberQuestionPublicIds: [
+              "question_mixed_type_a",
+              "question_mixed_type_b",
+            ],
+            questionSortOrder: 2,
+          },
+        },
+      ),
+    ];
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 1,
+          sections: [{ ...basePlan.sections[0], targetQuestionCount: 1 }],
+        },
+        platformQuestions: malformedGroups,
+      }),
+    );
+
+    expect(result.status).toBe("insufficient");
+    expect(result.container.selectedQuestionCount).toBe(0);
+  });
+
   it("只接受组卷结构计划，不接受 Provider 直接输出完整题目草稿", () => {
     expect(AI_PAPER_DEFAULT_TARGET_QUESTION_COUNT).toBe(30);
     expect(AI_PAPER_MAX_TARGET_QUESTION_COUNT).toBe(80);

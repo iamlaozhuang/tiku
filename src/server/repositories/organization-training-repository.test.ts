@@ -2555,6 +2555,16 @@ describe("organization training repository", () => {
             : "单选题部分",
         paperSectionSortOrder: index + 1,
         questionSortOrder: 1,
+        ...(index === 0
+          ? {
+              questionGroupPublicId: "qgroup_repository_snapshot_001",
+              questionGroupTitle: "仓储材料题组",
+              questionGroupQuestionSortOrder: 1,
+              questionGroupQuestionCount: 1,
+              materialTitle: "仓储不可变材料",
+              materialContent: "仓储不可变材料正文",
+            }
+          : {}),
       }));
     const { gateway: structuredGateway } = createGateway({
       publishedVersionRow: createVersionRow({
@@ -2601,7 +2611,15 @@ describe("organization training repository", () => {
         selectedQuestionCount: 1,
         totalScore: 2,
         questions: [
-          expect.objectContaining({ publicId: "training_question_public_123" }),
+          expect.objectContaining({
+            publicId: "training_question_public_123",
+            questionGroupPublicId: "qgroup_repository_snapshot_001",
+            questionGroupTitle: "仓储材料题组",
+            questionGroupQuestionSortOrder: 1,
+            questionGroupQuestionCount: 1,
+            materialTitle: "仓储不可变材料",
+            materialContent: "仓储不可变材料正文",
+          }),
         ],
       }),
       expect.objectContaining({

@@ -153,6 +153,95 @@ function createEnterpriseSnapshot(
 }
 
 describe("personal AI generation learning session paper source resolver", () => {
+  it("preserves the selected immutable material group snapshot while revalidating exact current source membership", async () => {
+    const container = createPaperAssemblyContainer();
+    const group = {
+      publicId: "qgroup_resolver_material_001",
+      title: "resolver material group",
+      materialSnapshot: {
+        materialPublicId: "resolver_material_public_001",
+        title: "resolver immutable material",
+        contentRichText: "resolver immutable material body",
+      },
+      memberQuestionPublicIds: [
+        "resolver_platform_question_public_001",
+        "resolver_platform_question_public_002",
+      ],
+      questionSortOrder: 1,
+    };
+    container.sourceComposition = {
+      platformFormalQuestionCount: 2,
+      enterpriseTrainingSnapshotCount: 0,
+    };
+    container.sections[0]!.selectedQuestions = [
+      Object.assign(container.sections[0]!.selectedQuestions[0]!, {
+        questionGroup: group,
+      }),
+      {
+        questionPublicId: "resolver_platform_question_public_002",
+        sourceKind: "platform_formal_question",
+        matchTier: "exact",
+        score: 2,
+        questionGroup: { ...group, questionSortOrder: 2 },
+      },
+    ];
+    const currentRows = ["001", "002"].map((suffix, index) =>
+      Object.assign(
+        createQuestionRow({
+          id: 101 + index,
+          public_id: `resolver_platform_question_public_${suffix}`,
+          material_id: 901,
+          material_public_id: "resolver_material_public_001",
+        }),
+        {
+          material_status: "available" as const,
+          material_title: "mutated current title must not replace snapshot",
+          material_content_rich_text:
+            "mutated current body must not replace snapshot",
+        },
+      ),
+    );
+    const resolver =
+      createPersonalAiGenerationLearningSessionPaperSourceResolver({
+        questionRepository: createQuestionRepository(currentRows),
+      });
+
+    const result = await resolver({
+      userContext: personalUserContext,
+      ownerScope: {
+        ownerType: "personal",
+        ownerPublicId: personalUserContext.userPublicId,
+        actorPublicId: personalUserContext.userPublicId,
+      },
+      sourceResultPublicId: "resolver_result_group_001",
+      sourceTaskPublicId: "resolver_task_group_001",
+      paperAssemblyContainer: container,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result.map((question) => question.questionGroup)).toEqual([
+      group,
+      { ...group, questionSortOrder: 2 },
+    ]);
+    expect(JSON.stringify(result)).not.toContain("mutated current title");
+    expect(JSON.stringify(result)).not.toContain("mutated current body");
+
+    currentRows[1]!.material_public_id = "resolver_material_public_other";
+    expect(
+      await resolver({
+        userContext: personalUserContext,
+        ownerScope: {
+          ownerType: "personal",
+          ownerPublicId: personalUserContext.userPublicId,
+          actorPublicId: personalUserContext.userPublicId,
+        },
+        sourceResultPublicId: "resolver_result_group_001",
+        sourceTaskPublicId: "resolver_task_group_001",
+        paperAssemblyContainer: container,
+      }),
+    ).toEqual([]);
+  });
+
   it("resolves selected platform formal questions and employee-visible enterprise snapshots", async () => {
     const questionQueries: AiPaperSourceQuestionListInput[] = [];
     const employeeSnapshotQueries: Array<{

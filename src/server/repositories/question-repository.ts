@@ -99,6 +99,10 @@ export type QuestionAccessRow = {
   fill_blank_answers?: FillBlankAnswer[];
   material_id: number | null;
   material_public_id: string | null;
+  material_status?: "available" | "disabled" | null;
+  material_title?: string | null;
+  material_content_rich_text?: string | null;
+  material_question_count?: number | null;
   question_options: QuestionOptionAccessRow[];
   scoring_points: ScoringPointAccessRow[];
   knowledge_node_public_ids: string[];
@@ -800,6 +804,17 @@ function createQuestionBaseSelection() {
     fill_blank_answers: question.fill_blank_answers,
     material_id: question.material_id,
     material_public_id: material.public_id,
+    material_status: material.status,
+    material_title: material.title,
+    material_content_rich_text: material.content_rich_text,
+    material_question_count: sql<number | null>`case
+      when ${question.material_id} is null then null
+      else (
+        select count(*)::int
+        from "question" as "material_question"
+        where "material_question"."material_id" = ${question.material_id}
+      )
+    end`,
     created_at: question.created_at,
     updated_at: question.updated_at,
   };

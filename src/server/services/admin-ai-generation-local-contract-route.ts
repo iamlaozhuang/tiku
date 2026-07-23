@@ -188,6 +188,11 @@ type OrganizationTrainingPaperSourceQuestionDetail = {
   questionType: OrganizationTrainingAdminQuestionDetailDto["questionType"];
   materialTitle: string | null;
   materialContent: string | null;
+  materialPublicId: string | null;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
+  questionGroupQuestionSortOrder: number | null;
+  questionGroupQuestionCount: number | null;
   stem: string;
   options: OrganizationTrainingAdminQuestionDetailDto["options"];
   standardAnswer: string | null;
@@ -1919,13 +1924,17 @@ async function resolveOrganizationTrainingPaperDraftDetailSnapshot(input: {
         return null;
       }
 
-      sectionQuestions.push(
-        createOrganizationTrainingPaperQuestionDetail({
-          selectedQuestion,
-          sequenceNumber,
-          sourceQuestion,
-        }),
-      );
+      const questionDetail = createOrganizationTrainingPaperQuestionDetail({
+        selectedQuestion,
+        sequenceNumber,
+        sourceQuestion,
+      });
+
+      if (questionDetail === null) {
+        return null;
+      }
+
+      sectionQuestions.push(questionDetail);
       sequenceNumber += 1;
     }
 
@@ -2060,8 +2069,15 @@ function mapPlatformQuestionRowToPaperSourceDetail(
     questionPublicId: questionRow.public_id,
     sourceKind: "platform_formal_question",
     questionType,
-    materialTitle: null,
-    materialContent: null,
+    materialTitle: normalizeRequiredText(questionRow.material_title),
+    materialContent: normalizeRequiredText(
+      questionRow.material_content_rich_text,
+    ),
+    materialPublicId: questionRow.material_public_id,
+    questionGroupPublicId: null,
+    questionGroupTitle: null,
+    questionGroupQuestionSortOrder: null,
+    questionGroupQuestionCount: null,
     stem: questionRow.stem_rich_text,
     options: questionRow.question_options.map((questionOption) => ({
       publicId: `${questionRow.public_id}_option_${questionOption.label.toLowerCase()}`,
@@ -2092,12 +2108,26 @@ function mapEnterpriseQuestionSnapshotToPaperSourceDetail(
     return null;
   }
 
+  const questionGroupSnapshot = snapshot as typeof snapshot & {
+    questionGroupPublicId?: string;
+    questionGroupTitle?: string;
+    questionGroupQuestionSortOrder?: number;
+    questionGroupQuestionCount?: number;
+  };
+
   return {
     questionPublicId: snapshot.publicId,
     sourceKind: "enterprise_training_snapshot",
     questionType,
     materialTitle: snapshot.materialTitle,
     materialContent: snapshot.materialContent,
+    materialPublicId: null,
+    questionGroupPublicId: questionGroupSnapshot.questionGroupPublicId ?? null,
+    questionGroupTitle: questionGroupSnapshot.questionGroupTitle ?? null,
+    questionGroupQuestionSortOrder:
+      questionGroupSnapshot.questionGroupQuestionSortOrder ?? null,
+    questionGroupQuestionCount:
+      questionGroupSnapshot.questionGroupQuestionCount ?? null,
     stem: snapshot.stem,
     options: snapshot.options.map((option) => ({ ...option })),
     standardAnswer: normalizeRequiredText(snapshot.standardAnswer),
@@ -2111,13 +2141,34 @@ function createOrganizationTrainingPaperQuestionDetail(input: {
   selectedQuestion: AiPaperSelectedQuestionDto;
   sequenceNumber: number;
   sourceQuestion: OrganizationTrainingPaperSourceQuestionDetail;
-}): OrganizationTrainingAdminQuestionDetailDto {
+}): OrganizationTrainingAdminQuestionDetailDto | null {
+  const selectedGroup = input.selectedQuestion.questionGroup;
+
+  if (
+    !doesSelectedGroupMatchCurrentSource(selectedGroup, input.sourceQuestion)
+  ) {
+    return null;
+  }
+
   return {
     publicId: input.sourceQuestion.questionPublicId,
     sequenceNumber: input.sequenceNumber,
     questionType: input.sourceQuestion.questionType,
-    materialTitle: input.sourceQuestion.materialTitle,
-    materialContent: input.sourceQuestion.materialContent,
+    ...(selectedGroup === null || selectedGroup === undefined
+      ? {}
+      : {
+          questionGroupPublicId: selectedGroup.publicId,
+          questionGroupTitle: selectedGroup.title,
+          questionGroupQuestionSortOrder: selectedGroup.questionSortOrder,
+          questionGroupQuestionCount:
+            selectedGroup.memberQuestionPublicIds.length,
+        }),
+    materialTitle:
+      selectedGroup?.materialSnapshot.title ??
+      input.sourceQuestion.materialTitle,
+    materialContent:
+      selectedGroup?.materialSnapshot.contentRichText ??
+      input.sourceQuestion.materialContent,
     stem: input.sourceQuestion.stem,
     options: input.sourceQuestion.options.map((option) => ({ ...option })),
     score: input.selectedQuestion.score,
@@ -2131,6 +2182,48 @@ function createOrganizationTrainingPaperQuestionDetail(input: {
       analysis: input.sourceQuestion.analysis,
     },
   };
+}
+
+function doesSelectedGroupMatchCurrentSource(
+  selectedGroup: AiPaperSelectedQuestionDto["questionGroup"],
+  sourceQuestion: OrganizationTrainingPaperSourceQuestionDetail,
+): boolean {
+  if (selectedGroup === null || selectedGroup === undefined) {
+    return (
+      sourceQuestion.materialPublicId === null &&
+      sourceQuestion.materialTitle === null &&
+      sourceQuestion.materialContent === null &&
+      sourceQuestion.questionGroupPublicId === null
+    );
+  }
+
+  if (
+    !selectedGroup.memberQuestionPublicIds.includes(
+      sourceQuestion.questionPublicId,
+    )
+  ) {
+    return false;
+  }
+
+  if (sourceQuestion.sourceKind === "platform_formal_question") {
+    return (
+      selectedGroup.materialSnapshot.materialPublicId !== null &&
+      sourceQuestion.materialPublicId ===
+        selectedGroup.materialSnapshot.materialPublicId
+    );
+  }
+
+  return (
+    sourceQuestion.questionGroupPublicId === selectedGroup.publicId &&
+    sourceQuestion.questionGroupTitle === selectedGroup.title &&
+    sourceQuestion.questionGroupQuestionSortOrder ===
+      selectedGroup.questionSortOrder &&
+    sourceQuestion.questionGroupQuestionCount ===
+      selectedGroup.memberQuestionPublicIds.length &&
+    sourceQuestion.materialTitle === selectedGroup.materialSnapshot.title &&
+    sourceQuestion.materialContent ===
+      selectedGroup.materialSnapshot.contentRichText
+  );
 }
 
 function collectSelectedPaperQuestionIdsBySource(
@@ -2230,6 +2323,20 @@ function createOrganizationTrainingPaperDraftSnapshot(input: {
           sourceKind: selectedQuestion.sourceKind,
           matchTier: selectedQuestion.matchTier,
           score: selectedQuestion.score,
+          ...(selectedQuestion.questionGroup === null ||
+          selectedQuestion.questionGroup === undefined
+            ? {}
+            : {
+                questionGroup: {
+                  ...selectedQuestion.questionGroup,
+                  materialSnapshot: {
+                    ...selectedQuestion.questionGroup.materialSnapshot,
+                  },
+                  memberQuestionPublicIds: [
+                    ...selectedQuestion.questionGroup.memberQuestionPublicIds,
+                  ],
+                },
+              }),
           ...(selectedQuestion.constraintMatchBasis === undefined
             ? {}
             : {

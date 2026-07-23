@@ -137,6 +137,10 @@ export type OrganizationTrainingPublishQuestionInput = {
   paperSectionTitle?: string;
   paperSectionSortOrder?: number;
   questionSortOrder?: number;
+  questionGroupPublicId?: string;
+  questionGroupTitle?: string;
+  questionGroupQuestionSortOrder?: number;
+  questionGroupQuestionCount?: number;
   materialTitle: string | null;
   materialContent: string | null;
   stem: string;

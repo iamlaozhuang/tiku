@@ -1373,6 +1373,15 @@ function createOrganizationAiCopyQuestions(row: {
     publicId: question.publicId,
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
+    ...(question.questionGroupPublicId === undefined
+      ? {}
+      : {
+          questionGroupPublicId: question.questionGroupPublicId,
+          questionGroupTitle: question.questionGroupTitle,
+          questionGroupQuestionSortOrder:
+            question.questionGroupQuestionSortOrder,
+          questionGroupQuestionCount: question.questionGroupQuestionCount,
+        }),
     ...(question.paperSectionKey !== undefined &&
     question.paperSectionTitle !== undefined &&
     question.paperSectionSortOrder !== undefined &&
@@ -2660,11 +2669,17 @@ function mapPaperQuestionSnapshotRowToDto(
 
   const materialSnapshot =
     row.materialSnapshot === null ? null : asRecord(row.materialSnapshot);
+  const questionGroupSnapshotFields = readQuestionGroupSnapshotFields(snapshot);
+
+  if (questionGroupSnapshotFields === null) {
+    return null;
+  }
 
   return {
     publicId,
     sequenceNumber,
     questionType,
+    ...questionGroupSnapshotFields,
     difficulty: getQuestionDifficulty(snapshot.difficulty),
     knowledgeNodePublicIds: getStringListField(
       snapshot,
@@ -2693,6 +2708,60 @@ function mapPaperQuestionSnapshotRowToDto(
     stem,
     options: mapQuestionOptionSnapshots(snapshot, publicId),
     score: getNonNegativeNumber(row.score ?? snapshot.score),
+  };
+}
+
+function readQuestionGroupSnapshotFields(
+  snapshot: Record<string, unknown>,
+):
+  | null
+  | Record<string, never>
+  | Pick<
+      OrganizationTrainingAdminQuestionDetailDto,
+      | "questionGroupPublicId"
+      | "questionGroupTitle"
+      | "questionGroupQuestionSortOrder"
+      | "questionGroupQuestionCount"
+    > {
+  const values = [
+    snapshot.questionGroupPublicId,
+    snapshot.questionGroupTitle,
+    snapshot.questionGroupQuestionSortOrder,
+    snapshot.questionGroupQuestionCount,
+  ];
+
+  if (values.every((value) => value === null || value === undefined)) {
+    return {};
+  }
+
+  const questionGroupPublicId = getFirstStringField(snapshot, [
+    "questionGroupPublicId",
+  ]);
+  const questionGroupTitle = getFirstStringField(snapshot, [
+    "questionGroupTitle",
+  ]);
+  const questionGroupQuestionSortOrder = getPositiveInteger(
+    snapshot.questionGroupQuestionSortOrder,
+  );
+  const questionGroupQuestionCount = getPositiveInteger(
+    snapshot.questionGroupQuestionCount,
+  );
+
+  if (
+    questionGroupPublicId === null ||
+    questionGroupTitle === null ||
+    questionGroupQuestionSortOrder === null ||
+    questionGroupQuestionCount === null ||
+    questionGroupQuestionSortOrder > questionGroupQuestionCount
+  ) {
+    return null;
+  }
+
+  return {
+    questionGroupPublicId,
+    questionGroupTitle,
+    questionGroupQuestionSortOrder,
+    questionGroupQuestionCount,
   };
 }
 
@@ -2906,11 +2975,17 @@ function mapQuestionSnapshotRecordToAdminDetail(
   const sequenceNumber = Number.isInteger(snapshot.sequenceNumber)
     ? Number(snapshot.sequenceNumber)
     : fallbackSequenceNumber;
+  const questionGroupSnapshotFields = readQuestionGroupSnapshotFields(snapshot);
+
+  if (questionGroupSnapshotFields === null) {
+    return null;
+  }
 
   return {
     publicId,
     sequenceNumber,
     questionType,
+    ...questionGroupSnapshotFields,
     materialTitle: getNullableStringField(snapshot, ["materialTitle"]),
     materialContent: getNullableStringField(snapshot, ["materialContent"]),
     stem,

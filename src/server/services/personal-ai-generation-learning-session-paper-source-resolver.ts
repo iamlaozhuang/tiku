@@ -1,4 +1,7 @@
-import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
+import type {
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperSelectedQuestionDto,
+} from "../contracts/ai-paper-plan-and-select-contract";
 import type { PersonalAiGenerationLearningPaperSourceQuestionDto } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { PersonalAiGenerationLearningSessionQuestionType } from "../models/personal-ai-generation-learning-session";
 import type { OrganizationTrainingQuestionSnapshotValue } from "@/db/schema";
@@ -47,7 +50,7 @@ export function createPersonalAiGenerationLearningSessionPaperSourceResolver(inp
       ),
     );
 
-    return selectedQuestions
+    const resolvedQuestions = selectedQuestions
       .map((selectedQuestion) =>
         sourceQuestionByKey.get(createSelectedQuestionKey(selectedQuestion)),
       )
@@ -57,7 +60,49 @@ export function createPersonalAiGenerationLearningSessionPaperSourceResolver(inp
         ): sourceQuestion is PersonalAiGenerationLearningPaperSourceQuestionDto =>
           sourceQuestion !== undefined,
       );
+
+    return filterIncompleteResolvedQuestionGroups(
+      selectedQuestions,
+      resolvedQuestions,
+    );
   };
+}
+
+function filterIncompleteResolvedQuestionGroups(
+  selectedQuestions: ReturnType<typeof collectSelectedQuestions>,
+  resolvedQuestions: PersonalAiGenerationLearningPaperSourceQuestionDto[],
+): PersonalAiGenerationLearningPaperSourceQuestionDto[] {
+  const resolvedKeys = new Set(
+    resolvedQuestions.map((question) => createSelectedQuestionKey(question)),
+  );
+  const invalidGroupPublicIds = new Set<string>();
+
+  for (const selectedQuestion of selectedQuestions) {
+    const group = selectedQuestion.questionGroup;
+
+    if (
+      group !== null &&
+      group !== undefined &&
+      group.memberQuestionPublicIds.some(
+        (questionPublicId) =>
+          !resolvedKeys.has(
+            createSelectedQuestionKey({
+              sourceKind: selectedQuestion.sourceKind,
+              questionPublicId,
+            }),
+          ),
+      )
+    ) {
+      invalidGroupPublicIds.add(group.publicId);
+    }
+  }
+
+  return resolvedQuestions.filter(
+    (question) =>
+      question.questionGroup === null ||
+      question.questionGroup === undefined ||
+      !invalidGroupPublicIds.has(question.questionGroup.publicId),
+  );
 }
 
 async function resolvePlatformSourceQuestions(input: {
@@ -89,7 +134,16 @@ async function resolvePlatformSourceQuestions(input: {
         selectedPlatformQuestionIds.has(row.public_id) &&
         row.status === "available",
     )
-    .map(mapPlatformQuestionRowToSourceQuestion)
+    .map((row) =>
+      mapPlatformQuestionRowToSourceQuestion(
+        row,
+        findSelectedQuestion(
+          input.resolverInput.paperAssemblyContainer,
+          "platform_formal_question",
+          row.public_id,
+        ),
+      ),
+    )
     .filter(
       (
         sourceQuestion,
@@ -133,7 +187,16 @@ async function resolveEnterpriseSourceQuestions(input: {
 
   return snapshots
     .filter((snapshot) => selectedEnterpriseQuestionIds.has(snapshot.publicId))
-    .map(mapEnterpriseSnapshotToSourceQuestion)
+    .map((snapshot) =>
+      mapEnterpriseSnapshotToSourceQuestion(
+        snapshot,
+        findSelectedQuestion(
+          input.resolverInput.paperAssemblyContainer,
+          "enterprise_training_snapshot",
+          snapshot.publicId,
+        ),
+      ),
+    )
     .filter(
       (
         sourceQuestion,
@@ -144,10 +207,15 @@ async function resolveEnterpriseSourceQuestions(input: {
 
 function mapPlatformQuestionRowToSourceQuestion(
   row: QuestionAccessRow,
+  selectedQuestion: ReturnType<typeof findSelectedQuestion>,
 ): PersonalAiGenerationLearningPaperSourceQuestionDto | null {
   const questionType = normalizeQuestionType(row.question_type);
 
-  if (questionType === null) {
+  if (
+    questionType === null ||
+    selectedQuestion === null ||
+    !isCurrentPlatformGroupIdentityValid(row, selectedQuestion.questionGroup)
+  ) {
     return null;
   }
 
@@ -170,16 +238,26 @@ function mapPlatformQuestionRowToSourceQuestion(
     ),
     standardAnswerText: normalizeNullableText(row.standard_answer_rich_text),
     analysis: normalizeNullableText(row.analysis_rich_text),
+    questionGroup: copyQuestionGroup(selectedQuestion.questionGroup),
   };
 }
 
 function mapEnterpriseSnapshotToSourceQuestion(
   snapshot: OrganizationTrainingQuestionSnapshotValue,
+  selectedQuestion: ReturnType<typeof findSelectedQuestion>,
 ): PersonalAiGenerationLearningPaperSourceQuestionDto | null {
   const questionType = normalizeQuestionType(snapshot.questionType);
   const questionStem = normalizeNullableText(snapshot.stem);
 
-  if (questionType === null || questionStem === null) {
+  if (
+    questionType === null ||
+    questionStem === null ||
+    selectedQuestion === null ||
+    !isCurrentEnterpriseGroupIdentityValid(
+      snapshot,
+      selectedQuestion.questionGroup,
+    )
+  ) {
     return null;
   }
 
@@ -200,6 +278,88 @@ function mapEnterpriseSnapshotToSourceQuestion(
     standardAnswerLabels: extractAnswerLabels(snapshot.standardAnswer),
     standardAnswerText: normalizeNullableText(snapshot.standardAnswer),
     analysis: normalizeNullableText(snapshot.analysisSummary),
+    questionGroup: copyQuestionGroup(selectedQuestion.questionGroup),
+  };
+}
+
+function findSelectedQuestion(
+  container: AiPaperPlanAndSelectContainerDto,
+  sourceKind: PersonalAiGenerationLearningPaperSourceQuestionDto["sourceKind"],
+  questionPublicId: string,
+) {
+  return (
+    collectSelectedQuestions(container).find(
+      (question) =>
+        question.sourceKind === sourceKind &&
+        question.questionPublicId === questionPublicId,
+    ) ?? null
+  );
+}
+
+function isCurrentPlatformGroupIdentityValid(
+  row: QuestionAccessRow,
+  selectedGroup: AiPaperSelectedQuestionDto["questionGroup"],
+): boolean {
+  if (selectedGroup === null || selectedGroup === undefined) {
+    return row.material_id === null && row.material_public_id === null;
+  }
+
+  return (
+    row.material_id !== null &&
+    selectedGroup.materialSnapshot.materialPublicId !== null &&
+    row.material_public_id ===
+      selectedGroup.materialSnapshot.materialPublicId &&
+    selectedGroup.memberQuestionPublicIds.includes(row.public_id)
+  );
+}
+
+function isCurrentEnterpriseGroupIdentityValid(
+  snapshot: OrganizationTrainingQuestionSnapshotValue,
+  selectedGroup: AiPaperSelectedQuestionDto["questionGroup"],
+): boolean {
+  if (selectedGroup === null || selectedGroup === undefined) {
+    return (
+      snapshot.materialTitle === null &&
+      snapshot.materialContent === null &&
+      !("questionGroupPublicId" in snapshot)
+    );
+  }
+
+  const snapshotRecord =
+    snapshot as OrganizationTrainingQuestionSnapshotValue & {
+      questionGroupPublicId?: string;
+      questionGroupTitle?: string;
+      questionGroupQuestionSortOrder?: number;
+      questionGroupQuestionCount?: number;
+    };
+
+  return (
+    snapshotRecord.questionGroupPublicId === selectedGroup.publicId &&
+    snapshotRecord.questionGroupTitle === selectedGroup.title &&
+    snapshotRecord.questionGroupQuestionSortOrder ===
+      selectedGroup.questionSortOrder &&
+    snapshotRecord.questionGroupQuestionCount ===
+      selectedGroup.memberQuestionPublicIds.length &&
+    snapshot.materialTitle === selectedGroup.materialSnapshot.title &&
+    snapshot.materialContent ===
+      selectedGroup.materialSnapshot.contentRichText &&
+    selectedGroup.memberQuestionPublicIds.includes(snapshot.publicId)
+  );
+}
+
+function copyQuestionGroup(
+  questionGroup: AiPaperSelectedQuestionDto["questionGroup"],
+): PersonalAiGenerationLearningPaperSourceQuestionDto["questionGroup"] {
+  if (questionGroup === null || questionGroup === undefined) {
+    return null;
+  }
+
+  return {
+    publicId: questionGroup.publicId,
+    title: questionGroup.title,
+    materialSnapshot: { ...questionGroup.materialSnapshot },
+    memberQuestionPublicIds: [...questionGroup.memberQuestionPublicIds],
+    questionSortOrder: questionGroup.questionSortOrder,
   };
 }
 

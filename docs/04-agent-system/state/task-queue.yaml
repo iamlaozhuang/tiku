@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
+  currentTaskId: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
   currentCandidateClusterId: P1-RC-07
   candidateClusterOrder:
     - P1-RC-01
@@ -544,78 +544,95 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-content-ai-review-draft-revisions-2026-07-22: closed
     p1-remediation-rc-07-content-ai-review-editor-2026-07-22: closed
     p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22: closed
-    p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22: in_progress
+    p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22: closed
+    p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22: in_progress
 activeTasks:
-  - id: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
-    title: Organization AI review workbench handoff
-    phase: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
+  - id: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
+    title: AI paper material question group integrity
+    phase: p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
     status: in_progress
     priority: p1
-    taskKind: permission_scoped_existing_organization_draft_read_projection_and_ui_handoff
-    productClosureContribution: partial_F0158_organization_review_and_exact_training_workbench_handoff
-    branch: fix/organization-ai-review-workbench-handoff
-    objective: render the already persisted server-owned organization draft snapshot before copy and hand the exact copied draft identity to the existing organization training editor
+    taskKind: bounded_database_application_logic_and_product_contract_propagation
+    productClosureContribution: closes_F0169
+    branch: fix/ai-paper-material-question-group-integrity
+    objective: preserve material-backed questions as one atomic server-owned question_group from source selection through organization drafts and personal or employee learning sessions
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-07
     findingIds:
-      - F-0158
+      - F-0169
     executionStage: validated_reviewed_conditional_closeout_ready
-    findingStatus: open_partitioned
-    findingDisposition: F0158_organization_review_and_exact_training_workbench_handoff_browser_runtime_residual
+    findingStatus: validated_pending_terminal_closeout
+    findingDisposition: F0169_confirmed_same_root_cause_atomic_product_bundle
     riskBoundary:
-      category: permission_scoped_existing_organization_draft_read_projection_and_ui_handoff
-      approvalId: guardian-f0158-organization-ai-review-workbench-handoff-2026-07-22
-      approvalFingerprint: bb97363f8fc484f582474fb006c37426f39d1825933acdcb287a593578118bcc
-      approvedBaseSha: 6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6
+      category: bounded_database_application_logic_and_product_contract_propagation
+      approvalId: standing-bounded-medium-risk-closeout-approval-2026-07-20
+      approvedBaseSha: 92491b38358be99d3551b22ae86968547d4892f2
       schemaOrMigrationChange: false
       persistentDatabaseExecution: false
       authorizationOrEntitlementExpansion: false
       providerOrRealExternalCall: false
       dependencyChange: false
       conditionalCloseout: true
-      hardConditions: authorization_first_exact_kind_projection_identity_only_copy_strict_selector_authorized_exact_detail_existing_editor_only
     preRedImpactScan:
-      chain: authorized_organization_history_to_server_owned_snapshot_to_review_panel_to_atomic_copy_to_exact_training_draft_selector_to_existing_editor
-      coreFiles: 12
-      contingencyFiles: 0
-      preflightTestFiles: 4
+      chain: formal_or_enterprise_question_source_to_atomic_group_candidate_to_plan_select_to_persisted_result_to_organization_draft_and_learning_session
+      coreFiles: 29
+      contingencyFiles: 4
       directCallerCalleeMocksFixturesReviewed: true
-      confirmedRootCause: history_drops_existing_organization_draft_snapshots_and_copy_UI_discards_exact_draft_identity_instead_of_reusing_existing_editor
-      bundleDisposition: organization_review_and_exact_existing_workbench_handoff_only_browser_runtime_separate
+      sameTaskCallChainExpansion: organization_training_mapper_and_direct_test_only_under_capsule_v1_1_two_file_allowance
+      confirmedRootCause: independent_question_only_contract_discards_platform_material_and_enterprise_group_identity_then_allows_partial_or_cross_section_selection_and_flat_downstream_consumption
+      bundleDisposition: one_atomic_F0169_bundle
     expectedAcceptance:
-      - organization_history_returns_only_the_matching_server_owned_admin_safe_question_or_paper_snapshot
-      - organization_admin_reviews_full_persisted_stem_options_answer_analysis_evidence_and_paper_structure_before_copy
-      - content_cross_organization_employee_and_raw_provider_boundaries_do_not_expand
-      - copy_body_remains_identity_only_and_UI_retains_only_validated_returned_draft_public_id
-      - exact_draft_link_opens_existing_authorization_scoped_training_editor_independent_of_list_pagination
-      - invalid_missing_unavailable_or_out_of_scope_selector_fails_closed_and_F0158_remains_open_partitioned_for_browser_runtime
+      - complete_material_group_selected_wholly_in_one_compatible_section_or_not_at_all
+      - stable_public_group_identity_immutable_material_snapshot_member_order_and_child_scores_survive_all_consumers
+      - malformed_legacy_cross_section_split_stale_or_inconsistent_groups_fail_closed
+      - standalone_questions_and_existing_authorization_boundaries_do_not_regress
     closeoutProjection:
-      current: validated_reviewed_conditional_closeout_ready
+      current: validated_reviewed_candidate_pending_kernel_commit_push_sync_cleanup
       triggers: TDD_focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
-      successProjection: F0158_organization_workbench_partition_closed_then_continue_browser_runtime_boundary_JIT
+      successProjection: F0169_closed_then_continue_RC07_residual_JIT
       terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
+    validationEvidence:
+      focused: passed_270_of_270_across_15_files
+      lint: passed_exact_affected_files_zero_warnings
+      typecheck: passed_tsc_no_emit
+      build: passed_next_production_build_with_pre_existing_nft_trace_warning
+      mainThreadAdversarialReview: passed_atomic_membership_authoritative_count_scope_snapshot_redaction_and_fail_closed_review
+      scope: 30_changed_files_all_within_33_allowed_files
     executionMetrics:
-      mandatoryFreshApprovals: 1_task_bound_guardian_permission_projection_approved
+      mandatoryFreshApprovals: 0
       preventableScopeMissApprovals: 0
       candidateReapprovals: 0
       approvalWaitTurns: 0
-      productValueTime: 25m_TDD_history_projection_full_review_identity_handoff_and_adversarial_correction
-      mechanismOverhead: 8m_contract_state_guardian_validation_and_closeout_preparation
+      productValueTime: terminal_clock_not_reconstructable_product_analysis_TDD_implementation_and_adversarial_corrections_completed
+      mechanismOverhead: terminal_clock_not_reconstructable_includes_contract_state_validation_and_closeout
       guardSmokeChanges: 0
-    validationEvidence:
-      tddRed: exit_1_9_expected_failures_114_existing_passed
-      focused: exit_0_4_files_123_tests_passed
-      targetedLint: exit_0_9_product_and_test_files
-      typecheck: exit_0_tsc_noEmit
-      build: exit_0_next_build_100_static_pages_preexisting_NFT_warning_only
-      mainThreadAdversarialReview: pass_authorization_first_exact_identity_unique_kind_projection_strict_selector_detail_scope_and_zero_mutation_handoff
     previousTaskCloseout:
-      taskId: p1-remediation-rc-07-content-ai-safe-citation-projection-2026-07-22
+      taskId: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
       findingIds:
         - F-0158
-      commit: 6992a46b7ca9c86a10be1a9fa1aeacb13a1179e6
+      commit: 92491b38358be99d3551b22ae86968547d4892f2
       status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
       findingStatus: open_partitioned
+      residual: browser_runtime_acceptance_runtime_hold_excluded_from_current_program
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+  - id: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
+    title: Organization AI review workbench handoff
+    phase: p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
+    status: closed
+    priority: p1
+    taskKind: permission_scoped_existing_organization_draft_read_projection_and_ui_handoff
+    productClosureContribution: partial_F0158_organization_review_and_exact_training_workbench_handoff
+    branch: fix/organization-ai-review-workbench-handoff
+    candidateRootCauseCluster: P1-RC-07
+    findingIds:
+      - F-0158
+    findingStatus: open_partitioned
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    residual: browser_runtime_acceptance_runtime_hold_excluded_from_current_program
+    closeoutEvidence:
+      commit: 92491b38358be99d3551b22ae86968547d4892f2
       masterOriginSync: pass
       worktreeClean: true
       shortBranchCleanup: pass
