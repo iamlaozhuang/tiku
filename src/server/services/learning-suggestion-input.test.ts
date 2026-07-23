@@ -579,14 +579,17 @@ describe("F-0176 learning suggestion whole-report input", () => {
 
     expect(taskSafety).toMatchObject({
       taskId:
-        "p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23",
-      baseSha: "9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148",
-      branch: "fix/learning-suggestion-whole-report-input",
+        "p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23",
+      baseSha: "b91ee5d3ae1982198b945e50cea521392c74c9cd",
+      branch: "fix/learning-suggestion-lifecycle-recovery",
       approvalId:
-        "guardian-f0176-learning-suggestion-whole-report-input-2026-07-23",
-      riskCategory:
-        "database_application_logic_and_provider_adapter_pure_logic",
+        "guardian-f0065-learning-suggestion-lifecycle-recovery-2026-07-23",
       conditionalCloseout: true,
+      previousTaskCloseout: {
+        taskId:
+          "p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23",
+        commit: "b91ee5d3ae1982198b945e50cea521392c74c9cd",
+      },
     });
     expect((projectState.currentTask as Record<string, unknown>).id).toBe(
       taskSafety.taskId,
@@ -607,7 +610,7 @@ describe("F-0176 learning suggestion whole-report input", () => {
       "eq(examReport.report_revision, input.expectedReportRevision)",
     );
     expect(repositorySource).toContain(
-      "isNull(examReport.learning_suggestion_snapshot)",
+      'eq(examReport.learning_suggestion_status, "running")',
     );
     expect(repositorySource).toContain("updatedRows.length !== 1");
   });

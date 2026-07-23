@@ -8,6 +8,7 @@ import {
   examModeValues,
   examReport,
   examStatusValues,
+  learningSuggestionStatusValues,
   mistakeBook,
   mistakeBookSourceValues,
   mistakeBookStatusValues,
@@ -74,6 +75,12 @@ describe("student experience schema baseline", () => {
       "unmastered",
       "mastered",
       "removed",
+    ]);
+    expect(learningSuggestionStatusValues).toEqual([
+      "pending",
+      "running",
+      "succeeded",
+      "failed",
     ]);
   });
 
@@ -241,3 +248,19 @@ describe("student experience schema baseline", () => {
     );
   });
 });
+expect(getColumnNames(examReport)).toEqual(
+  expect.arrayContaining([
+    "learning_suggestion_status",
+    "learning_suggestion_attempt_count",
+    "learning_suggestion_input_digest",
+    "learning_suggestion_claimed_at",
+    "learning_suggestion_completed_at",
+    "learning_suggestion_failure_category",
+  ]),
+);
+expect(getCheckNames(examReport)).toContain(
+  "chk_exam_report_learning_suggestion_lifecycle",
+);
+expect(getIndexNames(examReport)).toContain(
+  "idx_exam_report_learning_suggestion_status_updated_at",
+);

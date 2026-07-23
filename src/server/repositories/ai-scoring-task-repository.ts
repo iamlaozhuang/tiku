@@ -1268,6 +1268,20 @@ async function finalizeExistingExamReport(
         total_score = ${facts.mockExam.total_score}::numeric,
         duration_second = ${calculateDurationSecond(facts.mockExam)},
         learning_suggestion_snapshot = null,
+        learning_suggestion_status = case
+          when ${facts.mockExam.exam_status}::exam_status = 'completed'::exam_status
+            then 'pending'::learning_suggestion_status
+          else null
+        end,
+        learning_suggestion_attempt_count = case
+          when ${facts.mockExam.exam_status}::exam_status = 'completed'::exam_status
+            then 0
+          else null
+        end,
+        learning_suggestion_input_digest = null,
+        learning_suggestion_claimed_at = null,
+        learning_suggestion_completed_at = null,
+        learning_suggestion_failure_category = null,
         updated_at = ${completedAt.toISOString()}
       where id = ${existingReport.id}
         and exam_status in (

@@ -687,6 +687,11 @@ const completedMarketingReport: ExamReportDetailDto = {
     ],
   },
   learningSuggestionSnapshot: null,
+  learningSuggestionLifecycle: {
+    status: "pending",
+    failureCategory: null,
+    canRetry: false,
+  },
 };
 
 const scoringMarketingReport: ExamReportDetailDto = {
@@ -3565,9 +3570,41 @@ export function StudentExamReportPage({
     ExamReportDetailDto[]
   >([]);
   const [reloadRequestId, setReloadRequestId] = useState(0);
+  const [isLearningSuggestionRetrying, setIsLearningSuggestionRetrying] =
+    useState(false);
+  const [learningSuggestionRetryError, setLearningSuggestionRetryError] =
+    useState<string | null>(null);
   const displayState =
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayExamReports = examReports ?? runtimeExamReports;
+
+  async function handleRetryLearningSuggestion(publicId: string) {
+    if (!isRuntimeMode || isLearningSuggestionRetrying) {
+      return;
+    }
+    setIsLearningSuggestionRetrying(true);
+    setLearningSuggestionRetryError(null);
+    try {
+      const payload = await fetchStudentApi<null>(
+        `/api/v1/exam-reports/${encodeURIComponent(publicId)}/retry-learning-suggestion`,
+        getStoredStudentSessionToken(),
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: "{}",
+        },
+      );
+      if (payload.code !== 0) {
+        setLearningSuggestionRetryError("学习建议恢复失败，请稍后重试。");
+        return;
+      }
+      setReloadRequestId((current) => current + 1);
+    } catch {
+      setLearningSuggestionRetryError("学习建议恢复失败，请稍后重试。");
+    } finally {
+      setIsLearningSuggestionRetrying(false);
+    }
+  }
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -3961,10 +3998,33 @@ export function StudentExamReportPage({
           学习建议
         </h2>
         <p className="text-text-secondary text-sm">
-          {examReport.learningSuggestionSnapshot === null
-            ? "学习建议：生成中"
-            : "学习建议：已生成"}
+          {examReport.learningSuggestionLifecycle.status === "unavailable"
+            ? "学习建议：历史报告暂不可用"
+            : examReport.learningSuggestionLifecycle.status === "pending"
+              ? "学习建议：等待生成"
+              : examReport.learningSuggestionLifecycle.status === "running"
+                ? "学习建议：生成中"
+                : examReport.learningSuggestionLifecycle.status === "failed"
+                  ? "学习建议：生成失败"
+                  : "学习建议：已生成"}
         </p>
+        {examReport.learningSuggestionLifecycle.canRetry ? (
+          <button
+            type="button"
+            disabled={isLearningSuggestionRetrying}
+            onClick={() =>
+              void handleRetryLearningSuggestion(examReport.publicId)
+            }
+            className="bg-primary text-primary-foreground disabled:bg-disabled disabled:text-text-disabled inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium"
+          >
+            {isLearningSuggestionRetrying ? "正在重试" : "重试生成学习建议"}
+          </button>
+        ) : null}
+        {learningSuggestionRetryError === null ? null : (
+          <p className="text-danger text-sm" role="alert">
+            {learningSuggestionRetryError}
+          </p>
+        )}
         {parsedLearningSuggestion === null ? null : (
           <div className="space-y-3 text-sm">
             {parsedLearningSuggestion.summaryText === null ? null : (

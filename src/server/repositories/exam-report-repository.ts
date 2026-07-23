@@ -1,6 +1,7 @@
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
 import type {
   ExamReportSnapshotDto,
+  LearningSuggestionFailureCategory,
   LearningSuggestionSnapshotDto,
 } from "../contracts/exam-report-contract";
 import type { SortOrder } from "../contracts/api-response";
@@ -897,6 +898,17 @@ export type ExamReportRow = {
   report_revision: number | null;
   report_snapshot: ExamReportSnapshotDto;
   learning_suggestion_snapshot: LearningSuggestionSnapshotDto;
+  learning_suggestion_status:
+    | "pending"
+    | "running"
+    | "succeeded"
+    | "failed"
+    | null;
+  learning_suggestion_attempt_count: number | null;
+  learning_suggestion_input_digest: string | null;
+  learning_suggestion_claimed_at: Date | null;
+  learning_suggestion_completed_at: Date | null;
+  learning_suggestion_failure_category: LearningSuggestionFailureCategory | null;
   generated_at: Date;
   started_at: Date;
   created_at: Date;
@@ -951,12 +963,39 @@ export type ExamReportAnswerRecordRow = {
   submitted_at: Date | null;
 };
 
-export type UpdateExamReportLearningSuggestionInput = {
+export type ExamReportLearningSuggestionAttemptIdentity = {
+  userPublicId: string;
+  publicId: string;
+  reportRevision: number;
+  attemptCount: number;
+  inputDigest: string;
+  claimedAt: Date;
+};
+
+export type ClaimExamReportLearningSuggestionInput = {
   userPublicId: string;
   publicId: string;
   expectedReportRevision: number;
-  learningSuggestionSnapshot: LearningSuggestionSnapshotDto;
+  inputDigest: string;
+  claimMode: "automatic" | "manual";
+  claimedAt: Date;
+  pendingRecoveryBefore: Date;
+  staleRunningBefore: Date;
 };
+
+export type FinalizeExamReportLearningSuggestionInput =
+  ExamReportLearningSuggestionAttemptIdentity & {
+    learningSuggestionSnapshot: LearningSuggestionSnapshotDto;
+  };
+
+export type FailExamReportLearningSuggestionInput =
+  ExamReportLearningSuggestionAttemptIdentity & {
+    failureCategory: Exclude<
+      LearningSuggestionFailureCategory,
+      "input_unavailable"
+    >;
+    completedAt: Date;
+  };
 
 export type ExamReportListQuery = {
   userPublicId: string;
@@ -1017,7 +1056,19 @@ export type ExamReportRepository = {
   }): Promise<ExamReportAnswerRecordRow[]>;
   createExamReport(input: CreateExamReportInput): Promise<ExamReportRow>;
   rebuildExamReport(input: RebuildExamReportInput): Promise<ExamReportRow>;
-  updateExamReportLearningSuggestionSnapshot(
-    input: UpdateExamReportLearningSuggestionInput,
+  claimExamReportLearningSuggestion(
+    input: ClaimExamReportLearningSuggestionInput,
+  ): Promise<ExamReportLearningSuggestionAttemptIdentity | null>;
+  finalizeExamReportLearningSuggestion(
+    input: FinalizeExamReportLearningSuggestionInput & { completedAt: Date },
   ): Promise<void>;
+  failExamReportLearningSuggestion(
+    input: FailExamReportLearningSuggestionInput,
+  ): Promise<void>;
+  failPendingExamReportLearningSuggestionInput(input: {
+    userPublicId: string;
+    publicId: string;
+    expectedReportRevision: number;
+    completedAt: Date;
+  }): Promise<void>;
 };

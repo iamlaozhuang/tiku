@@ -9,11 +9,11 @@ import { createPostgresAiScoringTaskRepository } from "@/server/repositories/ai-
 import type { RuntimeDatabase } from "@/server/repositories/runtime-database";
 
 const TASK_ID =
-  "p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23";
-const BASE_SHA = "9ac24c0363fbe6bbaea9bcc4386275ddc5a7b148";
-const BRANCH = "fix/learning-suggestion-whole-report-input";
+  "p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23";
+const BASE_SHA = "b91ee5d3ae1982198b945e50cea521392c74c9cd";
+const BRANCH = "fix/learning-suggestion-lifecycle-recovery";
 const APPROVAL_ID =
-  "guardian-f0176-learning-suggestion-whole-report-input-2026-07-23";
+  "guardian-f0065-learning-suggestion-lifecycle-recovery-2026-07-23";
 const CLOSED_TASK_ID =
   "p1-remediation-rc-08-exam-report-scoring-finalization-2026-07-23";
 
@@ -117,9 +117,9 @@ describe("F-0067 exam report scoring finalization", () => {
       approvalSources: { database: APPROVAL_ID, provider: APPROVAL_ID },
       conditionalCloseout: true,
     });
-    expect(contract.allowedFiles).toHaveLength(21);
-    expect(contract.coreFiles).toHaveLength(16);
-    expect(contract.contingencyFiles).toHaveLength(5);
+    expect(contract.allowedFiles).toHaveLength(39);
+    expect(contract.coreFiles).toHaveLength(30);
+    expect(contract.contingencyFiles).toHaveLength(9);
     expect(projectState.currentTask).toMatchObject({
       id: TASK_ID,
       status: "in_progress",

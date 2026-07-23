@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createMockAiProvider } from "@/ai/mock-provider";
 import type {
@@ -13,7 +13,10 @@ import type {
   AppendAiCallLogInput,
 } from "@/server/repositories/admin-ai-audit-log-runtime-repository";
 import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
-import { createAiMockProviderRuntime } from "@/server/services/ai-mock-provider-runtime";
+import {
+  createAiMockProviderRuntime,
+  LearningSuggestionRuntimeTimeoutError,
+} from "@/server/services/ai-mock-provider-runtime";
 import type { LearningSuggestionInput } from "@/server/services/learning-suggestion-input";
 import type { SessionService } from "@/server/services/session-service";
 
@@ -244,6 +247,58 @@ function createRepositories(): AdminAiAuditLogRuntimeRepositories {
 }
 
 describe("phase 7 AI mock provider and log runtime smoke", () => {
+  it("aborts the Provider at the hard timeout without writing a success log", async () => {
+    vi.useFakeTimers();
+    try {
+      let appendedLogCount = 0;
+      let providerSignal: AbortSignal | undefined;
+      const aiRuntime = createAiMockProviderRuntime({
+        provider: {
+          async generateLearningSuggestion(input) {
+            providerSignal = input.signal;
+            return new Promise((_resolve, reject) => {
+              input.signal?.addEventListener(
+                "abort",
+                () => reject(new Error("late raw provider failure")),
+                { once: true },
+              );
+            });
+          },
+        },
+        aiCallLogRepository: {
+          async appendAiCallLog() {
+            appendedLogCount += 1;
+            throw new Error("success log must not be written after timeout");
+          },
+        },
+        now: () => completedAt,
+      });
+
+      const attempt = aiRuntime.generateLearningSuggestion({
+        userPublicId: "user-dev-student",
+        organizationPublicId: "organization-public-001",
+        profession: "monopoly",
+        level: 3,
+        mockExamPublicId: "mock-exam-dev-001",
+        learningSuggestionInput,
+        modelConfigSnapshot,
+        promptTemplate,
+        startedAt,
+        hardTimeoutMs: 30_000,
+      });
+      const rejection = expect(attempt).rejects.toBeInstanceOf(
+        LearningSuggestionRuntimeTimeoutError,
+      );
+      await vi.advanceTimersByTimeAsync(30_000);
+
+      await rejection;
+      expect(providerSignal?.aborted).toBe(true);
+      expect(appendedLogCount).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("requires an authenticated admin session before returning AI log data", async () => {
     const handlers = createAdminAiAuditLogRuntimeRouteHandlers({
       sessionService: createSessionService(null),
@@ -279,6 +334,7 @@ describe("phase 7 AI mock provider and log runtime smoke", () => {
       modelConfigSnapshot,
       promptTemplate,
       startedAt,
+      hardTimeoutMs: 30_000,
     });
     const handlers = createAdminAiAuditLogRuntimeRouteHandlers({
       sessionService: createSessionService("super_admin"),

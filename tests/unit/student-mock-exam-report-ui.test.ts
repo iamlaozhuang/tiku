@@ -1823,7 +1823,7 @@ describe("StudentExamReportPage", () => {
     expect(document.body.textContent).not.toContain(
       "mistake-book-marketing-101",
     );
-    expect(screen.getByText("学习建议：生成中")).toBeInTheDocument();
+    expect(screen.getByText("学习建议：等待生成")).toBeInTheDocument();
 
     const reportSurface = screen.getByTestId(
       "exam-report-surface-exam-report-marketing-theory-001",
@@ -1859,6 +1859,11 @@ describe("StudentExamReportPage", () => {
             headingPath: ["客户服务", "需求分析"],
           },
         ],
+      },
+      learningSuggestionLifecycle: {
+        status: "succeeded" as const,
+        failureCategory: null,
+        canRetry: false,
       },
     };
 
@@ -2503,6 +2508,78 @@ describe("StudentExamReportPage", () => {
     expect(await screen.findByText("86.0")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries only an authoritative retryable lifecycle and reloads exact detail", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const publicId = "exam-report-retry-001";
+    const failedReport = {
+      ...studentExamReportFixture.examReports[0],
+      publicId,
+      learningSuggestionLifecycle: {
+        status: "failed" as const,
+        failureCategory: "provider_failed" as const,
+        canRetry: true,
+      },
+    };
+    const succeededReport = {
+      ...failedReport,
+      learningSuggestionSnapshot: { summaryText: "恢复后的学习建议" },
+      learningSuggestionLifecycle: {
+        status: "succeeded" as const,
+        failureCategory: null,
+        canRetry: false,
+      },
+    };
+    let detailReadCount = 0;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+        if (path === `/api/v1/exam-reports/${publicId}`) {
+          detailReadCount += 1;
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                examReport:
+                  detailReadCount === 1 ? failedReport : succeededReport,
+              },
+            }),
+          };
+        }
+        expect(path).toBe(
+          `/api/v1/exam-reports/${encodeURIComponent(publicId)}/retry-learning-suggestion`,
+        );
+        expect(init).toMatchObject({ method: "POST", body: "{}" });
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ code: 0, message: "ok", data: null }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: publicId,
+      }),
+    );
+
+    const retryButton = await screen.findByRole("button", {
+      name: "重试生成学习建议",
+    });
+    fireEvent.click(retryButton);
+    fireEvent.click(retryButton);
+    expect(await screen.findByText("学习建议：已生成")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "重试生成学习建议" }),
+    ).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(detailReadCount).toBe(2);
   });
 });
 

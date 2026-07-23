@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
+  currentTaskId: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -332,7 +332,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
     - p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
+    - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
     - p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
     - p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
     - p1-remediation-rc-08-student-answer-input-bounds-2026-07-23
@@ -590,12 +592,74 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-student-answer-input-bounds-2026-07-23: closed
     p1-remediation-rc-08-ai-scoring-question-context-2026-07-23: closed
     p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23: closed
-    p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23: in_progress
+    p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23: closed
+    p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23: in_progress
 activeTasks:
+  - id: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
+    title: Learning suggestion durable lifecycle and recovery
+    phase: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
+    status: in_progress
+    priority: p1
+    taskKind: schema_migration_source_database_application_logic_and_provider_adapter_pure_logic
+    productClosureContribution: closes_F0065_static_durable_lifecycle_automatic_attempt_failure_projection_and_manual_recovery_gap
+    branch: fix/learning-suggestion-lifecycle-recovery
+    objective: persist a strict learning_suggestion lifecycle on the exact exam_report revision, automatically attempt once after completed report creation, recover stale or failed attempts without duplicate Provider work, and expose safe authoritative retry state in the learner report UI
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-08
+    findingIds:
+      - F-0065
+    executionStage: implemented_verified_static_pending_closeout
+    findingStatus: closed_static_product_pending_closeout_without_migration_apply_real_database_provider_or_browser_runtime_proof
+    findingDisposition: F0065_static_lifecycle_partition_is_implemented_with_pending_running_succeeded_failed_state_exact_revision_attempt_CAS_orphan_pending_manual_recovery_provider_timeout_and_truthful_UI; runtime_migration_and_real_provider_acceptance_remain_out_of_scope
+    riskBoundary:
+      category: schema_migration_source_database_application_logic_and_provider_adapter_pure_logic
+      approvalId: guardian-f0065-learning-suggestion-lifecycle-recovery-2026-07-23
+      approvalFingerprint: e91668822e8b699876e25056031b2308af3613c8cd62f567368d6cfc70bb0767
+      requestFingerprint: e91668822e8b699876e25056031b2308af3613c8cd62f567368d6cfc70bb0767
+      requestedBaseSha: b91ee5d3ae1982198b945e50cea521392c74c9cd
+      schemaOrMigrationChange: true
+      migrationApplyOrRealDatabase: false
+      authorizationOrEntitlementExpansion: false
+      providerOrRealExternalCall: false
+      providerAdapterPureLogic: true
+      dependencyChange: false
+      conditionalCloseoutRequested: true
+    preRedImpactScan:
+      chain: authorized_completed_exam_report_to_versioned_lifecycle_claim_to_whole_report_input_to_provider_attempt_to_attempt_bound_terminal_CAS_to_safe_UI_projection
+      coreFiles: 30
+      contingencyFiles: 9
+      directCallerCalleeMocksFixturesReviewed: true
+      bundleDisposition: F0176_whole_report_input_and_F0175_blocked_gate_are_closed_prerequisites; F0177_usage_provenance_remains_independent
+    requiredSemantics:
+      lifecycle: legacy_nullable_discriminator_then_pending_running_succeeded_failed_with_strict_coherence_attempt_cap_and_safe_failure_category
+      automaticAttempt: completed_report_create_or_authoritative_rebuild_persists_pending_before_one_claimed_attempt_without_blocking_score_report_on_generation_failure
+      concurrency: authorization_first_then_exact_user_report_revision_row_lock_or_CAS; one_attempt_winner_and_late_or_stale_results_cannot_overwrite_new_revision_or_attempt
+      recovery: bounded_hard_timeout_plus_abort_cleanup_below_stale_reclaim_window; response_loss_success_replay_zero_provider; stale_running_failed_and_overdue_pending_retry_are_durable_and_bounded; GET_detail_history_have_zero_side_effect
+      projection: server_owned_status_failure_category_and_canRetry; UI_never_infers_state_from_null_snapshot_and_only_retries_exact_report_publicId
+      unchanged: no_real_database_or_provider_migration_apply_permission_quota_dependency_prompt_or_mechanism_change
+    validationEvidence:
+      focused: 13_files_135_tests_green
+      lint: repository_lint_green_with_only_preexisting_unrelated_warnings
+      typecheck: green
+      build: green
+      migrationSource: one_additive_enum_six_columns_one_index_one_check_no_apply_or_data_SQL
+      adversarialReview: green_for_orphan_pending_recovery_exact_attempt_revision_CAS_provider_timeout_success_log_boundary_GET_zero_side_effect_and_UI_truthfulness
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
+      findingIds:
+        - F-0176
+      commit: b91ee5d3ae1982198b945e50cea521392c74c9cd
+      tree: f7565b90a72db5cf4517dc019cc574e61696cbfe
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed_static_bounded_product_partition_without_real_database_provider_or_browser_runtime_proof
+      masterOriginSync: pass
+      worktreeCleanBeforeBranch: true
+      shortBranchCleanup: pass
+      closeoutKernel: pass
   - id: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
     title: Learning suggestion whole-report input integrity
     phase: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: database_application_logic_and_provider_adapter_pure_logic
     productClosureContribution: closes_F0176_static_whole_report_input_minimization_and_revision_binding_gap
@@ -605,8 +669,10 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-08
     findingIds:
       - F-0176
-    executionStage: ready_for_closeout
-    findingStatus: implemented_verified_static_pending_closeout
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed_static_bounded_product_partition_without_real_database_provider_or_browser_runtime_proof
+    commit: b91ee5d3ae1982198b945e50cea521392c74c9cd
+    closeout: committed_ff_only_merged_pushed_synced_clean_and_branch_removed
     findingDisposition: F0176_independent_and_ordered_before_F0065_to_avoid_automating_invalid_single_answer_semantics
     riskBoundary:
       category: database_application_logic_and_provider_adapter_pure_logic

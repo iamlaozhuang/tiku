@@ -5,6 +5,25 @@ export type ExamReportSnapshotDto = Record<string, unknown>;
 
 export type LearningSuggestionSnapshotDto = Record<string, unknown> | null;
 
+export type LearningSuggestionLifecycleStatus =
+  | "unavailable"
+  | "pending"
+  | "running"
+  | "succeeded"
+  | "failed";
+
+export type LearningSuggestionFailureCategory =
+  | "configuration_unavailable"
+  | "input_unavailable"
+  | "provider_failed"
+  | "timeout";
+
+export type LearningSuggestionLifecycleDto = {
+  status: LearningSuggestionLifecycleStatus;
+  failureCategory: LearningSuggestionFailureCategory | null;
+  canRetry: boolean;
+};
+
 export type ExamReportSummaryDto = {
   publicId: string;
   examReportPublicId: string | null;
@@ -26,6 +45,7 @@ export type ExamReportSummaryDto = {
 export type ExamReportDetailDto = ExamReportSummaryDto & {
   reportSnapshot: ExamReportSnapshotDto;
   learningSuggestionSnapshot: LearningSuggestionSnapshotDto;
+  learningSuggestionLifecycle: LearningSuggestionLifecycleDto;
 };
 
 export type ExamReportListResultDto = {

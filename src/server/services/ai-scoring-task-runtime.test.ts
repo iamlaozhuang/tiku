@@ -6,10 +6,21 @@ import type {
 } from "../repositories/ai-scoring-task-repository";
 import {
   AiScoringTaskExecutionError,
-  createAiScoringTaskRuntime,
+  createAiScoringTaskRuntime as createProductionAiScoringTaskRuntime,
   type AiScoringTaskExecutor,
   type AiScoringTaskRuntimeOptions,
 } from "./ai-scoring-task-runtime";
+
+function createAiScoringTaskRuntime(
+  options: Omit<AiScoringTaskRuntimeOptions, "onCompletedScoringReport"> &
+    Partial<Pick<AiScoringTaskRuntimeOptions, "onCompletedScoringReport">>,
+) {
+  return createProductionAiScoringTaskRuntime({
+    ...options,
+    onCompletedScoringReport:
+      options.onCompletedScoringReport ?? (async () => {}),
+  });
+}
 
 const now = new Date("2026-07-15T20:10:00.000Z");
 
@@ -327,11 +338,13 @@ describe("durable AI scoring task runtime", () => {
       expect(timeoutSecond).toBe(60);
       return operation();
     });
+    const onCompletedScoringReport = vi.fn(async () => {});
     const runtime = createAiScoringTaskRuntime({
       repository,
       executor,
       executeWithTimeout,
       now: () => now,
+      onCompletedScoringReport,
     });
 
     await expect(
@@ -348,6 +361,10 @@ describe("durable AI scoring task runtime", () => {
     });
     expect(repository.recoverExpiredAiScoringTasks).toHaveBeenCalledWith({
       recoveredAt: now,
+    });
+    expect(onCompletedScoringReport).toHaveBeenCalledWith({
+      userPublicId: task.actorPublicId,
+      mockExamPublicId: task.mockExamPublicId,
     });
     expect(
       vi.mocked(repository.recoverExpiredAiScoringTasks).mock

@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { createExamReportRouteHandlers } from "./exam-report-route";
+import type { ExamReportDetailDto } from "../contracts/exam-report-contract";
 import type { ExamReportService } from "./exam-report-service";
 
 const userContext = {
   userPublicId: "user_public_123",
 };
 
-function createExamReportDto(publicId: string) {
+function createExamReportDto(publicId: string): ExamReportDetailDto {
   return {
     publicId,
     examReportPublicId: publicId,
@@ -29,6 +30,11 @@ function createExamReportDto(publicId: string) {
       questionDetails: [],
     },
     learningSuggestionSnapshot: null,
+    learningSuggestionLifecycle: {
+      status: "unavailable",
+      failureCategory: null,
+      canRetry: false,
+    },
   };
 }
 

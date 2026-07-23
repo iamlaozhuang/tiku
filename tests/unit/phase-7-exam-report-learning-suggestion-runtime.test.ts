@@ -114,10 +114,16 @@ function createRepository(): ExamReportRepository {
           knowledgeNodeAnalysis: [],
         },
         learning_suggestion_snapshot: null,
+        learning_suggestion_status: "pending",
+        learning_suggestion_attempt_count: 0,
+        learning_suggestion_input_digest: null,
+        learning_suggestion_claimed_at: null,
+        learning_suggestion_completed_at: null,
+        learning_suggestion_failure_category: null,
         generated_at: now,
         started_at: startedAt,
         created_at: now,
-        updated_at: now,
+        updated_at: new Date("2026-05-19T08:58:00.000Z"),
       };
     },
     async findExamReportByMockExamPublicId() {
@@ -135,7 +141,19 @@ function createRepository(): ExamReportRepository {
     async rebuildExamReport() {
       throw new Error("rebuildExamReport should not be called by retry");
     },
-    async updateExamReportLearningSuggestionSnapshot() {},
+    async claimExamReportLearningSuggestion(input) {
+      return {
+        userPublicId: input.userPublicId,
+        publicId: input.publicId,
+        reportRevision: input.expectedReportRevision,
+        attemptCount: 1,
+        inputDigest: input.inputDigest,
+        claimedAt: input.claimedAt,
+      };
+    },
+    async finalizeExamReportLearningSuggestion() {},
+    async failExamReportLearningSuggestion() {},
+    async failPendingExamReportLearningSuggestionInput() {},
   };
 }
 

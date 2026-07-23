@@ -393,6 +393,13 @@
       "when": 1784829635232,
       "tag": "20260723033000_p1_rc_08_organization_analytics_recipient_snapshot",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1784838364764,
+      "tag": "20260723043000_p1_rc_08_learning_suggestion_lifecycle",
+      "breakpoints": true
     }
   ]
 }

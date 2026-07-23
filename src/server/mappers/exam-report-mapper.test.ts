@@ -39,6 +39,12 @@ function createExamReportRow(
       questionDetails: [],
     },
     learning_suggestion_snapshot: null,
+    learning_suggestion_status: null,
+    learning_suggestion_attempt_count: null,
+    learning_suggestion_input_digest: null,
+    learning_suggestion_claimed_at: null,
+    learning_suggestion_completed_at: null,
+    learning_suggestion_failure_category: null,
     generated_at: generatedAt,
     started_at: startedAt,
     created_at: createdAt,
@@ -100,6 +106,11 @@ describe("exam report mapper", () => {
         questionDetails: [],
       },
       learningSuggestionSnapshot: null,
+      learningSuggestionLifecycle: {
+        status: "unavailable",
+        failureCategory: null,
+        canRetry: false,
+      },
     });
   });
 });

@@ -150,6 +150,7 @@ describe("phase 12 local mock model config runtime", () => {
         version: 1,
         templateHash: "learning_suggestion_v1_baseline",
       },
+      hardTimeoutMs: 30_000,
     });
 
     expect(appendedInputs).toHaveLength(1);

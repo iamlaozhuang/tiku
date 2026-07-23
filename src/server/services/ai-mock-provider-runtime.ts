@@ -30,7 +30,16 @@ export type LearningSuggestionMockContext = {
   modelConfigSnapshot: ModelConfigSnapshot;
   promptTemplate: AiMockProviderPromptTemplateSnapshot;
   startedAt?: Date;
+  signal?: AbortSignal;
+  hardTimeoutMs: 30_000;
 };
+
+export class LearningSuggestionRuntimeTimeoutError extends Error {
+  constructor() {
+    super("Learning suggestion Provider timed out.");
+    this.name = "LearningSuggestionRuntimeTimeoutError";
+  }
+}
 
 export type AiMockProviderRuntimeOptions = {
   provider: MockAiProvider;
@@ -48,6 +57,7 @@ export function createAiMockProviderRuntime(
 
   return {
     async generateLearningSuggestion(context: LearningSuggestionMockContext) {
+      context.signal?.throwIfAborted();
       if (
         context.modelConfigSnapshot.aiFuncType !== "learning_suggestion" ||
         context.promptTemplate.promptTemplateKey !== "learning_suggestion_v1" ||
@@ -61,12 +71,54 @@ export function createAiMockProviderRuntime(
       const providerVariables = serializeLearningSuggestionProviderVariables(
         context.learningSuggestionInput,
       );
-      const providerResult = await options.provider.generateLearningSuggestion({
-        rawPrompt: providerVariables,
-        rawAnswer: "",
-        modelConfigSnapshot: context.modelConfigSnapshot,
-        promptTemplate: context.promptTemplate,
+      const providerAbortController = new AbortController();
+      const abortFromCaller = () => providerAbortController.abort();
+      context.signal?.addEventListener("abort", abortFromCaller, {
+        once: true,
       });
+      if (context.signal?.aborted) {
+        providerAbortController.abort();
+      }
+      let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<never>((_resolve, reject) => {
+        timeoutHandle = setTimeout(() => {
+          reject(new LearningSuggestionRuntimeTimeoutError());
+          providerAbortController.abort();
+        }, context.hardTimeoutMs);
+        providerAbortController.signal.addEventListener(
+          "abort",
+          () => {
+            if (context.signal?.aborted) {
+              reject(
+                context.signal.reason ??
+                  new Error("Learning suggestion Provider was aborted."),
+              );
+            }
+          },
+          { once: true },
+        );
+      });
+      let providerResult: Awaited<
+        ReturnType<MockAiProvider["generateLearningSuggestion"]>
+      >;
+      try {
+        providerResult = await Promise.race([
+          options.provider.generateLearningSuggestion({
+            rawPrompt: providerVariables,
+            rawAnswer: "",
+            modelConfigSnapshot: context.modelConfigSnapshot,
+            promptTemplate: context.promptTemplate,
+            signal: providerAbortController.signal,
+          }),
+          timeoutPromise,
+        ]);
+      } finally {
+        if (timeoutHandle !== undefined) {
+          clearTimeout(timeoutHandle);
+        }
+        context.signal?.removeEventListener("abort", abortFromCaller);
+      }
+      context.signal?.throwIfAborted();
       const completedAt = now();
       const redactedSnapshots = createAiCallLogRedactedSnapshots({
         prompt: {
@@ -126,8 +178,11 @@ export function createAiMockProviderRuntime(
         startedAt,
         completedAt,
       } satisfies AppendAiCallLogInput;
+      context.signal?.throwIfAborted();
       const aiCallLog =
         await options.aiCallLogRepository.appendAiCallLog(aiCallLogInput);
+
+      context.signal?.throwIfAborted();
 
       return {
         learningSuggestion: providerResult.learningSuggestion,

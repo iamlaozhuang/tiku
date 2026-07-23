@@ -2421,6 +2421,14 @@ function createPostgresExamReportRepository(
               mapExamReportMockExamRow(ownedMockExam),
             ),
             learning_suggestion_snapshot: null,
+            learning_suggestion_status:
+              ownedMockExam.exam_status === "completed" ? "pending" : null,
+            learning_suggestion_attempt_count:
+              ownedMockExam.exam_status === "completed" ? 0 : null,
+            learning_suggestion_input_digest: null,
+            learning_suggestion_claimed_at: null,
+            learning_suggestion_completed_at: null,
+            learning_suggestion_failure_category: null,
             generated_at: input.generatedAt,
           })
           .onConflictDoNothing({ target: examReport.mock_exam_id })
@@ -2528,6 +2536,14 @@ function createPostgresExamReportRepository(
             total_score: ownedMockExam.total_score,
             duration_second: durationSecond,
             learning_suggestion_snapshot: null,
+            learning_suggestion_status:
+              ownedMockExam.exam_status === "completed" ? "pending" : null,
+            learning_suggestion_attempt_count:
+              ownedMockExam.exam_status === "completed" ? 0 : null,
+            learning_suggestion_input_digest: null,
+            learning_suggestion_claimed_at: null,
+            learning_suggestion_completed_at: null,
+            learning_suggestion_failure_category: null,
             updated_at: input.generatedAt,
           })
           .where(
@@ -2554,7 +2570,7 @@ function createPostgresExamReportRepository(
         );
       });
     },
-    async updateExamReportLearningSuggestionSnapshot(input) {
+    async claimExamReportLearningSuggestion(input) {
       const database = getDatabase();
       const userId = await findUserIdByPublicId(database, input.userPublicId);
 
@@ -2562,25 +2578,195 @@ function createPostgresExamReportRepository(
         throw new Error("Exam report learning suggestion user is unavailable.");
       }
 
+      return database.transaction(async (transaction) => {
+        const claimableCondition =
+          input.claimMode === "automatic"
+            ? and(
+                eq(examReport.learning_suggestion_status, "pending"),
+                eq(examReport.learning_suggestion_attempt_count, 0),
+                isNull(examReport.learning_suggestion_input_digest),
+              )
+            : or(
+                and(
+                  eq(examReport.learning_suggestion_status, "pending"),
+                  eq(examReport.learning_suggestion_attempt_count, 0),
+                  isNull(examReport.learning_suggestion_input_digest),
+                  lte(examReport.updated_at, input.pendingRecoveryBefore),
+                ),
+                and(
+                  eq(examReport.learning_suggestion_status, "failed"),
+                  sql`${examReport.learning_suggestion_attempt_count} < 3`,
+                  eq(
+                    examReport.learning_suggestion_input_digest,
+                    input.inputDigest,
+                  ),
+                  sql`${examReport.learning_suggestion_failure_category} in ('configuration_unavailable', 'provider_failed', 'timeout')`,
+                ),
+                and(
+                  eq(examReport.learning_suggestion_status, "running"),
+                  sql`${examReport.learning_suggestion_attempt_count} < 3`,
+                  eq(
+                    examReport.learning_suggestion_input_digest,
+                    input.inputDigest,
+                  ),
+                  lte(
+                    examReport.learning_suggestion_claimed_at,
+                    input.staleRunningBefore,
+                  ),
+                ),
+              );
+        const claimedRows = await transaction
+          .update(examReport)
+          .set({
+            learning_suggestion_status: "running",
+            learning_suggestion_attempt_count: sql`${examReport.learning_suggestion_attempt_count} + 1`,
+            learning_suggestion_input_digest: input.inputDigest,
+            learning_suggestion_claimed_at: input.claimedAt,
+            learning_suggestion_completed_at: null,
+            learning_suggestion_failure_category: null,
+            learning_suggestion_snapshot: null,
+            updated_at: input.claimedAt,
+          })
+          .where(
+            and(
+              eq(examReport.user_id, userId),
+              eq(examReport.public_id, input.publicId),
+              eq(examReport.exam_status, "completed"),
+              eq(examReport.report_revision, input.expectedReportRevision),
+              claimableCondition,
+            ),
+          )
+          .returning({
+            reportRevision: examReport.report_revision,
+            attemptCount: examReport.learning_suggestion_attempt_count,
+            inputDigest: examReport.learning_suggestion_input_digest,
+            claimedAt: examReport.learning_suggestion_claimed_at,
+          });
+
+        if (claimedRows.length > 1) {
+          throw new Error(
+            "Exam report learning suggestion claim cardinality is invalid.",
+          );
+        }
+        const claimed = claimedRows[0];
+        if (
+          claimed === undefined ||
+          claimed.attemptCount === null ||
+          claimed.inputDigest === null ||
+          claimed.claimedAt === null
+        ) {
+          return null;
+        }
+        return {
+          userPublicId: input.userPublicId,
+          publicId: input.publicId,
+          reportRevision: claimed.reportRevision,
+          attemptCount: claimed.attemptCount,
+          inputDigest: claimed.inputDigest,
+          claimedAt: claimed.claimedAt,
+        };
+      });
+    },
+    async finalizeExamReportLearningSuggestion(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+      if (userId === null) {
+        throw new Error("Exam report learning suggestion user is unavailable.");
+      }
       const updatedRows = await database
         .update(examReport)
         .set({
+          learning_suggestion_status: "succeeded",
           learning_suggestion_snapshot: input.learningSuggestionSnapshot,
-          updated_at: getNow(options),
+          learning_suggestion_completed_at: input.completedAt,
+          learning_suggestion_failure_category: null,
+          updated_at: input.completedAt,
         })
         .where(
           and(
             eq(examReport.user_id, userId),
             eq(examReport.public_id, input.publicId),
-            eq(examReport.exam_status, "completed"),
-            eq(examReport.report_revision, input.expectedReportRevision),
-            isNull(examReport.learning_suggestion_snapshot),
+            eq(examReport.report_revision, input.reportRevision),
+            eq(examReport.learning_suggestion_status, "running"),
+            eq(
+              examReport.learning_suggestion_attempt_count,
+              input.attemptCount,
+            ),
+            eq(examReport.learning_suggestion_input_digest, input.inputDigest),
+            eq(examReport.learning_suggestion_claimed_at, input.claimedAt),
           ),
         )
         .returning({ id: examReport.id });
-
       if (updatedRows.length !== 1) {
-        throw new Error("Exam report learning suggestion revision conflict.");
+        throw new Error("Exam report learning suggestion finalize conflict.");
+      }
+    },
+    async failExamReportLearningSuggestion(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+      if (userId === null) {
+        throw new Error("Exam report learning suggestion user is unavailable.");
+      }
+      const updatedRows = await database
+        .update(examReport)
+        .set({
+          learning_suggestion_status: "failed",
+          learning_suggestion_snapshot: null,
+          learning_suggestion_completed_at: input.completedAt,
+          learning_suggestion_failure_category: input.failureCategory,
+          updated_at: input.completedAt,
+        })
+        .where(
+          and(
+            eq(examReport.user_id, userId),
+            eq(examReport.public_id, input.publicId),
+            eq(examReport.report_revision, input.reportRevision),
+            eq(examReport.learning_suggestion_status, "running"),
+            eq(
+              examReport.learning_suggestion_attempt_count,
+              input.attemptCount,
+            ),
+            eq(examReport.learning_suggestion_input_digest, input.inputDigest),
+            eq(examReport.learning_suggestion_claimed_at, input.claimedAt),
+          ),
+        )
+        .returning({ id: examReport.id });
+      if (updatedRows.length !== 1) {
+        throw new Error("Exam report learning suggestion failure conflict.");
+      }
+    },
+    async failPendingExamReportLearningSuggestionInput(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+      if (userId === null) {
+        throw new Error("Exam report learning suggestion user is unavailable.");
+      }
+      const updatedRows = await database
+        .update(examReport)
+        .set({
+          learning_suggestion_status: "failed",
+          learning_suggestion_attempt_count: 0,
+          learning_suggestion_input_digest: null,
+          learning_suggestion_claimed_at: null,
+          learning_suggestion_completed_at: input.completedAt,
+          learning_suggestion_failure_category: "input_unavailable",
+          learning_suggestion_snapshot: null,
+          updated_at: input.completedAt,
+        })
+        .where(
+          and(
+            eq(examReport.user_id, userId),
+            eq(examReport.public_id, input.publicId),
+            eq(examReport.report_revision, input.expectedReportRevision),
+            eq(examReport.learning_suggestion_status, "pending"),
+            eq(examReport.learning_suggestion_attempt_count, 0),
+          ),
+        )
+        .returning({ id: examReport.id });
+      if (updatedRows.length !== 1) {
+        throw new Error(
+          "Exam report learning suggestion input failure conflict.",
+        );
       }
     },
   };
@@ -3609,6 +3795,12 @@ function mapExamReportListRow(
     report_revision: null,
     report_snapshot: {},
     learning_suggestion_snapshot: null,
+    learning_suggestion_status: null,
+    learning_suggestion_attempt_count: null,
+    learning_suggestion_input_digest: null,
+    learning_suggestion_claimed_at: null,
+    learning_suggestion_completed_at: null,
+    learning_suggestion_failure_category: null,
     generated_at: getMockExamRecordGeneratedAt(attempt),
     started_at: attempt.started_at,
     created_at: attempt.created_at,
@@ -3622,6 +3814,21 @@ function mapExamReportRow(
   paperName: string,
   startedAt: Date,
 ): ExamReportRow {
+  const learningSuggestionFailureCategory =
+    row.learning_suggestion_failure_category;
+  if (
+    learningSuggestionFailureCategory !== null &&
+    ![
+      "configuration_unavailable",
+      "input_unavailable",
+      "provider_failed",
+      "timeout",
+    ].includes(learningSuggestionFailureCategory)
+  ) {
+    throw new Error(
+      "Exam report learning suggestion failure category is invalid.",
+    );
+  }
   return {
     id: row.id,
     public_id: row.public_id,
@@ -3643,6 +3850,13 @@ function mapExamReportRow(
       row.learning_suggestion_snapshot === null
         ? null
         : asRecord(row.learning_suggestion_snapshot),
+    learning_suggestion_status: row.learning_suggestion_status,
+    learning_suggestion_attempt_count: row.learning_suggestion_attempt_count,
+    learning_suggestion_input_digest: row.learning_suggestion_input_digest,
+    learning_suggestion_claimed_at: row.learning_suggestion_claimed_at,
+    learning_suggestion_completed_at: row.learning_suggestion_completed_at,
+    learning_suggestion_failure_category:
+      learningSuggestionFailureCategory as ExamReportRow["learning_suggestion_failure_category"],
     generated_at: row.generated_at,
     started_at: startedAt,
     created_at: row.created_at,

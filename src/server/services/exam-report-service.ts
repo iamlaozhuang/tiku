@@ -9,8 +9,12 @@ import type {
   ExamReportResultDto,
 } from "../contracts/exam-report-contract";
 import {
+  EXAM_REPORT_LEARNING_SUGGESTION_PENDING_RECOVERY_MS,
+  EXAM_REPORT_LEARNING_SUGGESTION_STALE_MS,
+  EXAM_REPORT_LEARNING_SUGGESTION_TIMEOUT_MS,
   mapExamReportDetailToApi,
   mapExamReportSummaryToApi,
+  projectExamReportLearningSuggestionLifecycle,
 } from "../mappers/exam-report-mapper";
 import { buildExamReportSnapshot } from "../repositories/exam-report-repository";
 import {
@@ -27,6 +31,7 @@ import type {
   AiMockProviderPromptTemplateSnapshot,
   LearningSuggestionMockContext,
 } from "./ai-mock-provider-runtime";
+import { LearningSuggestionRuntimeTimeoutError } from "./ai-mock-provider-runtime";
 import type { ModelConfigSnapshot } from "../models/ai-rag";
 import {
   buildLearningSuggestionInput,
@@ -176,6 +181,7 @@ async function getAuthorizedReport(
   userContext: ExamReportUserContext,
   publicId: string,
 ): Promise<ExamReportRow | ApiResponse<null>> {
+  const scopes = await listScopes(repository, userContext);
   const report = await repository.findExamReportByPublicId({
     userPublicId: userContext.userPublicId,
     publicId,
@@ -184,8 +190,6 @@ async function getAuthorizedReport(
   if (report === null) {
     return createExamReportNotFoundResponse();
   }
-
-  const scopes = await listScopes(repository, userContext);
 
   if (!hasEffectiveAuthorization(scopes, report)) {
     return createExamReportNotFoundResponse();
@@ -201,6 +205,9 @@ function isExamReportRow(
 }
 
 function createLearningSuggestionInput(report: ExamReportRow) {
+  if (report.report_revision === null || report.report_revision <= 0) {
+    throw new LearningSuggestionInputIntegrityError();
+  }
   return buildLearningSuggestionInput({
     report: {
       publicId: report.public_id,
@@ -218,6 +225,128 @@ function createLearningSuggestionInput(report: ExamReportRow) {
       reportSnapshot: report.report_snapshot,
     },
   });
+}
+
+type LearningSuggestionAttemptDisposition =
+  | "succeeded"
+  | "failed"
+  | "not_claimed"
+  | "stale"
+  | "input_unavailable";
+
+async function executeLearningSuggestionAttempt(
+  repository: ExamReportRepository,
+  report: ExamReportRow,
+  userContext: ExamReportUserContext,
+  claimMode: "automatic" | "manual",
+  clock: ExamReportClock,
+  options: ExamReportLearningSuggestionOptions | undefined,
+): Promise<LearningSuggestionAttemptDisposition> {
+  const reportRevision = report.report_revision;
+  if (reportRevision === null || reportRevision <= 0) {
+    return "input_unavailable";
+  }
+  let learningSuggestionInput: LearningSuggestionInput;
+  try {
+    learningSuggestionInput = createLearningSuggestionInput(report);
+  } catch (error) {
+    if (!(error instanceof LearningSuggestionInputIntegrityError)) {
+      throw error;
+    }
+    if (report.learning_suggestion_status === "pending") {
+      try {
+        await repository.failPendingExamReportLearningSuggestionInput({
+          userPublicId: userContext.userPublicId,
+          publicId: report.public_id,
+          expectedReportRevision: reportRevision,
+          completedAt: clock.now(),
+        });
+      } catch {
+        return "stale";
+      }
+    }
+    return "input_unavailable";
+  }
+
+  const claimedAt = clock.now();
+  const attempt = await repository.claimExamReportLearningSuggestion({
+    userPublicId: userContext.userPublicId,
+    publicId: report.public_id,
+    expectedReportRevision: learningSuggestionInput.reportRevision,
+    inputDigest: learningSuggestionInput.inputDigest,
+    claimMode,
+    claimedAt,
+    pendingRecoveryBefore: new Date(
+      claimedAt.getTime() - EXAM_REPORT_LEARNING_SUGGESTION_PENDING_RECOVERY_MS,
+    ),
+    staleRunningBefore: new Date(
+      claimedAt.getTime() - EXAM_REPORT_LEARNING_SUGGESTION_STALE_MS,
+    ),
+  });
+
+  if (attempt === null) {
+    return "not_claimed";
+  }
+
+  if (options === undefined) {
+    try {
+      await repository.failExamReportLearningSuggestion({
+        ...attempt,
+        failureCategory: "configuration_unavailable",
+        completedAt: clock.now(),
+      });
+      return "failed";
+    } catch {
+      return "stale";
+    }
+  }
+
+  let providerCompleted = false;
+  try {
+    const learningSuggestionResult =
+      await options.learningSuggestionRuntime.generateLearningSuggestion({
+        userPublicId: userContext.userPublicId,
+        organizationPublicId: userContext.organizationPublicId ?? null,
+        profession: report.profession,
+        level: report.level,
+        mockExamPublicId: report.mock_exam_public_id,
+        learningSuggestionInput,
+        modelConfigSnapshot: options.modelConfigSnapshot,
+        promptTemplate: options.promptTemplate,
+        startedAt: attempt.claimedAt,
+        hardTimeoutMs: EXAM_REPORT_LEARNING_SUGGESTION_TIMEOUT_MS,
+      });
+    providerCompleted = true;
+    const completedAt = clock.now();
+    await repository.finalizeExamReportLearningSuggestion({
+      ...attempt,
+      learningSuggestionSnapshot: buildLearningSuggestionSnapshot(
+        learningSuggestionInput,
+        learningSuggestionResult,
+        options,
+        completedAt,
+      ),
+      completedAt,
+    });
+    return "succeeded";
+  } catch (error) {
+    if (providerCompleted) {
+      return "stale";
+    }
+    try {
+      await repository.failExamReportLearningSuggestion({
+        ...attempt,
+        failureCategory:
+          error instanceof LearningSuggestionRuntimeTimeoutError
+            ? "timeout"
+            : "provider_failed",
+        completedAt: clock.now(),
+      });
+      return "failed";
+    } catch {
+      return "stale";
+    }
+  }
 }
 
 export function createExamReportService(
@@ -260,7 +389,7 @@ export function createExamReportService(
       }
 
       return createSuccessResponse({
-        examReport: mapExamReportDetailToApi(report),
+        examReport: mapExamReportDetailToApi(report, clock.now()),
       });
     },
 
@@ -335,8 +464,24 @@ export function createExamReportService(
           ? await repository.createExamReport(reportInput)
           : await repository.rebuildExamReport(reportInput);
 
+      let currentReport = report;
+      if (report.learning_suggestion_status === "pending") {
+        await executeLearningSuggestionAttempt(
+          repository,
+          report,
+          userContext,
+          "automatic",
+          clock,
+          learningSuggestionOptions,
+        );
+        currentReport =
+          (await repository.findExamReportByPublicId({
+            userPublicId: userContext.userPublicId,
+            publicId: report.public_id,
+          })) ?? report;
+      }
       return createSuccessResponse({
-        examReport: mapExamReportDetailToApi(report),
+        examReport: mapExamReportDetailToApi(currentReport, clock.now()),
       });
     },
 
@@ -353,85 +498,87 @@ export function createExamReportService(
         return report;
       }
 
-      if (learningSuggestionOptions === undefined) {
+      if (report.learning_suggestion_status === null) {
         return createErrorResponse(
-          422321,
-          "Learning suggestion retry is not available in Phase 4.",
+          409323,
+          "Learning suggestion input is unavailable.",
         );
       }
 
-      let learningSuggestionInput: LearningSuggestionInput;
-      try {
-        learningSuggestionInput = createLearningSuggestionInput(report);
-        if (report.learning_suggestion_snapshot !== null) {
+      if (report.learning_suggestion_status === "succeeded") {
+        try {
+          const learningSuggestionInput = createLearningSuggestionInput(report);
+          if (report.learning_suggestion_snapshot === null) {
+            throw new LearningSuggestionInputIntegrityError();
+          }
           validatePersistedLearningSuggestionSnapshot(
             report.learning_suggestion_snapshot,
             learningSuggestionInput,
-            {
-              modelConfigSnapshot: {
-                modelConfigPublicId:
-                  learningSuggestionOptions.modelConfigSnapshot
-                    .modelConfigPublicId,
-                aiFuncType:
-                  learningSuggestionOptions.modelConfigSnapshot.aiFuncType,
-                modelName:
-                  learningSuggestionOptions.modelConfigSnapshot.modelName,
-                providerDisplayName:
-                  learningSuggestionOptions.modelConfigSnapshot
-                    .providerDisplayName,
-                configVersion:
-                  learningSuggestionOptions.modelConfigSnapshot.configVersion,
-              },
-              promptTemplate: {
-                promptTemplateKey:
-                  learningSuggestionOptions.promptTemplate.promptTemplateKey,
-                version: learningSuggestionOptions.promptTemplate.version,
-                templateHash:
-                  learningSuggestionOptions.promptTemplate.templateHash,
-              },
-            },
+            learningSuggestionOptions === undefined
+              ? undefined
+              : {
+                  modelConfigSnapshot: {
+                    modelConfigPublicId:
+                      learningSuggestionOptions.modelConfigSnapshot
+                        .modelConfigPublicId,
+                    aiFuncType:
+                      learningSuggestionOptions.modelConfigSnapshot.aiFuncType,
+                    modelName:
+                      learningSuggestionOptions.modelConfigSnapshot.modelName,
+                    providerDisplayName:
+                      learningSuggestionOptions.modelConfigSnapshot
+                        .providerDisplayName,
+                    configVersion:
+                      learningSuggestionOptions.modelConfigSnapshot
+                        .configVersion,
+                  },
+                  promptTemplate: {
+                    promptTemplateKey:
+                      learningSuggestionOptions.promptTemplate
+                        .promptTemplateKey,
+                    version: learningSuggestionOptions.promptTemplate.version,
+                    templateHash:
+                      learningSuggestionOptions.promptTemplate.templateHash,
+                  },
+                },
           );
           return createSuccessResponse(null);
+        } catch (error) {
+          if (error instanceof LearningSuggestionInputIntegrityError) {
+            return createErrorResponse(
+              409323,
+              "Learning suggestion input is unavailable.",
+            );
+          }
+          throw error;
         }
-      } catch (error) {
-        if (error instanceof LearningSuggestionInputIntegrityError) {
-          return createErrorResponse(
+      }
+      const lifecycle = projectExamReportLearningSuggestionLifecycle(
+        report,
+        clock.now(),
+      );
+      if (!lifecycle.canRetry) {
+        return createErrorResponse(
+          409324,
+          "Learning suggestion is not retryable.",
+        );
+      }
+      const disposition = await executeLearningSuggestionAttempt(
+        repository,
+        report,
+        userContext,
+        "manual",
+        clock,
+        learningSuggestionOptions,
+      );
+      return disposition === "input_unavailable"
+        ? createErrorResponse(
             409323,
             "Learning suggestion input is unavailable.",
-          );
-        }
-        throw error;
-      }
-
-      const generatedAt = clock.now();
-      const learningSuggestionResult =
-        await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
-          {
-            userPublicId: userContext.userPublicId,
-            organizationPublicId: userContext.organizationPublicId ?? null,
-            profession: report.profession,
-            level: report.level,
-            mockExamPublicId: report.mock_exam_public_id,
-            learningSuggestionInput,
-            modelConfigSnapshot: learningSuggestionOptions.modelConfigSnapshot,
-            promptTemplate: learningSuggestionOptions.promptTemplate,
-            startedAt: generatedAt,
-          },
-        );
-
-      await repository.updateExamReportLearningSuggestionSnapshot({
-        userPublicId: userContext.userPublicId,
-        publicId: report.public_id,
-        expectedReportRevision: learningSuggestionInput.reportRevision,
-        learningSuggestionSnapshot: buildLearningSuggestionSnapshot(
-          learningSuggestionInput,
-          learningSuggestionResult,
-          learningSuggestionOptions,
-          generatedAt,
-        ),
-      });
-
-      return createSuccessResponse(null);
+          )
+        : disposition === "stale"
+          ? createErrorResponse(409325, "Learning suggestion attempt is stale.")
+          : createSuccessResponse(null);
     },
   };
 }

@@ -81,6 +81,12 @@ export const mockExamDeadlineTaskStatusValues = [
   "failed",
   "cancelled",
 ] as const;
+export const learningSuggestionStatusValues = [
+  "pending",
+  "running",
+  "succeeded",
+  "failed",
+] as const;
 
 export const examModeEnum = pgEnum("exam_mode", examModeValues);
 export const examStatusEnum = pgEnum("exam_status", examStatusValues);
@@ -103,6 +109,10 @@ export const mistakeBookStatusEnum = pgEnum(
 export const mockExamDeadlineTaskStatusEnum = pgEnum(
   "mock_exam_deadline_task_status",
   mockExamDeadlineTaskStatusValues,
+);
+export const learningSuggestionStatusEnum = pgEnum(
+  "learning_suggestion_status",
+  learningSuggestionStatusValues,
 );
 
 export const practice = pgTable(
@@ -369,18 +379,96 @@ export const examReport = pgTable(
     total_score: scoreColumn("total_score"),
     duration_second: integer("duration_second").notNull(),
     learning_suggestion_snapshot: jsonb("learning_suggestion_snapshot"),
+    learning_suggestion_status: learningSuggestionStatusEnum(
+      "learning_suggestion_status",
+    ),
+    learning_suggestion_attempt_count: integer(
+      "learning_suggestion_attempt_count",
+    ),
+    learning_suggestion_input_digest: text("learning_suggestion_input_digest"),
+    learning_suggestion_claimed_at: nullableTimestampColumn(
+      "learning_suggestion_claimed_at",
+    ),
+    learning_suggestion_completed_at: nullableTimestampColumn(
+      "learning_suggestion_completed_at",
+    ),
+    learning_suggestion_failure_category: text(
+      "learning_suggestion_failure_category",
+    ),
     generated_at: timestampColumn("generated_at"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
   (table) => [
     check("chk_exam_report_report_revision", sql`${table.report_revision} > 0`),
+    check(
+      "chk_exam_report_learning_suggestion_lifecycle",
+      sql`(
+        (${table.learning_suggestion_status} is null
+          and ${table.learning_suggestion_attempt_count} is null
+          and ${table.learning_suggestion_input_digest} is null
+          and ${table.learning_suggestion_claimed_at} is null
+          and ${table.learning_suggestion_completed_at} is null
+          and ${table.learning_suggestion_failure_category} is null)
+        or
+        (${table.exam_status} = 'completed'::exam_status and (
+          (${table.learning_suggestion_status} = 'pending'::learning_suggestion_status
+            and ${table.learning_suggestion_attempt_count} = 0
+            and ${table.learning_suggestion_input_digest} is null
+            and ${table.learning_suggestion_claimed_at} is null
+            and ${table.learning_suggestion_completed_at} is null
+            and ${table.learning_suggestion_failure_category} is null
+            and ${table.learning_suggestion_snapshot} is null)
+          or
+          (${table.learning_suggestion_status} = 'running'::learning_suggestion_status
+            and ${table.learning_suggestion_attempt_count} between 1 and 3
+            and ${table.learning_suggestion_input_digest} ~ '^[0-9a-f]{64}$'
+            and ${table.learning_suggestion_claimed_at} is not null
+            and ${table.learning_suggestion_completed_at} is null
+            and ${table.learning_suggestion_failure_category} is null
+            and ${table.learning_suggestion_snapshot} is null)
+          or
+          (${table.learning_suggestion_status} = 'succeeded'::learning_suggestion_status
+            and ${table.learning_suggestion_attempt_count} between 1 and 3
+            and ${table.learning_suggestion_input_digest} ~ '^[0-9a-f]{64}$'
+            and ${table.learning_suggestion_claimed_at} is not null
+            and ${table.learning_suggestion_completed_at} is not null
+            and ${table.learning_suggestion_failure_category} is null
+            and ${table.learning_suggestion_snapshot} is not null)
+          or
+          (${table.learning_suggestion_status} = 'failed'::learning_suggestion_status
+            and ${table.learning_suggestion_attempt_count} between 0 and 3
+            and ${table.learning_suggestion_completed_at} is not null
+            and ${table.learning_suggestion_failure_category} in (
+              'configuration_unavailable',
+              'input_unavailable',
+              'provider_failed',
+              'timeout'
+            )
+            and ${table.learning_suggestion_snapshot} is null
+            and (
+              (${table.learning_suggestion_attempt_count} = 0
+                and ${table.learning_suggestion_input_digest} is null
+                and ${table.learning_suggestion_claimed_at} is null
+                and ${table.learning_suggestion_failure_category} = 'input_unavailable')
+              or
+              (${table.learning_suggestion_attempt_count} between 1 and 3
+                and ${table.learning_suggestion_input_digest} ~ '^[0-9a-f]{64}$'
+                and ${table.learning_suggestion_claimed_at} is not null)
+            ))
+        ))
+      )`,
+    ),
     uniqueIndex("udx_exam_report_public_id").on(table.public_id),
     uniqueIndex("udx_exam_report_mock_exam_id").on(table.mock_exam_id),
     index("idx_exam_report_user_id").on(table.user_id),
     index("idx_exam_report_paper_id").on(table.paper_id),
     index("idx_exam_report_generated_at").on(table.generated_at),
     index("idx_exam_report_exam_status").on(table.exam_status),
+    index("idx_exam_report_learning_suggestion_status_updated_at").on(
+      table.learning_suggestion_status,
+      table.updated_at,
+    ),
   ],
 );
 

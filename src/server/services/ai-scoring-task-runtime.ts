@@ -83,6 +83,10 @@ export type AiScoringTaskRuntimeOptions = {
   createPublicId?: () => string;
   now?: () => Date;
   executeWithTimeout?: ExecuteWithTimeout;
+  onCompletedScoringReport(input: {
+    userPublicId: string;
+    mockExamPublicId: string;
+  }): Promise<void>;
 };
 
 export type AiScoringTaskEnqueueInputFactoryOptions = {
@@ -512,6 +516,16 @@ export function createAiScoringTaskRuntime(
           aiCallLogPublicId: executionResult.aiCallLogPublicId,
           completedAt: now(),
         });
+
+        try {
+          await options.onCompletedScoringReport({
+            userPublicId: completedTask.actorPublicId,
+            mockExamPublicId: completedTask.mockExamPublicId,
+          });
+        } catch {
+          // Scoring is already committed. The report remains pending and can
+          // be recovered by the authorized manual lifecycle command.
+        }
 
         return {
           status: "succeeded",

@@ -13,6 +13,7 @@ export type MockLearningSuggestionInput = {
     version: number;
     templateHash: string;
   };
+  signal?: AbortSignal;
 };
 
 export type MockLearningSuggestionResult = {
@@ -58,12 +59,14 @@ function createMockProviderRedactionReference(
 export function createMockAiProvider(): MockAiProvider {
   return {
     async generateLearningSuggestion(input) {
+      input.signal?.throwIfAborted();
       const promptTokenCount =
         estimateTokenCount(input.rawPrompt) +
         estimateTokenCount(input.rawAnswer);
       const completionTokenCount = 24;
       const learningSuggestion =
         "本地模拟学习建议：复盘错题对应知识点，先回看标准答案结构，再完成一次同类题训练。";
+      input.signal?.throwIfAborted();
 
       return {
         learningSuggestion,
