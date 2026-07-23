@@ -33,6 +33,18 @@ const task: AiScoringTaskRecord = {
     questionPublicId: "question_public_001",
     studentAnswer: "immutable answer",
     maxScore: "5.0",
+    scoringPoints: [
+      {
+        scoringPointPublicId: "scoring_point_public_1",
+        label: "first",
+        maxScore: 2,
+      },
+      {
+        scoringPointPublicId: "scoring_point_public_2",
+        label: "second",
+        maxScore: 3,
+      },
+    ],
   },
   authorizationSnapshot: {
     authorizationPublicId: "personal_auth_public_001",
@@ -126,6 +138,22 @@ describe("durable AI scoring task runtime", () => {
         score: "4.0",
         resultSnapshot: {
           scoringStatus: "scored",
+          scoringPoints: [
+            {
+              scoringPointPublicId: "scoring_point_public_2",
+              isHit: true,
+              score: 2.4,
+              reason: "second",
+            },
+            {
+              scoringPointPublicId: "scoring_point_public_1",
+              isHit: true,
+              score: 1.7,
+              reason: "first",
+            },
+          ],
+          overallComment: "valid",
+          improvementSuggestion: null,
           modelConfigPublicId: "model_config_public_001",
           promptTemplateKey: "ai_scoring_v1",
           promptTemplateVersion: 3,
@@ -183,6 +211,23 @@ describe("durable AI scoring task runtime", () => {
       score: "4.0",
       resultSnapshot: {
         scoringStatus: "scored",
+        scoringPoints: [
+          {
+            scoringPointPublicId: "scoring_point_public_1",
+            isHit: true,
+            score: 1.5,
+            reason: "first",
+          },
+          {
+            scoringPointPublicId: "scoring_point_public_2",
+            isHit: true,
+            score: 2.5,
+            reason: "second",
+          },
+        ],
+        totalScore: 4,
+        overallComment: "valid",
+        improvementSuggestion: null,
         modelConfigPublicId: "model_config_public_001",
         promptTemplateKey: "ai_scoring_v1",
         promptTemplateVersion: 3,
@@ -199,6 +244,209 @@ describe("durable AI scoring task runtime", () => {
       aiCallLogPublicId: "ai_call_log_public_001",
       completedAt: now,
     });
+  });
+
+  it("fails instead of completing a durable task with duplicate scoring points", async () => {
+    const repository = createRepository({
+      failAiScoringTaskAttempt: vi.fn(async () => ({
+        ...task,
+        taskStatus: "failed" as const,
+      })),
+    });
+    const runtime = createAiScoringTaskRuntime({
+      repository,
+      executor: {
+        execute: vi.fn(async () => ({
+          score: "4.0",
+          resultSnapshot: {
+            scoringStatus: "scored",
+            scoringPoints: [
+              {
+                scoringPointPublicId: "scoring_point_public_1",
+                isHit: true,
+                score: 2,
+                reason: "first",
+              },
+              {
+                scoringPointPublicId: "scoring_point_public_1",
+                isHit: true,
+                score: 2,
+                reason: "duplicate",
+              },
+            ],
+            overallComment: "invalid",
+            improvementSuggestion: null,
+          },
+          aiCallLogPublicId: "ai_call_log_public_001",
+        })),
+      },
+      executeWithTimeout: vi.fn(async (operation) => operation()),
+      now: () => now,
+    });
+
+    await expect(
+      runtime.processNext({ workerPublicId: "worker_public_001" }),
+    ).resolves.toMatchObject({
+      status: "failed",
+      failureCode: "invalid_scoring_result",
+    });
+    expect(repository.completeAiScoringTask).not.toHaveBeenCalled();
+  });
+
+  it("rejects an executor scalar score that differs from canonical points", async () => {
+    const repository = createRepository({
+      failAiScoringTaskAttempt: vi.fn(async () => ({
+        ...task,
+        taskStatus: "failed" as const,
+      })),
+    });
+    const runtime = createAiScoringTaskRuntime({
+      repository,
+      executor: {
+        execute: vi.fn(async () => ({
+          score: "5.0",
+          resultSnapshot: {
+            scoringStatus: "scored",
+            scoringPoints: [
+              {
+                scoringPointPublicId: "scoring_point_public_1",
+                isHit: true,
+                score: 1,
+                reason: "first",
+              },
+              {
+                scoringPointPublicId: "scoring_point_public_2",
+                isHit: true,
+                score: 2,
+                reason: "second",
+              },
+            ],
+            overallComment: "scalar mismatch",
+            improvementSuggestion: null,
+          },
+          aiCallLogPublicId: "ai_call_log_public_001",
+        })),
+      },
+      executeWithTimeout: vi.fn(async (operation) => operation()),
+      now: () => now,
+    });
+
+    await expect(
+      runtime.processNext({ workerPublicId: "worker_public_001" }),
+    ).resolves.toMatchObject({
+      status: "failed",
+      failureCode: "invalid_scoring_result",
+    });
+    expect(repository.completeAiScoringTask).not.toHaveBeenCalled();
+  });
+
+  it("rejects corrupt persisted expected facts before executing", async () => {
+    const corruptTask = {
+      ...task,
+      inputSnapshot: {
+        ...task.inputSnapshot,
+        scoringPoints: [
+          {
+            scoringPointPublicId: "scoring_point_public_1",
+            label: "first",
+            maxScore: 2,
+          },
+          {
+            scoringPointPublicId: "scoring_point_public_1",
+            label: "duplicate first",
+            maxScore: 2,
+          },
+        ],
+      },
+    };
+    const repository = createRepository({
+      claimNextAiScoringTask: vi.fn(async () => corruptTask),
+      failAiScoringTaskAttempt: vi.fn(async () => ({
+        ...corruptTask,
+        taskStatus: "failed" as const,
+      })),
+    });
+    const executor = { execute: vi.fn() };
+    const runtime = createAiScoringTaskRuntime({
+      repository,
+      executor,
+      now: () => now,
+    });
+
+    await expect(
+      runtime.processNext({ workerPublicId: "worker_public_001" }),
+    ).resolves.toMatchObject({
+      status: "failed",
+      failureCode: "invalid_scoring_result",
+    });
+    expect(executor.execute).not.toHaveBeenCalled();
+    expect(repository.completeAiScoringTask).not.toHaveBeenCalled();
+  });
+
+  it("persists only a detached canonical allowlist snapshot", async () => {
+    const providerScoringPoints = [
+      {
+        scoringPointPublicId: "scoring_point_public_2",
+        isHit: true,
+        score: 2.4,
+        reason: "second",
+      },
+      {
+        scoringPointPublicId: "scoring_point_public_1",
+        isHit: true,
+        score: 1.7,
+        reason: "first",
+      },
+    ];
+    const repository = createRepository();
+    const runtime = createAiScoringTaskRuntime({
+      repository,
+      executor: {
+        execute: vi.fn(async () => ({
+          score: "4.0",
+          resultSnapshot: {
+            scoringStatus: "scored",
+            scoringPoints: providerScoringPoints,
+            overallComment: "valid",
+            improvementSuggestion: null,
+            rawProviderPayload: "must-not-persist",
+          },
+          aiCallLogPublicId: "ai_call_log_public_001",
+        })),
+      },
+      executeWithTimeout: vi.fn(async (operation) => operation()),
+      now: () => now,
+    });
+
+    await expect(
+      runtime.processNext({ workerPublicId: "worker_public_001" }),
+    ).resolves.toMatchObject({ status: "succeeded" });
+
+    providerScoringPoints[1]!.reason = "mutated after completion";
+    const completionInput = vi.mocked(repository.completeAiScoringTask).mock
+      .calls[0]?.[0];
+    expect(completionInput?.resultSnapshot).toMatchObject({
+      scoringStatus: "scored",
+      scoringPoints: [
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          score: 1.5,
+          reason: "first",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_2",
+          score: 2.5,
+          reason: "second",
+        },
+      ],
+      totalScore: 4,
+    });
+    expect(JSON.stringify(completionInput?.resultSnapshot)).not.toContain(
+      "rawProviderPayload",
+    );
+    expect(JSON.stringify(completionInput?.resultSnapshot)).not.toContain(
+      "must-not-persist",
+    );
   });
 
   it("fails closed when an executor omits durable call provenance", async () => {

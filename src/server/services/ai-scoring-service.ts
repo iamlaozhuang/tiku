@@ -14,6 +14,11 @@ import {
   type RedactedJsonObject,
 } from "../models/ai-rag";
 import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
+import {
+  AiScoringResultContractError,
+  normalizeAiScoringPointResults,
+  validateAiScoringExpectedFacts,
+} from "./ai-scoring-result-contract";
 
 export type AiScoringStatus =
   | "scored"
@@ -128,49 +133,7 @@ export type AiScoringServiceDependencies = {
 const scoringMaxRetryCount = 3;
 const scoringFallbackNotAllowedReason = "scoring_fallback_not_allowed";
 const scoringRunnerFailedReason = "scoring_runner_failed";
-
-function roundToHalfPoint(score: number): number {
-  return Math.round(score * 2) / 2;
-}
-
-function clampScore(score: number, maxScore: number): number {
-  return Math.min(Math.max(score, 0), maxScore);
-}
-
-function normalizeScoringPointResults(
-  context: AiScoringContext,
-  runnerResult: AiScoringRunnerResult,
-): AiScoringPointResult[] {
-  const scoringPointMaxScoreByPublicId = new Map(
-    context.scoringPoints.map((scoringPoint) => [
-      scoringPoint.scoringPointPublicId,
-      scoringPoint.maxScore,
-    ]),
-  );
-
-  return runnerResult.scoringPoints.map((scoringPoint) => {
-    const scoringPointMaxScore =
-      scoringPointMaxScoreByPublicId.get(scoringPoint.scoringPointPublicId) ??
-      0;
-
-    return {
-      scoringPointPublicId: scoringPoint.scoringPointPublicId,
-      isHit: scoringPoint.isHit,
-      score: clampScore(
-        roundToHalfPoint(scoringPoint.score),
-        scoringPointMaxScore,
-      ),
-      reason: scoringPoint.reason,
-    };
-  });
-}
-
-function sumScore(scoringPoints: AiScoringPointResult[]): number {
-  return scoringPoints.reduce(
-    (totalScore, scoringPoint) => totalScore + scoringPoint.score,
-    0,
-  );
-}
+const invalidScoringResultReason = "invalid_scoring_result";
 
 function createRequestSnapshot(context: AiScoringContext): unknown {
   return {
@@ -324,6 +287,25 @@ function createBaseResult(
   };
 }
 
+function createInvalidScoringResult(
+  context: AiScoringContext,
+  retryCount: number,
+): ExistingAiScoringResult {
+  return createBaseResult(context, {
+    scoringStatus: "scoring_failed",
+    retryCount: retryCount + 1,
+    citations: [],
+    failureReason: invalidScoringResultReason,
+    aiScoringAttemptDraft: createAiScoringAttemptDraft({
+      context,
+      status: "failed",
+      scoringStatus: "scoring_failed",
+      failureCode: invalidScoringResultReason,
+      failureMessage: null,
+    }),
+  });
+}
+
 function isUnanswered(studentAnswer: string): boolean {
   return studentAnswer.trim().length === 0;
 }
@@ -348,6 +330,18 @@ export function createAiScoringService(
       }
 
       const retryCount = context.retryCount ?? 0;
+
+      try {
+        validateAiScoringExpectedFacts({
+          expectedScoringPoints: context.scoringPoints,
+          questionMaxScore: context.maxScore,
+        });
+      } catch (error) {
+        if (error instanceof AiScoringResultContractError) {
+          return createInvalidScoringResult(context, retryCount);
+        }
+        throw error;
+      }
 
       if (!canAttemptScoring(retryCount)) {
         return createBaseResult(context, {
@@ -414,14 +408,11 @@ export function createAiScoringService(
           modelConfigSnapshot: context.modelConfigSnapshot,
           promptTemplate: context.promptTemplate,
         });
-        const scoringPoints = normalizeScoringPointResults(
-          context,
-          runnerResult,
-        );
-        const totalScore = clampScore(
-          sumScore(scoringPoints),
-          context.maxScore,
-        );
+        const { scoringPoints, totalScore } = normalizeAiScoringPointResults({
+          expectedScoringPoints: context.scoringPoints,
+          actualScoringPoints: runnerResult.scoringPoints,
+          questionMaxScore: context.maxScore,
+        });
         const resultSnapshot = {
           scoringPoints,
           totalScore,
@@ -459,21 +450,27 @@ export function createAiScoringService(
         });
       } catch (error) {
         const nextRetryCount = retryCount + 1;
+        const failureReason =
+          error instanceof AiScoringResultContractError
+            ? invalidScoringResultReason
+            : scoringRunnerFailedReason;
         const providerErrorPayload =
-          error instanceof Error
-            ? { message: error.message, name: error.name }
-            : error;
+          error instanceof AiScoringResultContractError
+            ? { code: invalidScoringResultReason }
+            : error instanceof Error
+              ? { message: error.message, name: error.name }
+              : error;
 
         return createBaseResult(context, {
           scoringStatus: "scoring_failed",
           retryCount: nextRetryCount,
           citations: [],
-          failureReason: scoringRunnerFailedReason,
+          failureReason,
           aiScoringAttemptDraft: createAiScoringAttemptDraft({
             context,
             status: "failed",
             scoringStatus: "scoring_failed",
-            failureCode: scoringRunnerFailedReason,
+            failureCode: failureReason,
             failureMessage: providerErrorPayload,
           }),
           aiCallLogDraft: createAiCallLogDraft({

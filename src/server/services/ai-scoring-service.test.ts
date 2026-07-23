@@ -272,6 +272,167 @@ describe("ai scoring service", () => {
     );
   });
 
+  it.each([
+    {
+      name: "duplicate",
+      scoringPoints: [
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          isHit: true,
+          score: 2,
+          reason: "duplicate first",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          isHit: true,
+          score: 2,
+          reason: "duplicate second",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_3",
+          isHit: true,
+          score: 1,
+          reason: "third",
+        },
+      ],
+    },
+    {
+      name: "missing",
+      scoringPoints: [
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          isHit: true,
+          score: 2,
+          reason: "first",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_3",
+          isHit: true,
+          score: 1,
+          reason: "third",
+        },
+      ],
+    },
+    {
+      name: "unknown",
+      scoringPoints: [
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          isHit: true,
+          score: 2,
+          reason: "first",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_unknown",
+          isHit: true,
+          score: 2,
+          reason: "unknown",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_3",
+          isHit: true,
+          score: 1,
+          reason: "third",
+        },
+      ],
+    },
+    {
+      name: "case-conflicting",
+      scoringPoints: [
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          isHit: true,
+          score: 2,
+          reason: "first",
+        },
+        {
+          scoringPointPublicId: "SCORING_POINT_PUBLIC_2",
+          isHit: true,
+          score: 2,
+          reason: "case variant",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_3",
+          isHit: true,
+          score: 1,
+          reason: "third",
+        },
+      ],
+    },
+    {
+      name: "non-finite",
+      scoringPoints: [
+        {
+          scoringPointPublicId: "scoring_point_public_1",
+          isHit: true,
+          score: Number.NaN,
+          reason: "not a number",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_2",
+          isHit: true,
+          score: 2,
+          reason: "second",
+        },
+        {
+          scoringPointPublicId: "scoring_point_public_3",
+          isHit: true,
+          score: 1,
+          reason: "third",
+        },
+      ],
+    },
+  ])(
+    "fails closed for a $name Provider scoring-point set",
+    async ({ scoringPoints }) => {
+      const runner = createRunner({
+        scoringPoints,
+        overallComment: "must not become a successful score",
+        improvementSuggestion: null,
+        providerRequestPayload: { raw: "private request" },
+        providerResponsePayload: { raw: "private response" },
+      });
+      const service = createAiScoringService({ runner });
+
+      const result = await service.scoreSubjectiveAnswer(context);
+
+      expect(result).toMatchObject({
+        scoringStatus: "scoring_failed",
+        scoringPoints: [],
+        failureReason: "invalid_scoring_result",
+        aiCallLogDraft: { callStatus: "failed" },
+        aiScoringAttemptDraft: {
+          status: "failed",
+          failureCode: "invalid_scoring_result",
+        },
+      });
+      expect(JSON.stringify(result)).not.toContain("private request");
+      expect(JSON.stringify(result)).not.toContain("private response");
+    },
+  );
+
+  it("rejects corrupt expected scoring-point identity before calling the runner", async () => {
+    const runner = createRunner({
+      scoringPoints: [],
+      overallComment: "must not run",
+      improvementSuggestion: null,
+      providerRequestPayload: null,
+      providerResponsePayload: null,
+    });
+    const service = createAiScoringService({ runner });
+
+    await expect(
+      service.scoreSubjectiveAnswer({
+        ...context,
+        scoringPoints: [context.scoringPoints[0]!, context.scoringPoints[0]!],
+      }),
+    ).resolves.toMatchObject({
+      scoringStatus: "scoring_failed",
+      failureReason: "invalid_scoring_result",
+    });
+    expect(runner).not.toHaveBeenCalled();
+  });
+
   it("does not fabricate citations when RAG evidence is weak or none", async () => {
     const runner = createRunner({
       scoringPoints: [

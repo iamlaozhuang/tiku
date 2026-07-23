@@ -5,6 +5,12 @@ import type {
   AiScoringTaskRepository,
   EnqueueAiScoringTaskInput,
 } from "../repositories/ai-scoring-task-repository";
+import {
+  AiScoringResultContractError,
+  normalizeAiScoringPointResults,
+  validateAiScoringExpectedFacts,
+  type AiScoringCanonicalResult,
+} from "./ai-scoring-result-contract";
 
 export type EnqueueAiScoringTaskCommand = {
   answerRecordPublicId: string;
@@ -79,6 +85,148 @@ export type AiScoringTaskEnqueueInputFactoryOptions = {
   now?: () => Date;
 };
 
+function invalidScoringResult(): never {
+  throw new AiScoringTaskExecutionError("invalid_scoring_result", false);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return invalidScoringResult();
+  }
+  return value;
+}
+
+function readNullableString(value: unknown): string | null {
+  return value === null ? null : readString(value);
+}
+
+function readStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return invalidScoringResult();
+  }
+
+  const result: string[] = [];
+  for (let index = 0; index < value.length; index += 1) {
+    if (!(index in value)) {
+      return invalidScoringResult();
+    }
+    result.push(readString(value[index]));
+  }
+  return result;
+}
+
+function readCitation(value: unknown): Record<string, unknown> {
+  if (!isRecord(value)) {
+    return invalidScoringResult();
+  }
+
+  const chunkIndex = value.chunkIndex;
+  const score = value.score;
+  const isStale = value.isStale;
+
+  if (
+    typeof chunkIndex !== "number" ||
+    !Number.isInteger(chunkIndex) ||
+    chunkIndex < 0 ||
+    typeof score !== "number" ||
+    !Number.isFinite(score) ||
+    (isStale !== undefined && typeof isStale !== "boolean")
+  ) {
+    return invalidScoringResult();
+  }
+
+  return {
+    chunkPublicId: readString(value.chunkPublicId),
+    generationPublicId: readNullableString(value.generationPublicId),
+    resourcePublicId: readString(value.resourcePublicId),
+    resourceTitle: readString(value.resourceTitle),
+    headingPath: readStringArray(value.headingPath),
+    chunkIndex,
+    chunkText: readString(value.chunkText),
+    textHash: readString(value.textHash),
+    ...(isStale === undefined ? {} : { isStale }),
+    score,
+  };
+}
+
+function copyOptionalString(
+  source: Record<string, unknown>,
+  target: Record<string, unknown>,
+  key: string,
+): void {
+  if (Object.hasOwn(source, key)) {
+    target[key] = readString(source[key]);
+  }
+}
+
+function createCanonicalDurableResultSnapshot(
+  snapshot: unknown,
+  canonicalResult: AiScoringCanonicalResult,
+): Record<string, unknown> {
+  if (!isRecord(snapshot) || snapshot.scoringStatus !== "scored") {
+    return invalidScoringResult();
+  }
+
+  const canonicalSnapshot: Record<string, unknown> = {
+    scoringStatus: "scored",
+    scoringPoints: canonicalResult.scoringPoints.map((scoringPoint) => ({
+      ...scoringPoint,
+    })),
+    totalScore: canonicalResult.totalScore,
+    overallComment: readString(snapshot.overallComment),
+    improvementSuggestion: readNullableString(snapshot.improvementSuggestion),
+  };
+
+  for (const key of ["modelConfigPublicId", "modelName", "promptTemplateKey"]) {
+    copyOptionalString(snapshot, canonicalSnapshot, key);
+  }
+
+  if (Object.hasOwn(snapshot, "promptTemplateVersion")) {
+    const promptTemplateVersion = snapshot.promptTemplateVersion;
+    if (
+      typeof promptTemplateVersion !== "number" ||
+      !Number.isInteger(promptTemplateVersion) ||
+      promptTemplateVersion < 1
+    ) {
+      return invalidScoringResult();
+    }
+    canonicalSnapshot.promptTemplateVersion = promptTemplateVersion;
+  }
+
+  if (Object.hasOwn(snapshot, "evidenceStatus")) {
+    const evidenceStatus = snapshot.evidenceStatus;
+    if (
+      evidenceStatus !== "sufficient" &&
+      evidenceStatus !== "weak" &&
+      evidenceStatus !== "none"
+    ) {
+      return invalidScoringResult();
+    }
+    canonicalSnapshot.evidenceStatus = evidenceStatus;
+  }
+
+  if (Object.hasOwn(snapshot, "citations")) {
+    const citations = snapshot.citations;
+    if (!Array.isArray(citations)) {
+      return invalidScoringResult();
+    }
+    const canonicalCitations: Record<string, unknown>[] = [];
+    for (let index = 0; index < citations.length; index += 1) {
+      if (!(index in citations)) {
+        return invalidScoringResult();
+      }
+      canonicalCitations.push(readCitation(citations[index]));
+    }
+    canonicalSnapshot.citations = canonicalCitations;
+  }
+
+  return canonicalSnapshot;
+}
+
 export type AiScoringTaskProcessResult =
   | { status: "empty" }
   | {
@@ -140,6 +288,25 @@ export function createAiScoringTaskRuntime(
         );
       }
 
+      try {
+        validateAiScoringExpectedFacts({
+          expectedScoringPoints: task.inputSnapshot.scoringPoints,
+          questionMaxScore: task.inputSnapshot.maxScore,
+        });
+      } catch (error) {
+        if (!(error instanceof AiScoringResultContractError)) {
+          throw error;
+        }
+
+        return failTask(
+          task,
+          new AiScoringTaskExecutionError("invalid_scoring_result", false),
+          input.workerPublicId,
+          now(),
+          options.repository,
+        );
+      }
+
       const abortController = new AbortController();
 
       try {
@@ -173,15 +340,29 @@ export function createAiScoringTaskRuntime(
             false,
           );
         }
+        let canonicalResult: AiScoringCanonicalResult;
+
+        try {
+          canonicalResult = normalizeAiScoringPointResults({
+            expectedScoringPoints: task.inputSnapshot.scoringPoints,
+            actualScoringPoints: executionResult.resultSnapshot.scoringPoints,
+            questionMaxScore: task.inputSnapshot.maxScore,
+          });
+        } catch (error) {
+          if (!(error instanceof AiScoringResultContractError)) {
+            throw error;
+          }
+          throw new AiScoringTaskExecutionError(
+            "invalid_scoring_result",
+            false,
+          );
+        }
+
         const score = Number(executionResult.score);
-        const maxScore = Number(task.inputSnapshot.maxScore);
 
         if (
           !Number.isFinite(score) ||
-          !Number.isFinite(maxScore) ||
-          maxScore < 0 ||
-          score < 0 ||
-          score > maxScore ||
+          score !== canonicalResult.totalScore ||
           executionResult.resultSnapshot.scoringStatus !== "scored"
         ) {
           throw new AiScoringTaskExecutionError(
@@ -190,8 +371,12 @@ export function createAiScoringTaskRuntime(
           );
         }
 
-        const resultSnapshot = {
-          ...executionResult.resultSnapshot,
+        const resultSnapshot = createCanonicalDurableResultSnapshot(
+          executionResult.resultSnapshot,
+          canonicalResult,
+        );
+        const resultSnapshotWithProvenance = {
+          ...resultSnapshot,
           provenance: {
             aiScoringTaskPublicId: task.publicId,
             attemptCount: task.attemptCount,
@@ -206,7 +391,7 @@ export function createAiScoringTaskRuntime(
           taskPublicId: task.publicId,
           workerPublicId: input.workerPublicId,
           score: executionResult.score,
-          resultSnapshot,
+          resultSnapshot: resultSnapshotWithProvenance,
           aiCallLogPublicId: executionResult.aiCallLogPublicId,
           completedAt: now(),
         });
