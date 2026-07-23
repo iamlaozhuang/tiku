@@ -51,6 +51,11 @@ function createMockExamRow(overrides: Partial<MockExamRow> = {}): MockExamRow {
       ],
     },
     answered_count: 1,
+    authorization_source: null,
+    authorization_public_id: null,
+    authorization_organization_public_id: null,
+    quota_owner_type: null,
+    quota_owner_public_id: null,
   };
 
   return {

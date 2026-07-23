@@ -1061,6 +1061,8 @@ describe("StudentMockExamPage", () => {
         expect(new Headers(init?.headers).get("authorization")).toBeNull();
         expect(JSON.parse(String(init?.body))).toEqual({
           paperPublicId: "paper-content-published-001",
+          authorizationSource: "org_auth",
+          authorizationPublicId: "org-auth-public-001",
         });
 
         return {
@@ -1079,6 +1081,8 @@ describe("StudentMockExamPage", () => {
     render(
       createElement(StudentMockExamPage, {
         paperPublicId: "paper-content-published-001",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org-auth-public-001",
       }),
     );
 

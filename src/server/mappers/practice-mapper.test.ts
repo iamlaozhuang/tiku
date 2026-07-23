@@ -40,6 +40,11 @@ function createPracticeRow(overrides: Partial<PracticeRow> = {}): PracticeRow {
         },
       ],
     },
+    authorization_source: null,
+    authorization_public_id: null,
+    authorization_organization_public_id: null,
+    quota_owner_type: null,
+    quota_owner_public_id: null,
     ...overrides,
   };
 }

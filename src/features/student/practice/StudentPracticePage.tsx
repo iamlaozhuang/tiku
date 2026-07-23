@@ -43,6 +43,8 @@ type StudentPracticePageState =
 type StudentPracticePageProps = {
   state?: StudentPracticePageState;
   paperPublicId?: string;
+  authorizationSource?: string;
+  authorizationPublicId?: string;
   practices?: StudentPracticeFixture[];
 };
 
@@ -1203,6 +1205,8 @@ function SubjectiveQuestionPanel({
 export function StudentPracticePage({
   state = "ready",
   paperPublicId,
+  authorizationSource,
+  authorizationPublicId,
   practices,
 }: StudentPracticePageProps) {
   const isRuntimeMode = practices === undefined;
@@ -1276,7 +1280,11 @@ export function StudentPracticePage({
           storedSessionValue,
           {
             method: "POST",
-            body: JSON.stringify({ paperPublicId: selectedPaperPublicId }),
+            body: JSON.stringify({
+              paperPublicId: selectedPaperPublicId,
+              authorizationSource,
+              authorizationPublicId,
+            }),
           },
         );
 
@@ -1335,7 +1343,13 @@ export function StudentPracticePage({
     return () => {
       isActive = false;
     };
-  }, [isRuntimeMode, selectedPaperPublicId, state]);
+  }, [
+    authorizationPublicId,
+    authorizationSource,
+    isRuntimeMode,
+    selectedPaperPublicId,
+    state,
+  ]);
 
   if (isRuntimeMode && state === "ready" && selectedPaperPublicId === null) {
     return (

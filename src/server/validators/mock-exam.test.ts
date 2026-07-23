@@ -12,10 +12,37 @@ describe("mock exam validators", () => {
     expect(
       normalizeStartMockExamInput({
         paperPublicId: " paper_public_123 ",
+        authorizationSource: "org_auth",
+        authorizationPublicId: " org_auth_public_123 ",
       }),
     ).toEqual({
       paperPublicId: "paper_public_123",
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_123",
     });
+  });
+
+  it("allows omitted authorization selection but rejects partial or unknown selectors", () => {
+    expect(
+      normalizeStartMockExamInput({ paperPublicId: "paper_public_123" }),
+    ).toEqual({
+      paperPublicId: "paper_public_123",
+      authorizationSource: null,
+      authorizationPublicId: null,
+    });
+    expect(
+      normalizeStartMockExamInput({
+        paperPublicId: "paper_public_123",
+        authorizationPublicId: "org_auth_public_123",
+      }),
+    ).toBeNull();
+    expect(
+      normalizeStartMockExamInput({
+        paperPublicId: "paper_public_123",
+        authorizationSource: "other_auth",
+        authorizationPublicId: "auth_public_123",
+      }),
+    ).toBeNull();
   });
 
   it("rejects invalid start mock exam input", () => {

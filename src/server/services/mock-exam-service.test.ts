@@ -225,6 +225,11 @@ function createScope(
     level: 3,
     authorization_types: ["personal_auth"],
     expires_at: scopeExpiresAt,
+    authorization_source: "personal_auth",
+    authorization_public_id: "personal_auth_public_123",
+    organization_public_id: null,
+    quota_owner_type: "personal",
+    quota_owner_public_id: "user_public_123",
     ...overrides,
   };
 }
@@ -263,6 +268,11 @@ function createMockExam(overrides: Partial<MockExamRow> = {}): MockExamRow {
     total_score: null,
     paper_snapshot: createPaperSnapshot(),
     answered_count: 0,
+    authorization_source: "personal_auth",
+    authorization_public_id: "personal_auth_public_123",
+    authorization_organization_public_id: null,
+    quota_owner_type: "personal",
+    quota_owner_public_id: "user_public_123",
     ...overrides,
   };
 }
@@ -294,6 +304,13 @@ function createRepository(
         started_at: input.startedAt,
         server_deadline_at: input.serverDeadlineAt,
         duration_minute: input.durationMinute,
+        authorization_source: input.authorizationLineage.authorizationSource,
+        authorization_public_id:
+          input.authorizationLineage.authorizationPublicId,
+        authorization_organization_public_id:
+          input.authorizationLineage.organizationPublicId,
+        quota_owner_type: input.authorizationLineage.quotaOwnerType,
+        quota_owner_public_id: input.authorizationLineage.quotaOwnerPublicId,
       });
     },
     async saveMockExamAnswerRecord(input) {
@@ -878,6 +895,40 @@ describe("mock exam service", () => {
         durationMinute: 120,
       }),
     ]);
+  });
+
+  it("fails closed when same-scope authorization selection is ambiguous", async () => {
+    let createCalled = false;
+    const service = createMockExamService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [
+            createScope(),
+            createScope({
+              authorization_source: "org_auth",
+              authorization_public_id: "org_auth_public_123",
+              authorization_types: ["org_auth"],
+              organization_public_id: "organization_public_123",
+              quota_owner_type: "organization",
+              quota_owner_public_id: "organization_public_123",
+            }),
+          ];
+        },
+        async createMockExam() {
+          createCalled = true;
+          return createMockExam();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({ code: 403311, data: null });
+    expect(createCalled).toBe(false);
   });
 
   it.each([
@@ -2602,6 +2653,37 @@ describe("mock exam service", () => {
         terminationReason: "authorization_invalid",
       },
     ]);
+  });
+
+  it("does not let another same-scope source keep a lineaged mock_exam alive", async () => {
+    const terminationInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [
+            createScope({
+              authorization_source: "org_auth",
+              authorization_public_id: "org_auth_public_123",
+              authorization_types: ["org_auth"],
+              organization_public_id: "organization_public_123",
+              quota_owner_type: "organization",
+              quota_owner_public_id: "organization_public_123",
+            }),
+          ];
+        },
+        async terminateMockExam(input) {
+          terminationInputs.push(input);
+          return createMockExam({ exam_status: "terminated" });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.getMockExam(userContext, "mock_exam_public_existing"),
+    ).resolves.toMatchObject({ code: 403313, data: null });
+    expect(terminationInputs).toHaveLength(1);
   });
 
   it("terminates mock_exam without scoring", async () => {

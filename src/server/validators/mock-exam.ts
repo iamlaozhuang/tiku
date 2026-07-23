@@ -1,5 +1,7 @@
 export type NormalizedStartMockExamInput = {
   paperPublicId: string;
+  authorizationSource: "personal_auth" | "org_auth" | null;
+  authorizationPublicId: string | null;
 };
 
 export type NormalizedMockExamAnswerInput = {
@@ -86,13 +88,32 @@ export function normalizeStartMockExamInput(
   }
 
   const paperPublicId = normalizeRequiredString(input.paperPublicId);
+  const authorizationSource =
+    input.authorizationSource === "personal_auth" ||
+    input.authorizationSource === "org_auth"
+      ? input.authorizationSource
+      : input.authorizationSource === undefined ||
+          input.authorizationSource === null
+        ? null
+        : undefined;
+  const authorizationPublicId =
+    input.authorizationPublicId === undefined ||
+    input.authorizationPublicId === null
+      ? null
+      : normalizeRequiredString(input.authorizationPublicId);
 
-  if (paperPublicId === null) {
+  if (
+    paperPublicId === null ||
+    authorizationSource === undefined ||
+    (authorizationSource === null) !== (authorizationPublicId === null)
+  ) {
     return null;
   }
 
   return {
     paperPublicId,
+    authorizationSource,
+    authorizationPublicId,
   };
 }
 

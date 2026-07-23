@@ -64,6 +64,11 @@ describe("student experience domain models", () => {
       expires_at: new Date("2026-06-03T12:00:00.000Z"),
       terminated_at: null,
       termination_reason: null,
+      authorization_source: null,
+      authorization_public_id: null,
+      authorization_organization_public_id: null,
+      quota_owner_type: null,
+      quota_owner_public_id: null,
       created_at: createdAt,
       updated_at: createdAt,
     } satisfies PracticeRow;
@@ -88,6 +93,11 @@ describe("student experience domain models", () => {
       objective_score: null,
       subjective_score: null,
       total_score: null,
+      authorization_source: null,
+      authorization_public_id: null,
+      authorization_organization_public_id: null,
+      quota_owner_type: null,
+      quota_owner_public_id: null,
       created_at: createdAt,
       updated_at: createdAt,
     } satisfies MockExamRow;

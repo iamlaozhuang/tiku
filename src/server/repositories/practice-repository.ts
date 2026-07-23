@@ -8,11 +8,31 @@ import type {
   PracticeStatus,
 } from "../models/student-experience";
 
+export type AnswerSessionAuthorizationLineage = {
+  authorizationSource: AuthorizationType;
+  authorizationPublicId: string;
+  organizationPublicId: string | null;
+  quotaOwnerType: "personal" | "organization";
+  quotaOwnerPublicId: string;
+};
+
+export class AuthorizationStartConflictError extends Error {
+  constructor() {
+    super("Selected authorization is no longer valid.");
+    this.name = "AuthorizationStartConflictError";
+  }
+}
+
 export type PracticeAuthorizationScopeRow = {
   profession: Profession;
   level: number;
   authorization_types: AuthorizationType[];
   expires_at: Date;
+  authorization_source: AuthorizationType;
+  authorization_public_id: string;
+  organization_public_id: string | null;
+  quota_owner_type: "personal" | "organization";
+  quota_owner_public_id: string;
 };
 
 export type PracticePaperRow = {
@@ -35,6 +55,11 @@ export type PracticeRow = {
   last_answered_at: Date | null;
   expires_at: Date;
   paper_snapshot: Record<string, unknown>;
+  authorization_source: AuthorizationType | null;
+  authorization_public_id: string | null;
+  authorization_organization_public_id: string | null;
+  quota_owner_type: "personal" | "organization" | null;
+  quota_owner_public_id: string | null;
 };
 
 export type PracticeAnswerRecordRow = {
@@ -83,6 +108,7 @@ export type CreatePracticeInput = {
   subject: Subject;
   startedAt: Date;
   expiresAt: Date;
+  authorizationLineage: AnswerSessionAuthorizationLineage;
 };
 
 export type CreatePracticeAnswerInput = {

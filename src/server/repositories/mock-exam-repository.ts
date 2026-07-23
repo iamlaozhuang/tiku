@@ -8,12 +8,18 @@ import type {
   ExamStatus,
 } from "../models/student-experience";
 import type { EnqueueAiScoringTaskInput } from "./ai-scoring-task-repository";
+import type { AnswerSessionAuthorizationLineage } from "./practice-repository";
 
 export type MockExamAuthorizationScopeRow = {
   profession: Profession;
   level: number;
   authorization_types: AuthorizationType[];
   expires_at: Date;
+  authorization_source: AuthorizationType;
+  authorization_public_id: string;
+  organization_public_id: string | null;
+  quota_owner_type: "personal" | "organization";
+  quota_owner_public_id: string;
 };
 
 export type MockExamPaperRow = {
@@ -44,6 +50,11 @@ export type MockExamRow = {
   total_score: string | null;
   paper_snapshot: Record<string, unknown>;
   answered_count: number;
+  authorization_source: AuthorizationType | null;
+  authorization_public_id: string | null;
+  authorization_organization_public_id: string | null;
+  quota_owner_type: "personal" | "organization" | null;
+  quota_owner_public_id: string | null;
 };
 
 export type MockExamAnswerRecordRow = {
@@ -77,6 +88,7 @@ export type CreateMockExamInput = {
   startedAt: Date;
   serverDeadlineAt: Date | null;
   durationMinute: number | null;
+  authorizationLineage: AnswerSessionAuthorizationLineage;
 };
 
 export type SaveMockExamAnswerInput = {

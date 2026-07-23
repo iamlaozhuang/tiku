@@ -687,6 +687,8 @@ describe("StudentPracticePage", () => {
         expect(new Headers(init?.headers).get("authorization")).toBeNull();
         expect(JSON.parse(String(init?.body))).toEqual({
           paperPublicId: "paper-marketing-theory-002",
+          authorizationSource: "personal_auth",
+          authorizationPublicId: "personal-auth-public-001",
         });
 
         return {
@@ -708,6 +710,8 @@ describe("StudentPracticePage", () => {
     render(
       createElement(StudentPracticePage, {
         paperPublicId: "paper-marketing-theory-002",
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal-auth-public-001",
       }),
     );
 

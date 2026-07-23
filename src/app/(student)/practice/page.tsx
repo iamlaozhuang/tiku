@@ -8,13 +8,15 @@ void pageBoundary;
 type StudentPracticeRoutePageProps = {
   searchParams?: Promise<{
     paperPublicId?: string | string[];
+    authorizationSource?: string | string[];
+    authorizationPublicId?: string | string[];
   }>;
 };
 
 function normalizePaperPublicId(
   paperPublicId: string | string[] | undefined,
 ): string | undefined {
-  return Array.isArray(paperPublicId) ? paperPublicId[0] : paperPublicId;
+  return Array.isArray(paperPublicId) ? undefined : paperPublicId;
 }
 
 export default async function StudentPracticeRoutePage({
@@ -25,6 +27,18 @@ export default async function StudentPracticeRoutePage({
   const paperPublicId = normalizePaperPublicId(
     resolvedSearchParams.paperPublicId,
   );
+  const authorizationSource = normalizePaperPublicId(
+    resolvedSearchParams.authorizationSource,
+  );
+  const authorizationPublicId = normalizePaperPublicId(
+    resolvedSearchParams.authorizationPublicId,
+  );
 
-  return <StudentPracticePage paperPublicId={paperPublicId} />;
+  return (
+    <StudentPracticePage
+      authorizationPublicId={authorizationPublicId}
+      authorizationSource={authorizationSource}
+      paperPublicId={paperPublicId}
+    />
+  );
 }

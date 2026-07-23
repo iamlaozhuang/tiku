@@ -23,6 +23,8 @@ import type {
   MockExamRepository,
   MockExamRow,
 } from "../repositories/mock-exam-repository";
+import type { AnswerSessionAuthorizationLineage } from "../repositories/practice-repository";
+import { AuthorizationStartConflictError } from "../repositories/practice-repository";
 import type { EnqueueAiScoringTaskInput } from "../repositories/ai-scoring-task-repository";
 import {
   normalizeMockExamAnswerInput,
@@ -279,6 +281,69 @@ function hasEffectiveAuthorization(
 ): boolean {
   return scopes.some(
     (scope) => isSameScope(scope, profession, level) && scope.expires_at > now,
+  );
+}
+
+function selectEffectiveAuthorization(
+  scopes: MockExamAuthorizationScopeRow[],
+  profession: MockExamPaperRow["profession"],
+  level: number,
+  now: Date,
+  requestedSource: "personal_auth" | "org_auth" | null,
+  requestedPublicId: string | null,
+): MockExamAuthorizationScopeRow | null {
+  const candidates = scopes.filter(
+    (scope) => isSameScope(scope, profession, level) && scope.expires_at > now,
+  );
+  if (requestedSource === null || requestedPublicId === null) {
+    return candidates.length === 1 ? candidates[0]! : null;
+  }
+  const matches = candidates.filter(
+    (scope) =>
+      scope.authorization_source === requestedSource &&
+      scope.authorization_public_id === requestedPublicId,
+  );
+  return matches.length === 1 ? matches[0]! : null;
+}
+
+function toAuthorizationLineage(
+  scope: MockExamAuthorizationScopeRow,
+): AnswerSessionAuthorizationLineage {
+  return {
+    authorizationSource: scope.authorization_source,
+    authorizationPublicId: scope.authorization_public_id,
+    organizationPublicId: scope.organization_public_id,
+    quotaOwnerType: scope.quota_owner_type,
+    quotaOwnerPublicId: scope.quota_owner_public_id,
+  };
+}
+
+function hasEffectiveAuthorizationForMockExam(
+  scopes: MockExamAuthorizationScopeRow[],
+  mockExam: MockExamRow,
+  now: Date,
+): boolean {
+  if (
+    mockExam.authorization_source === null ||
+    mockExam.authorization_public_id === null
+  ) {
+    return hasEffectiveAuthorization(
+      scopes,
+      mockExam.profession,
+      mockExam.level,
+      now,
+    );
+  }
+  return scopes.some(
+    (scope) =>
+      isSameScope(scope, mockExam.profession, mockExam.level) &&
+      scope.expires_at > now &&
+      scope.authorization_source === mockExam.authorization_source &&
+      scope.authorization_public_id === mockExam.authorization_public_id &&
+      scope.organization_public_id ===
+        mockExam.authorization_organization_public_id &&
+      scope.quota_owner_type === mockExam.quota_owner_type &&
+      scope.quota_owner_public_id === mockExam.quota_owner_public_id,
   );
 }
 
@@ -1254,9 +1319,7 @@ async function getOwnedMockExam(
     userPublicId: userContext.userPublicId,
   });
 
-  if (
-    !hasEffectiveAuthorization(scopes, mockExam.profession, mockExam.level, now)
-  ) {
+  if (!hasEffectiveAuthorizationForMockExam(scopes, mockExam, now)) {
     if (mockExam.exam_status === "in_progress") {
       await terminateMockExamForInvalidAuthorization(repository, mockExam, now);
 
@@ -1338,7 +1401,8 @@ async function createFreshMockExam(
   userContext: MockExamUserContext,
   paper: MockExamPaperRow,
   startedAt: Date,
-): Promise<MockExamRow | null> {
+  authorizationScope: MockExamAuthorizationScopeRow,
+): Promise<MockExamRow | null | "authorization_invalid"> {
   const serverDeadlineAt = addDurationMinute(startedAt, paper.duration_minute);
 
   try {
@@ -1357,10 +1421,14 @@ async function createFreshMockExam(
       startedAt,
       serverDeadlineAt,
       durationMinute: paper.duration_minute,
+      authorizationLineage: toAuthorizationLineage(authorizationScope),
     });
   } catch (error) {
     if (error instanceof Error && error.name === "PaperStartConflictError") {
       return null;
+    }
+    if (error instanceof AuthorizationStartConflictError) {
+      return "authorization_invalid";
     }
     throw error;
   }
@@ -1435,16 +1503,25 @@ export function createMockExamService(
       const scopes = await repository.listEffectiveAuthorizationScopes({
         userPublicId: userContext.userPublicId,
       });
+      const authorizationScope = selectEffectiveAuthorization(
+        scopes,
+        paper.profession,
+        paper.level,
+        now,
+        normalizedInput.authorizationSource,
+        normalizedInput.authorizationPublicId,
+      );
 
-      if (
-        !hasEffectiveAuthorization(scopes, paper.profession, paper.level, now)
-      ) {
+      if (authorizationScope === null) {
         const activeMockExam = await repository.findActiveMockExamByPaper({
           userPublicId: userContext.userPublicId,
           paperPublicId: normalizedInput.paperPublicId,
         });
 
-        if (activeMockExam !== null) {
+        if (
+          activeMockExam !== null &&
+          !hasEffectiveAuthorizationForMockExam(scopes, activeMockExam, now)
+        ) {
           await terminateMockExamForInvalidAuthorization(
             repository,
             activeMockExam,
@@ -1464,6 +1541,18 @@ export function createMockExamService(
       });
 
       if (activeMockExam !== null) {
+        if (
+          activeMockExam.authorization_source !== null &&
+          (activeMockExam.authorization_source !==
+            authorizationScope.authorization_source ||
+            activeMockExam.authorization_public_id !==
+              authorizationScope.authorization_public_id)
+        ) {
+          return createErrorResponse(
+            409318,
+            "Active mock exam uses a different authorization context.",
+          );
+        }
         if (shouldReplaceMockExamSnapshot(activeMockExam, paper)) {
           await repository.terminateMockExam({
             publicId: activeMockExam.public_id,
@@ -1477,8 +1566,15 @@ export function createMockExamService(
             userContext,
             paper,
             now,
+            authorizationScope,
           );
 
+          if (mockExam === "authorization_invalid") {
+            return createErrorResponse(
+              403311,
+              "Student authorization is not valid for this mock exam.",
+            );
+          }
           if (mockExam === null) {
             return createErrorResponse(
               409313,
@@ -1531,8 +1627,15 @@ export function createMockExamService(
         userContext,
         paper,
         now,
+        authorizationScope,
       );
 
+      if (mockExam === "authorization_invalid") {
+        return createErrorResponse(
+          403311,
+          "Student authorization is not valid for this mock exam.",
+        );
+      }
       if (mockExam === null) {
         return createErrorResponse(
           409313,

@@ -148,6 +148,11 @@ function createPracticeRepository(): PracticeRepository {
     started_at: now,
     last_answered_at: null,
     expires_at: expiresAt,
+    authorization_source: "personal_auth" as const,
+    authorization_public_id: "personal_auth-dev-smoke",
+    authorization_organization_public_id: null,
+    quota_owner_type: "personal" as const,
+    quota_owner_public_id: "user-dev-smoke",
     paper_snapshot: paperSnapshot,
   };
 
@@ -159,6 +164,11 @@ function createPracticeRepository(): PracticeRepository {
           level: 3,
           authorization_types: ["personal_auth"],
           expires_at: expiresAt,
+          authorization_source: "personal_auth",
+          authorization_public_id: "personal_auth-dev-smoke",
+          organization_public_id: null,
+          quota_owner_type: "personal",
+          quota_owner_public_id: "user-dev-smoke",
         },
       ];
     },
@@ -235,6 +245,11 @@ function createMockExamRepository(): MockExamRepository {
     total_score: null,
     paper_snapshot: paperSnapshot,
     answered_count: 0,
+    authorization_source: "personal_auth" as const,
+    authorization_public_id: "personal_auth-dev-smoke",
+    authorization_organization_public_id: null,
+    quota_owner_type: "personal" as const,
+    quota_owner_public_id: "user-dev-smoke",
   };
 
   return {
@@ -245,6 +260,11 @@ function createMockExamRepository(): MockExamRepository {
           level: 3,
           authorization_types: ["personal_auth"],
           expires_at: expiresAt,
+          authorization_source: "personal_auth",
+          authorization_public_id: "personal_auth-dev-smoke",
+          organization_public_id: null,
+          quota_owner_type: "personal",
+          quota_owner_public_id: "user-dev-smoke",
         },
       ];
     },

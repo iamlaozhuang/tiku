@@ -1,0 +1,18 @@
+ALTER TABLE "mock_exam" ADD COLUMN "authorization_source" text;--> statement-breakpoint
+ALTER TABLE "mock_exam" ADD COLUMN "authorization_public_id" text;--> statement-breakpoint
+ALTER TABLE "mock_exam" ADD COLUMN "authorization_organization_public_id" text;--> statement-breakpoint
+ALTER TABLE "mock_exam" ADD COLUMN "quota_owner_type" text;--> statement-breakpoint
+ALTER TABLE "mock_exam" ADD COLUMN "quota_owner_public_id" text;--> statement-breakpoint
+ALTER TABLE "practice" ADD COLUMN "authorization_source" text;--> statement-breakpoint
+ALTER TABLE "practice" ADD COLUMN "authorization_public_id" text;--> statement-breakpoint
+ALTER TABLE "practice" ADD COLUMN "authorization_organization_public_id" text;--> statement-breakpoint
+ALTER TABLE "practice" ADD COLUMN "quota_owner_type" text;--> statement-breakpoint
+ALTER TABLE "practice" ADD COLUMN "quota_owner_public_id" text;--> statement-breakpoint
+CREATE INDEX "idx_mock_exam_authorization_source_public_id" ON "mock_exam" USING btree ("authorization_source","authorization_public_id");--> statement-breakpoint
+CREATE INDEX "idx_mock_exam_authorization_organization_public_id" ON "mock_exam" USING btree ("authorization_organization_public_id");--> statement-breakpoint
+CREATE INDEX "idx_practice_authorization_source_public_id" ON "practice" USING btree ("authorization_source","authorization_public_id");--> statement-breakpoint
+CREATE INDEX "idx_practice_authorization_organization_public_id" ON "practice" USING btree ("authorization_organization_public_id");--> statement-breakpoint
+ALTER TABLE "mock_exam" ADD CONSTRAINT "chk_mock_exam_authorization_lineage_completeness" CHECK (("mock_exam"."authorization_source" is null and "mock_exam"."authorization_public_id" is null and "mock_exam"."authorization_organization_public_id" is null and "mock_exam"."quota_owner_type" is null and "mock_exam"."quota_owner_public_id" is null) or ("mock_exam"."authorization_source" is not null and "mock_exam"."authorization_public_id" is not null and "mock_exam"."quota_owner_type" is not null and "mock_exam"."quota_owner_public_id" is not null));--> statement-breakpoint
+ALTER TABLE "mock_exam" ADD CONSTRAINT "chk_mock_exam_authorization_lineage_source" CHECK ("mock_exam"."authorization_source" is null or ("mock_exam"."authorization_source" = 'personal_auth' and "mock_exam"."authorization_organization_public_id" is null and "mock_exam"."quota_owner_type" = 'personal') or ("mock_exam"."authorization_source" = 'org_auth' and "mock_exam"."authorization_organization_public_id" is not null and "mock_exam"."quota_owner_type" = 'organization'));--> statement-breakpoint
+ALTER TABLE "practice" ADD CONSTRAINT "chk_practice_authorization_lineage_completeness" CHECK (("practice"."authorization_source" is null and "practice"."authorization_public_id" is null and "practice"."authorization_organization_public_id" is null and "practice"."quota_owner_type" is null and "practice"."quota_owner_public_id" is null) or ("practice"."authorization_source" is not null and "practice"."authorization_public_id" is not null and "practice"."quota_owner_type" is not null and "practice"."quota_owner_public_id" is not null));--> statement-breakpoint
+ALTER TABLE "practice" ADD CONSTRAINT "chk_practice_authorization_lineage_source" CHECK ("practice"."authorization_source" is null or ("practice"."authorization_source" = 'personal_auth' and "practice"."authorization_organization_public_id" is null and "practice"."quota_owner_type" = 'personal') or ("practice"."authorization_source" = 'org_auth' and "practice"."authorization_organization_public_id" is not null and "practice"."quota_owner_type" = 'organization'));

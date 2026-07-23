@@ -29,12 +29,18 @@ import type {
   MockExamRow,
 } from "./mock-exam-repository";
 import type {
+  AnswerSessionAuthorizationLineage,
+  PracticeAuthorizationScopeRow,
   PracticeAnswerRecordRow,
   PracticeRepository,
   PracticeRow,
 } from "./practice-repository";
+import { AuthorizationStartConflictError } from "./practice-repository";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
-import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
+import {
+  createOrgAuthCoversOrganizationCondition,
+  lockOrganizationScopeMutation,
+} from "./organization-scope-query";
 import type {
   StudentPaperAuthorizationScopeRow,
   StudentPaperRepository,
@@ -301,8 +307,17 @@ function createPostgresPracticeRepository(
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
       return database.transaction(async (transaction) => {
+        const transactionalDatabase = transaction as StudentFlowRuntimeDatabase;
+        await validateAndLockAuthorizationLineageForStart(
+          transactionalDatabase,
+          input.userPublicId,
+          input.profession,
+          input.level,
+          input.startedAt,
+          input.authorizationLineage,
+        );
         const paperId = await getRequiredPublishedPaperIdForStart(
-          transaction as StudentFlowRuntimeDatabase,
+          transactionalDatabase,
           input.paperPublicId,
         );
         const [row] = await transaction
@@ -322,6 +337,15 @@ function createPostgresPracticeRepository(
             expires_at: input.expiresAt,
             terminated_at: null,
             termination_reason: null,
+            authorization_source:
+              input.authorizationLineage.authorizationSource,
+            authorization_public_id:
+              input.authorizationLineage.authorizationPublicId,
+            authorization_organization_public_id:
+              input.authorizationLineage.organizationPublicId,
+            quota_owner_type: input.authorizationLineage.quotaOwnerType,
+            quota_owner_public_id:
+              input.authorizationLineage.quotaOwnerPublicId,
           })
           .returning();
 
@@ -672,8 +696,17 @@ function createPostgresMockExamRepository(
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
       return database.transaction(async (transaction) => {
+        const transactionalDatabase = transaction as StudentFlowRuntimeDatabase;
+        await validateAndLockAuthorizationLineageForStart(
+          transactionalDatabase,
+          input.userPublicId,
+          input.profession,
+          input.level,
+          input.startedAt,
+          input.authorizationLineage,
+        );
         const paperId = await getRequiredPublishedPaperIdForStart(
-          transaction as StudentFlowRuntimeDatabase,
+          transactionalDatabase,
           input.paperPublicId,
         );
         const [row] = await transaction
@@ -697,6 +730,15 @@ function createPostgresMockExamRepository(
             objective_score: null,
             subjective_score: null,
             total_score: null,
+            authorization_source:
+              input.authorizationLineage.authorizationSource,
+            authorization_public_id:
+              input.authorizationLineage.authorizationPublicId,
+            authorization_organization_public_id:
+              input.authorizationLineage.organizationPublicId,
+            quota_owner_type: input.authorizationLineage.quotaOwnerType,
+            quota_owner_public_id:
+              input.authorizationLineage.quotaOwnerPublicId,
           })
           .returning();
 
@@ -1943,13 +1985,102 @@ function createPostgresExamReportRepository(
   };
 }
 
+async function validateAndLockAuthorizationLineageForStart(
+  database: StudentFlowRuntimeDatabase,
+  userPublicId: string,
+  profession: PracticeRow["profession"],
+  level: number,
+  startedAt: Date,
+  lineage: AnswerSessionAuthorizationLineage,
+): Promise<void> {
+  await lockOrganizationScopeMutation(database);
+
+  if (lineage.authorizationSource === "personal_auth") {
+    const rows = await database
+      .select({
+        authorization_public_id: personalAuth.public_id,
+        user_public_id: user.public_id,
+      })
+      .from(personalAuth)
+      .innerJoin(user, eq(user.id, personalAuth.user_id))
+      .where(
+        and(
+          eq(personalAuth.public_id, lineage.authorizationPublicId),
+          eq(user.public_id, userPublicId),
+          eq(user.status, "active"),
+          eq(personalAuth.status, "active"),
+          eq(personalAuth.profession, profession),
+          eq(personalAuth.level, level),
+          lte(personalAuth.starts_at, startedAt),
+          gt(personalAuth.expires_at, startedAt),
+        ),
+      )
+      .limit(2)
+      .for("update");
+
+    if (
+      rows.length !== 1 ||
+      lineage.organizationPublicId !== null ||
+      lineage.quotaOwnerType !== "personal" ||
+      lineage.quotaOwnerPublicId !== rows[0]?.user_public_id
+    ) {
+      throw new AuthorizationStartConflictError();
+    }
+    return;
+  }
+
+  const rows = await database
+    .select({
+      authorization_public_id: orgAuth.public_id,
+      organization_public_id: organization.public_id,
+    })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(organization, eq(organization.id, employee.organization_id))
+    .innerJoin(employeeOrgAuth, eq(employeeOrgAuth.employee_id, employee.id))
+    .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
+    .where(
+      and(
+        eq(orgAuth.public_id, lineage.authorizationPublicId),
+        eq(user.public_id, userPublicId),
+        eq(user.user_type, "employee"),
+        eq(user.status, "active"),
+        eq(organization.status, "active"),
+        eq(orgAuth.status, "active"),
+        eq(orgAuth.profession, profession),
+        eq(orgAuth.level, level),
+        createOrgAuthCoversOrganizationCondition({
+          authScopeType: orgAuth.auth_scope_type,
+          orgAuthId: orgAuth.id,
+          organizationId: organization.id,
+          purchaserOrganizationId: orgAuth.purchaser_organization_id,
+        }),
+        lte(orgAuth.starts_at, startedAt),
+        gt(orgAuth.expires_at, startedAt),
+      ),
+    )
+    .limit(2)
+    .for("update");
+
+  if (
+    rows.length !== 1 ||
+    lineage.organizationPublicId !== rows[0]?.organization_public_id ||
+    lineage.quotaOwnerType !== "organization" ||
+    lineage.quotaOwnerPublicId !== rows[0]?.organization_public_id
+  ) {
+    throw new AuthorizationStartConflictError();
+  }
+}
+
 async function listEffectiveAuthorizationScopes(
   database: StudentFlowRuntimeDatabase,
   userPublicId: string,
   now: Date,
-): Promise<StudentPaperAuthorizationScopeRow[]> {
+): Promise<PracticeAuthorizationScopeRow[]> {
   const personalAuthRows = await database
     .select({
+      authorization_public_id: personalAuth.public_id,
+      user_public_id: user.public_id,
       profession: personalAuth.profession,
       level: personalAuth.level,
       expires_at: personalAuth.expires_at,
@@ -1969,6 +2100,8 @@ async function listEffectiveAuthorizationScopes(
 
   const orgAuthRows = await database
     .select({
+      authorization_public_id: orgAuth.public_id,
+      organization_public_id: organization.public_id,
       profession: orgAuth.profession,
       level: orgAuth.level,
       expires_at: orgAuth.expires_at,
@@ -2003,12 +2136,22 @@ async function listEffectiveAuthorizationScopes(
       level: row.level,
       authorization_types: ["personal_auth"] satisfies AuthorizationType[],
       expires_at: row.expires_at,
+      authorization_source: "personal_auth" as const,
+      authorization_public_id: row.authorization_public_id,
+      organization_public_id: null,
+      quota_owner_type: "personal" as const,
+      quota_owner_public_id: row.user_public_id,
     })),
     ...orgAuthRows.map((row) => ({
       profession: row.profession,
       level: row.level,
       authorization_types: ["org_auth"] satisfies AuthorizationType[],
       expires_at: row.expires_at,
+      authorization_source: "org_auth" as const,
+      authorization_public_id: row.authorization_public_id,
+      organization_public_id: row.organization_public_id,
+      quota_owner_type: "organization" as const,
+      quota_owner_public_id: row.organization_public_id,
     })),
   ];
 }
@@ -2595,6 +2738,12 @@ function mapPracticeRow(row: typeof practice.$inferSelect): PracticeRow {
     last_answered_at: row.last_answered_at,
     expires_at: row.expires_at,
     paper_snapshot: asRecord(row.paper_snapshot),
+    authorization_source: asAuthorizationSource(row.authorization_source),
+    authorization_public_id: row.authorization_public_id,
+    authorization_organization_public_id:
+      row.authorization_organization_public_id,
+    quota_owner_type: asQuotaOwnerType(row.quota_owner_type),
+    quota_owner_public_id: row.quota_owner_public_id,
   };
 }
 
@@ -2639,6 +2788,12 @@ function mapMockExamRow(
     total_score: row.total_score,
     paper_snapshot: asRecord(row.paper_snapshot),
     answered_count: answeredCount,
+    authorization_source: asAuthorizationSource(row.authorization_source),
+    authorization_public_id: row.authorization_public_id,
+    authorization_organization_public_id:
+      row.authorization_organization_public_id,
+    quota_owner_type: asQuotaOwnerType(row.quota_owner_type),
+    quota_owner_public_id: row.quota_owner_public_id,
   };
 }
 
@@ -2760,6 +2915,28 @@ function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null
     ? (value as Record<string, unknown>)
     : {};
+}
+
+function asAuthorizationSource(value: string | null): AuthorizationType | null {
+  if (value === null) {
+    return null;
+  }
+  if (value === "personal_auth" || value === "org_auth") {
+    return value;
+  }
+  throw new Error("Stored authorization source is invalid.");
+}
+
+function asQuotaOwnerType(
+  value: string | null,
+): "personal" | "organization" | null {
+  if (value === null) {
+    return null;
+  }
+  if (value === "personal" || value === "organization") {
+    return value;
+  }
+  throw new Error("Stored quota owner type is invalid.");
 }
 
 function asPracticeAnswerSnapshot(value: unknown) {

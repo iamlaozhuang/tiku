@@ -3669,12 +3669,12 @@ async function terminateOrganizationActiveFlows(
 ): Promise<
   Pick<LifecycleTerminationResult, "practiceCount" | "mockExamCount">
 > {
-  const userIds = await listActiveUserIdsByOrganizationIds(
+  const organizationPublicIds = await listOrganizationPublicIdsByIds(
     database,
     organizationIds,
   );
 
-  if (userIds.length === 0) {
+  if (organizationPublicIds.length === 0) {
     return { practiceCount: 0, mockExamCount: 0 };
   }
 
@@ -3684,12 +3684,16 @@ async function terminateOrganizationActiveFlows(
     .set({
       practice_status: "terminated",
       terminated_at: now,
-      termination_reason: "authorization_invalid",
+      termination_reason: "organization_disabled",
       updated_at: now,
     })
     .where(
       and(
-        inArray(practice.user_id, userIds),
+        eq(practice.authorization_source, "org_auth"),
+        inArray(
+          practice.authorization_organization_public_id,
+          organizationPublicIds,
+        ),
         eq(practice.practice_status, "in_progress"),
       ),
     )
@@ -3699,12 +3703,16 @@ async function terminateOrganizationActiveFlows(
     .set({
       exam_status: "terminated",
       terminated_at: now,
-      termination_reason: "authorization_invalid",
+      termination_reason: "organization_disabled",
       updated_at: now,
     })
     .where(
       and(
-        inArray(mockExam.user_id, userIds),
+        eq(mockExam.authorization_source, "org_auth"),
+        inArray(
+          mockExam.authorization_organization_public_id,
+          organizationPublicIds,
+        ),
         inArray(mockExam.exam_status, [
           "in_progress",
           "scoring",
@@ -3753,6 +3761,7 @@ async function findOrgAuthActiveFlowScope(
   publicId: string,
 ): Promise<{
   orgAuthId: number;
+  orgAuthPublicId: string;
   organizationIds: number[];
   profession: (typeof orgAuth.$inferSelect)["profession"];
   level: number;
@@ -3760,6 +3769,7 @@ async function findOrgAuthActiveFlowScope(
   const [orgAuthRow] = await database
     .select({
       id: orgAuth.id,
+      public_id: orgAuth.public_id,
       auth_scope_type: orgAuth.auth_scope_type,
       purchaser_organization_id: orgAuth.purchaser_organization_id,
       profession: orgAuth.profession,
@@ -3787,120 +3797,60 @@ async function findOrgAuthActiveFlowScope(
 
   return {
     orgAuthId: orgAuthRow.id,
+    orgAuthPublicId: orgAuthRow.public_id,
     organizationIds: organizationRows.map((row) => row.organization_id),
     profession: orgAuthRow.profession,
     level: orgAuthRow.level,
   };
 }
 
-async function listActiveUserIdsByOrganizationIds(
-  database: AdminOrganizationOrgAuthRuntimeDatabase,
-  organizationIds: number[],
-): Promise<number[]> {
-  if (organizationIds.length === 0) {
-    return [];
-  }
-
-  const rows = await database
-    .select({ id: user.id })
-    .from(employee)
-    .innerJoin(user, eq(user.id, employee.user_id))
-    .where(
-      and(
-        inArray(employee.organization_id, organizationIds),
-        eq(user.status, "active"),
-        eq(user.user_type, "employee"),
-      ),
-    );
-
-  return rows.map((row) => row.id);
-}
-
-async function listReservedActiveUserIdsByOrgAuth(
-  database: AdminOrganizationOrgAuthRuntimeDatabase,
-  orgAuthId: number,
-  organizationIds: number[],
-): Promise<number[]> {
-  if (organizationIds.length === 0) {
-    return [];
-  }
-
-  const rows = await database
-    .select({ id: user.id })
-    .from(employeeOrgAuth)
-    .innerJoin(employee, eq(employee.id, employeeOrgAuth.employee_id))
-    .innerJoin(user, eq(user.id, employee.user_id))
-    .where(
-      and(
-        eq(employeeOrgAuth.org_auth_id, orgAuthId),
-        inArray(employee.organization_id, organizationIds),
-        eq(user.status, "active"),
-        eq(user.user_type, "employee"),
-      ),
-    );
-
-  return rows.map((row) => row.id);
-}
-
 async function terminateOrgAuthActiveFlowsInTransaction(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   activeFlowScope: {
     orgAuthId: number;
+    orgAuthPublicId: string;
     organizationIds: number[];
     profession: (typeof orgAuth.$inferSelect)["profession"];
     level: number;
   },
 ): Promise<LifecycleTerminationResult> {
-  const userIds = await listReservedActiveUserIdsByOrgAuth(
-    database,
-    activeFlowScope.orgAuthId,
-    activeFlowScope.organizationIds,
-  );
   const now = new Date();
-  const terminatedPractices =
-    userIds.length === 0
-      ? []
-      : await database
-          .update(practice)
-          .set({
-            practice_status: "terminated",
-            terminated_at: now,
-            termination_reason: "authorization_invalid",
-            updated_at: now,
-          })
-          .where(
-            and(
-              inArray(practice.user_id, userIds),
-              eq(practice.profession, activeFlowScope.profession),
-              eq(practice.level, activeFlowScope.level),
-              eq(practice.practice_status, "in_progress"),
-            ),
-          )
-          .returning({ id: practice.id });
-  const terminatedMockExams =
-    userIds.length === 0
-      ? []
-      : await database
-          .update(mockExam)
-          .set({
-            exam_status: "terminated",
-            terminated_at: now,
-            termination_reason: "authorization_invalid",
-            updated_at: now,
-          })
-          .where(
-            and(
-              inArray(mockExam.user_id, userIds),
-              eq(mockExam.profession, activeFlowScope.profession),
-              eq(mockExam.level, activeFlowScope.level),
-              inArray(mockExam.exam_status, [
-                "in_progress",
-                "scoring",
-                "scoring_partial_failed",
-              ]),
-            ),
-          )
-          .returning({ id: mockExam.id });
+  const terminatedPractices = await database
+    .update(practice)
+    .set({
+      practice_status: "terminated",
+      terminated_at: now,
+      termination_reason: "org_auth_cancelled",
+      updated_at: now,
+    })
+    .where(
+      and(
+        eq(practice.authorization_source, "org_auth"),
+        eq(practice.authorization_public_id, activeFlowScope.orgAuthPublicId),
+        eq(practice.practice_status, "in_progress"),
+      ),
+    )
+    .returning({ id: practice.id });
+  const terminatedMockExams = await database
+    .update(mockExam)
+    .set({
+      exam_status: "terminated",
+      terminated_at: now,
+      termination_reason: "org_auth_cancelled",
+      updated_at: now,
+    })
+    .where(
+      and(
+        eq(mockExam.authorization_source, "org_auth"),
+        eq(mockExam.authorization_public_id, activeFlowScope.orgAuthPublicId),
+        inArray(mockExam.exam_status, [
+          "in_progress",
+          "scoring",
+          "scoring_partial_failed",
+        ]),
+      ),
+    )
+    .returning({ id: mockExam.id });
   const blockedTrainingAnswers = await database
     .update(organizationTrainingAnswer)
     .set({

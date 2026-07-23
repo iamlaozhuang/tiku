@@ -56,6 +56,8 @@ type StudentMockExamPageProps = {
   state?: StudentPageState;
   paperPublicId?: string;
   mockExamPublicId?: string;
+  authorizationSource?: string;
+  authorizationPublicId?: string;
   mockExams?: StudentMockExamFixture[];
 };
 
@@ -1901,6 +1903,8 @@ export function StudentMockExamPage({
   state = "ready",
   paperPublicId,
   mockExamPublicId,
+  authorizationSource,
+  authorizationPublicId,
   mockExams,
 }: StudentMockExamPageProps) {
   const isRuntimeMode = mockExams === undefined;
@@ -2037,7 +2041,11 @@ export function StudentMockExamPage({
                 storedSessionValue,
                 {
                   method: "POST",
-                  body: JSON.stringify({ paperPublicId }),
+                  body: JSON.stringify({
+                    paperPublicId,
+                    authorizationSource,
+                    authorizationPublicId,
+                  }),
                 },
               );
 
@@ -2186,7 +2194,14 @@ export function StudentMockExamPage({
     return () => {
       isActive = false;
     };
-  }, [isRuntimeMode, paperPublicId, selectedRouteMockExamPublicId, state]);
+  }, [
+    authorizationPublicId,
+    authorizationSource,
+    isRuntimeMode,
+    paperPublicId,
+    selectedRouteMockExamPublicId,
+    state,
+  ]);
 
   useEffect(() => {
     if (

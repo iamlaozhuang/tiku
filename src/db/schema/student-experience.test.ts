@@ -26,6 +26,10 @@ function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   );
 }
 
+function getCheckNames(table: Parameters<typeof getTableConfig>[0]): string[] {
+  return getTableConfig(table).checks.map((schemaCheck) => schemaCheck.name);
+}
+
 describe("student experience schema baseline", () => {
   it("defines the approved Phase 4 table names", () => {
     expect([
@@ -91,6 +95,11 @@ describe("student experience schema baseline", () => {
         "expires_at",
         "terminated_at",
         "termination_reason",
+        "authorization_source",
+        "authorization_public_id",
+        "authorization_organization_public_id",
+        "quota_owner_type",
+        "quota_owner_public_id",
         "created_at",
         "updated_at",
       ]),
@@ -109,6 +118,26 @@ describe("student experience schema baseline", () => {
         "objective_score",
         "subjective_score",
         "total_score",
+        "authorization_source",
+        "authorization_public_id",
+        "authorization_organization_public_id",
+        "quota_owner_type",
+        "quota_owner_public_id",
+      ]),
+    );
+  });
+
+  it("keeps authorization lineage either legacy-null or source-coherent", () => {
+    expect(getCheckNames(practice)).toEqual(
+      expect.arrayContaining([
+        "chk_practice_authorization_lineage_completeness",
+        "chk_practice_authorization_lineage_source",
+      ]),
+    );
+    expect(getCheckNames(mockExam)).toEqual(
+      expect.arrayContaining([
+        "chk_mock_exam_authorization_lineage_completeness",
+        "chk_mock_exam_authorization_lineage_source",
       ]),
     );
   });

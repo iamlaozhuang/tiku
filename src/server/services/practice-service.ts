@@ -15,12 +15,14 @@ import {
   mapPracticeToApi,
 } from "../mappers/practice-mapper";
 import type {
+  AnswerSessionAuthorizationLineage,
   PracticeAuthorizationScopeRow,
   PracticeAnswerFeedbackRow,
   PracticePaperRow,
   PracticeRepository,
   PracticeRow,
 } from "../repositories/practice-repository";
+import { AuthorizationStartConflictError } from "../repositories/practice-repository";
 import {
   normalizePracticeAnswerInput,
   normalizePracticeQuestionFavoriteInput,
@@ -140,6 +142,94 @@ function hasEffectiveAuthorization(
   return scopes.some(
     (scope) => isSameScope(scope, profession, level) && scope.expires_at > now,
   );
+}
+
+function selectEffectiveAuthorization(
+  scopes: PracticeAuthorizationScopeRow[],
+  profession: PracticePaperRow["profession"],
+  level: number,
+  now: Date,
+  requestedSource: "personal_auth" | "org_auth" | null,
+  requestedPublicId: string | null,
+): PracticeAuthorizationScopeRow | null {
+  const candidates = scopes.filter(
+    (scope) => isSameScope(scope, profession, level) && scope.expires_at > now,
+  );
+  if (requestedSource === null || requestedPublicId === null) {
+    return candidates.length === 1 ? candidates[0]! : null;
+  }
+  const matches = candidates.filter(
+    (scope) =>
+      scope.authorization_source === requestedSource &&
+      scope.authorization_public_id === requestedPublicId,
+  );
+  return matches.length === 1 ? matches[0]! : null;
+}
+
+function toAuthorizationLineage(
+  scope: PracticeAuthorizationScopeRow,
+): AnswerSessionAuthorizationLineage {
+  return {
+    authorizationSource: scope.authorization_source,
+    authorizationPublicId: scope.authorization_public_id,
+    organizationPublicId: scope.organization_public_id,
+    quotaOwnerType: scope.quota_owner_type,
+    quotaOwnerPublicId: scope.quota_owner_public_id,
+  };
+}
+
+function hasEffectiveAuthorizationForPractice(
+  scopes: PracticeAuthorizationScopeRow[],
+  practice: PracticeRow,
+  now: Date,
+): boolean {
+  if (
+    practice.authorization_source === null ||
+    practice.authorization_public_id === null
+  ) {
+    return hasEffectiveAuthorization(
+      scopes,
+      practice.profession,
+      practice.level,
+      now,
+    );
+  }
+  return scopes.some(
+    (scope) =>
+      isSameScope(scope, practice.profession, practice.level) &&
+      scope.expires_at > now &&
+      scope.authorization_source === practice.authorization_source &&
+      scope.authorization_public_id === practice.authorization_public_id &&
+      scope.organization_public_id ===
+        practice.authorization_organization_public_id &&
+      scope.quota_owner_type === practice.quota_owner_type &&
+      scope.quota_owner_public_id === practice.quota_owner_public_id,
+  );
+}
+
+function getLineagedAuthorizationScope(
+  practice: PracticeRow,
+  expiresAt: Date,
+): PracticeAuthorizationScopeRow | null {
+  if (
+    practice.authorization_source === null ||
+    practice.authorization_public_id === null ||
+    practice.quota_owner_type === null ||
+    practice.quota_owner_public_id === null
+  ) {
+    return null;
+  }
+  return {
+    profession: practice.profession,
+    level: practice.level,
+    authorization_types: [practice.authorization_source],
+    expires_at: expiresAt,
+    authorization_source: practice.authorization_source,
+    authorization_public_id: practice.authorization_public_id,
+    organization_public_id: practice.authorization_organization_public_id,
+    quota_owner_type: practice.quota_owner_type,
+    quota_owner_public_id: practice.quota_owner_public_id,
+  };
 }
 
 function isPracticeExpired(practice: PracticeRow, now: Date): boolean {
@@ -645,9 +735,7 @@ async function getReadablePractice(
     userPublicId: userContext.userPublicId,
   });
 
-  if (
-    !hasEffectiveAuthorization(scopes, practice.profession, practice.level, now)
-  ) {
+  if (!hasEffectiveAuthorizationForPractice(scopes, practice, now)) {
     await terminatePracticeForInvalidAuthorization(repository, practice, now);
 
     return createPracticeAuthorizationTerminatedResponse();
@@ -668,8 +756,9 @@ async function createFreshPractice(
   userContext: PracticeUserContext,
   paper: PracticePaperRow,
   startedAt: Date,
-): Promise<PracticeRow | null> {
-  const startKey = `${userContext.userPublicId}\u0000${paper.public_id}`;
+  authorizationScope: PracticeAuthorizationScopeRow,
+): Promise<PracticeRow | null | "authorization_invalid"> {
+  const startKey = `${userContext.userPublicId}\u0000${paper.public_id}\u0000${authorizationScope.authorization_source}\u0000${authorizationScope.authorization_public_id}`;
   const inFlightPractice = inFlightFreshPracticeByUserPaper.get(startKey);
 
   if (inFlightPractice !== undefined) {
@@ -686,6 +775,7 @@ async function createFreshPractice(
     subject: paper.subject,
     startedAt,
     expiresAt: addPracticeRetentionWindow(startedAt),
+    authorizationLineage: toAuthorizationLineage(authorizationScope),
   });
 
   inFlightFreshPracticeByUserPaper.set(startKey, practicePromise);
@@ -695,6 +785,9 @@ async function createFreshPractice(
   } catch (error) {
     if (error instanceof Error && error.name === "PaperStartConflictError") {
       return null;
+    }
+    if (error instanceof AuthorizationStartConflictError) {
+      return "authorization_invalid";
     }
     throw error;
   } finally {
@@ -761,10 +854,16 @@ export function createPracticeService(
       const scopes = await repository.listEffectiveAuthorizationScopes({
         userPublicId: userContext.userPublicId,
       });
+      const authorizationScope = selectEffectiveAuthorization(
+        scopes,
+        paper.profession,
+        paper.level,
+        now,
+        normalizedInput.authorizationSource,
+        normalizedInput.authorizationPublicId,
+      );
 
-      if (
-        !hasEffectiveAuthorization(scopes, paper.profession, paper.level, now)
-      ) {
+      if (authorizationScope === null) {
         const activePractice = await repository.findActivePracticeByPaper({
           userPublicId: userContext.userPublicId,
           paperPublicId: normalizedInput.paperPublicId,
@@ -772,7 +871,8 @@ export function createPracticeService(
 
         if (
           activePractice !== null &&
-          !isPracticeExpired(activePractice, now)
+          !isPracticeExpired(activePractice, now) &&
+          !hasEffectiveAuthorizationForPractice(scopes, activePractice, now)
         ) {
           await terminatePracticeForInvalidAuthorization(
             repository,
@@ -793,6 +893,18 @@ export function createPracticeService(
       });
 
       if (activePractice !== null && !isPracticeExpired(activePractice, now)) {
+        if (
+          activePractice.authorization_source !== null &&
+          (activePractice.authorization_source !==
+            authorizationScope.authorization_source ||
+            activePractice.authorization_public_id !==
+              authorizationScope.authorization_public_id)
+        ) {
+          return createErrorResponse(
+            409304,
+            "Active practice uses a different authorization context.",
+          );
+        }
         if (shouldReplacePracticeSnapshot(activePractice, paper)) {
           await repository.expirePractice({
             publicId: activePractice.public_id,
@@ -805,8 +917,15 @@ export function createPracticeService(
             userContext,
             paper,
             now,
+            authorizationScope,
           );
 
+          if (practice === "authorization_invalid") {
+            return createErrorResponse(
+              403301,
+              "Student authorization is not valid for this practice.",
+            );
+          }
           if (practice === null) {
             return createErrorResponse(
               409303,
@@ -842,8 +961,15 @@ export function createPracticeService(
         userContext,
         paper,
         now,
+        authorizationScope,
       );
 
+      if (practice === "authorization_invalid") {
+        return createErrorResponse(
+          403301,
+          "Student authorization is not valid for this practice.",
+        );
+      }
       if (practice === null) {
         return createErrorResponse(
           409303,
@@ -1091,6 +1217,26 @@ export function createPracticeService(
         return practice;
       }
 
+      const scopes = await repository.listEffectiveAuthorizationScopes({
+        userPublicId: userContext.userPublicId,
+      });
+      const authorizationScope =
+        getLineagedAuthorizationScope(practice, now) ??
+        selectEffectiveAuthorization(
+          scopes,
+          practice.profession,
+          practice.level,
+          now,
+          null,
+          null,
+        );
+      if (authorizationScope === null) {
+        return createErrorResponse(
+          409304,
+          "Practice authorization context is ambiguous.",
+        );
+      }
+
       await repository.terminatePractice({
         publicId: practice.public_id,
         terminatedAt: now,
@@ -1109,8 +1255,15 @@ export function createPracticeService(
           paper_snapshot: practice.paper_snapshot,
         },
         now,
+        authorizationScope,
       );
 
+      if (freshPractice === "authorization_invalid") {
+        return createErrorResponse(
+          403301,
+          "Student authorization is not valid for this practice.",
+        );
+      }
       if (freshPractice === null) {
         return createErrorResponse(
           409303,

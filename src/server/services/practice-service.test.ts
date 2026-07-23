@@ -334,6 +334,11 @@ function createScope(
     level: 3,
     authorization_types: ["personal_auth"],
     expires_at: expiresAt,
+    authorization_source: "personal_auth",
+    authorization_public_id: "personal_auth_public_123",
+    organization_public_id: null,
+    quota_owner_type: "personal",
+    quota_owner_public_id: "user_public_123",
     ...overrides,
   };
 }
@@ -364,6 +369,11 @@ function createPractice(overrides: Partial<PracticeRow> = {}): PracticeRow {
     last_answered_at: null,
     expires_at: expiresAt,
     paper_snapshot: createPaperSnapshot(),
+    authorization_source: "personal_auth",
+    authorization_public_id: "personal_auth_public_123",
+    authorization_organization_public_id: null,
+    quota_owner_type: "personal",
+    quota_owner_public_id: "user_public_123",
     ...overrides,
   };
 }
@@ -389,6 +399,13 @@ function createRepository(
         public_id: input.publicId,
         paper_public_id: input.paperPublicId,
         paper_snapshot: input.paperSnapshot,
+        authorization_source: input.authorizationLineage.authorizationSource,
+        authorization_public_id:
+          input.authorizationLineage.authorizationPublicId,
+        authorization_organization_public_id:
+          input.authorizationLineage.organizationPublicId,
+        quota_owner_type: input.authorizationLineage.quotaOwnerType,
+        quota_owner_public_id: input.authorizationLineage.quotaOwnerPublicId,
         profession: input.profession,
         level: input.level,
         subject: input.subject,
@@ -516,6 +533,94 @@ describe("practice service", () => {
         paperPublicId: "paper_public_123",
         startedAt: now,
         expiresAt,
+      }),
+    ]);
+  });
+
+  it("fails closed when multiple same-scope authorizations are not explicitly selected", async () => {
+    let createCalled = false;
+    const service = createPracticeService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [
+            createScope(),
+            createScope({
+              authorization_source: "org_auth",
+              authorization_public_id: "org_auth_public_123",
+              authorization_types: ["org_auth"],
+              organization_public_id: "organization_public_123",
+              quota_owner_type: "organization",
+              quota_owner_public_id: "organization_public_123",
+            }),
+          ];
+        },
+        async createPractice() {
+          createCalled = true;
+          return createPractice();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({ code: 403301, data: null });
+    expect(createCalled).toBe(false);
+  });
+
+  it("persists the explicitly selected same-scope authorization lineage", async () => {
+    const createdInputs: unknown[] = [];
+    const organizationScope = createScope({
+      authorization_source: "org_auth",
+      authorization_public_id: "org_auth_public_123",
+      authorization_types: ["org_auth"],
+      organization_public_id: "organization_public_123",
+      quota_owner_type: "organization",
+      quota_owner_public_id: "organization_public_123",
+    });
+    const service = createPracticeService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [createScope(), organizationScope];
+        },
+        async createPractice(input) {
+          createdInputs.push(input);
+          return createPractice({
+            authorization_source:
+              input.authorizationLineage.authorizationSource,
+            authorization_public_id:
+              input.authorizationLineage.authorizationPublicId,
+            authorization_organization_public_id:
+              input.authorizationLineage.organizationPublicId,
+            quota_owner_type: input.authorizationLineage.quotaOwnerType,
+            quota_owner_public_id:
+              input.authorizationLineage.quotaOwnerPublicId,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+      }),
+    ).resolves.toMatchObject({ code: 0 });
+    expect(createdInputs).toEqual([
+      expect.objectContaining({
+        authorizationLineage: {
+          authorizationSource: "org_auth",
+          authorizationPublicId: "org_auth_public_123",
+          organizationPublicId: "organization_public_123",
+          quotaOwnerType: "organization",
+          quotaOwnerPublicId: "organization_public_123",
+        },
       }),
     ]);
   });
@@ -983,6 +1088,37 @@ describe("practice service", () => {
         terminationReason: "authorization_invalid",
       },
     ]);
+  });
+
+  it("does not let another same-scope source keep a lineaged practice alive", async () => {
+    const terminationInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [
+            createScope({
+              authorization_source: "org_auth",
+              authorization_public_id: "org_auth_public_123",
+              authorization_types: ["org_auth"],
+              organization_public_id: "organization_public_123",
+              quota_owner_type: "organization",
+              quota_owner_public_id: "organization_public_123",
+            }),
+          ];
+        },
+        async terminatePractice(input) {
+          terminationInputs.push(input);
+          return createPractice({ practice_status: "terminated" });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.getPractice(userContext, "practice_public_existing"),
+    ).resolves.toMatchObject({ code: 403303, data: null });
+    expect(terminationInputs).toHaveLength(1);
   });
 
   it("submits objective answer feedback and updates mistake book for wrong answers", async () => {

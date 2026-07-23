@@ -125,6 +125,13 @@ export const practice = pgTable(
     expires_at: timestampColumn("expires_at"),
     terminated_at: nullableTimestampColumn("terminated_at"),
     termination_reason: text("termination_reason"),
+    authorization_source: text("authorization_source"),
+    authorization_public_id: text("authorization_public_id"),
+    authorization_organization_public_id: text(
+      "authorization_organization_public_id",
+    ),
+    quota_owner_type: text("quota_owner_type"),
+    quota_owner_public_id: text("quota_owner_public_id"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -138,6 +145,21 @@ export const practice = pgTable(
       table.practice_status,
     ),
     index("idx_practice_expires_at").on(table.expires_at),
+    index("idx_practice_authorization_source_public_id").on(
+      table.authorization_source,
+      table.authorization_public_id,
+    ),
+    index("idx_practice_authorization_organization_public_id").on(
+      table.authorization_organization_public_id,
+    ),
+    check(
+      "chk_practice_authorization_lineage_completeness",
+      sql`(${table.authorization_source} is null and ${table.authorization_public_id} is null and ${table.authorization_organization_public_id} is null and ${table.quota_owner_type} is null and ${table.quota_owner_public_id} is null) or (${table.authorization_source} is not null and ${table.authorization_public_id} is not null and ${table.quota_owner_type} is not null and ${table.quota_owner_public_id} is not null)`,
+    ),
+    check(
+      "chk_practice_authorization_lineage_source",
+      sql`${table.authorization_source} is null or (${table.authorization_source} = 'personal_auth' and ${table.authorization_organization_public_id} is null and ${table.quota_owner_type} = 'personal') or (${table.authorization_source} = 'org_auth' and ${table.authorization_organization_public_id} is not null and ${table.quota_owner_type} = 'organization')`,
+    ),
   ],
 );
 
@@ -163,6 +185,13 @@ export const mockExam = pgTable(
     objective_score: scoreColumn("objective_score"),
     subjective_score: scoreColumn("subjective_score"),
     total_score: scoreColumn("total_score"),
+    authorization_source: text("authorization_source"),
+    authorization_public_id: text("authorization_public_id"),
+    authorization_organization_public_id: text(
+      "authorization_organization_public_id",
+    ),
+    quota_owner_type: text("quota_owner_type"),
+    quota_owner_public_id: text("quota_owner_public_id"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -173,6 +202,21 @@ export const mockExam = pgTable(
     index("idx_mock_exam_exam_status").on(table.exam_status),
     index("idx_mock_exam_started_at").on(table.started_at),
     index("idx_mock_exam_server_deadline_at").on(table.server_deadline_at),
+    index("idx_mock_exam_authorization_source_public_id").on(
+      table.authorization_source,
+      table.authorization_public_id,
+    ),
+    index("idx_mock_exam_authorization_organization_public_id").on(
+      table.authorization_organization_public_id,
+    ),
+    check(
+      "chk_mock_exam_authorization_lineage_completeness",
+      sql`(${table.authorization_source} is null and ${table.authorization_public_id} is null and ${table.authorization_organization_public_id} is null and ${table.quota_owner_type} is null and ${table.quota_owner_public_id} is null) or (${table.authorization_source} is not null and ${table.authorization_public_id} is not null and ${table.quota_owner_type} is not null and ${table.quota_owner_public_id} is not null)`,
+    ),
+    check(
+      "chk_mock_exam_authorization_lineage_source",
+      sql`${table.authorization_source} is null or (${table.authorization_source} = 'personal_auth' and ${table.authorization_organization_public_id} is null and ${table.quota_owner_type} = 'personal') or (${table.authorization_source} = 'org_auth' and ${table.authorization_organization_public_id} is not null and ${table.quota_owner_type} = 'organization')`,
+    ),
   ],
 );
 

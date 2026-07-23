@@ -610,13 +610,13 @@ describe("StudentHomePage", () => {
       within(publishedPaperCard).getByRole("link", { name: "练习" }),
     ).toHaveAttribute(
       "href",
-      "/practice?paperPublicId=paper-content-published-001",
+      "/practice?paperPublicId=paper-content-published-001&authorizationSource=org_auth&authorizationPublicId=org-auth-runtime-ui-001",
     );
     expect(
       within(publishedPaperCard).getByRole("link", { name: "模拟考试" }),
     ).toHaveAttribute(
       "href",
-      "/mock-exam?paperPublicId=paper-content-published-001",
+      "/mock-exam?paperPublicId=paper-content-published-001&authorizationSource=org_auth&authorizationPublicId=org-auth-runtime-ui-001",
     );
     expect(screen.getByRole("button", { name: "营销 3级" })).toHaveAttribute(
       "aria-pressed",

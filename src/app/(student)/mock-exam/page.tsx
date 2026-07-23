@@ -9,21 +9,21 @@ type StudentMockExamRoutePageProps = {
   searchParams?: Promise<{
     paperPublicId?: string | string[];
     mockExamPublicId?: string | string[];
+    authorizationSource?: string | string[];
+    authorizationPublicId?: string | string[];
   }>;
 };
 
 function normalizePaperPublicId(
   paperPublicId: string | string[] | undefined,
 ): string | undefined {
-  return Array.isArray(paperPublicId) ? paperPublicId[0] : paperPublicId;
+  return Array.isArray(paperPublicId) ? undefined : paperPublicId;
 }
 
 function normalizeMockExamPublicId(
   mockExamPublicId: string | string[] | undefined,
 ): string | undefined {
-  return Array.isArray(mockExamPublicId)
-    ? mockExamPublicId[0]
-    : mockExamPublicId;
+  return Array.isArray(mockExamPublicId) ? undefined : mockExamPublicId;
 }
 
 export default async function StudentMockExamRoutePage({
@@ -37,11 +37,19 @@ export default async function StudentMockExamRoutePage({
   const mockExamPublicId = normalizeMockExamPublicId(
     resolvedSearchParams.mockExamPublicId,
   );
+  const authorizationSource = normalizePaperPublicId(
+    resolvedSearchParams.authorizationSource,
+  );
+  const authorizationPublicId = normalizePaperPublicId(
+    resolvedSearchParams.authorizationPublicId,
+  );
 
   return (
     <StudentMockExamPage
       paperPublicId={paperPublicId}
       mockExamPublicId={mockExamPublicId}
+      authorizationSource={authorizationSource}
+      authorizationPublicId={authorizationPublicId}
     />
   );
 }

@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-07-residual-static-disposition-2026-07-22
+currentPhase: p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
 updatedAt: "2026-07-22T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,8 +470,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-07-residual-static-disposition-2026-07-22
-  currentCandidateClusterId: P1-RC-07
+  currentTaskId: p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
+  currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -564,7 +564,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
     - p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22
     - p1-remediation-rc-07-residual-static-disposition-2026-07-22
+    - p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
   completedTaskIds:
+    - p1-remediation-rc-07-residual-static-disposition-2026-07-22
     - p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22
     - p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22
     - p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22
@@ -726,7 +728,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-organization-ai-review-workbench-handoff-2026-07-22: closed
     p1-remediation-rc-07-ai-paper-material-question-group-integrity-2026-07-22: closed
     p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22: closed
-    p1-remediation-rc-07-residual-static-disposition-2026-07-22: in_progress
+    p1-remediation-rc-07-residual-static-disposition-2026-07-22: closed
+    p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -915,81 +918,95 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-07-residual-static-disposition-2026-07-22
-  title: RC-07 residual static disposition
-  phase: p1-remediation-rc-07-residual-static-disposition-2026-07-22
+  id: p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
+  title: Answer session authorization lineage
+  phase: p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: low_risk_state_only_static_disposition
-  productClosureContribution: completes_RC07_static_scope_with_independent_runtime_holds
-  branch: fix/rc07-residual-static-disposition
+  taskKind: schema_migration_source_database_application_logic_and_permission_semantics_contraction
+  productClosureContribution: closes_F0008_without_expanding_entitlement
+  branch: fix/answer-session-authorization-lineage
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0154
-    - F-0158
-  candidateRootCauseCluster: P1-RC-07
-  objective: independently verify no RC-07 static product failure remains, preserve only explicit legacy-data and browser runtime holds, and move the product queue to RC-08 without changing product code
+    - F-0008
+  candidateRootCauseCluster: P1-RC-08
+  objective: persist and revalidate the exact server-owned authorization context for new practice and mock_exam sessions so unrelated org_auth cancellation or organization disable cannot terminate personal_auth-backed work
   executionStage: validated_reviewed_conditional_closeout_ready
-  findingStatus: runtime_hold_static_coverage_verified
-  findingDisposition: F0154_and_F0158_independent_static_coverage_review
+  findingStatus: implementation_verified_pending_actual_closeout
+  findingDisposition: separate_confirmed_root_cause
   riskBoundary:
-    category: low_risk_state_only_static_disposition
-    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
-    approvedBaseSha: 3fcd499db02c28fbc362b1921f8ddea40293a531
-    schemaOrMigrationChange: false
+    category: schema_migration_source_database_application_logic_and_permission_semantics_contraction
+    approvalId: guardian-f0008-answer-session-authorization-lineage-2026-07-22
+    approvedBaseSha: 3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3
+    schemaOrMigrationChange: true
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: completed_RC07_evidence_to_independent_F0154_F0158_characterization_to_runtime_hold_disposition_to_RC08_anchor
-    coreFiles: 3
-    contingencyFiles: 10
+    chain: selected_authorization_context_to_start_command_to_exact_server_validation_to_atomic_session_lineage_to_exact_revalidation_and_scoped_admin_termination
+    coreFiles: 26
+    contingencyFiles: 11
     directCallerCalleeMocksFixturesReviewed: true
-    productCodeChangeRequired: false
-    bundleDisposition: one_state_only_cluster_review_with_independent_finding_evidence_and_no_shared_product_implementation
+    bundleDisposition: F0008_only_F0013_runtime_hold_F0026_and_F0027_separate
+  requiredSemantics:
+    newSession: exact_personal_or_org_context_and_quota_owner_snapshot
+    revalidation: exact_source_without_silent_switch
+    orgAuthCancellation: exact_org_auth_public_id_only
+    organizationDisable: captured_org_auth_organization_only
+    employeeDisable: all_user_sessions_account_disabled
+    legacy: all_null_union_compatibility_without_guess_or_backfill
   expectedAcceptance:
-    - F0148_closeout_commit_and_clean_sync_are_recorded
-    - F0154_static_metadata_loss_path_is_covered_and_only_real_data_backfill_acceptance_remains_runtime_hold
-    - F0158_static_blind_review_path_is_covered_and_only_browser_cross_device_acceptance_remains_runtime_hold
-    - no_runtime_or_real_data_action_is_misrepresented_as_executed
-    - RC07_static_queue_completes_and_RC08_becomes_the_next_JIT_anchor
-  independentDispositions:
-    F-0154:
-      staticDisposition: covered_on_current_master
-      runtimeHold: legacy_data_backfill_or_migrated_real_data_acceptance_requires_fresh_database_and_data_authorization
-      failureModeStatus: no_static_product_path_can_masquerade_missing_metadata_as_exact_descendant_or_nearby
-    F-0158:
-      staticDisposition: covered_on_current_master
-      runtimeHold: browser_and_cross_device_runtime_acceptance_requires_separate_runtime_session_authorization
-      failureModeStatus: no_static_product_path_blindly_adopts_hidden_client_draft_or_leaves_review_actions_as_static_labels
+    - personal_auth_sessions_survive_unrelated_org_auth_cancel_and_organization_disable
+    - org_auth_sessions_terminate_on_exact_source_invalidation_even_when_personal_auth_also_exists
+    - active_session_lineage_never_silently_switches_sources
+    - legacy_rows_remain_explicit_all_null_and_are_not_guessed_or_backfilled
+    - migration_source_is_additive_nullable_and_never_applied
+    - no_entitlement_quota_role_provider_dependency_or_mechanism_expansion
+  validationEvidence:
+    tddRed: pass_6_expected_failures_across_3_files_25_tests_before_implementation
+    focused: pass_16_files_225_tests
+    changedUiFocused: pass_2_files_74_tests_with_exact_source_identity_payload_assertions
+    lint: pass_all_changed_typescript_and_tsx
+    typecheck: pass
+    build: pass_on_final_product_source_with_preexisting_NFT_warning_only
+    formatAndDiff: pass
+    schemaSource: pass_10_additive_columns_4_indexes_4_checks_no_data_or_destructive_sql
+    stateParse: pass
+    runtimeDatabaseProof: not_claimed_static_and_synthetic_only
+  adversarialReview:
+    status: pass
+    conclusion: exact_source_revalidation_no_alternate_source_substitution_shared_creation_cancel_disable_serialization_legacy_all_null_excluded_from_bulk_org_termination_no_entitlement_or_quota_expansion
+    changedFilesWithinAllowedEnvelope: true
+    clientOwnedServerFactsRejected: organization_and_quota_owner_never_accepted_from_client
   closeoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    triggers: focused_characterization_state_parse_format_diff_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: RC07_static_scope_complete_runtime_holds_preserved_then_RC08_JIT
+    triggers: unchanged_base_origin_envelope_and_tree_plus_kernel_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0008_closed_then_RC08_residual_JIT
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 0_covered_by_low_risk_standing_approval
+    mandatoryFreshApprovals: 1
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 0
-    productValueTime: independent_residual_JIT_and_static_characterization
-    mechanismOverhead: three_state_files_and_one_kernel_closeout
+    approvalWaitTurns: 1
+    productValueTime: not_reliably_reconstructable_after_context_compaction
+    mechanismOverhead: focused_validation_review_and_closeout_recorded_without_guard_or_smoke_changes
     guardSmokeChanges: 0
-  freshValidation:
-    focused: exit_0_10_files_133_tests_passed
-    format: exit_0_three_state_files
-    stateParse: exit_0_JSON_and_two_YAML_documents
-    diffCheck: exit_0
-    mainThreadAdversarialReview: pass_independent_F0154_and_F0158_static_chains_runtime_and_real_data_not_claimed
+  pendingApproval:
+    status: approved_before_product_RED
+    proposedApprovalId: guardian-f0008-answer-session-authorization-lineage-2026-07-22
+    approvalFingerprint: d6a7a80e5556b4e0f557f46f61b40fa5e066bf2ae108c4cdd2aec9694995c1c8
+    conditionalCloseoutRequested: true
+    approved: true
   previousTaskCloseout:
-    taskId: p1-remediation-rc-07-ai-generation-quota-fail-closed-gate-2026-07-22
+    taskId: p1-remediation-rc-07-residual-static-disposition-2026-07-22
     findingIds:
-      - F-0148
-    commit: 3fcd499db02c28fbc362b1921f8ddea40293a531
+      - F-0154
+      - F-0158
+    commit: 3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed
+    findingStatus: runtime_hold_static_coverage_verified
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
@@ -1002,9 +1019,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: f76553aa132c4087aac95bf7512ccf609dfe4874
-  lastKnownOriginMasterSha: f76553aa132c4087aac95bf7512ccf609dfe4874
-  lastKnownRemoteMasterSha: f76553aa132c4087aac95bf7512ccf609dfe4874
+  lastKnownMasterSha: 3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3
+  lastKnownOriginMasterSha: 3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3
+  lastKnownRemoteMasterSha: 3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

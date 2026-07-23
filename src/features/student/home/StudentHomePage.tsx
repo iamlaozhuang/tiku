@@ -638,7 +638,32 @@ function StudentHomeLoading() {
   );
 }
 
-function StudentPaperCard({ paper }: { paper: StudentPaperSummaryDto }) {
+function createAnswerSessionPath(
+  pathname: "/practice" | "/mock-exam",
+  paperPublicId: string,
+  authorizationContext: EffectiveAuthorizationContextDto | null,
+): string {
+  const searchParameters = new URLSearchParams({ paperPublicId });
+  if (authorizationContext !== null) {
+    searchParameters.set(
+      "authorizationSource",
+      authorizationContext.authorizationSource,
+    );
+    searchParameters.set(
+      "authorizationPublicId",
+      authorizationContext.authorizationPublicId,
+    );
+  }
+  return `${pathname}?${searchParameters.toString()}`;
+}
+
+function StudentPaperCard({
+  authorizationContext,
+  paper,
+}: {
+  authorizationContext: EffectiveAuthorizationContextDto | null;
+  paper: StudentPaperSummaryDto;
+}) {
   return (
     <article
       data-testid={`paper-card-${paper.publicId}`}
@@ -676,16 +701,24 @@ function StudentPaperCard({ paper }: { paper: StudentPaperSummaryDto }) {
 
       <div className="grid grid-cols-2 gap-2">
         <Link
-          href={`/practice?paperPublicId=${paper.publicId}`}
-          aria-disabled={!paper.canPractice}
+          href={createAnswerSessionPath(
+            "/practice",
+            paper.publicId,
+            authorizationContext,
+          )}
+          aria-disabled={!paper.canPractice || authorizationContext === null}
           className="bg-primary text-primary-foreground flex h-9 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-transform active:scale-[0.98] aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           <PlayCircle className="size-4" aria-hidden="true" />
           练习
         </Link>
         <Link
-          href={`/mock-exam?paperPublicId=${paper.publicId}`}
-          aria-disabled={!paper.canMockExam}
+          href={createAnswerSessionPath(
+            "/mock-exam",
+            paper.publicId,
+            authorizationContext,
+          )}
+          aria-disabled={!paper.canMockExam || authorizationContext === null}
           className="border-border text-text-primary hover:bg-muted flex h-9 items-center justify-center gap-1.5 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           模拟考试
@@ -1363,7 +1396,11 @@ export function StudentHomePage({
               ) : (
                 <div className="space-y-3">
                   {group.papers.map((paper) => (
-                    <StudentPaperCard key={paper.publicId} paper={paper} />
+                    <StudentPaperCard
+                      key={paper.publicId}
+                      authorizationContext={selectedAuthorizationContext}
+                      paper={paper}
+                    />
                   ))}
                 </div>
               )}

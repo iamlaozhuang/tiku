@@ -365,6 +365,13 @@
       "when": 1784763900000,
       "tag": "20260722234500_p1_rc_07_content_ai_review_draft_revision",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1784792180992,
+      "tag": "20260723003000_p1_rc_08_answer_session_authorization_lineage",
+      "breakpoints": true
     }
   ]
 }

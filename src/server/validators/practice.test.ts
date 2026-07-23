@@ -10,10 +10,37 @@ describe("practice validators", () => {
     expect(
       normalizeStartPracticeInput({
         paperPublicId: " paper_public_123 ",
+        authorizationSource: "personal_auth",
+        authorizationPublicId: " personal_auth_public_123 ",
       }),
     ).toEqual({
       paperPublicId: "paper_public_123",
+      authorizationSource: "personal_auth",
+      authorizationPublicId: "personal_auth_public_123",
     });
+  });
+
+  it("allows omitted authorization selection but rejects partial or unknown selectors", () => {
+    expect(
+      normalizeStartPracticeInput({ paperPublicId: "paper_public_123" }),
+    ).toEqual({
+      paperPublicId: "paper_public_123",
+      authorizationSource: null,
+      authorizationPublicId: null,
+    });
+    expect(
+      normalizeStartPracticeInput({
+        paperPublicId: "paper_public_123",
+        authorizationSource: "org_auth",
+      }),
+    ).toBeNull();
+    expect(
+      normalizeStartPracticeInput({
+        paperPublicId: "paper_public_123",
+        authorizationSource: "forged_auth",
+        authorizationPublicId: "auth_public_123",
+      }),
+    ).toBeNull();
   });
 
   it("rejects invalid start practice input", () => {
