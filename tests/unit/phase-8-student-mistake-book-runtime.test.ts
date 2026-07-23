@@ -155,6 +155,9 @@ function createHandlers(
     acceptedAuthorization?: string;
     repository?: MistakeBookRepository;
     sessionResponse?: ApiResponse<AuthContextDto>;
+    aiExplanationRuntime?: NonNullable<
+      Parameters<typeof createStudentMistakeBookRuntimeRouteHandlers>[0]
+    >["aiExplanationRuntime"];
   } = {},
 ) {
   const acceptedAuthorization =
@@ -186,6 +189,7 @@ function createHandlers(
         };
       },
     },
+    aiExplanationRuntime: options.aiExplanationRuntime,
     now: () => now,
     sessionService: {
       async getCurrentSession(input) {
@@ -533,6 +537,185 @@ describe("phase 8 student mistake_book runtime", () => {
         latencyMs: expect.any(Number),
       },
     ]);
+  });
+
+  it("keeps governed internal RAG facts available before network projection", async () => {
+    const localCatalog = createLocalModelConfigRuntimeCatalog({
+      overrides: {
+        "model-config-dev-ai-explanation": { isEnabled: true },
+        "model-config-dev-ai-explanation-fallback": { isEnabled: false },
+      },
+    });
+    const runtime = createGovernedMistakeBookAiExplanationRuntime({
+      modelConfigRuntimeCatalog: {
+        records: localCatalog.records.map((record) => ({
+          ...record,
+          executionMode: "governed_provider" as const,
+        })),
+      },
+      explanationRunner: async () => ({
+        explanationText: "governed explanation",
+        keyPoints: ["key point"],
+        learningSuggestion: null,
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
+      aiCallLogRepository: {
+        async appendAiCallLog(input) {
+          return {
+            publicId: "ai-call-log-public-redaction",
+            userPublicId: input.userPublicId,
+            organizationPublicId: input.organizationPublicId ?? null,
+            profession: input.profession ?? null,
+            level: input.level ?? null,
+            aiFuncType: input.aiFuncType,
+            callStatus: input.callStatus,
+            providerDisplayName: input.modelConfigSnapshot.providerDisplayName,
+            modelAlias: input.modelConfigSnapshot.modelName,
+            promptSummary: "redacted prompt snapshot",
+            outputSummary: "redacted model output snapshot",
+            promptTokenCount: input.promptTokenCount,
+            completionTokenCount: input.completionTokenCount,
+            totalTokenCount: input.totalTokenCount,
+            estimatedCostCny: null,
+            latencyMs: input.latencyMs,
+            startedAt: input.startedAt.toISOString(),
+            completedAt: input.completedAt?.toISOString() ?? null,
+          };
+        },
+      },
+      ragRetrievalRuntime: {
+        async retrieveForAiExplanation() {
+          return {
+            evidenceStatus: "sufficient",
+            citations: [
+              {
+                chunkPublicId: "chunk_public_private",
+                generationPublicId: "generation_public_private",
+                resourcePublicId: "resource_public_private",
+                resourceTitle: "专卖管理教材",
+                headingPath: ["第三篇", "第一章"],
+                chunkIndex: 7,
+                chunkText: "private chunk text",
+                textHash: "private-text-hash",
+                isStale: true,
+                score: 0.97,
+              },
+            ],
+            evidenceSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 1,
+              resourcePublicIds: ["resource_public_private"],
+              chunkPublicIds: ["chunk_public_private"],
+              generationPublicIds: ["generation_public_private"],
+              chunkIndexes: [7],
+              textHashes: ["private-text-hash"],
+              queryHash: "redaction-test-query",
+              maxScore: 0.97,
+              retrievalMode: "fusion_sort",
+            },
+          };
+        },
+      },
+    });
+
+    const result = await runtime.generateObjectiveExplanation({
+      userPublicId: "user_public_student_123",
+      organizationPublicId: null,
+      mistakeBookPublicId: "mistake_book_public_123",
+      questionPublicId: "question_public_123",
+      paperQuestionPublicId: "paper_question_public_123",
+      questionSnapshot: {
+        profession: "monopoly",
+        level: 3,
+        stemRichText: "question",
+      },
+      standardAnswer: "answer",
+      analysis: "analysis",
+      learnerAnswer: "learner answer",
+      isCorrect: false,
+      triggerReason: "manual_request",
+    });
+
+    expect(result.citations).toEqual([
+      expect.objectContaining({
+        chunkPublicId: "chunk_public_private",
+        generationPublicId: "generation_public_private",
+        resourcePublicId: "resource_public_private",
+        chunkIndex: 7,
+        chunkText: "private chunk text",
+        textHash: "private-text-hash",
+        score: 0.97,
+      }),
+    ]);
+    const serialized = JSON.stringify(result);
+    expect(serialized).toContain("chunk_public_private");
+    expect(serialized).toContain("generation_public_private");
+    expect(serialized).toContain("resource_public_private");
+    expect(serialized).toContain("private chunk text");
+    expect(serialized).toContain("private-text-hash");
+  });
+
+  it("keeps internal citation identities out of the complete network response", async () => {
+    const internalCitation = {
+      chunkPublicId: "chunk_public_network_private",
+      generationPublicId: "generation_public_network_private",
+      resourcePublicId: "resource_public_network_private",
+      resourceTitle: "专卖管理教材",
+      headingPath: ["第三篇", "第一章"],
+      chunkIndex: 5,
+      chunkText: "network private chunk text",
+      textHash: "network-private-text-hash",
+      isStale: false,
+      score: 0.95,
+    };
+    const handlers = createHandlers({
+      aiExplanationRuntime: {
+        async generateObjectiveExplanation() {
+          return {
+            explanationStatus: "explained",
+            explanationText: "safe explanation",
+            keyPoints: ["safe point"],
+            learningSuggestion: null,
+            insufficientEvidenceMessage: null,
+            evidenceStatus: "sufficient",
+            citations: [internalCitation],
+            promptTemplateKey: "ai_explanation_v1",
+            promptTemplateVersion: 1,
+          };
+        },
+      },
+    });
+
+    const response = await handlers.aiExplanation.POST(
+      new Request(
+        "http://localhost/api/v1/mistake-books/mistake_book_public_123/ai-explanation",
+        {
+          method: "POST",
+          headers: {
+            authorization: "Bearer student-session-token",
+          },
+          body: JSON.stringify({
+            requestedFromClientAt: "2026-05-22T05:05:00.000Z",
+          }),
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "mistake_book_public_123" }),
+      },
+    );
+    const serialized = JSON.stringify(await readJson(response));
+
+    expect(serialized).toContain("专卖管理教材");
+    expect(serialized).not.toContain("chunkPublicId");
+    expect(serialized).not.toContain("generationPublicId");
+    expect(serialized).not.toContain("resourcePublicId");
+    expect(serialized).not.toContain("chunkIndex");
+    expect(serialized).not.toContain("chunkText");
+    expect(serialized).not.toContain("textHash");
+    expect(serialized).not.toContain("score");
+    expect(serialized).not.toContain("network_private");
+    expect(serialized).not.toContain("network private chunk text");
   });
 
   it("does not execute a local fixture model_config in the student runtime", async () => {

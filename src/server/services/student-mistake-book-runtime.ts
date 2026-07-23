@@ -1,7 +1,11 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { ApiResponse } from "../contracts/api-response";
-import type { RagRetrievalResultDto } from "../contracts/ai-rag-contract";
+import type {
+  RagCitationDto,
+  RagRetrievalResultDto,
+} from "../contracts/ai-rag-contract";
+import type { AiExplanationDto } from "../contracts/mistake-book-contract";
 import type { Profession } from "../models/auth";
 import {
   createPostgresMistakeBookRepository,
@@ -34,6 +38,7 @@ import {
   buildResourceRagRetrievalResult,
 } from "./rag-resource-knowledge-runtime";
 import type { SessionService } from "./session-service";
+import { mapLearnerCitations } from "../mappers/learner-citation-mapper";
 
 export type StudentMistakeBookRuntimeOptions =
   MistakeBookRuntimeRepositoryOptions & {
@@ -54,6 +59,14 @@ type MistakeBookRagRetrievalRuntime = {
   retrieveForAiExplanation(
     context: MistakeBookAiExplanationRuntimeContext,
   ): Promise<RagRetrievalResultDto>;
+};
+
+type InternalMistakeBookAiExplanationRuntime = {
+  generateObjectiveExplanation(
+    context: MistakeBookAiExplanationRuntimeContext,
+  ): Promise<
+    Omit<AiExplanationDto, "citations"> & { citations: RagCitationDto[] }
+  >;
 };
 
 function isSuccessfulSessionResponse(
@@ -191,7 +204,7 @@ export function createGovernedMistakeBookAiExplanationRuntime(input: {
   explanationRunner: AiExplanationRunner;
   ragRetrievalRuntime?: MistakeBookRagRetrievalRuntime;
   localResourceStorageRoot?: string;
-}): MistakeBookAiExplanationRuntime {
+}): InternalMistakeBookAiExplanationRuntime {
   const aiCallLogRepository =
     input.aiCallLogRepository ??
     createPostgresAdminAiAuditLogRuntimeRepositories();
@@ -318,10 +331,36 @@ export function createStudentMistakeBookRuntimeRouteHandlers(
           localResourceStorageRoot: options.localResourceStorageRoot,
         })
       : undefined);
+  const learnerAiExplanationRuntime =
+    aiExplanationRuntime === undefined
+      ? undefined
+      : {
+          async generateObjectiveExplanation(
+            context: MistakeBookAiExplanationRuntimeContext,
+          ) {
+            const result =
+              await aiExplanationRuntime.generateObjectiveExplanation(context);
+
+            return {
+              explanationStatus: result.explanationStatus,
+              explanationText: result.explanationText,
+              keyPoints: result.keyPoints,
+              learningSuggestion: result.learningSuggestion,
+              insufficientEvidenceMessage: result.insufficientEvidenceMessage,
+              evidenceStatus: result.evidenceStatus,
+              citations: mapLearnerCitations({
+                evidenceStatus: result.evidenceStatus,
+                citations: result.citations,
+              }),
+              promptTemplateKey: result.promptTemplateKey,
+              promptTemplateVersion: result.promptTemplateVersion,
+            };
+          },
+        };
 
   return createMistakeBookRouteHandlers(
     createMistakeBookService(repository, clock, {
-      aiExplanationRuntime,
+      aiExplanationRuntime: learnerAiExplanationRuntime,
     }),
     createStudentMistakeBookUserResolver(sessionService),
   );

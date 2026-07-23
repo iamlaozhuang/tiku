@@ -949,57 +949,66 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
-  title: Paper question knowledge snapshot
-  phase: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
+  id: p1-remediation-rc-08-learner-citation-redaction-2026-07-23
+  title: Learner citation minimum disclosure
+  phase: p1-remediation-rc-08-learner-citation-redaction-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: database_application_logic_and_low_risk_report_projection_ui
-  productClosureContribution: closes_F0079_static_knowledge_snapshot_and_report_history_gap
-  branch: fix/paper-question-knowledge-snapshot
+  taskKind: permission_scoped_learner_citation_disclosure_contraction
+  productClosureContribution: closes_F0150_static_learner_RAG_citation_disclosure_gap
+  branch: fix/learner-citation-redaction
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0079
+    - F-0150
   candidateRootCauseCluster: P1-RC-08
-  objective: preserve immutable knowledge_node identity, name, path and confirmed binding facts in paper question snapshots and consume them in historical exam reports
+  objective: separate internal RAG citations from learner-visible citations and enforce a server-side minimum-disclosure projection across mistake-book and practice responses
   executionStage: validated_reviewed_conditional_closeout_ready
   findingStatus: validated_static_candidate
-  findingDisposition: conditional_closeout_ready_without_real_database_or_browser_runtime_proof
+  findingDisposition: conditional_closeout_ready_without_browser_or_runtime_network_proof
   riskBoundary:
-    category: database_application_logic_and_low_risk_report_projection_ui
-    approvalId: guardian-f0079-paper-question-knowledge-snapshot-2026-07-23
-    approvalFingerprint: 106e307181c5f326d4778813ce3458c81c10bffdf0c5f683d0515dc7dcb8d143
-    approvedBaseSha: 1f4b953f015ad125db42add291cd41288424bd53
+    category: permission_scoped_learner_citation_disclosure_contraction
+    approvalId: guardian-f0150-learner-citation-redaction-2026-07-23
+    approvalFingerprint: f0150-learner-citation-redaction-5bf667ec-envelope-v1-2026-07-23
+    approvedBaseSha: 5bf667ec899d689fc5a5ab216efa9915e1c3e250
+    requestedBaseSha: 5bf667ec899d689fc5a5ab216efa9915e1c3e250
     schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
+    disclosureContractionOnly: true
     providerOrRealExternalCall: false
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: formal_question_binding_to_question_repository_to_paper_question_snapshot_to_practice_mock_snapshot_to_exam_report_projector_to_learner_UI
-    coreFiles: 13
-    contingencyFiles: 3
+    chain: internal_RAG_citation_to_explanation_hint_and_audit_to_mistake_book_and_practice_learner_API_to_UI
+    coreFiles: 14
+    contingencyFiles: 4
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0079_current_F0013_runtime_hold_F0065_quota_deferred
+    bundleDisposition: F0150_current_F0063_covered_F0137_covered_F0013_runtime_hold_F0065_quota_deferred
   requiredSemantics:
-    authority: formal_question_knowledge_binding_and_current_node_facts_at_paper_composition
-    immutability: captured_name_path_and_binding_status_never_requery_mutable_tree_for_history
-    integrity: exact_deterministic_direct_binding_set_and_malformed_present_snapshot_fail_closed
-    legacy: missing_structured_metadata_explicitly_legacy_unavailable_without_backfill
-    report: aggregate_by_public_id_and_display_captured_name_path
+    allowlist: learner_citation_only_resource_title_heading_path_and_optional_stale_status
+    forbidden: no_chunk_text_hash_score_index_or_internal_public_identity
+    enforcement: one_server_side_mapper_for_mistake_book_and_practice
+    internalCompatibility: retrieval_provider_and_redacted_audit_keep_internal_RagCitationDto
+    malformed: fail_closed_without_partial_filter_or_identifier_fallback
+  validationEvidence:
+    red: 2_expected_failures_proved_internal_citation_fields_reached_mistake_book_and_practice_learner_sinks
+    focused: 8_files_100_tests_exit_0
+    lint: exit_0_with_3_pre_existing_unrelated_warnings
+    typecheck: exit_0
+    build: exit_0_with_pre_existing_NFT_trace_warning
+    adversarialReview: pass_allowlist_runtime_validation_evidence_consistency_copy_isolation_deterministic_dedup_and_no_internal_identity_UI_key
   conditionalCloseoutProjection:
     current: validated_reviewed_conditional_closeout_ready
-    trigger: TDD_and_full_declared_validation_GREEN
-    projected: F0079_static_closed_without_real_database_or_browser_runtime_proof
+    trigger: guardian_approval_then_TDD_and_full_declared_validation_GREEN
+    projected: F0150_static_closed_without_browser_or_runtime_network_proof
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23
+    taskId: p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23
     findingIds:
-      - F-0161
-    commit: 1f4b953f015ad125db42add291cd41288424bd53
-    tree: 70c3306633b305a61e7d9f0bbc8f72553021743b
+      - F-0079
+    commit: 5bf667ec899d689fc5a5ab216efa9915e1c3e250
+    tree: cdfda3b8bf67caf12bda2e184fb92c8c19ac8b38
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_product_without_browser_or_runtime_database_proof
+    findingStatus: closed_static_product_without_real_database_or_browser_runtime_proof
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
@@ -1012,9 +1021,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 1f4b953f015ad125db42add291cd41288424bd53
-  lastKnownOriginMasterSha: 1f4b953f015ad125db42add291cd41288424bd53
-  lastKnownRemoteMasterSha: 1f4b953f015ad125db42add291cd41288424bd53
+  lastKnownMasterSha: 5bf667ec899d689fc5a5ab216efa9915e1c3e250
+  lastKnownOriginMasterSha: 5bf667ec899d689fc5a5ab216efa9915e1c3e250
+  lastKnownRemoteMasterSha: 5bf667ec899d689fc5a5ab216efa9915e1c3e250
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

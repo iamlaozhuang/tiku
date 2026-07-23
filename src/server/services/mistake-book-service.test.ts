@@ -358,15 +358,9 @@ describe("mistake book service", () => {
             evidenceStatus: "sufficient",
             citations: [
               {
-                chunkPublicId: "chunk_public_123",
-                generationPublicId: "resource-index-generation-public-123",
-                resourcePublicId: "resource_public_123",
                 resourceTitle: "专卖管理教材",
                 headingPath: ["第一章"],
-                chunkIndex: 1,
-                chunkText: "法规依据片段",
-                textHash: "hash_123",
-                score: 0.91,
+                isStale: null,
               },
             ],
             promptTemplateKey: "ai_explanation_v1",
@@ -393,15 +387,9 @@ describe("mistake book service", () => {
           evidenceStatus: "sufficient",
           citations: [
             {
-              chunkPublicId: "chunk_public_123",
-              generationPublicId: "resource-index-generation-public-123",
-              resourcePublicId: "resource_public_123",
               resourceTitle: "专卖管理教材",
               headingPath: ["第一章"],
-              chunkIndex: 1,
-              chunkText: "法规依据片段",
-              textHash: "hash_123",
-              score: 0.91,
+              isStale: null,
             },
           ],
           promptTemplateKey: "ai_explanation_v1",

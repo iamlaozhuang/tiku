@@ -220,6 +220,62 @@ describe("practice mapper", () => {
     });
   });
 
+  it("projects persisted internal citations to the learner allowlist", () => {
+    const mapped = mapPracticeAnswerFeedbackToApi(
+      createFeedbackRow({
+        ai_explanation_evidence_status: "sufficient",
+        ai_explanation_citations: [
+          {
+            chunkPublicId: "chunk_public_private_2",
+            generationPublicId: "generation_public_private_2",
+            resourcePublicId: "resource_public_private_2",
+            resourceTitle: "专卖管理教材",
+            headingPath: ["第三篇", "第一章"],
+            chunkIndex: 9,
+            chunkText: "private explanation evidence",
+            textHash: "private-explanation-hash",
+            isStale: false,
+            score: 0.99,
+          },
+        ],
+        ai_hint_evidence_status: "sufficient",
+        ai_hint_citations: [
+          {
+            chunkPublicId: "chunk_public_private_1",
+            generationPublicId: null,
+            resourcePublicId: "resource_public_private_1",
+            resourceTitle: "技能训练手册",
+            headingPath: [],
+            chunkIndex: 3,
+            chunkText: "private hint evidence",
+            textHash: "private-hint-hash",
+            score: 0.88,
+          },
+        ],
+      }),
+    );
+
+    expect(mapped.aiExplanationCitations).toEqual([
+      {
+        resourceTitle: "专卖管理教材",
+        headingPath: ["第三篇", "第一章"],
+        isStale: false,
+      },
+    ]);
+    expect(mapped.aiHintCitations).toEqual([
+      {
+        resourceTitle: "技能训练手册",
+        headingPath: [],
+        isStale: null,
+      },
+    ]);
+    expect(JSON.stringify(mapped)).not.toContain("chunk_public_private");
+    expect(JSON.stringify(mapped)).not.toContain(
+      "private explanation evidence",
+    );
+    expect(JSON.stringify(mapped)).not.toContain("private hint evidence");
+  });
+
   it("builds deterministic answer and feedback progress from persisted attempts", () => {
     const projection = buildPracticeResumeProjection(
       createPracticeRow({

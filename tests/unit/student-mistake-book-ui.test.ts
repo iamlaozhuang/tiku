@@ -301,14 +301,9 @@ describe("StudentMistakeBookPage", () => {
                 evidenceStatus: "sufficient",
                 citations: [
                   {
-                    chunkPublicId: "chunk-public-001",
-                    resourcePublicId: "resource-public-001",
                     resourceTitle: "专卖管理教材",
                     headingPath: ["第三篇", "第一章"],
-                    chunkIndex: 1,
-                    chunkText: "引用片段不应完整渲染",
-                    textHash: "chunk-hash-001",
-                    score: 0.93,
+                    isStale: true,
                   },
                 ],
                 promptTemplateKey: "ai_explanation_v1",
@@ -341,6 +336,7 @@ describe("StudentMistakeBookPage", () => {
       screen.getByText("复习对应知识点并完成同类题。"),
     ).toBeInTheDocument();
     expect(screen.getByText("专卖管理教材")).toBeInTheDocument();
+    expect(screen.getByText(/来源可能已更新/)).toBeInTheDocument();
     const item = screen.getByTestId(
       "mistake-book-item-mistake-book-public-001",
     );
@@ -349,7 +345,6 @@ describe("StudentMistakeBookPage", () => {
     expect(document.body.textContent).not.toContain(
       "raw answer should not render",
     );
-    expect(document.body.textContent).not.toContain("引用片段不应完整渲染");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/mistake-books/mistake-book-public-001/ai-explanation",
       expect.objectContaining({

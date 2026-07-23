@@ -1,5 +1,5 @@
 import type { Profession, Subject } from "../models/paper";
-import type { RagCitationDto } from "./ai-rag-contract";
+import type { LearnerCitationDto } from "./ai-rag-contract";
 import type { EvidenceStatus } from "../models/ai-rag";
 import type {
   AnswerRecordStatus,
@@ -39,12 +39,12 @@ export type PracticeAnswerFeedbackDto = {
   aiExplanationText: string | null;
   aiExplanationLearningSuggestion: string | null;
   aiExplanationEvidenceStatus: EvidenceStatus | null;
-  aiExplanationCitations: RagCitationDto[];
+  aiExplanationCitations: LearnerCitationDto[];
   aiHintStatus: string | null;
   aiHintText: string | null;
   aiHintImprovementDirections: string[];
   aiHintEvidenceStatus: EvidenceStatus | null;
-  aiHintCitations: RagCitationDto[];
+  aiHintCitations: LearnerCitationDto[];
   retryRemainingCount: number;
   answeredAt: string | null;
 };

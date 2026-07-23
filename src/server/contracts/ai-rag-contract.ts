@@ -166,6 +166,12 @@ export type RagCitationDto = {
   score: number;
 };
 
+export type LearnerCitationDto = {
+  resourceTitle: string;
+  headingPath: string[];
+  isStale: boolean | null;
+};
+
 export type RagCitationSourceDto = {
   chunkPublicId: string;
   generationPublicId: string | null;

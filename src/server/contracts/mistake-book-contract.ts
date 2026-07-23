@@ -1,6 +1,6 @@
 import type { Profession, Subject } from "../models/paper";
 import type { EvidenceStatus } from "../models/ai-rag";
-import type { RagCitationDto } from "./ai-rag-contract";
+import type { LearnerCitationDto } from "./ai-rag-contract";
 import type {
   MistakeBookSource,
   MistakeBookStatus,
@@ -47,7 +47,7 @@ export type AiExplanationDto = {
   learningSuggestion: string | null;
   insufficientEvidenceMessage: string | null;
   evidenceStatus: EvidenceStatus;
-  citations: RagCitationDto[];
+  citations: LearnerCitationDto[];
   promptTemplateKey: string;
   promptTemplateVersion: number;
 };

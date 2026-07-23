@@ -1,50 +1,54 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23",
-  "findingIds": ["F-0079"],
+  "taskId": "p1-remediation-rc-08-learner-citation-redaction-2026-07-23",
+  "findingIds": ["F-0150"],
   "candidateRootCauseCluster": "P1-RC-08",
   "status": "validated_reviewed_conditional_closeout_ready",
-  "branch": "fix/paper-question-knowledge-snapshot",
-  "baseSha": "1f4b953f015ad125db42add291cd41288424bd53",
-  "objective": "Close F-0079 statically by preserving deterministic immutable knowledge_node identity, name, full path and confirmed formal-binding status in every newly composed paper question snapshot, and by making exam_report analytics and learner UI consume only those historical facts without mutable-tree lookups.",
-  "riskCategory": "database_application_logic_and_low_risk_report_projection_ui",
+  "branch": "fix/learner-citation-redaction",
+  "baseSha": "5bf667ec899d689fc5a5ab216efa9915e1c3e250",
+  "objective": "Close F-0150 statically by separating internal RAG citations from learner-visible citations and enforcing a server-side allowlist projection that exposes only resource title, heading path, and stale display status across mistake-book and practice learner responses.",
+  "riskCategory": "permission_scoped_learner_citation_disclosure_contraction",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/repositories/question-repository.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "src/server/repositories/exam-report-repository.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "tests/unit/student-mock-exam-report-ui.test.ts",
-    "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
-    "src/lib/published-paper-snapshot.ts",
-    "src/lib/published-paper-snapshot.test.ts",
-    "tests/unit/p1-exam-report-scoring-finalization.test.ts"
+    "src/server/contracts/ai-rag-contract.ts",
+    "src/server/contracts/mistake-book-contract.ts",
+    "src/server/contracts/practice-contract.ts",
+    "src/server/mappers/learner-citation-mapper.ts",
+    "src/server/services/student-mistake-book-runtime.ts",
+    "src/server/mappers/practice-mapper.ts",
+    "src/features/student/mistake-book/StudentMistakeBookPage.tsx",
+    "tests/unit/p1-learner-citation-redaction.test.ts",
+    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+    "src/server/mappers/practice-mapper.test.ts",
+    "tests/unit/student-mistake-book-ui.test.ts",
+    "src/server/services/mistake-book-service.test.ts",
+    "src/server/services/ai-explanation-hint-service.test.ts",
+    "src/server/services/practice-service.test.ts",
+    "src/server/services/practice-route.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/contracts/paper-draft-contract.ts",
-    "src/server/repositories/question-repository.ts",
-    "src/server/repositories/question-repository.test.ts",
-    "src/server/repositories/paper-draft-repository.ts",
-    "src/server/repositories/paper-draft-repository.test.ts",
-    "src/server/repositories/exam-report-repository.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "tests/unit/student-mock-exam-report-ui.test.ts",
-    "tests/unit/p1-paper-question-knowledge-snapshot.test.ts"
+    "src/server/contracts/ai-rag-contract.ts",
+    "src/server/contracts/mistake-book-contract.ts",
+    "src/server/contracts/practice-contract.ts",
+    "src/server/mappers/learner-citation-mapper.ts",
+    "src/server/services/student-mistake-book-runtime.ts",
+    "src/server/mappers/practice-mapper.ts",
+    "src/features/student/mistake-book/StudentMistakeBookPage.tsx",
+    "tests/unit/p1-learner-citation-redaction.test.ts",
+    "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+    "src/server/mappers/practice-mapper.test.ts",
+    "tests/unit/student-mistake-book-ui.test.ts"
   ],
   "contingencyFiles": [
-    "src/lib/published-paper-snapshot.ts",
-    "src/lib/published-paper-snapshot.test.ts",
-    "tests/unit/p1-exam-report-scoring-finalization.test.ts"
+    "src/server/services/mistake-book-service.test.ts",
+    "src/server/services/ai-explanation-hint-service.test.ts",
+    "src/server/services/practice-service.test.ts",
+    "src/server/services/practice-route.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -56,41 +60,51 @@
     "drizzle/**",
     "package.json",
     "pnpm-lock.yaml",
-    "any migration apply, real database/data access, permission expansion, quota, Provider, deployment or external-service configuration"
+    "any schema or migration source, real database/data access, permission expansion, Provider behavior/configuration, dependency, deployment, secret/env, external service, PR or force-push"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "formal question question_knowledge_node binding -> question repository hierarchy read -> paper draft repository immutable question snapshot -> published paper snapshot -> practice/mock_exam snapshot -> canonical exam report projector -> report detail -> learner knowledge weakness UI",
-    "coreFileCount": 13,
-    "contingencyFileCount": 3,
+    "authoritativeChain": "internal RagRetrievalResultDto and RagCitationDto -> ai-explanation/hint execution and audit redaction -> student mistake-book runtime and persisted practice feedback -> learner API contracts -> learner UI",
+    "attackerPrecondition": "an authenticated learner can request mistake-book explanation or read practice feedback containing sufficient RAG citations",
+    "currentVulnerableSink": "MistakeBookAiExplanationResultDto and PracticeAnswerFeedbackDto reuse RagCitationDto, exposing chunkText, textHash, score, chunkIndex and internal resource/chunk/generation public identities in learner network responses",
+    "securityInvariant": "learner responses contain only normalized resourceTitle, headingPath and optional isStale; internal citations remain available only to retrieval, Provider and redacted audit boundaries",
+    "legitimateBehavior": "sufficient citations still show source title and chapter path; weak/none remains empty; internal grounding, stale handling and audit redaction remain unchanged",
+    "coreFileCount": 14,
+    "contingencyFileCount": 4,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
     "schemaMigrationRequired": false,
-    "permissionSemantics": "unchanged; existing paper composition and learner report authorization remains authoritative",
-    "providerSemantics": "unchanged; no Provider or learning_suggestion execution",
-    "currentMasterEvidence": "F-0154 now copies only direct/parent/ancestor public-id arrays; the immutable paper snapshot still omits knowledge_node name, full path and confirmation status, while report analytics and UI display only public ids."
+    "providerSemantics": "unchanged",
+    "authorizationSemantics": "existing learner object authorization unchanged; response disclosure is strictly contracted"
   },
-  "knowledgeSnapshotContract": {
-    "container": "knowledgeNodeSnapshot={schemaVersion:1,bindings:[...]} where absence means legacy, present malformed means corrupt and must fail closed",
-    "sourceAuthority": "question_knowledge_node joined to the current formal knowledge_node row inside paper composition; unresolved recommendation candidates are excluded until formally confirmed",
-    "snapshotFacts": [
-      "knowledgeNodePublicId",
-      "name",
-      "pathName",
-      "confirmationStatus=confirmed",
-      "bindingSource=formal_question_binding"
+  "learnerCitationContract": {
+    "allowedFields": ["resourceTitle", "headingPath", "isStale"],
+    "forbiddenFields": [
+      "chunkText",
+      "textHash",
+      "score",
+      "chunkIndex",
+      "chunkPublicId",
+      "resourcePublicId",
+      "generationPublicId"
     ],
-    "determinism": "all direct bindings appear exactly once in ordinal case-sensitive public-id order and remain exactly consistent in count, order and case with existing direct public-id metadata; localeCompare is forbidden",
-    "integrity": "unknown fields, missing/duplicate/case-conflicting identities, cross-profession, cross-knowledge-base, cyclic or malformed hierarchy/name/path facts fail closed before paper question persistence",
-    "pathProof": "captured pathName must equal the complete root-to-direct node name chain from one transactionally consistent hierarchy read; names and paths are nonempty normalized strings without control characters",
-    "transactionConsistency": "binding, question and complete node hierarchy are read as one consistent transaction fact through one recursive statement or explicit locks plus final revalidation",
-    "legacy": "existing snapshots without structured knowledge facts remain readable as explicitly legacy/unavailable and are never repaired from the mutable current tree",
-    "report": "new report analysis groups by snapshot public id while preserving and displaying the captured name/path; valid empty, legacy unavailable and corrupt present are distinct; mixed legacy/current analytics are unavailable rather than partial",
-    "immutability": "knowledge_node rename, move or disable after paper composition cannot alter paper, practice, mock_exam or exam_report history",
-    "noSchema": "the change only strengthens existing JSON snapshot application logic; no schema or migration source is modified"
+    "enforcement": "one server-side explicit allowlist mapper used by mistake-book runtime and practice API mapper; no spread, assign, serialize-delete or input reference reuse",
+    "validation": "runtime-untrusted input; maximum 3 raw citations, 200 title characters, 12 heading segments and 200 characters per segment; C0/C1, newline, bidi controls and non-printable separators rejected; malformed collections fail closed instead of partial filtering",
+    "stale": "isStale is explicit boolean or null; missing maps only to null and string/number truthy values are rejected",
+    "evidenceConsistency": "sufficient requires one to three valid citations; weak and none require an empty collection; contradictions fail closed",
+    "determinism": "ordinal public-fact sort and exact tuple dedup; conflicting stale facts fail closed; score, rank, chunk index and internal identities never influence output order or labels",
+    "internalBoundary": "RagCitationDto remains internal for retrieval, governed execution and redacted audit; no Provider or RAG semantics change"
+  },
+  "validationEvidence": {
+    "red": "2 expected failures proved internal citation fields reached mistake-book and practice learner sinks",
+    "focused": "8 files and 100 tests passed",
+    "lint": "exit 0 with 3 pre-existing unrelated warnings",
+    "typecheck": "exit 0",
+    "build": "exit 0 with the pre-existing NFT trace warning",
+    "adversarialReview": "PASS: one explicit learner mapper validates count/text/path/stale/evidence consistency, rejects malformed collections atomically, copies and ordinally sorts public facts, rejects stale conflicts, preserves internal RAG facts, and removes internal identity UI keys"
   },
   "validationCommands": [
     {
-      "name": "paper-knowledge-snapshot-focused",
+      "name": "learner-citation-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -98,13 +112,14 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/repositories/paper-draft-repository.test.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "src/lib/published-paper-snapshot.test.ts",
-        "tests/unit/p1-exam-report-scoring-finalization.test.ts",
-        "tests/unit/student-mock-exam-report-ui.test.ts",
-        "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
+        "tests/unit/p1-learner-citation-redaction.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+        "src/server/mappers/practice-mapper.test.ts",
+        "tests/unit/student-mistake-book-ui.test.ts",
+        "src/server/services/mistake-book-service.test.ts",
+        "src/server/services/ai-explanation-hint-service.test.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/practice-route.test.ts",
         "--maxWorkers=1"
       ]
     },
@@ -138,19 +153,21 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/contracts/paper-draft-contract.ts",
-        "src/server/repositories/question-repository.ts",
-        "src/server/repositories/question-repository.test.ts",
-        "src/server/repositories/paper-draft-repository.ts",
-        "src/server/repositories/paper-draft-repository.test.ts",
-        "src/server/repositories/exam-report-repository.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-        "tests/unit/student-mock-exam-report-ui.test.ts",
-        "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
-        "src/lib/published-paper-snapshot.ts",
-        "src/lib/published-paper-snapshot.test.ts",
-        "tests/unit/p1-exam-report-scoring-finalization.test.ts"
+        "src/server/contracts/ai-rag-contract.ts",
+        "src/server/contracts/mistake-book-contract.ts",
+        "src/server/contracts/practice-contract.ts",
+        "src/server/mappers/learner-citation-mapper.ts",
+        "src/server/services/student-mistake-book-runtime.ts",
+        "src/server/mappers/practice-mapper.ts",
+        "src/features/student/mistake-book/StudentMistakeBookPage.tsx",
+        "tests/unit/p1-learner-citation-redaction.test.ts",
+        "tests/unit/phase-8-student-mistake-book-runtime.test.ts",
+        "src/server/mappers/practice-mapper.test.ts",
+        "tests/unit/student-mistake-book-ui.test.ts",
+        "src/server/services/mistake-book-service.test.ts",
+        "src/server/services/ai-explanation-hint-service.test.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/practice-route.test.ts"
       ]
     },
     {
@@ -162,95 +179,60 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-paper-question-knowledge-snapshot.test.ts",
+        "tests/unit/p1-learner-citation-redaction.test.ts",
         "-t",
-        "strictly parses the F-0079 task contract and WIP state",
+        "strictly parses the F-0150 task contract and WIP state",
         "--maxWorkers=1"
       ]
     }
   ],
-  "consumedPreRedApproval": {
+  "freshApprovalRequest": {
     "delegationId": "current-user-delegated-p1-guardian-v1-2026-07-21",
-    "approvalFingerprint": "106e307181c5f326d4778813ce3458c81c10bffdf0c5f683d0515dc7dcb8d143",
-    "riskCategory": "database_application_logic_and_low_risk_report_projection_ui",
-    "requestedOperations": [
-      "TDD",
-      "database application snapshot read/write logic",
-      "report projection and UI",
-      "validation",
-      "single commit",
-      "ff-only master merge",
-      "canonical origin/master push",
-      "sync and cleanup"
-    ],
-    "baseSha": "1f4b953f015ad125db42add291cd41288424bd53",
-    "approvalId": "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23",
-    "decision": "APPROVED",
+    "approvalId": "guardian-f0150-learner-citation-redaction-2026-07-23",
+    "approvalFingerprint": "f0150-learner-citation-redaction-5bf667ec-envelope-v1-2026-07-23",
+    "riskCategory": "permission_scoped_learner_citation_disclosure_contraction",
     "requestStatus": "approved_and_consumed_for_pre_RED",
-    "conditionalCloseout": true
+    "conditionalCloseoutRequested": true,
+    "approvedBaseSha": "5bf667ec899d689fc5a5ab216efa9915e1c3e250"
   },
   "approvalSources": {
     "lowRiskCloseout": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20",
     "testOnlyAllowlistExpansion": "standing-test-only-allowlist-expansion-2026-07-21",
-    "database": "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23",
-    "permission": null,
+    "database": null,
+    "permission": "guardian-f0150-learner-citation-redaction-2026-07-23",
     "dependency": null,
     "provider": null
   },
   "conditionalCloseout": true,
   "closeoutProjection": {
     "current": "validated_reviewed_conditional_closeout_ready",
-    "triggers": "focused_lint_typecheck_build_format_diff_state_parse_and_main_thread_adversarial_review_GREEN_with_unchanged_base_origin_and_envelope",
-    "successProjection": "F0079_closed_static_without_real_database_or_browser_runtime_proof",
+    "triggers": "guardian_approval_then_TDD_focused_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup",
+    "successProjection": "F0150_closed_static_without_browser_or_runtime_network_proof",
     "terminalEvidence": "only actual commit push sync and cleanup evidence may prove closeout"
   },
-  "validationEvidence": {
-    "tddRed": "5_files_89_tests_10_expected_product_failures_plus_1_missing_new_test_dependency_before_implementation",
-    "focused": "7_files_106_tests_GREEN",
-    "lint": "exit_0_with_3_pre_existing_unrelated_warnings",
-    "typecheck": "tsc_noEmit_exit_0",
-    "build": "next_build_exit_0_with_existing_NFT_trace_warning",
-    "format": "approved_changed_files_prettier_formatted",
-    "diff": "git_diff_check_exit_0",
-    "stateParse": "JSON_parse_and_strict_unique_key_YAML_parse_GREEN",
-    "adversarialReview": "GREEN_unique_builder_transactional_share_locks_exact_identity_set_legacy_current_corrupt_tristate_no_mutable_tree_report_lookup_no_partial_UI_filtering",
-    "runtimeBoundary": "static_and_synthetic_only_no_real_database_or_browser_runtime_proof"
-  },
-  "executionMetrics": {
-    "mandatoryFreshApprovals": 1,
-    "preventableScopeMissApprovals": 0,
-    "candidateReapprovals": 0,
-    "approvalWaitTurns": 1,
-    "productValueTime": "JIT_and_pre_RED_chain_scan_completed_exact_clock_not_reconstructed",
-    "mechanismOverhead": "includes_contract_materialization_and_guardian_request_exact_clock_not_reconstructed",
-    "guardSmokeChanges": 0
-  },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23",
-    "findingIds": ["F-0161"],
-    "commit": "1f4b953f015ad125db42add291cd41288424bd53",
-    "tree": "70c3306633b305a61e7d9f0bbc8f72553021743b",
+    "taskId": "p1-remediation-rc-08-paper-question-knowledge-snapshot-2026-07-23",
+    "findingIds": ["F-0079"],
+    "commit": "5bf667ec899d689fc5a5ab216efa9915e1c3e250",
+    "tree": "cdfda3b8bf67caf12bda2e184fb92c8c19ac8b38",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "findingStatus": "closed_static_product_without_browser_or_runtime_database_proof",
+    "findingStatus": "closed_static_product_without_real_database_or_browser_runtime_proof",
     "masterOriginSync": true,
-    "worktreeCleanBeforeBranch": true,
     "shortBranchCleanup": true
   },
-  "residualDisposition": {
-    "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
-    "F-0065": "confirmed_deferred_by_F0148_quota_and_Cost_Calibration_gate",
-    "F-0079": "validated_static_candidate_ready_for_conditional_closeout",
-    "F-0161": "closed_static_product_without_browser_or_runtime_database_proof"
+  "jitRevalidation": {
+    "F-0063": "covered_by_durable_ai_scoring_task_attempt_count_atomic_claim_max_three_retry_and_terminal_replay_current_code_no_product_change_required",
+    "F-0137": "covered_by_F0027_database_unique_key_and_atomic_mistake_book_upsert_pending_state_disposition"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0079",
-    "currentPartition": "paper_question_knowledge_snapshot_and_report_history",
-    "nextReviewHints": ["after_F0079_closeout_continue_RC08_residual_JIT"]
+    "currentFindingId": "F-0150",
+    "currentPartition": "learner_citation_minimum_disclosure",
+    "nextReviewHints": ["after_F0150_closeout_continue_RC08_residual_JIT"]
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0079-paper-question-knowledge-snapshot-2026-07-23"
+    "approvalId": "guardian-f0150-learner-citation-redaction-2026-07-23"
   }
 }

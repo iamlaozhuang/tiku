@@ -10,6 +10,7 @@ import type {
   PracticeAnswerResumeRow,
   PracticeRow,
 } from "../repositories/practice-repository";
+import { mapLearnerCitations } from "./learner-citation-mapper";
 import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
 import { listPublishedPaperSnapshotQuestionEntries } from "@/lib/published-paper-snapshot";
 
@@ -390,12 +391,18 @@ export function mapPracticeAnswerFeedbackToApi(
     aiExplanationLearningSuggestion:
       feedback.ai_explanation_learning_suggestion,
     aiExplanationEvidenceStatus: feedback.ai_explanation_evidence_status,
-    aiExplanationCitations: feedback.ai_explanation_citations,
+    aiExplanationCitations: mapLearnerCitations({
+      evidenceStatus: feedback.ai_explanation_evidence_status,
+      citations: feedback.ai_explanation_citations,
+    }),
     aiHintStatus: feedback.ai_hint_status,
     aiHintText: feedback.ai_hint_text,
     aiHintImprovementDirections: feedback.ai_hint_improvement_directions,
     aiHintEvidenceStatus: feedback.ai_hint_evidence_status,
-    aiHintCitations: feedback.ai_hint_citations,
+    aiHintCitations: mapLearnerCitations({
+      evidenceStatus: feedback.ai_hint_evidence_status,
+      citations: feedback.ai_hint_citations,
+    }),
     retryRemainingCount: feedback.retry_remaining_count,
     answeredAt: formatNullableTimestamp(feedback.answered_at),
   };

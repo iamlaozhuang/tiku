@@ -587,7 +587,11 @@ function StudentMistakeBookCard({
               <ul className="space-y-1">
                 {aiExplanation.citations.map((citation) => (
                   <li
-                    key={`${citation.resourcePublicId}-${citation.chunkPublicId}`}
+                    key={JSON.stringify([
+                      citation.resourceTitle,
+                      citation.headingPath,
+                      citation.isStale,
+                    ])}
                     className="text-text-secondary text-xs leading-5"
                   >
                     <span className="text-text-primary font-medium">
@@ -597,6 +601,9 @@ function StudentMistakeBookCard({
                       {" "}
                       · {formatCitationHeadingPath(citation.headingPath)}
                     </span>
+                    {citation.isStale === true ? (
+                      <span className="text-warning"> · 来源可能已更新</span>
+                    ) : null}
                   </li>
                 ))}
               </ul>
