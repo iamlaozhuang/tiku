@@ -1645,100 +1645,219 @@ function createPostgresMockExamRepository(
     async submitMockExam(input) {
       const database = getDatabase();
       return database.transaction(async (transaction) => {
-        const [row] = await transaction
-          .update(mockExam)
-          .set({
-            exam_status: input.examStatus,
-            submitted_at: input.submittedAt,
-            objective_score: input.objectiveScore,
-            subjective_score: input.subjectiveScore,
-            total_score: input.totalScore,
-            updated_at: input.submittedAt,
-          })
-          .where(
-            and(
-              eq(mockExam.public_id, input.publicId),
-              eq(mockExam.exam_status, "in_progress"),
-            ),
-          )
-          .returning();
-
-        if (row === undefined) {
+        const userId = await findUserIdByPublicId(
+          transaction as StudentFlowRuntimeDatabase,
+          input.userPublicId,
+        );
+        if (userId === null) {
           return null;
         }
 
-        await transaction
-          .update(mockExamDeadlineTask)
-          .set({
-            task_status: "completed",
-            lease_expires_at: null,
-            worker_public_id: null,
-            failure_message_digest: null,
-            completed_at: input.submittedAt,
-            updated_at: input.submittedAt,
-          })
-          .where(eq(mockExamDeadlineTask.mock_exam_id, row.id));
+        const [ownedMockExam] = await transaction
+          .select()
+          .from(mockExam)
+          .where(
+            and(
+              eq(mockExam.public_id, input.publicId),
+              eq(mockExam.user_id, userId),
+            ),
+          )
+          .for("update");
 
-        await Promise.all(
-          input.answerRecordResults.map((answerRecordResult) =>
-            transaction
-              .update(answerRecord)
-              .set({
-                answer_record_status: answerRecordResult.answerRecordStatus,
-                is_correct: answerRecordResult.isCorrect,
-                score: answerRecordResult.score,
-                submitted_at: answerRecordResult.submittedAt,
-                updated_at: answerRecordResult.submittedAt,
-              })
-              .where(
-                and(
-                  eq(answerRecord.mock_exam_id, row.id),
-                  eq(
-                    answerRecord.paper_question_public_id,
-                    answerRecordResult.paperQuestionPublicId,
-                  ),
-                ),
-              ),
-          ),
+        if (ownedMockExam === undefined) {
+          return null;
+        }
+
+        if (
+          ["completed", "scoring", "scoring_partial_failed"].includes(
+            ownedMockExam.exam_status,
+          )
+        ) {
+          return mapMockExamRow(
+            ownedMockExam,
+            await countMockExamAnswers(
+              transaction as StudentFlowRuntimeDatabase,
+              ownedMockExam.id,
+            ),
+          );
+        }
+
+        if (ownedMockExam.exam_status !== "in_progress") {
+          return null;
+        }
+
+        const currentAnswerRows = await transaction
+          .select()
+          .from(answerRecord)
+          .where(eq(answerRecord.mock_exam_id, ownedMockExam.id))
+          .for("update");
+        const answerByPublicId = new Map(
+          currentAnswerRows.map((row) => [row.public_id, row]),
+        );
+        const resultPublicIds = input.answerRecordResults.map(
+          (result) => result.answerRecordPublicId,
+        );
+        const resultPaperQuestionPublicIds = input.answerRecordResults.map(
+          (result) => result.paperQuestionPublicId,
         );
 
-        if (input.aiScoringTasks.length > 0) {
+        if (
+          currentAnswerRows.length !== input.answerRecordResults.length ||
+          answerByPublicId.size !== currentAnswerRows.length ||
+          new Set(resultPublicIds).size !== resultPublicIds.length ||
+          new Set(resultPaperQuestionPublicIds).size !==
+            resultPaperQuestionPublicIds.length
+        ) {
+          throw new Error("Mock exam answer set cardinality is invalid.");
+        }
+
+        for (const result of input.answerRecordResults) {
+          const current = answerByPublicId.get(result.answerRecordPublicId);
           if (
-            input.aiScoringTasks.some(
-              (task) => task.mockExamPublicId !== input.publicId,
-            )
+            current === undefined ||
+            current.user_id !== userId ||
+            current.exam_mode !== "mock_exam" ||
+            current.practice_id !== null ||
+            current.mock_exam_id !== ownedMockExam.id ||
+            current.paper_question_public_id !== result.paperQuestionPublicId ||
+            current.answer_revision !== result.expectedRevision ||
+            current.answer_record_status !==
+              result.expectedAnswerRecordStatus ||
+            current.submitted_at !== null ||
+            current.is_correct !== null ||
+            current.score !== null
           ) {
-            throw new Error("AI scoring task mock_exam scope mismatch.");
+            throw new Error("Mock exam answer identity or revision is stale.");
           }
 
-          const answerRecordPublicIds = input.aiScoringTasks.map(
-            (task) => task.answerRecordPublicId,
-          );
-          const answerRecordLinks = await transaction
-            .select({
-              id: answerRecord.id,
-              public_id: answerRecord.public_id,
+          if (
+            (result.answerRecordStatus === "submitted" &&
+              (result.isCorrect !== null || result.score !== null)) ||
+            (result.answerRecordStatus === "scored" && result.score === null) ||
+            !["submitted", "scored"].includes(result.answerRecordStatus)
+          ) {
+            throw new Error("Mock exam answer result state is invalid.");
+          }
+        }
+
+        const submittedAnswerPublicIds = input.answerRecordResults
+          .filter((result) => result.answerRecordStatus === "submitted")
+          .map((result) => result.answerRecordPublicId);
+        const taskAnswerPublicIds = input.aiScoringTasks.map(
+          (task) => task.answerRecordPublicId,
+        );
+        const taskPublicIds = input.aiScoringTasks.map((task) => task.publicId);
+        const taskIdempotencyHashes = input.aiScoringTasks.map(
+          (task) => task.idempotencyKeyHash,
+        );
+        const sortedSubmittedAnswerPublicIds = [
+          ...submittedAnswerPublicIds,
+        ].sort();
+        const sortedTaskAnswerPublicIds = [...taskAnswerPublicIds].sort();
+        if (
+          JSON.stringify(sortedSubmittedAnswerPublicIds) !==
+            JSON.stringify(sortedTaskAnswerPublicIds) ||
+          new Set(taskAnswerPublicIds).size !== taskAnswerPublicIds.length ||
+          new Set(taskPublicIds).size !== taskPublicIds.length ||
+          new Set(taskIdempotencyHashes).size !==
+            taskIdempotencyHashes.length ||
+          input.aiScoringTasks.some(
+            (task) =>
+              task.mockExamPublicId !== input.publicId ||
+              task.actorPublicId !== input.userPublicId ||
+              !answerByPublicId.has(task.answerRecordPublicId),
+          )
+        ) {
+          throw new Error("AI scoring task set is inconsistent.");
+        }
+
+        const derivedExamStatus =
+          input.aiScoringTasks.length > 0 ? "scoring" : "completed";
+        if (
+          input.examStatus !== derivedExamStatus ||
+          (derivedExamStatus === "scoring" && input.subjectiveScore !== null)
+        ) {
+          throw new Error("Mock exam terminal status is inconsistent.");
+        }
+
+        const deadlineRows = await transaction
+          .select()
+          .from(mockExamDeadlineTask)
+          .where(eq(mockExamDeadlineTask.mock_exam_id, ownedMockExam.id))
+          .for("update");
+        if (
+          (ownedMockExam.server_deadline_at === null &&
+            deadlineRows.length !== 0) ||
+          (ownedMockExam.server_deadline_at !== null &&
+            deadlineRows.length !== 1)
+        ) {
+          throw new Error("Mock exam deadline task cardinality is invalid.");
+        }
+
+        const deadlineTask = deadlineRows[0];
+        if (deadlineTask !== undefined) {
+          if (deadlineTask.task_status === "pending") {
+            if (
+              deadlineTask.claimed_at !== null ||
+              deadlineTask.lease_expires_at !== null ||
+              deadlineTask.worker_public_id !== null
+            ) {
+              throw new Error("Pending deadline task has an invalid lease.");
+            }
+          } else if (deadlineTask.task_status === "running") {
+            if (
+              deadlineTask.claimed_at === null ||
+              deadlineTask.lease_expires_at === null ||
+              deadlineTask.worker_public_id === null ||
+              deadlineTask.lease_expires_at <= input.submittedAt
+            ) {
+              throw new Error("Running deadline task lease is invalid.");
+            }
+          } else {
+            throw new Error("Mock exam deadline task state is invalid.");
+          }
+        }
+
+        for (const result of input.answerRecordResults) {
+          const updatedAnswerRows = await transaction
+            .update(answerRecord)
+            .set({
+              answer_revision: result.expectedRevision + 1,
+              answer_record_status: result.answerRecordStatus,
+              is_correct: result.isCorrect,
+              score: result.score,
+              submitted_at: result.submittedAt,
+              updated_at: result.submittedAt,
             })
-            .from(answerRecord)
             .where(
               and(
-                eq(answerRecord.mock_exam_id, row.id),
-                inArray(answerRecord.public_id, answerRecordPublicIds),
+                eq(answerRecord.public_id, result.answerRecordPublicId),
+                eq(answerRecord.mock_exam_id, ownedMockExam.id),
+                eq(
+                  answerRecord.paper_question_public_id,
+                  result.paperQuestionPublicId,
+                ),
+                eq(answerRecord.answer_revision, result.expectedRevision),
+                eq(
+                  answerRecord.answer_record_status,
+                  result.expectedAnswerRecordStatus,
+                ),
               ),
-            );
-          const answerRecordIdByPublicId = new Map(
-            answerRecordLinks.map((link) => [link.public_id, link.id]),
-          );
-
+            )
+            .returning({ public_id: answerRecord.public_id });
           if (
-            new Set(answerRecordPublicIds).size !==
-              input.aiScoringTasks.length ||
-            answerRecordLinks.length !== input.aiScoringTasks.length
+            updatedAnswerRows.length !== 1 ||
+            updatedAnswerRows[0]!.public_id !== result.answerRecordPublicId
           ) {
-            throw new Error("AI scoring task answer_record scope is invalid.");
+            throw new Error("Mock exam answer CAS failed.");
           }
+        }
 
-          await transaction
+        if (input.aiScoringTasks.length > 0) {
+          const answerRecordIdByPublicId = new Map(
+            currentAnswerRows.map((row) => [row.public_id, row.id]),
+          );
+          const insertedTaskRows = await transaction
             .insert(aiScoringTask)
             .values(
               input.aiScoringTasks.map((task) => ({
@@ -1771,64 +1890,76 @@ function createPostgresMockExamRepository(
                 completed_at: null,
               })),
             )
-            .onConflictDoNothing({
-              target: [
-                aiScoringTask.answer_record_id,
-                aiScoringTask.idempotency_key_hash,
-              ],
+            .returning({
+              public_id: aiScoringTask.public_id,
+              answer_record_id: aiScoringTask.answer_record_id,
+              idempotency_key_hash: aiScoringTask.idempotency_key_hash,
             });
+          if (
+            insertedTaskRows.length !== input.aiScoringTasks.length ||
+            insertedTaskRows.some((insertedTask) => {
+              const expected = input.aiScoringTasks.find(
+                (task) => task.publicId === insertedTask.public_id,
+              );
+              return (
+                expected === undefined ||
+                answerRecordIdByPublicId.get(expected.answerRecordPublicId) !==
+                  insertedTask.answer_record_id ||
+                expected.idempotencyKeyHash !==
+                  insertedTask.idempotency_key_hash
+              );
+            })
+          ) {
+            throw new Error("AI scoring task insert cardinality is invalid.");
+          }
         }
 
-        return mapMockExamRow(
-          row,
-          await countMockExamAnswers(
-            transaction as StudentFlowRuntimeDatabase,
-            row.id,
-          ),
-        );
-      });
-    },
-    async applyMockExamScoringResults(input) {
-      const database = getDatabase();
-      const [row] = await database
-        .update(mockExam)
-        .set({
-          exam_status: input.examStatus,
-          objective_score: input.objectiveScore,
-          subjective_score: input.subjectiveScore,
-          total_score: input.totalScore,
-          updated_at: input.scoredAt,
-        })
-        .where(eq(mockExam.public_id, input.publicId))
-        .returning();
-
-      if (row !== undefined) {
-        await Promise.all(
-          input.answerRecordResults.map((answerRecordResult) =>
-            database
-              .update(answerRecord)
-              .set({
-                answer_record_status: answerRecordResult.answerRecordStatus,
-                is_correct: answerRecordResult.isCorrect,
-                score: answerRecordResult.score,
-                updated_at: input.scoredAt,
-              })
-              .where(
-                and(
-                  eq(answerRecord.mock_exam_id, row.id),
-                  eq(
-                    answerRecord.paper_question_public_id,
-                    answerRecordResult.paperQuestionPublicId,
-                  ),
-                ),
+        if (deadlineTask?.task_status === "pending") {
+          const completedDeadlineTasks = await transaction
+            .update(mockExamDeadlineTask)
+            .set({
+              task_status: "completed",
+              failure_message_digest: null,
+              completed_at: input.submittedAt,
+              updated_at: input.submittedAt,
+            })
+            .where(
+              and(
+                eq(mockExamDeadlineTask.id, deadlineTask.id),
+                eq(mockExamDeadlineTask.mock_exam_id, ownedMockExam.id),
+                eq(mockExamDeadlineTask.task_status, "pending"),
               ),
-          ),
-        );
-      }
+            )
+            .returning({ id: mockExamDeadlineTask.id });
+          if (completedDeadlineTasks.length !== 1) {
+            throw new Error("Mock exam deadline task CAS failed.");
+          }
+        }
 
-      return row === undefined
-        ? null
-        : mapMockExamRow(row, await countMockExamAnswers(database, row.id));
+        const transitionedRows = await transaction
+          .update(mockExam)
+          .set({
+            exam_status: derivedExamStatus,
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            updated_at: input.submittedAt,
+          })
+          .where(
+            and(
+              eq(mockExam.id, ownedMockExam.id),
+              eq(mockExam.user_id, userId),
+              eq(mockExam.exam_status, "in_progress"),
+            ),
+          )
+          .returning();
+        if (transitionedRows.length !== 1) {
+          throw new Error("Mock exam submit CAS failed.");
+        }
+
+        return mapMockExamRow(transitionedRows[0]!, currentAnswerRows.length);
+      });
     },
     async retryFailedAiScoringTasks(input) {
       const database = getDatabase();

@@ -352,16 +352,6 @@ function createMockExamRepository(): MockExamRepository {
         answered_count: 1,
       };
     },
-    async applyMockExamScoringResults(input) {
-      return {
-        ...mockExam,
-        exam_status: input.examStatus,
-        objective_score: input.objectiveScore,
-        subjective_score: input.subjectiveScore,
-        total_score: input.totalScore,
-        answered_count: 1,
-      };
-    },
     async terminateMockExam() {
       return null;
     },

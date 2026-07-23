@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
+currentPhase: p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
 updatedAt: "2026-07-23T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
+  currentTaskId: p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -567,7 +567,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
     - p1-remediation-rc-08-active-answer-session-claim-2026-07-23
     - p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
+    - p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
     - p1-remediation-rc-08-active-answer-session-claim-2026-07-23
     - p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22
     - p1-remediation-rc-07-residual-static-disposition-2026-07-22
@@ -735,7 +737,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-07-residual-static-disposition-2026-07-22: closed
     p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22: closed
     p1-remediation-rc-08-active-answer-session-claim-2026-07-23: closed
-    p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23: in_progress
+    p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23: closed
+    p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -761,6 +764,12 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21: closed
     p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21: in_progress
   closeoutCheckpoints:
+    p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
     p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22:
       taskCommit: pass
       masterMerge: pass
@@ -930,82 +939,79 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
-  title: Practice answer atomic command
-  phase: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
+  id: p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
+  title: Mock exam submit and scoring atomic command
+  phase: p1-remediation-rc-08-mock-exam-submit-scoring-atomic-command-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: schema_migration_source_and_database_application_logic
-  productClosureContribution: closes_F0027_practice_answer_atomicity_partition_only
-  branch: fix/practice-answer-atomic-command
+  taskKind: database_application_logic_and_provider_execution_path_contraction
+  productClosureContribution: closes_remaining_F0027_mock_submit_scoring_partition
+  branch: fix/mock-exam-submit-scoring-atomic-command
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
     - F-0027
   candidateRootCauseCluster: P1-RC-08
-  objective: make practice answer attempt enforcement, answer persistence, progress update and wrong-answer mistake_book mutation one authoritative transaction command while leaving mock submit and scoring finalization as a separate residual
-  executionStage: validated_candidate_pending_commit
-  findingStatus: open_partitioned
-  findingDisposition: practice_answer_atomicity_current_mock_submit_scoring_finalize_residual
+  objective: make mock_exam submit exact and all-or-nothing over the locked exam, current answer revisions, deadline owner and durable ai_scoring_task set while removing non-durable scoring finalization from the production service contract
+  executionStage: validated_reviewed_conditional_closeout_ready
+  findingStatus: open_pending_conditional_closeout
+  findingDisposition: static_product_closure_validated_pending_commit_push_runtime_hold_unchanged
   riskBoundary:
-    category: schema_migration_source_and_database_application_logic
-    approvalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
-    requestedApprovalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
-    approvedBaseSha: da410333050b0db8b17ed7ca5b16074fb0faa45e
-    schemaOrMigrationChange: true
+    category: database_application_logic_and_provider_execution_path_contraction
+    approvalId: guardian-f0027-mock-submit-scoring-atomic-command-2026-07-23
+    requestedApprovalId: guardian-f0027-mock-submit-scoring-atomic-command-2026-07-23
+    approvedBaseSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
+    schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: practice_answer_route_to_service_to_repository_atomic_command_to_answer_record_practice_mistake_book_schema_and_direct_regressions
-    coreFiles: 13
-    contingencyFiles: 4
+    chain: mock_exam_submit_route_to_service_to_repository_transaction_to_deadline_answer_and_durable_scoring_tasks_then_existing_worker_atomic_finalize
+    coreFiles: 8
+    contingencyFiles: 7
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0013_runtime_hold_F0026_closed_F0027_practice_partition_current_mock_finalize_later
+    bundleDisposition: F0013_runtime_hold_F0026_closed_F0027_practice_closed_mock_submit_scoring_current
   requiredSemantics:
-    attemptLimit: objective_one_subjective_two_with_database_backed_attempt_identity
-    transaction: exact_lineage_revalidation_answer_insert_progress_update_and_mistake_book_upsert_all_or_nothing
-    concurrency: concurrent_commands_cannot_duplicate_objective_or_exceed_subjective_limit
-    corruption: ambiguous_or_partial_legacy_attempt_history_fails_closed
-    authorization: preserve_F0008_exact_lineage_without_silent_source_switch
-    migration: additive_legacy_nullable_attempt_facts_and_user_question_mistake_book_uniqueness_without_apply_or_data_mutation
+    submit: exact_locked_answer_identity_and_revision_set_deadline_and_durable_tasks_all_or_nothing
+    concurrency: save_submit_and_duplicate_submit_cannot_overwrite_newer_answers_or_create_duplicate_tasks
+    scoring: existing_leased_durable_worker_is_only_production_finalize_path
+    rollback: row_count_identity_revision_deadline_or_task_conflict_rolls_back_every_write
+    provider: remove_non_durable_direct_and_in_memory_queue_execution_paths_without_real_provider_change
   pendingApproval:
-    status: approved_before_product_RED
-    proposedApprovalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
-    approvalFingerprint: 06a16723f44c1d7888711a1d4e14df0017dbc5853ac1c7cb5b9f1d40f91e4fcb
+    status: approved_conditional_closeout
+    proposedApprovalId: guardian-f0027-mock-submit-scoring-atomic-command-2026-07-23
+    approvalFingerprint: a2528ff21c12522038cfb7553eadb93d0bec1a4658ae20af19776eb947cb2b2f
     conditionalCloseoutRequested: true
     approved: true
-  approvalAmendments:
-    - approvalId: guardian-f0027-test-fixture-schema-inferselect-amendment-2026-07-23
-      parentApprovalId: guardian-f0027-practice-answer-atomic-command-2026-07-23
-      scope: test_only_legacy_answer_record_inferselect_fixture_null_fields
-      addedFile: src/server/models/student-experience.test.ts
-  validationEvidence:
-    red: 3_files_4_expected_failures_40_passes_exit_1
-    focused: 7_files_58_tests_GREEN
-    lint: exit_0_with_3_pre_existing_warnings_outside_changed_files
+  candidateEvidence:
+    tddRed: expected_two_source_contract_failures_before_implementation
+    focused: 9_files_98_tests_GREEN
+    lint: exit_0_task_local_warning_removed_before_final_validation
     typecheck: exit_0
-    build: exit_0_with_existing_NFT_tracing_warning
-    formatAndDiff: exit_0
-    schemaSource: exact_7_statement_additive_migration_and_coherent_snapshot_journal
-    databaseRuntime: not_executed_static_and_synthetic_evidence_only
-  adversarialReview: GREEN_exact_lineage_lock_order_all_attempt_rows_corrupt_history_fail_closed_atomic_answer_progress_mistake_upsert_favorite_merge_preserved
+    build: exit_0_with_pre_existing_NFT_trace_warning
+    sourceScan: durable_task_only_no_direct_runtime_queue_or_apply_results_path
+    mainThreadAdversarialReview: passed_exact_identity_revision_cardinality_deadline_task_set_replay_and_rollback_review
+    runtimeBoundary: static_and_synthetic_only_no_real_database_or_provider_execution
+  conditionalCloseoutProjection:
+    current: validated_reviewed_conditional_closeout_ready
+    trigger: unchanged_candidate_kernel_full_then_single_commit_ff_only_canonical_push_sync_cleanup
+    projected: F0027_static_product_closed_F0013_runtime_hold_and_no_runtime_DB_or_Provider_proof_preserved
   executionMetrics:
     mandatoryFreshApprovals: 1
-    preventableScopeMissApprovals: 1
+    preventableScopeMissApprovals: 0
     candidateReapprovals: 0
     approvalWaitTurns: 1
-    productValueTime: includes_JIT_TDD_schema_transaction_service_and_adversarial_review_exact_clock_not_reconstructed
-    mechanismOverhead: includes_contract_state_offline_generation_scope_amendment_and_validation_exact_clock_not_reconstructed
+    productValueTime: TDD_implementation_focused_regression_build_and_adversarial_review
+    mechanismOverhead: task_contract_one_guardian_request_validation_and_conditional_closeout_preparation
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-active-answer-session-claim-2026-07-23
+    taskId: p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23
     findingIds:
-      - F-0026
-    commit: da410333050b0db8b17ed7ca5b16074fb0faa45e
+      - F-0027
+    commit: 3bba78a8eddbba33bd438e1633510c69688aa13f
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_without_migration_apply_or_runtime_database_proof
+    findingStatus: open_partitioned_mock_submit_scoring_finalize_residual
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
@@ -1018,9 +1024,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: da410333050b0db8b17ed7ca5b16074fb0faa45e
-  lastKnownOriginMasterSha: da410333050b0db8b17ed7ca5b16074fb0faa45e
-  lastKnownRemoteMasterSha: da410333050b0db8b17ed7ca5b16074fb0faa45e
+  lastKnownMasterSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
+  lastKnownOriginMasterSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
+  lastKnownRemoteMasterSha: 3bba78a8eddbba33bd438e1633510c69688aa13f
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

@@ -90,11 +90,6 @@ export type MockExamService = {
   ): Promise<ApiResponse<MockExamResultDto | null>>;
 };
 
-export type MockExamAiScoringStatus =
-  | "scored"
-  | "scoring_failed"
-  | "retry_limit_reached";
-
 export type MockExamAiScoringRuntimeContext = {
   userPublicId: string;
   organizationPublicId?: string | null;
@@ -117,6 +112,11 @@ export type MockExamAiScoringRuntimeContext = {
     maxScore: number;
   }[];
 };
+
+export type MockExamAiScoringStatus =
+  | "scored"
+  | "scoring_failed"
+  | "retry_limit_reached";
 
 export type MockExamAiScoringRuntimeResult = {
   answerRecordPublicId: string;
@@ -150,16 +150,8 @@ export type MockExamAiScoringQueue = {
   ): Promise<MockExamAiScoringQueueReceipt>;
 };
 
-export type MockExamAiScoringTaskPreparer = {
-  prepareTask(
-    context: MockExamAiScoringRuntimeContext,
-  ): Promise<EnqueueAiScoringTaskInput>;
-};
-
 export type MockExamAiScoringQueueDrainResult =
-  | {
-      status: "empty";
-    }
+  | { status: "empty" }
   | {
       status: "processed";
       jobPublicId: string;
@@ -173,9 +165,13 @@ export type DeterministicMockExamAiScoringQueue = MockExamAiScoringQueue & {
   drainAll(): Promise<MockExamAiScoringQueueDrainResult[]>;
 };
 
+export type MockExamAiScoringTaskPreparer = {
+  prepareTask(
+    context: MockExamAiScoringRuntimeContext,
+  ): Promise<EnqueueAiScoringTaskInput>;
+};
+
 export type MockExamServiceOptions = {
-  aiScoringRuntime?: MockExamAiScoringRuntime;
-  aiScoringQueue?: MockExamAiScoringQueue;
   aiScoringTaskPreparer?: MockExamAiScoringTaskPreparer;
 };
 
@@ -220,11 +216,9 @@ const systemPublicIdFactory: MockExamPublicIdFactory = {
 
 export function createDeterministicMockExamAiScoringQueue(): DeterministicMockExamAiScoringQueue {
   const pendingJobs: MockExamAiScoringQueueJob[] = [];
-
   return {
     async enqueue(job) {
       pendingJobs.push(job);
-
       return {
         jobPublicId: job.jobPublicId,
         mockExamPublicId: job.mockExamPublicId,
@@ -242,13 +236,10 @@ export function createDeterministicMockExamAiScoringQueue(): DeterministicMockEx
     },
     async drainNext() {
       const job = pendingJobs.shift();
-
       if (job === undefined) {
         return { status: "empty" };
       }
-
       await job.process();
-
       return {
         status: "processed",
         jobPublicId: job.jobPublicId,
@@ -258,11 +249,9 @@ export function createDeterministicMockExamAiScoringQueue(): DeterministicMockEx
     },
     async drainAll() {
       const results: MockExamAiScoringQueueDrainResult[] = [];
-
       while (pendingJobs.length > 0) {
         results.push(await this.drainNext());
       }
-
       return results;
     },
   };
@@ -798,6 +787,7 @@ function buildSubmittedAnswerRecordResult(
   isCorrect: boolean | null;
   score: string | null;
   submittedAt: Date;
+  aiScoringSnapshot: Record<string, unknown> | null;
 } {
   if (!isObjectiveQuestion(question)) {
     return {
@@ -806,6 +796,7 @@ function buildSubmittedAnswerRecordResult(
       isCorrect: null,
       score: null,
       submittedAt,
+      aiScoringSnapshot: null,
     };
   }
 
@@ -817,6 +808,7 @@ function buildSubmittedAnswerRecordResult(
     isCorrect,
     score: isCorrect ? question.score : "0.0",
     submittedAt,
+    aiScoringSnapshot: null,
   };
 }
 
@@ -852,34 +844,6 @@ function buildAiScoringRuntimeContext(input: {
   };
 }
 
-function createSuccessfulSubjectiveResult(input: {
-  question: MockExamQuestionSnapshot;
-  answerRecord: MockExamAnswerRecordRow;
-  scoringResult: MockExamAiScoringRuntimeResult;
-  submittedAt: Date;
-}): MockExamSubjectiveScoringResult {
-  return {
-    paperQuestionPublicId: input.question.paperQuestionPublicId,
-    answerRecordStatus:
-      input.scoringResult.scoringStatus === "scored"
-        ? "scored"
-        : "scoring_failed",
-    isCorrect: null,
-    score:
-      input.scoringResult.scoringStatus === "scored"
-        ? input.scoringResult.score
-        : null,
-    submittedAt: input.submittedAt,
-    aiScoringSnapshot:
-      input.scoringResult.scoringStatus === "scored"
-        ? input.scoringResult.scoringSnapshot
-        : {
-            scoringStatus: input.scoringResult.scoringStatus,
-            failureReason: input.scoringResult.failureReason,
-          },
-  };
-}
-
 function createUnansweredSubjectiveResult(
   question: MockExamQuestionSnapshot,
   submittedAt: Date,
@@ -895,73 +859,6 @@ function createUnansweredSubjectiveResult(
       reason: "unanswered",
     },
   };
-}
-
-async function scoreSubjectiveQuestions(input: {
-  aiScoringRuntime: MockExamAiScoringRuntime;
-  userContext: MockExamUserContext;
-  mockExam: MockExamRow;
-  answerByPaperQuestion: Map<string, MockExamAnswerRecordRow>;
-  questions: MockExamQuestionSnapshot[];
-  submittedAt: Date;
-  onlyFailedRecords: boolean;
-}): Promise<MockExamSubjectiveScoringResult[]> {
-  const results: MockExamSubjectiveScoringResult[] = [];
-
-  for (const question of input.questions.filter(isAiScoringQuestion)) {
-    const answerRecord = input.answerByPaperQuestion.get(
-      question.paperQuestionPublicId,
-    );
-
-    if (answerRecord === undefined) {
-      if (!input.onlyFailedRecords) {
-        results.push(
-          createUnansweredSubjectiveResult(question, input.submittedAt),
-        );
-      }
-
-      continue;
-    }
-
-    if (
-      input.onlyFailedRecords &&
-      answerRecord.answer_record_status !== "scoring_failed"
-    ) {
-      continue;
-    }
-
-    const studentAnswer = getStudentAnswer(answerRecord.answer_snapshot);
-
-    if (studentAnswer.trim().length === 0) {
-      if (!input.onlyFailedRecords) {
-        results.push(
-          createUnansweredSubjectiveResult(question, input.submittedAt),
-        );
-      }
-
-      continue;
-    }
-
-    const scoringResult = await input.aiScoringRuntime.scoreSubjectiveAnswer(
-      buildAiScoringRuntimeContext({
-        userContext: input.userContext,
-        mockExam: input.mockExam,
-        question,
-        answerRecord,
-      }),
-    );
-
-    results.push(
-      createSuccessfulSubjectiveResult({
-        question,
-        answerRecord,
-        scoringResult,
-        submittedAt: input.submittedAt,
-      }),
-    );
-  }
-
-  return results;
 }
 
 function createSubmittedSubjectiveResult(input: {
@@ -997,38 +894,6 @@ function listQueueableSubjectiveAnswerRecords(input: {
       ? [answerRecord]
       : [];
   });
-}
-
-function calculateSubjectiveScore(
-  subjectiveResults: MockExamSubjectiveScoringResult[],
-): string | null {
-  return subjectiveResults.some(
-    (result) => result.answerRecordStatus === "scoring_failed",
-  )
-    ? null
-    : formatScore(
-        subjectiveResults.reduce(
-          (scoreTotal, result) => scoreTotal + parseScore(result.score),
-          0,
-        ),
-      );
-}
-
-function calculateExamStatus(
-  subjectiveResults: MockExamSubjectiveScoringResult[],
-): Extract<MockExamRow["exam_status"], "completed" | "scoring_partial_failed"> {
-  return subjectiveResults.some(
-    (result) => result.answerRecordStatus === "scoring_failed",
-  )
-    ? "scoring_partial_failed"
-    : "completed";
-}
-
-function createAiScoringQueueJobPublicId(
-  mockExamPublicId: string,
-  queuedAt: Date,
-): string {
-  return `ai_scoring_queue_${mockExamPublicId}_${queuedAt.getTime()}`;
 }
 
 function createMockExamNotFoundResponse(): ApiResponse<null> {
@@ -1087,12 +952,25 @@ async function submitReadableMockExam(
       "Mock exam paper scoring contract is invalid.",
     );
   }
-  const answerByPaperQuestion = new Map(
-    answerRecords.map((answerRecord) => [
+  const answerByPaperQuestion = new Map<string, MockExamAnswerRecordRow>();
+  const questionByPaperQuestion = new Map(
+    questions.map((question) => [question.paperQuestionPublicId, question]),
+  );
+  for (const answerRecord of answerRecords) {
+    if (
+      answerByPaperQuestion.has(answerRecord.paper_question_public_id) ||
+      !questionByPaperQuestion.has(answerRecord.paper_question_public_id)
+    ) {
+      return createErrorResponse(
+        409311,
+        "Mock exam answer set is inconsistent.",
+      );
+    }
+    answerByPaperQuestion.set(
       answerRecord.paper_question_public_id,
       answerRecord,
-    ]),
-  );
+    );
+  }
   const objectiveScore = questions
     .filter(isObjectiveQuestion)
     .reduce((scoreTotal, question) => {
@@ -1112,21 +990,21 @@ async function submitReadableMockExam(
   const unansweredCount = questions.filter(
     (question) => !answerByPaperQuestion.has(question.paperQuestionPublicId),
   ).length;
-  const shouldQueueAiScoring =
-    options.aiScoringRuntime !== undefined &&
-    options.aiScoringQueue !== undefined;
-  const shouldPersistAiScoring = options.aiScoringTaskPreparer !== undefined;
-  const shouldUseAsyncAiScoring =
-    shouldQueueAiScoring || shouldPersistAiScoring;
-  const queueableSubjectiveAnswerRecords = shouldUseAsyncAiScoring
-    ? listQueueableSubjectiveAnswerRecords({
-        answerByPaperQuestion,
-        questions,
-      })
-    : [];
+  const queueableSubjectiveAnswerRecords = listQueueableSubjectiveAnswerRecords(
+    {
+      answerByPaperQuestion,
+      questions,
+    },
+  );
+  if (
+    queueableSubjectiveAnswerRecords.length > 0 &&
+    options.aiScoringTaskPreparer === undefined
+  ) {
+    return createErrorResponse(503318, "Durable AI scoring is unavailable.");
+  }
   let aiScoringTasks: EnqueueAiScoringTaskInput[] = [];
 
-  if (shouldPersistAiScoring && options.aiScoringTaskPreparer !== undefined) {
+  if (options.aiScoringTaskPreparer !== undefined) {
     try {
       aiScoringTasks = await Promise.all(
         queueableSubjectiveAnswerRecords.map((answerRecord) => {
@@ -1157,34 +1035,37 @@ async function submitReadableMockExam(
       );
     }
   }
-  const subjectiveResults =
-    options.aiScoringRuntime === undefined || shouldUseAsyncAiScoring
-      ? []
-      : await scoreSubjectiveQuestions({
-          aiScoringRuntime: options.aiScoringRuntime,
-          userContext,
-          mockExam,
-          answerByPaperQuestion,
-          questions,
-          submittedAt,
-          onlyFailedRecords: false,
-        });
   const subjectiveScore =
-    options.aiScoringRuntime === undefined || shouldUseAsyncAiScoring
+    aiScoringTasks.length > 0
       ? null
-      : calculateSubjectiveScore(subjectiveResults);
-  const examStatus =
-    shouldUseAsyncAiScoring && queueableSubjectiveAnswerRecords.length > 0
-      ? "scoring"
-      : options.aiScoringRuntime === undefined
-        ? "completed"
-        : calculateExamStatus(subjectiveResults);
+      : answerRecords.every((answerRecord) => {
+            const question = questionByPaperQuestion.get(
+              answerRecord.paper_question_public_id,
+            );
+            return question === undefined || !isAiScoringQuestion(question);
+          })
+        ? null
+        : formatScore(
+            answerRecords
+              .filter((answerRecord) => {
+                const question = questionByPaperQuestion.get(
+                  answerRecord.paper_question_public_id,
+                );
+                return question !== undefined && isAiScoringQuestion(question);
+              })
+              .reduce(
+                (total, answerRecord) => total + parseScore(answerRecord.score),
+                0,
+              ),
+          );
+  const examStatus = aiScoringTasks.length > 0 ? "scoring" : "completed";
   const totalScore = formatScore(
     objectiveScore +
       (subjectiveScore === null ? 0 : parseScore(subjectiveScore)),
   );
   const submittedMockExam = await repository.submitMockExam({
     publicId: mockExam.public_id,
+    userPublicId: userContext.userPublicId,
     examStatus,
     submittedAt,
     objectiveScore: formatScore(objectiveScore),
@@ -1192,109 +1073,37 @@ async function submitReadableMockExam(
     totalScore,
     unansweredCount,
     aiScoringTasks,
-    answerRecordResults: [
-      ...questions.flatMap((question) => {
-        const answerRecord = answerByPaperQuestion.get(
-          question.paperQuestionPublicId,
-        );
-
-        if (
-          answerRecord === undefined ||
-          (!shouldUseAsyncAiScoring &&
-            options.aiScoringRuntime !== undefined &&
-            isAiScoringQuestion(question))
-        ) {
-          return [];
-        }
-
-        if (shouldUseAsyncAiScoring && isAiScoringQuestion(question)) {
-          const studentAnswer = getStudentAnswer(answerRecord.answer_snapshot);
-
-          return studentAnswer.trim().length === 0
-            ? [createUnansweredSubjectiveResult(question, submittedAt)]
-            : [createSubmittedSubjectiveResult({ question, submittedAt })];
-        }
-
-        return [
-          buildSubmittedAnswerRecordResult(question, answerRecord, submittedAt),
-        ];
-      }),
-      ...subjectiveResults,
-    ],
+    answerRecordResults: answerRecords.map((answerRecord) => {
+      const question = questionByPaperQuestion.get(
+        answerRecord.paper_question_public_id,
+      );
+      if (question === undefined) {
+        throw new Error("Mock exam answer question snapshot is missing.");
+      }
+      const result = isAiScoringQuestion(question)
+        ? getStudentAnswer(answerRecord.answer_snapshot).trim().length === 0
+          ? createUnansweredSubjectiveResult(question, submittedAt)
+          : createSubmittedSubjectiveResult({ question, submittedAt })
+        : buildSubmittedAnswerRecordResult(question, answerRecord, submittedAt);
+      return {
+        answerRecordPublicId: answerRecord.public_id,
+        paperQuestionPublicId: result.paperQuestionPublicId,
+        expectedRevision: answerRecord.answer_revision,
+        expectedAnswerRecordStatus: "saved" as const,
+        answerRecordStatus: result.answerRecordStatus,
+        isCorrect: result.isCorrect,
+        score: result.score,
+        submittedAt: result.submittedAt,
+        aiScoringSnapshot: result.aiScoringSnapshot,
+      };
+    }),
   });
 
   if (submittedMockExam === null) {
-    const replayedMockExam = await repository.findMockExamByPublicId({
-      userPublicId: userContext.userPublicId,
-      publicId: mockExam.public_id,
-    });
-
-    if (
-      replayedMockExam !== null &&
-      ["completed", "scoring", "scoring_partial_failed"].includes(
-        replayedMockExam.exam_status,
-      )
-    ) {
-      return {
-        mockExam: replayedMockExam,
-        unansweredCount,
-      };
-    }
-
-    return createMockExamNotFoundResponse();
-  }
-
-  if (
-    shouldQueueAiScoring &&
-    queueableSubjectiveAnswerRecords.length > 0 &&
-    options.aiScoringRuntime !== undefined &&
-    options.aiScoringQueue !== undefined
-  ) {
-    const aiScoringRuntime = options.aiScoringRuntime;
-    const aiScoringQueue = options.aiScoringQueue;
-
-    await aiScoringQueue.enqueue({
-      jobPublicId: createAiScoringQueueJobPublicId(
-        mockExam.public_id,
-        submittedAt,
-      ),
-      mockExamPublicId: mockExam.public_id,
-      queuedAt: submittedAt,
-      answerRecordPublicIds: queueableSubjectiveAnswerRecords.map(
-        (answerRecord) => answerRecord.public_id,
-      ),
-      async process() {
-        const queuedSubjectiveResults = await scoreSubjectiveQuestions({
-          aiScoringRuntime,
-          userContext,
-          mockExam,
-          answerByPaperQuestion,
-          questions,
-          submittedAt,
-          onlyFailedRecords: false,
-        });
-        const queuedSubjectiveScore = calculateSubjectiveScore(
-          queuedSubjectiveResults,
-        );
-        const queuedExamStatus = calculateExamStatus(queuedSubjectiveResults);
-        const queuedTotalScore = formatScore(
-          objectiveScore +
-            (queuedSubjectiveScore === null
-              ? 0
-              : parseScore(queuedSubjectiveScore)),
-        );
-
-        await repository.applyMockExamScoringResults({
-          publicId: mockExam.public_id,
-          examStatus: queuedExamStatus,
-          scoredAt: submittedAt,
-          objectiveScore: formatScore(objectiveScore),
-          subjectiveScore: queuedSubjectiveScore,
-          totalScore: queuedTotalScore,
-          answerRecordResults: queuedSubjectiveResults,
-        });
-      },
-    });
+    return createErrorResponse(
+      409311,
+      "Mock exam submit state changed; retry with current state.",
+    );
   }
 
   return {
@@ -2024,14 +1833,10 @@ export function createMockExamService(
     },
 
     async retryMockExamScoring(userContext, publicId) {
-      const usesDurableScoringTasks =
-        options.aiScoringTaskPreparer !== undefined;
-      const aiScoringRuntime = options.aiScoringRuntime;
-
-      if (!usesDurableScoringTasks && aiScoringRuntime === undefined) {
+      if (options.aiScoringTaskPreparer === undefined) {
         return createErrorResponse(
-          422315,
-          "AI scoring retry is not configured.",
+          503318,
+          "Durable AI scoring retry is unavailable.",
         );
       }
 
@@ -2054,111 +1859,27 @@ export function createMockExamService(
         );
       }
 
-      if (usesDurableScoringTasks) {
-        if (repository.retryFailedAiScoringTasks === undefined) {
-          return createErrorResponse(
-            503318,
-            "Durable AI scoring retry is unavailable.",
-          );
-        }
-
-        const retryResult = await repository.retryFailedAiScoringTasks({
-          userPublicId: userContext.userPublicId,
-          mockExamPublicId: publicId,
-          retriedAt: now,
-        });
-
-        if (retryResult === null) {
-          return createMockExamNotFoundResponse();
-        }
-
-        return createSuccessResponse({
-          mockExam: mapMockExamToApi(retryResult.mockExam, now),
-          retriedCount: retryResult.retriedCount,
-          failedCount: retryResult.failedCount,
-        });
-      }
-
-      if (aiScoringRuntime === undefined) {
+      if (repository.retryFailedAiScoringTasks === undefined) {
         return createErrorResponse(
-          422315,
-          "AI scoring retry is not configured.",
+          503318,
+          "Durable AI scoring retry is unavailable.",
         );
       }
 
-      const answerRecords = await repository.listMockExamAnswerRecords({
+      const retryResult = await repository.retryFailedAiScoringTasks({
         userPublicId: userContext.userPublicId,
         mockExamPublicId: mockExam.public_id,
-      });
-      const questions = listValidatedMockExamQuestions(mockExam.paper_snapshot);
-      if (questions === null) {
-        return createErrorResponse(
-          422317,
-          "Mock exam paper scoring contract is invalid.",
-        );
-      }
-      const answerByPaperQuestion = new Map(
-        answerRecords.map((answerRecord) => [
-          answerRecord.paper_question_public_id,
-          answerRecord,
-        ]),
-      );
-      const subjectiveResults = await scoreSubjectiveQuestions({
-        aiScoringRuntime,
-        userContext,
-        mockExam,
-        answerByPaperQuestion,
-        questions,
-        submittedAt: now,
-        onlyFailedRecords: true,
-      });
-      const existingSubjectiveScore = answerRecords
-        .filter(
-          (answerRecord) =>
-            answerRecord.answer_record_status === "scored" &&
-            answerRecord.is_correct === null,
-        )
-        .reduce(
-          (scoreTotal, answerRecord) =>
-            scoreTotal + parseScore(answerRecord.score),
-          0,
-        );
-      const retriedSubjectiveScore = subjectiveResults.reduce(
-        (scoreTotal, result) => scoreTotal + parseScore(result.score),
-        0,
-      );
-      const failedCount = subjectiveResults.filter(
-        (result) => result.answerRecordStatus === "scoring_failed",
-      ).length;
-      const examStatus =
-        failedCount === 0 ? "completed" : "scoring_partial_failed";
-      const objectiveScore = mockExam.objective_score ?? "0.0";
-      const subjectiveScore =
-        failedCount === 0
-          ? formatScore(existingSubjectiveScore + retriedSubjectiveScore)
-          : null;
-      const totalScore = formatScore(
-        parseScore(objectiveScore) +
-          (subjectiveScore === null ? 0 : parseScore(subjectiveScore)),
-      );
-      const updatedMockExam = await repository.applyMockExamScoringResults({
-        publicId: mockExam.public_id,
-        examStatus,
-        scoredAt: now,
-        objectiveScore,
-        subjectiveScore,
-        totalScore,
-        answerRecordResults: subjectiveResults,
+        retriedAt: now,
       });
 
-      if (updatedMockExam === null) {
+      if (retryResult === null) {
         return createMockExamNotFoundResponse();
       }
 
       return createSuccessResponse({
-        mockExam: mapMockExamToApi(updatedMockExam, now),
-        retriedCount: subjectiveResults.length,
-        failedCount,
+        mockExam: mapMockExamToApi(retryResult.mockExam, now),
+        retriedCount: retryResult.retriedCount,
+        failedCount: retryResult.failedCount,
       });
     },
 

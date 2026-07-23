@@ -111,10 +111,8 @@ export type SaveMockExamAnswerInput = {
 
 export type SubmitMockExamInput = {
   publicId: string;
-  examStatus: Extract<
-    ExamStatus,
-    "completed" | "scoring" | "scoring_partial_failed"
-  >;
+  userPublicId: string;
+  examStatus: Extract<ExamStatus, "completed" | "scoring">;
   submittedAt: Date;
   objectiveScore: string;
   subjectiveScore: string | null;
@@ -122,27 +120,14 @@ export type SubmitMockExamInput = {
   unansweredCount: number;
   aiScoringTasks: EnqueueAiScoringTaskInput[];
   answerRecordResults: {
+    answerRecordPublicId: string;
     paperQuestionPublicId: string;
+    expectedRevision: number;
+    expectedAnswerRecordStatus: Extract<AnswerRecordStatus, "saved">;
     answerRecordStatus: AnswerRecordStatus;
     isCorrect: boolean | null;
     score: string | null;
     submittedAt: Date;
-    aiScoringSnapshot?: Record<string, unknown> | null;
-  }[];
-};
-
-export type ApplyMockExamScoringResultsInput = {
-  publicId: string;
-  examStatus: Extract<ExamStatus, "completed" | "scoring_partial_failed">;
-  scoredAt: Date;
-  objectiveScore: string;
-  subjectiveScore: string | null;
-  totalScore: string;
-  answerRecordResults: {
-    paperQuestionPublicId: string;
-    answerRecordStatus: AnswerRecordStatus;
-    isCorrect: boolean | null;
-    score: string | null;
     aiScoringSnapshot?: Record<string, unknown> | null;
   }[];
 };
@@ -238,9 +223,6 @@ export type MockExamRepository = {
     rebuiltAt: Date;
   }): Promise<RebuildExistingExamReportResult | null>;
   submitMockExam(input: SubmitMockExamInput): Promise<MockExamRow | null>;
-  applyMockExamScoringResults(
-    input: ApplyMockExamScoringResultsInput,
-  ): Promise<MockExamRow | null>;
   retryFailedAiScoringTasks?(input: {
     userPublicId: string;
     mockExamPublicId: string;

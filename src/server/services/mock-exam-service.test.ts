@@ -354,15 +354,6 @@ function createRepository(
         total_score: input.totalScore,
       });
     },
-    async applyMockExamScoringResults(input) {
-      return createMockExam({
-        public_id: input.publicId,
-        exam_status: input.examStatus,
-        objective_score: input.objectiveScore,
-        subjective_score: input.subjectiveScore,
-        total_score: input.totalScore,
-      });
-    },
     async retryFailedAiScoringTasks() {
       return null;
     },
@@ -1587,13 +1578,13 @@ describe("mock exam service", () => {
         totalScore: "1.0",
         unansweredCount: 1,
         answerRecordResults: [
-          {
+          expect.objectContaining({
             paperQuestionPublicId: "paper_question_public_123",
             answerRecordStatus: "scored",
             isCorrect: true,
             score: "1.0",
             submittedAt: now,
-          },
+          }),
         ],
       }),
     ]);
@@ -1667,19 +1658,19 @@ describe("mock exam service", () => {
         objectiveScore: "5.0",
         totalScore: "5.0",
         answerRecordResults: [
-          {
+          expect.objectContaining({
             paperQuestionPublicId: "paper_question_options_only_123",
             answerRecordStatus: "scored",
             isCorrect: true,
             score: "5.0",
             submittedAt: now,
-          },
+          }),
         ],
       }),
     ]);
   });
 
-  it("submits subjective answers as pending scoring without exposing feedback", async () => {
+  it("fails closed before submit when subjective scoring is unavailable", async () => {
     const submitInputs: unknown[] = [];
     const service = createMockExamService(
       createRepository({
@@ -1731,38 +1722,17 @@ describe("mock exam service", () => {
       {},
     );
 
-    expect(response).toMatchObject({
-      code: 0,
-      data: {
-        mockExam: {
-          examStatus: "completed",
-        },
-        unansweredCount: 1,
-      },
+    expect(response).toEqual({
+      code: 503318,
+      message: "Durable AI scoring is unavailable.",
+      data: null,
     });
-    expect(submitInputs).toEqual([
-      expect.objectContaining({
-        publicId: "mock_exam_public_existing",
-        objectiveScore: "0.0",
-        subjectiveScore: null,
-        totalScore: "0.0",
-        unansweredCount: 1,
-        answerRecordResults: [
-          {
-            paperQuestionPublicId: "paper_question_public_456",
-            answerRecordStatus: "submitted",
-            isCorrect: null,
-            score: null,
-            submittedAt: now,
-          },
-        ],
-      }),
-    ]);
+    expect(submitInputs).toEqual([]);
   });
 
-  it("scores submitted subjective answers with deterministic AI runtime", async () => {
+  it("prepares submitted subjective answers for durable AI scoring", async () => {
     const submitInputs: unknown[] = [];
-    const scoringContexts: unknown[] = [];
+    const preparedContexts: unknown[] = [];
     const service = createMockExamService(
       createRepository({
         async listMockExamAnswerRecords() {
@@ -1826,25 +1796,25 @@ describe("mock exam service", () => {
       clock,
       createIdFactory(),
       {
-        aiScoringRuntime: {
-          async scoreSubjectiveAnswer(context) {
-            scoringContexts.push(context);
-
+        aiScoringTaskPreparer: {
+          async prepareTask(context) {
+            preparedContexts.push(context);
             return {
+              publicId: "ai_scoring_task_public_001",
               answerRecordPublicId: context.answerRecordPublicId,
-              scoringStatus: "scored",
-              score: "4.5",
-              maxScore: "5.0",
-              scoringSnapshot: {
-                promptTemplateKey: "ai_scoring_v1",
-                promptTemplateVersion: 1,
-                scoringPoints: [],
-                overallComment: "本地确定性评分完成。",
-                improvementSuggestion: "补充法规依据。",
-                citations: [],
-                evidenceStatus: "none",
-              },
-              failureReason: null,
+              mockExamPublicId: context.mockExamPublicId,
+              actorPublicId: context.userPublicId,
+              idempotencyKeyHash: "a".repeat(64),
+              maxAttemptCount: 3 as const,
+              timeoutSecond: 60 as const,
+              modelConfigSnapshot: {},
+              promptTemplateKey: "ai_scoring_v1",
+              promptTemplateVersion: 1,
+              promptTemplateHash: "sha256:prompt-v1",
+              inputSnapshot: {},
+              authorizationSnapshot: {},
+              ragSnapshot: null,
+              scheduledAt: now,
             };
           },
         },
@@ -1857,12 +1827,12 @@ describe("mock exam service", () => {
       code: 0,
       data: {
         mockExam: {
-          examStatus: "completed",
+          examStatus: "scoring",
         },
         unansweredCount: 0,
       },
     });
-    expect(scoringContexts).toEqual([
+    expect(preparedContexts).toEqual([
       expect.objectContaining({
         userPublicId: "user_public_123",
         mockExamPublicId: "mock_exam_public_existing",
@@ -1874,10 +1844,10 @@ describe("mock exam service", () => {
     ]);
     expect(submitInputs).toEqual([
       expect.objectContaining({
-        examStatus: "completed",
+        examStatus: "scoring",
         objectiveScore: "1.0",
-        subjectiveScore: "4.5",
-        totalScore: "5.5",
+        subjectiveScore: null,
+        totalScore: "1.0",
         unansweredCount: 0,
         answerRecordResults: [
           expect.objectContaining({
@@ -1887,21 +1857,18 @@ describe("mock exam service", () => {
           }),
           expect.objectContaining({
             paperQuestionPublicId: "paper_question_public_456",
-            answerRecordStatus: "scored",
-            score: "4.5",
-            aiScoringSnapshot: expect.objectContaining({
-              promptTemplateKey: "ai_scoring_v1",
-            }),
+            answerRecordStatus: "submitted",
+            score: null,
           }),
         ],
       }),
     ]);
   });
 
-  it("queues subjective AI scoring and applies results after FIFO drain", async () => {
+  it("keeps the legacy in-memory queue detached from production submit", async () => {
     const submitInputs: unknown[] = [];
     const scoringUpdateInputs: unknown[] = [];
-    const scoringContexts: unknown[] = [];
+    const preparedContexts: unknown[] = [];
     const aiScoringQueue = createDeterministicMockExamAiScoringQueue();
     const service = createMockExamService(
       createRepository({
@@ -1962,41 +1929,29 @@ describe("mock exam service", () => {
             answered_count: 2,
           });
         },
-        async applyMockExamScoringResults(input) {
-          scoringUpdateInputs.push(input);
-
-          return createMockExam({
-            public_id: input.publicId,
-            exam_status: input.examStatus,
-            submitted_at: now,
-            objective_score: input.objectiveScore,
-            subjective_score: input.subjectiveScore,
-            total_score: input.totalScore,
-            answered_count: 2,
-          });
-        },
       }),
       clock,
       createIdFactory(),
       {
-        aiScoringQueue,
-        aiScoringRuntime: {
-          async scoreSubjectiveAnswer(context) {
-            scoringContexts.push(context);
-
+        aiScoringTaskPreparer: {
+          async prepareTask(context) {
+            preparedContexts.push(context);
             return {
+              publicId: "ai_scoring_task_public_legacy_queue_unreachable",
               answerRecordPublicId: context.answerRecordPublicId,
-              scoringStatus: "scored",
-              score: "4.5",
-              maxScore: "5.0",
-              scoringSnapshot: {
-                promptTemplateKey: "ai_scoring_v1",
-                promptTemplateVersion: 1,
-                scoringPoints: [],
-                citations: [],
-                evidenceStatus: "none",
-              },
-              failureReason: null,
+              mockExamPublicId: context.mockExamPublicId,
+              actorPublicId: context.userPublicId,
+              idempotencyKeyHash: "b".repeat(64),
+              maxAttemptCount: 3 as const,
+              timeoutSecond: 60 as const,
+              modelConfigSnapshot: {},
+              promptTemplateKey: "ai_scoring_v1",
+              promptTemplateVersion: 1,
+              promptTemplateHash: "sha256:prompt-v1",
+              inputSnapshot: {},
+              authorizationSnapshot: {},
+              ragSnapshot: null,
+              scheduledAt: now,
             };
           },
         },
@@ -2014,13 +1969,13 @@ describe("mock exam service", () => {
         unansweredCount: 0,
       },
     });
-    expect(scoringContexts).toEqual([]);
-    expect(aiScoringQueue.listPendingJobs()).toEqual([
+    expect(preparedContexts).toEqual([
       expect.objectContaining({
-        mockExamPublicId: "mock_exam_public_existing",
-        answerRecordPublicIds: ["answer_record_public_subjective"],
+        answerRecordPublicId: "answer_record_public_subjective",
+        studentAnswer: "queued subjective answer",
       }),
     ]);
+    expect(aiScoringQueue.listPendingJobs()).toEqual([]);
     expect(submitInputs).toEqual([
       expect.objectContaining({
         examStatus: "scoring",
@@ -2042,32 +1997,10 @@ describe("mock exam service", () => {
       }),
     ]);
 
-    await expect(aiScoringQueue.drainNext()).resolves.toMatchObject({
-      status: "processed",
-      mockExamPublicId: "mock_exam_public_existing",
+    await expect(aiScoringQueue.drainNext()).resolves.toEqual({
+      status: "empty",
     });
-
-    expect(scoringContexts).toEqual([
-      expect.objectContaining({
-        answerRecordPublicId: "answer_record_public_subjective",
-        studentAnswer: "queued subjective answer",
-      }),
-    ]);
-    expect(scoringUpdateInputs).toEqual([
-      expect.objectContaining({
-        examStatus: "completed",
-        objectiveScore: "1.0",
-        subjectiveScore: "4.5",
-        totalScore: "5.5",
-        answerRecordResults: [
-          expect.objectContaining({
-            paperQuestionPublicId: "paper_question_public_456",
-            answerRecordStatus: "scored",
-            score: "4.5",
-          }),
-        ],
-      }),
-    ]);
+    expect(scoringUpdateInputs).toEqual([]);
   });
 
   it("persists prepared scoring tasks through the authoritative submit input", async () => {
@@ -2238,7 +2171,7 @@ describe("mock exam service", () => {
   it.each(["case_analysis", "calculation"] as const)(
     "preserves %s snapshots while sending text answers to AI scoring",
     async (questionType) => {
-      const scoringContexts: unknown[] = [];
+      const preparedContexts: unknown[] = [];
       const service = createMockExamService(
         createRepository({
           async findMockExamByPublicId(input) {
@@ -2306,25 +2239,25 @@ describe("mock exam service", () => {
         clock,
         createIdFactory(),
         {
-          aiScoringRuntime: {
-            async scoreSubjectiveAnswer(context) {
-              scoringContexts.push(context);
-
+          aiScoringTaskPreparer: {
+            async prepareTask(context) {
+              preparedContexts.push(context);
               return {
+                publicId: `ai_scoring_task_public_${questionType}`,
                 answerRecordPublicId: context.answerRecordPublicId,
-                scoringStatus: "scored",
-                score: "4.0",
-                maxScore: "5.0",
-                scoringSnapshot: {
-                  promptTemplateKey: "ai_scoring_v1",
-                  promptTemplateVersion: 1,
-                  scoringPoints: [],
-                  overallComment: "Synthetic scoring completed.",
-                  improvementSuggestion: "Synthetic improvement.",
-                  citations: [],
-                  evidenceStatus: "none",
-                },
-                failureReason: null,
+                mockExamPublicId: context.mockExamPublicId,
+                actorPublicId: context.userPublicId,
+                idempotencyKeyHash: "c".repeat(64),
+                maxAttemptCount: 3 as const,
+                timeoutSecond: 60 as const,
+                modelConfigSnapshot: {},
+                promptTemplateKey: "ai_scoring_v1",
+                promptTemplateVersion: 1,
+                promptTemplateHash: "sha256:prompt-v1",
+                inputSnapshot: {},
+                authorizationSnapshot: {},
+                ragSnapshot: null,
+                scheduledAt: now,
               };
             },
           },
@@ -2337,12 +2270,12 @@ describe("mock exam service", () => {
         code: 0,
         data: {
           mockExam: {
-            examStatus: "completed",
+            examStatus: "scoring",
           },
           unansweredCount: 0,
         },
       });
-      expect(scoringContexts).toEqual([
+      expect(preparedContexts).toEqual([
         expect.objectContaining({
           questionSnapshot: expect.objectContaining({
             questionType,
@@ -2356,9 +2289,8 @@ describe("mock exam service", () => {
     },
   );
 
-  it("scores unanswered subjective questions as zero without invoking AI", async () => {
+  it("keeps an unanswered subjective score unavailable without invoking AI", async () => {
     const submitInputs: unknown[] = [];
-    const scoringContexts: unknown[] = [];
     const service = createMockExamService(
       createRepository({
         async listMockExamAnswerRecords() {
@@ -2401,31 +2333,22 @@ describe("mock exam service", () => {
       }),
       clock,
       createIdFactory(),
-      {
-        aiScoringRuntime: {
-          async scoreSubjectiveAnswer(context) {
-            scoringContexts.push(context);
-            throw new Error("unanswered subjective answer must not call AI");
-          },
-        },
-      },
     );
 
     await service.submitMockExam(userContext, "mock_exam_public_existing", {});
 
-    expect(scoringContexts).toEqual([]);
     expect(submitInputs).toEqual([
       expect.objectContaining({
         examStatus: "completed",
         objectiveScore: "1.0",
-        subjectiveScore: "0.0",
+        subjectiveScore: null,
         totalScore: "1.0",
         unansweredCount: 1,
       }),
     ]);
   });
 
-  it("marks mock_exam as scoring_partial_failed when subjective AI scoring fails", async () => {
+  it("fails closed when durable subjective task preparation fails", async () => {
     const submitInputs: unknown[] = [];
     const service = createMockExamService(
       createRepository({
@@ -2470,16 +2393,9 @@ describe("mock exam service", () => {
       clock,
       createIdFactory(),
       {
-        aiScoringRuntime: {
-          async scoreSubjectiveAnswer(context) {
-            return {
-              answerRecordPublicId: context.answerRecordPublicId,
-              scoringStatus: "scoring_failed",
-              score: null,
-              maxScore: "5.0",
-              scoringSnapshot: null,
-              failureReason: "scoring_runner_failed",
-            };
+        aiScoringTaskPreparer: {
+          async prepareTask() {
+            throw new Error("durable scoring task preparation failed");
           },
         },
       },
@@ -2487,37 +2403,15 @@ describe("mock exam service", () => {
 
     await expect(
       service.submitMockExam(userContext, "mock_exam_public_existing", {}),
-    ).resolves.toMatchObject({
-      code: 0,
-      data: {
-        mockExam: {
-          examStatus: "scoring_partial_failed",
-        },
-      },
+    ).resolves.toEqual({
+      code: 503318,
+      message: "AI scoring configuration is unavailable.",
+      data: null,
     });
-    expect(submitInputs).toEqual([
-      expect.objectContaining({
-        examStatus: "scoring_partial_failed",
-        objectiveScore: "0.0",
-        subjectiveScore: null,
-        totalScore: "0.0",
-        answerRecordResults: [
-          expect.objectContaining({
-            paperQuestionPublicId: "paper_question_public_456",
-            answerRecordStatus: "scoring_failed",
-            score: null,
-            aiScoringSnapshot: expect.objectContaining({
-              failureReason: "scoring_runner_failed",
-            }),
-          }),
-        ],
-      }),
-    ]);
+    expect(submitInputs).toEqual([]);
   });
 
-  it("retries only failed subjective scoring records and preserves successful results", async () => {
-    const retryInputs: unknown[] = [];
-    const scoringContexts: unknown[] = [];
+  it("rejects retry when durable scoring is unavailable", async () => {
     const service = createMockExamService(
       createRepository({
         async findMockExamByPublicId() {
@@ -2573,76 +2467,18 @@ describe("mock exam service", () => {
             },
           ];
         },
-        async applyMockExamScoringResults(input) {
-          retryInputs.push(input);
-
-          return createMockExam({
-            public_id: input.publicId,
-            exam_status: input.examStatus,
-            submitted_at: now,
-            objective_score: input.objectiveScore,
-            subjective_score: input.subjectiveScore,
-            total_score: input.totalScore,
-            answered_count: 2,
-          });
-        },
       }),
       clock,
       createIdFactory(),
-      {
-        aiScoringRuntime: {
-          async scoreSubjectiveAnswer(context) {
-            scoringContexts.push(context);
-
-            return {
-              answerRecordPublicId: context.answerRecordPublicId,
-              scoringStatus: "scored",
-              score: "3.5",
-              maxScore: "5.0",
-              scoringSnapshot: {
-                promptTemplateKey: "ai_scoring_v1",
-                promptTemplateVersion: 1,
-                scoringPoints: [],
-                citations: [],
-                evidenceStatus: "none",
-              },
-              failureReason: null,
-            };
-          },
-        },
-      },
     );
 
     await expect(
       service.retryMockExamScoring(userContext, "mock_exam_public_existing"),
-    ).resolves.toMatchObject({
-      code: 0,
-      data: {
-        mockExam: {
-          examStatus: "completed",
-        },
-      },
+    ).resolves.toEqual({
+      code: 503318,
+      message: "Durable AI scoring retry is unavailable.",
+      data: null,
     });
-    expect(scoringContexts).toEqual([
-      expect.objectContaining({
-        answerRecordPublicId: "answer_record_public_failed",
-      }),
-    ]);
-    expect(retryInputs).toEqual([
-      expect.objectContaining({
-        examStatus: "completed",
-        objectiveScore: "1.0",
-        subjectiveScore: "3.5",
-        totalScore: "4.5",
-        answerRecordResults: [
-          expect.objectContaining({
-            paperQuestionPublicId: "paper_question_public_456",
-            answerRecordStatus: "scored",
-            score: "3.5",
-          }),
-        ],
-      }),
-    ]);
   });
 
   it("reschedules durable failed scoring tasks without invoking a Provider in the request", async () => {
