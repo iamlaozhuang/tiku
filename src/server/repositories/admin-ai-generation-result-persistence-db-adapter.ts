@@ -1,5 +1,6 @@
 import {
   adminAiGenerationFormalAdoption,
+  adminAiGenerationReviewDraft,
   adminAiGenerationResult,
   adminAiGenerationTaskMetadata,
   aiCallLog,
@@ -43,6 +44,11 @@ import {
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
 import { createRunningAttemptCondition } from "./ai-generation-task-lifecycle-repository";
+import {
+  createAdminAiGenerationReviewDraftDigest,
+  createAdminAiGenerationReviewDraftPublicId,
+} from "./admin-ai-generation-review-draft-repository";
+import { normalizeAdminAiGenerationReviewedDraft } from "../validators/admin-ai-generation-review-draft";
 
 type AdminAiGenerationResultInsertValue =
   typeof adminAiGenerationResult.$inferInsert;
@@ -82,6 +88,9 @@ export type AdminAiGenerationResultPersistenceDbRow = {
   source_question_public_id: string | null;
   source_paper_public_id: string | null;
   is_formal_adoption_blocked: boolean;
+  current_review_draft_public_id: string | null;
+  current_review_draft_revision: number | null;
+  current_review_draft_digest: string | null;
   formal_adoption_review_status: string | null;
   formal_adoption_target_write_status: string | null;
   formal_adoption_question_public_id: string | null;
@@ -132,6 +141,12 @@ const adminAiGenerationResultSelection = {
   source_paper_public_id: adminAiGenerationResult.source_paper_public_id,
   is_formal_adoption_blocked:
     adminAiGenerationResult.is_formal_adoption_blocked,
+  current_review_draft_public_id:
+    adminAiGenerationResult.current_review_draft_public_id,
+  current_review_draft_revision:
+    adminAiGenerationResult.current_review_draft_revision,
+  current_review_draft_digest:
+    adminAiGenerationResult.current_review_draft_digest,
   created_at: adminAiGenerationResult.created_at,
   updated_at: adminAiGenerationResult.updated_at,
 };
@@ -188,6 +203,9 @@ export function createAdminAiGenerationResultInsertValue(
     source_question_public_id: input.sourceQuestionPublicId,
     source_paper_public_id: input.sourcePaperPublicId,
     is_formal_adoption_blocked: input.isFormalAdoptionBlocked,
+    current_review_draft_public_id: null,
+    current_review_draft_revision: null,
+    current_review_draft_digest: null,
     created_at: input.createdAt,
     updated_at: input.createdAt,
   };
@@ -386,6 +404,87 @@ export async function persistAdminAiGenerationDraftResultAndCompleteTask(
       throw new Error("admin AI generation result persistence conflicted.");
     }
     const insertedRow = insertedRows[0];
+    let resultRow = insertedRow;
+
+    if (input.workspace === "content") {
+      const reviewedDraft = normalizeAdminAiGenerationReviewedDraft(
+        input.generationKind,
+        input.contentRedactedSnapshot.formalReviewedDraft,
+        { allowUnresolvedKnowledgeCandidate: true },
+      );
+      if (reviewedDraft === null) {
+        throw new Error(
+          "content admin AI generation result requires a strict initial review draft.",
+        );
+      }
+
+      const reviewDraftIdentity = {
+        resultPublicId: input.resultPublicId,
+        sourceContentDigest: input.contentDigest,
+        targetType: input.generationKind,
+        revision: 0,
+        reviewedDraft,
+      } as const;
+      const reviewDraftPublicId =
+        createAdminAiGenerationReviewDraftPublicId(reviewDraftIdentity);
+      const reviewDraftDigest =
+        createAdminAiGenerationReviewDraftDigest(reviewDraftIdentity);
+
+      const insertedReviewDrafts = await transaction
+        .insert(adminAiGenerationReviewDraft)
+        .values({
+          public_id: reviewDraftPublicId,
+          admin_ai_generation_result_id: insertedRow.id,
+          source_result_public_id: input.resultPublicId,
+          source_task_public_id: input.taskPublicId,
+          target_type: input.generationKind,
+          revision_number: 0,
+          revision_origin: "generated_result",
+          predecessor_public_id: null,
+          predecessor_digest: null,
+          source_content_digest: input.contentDigest,
+          draft_snapshot: reviewedDraft,
+          draft_digest: reviewDraftDigest,
+          editor_public_id: null,
+          created_at: input.createdAt,
+        })
+        .returning({ public_id: adminAiGenerationReviewDraft.public_id });
+
+      if (
+        insertedReviewDrafts.length !== 1 ||
+        insertedReviewDrafts[0].public_id !== reviewDraftPublicId
+      ) {
+        throw new Error(
+          "admin AI generation initial review draft persistence failed.",
+        );
+      }
+
+      const updatedResults = await transaction
+        .update(adminAiGenerationResult)
+        .set({
+          current_review_draft_public_id: reviewDraftPublicId,
+          current_review_draft_revision: 0,
+          current_review_draft_digest: reviewDraftDigest,
+          updated_at: input.createdAt,
+        })
+        .where(
+          and(
+            eq(adminAiGenerationResult.id, insertedRow.id),
+            eq(adminAiGenerationResult.public_id, input.resultPublicId),
+            sql`${adminAiGenerationResult.current_review_draft_public_id} is null`,
+            sql`${adminAiGenerationResult.current_review_draft_revision} is null`,
+            sql`${adminAiGenerationResult.current_review_draft_digest} is null`,
+          ),
+        )
+        .returning(adminAiGenerationResultSelection);
+
+      if (updatedResults.length !== 1) {
+        throw new Error(
+          "admin AI generation initial review draft binding failed.",
+        );
+      }
+      resultRow = updatedResults[0];
+    }
 
     const updatedTaskRows = await transaction
       .update(aiGenerationTask)
@@ -406,7 +505,7 @@ export async function persistAdminAiGenerationDraftResultAndCompleteTask(
 
     return mapAdminAiGenerationResultDbRowToRow(
       normalizeAdminAiGenerationResultDbRow(
-        createAdminAiGenerationResultDbRowWithoutFormalAdoption(insertedRow),
+        createAdminAiGenerationResultDbRowWithoutFormalAdoption(resultRow),
       ),
     );
   });

@@ -2,16 +2,16 @@ import {
   adminAiGenerationFormalAdoptionReviewDecisionValues,
   adminAiGenerationFormalAdoptionTargetTypeValues,
   type AdminAiGenerationFormalAdoptionActor,
-  type AdminAiGenerationFormalAdoptionCommandInput,
   type AdminAiGenerationFormalAdoptionReviewDecision,
   type AdminAiGenerationFormalAdoptionTargetType,
   type AdminAiGenerationKnowledgeNodeResolutionCommand,
 } from "../models/admin-ai-generation-formal-adoption";
+import type { CreateAdminAiGenerationFormalAdoptionInput } from "../contracts/admin-ai-generation-formal-adoption-contract";
 
 export type AdminAiGenerationFormalAdoptionValidationResult =
   | {
       success: true;
-      value: AdminAiGenerationFormalAdoptionCommandInput;
+      value: CreateAdminAiGenerationFormalAdoptionInput;
     }
   | {
       success: false;
@@ -194,6 +194,10 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
   const expectedContentDigest = normalizeRequiredText(
     input.expectedContentDigest,
   );
+  const expectedReviewDraftRevision = input.expectedReviewDraftRevision;
+  const expectedReviewDraftDigest = normalizeRequiredText(
+    input.expectedReviewDraftDigest,
+  );
   const targetType = normalizeTargetType(input.targetType);
   const reviewDecision = normalizeReviewDecision(input.reviewDecision);
   const reviewedAt = normalizeReviewedAt(input.reviewedAt);
@@ -206,6 +210,11 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
     actor === null ||
     resultPublicId === null ||
     expectedContentDigest === null ||
+    typeof expectedReviewDraftRevision !== "number" ||
+    !Number.isSafeInteger(expectedReviewDraftRevision) ||
+    expectedReviewDraftRevision < 0 ||
+    expectedReviewDraftDigest === null ||
+    !/^sha256:[0-9a-f]{64}$/u.test(expectedReviewDraftDigest) ||
     targetType === null ||
     reviewDecision === null ||
     input.reviewerConfirmed !== true ||
@@ -227,6 +236,8 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
       actor,
       resultPublicId,
       expectedContentDigest,
+      expectedReviewDraftRevision,
+      expectedReviewDraftDigest,
       targetType,
       reviewDecision,
       reviewerConfirmed: true,

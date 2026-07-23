@@ -356,6 +356,9 @@ function createPostRequest(body: Record<string, unknown>): Request {
     {
       body: JSON.stringify({
         expectedContentDigest: "sha256:admin_ai_generation_result_177",
+        expectedReviewDraftRevision: 0,
+        expectedReviewDraftDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         ...body,
       }),
       headers: {
@@ -559,6 +562,9 @@ describe("admin AI generation formal adoption runtime route", () => {
           roles: ["content_admin"],
         },
         expectedContentDigest: "sha256:admin_ai_generation_result_177",
+        expectedReviewDraftRevision: 0,
+        expectedReviewDraftDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         resultPublicId: "admin_ai_generation_result_content_question_177",
         targetType: "question",
         reviewDecision: "approved",
@@ -580,6 +586,9 @@ describe("admin AI generation formal adoption runtime route", () => {
       adoptionRepository.findTrustedReviewedDraftForAdoption,
     ).toHaveBeenCalledWith({
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       resultPublicId: "admin_ai_generation_result_content_question_177",
       targetType: "question",
     });
@@ -669,6 +678,9 @@ describe("admin AI generation formal adoption runtime route", () => {
       adoptionRepository.findTrustedReviewedDraftForAdoption,
     ).toHaveBeenCalledWith({
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       resultPublicId: "admin_ai_generation_result_content_paper_177",
       targetType: "paper",
     });
@@ -771,6 +783,9 @@ describe("admin AI generation formal adoption runtime route", () => {
           roles: ["content_admin"],
         },
         expectedContentDigest: "sha256:admin_ai_generation_result_177",
+        expectedReviewDraftRevision: 0,
+        expectedReviewDraftDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         resultPublicId: "admin_ai_generation_result_content_question_177",
         targetType: "question",
         reviewDecision: "rejected",

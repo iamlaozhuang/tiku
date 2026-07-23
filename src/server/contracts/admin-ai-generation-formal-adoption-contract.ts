@@ -21,7 +21,17 @@ import type {
 } from "../models/admin-ai-generation-result";
 
 export type CreateAdminAiGenerationFormalAdoptionInput =
-  AdminAiGenerationFormalAdoptionCommandInput;
+  AdminAiGenerationFormalAdoptionCommandInput & {
+    expectedReviewDraftRevision: number;
+    expectedReviewDraftDigest: string;
+  };
+
+export type AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft =
+  AdminAiGenerationFormalAdoptionSourceResult & {
+    currentReviewDraftPublicId: string | null;
+    currentReviewDraftRevision: number | null;
+    currentReviewDraftDigest: string | null;
+  };
 
 export type FindAdminAiGenerationFormalAdoptionQuery = {
   sourceResultPublicId: string;
@@ -46,6 +56,7 @@ export type InsertAdminAiGenerationFormalAdoptionInput = {
   formalQuestionPublicId: string | null;
   formalPaperPublicId: string | null;
   reviewerPublicId: string;
+  reviewerRole: "super_admin" | "content_admin";
   reviewedAt: Date;
   contentDigest: string;
   contentPreviewMasked: string;
@@ -56,6 +67,9 @@ export type InsertAdminAiGenerationFormalAdoptionInput = {
   knowledgeNodeCandidateDigest: string | null;
   knowledgeNodeResolutionSnapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
   knowledgeNodeResolutionDigest: string | null;
+  reviewDraftPublicId: string;
+  reviewDraftRevision: number;
+  reviewDraftDigest: string;
   createdAt: Date;
 };
 
@@ -98,6 +112,8 @@ export type MarkAdminAiGenerationFormalDraftCreatedInput = {
 export type FindTrustedAdminAiGenerationFormalDraftInput = {
   resultPublicId: string;
   expectedContentDigest: string;
+  expectedReviewDraftRevision: number;
+  expectedReviewDraftDigest: string;
   targetType: AdminAiGenerationFormalAdoptionTargetType;
 };
 
@@ -128,6 +144,9 @@ export type AdminAiGenerationFormalAdoptionRow = {
   knowledge_node_candidate_digest: string | null;
   knowledge_node_resolution_snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
   knowledge_node_resolution_digest: string | null;
+  review_draft_public_id: string;
+  review_draft_revision: number;
+  review_draft_digest: string;
   created_at: Date;
 };
 
@@ -518,7 +537,7 @@ export type AdminAiGenerationFormalAdoptionGateway = {
   ): Promise<AdminAiGenerationFormalAdoptionRow | null>;
   findSourceResultForAdoption(
     resultPublicId: string,
-  ): Promise<AdminAiGenerationFormalAdoptionSourceResult | null>;
+  ): Promise<AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft | null>;
   findKnowledgeNodesForResolution(input: {
     knowledgeNodePublicIds: string[];
   }): Promise<AdminAiGenerationKnowledgeNodeResolutionRow[]>;

@@ -31,6 +31,26 @@ function createDraftResultInput(
     contentRedactedSnapshot: {
       redactionStatus: "redacted",
       contentDigest: "sha256:admin_result_901",
+      formalReviewedDraft: {
+        questionType: "short_answer",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        difficulty: "medium",
+        stemRichText: "<p>reviewed question</p>",
+        analysisRichText: "<p>reviewed analysis</p>",
+        standardAnswerRichText: "<p>reviewed answer</p>",
+        multiChoiceRule: "all_correct_only",
+        scoringMethod: "ai_scoring",
+        materialPublicId: null,
+        questionOptions: [],
+        scoringPoints: [
+          { description: "key point", score: "2.0", sortOrder: 1 },
+        ],
+        fillBlankAnswers: [],
+        knowledgeNodePublicIds: [],
+        tagPublicIds: [],
+      },
     },
     contentDigest: "sha256:admin_result_901",
     contentPreviewMasked: "masked admin generated result preview",
@@ -109,20 +129,36 @@ describe("admin AI generation result persistence DB adapter", () => {
           }),
         }),
       }),
-      insert: () => ({
-        values: () => ({
-          onConflictDoNothing: () => ({
-            returning: async () => [insertedRow],
+      insert: () => {
+        return {
+          values: (values: { public_id?: string }) => ({
+            returning: async () => [{ public_id: values.public_id }],
+            onConflictDoNothing: () => ({
+              returning: async () => [insertedRow],
+            }),
           }),
-        }),
-      }),
+        };
+      },
       update: () => {
         updateCallCount += 1;
         return {
           set: () => ({
             where: () => ({
-              returning: async () =>
-                updateCallCount === 1 ? [{ id: 801 }] : [],
+              returning: async () => {
+                if (updateCallCount === 1) return [{ id: 801 }];
+                if (updateCallCount === 2)
+                  return [
+                    {
+                      ...insertedRow,
+                      current_review_draft_public_id:
+                        "admin_ai_review_draft_initial_persistence_test",
+                      current_review_draft_revision: 0,
+                      current_review_draft_digest:
+                        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    },
+                  ];
+                return [];
+              },
             }),
           }),
         };
@@ -146,6 +182,7 @@ describe("admin AI generation result persistence DB adapter", () => {
       ...createAdminAiGenerationResultInsertValue(input),
     };
     const updateValues: unknown[] = [];
+    const insertValues: unknown[] = [];
     let updateCallCount = 0;
     const transactionDatabase = {
       select: () => ({
@@ -157,11 +194,19 @@ describe("admin AI generation result persistence DB adapter", () => {
           }),
         }),
       }),
-      insert: () => ({
-        values: () => ({
-          onConflictDoNothing: () => ({ returning: async () => [insertedRow] }),
-        }),
-      }),
+      insert: () => {
+        return {
+          values: (values: { public_id?: string }) => {
+            insertValues.push(values);
+            return {
+              returning: async () => [{ public_id: values.public_id }],
+              onConflictDoNothing: () => ({
+                returning: async () => [insertedRow],
+              }),
+            };
+          },
+        };
+      },
       update: () => {
         updateCallCount += 1;
         return {
@@ -169,10 +214,21 @@ describe("admin AI generation result persistence DB adapter", () => {
             updateValues.push(values);
             return {
               where: () => ({
-                returning: async () =>
-                  updateCallCount === 1
-                    ? [{ id: 801 }]
-                    : [{ public_id: input.taskPublicId }],
+                returning: async () => {
+                  if (updateCallCount === 1) return [{ id: 801 }];
+                  if (updateCallCount === 2)
+                    return [
+                      {
+                        ...insertedRow,
+                        current_review_draft_public_id:
+                          "admin_ai_review_draft_initial_success_test",
+                        current_review_draft_revision: 0,
+                        current_review_draft_digest:
+                          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      },
+                    ];
+                  return [{ public_id: input.taskPublicId }];
+                },
               }),
             };
           },
@@ -191,11 +247,21 @@ describe("admin AI generation result persistence DB adapter", () => {
     expect(transaction).toHaveBeenCalledTimes(1);
     expect(updateValues).toEqual([
       expect.objectContaining({ call_status: "success" }),
+      expect.objectContaining({ current_review_draft_revision: 0 }),
       expect.objectContaining({
         task_status: "succeeded",
         ai_call_log_public_id: input.aiCallLogPublicId,
       }),
     ]);
+    expect(insertValues[1]).toMatchObject({
+      source_result_public_id: input.resultPublicId,
+      source_task_public_id: input.taskPublicId,
+      revision_number: 0,
+      revision_origin: "generated_result",
+      predecessor_public_id: null,
+      predecessor_digest: null,
+      editor_public_id: null,
+    });
     expect(result?.ai_call_log_public_id).toBe(input.aiCallLogPublicId);
   });
 
@@ -286,6 +352,9 @@ describe("admin AI generation result persistence DB adapter", () => {
       source_question_public_id: null,
       source_paper_public_id: null,
       is_formal_adoption_blocked: true,
+      current_review_draft_public_id: null,
+      current_review_draft_revision: null,
+      current_review_draft_digest: null,
       created_at: input.createdAt,
       updated_at: input.createdAt,
     });
@@ -340,6 +409,9 @@ describe("admin AI generation result persistence DB adapter", () => {
       source_question_public_id: null,
       source_paper_public_id: null,
       is_formal_adoption_blocked: true,
+      current_review_draft_public_id: null,
+      current_review_draft_revision: null,
+      current_review_draft_digest: null,
       formal_adoption_review_status: null,
       formal_adoption_target_write_status: null,
       formal_adoption_question_public_id: null,
@@ -392,6 +464,9 @@ describe("admin AI generation result persistence DB adapter", () => {
         source_question_public_id: null,
         source_paper_public_id: null,
         is_formal_adoption_blocked: false,
+        current_review_draft_public_id: null,
+        current_review_draft_revision: null,
+        current_review_draft_digest: null,
         formal_adoption_review_status: null,
         formal_adoption_target_write_status: null,
         formal_adoption_question_public_id: null,

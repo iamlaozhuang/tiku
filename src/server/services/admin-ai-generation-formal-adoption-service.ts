@@ -92,6 +92,10 @@ export function createAdminAiGenerationFormalAdoptionService(
             {
               expectedContentDigest:
                 normalizedInput.value.expectedContentDigest,
+              expectedReviewDraftRevision:
+                normalizedInput.value.expectedReviewDraftRevision,
+              expectedReviewDraftDigest:
+                normalizedInput.value.expectedReviewDraftDigest,
               resultPublicId: normalizedInput.value.resultPublicId,
               targetType: normalizedInput.value.targetType,
             },

@@ -740,6 +740,9 @@ export const adminAiGenerationResult = pgTable(
     is_formal_adoption_blocked: boolean("is_formal_adoption_blocked")
       .default(true)
       .notNull(),
+    current_review_draft_public_id: text("current_review_draft_public_id"),
+    current_review_draft_revision: integer("current_review_draft_revision"),
+    current_review_draft_digest: text("current_review_draft_digest"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -767,6 +770,82 @@ export const adminAiGenerationResult = pgTable(
     ),
     index("idx_admin_ai_generation_result_organization_public_id").on(
       table.organization_public_id,
+    ),
+    check(
+      "chk_admin_ai_generation_result_review_draft_coherence",
+      sql`(
+        (${table.current_review_draft_public_id} is null and ${table.current_review_draft_revision} is null and ${table.current_review_draft_digest} is null)
+        or
+        (${table.current_review_draft_public_id} is not null and ${table.current_review_draft_revision} >= 0 and ${table.current_review_draft_digest} ~ '^sha256:[0-9a-f]{64}$')
+      )`,
+    ),
+  ],
+);
+
+export const adminAiGenerationReviewDraft = pgTable(
+  "admin_ai_generation_review_draft",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    admin_ai_generation_result_id: bigint("admin_ai_generation_result_id", {
+      mode: "number",
+    }).notNull(),
+    source_result_public_id: text("source_result_public_id").notNull(),
+    source_task_public_id: text("source_task_public_id").notNull(),
+    target_type: text("target_type").notNull(),
+    revision_number: integer("revision_number").notNull(),
+    revision_origin: text("revision_origin").notNull(),
+    predecessor_public_id: text("predecessor_public_id"),
+    predecessor_digest: text("predecessor_digest"),
+    source_content_digest: text("source_content_digest").notNull(),
+    draft_snapshot: jsonb("draft_snapshot").notNull(),
+    draft_digest: text("draft_digest").notNull(),
+    editor_public_id: text("editor_public_id"),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.admin_ai_generation_result_id],
+      foreignColumns: [adminAiGenerationResult.id],
+      name: "fk_admin_ai_generation_review_draft_result",
+    }).onDelete("restrict"),
+    uniqueIndex("udx_admin_ai_generation_review_draft_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_admin_ai_generation_review_draft_result_revision").on(
+      table.admin_ai_generation_result_id,
+      table.revision_number,
+    ),
+    index("idx_admin_ai_generation_review_draft_source_result").on(
+      table.source_result_public_id,
+      table.revision_number,
+    ),
+    check(
+      "chk_admin_ai_generation_review_draft_identity",
+      sql`(
+        ${table.revision_number} >= 0
+        and ${table.target_type} in ('question', 'paper')
+        and ${table.revision_origin} in ('generated_result', 'review_edit')
+        and jsonb_typeof(${table.draft_snapshot}) = 'object'
+        and ${table.source_content_digest} ~ '^sha256:[0-9a-f]{64}$'
+        and ${table.draft_digest} ~ '^sha256:[0-9a-f]{64}$'
+      )`,
+    ),
+    check(
+      "chk_admin_ai_generation_review_draft_predecessor",
+      sql`(
+        (${table.revision_number} = 0 and ${table.predecessor_public_id} is null and ${table.predecessor_digest} is null)
+        or
+        (${table.revision_number} > 0 and ${table.predecessor_public_id} is not null and ${table.predecessor_digest} ~ '^sha256:[0-9a-f]{64}$')
+      )`,
+    ),
+    check(
+      "chk_admin_ai_generation_review_draft_origin",
+      sql`(
+        (${table.revision_origin} = 'generated_result' and ${table.revision_number} = 0 and ${table.editor_public_id} is null)
+        or
+        (${table.revision_origin} = 'review_edit' and ${table.editor_public_id} is not null)
+      )`,
     ),
   ],
 );
@@ -807,6 +886,9 @@ export const adminAiGenerationFormalAdoption = pgTable(
       "knowledge_node_resolution_snapshot",
     ),
     knowledge_node_resolution_digest: text("knowledge_node_resolution_digest"),
+    review_draft_public_id: text("review_draft_public_id"),
+    review_draft_revision: integer("review_draft_revision"),
+    review_draft_digest: text("review_draft_digest"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -845,6 +927,14 @@ export const adminAiGenerationFormalAdoption = pgTable(
         (${table.knowledge_node_candidate_digest} is null or ${table.knowledge_node_candidate_digest} ~ '^sha256:[0-9a-f]{64}$')
         and
         (${table.knowledge_node_resolution_digest} is null or ${table.knowledge_node_resolution_digest} ~ '^sha256:[0-9a-f]{64}$')
+      )`,
+    ),
+    check(
+      "chk_admin_ai_formal_adoption_review_draft_coherence",
+      sql`(
+        (${table.review_draft_public_id} is null and ${table.review_draft_revision} is null and ${table.review_draft_digest} is null)
+        or
+        (${table.review_draft_public_id} is not null and ${table.review_draft_revision} >= 0 and ${table.review_draft_digest} ~ '^sha256:[0-9a-f]{64}$')
       )`,
     ),
   ],

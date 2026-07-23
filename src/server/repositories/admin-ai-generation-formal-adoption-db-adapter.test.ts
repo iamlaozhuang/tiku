@@ -9,6 +9,7 @@ import type {
 import type { AdminAiGenerationFormalAdoptionSourceResult } from "../models/admin-ai-generation-formal-adoption";
 import {
   createAdminAiGenerationFormalDraftMetadataUpdateValue,
+  createAdminAiGenerationFormalAdoptionAuditInsertValue,
   createAdminAiGenerationFormalAdoptionInsertValue,
   mapAdminAiGenerationFormalAdoptionDbRowToRow,
   mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult,
@@ -34,6 +35,7 @@ function createAdoptionInput(
     formalQuestionPublicId: null,
     formalPaperPublicId: null,
     reviewerPublicId: "admin_content_public_901",
+    reviewerRole: "content_admin",
     reviewedAt: new Date("2026-06-26T23:50:00.000Z"),
     contentDigest: "sha256:admin_ai_generation_result_901",
     contentPreviewMasked: "masked formal adoption source preview",
@@ -44,6 +46,10 @@ function createAdoptionInput(
     knowledgeNodeCandidateDigest: null,
     knowledgeNodeResolutionSnapshot: null,
     knowledgeNodeResolutionDigest: null,
+    reviewDraftPublicId: "admin_ai_review_draft_public_901",
+    reviewDraftRevision: 0,
+    reviewDraftDigest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     createdAt: new Date("2026-06-26T23:50:00.000Z"),
     ...overrides,
   };
@@ -80,6 +86,10 @@ function createAdoptionDbRow(
     knowledge_node_candidate_digest: null,
     knowledge_node_resolution_snapshot: null,
     knowledge_node_resolution_digest: null,
+    review_draft_public_id: "admin_ai_review_draft_public_901",
+    review_draft_revision: 0,
+    review_draft_digest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     created_at: new Date("2026-06-26T23:50:00.000Z"),
     updated_at: new Date("2026-06-26T23:50:00.000Z"),
     ...overrides,
@@ -90,6 +100,7 @@ function createSourceResultDbRow(
   overrides: Partial<AdminAiGenerationFormalAdoptionSourceResultDbRowFixture> = {},
 ): AdminAiGenerationFormalAdoptionSourceResultDbRowFixture {
   return {
+    id: 901,
     public_id: "admin_ai_generation_result_public_901",
     task_public_id: "admin_ai_generation_task_public_901",
     request_public_id: "admin_ai_generation_request_public_901",
@@ -115,6 +126,17 @@ function createSourceResultDbRow(
     evidence_status: "weak",
     citation_count: 1,
     ai_call_log_public_id: null,
+    current_review_draft_public_id: "admin_ai_review_draft_public_901",
+    current_review_draft_revision: 0,
+    current_review_draft_digest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    reviewed_draft_snapshot: {
+      questionType: "short_answer",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      stemRichText: "server-owned reviewed question",
+    },
     ...overrides,
   };
 }
@@ -156,11 +178,15 @@ type AdminAiGenerationFormalAdoptionDbRowFixture = {
   knowledge_node_candidate_digest: string | null;
   knowledge_node_resolution_snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
   knowledge_node_resolution_digest: string | null;
+  review_draft_public_id: string;
+  review_draft_revision: number;
+  review_draft_digest: string;
   created_at: Date;
   updated_at: Date;
 };
 
 type AdminAiGenerationFormalAdoptionSourceResultDbRowFixture = {
+  id: number;
   public_id: string;
   task_public_id: string;
   request_public_id: string;
@@ -178,9 +204,29 @@ type AdminAiGenerationFormalAdoptionSourceResultDbRowFixture = {
   evidence_status: string;
   citation_count: number;
   ai_call_log_public_id: string | null;
+  current_review_draft_public_id: string | null;
+  current_review_draft_revision: number | null;
+  current_review_draft_digest: string | null;
+  reviewed_draft_snapshot: unknown | null;
 };
 
 describe("admin AI generation formal adoption DB adapter", () => {
+  it("builds a redacted adoption audit bound to the exact review revision", () => {
+    const audit = createAdminAiGenerationFormalAdoptionAuditInsertValue(
+      createAdoptionInput(),
+    );
+
+    expect(audit).toMatchObject({
+      actor_public_id: "admin_content_public_901",
+      actor_role: "content_admin",
+      action_type: "admin_ai_generation_result.formal_adoption.approve",
+      target_public_id: "admin_ai_generation_result_public_901",
+    });
+    expect(audit.metadata_summary).toContain('"reviewDraftRevision":0');
+    expect(audit.metadata_summary).toContain('"reviewDraftDigest":"sha256:');
+    expect(audit.metadata_summary).not.toContain("formalReviewedDraft");
+  });
+
   it("maps immutable generated-knowledge snapshots and digests without exposing them in public DTOs", () => {
     const candidateSnapshot = {
       schemaVersion: 1 as const,
@@ -244,6 +290,10 @@ describe("admin AI generation formal adoption DB adapter", () => {
       target_domain: "platform_formal_content",
       review_status: "approved_for_formal_adoption",
       formal_target_write_status: "blocked_without_follow_up_task",
+      review_draft_public_id: "admin_ai_review_draft_public_901",
+      review_draft_revision: 0,
+      review_draft_digest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       formal_question_public_id: null,
       formal_paper_public_id: null,
       reviewer_public_id: "admin_content_public_901",

@@ -5,13 +5,13 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   AdminAiGenerationFormalAdoptionGateway,
   AdminAiGenerationFormalAdoptionRow,
+  AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
-import type { AdminAiGenerationFormalAdoptionSourceResult } from "../models/admin-ai-generation-formal-adoption";
 import { createAdminAiGenerationFormalAdoptionRepository } from "./admin-ai-generation-formal-adoption-repository";
 
 function createSourceResult(
-  overrides: Partial<AdminAiGenerationFormalAdoptionSourceResult> = {},
-): AdminAiGenerationFormalAdoptionSourceResult {
+  overrides: Partial<AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft> = {},
+): AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft {
   return {
     resultPublicId: "admin_ai_generation_result_public_177",
     taskPublicId: "admin_ai_generation_task_public_177",
@@ -33,6 +33,10 @@ function createSourceResult(
     evidenceStatus: "weak",
     citationCount: 1,
     aiCallLogPublicId: null,
+    currentReviewDraftPublicId: "admin_ai_review_draft_public_177",
+    currentReviewDraftRevision: 0,
+    currentReviewDraftDigest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     ...overrides,
   };
 }
@@ -114,13 +118,17 @@ function createAdoptionRow(
     knowledge_node_candidate_digest: null,
     knowledge_node_resolution_snapshot: null,
     knowledge_node_resolution_digest: null,
+    review_draft_public_id: "admin_ai_review_draft_public_177",
+    review_draft_revision: 0,
+    review_draft_digest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     created_at: new Date("2026-06-26T23:40:00.000Z"),
     ...overrides,
   };
 }
 
 function createGateway(options: {
-  sourceResult?: AdminAiGenerationFormalAdoptionSourceResult | null;
+  sourceResult?: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft | null;
   existingRow?: AdminAiGenerationFormalAdoptionRow | null;
   insertedRow?: AdminAiGenerationFormalAdoptionRow | null;
   updatedRow?: AdminAiGenerationFormalAdoptionRow | null;
@@ -228,6 +236,9 @@ function createBaseInput() {
     },
     resultPublicId: "admin_ai_generation_result_public_177",
     expectedContentDigest: "sha256:admin_ai_generation_result_177",
+    expectedReviewDraftRevision: 0,
+    expectedReviewDraftDigest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     targetType: "question" as const,
     reviewDecision: "approved" as const,
     reviewerConfirmed: true as const,
@@ -239,6 +250,23 @@ function createBaseInput() {
 }
 
 describe("admin AI generation formal adoption repository", () => {
+  it("rejects a stale browser command before adoption persistence", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult({
+        currentReviewDraftPublicId: "admin_ai_review_draft_public_newer",
+        currentReviewDraftRevision: 1,
+        currentReviewDraftDigest:
+          "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      }),
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption(createBaseInput()),
+    ).rejects.toThrow("review draft conflict");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
   it("persists an immutable candidate and exact scoped resolution before returning a resolved draft", async () => {
     const candidate = createGeneratedKnowledgeCandidate();
     const sourceResult = createSourceResult({
@@ -530,6 +558,9 @@ describe("admin AI generation formal adoption repository", () => {
     const resolvedDraft =
       await secondRepository.findTrustedReviewedDraftForAdoption({
         expectedContentDigest: sourceResult.contentDigest,
+        expectedReviewDraftRevision: 0,
+        expectedReviewDraftDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         resultPublicId: sourceResult.resultPublicId,
         targetType: "question",
       });

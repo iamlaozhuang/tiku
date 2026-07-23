@@ -17,6 +17,7 @@ import {
   aiScoringTask,
   aiScoringTaskStatusValues,
   adminAiGenerationFormalAdoption,
+  adminAiGenerationReviewDraft,
   knowledgeBase,
   knowledgeNode,
   knowledgeNodeResource,
@@ -1167,6 +1168,82 @@ describe("admin AI generated content result schema", () => {
         (databaseObjectName) => databaseObjectName.length <= 63,
       ),
     ).toBe(true);
+  });
+});
+
+describe("admin AI content review draft revision schema", () => {
+  const adminAiGenerationResult = aiRagSchema.adminAiGenerationResult;
+
+  it("defines append-only review revisions and legacy-safe current pointers", () => {
+    expect(getTableName(adminAiGenerationReviewDraft)).toBe(
+      "admin_ai_generation_review_draft",
+    );
+    expect(getColumnNames(adminAiGenerationReviewDraft)).toEqual(
+      expect.arrayContaining([
+        "public_id",
+        "admin_ai_generation_result_id",
+        "source_result_public_id",
+        "source_task_public_id",
+        "target_type",
+        "revision_number",
+        "revision_origin",
+        "predecessor_public_id",
+        "predecessor_digest",
+        "source_content_digest",
+        "draft_snapshot",
+        "draft_digest",
+        "editor_public_id",
+      ]),
+    );
+    expect(getIndexNames(adminAiGenerationReviewDraft)).toEqual(
+      expect.arrayContaining([
+        "udx_admin_ai_generation_review_draft_public_id",
+        "udx_admin_ai_generation_review_draft_result_revision",
+        "idx_admin_ai_generation_review_draft_source_result",
+      ]),
+    );
+    expect(getCheckNames(adminAiGenerationReviewDraft)).toEqual(
+      expect.arrayContaining([
+        "chk_admin_ai_generation_review_draft_identity",
+        "chk_admin_ai_generation_review_draft_predecessor",
+        "chk_admin_ai_generation_review_draft_origin",
+      ]),
+    );
+    expect(getColumnNames(adminAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "current_review_draft_public_id",
+        "current_review_draft_revision",
+        "current_review_draft_digest",
+      ]),
+    );
+    expect(getCheckNames(adminAiGenerationResult)).toContain(
+      "chk_admin_ai_generation_result_review_draft_coherence",
+    );
+    expect(getColumnNames(adminAiGenerationFormalAdoption)).toEqual(
+      expect.arrayContaining([
+        "review_draft_public_id",
+        "review_draft_revision",
+        "review_draft_digest",
+      ]),
+    );
+  });
+
+  it("keeps the migration additive, nullable and data-free", () => {
+    const migrationSql = readFileSync(
+      resolve(
+        process.cwd(),
+        "drizzle/20260722234500_p1_rc_07_content_ai_review_draft_revision.sql",
+      ),
+      "utf8",
+    );
+
+    expect(migrationSql).toContain(
+      'CREATE TABLE "admin_ai_generation_review_draft"',
+    );
+    expect(migrationSql.match(/ADD COLUMN/gu)).toHaveLength(6);
+    expect(migrationSql).not.toMatch(
+      /^\s*(?:UPDATE|DELETE|DROP|TRUNCATE|INSERT)\b|ALTER\s+TABLE[^;]*ALTER\s+COLUMN|SET\s+DEFAULT|SET\s+NOT\s+NULL/imu,
+    );
   });
 });
 

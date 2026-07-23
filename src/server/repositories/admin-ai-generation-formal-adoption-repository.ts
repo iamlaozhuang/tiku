@@ -8,6 +8,7 @@ import type {
   AdminAiGenerationFormalAdoptionResult,
   AdminAiGenerationFormalAdoptionReviewTraceabilityDto,
   AdminAiGenerationFormalAdoptionRow,
+  AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   AdminAiGenerationKnowledgeNodeCandidateSnapshot,
   AdminAiGenerationKnowledgeNodeResolutionSnapshot,
   CreateAdminAiGenerationFormalAdoptionInput,
@@ -63,6 +64,7 @@ export function createAdminAiGenerationFormalAdoptionRepository(
 
       assertSourceResultEligibleForPlatformFormalAdoption(sourceResult, input);
       assertExpectedContentDigest(sourceResult, input.expectedContentDigest);
+      assertExpectedReviewDraft(sourceResult, input);
 
       const knowledgeNodeBinding = await createKnowledgeNodeResolutionBinding(
         gateway,
@@ -151,7 +153,7 @@ export function createAdminAiGenerationFormalAdoptionRepository(
 
 function assertExpectedContentDigest(
   sourceResult: Pick<
-    AdminAiGenerationFormalAdoptionSourceResult,
+    AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
     "contentDigest"
   >,
   expectedContentDigest: string,
@@ -163,9 +165,28 @@ function assertExpectedContentDigest(
   }
 }
 
+function assertExpectedReviewDraft(
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
+  input: Pick<
+    CreateAdminAiGenerationFormalAdoptionInput,
+    "expectedReviewDraftRevision" | "expectedReviewDraftDigest"
+  >,
+): void {
+  if (
+    sourceResult.currentReviewDraftPublicId === null ||
+    sourceResult.currentReviewDraftRevision !==
+      input.expectedReviewDraftRevision ||
+    sourceResult.currentReviewDraftDigest !== input.expectedReviewDraftDigest
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption review draft conflict",
+    );
+  }
+}
+
 function assertExistingAdoptionMatchesCommand(
   existingRow: AdminAiGenerationFormalAdoptionRow,
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   input: CreateAdminAiGenerationFormalAdoptionInput,
   knowledgeNodeBinding: KnowledgeNodeResolutionBinding | null,
 ): void {
@@ -175,6 +196,17 @@ function assertExistingAdoptionMatchesCommand(
   ) {
     throw new Error(
       "admin AI generation formal adoption content digest conflict",
+    );
+  }
+
+  if (
+    existingRow.review_draft_public_id !==
+      sourceResult.currentReviewDraftPublicId ||
+    existingRow.review_draft_revision !== input.expectedReviewDraftRevision ||
+    existingRow.review_draft_digest !== input.expectedReviewDraftDigest
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption review draft conflict",
     );
   }
 
@@ -190,10 +222,11 @@ function assertExistingAdoptionMatchesCommand(
 }
 
 function assertTrustedReviewedDraftSource(
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   input: FindTrustedAdminAiGenerationFormalDraftInput,
 ): void {
   assertExpectedContentDigest(sourceResult, input.expectedContentDigest);
+  assertExpectedReviewDraft(sourceResult, input);
 
   if (
     sourceResult.workspace !== "content" ||
@@ -231,7 +264,7 @@ function assertConfirmedAdoptionInput(
 }
 
 function assertSourceResultEligibleForPlatformFormalAdoption(
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   input: CreateAdminAiGenerationFormalAdoptionInput,
 ): void {
   if (sourceResult.workspace === "organization") {
@@ -298,7 +331,7 @@ function assertSourceResultEvidenceAllowsAdoption(
 
 async function createKnowledgeNodeResolutionBinding(
   gateway: AdminAiGenerationFormalAdoptionGateway,
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   input: CreateAdminAiGenerationFormalAdoptionInput,
 ): Promise<KnowledgeNodeResolutionBinding | null> {
   const candidate = parseGeneratedKnowledgeCandidate(sourceResult);
@@ -348,7 +381,7 @@ async function createKnowledgeNodeResolutionBinding(
 }
 
 function parseGeneratedKnowledgeCandidate(
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
 ): ParsedGeneratedKnowledgeCandidate | null {
   if (!isRecord(sourceResult.reviewedDraft)) {
     return null;
@@ -589,9 +622,21 @@ function assertKnowledgeNodeBindingMatchesRow(
 }
 
 function resolveTrustedReviewedDraft(
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   adoptionRow: AdminAiGenerationFormalAdoptionRow,
 ): unknown {
+  if (
+    adoptionRow.review_draft_public_id !==
+      sourceResult.currentReviewDraftPublicId ||
+    adoptionRow.review_draft_revision !==
+      sourceResult.currentReviewDraftRevision ||
+    adoptionRow.review_draft_digest !== sourceResult.currentReviewDraftDigest
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption review draft conflict",
+    );
+  }
+
   const candidate = parseGeneratedKnowledgeCandidate(sourceResult);
 
   if (candidate === null) {
@@ -687,9 +732,22 @@ function createAdoptionLookupQuery(
 
 function createInsertAdoptionRecordInput(
   input: CreateAdminAiGenerationFormalAdoptionInput,
-  sourceResult: AdminAiGenerationFormalAdoptionSourceResult,
+  sourceResult: AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   knowledgeNodeBinding: KnowledgeNodeResolutionBinding | null,
 ): InsertAdminAiGenerationFormalAdoptionInput {
+  const reviewDraftPublicId = sourceResult.currentReviewDraftPublicId;
+  const reviewDraftRevision = sourceResult.currentReviewDraftRevision;
+  const reviewDraftDigest = sourceResult.currentReviewDraftDigest;
+  if (
+    reviewDraftPublicId === null ||
+    reviewDraftRevision === null ||
+    reviewDraftDigest === null
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption review draft conflict",
+    );
+  }
+
   return {
     adoptionPublicId: input.adoptionPublicId,
     sourceResultPublicId: sourceResult.resultPublicId,
@@ -707,6 +765,9 @@ function createInsertAdoptionRecordInput(
     formalQuestionPublicId: null,
     formalPaperPublicId: null,
     reviewerPublicId: input.actor.publicId,
+    reviewerRole: input.actor.roles.includes("super_admin")
+      ? "super_admin"
+      : "content_admin",
     reviewedAt: input.reviewedAt,
     contentDigest: sourceResult.contentDigest,
     contentPreviewMasked: sourceResult.contentPreviewMasked,
@@ -720,6 +781,9 @@ function createInsertAdoptionRecordInput(
       knowledgeNodeBinding?.resolutionSnapshot ?? null,
     knowledgeNodeResolutionDigest:
       knowledgeNodeBinding?.resolutionDigest ?? null,
+    reviewDraftPublicId,
+    reviewDraftRevision,
+    reviewDraftDigest,
     createdAt: input.reviewedAt,
   };
 }

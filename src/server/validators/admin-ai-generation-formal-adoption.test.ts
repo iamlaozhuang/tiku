@@ -12,6 +12,9 @@ function createInput() {
     resultPublicId: "admin_ai_generation_result_public_candidate",
     expectedContentDigest:
       "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    expectedReviewDraftRevision: 0,
+    expectedReviewDraftDigest:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     targetType: "question",
     reviewDecision: "approved",
     reviewerConfirmed: true,
@@ -31,6 +34,22 @@ function createInput() {
 }
 
 describe("admin AI generation formal adoption validator", () => {
+  it("requires the exact server review revision and digest binding", () => {
+    const input = createInput();
+    const { expectedReviewDraftRevision: _revision, ...withoutRevision } =
+      input;
+
+    expect(
+      normalizeAdminAiGenerationFormalAdoptionInput(withoutRevision),
+    ).toMatchObject({ success: false });
+    expect(
+      normalizeAdminAiGenerationFormalAdoptionInput({
+        ...input,
+        expectedReviewDraftDigest: "sha256:unsafe",
+      }),
+    ).toMatchObject({ success: false });
+  });
+
   it("preserves only exact label-to-public-id resolution commands", () => {
     expect(
       normalizeAdminAiGenerationFormalAdoptionInput(createInput()),

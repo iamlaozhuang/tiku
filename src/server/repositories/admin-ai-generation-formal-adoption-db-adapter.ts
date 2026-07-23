@@ -1,6 +1,8 @@
 import {
   adminAiGenerationFormalAdoption,
+  adminAiGenerationReviewDraft,
   adminAiGenerationResult,
+  auditLog,
   knowledgeBase,
   knowledgeNode,
 } from "@/db/schema";
@@ -10,6 +12,7 @@ import type {
   AdminAiGenerationFormalAdoptionGateway,
   AdminAiGenerationFormalAdoptionRepository,
   AdminAiGenerationFormalAdoptionRow,
+  AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft,
   AdminAiGenerationKnowledgeNodeCandidateSnapshot,
   AdminAiGenerationKnowledgeNodeResolutionSnapshot,
   FindAdminAiGenerationFormalAdoptionQuery,
@@ -22,7 +25,6 @@ import type {
 } from "../contracts/admin-ai-generation-local-contract";
 import type {
   AdminAiGenerationFormalAdoptionReviewStatus,
-  AdminAiGenerationFormalAdoptionSourceResult,
   AdminAiGenerationFormalAdoptionTargetDomain,
   AdminAiGenerationFormalAdoptionTargetType,
   AdminAiGenerationFormalTargetWriteStatus,
@@ -70,11 +72,15 @@ export type AdminAiGenerationFormalAdoptionDbRow = {
   knowledge_node_candidate_digest: string | null;
   knowledge_node_resolution_snapshot: AdminAiGenerationKnowledgeNodeResolutionSnapshot | null;
   knowledge_node_resolution_digest: string | null;
+  review_draft_public_id: string;
+  review_draft_revision: number;
+  review_draft_digest: string;
   created_at: Date;
   updated_at: Date;
 };
 
 export type AdminAiGenerationFormalAdoptionSourceResultDbRow = {
+  id: number;
   public_id: string;
   task_public_id: string;
   request_public_id: string;
@@ -92,6 +98,10 @@ export type AdminAiGenerationFormalAdoptionSourceResultDbRow = {
   evidence_status: string;
   citation_count: number;
   ai_call_log_public_id: string | null;
+  current_review_draft_public_id: string | null;
+  current_review_draft_revision: number | null;
+  current_review_draft_digest: string | null;
+  reviewed_draft_snapshot: unknown | null;
 };
 
 const adminAiGenerationFormalAdoptionSelection = {
@@ -133,11 +143,16 @@ const adminAiGenerationFormalAdoptionSelection = {
     adminAiGenerationFormalAdoption.knowledge_node_resolution_snapshot,
   knowledge_node_resolution_digest:
     adminAiGenerationFormalAdoption.knowledge_node_resolution_digest,
+  review_draft_public_id:
+    adminAiGenerationFormalAdoption.review_draft_public_id,
+  review_draft_revision: adminAiGenerationFormalAdoption.review_draft_revision,
+  review_draft_digest: adminAiGenerationFormalAdoption.review_draft_digest,
   created_at: adminAiGenerationFormalAdoption.created_at,
   updated_at: adminAiGenerationFormalAdoption.updated_at,
 };
 
 const adminAiGenerationFormalAdoptionSourceSelection = {
+  id: adminAiGenerationResult.id,
   public_id: adminAiGenerationResult.public_id,
   task_public_id: adminAiGenerationResult.task_public_id,
   request_public_id: adminAiGenerationResult.request_public_id,
@@ -156,6 +171,12 @@ const adminAiGenerationFormalAdoptionSourceSelection = {
   evidence_status: adminAiGenerationResult.evidence_status,
   citation_count: adminAiGenerationResult.citation_count,
   ai_call_log_public_id: adminAiGenerationResult.ai_call_log_public_id,
+  current_review_draft_public_id:
+    adminAiGenerationResult.current_review_draft_public_id,
+  current_review_draft_revision:
+    adminAiGenerationResult.current_review_draft_revision,
+  current_review_draft_digest:
+    adminAiGenerationResult.current_review_draft_digest,
 };
 
 const blockedFormalTargetWriteStatus = "blocked_without_follow_up_task";
@@ -191,8 +212,35 @@ export function createAdminAiGenerationFormalAdoptionInsertValue(
     knowledge_node_candidate_digest: input.knowledgeNodeCandidateDigest,
     knowledge_node_resolution_snapshot: input.knowledgeNodeResolutionSnapshot,
     knowledge_node_resolution_digest: input.knowledgeNodeResolutionDigest,
+    review_draft_public_id: input.reviewDraftPublicId,
+    review_draft_revision: input.reviewDraftRevision,
+    review_draft_digest: input.reviewDraftDigest,
     created_at: input.createdAt,
     updated_at: input.createdAt,
+  };
+}
+
+export function createAdminAiGenerationFormalAdoptionAuditInsertValue(
+  input: InsertAdminAiGenerationFormalAdoptionInput,
+) {
+  return {
+    public_id: `audit_${input.adoptionPublicId}`,
+    actor_public_id: input.reviewerPublicId,
+    actor_role: input.reviewerRole,
+    action_type:
+      input.reviewStatus === "approved_for_formal_adoption"
+        ? "admin_ai_generation_result.formal_adoption.approve"
+        : "admin_ai_generation_result.formal_adoption.reject",
+    target_resource_type: "admin_ai_generation_result",
+    target_public_id: input.sourceResultPublicId,
+    result_status: "success",
+    metadata_summary: JSON.stringify({
+      reviewDraftDigest: input.reviewDraftDigest,
+      reviewDraftRevision: input.reviewDraftRevision,
+      targetType: input.targetType,
+    }),
+    request_ip: null,
+    created_at: input.reviewedAt,
   };
 }
 
@@ -236,17 +284,80 @@ export function createPostgresAdminAiGenerationFormalAdoptionGateway(
           );
     },
     async findSourceResultForAdoption(resultPublicId) {
-      const [row] = await getDatabase()
+      const database = getDatabase();
+      const rows = await database
         .select(adminAiGenerationFormalAdoptionSourceSelection)
         .from(adminAiGenerationResult)
         .where(eq(adminAiGenerationResult.public_id, resultPublicId))
-        .limit(1);
+        .for("update")
+        .limit(2);
 
-      return row === undefined
-        ? null
-        : mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult(
-            normalizeAdminAiGenerationFormalAdoptionSourceResultDbRow(row),
+      if (rows.length === 0) {
+        return null;
+      }
+      if (rows.length !== 1) {
+        throw new Error("admin AI generation result identity is ambiguous");
+      }
+      const resultRow = rows[0];
+      let reviewedDraftSnapshot: unknown | null = null;
+      if (
+        resultRow.current_review_draft_public_id !== null &&
+        resultRow.current_review_draft_revision !== null &&
+        resultRow.current_review_draft_digest !== null
+      ) {
+        const draftRows = await database
+          .select({
+            publicId: adminAiGenerationReviewDraft.public_id,
+            revision: adminAiGenerationReviewDraft.revision_number,
+            digest: adminAiGenerationReviewDraft.draft_digest,
+            sourceResultPublicId:
+              adminAiGenerationReviewDraft.source_result_public_id,
+            sourceContentDigest:
+              adminAiGenerationReviewDraft.source_content_digest,
+            reviewedDraft: adminAiGenerationReviewDraft.draft_snapshot,
+          })
+          .from(adminAiGenerationReviewDraft)
+          .where(
+            and(
+              eq(
+                adminAiGenerationReviewDraft.admin_ai_generation_result_id,
+                resultRow.id,
+              ),
+              eq(
+                adminAiGenerationReviewDraft.public_id,
+                resultRow.current_review_draft_public_id,
+              ),
+            ),
+          )
+          .limit(2);
+        if (
+          draftRows.length !== 1 ||
+          draftRows[0].revision !== resultRow.current_review_draft_revision ||
+          draftRows[0].digest !== resultRow.current_review_draft_digest ||
+          draftRows[0].sourceResultPublicId !== resultRow.public_id ||
+          draftRows[0].sourceContentDigest !== resultRow.content_digest
+        ) {
+          throw new Error(
+            "admin AI generation current review draft identity conflict",
           );
+        }
+        reviewedDraftSnapshot = draftRows[0].reviewedDraft;
+      } else if (
+        resultRow.current_review_draft_public_id !== null ||
+        resultRow.current_review_draft_revision !== null ||
+        resultRow.current_review_draft_digest !== null
+      ) {
+        throw new Error(
+          "admin AI generation current review draft identity conflict",
+        );
+      }
+
+      return mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult(
+        normalizeAdminAiGenerationFormalAdoptionSourceResultDbRow({
+          ...resultRow,
+          reviewed_draft_snapshot: reviewedDraftSnapshot,
+        }),
+      );
     },
     async findKnowledgeNodesForResolution(input) {
       if (input.knowledgeNodePublicIds.length === 0) {
@@ -284,7 +395,8 @@ export function createPostgresAdminAiGenerationFormalAdoptionGateway(
       }));
     },
     async insertAdoptionRecord(input) {
-      const [row] = await getDatabase()
+      const database = getDatabase();
+      const [row] = await database
         .insert(adminAiGenerationFormalAdoption)
         .values(createAdminAiGenerationFormalAdoptionInsertValue(input))
         .onConflictDoNothing({
@@ -296,11 +408,15 @@ export function createPostgresAdminAiGenerationFormalAdoptionGateway(
         })
         .returning(adminAiGenerationFormalAdoptionSelection);
 
-      return row === undefined
-        ? null
-        : mapAdminAiGenerationFormalAdoptionDbRowToRow(
-            normalizeAdminAiGenerationFormalAdoptionDbRow(row),
-          );
+      if (row === undefined) {
+        return null;
+      }
+      await database
+        .insert(auditLog)
+        .values(createAdminAiGenerationFormalAdoptionAuditInsertValue(input));
+      return mapAdminAiGenerationFormalAdoptionDbRowToRow(
+        normalizeAdminAiGenerationFormalAdoptionDbRow(row),
+      );
     },
     async updateFormalDraftMetadata(input) {
       const [row] = await getDatabase()
@@ -371,6 +487,9 @@ export function mapAdminAiGenerationFormalAdoptionDbRowToRow(
     knowledge_node_candidate_digest: row.knowledge_node_candidate_digest,
     knowledge_node_resolution_snapshot: row.knowledge_node_resolution_snapshot,
     knowledge_node_resolution_digest: row.knowledge_node_resolution_digest,
+    review_draft_public_id: row.review_draft_public_id,
+    review_draft_revision: row.review_draft_revision,
+    review_draft_digest: row.review_draft_digest,
     created_at: row.created_at,
   };
 }
@@ -396,7 +515,7 @@ function toLevelList(value: unknown): number[] {
 
 export function mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult(
   row: AdminAiGenerationFormalAdoptionSourceResultDbRow,
-): AdminAiGenerationFormalAdoptionSourceResult {
+): AdminAiGenerationFormalAdoptionSourceResultWithReviewDraft {
   if (row.is_formal_adoption_blocked !== true) {
     throw new Error("unsafe admin AI generation formal adoption boundary");
   }
@@ -413,25 +532,16 @@ export function mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResul
     taskType: toAdminAiGenerationResultTaskType(row.task_type),
     resultStatus: toAdminAiGenerationResultStatus(row.result_status),
     isFormalAdoptionBlocked: true,
-    reviewedDraft: resolveTrustedReviewedDraft(row.content_redacted_snapshot),
+    reviewedDraft: row.reviewed_draft_snapshot,
     contentDigest: row.content_digest,
     contentPreviewMasked: row.content_preview_masked,
     evidenceStatus: toEvidenceStatus(row.evidence_status),
     citationCount: row.citation_count,
     aiCallLogPublicId: row.ai_call_log_public_id,
+    currentReviewDraftPublicId: row.current_review_draft_public_id,
+    currentReviewDraftRevision: row.current_review_draft_revision,
+    currentReviewDraftDigest: row.current_review_draft_digest,
   };
-}
-
-function resolveTrustedReviewedDraft(snapshot: unknown): unknown {
-  if (
-    typeof snapshot !== "object" ||
-    snapshot === null ||
-    Array.isArray(snapshot)
-  ) {
-    return null;
-  }
-
-  return (snapshot as Record<string, unknown>).formalReviewedDraft ?? null;
 }
 
 function createAdminAiGenerationFormalAdoptionLookupCondition(

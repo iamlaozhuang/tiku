@@ -178,6 +178,9 @@ describe("admin AI generation formal adoption service", () => {
       },
       resultPublicId: "admin_ai_generation_result_content_question_177",
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       targetType: "question",
       reviewDecision: "rejected",
       reviewerConfirmed: true,
@@ -198,6 +201,9 @@ describe("admin AI generation formal adoption service", () => {
         },
         resultPublicId: "admin_ai_generation_result_content_question_177",
         expectedContentDigest: "sha256:admin_ai_generation_result_177",
+        expectedReviewDraftRevision: 0,
+        expectedReviewDraftDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         targetType: "question",
         reviewDecision: "rejected",
         reviewerConfirmed: true,
@@ -224,6 +230,9 @@ describe("admin AI generation formal adoption service", () => {
       },
       resultPublicId: "admin_ai_generation_result_content_question_177",
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       targetType: "question",
       reviewDecision: "rejected",
       reviewerConfirmed: false,
@@ -272,6 +281,9 @@ describe("admin AI generation formal adoption service", () => {
       reviewDecision: "approved",
       reviewerConfirmed: true,
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       reviewedDraft: tamperedBrowserDraft,
       reviewedAt: "2026-06-26T20:00:00.000Z",
     });
@@ -280,6 +292,9 @@ describe("admin AI generation formal adoption service", () => {
       adoptionRepository.findTrustedReviewedDraftForAdoption,
     ).toHaveBeenCalledWith({
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       resultPublicId: "admin_ai_generation_result_content_question_177",
       targetType: "question",
     });
@@ -311,6 +326,9 @@ describe("admin AI generation formal adoption service", () => {
       reviewDecision: "approved",
       reviewerConfirmed: true,
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       reviewedAt: "2026-06-26T20:01:00.000Z",
     });
 
@@ -340,6 +358,9 @@ describe("admin AI generation formal adoption service", () => {
       },
       resultPublicId: "admin_ai_generation_result_content_question_177",
       expectedContentDigest: "sha256:admin_ai_generation_result_177",
+      expectedReviewDraftRevision: 0,
+      expectedReviewDraftDigest:
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       targetType: "question",
       reviewDecision: "approved",
       reviewerConfirmed: true,
