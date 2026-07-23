@@ -12,6 +12,7 @@ import type {
   MockExamRepository,
   MockExamRow,
 } from "../repositories/mock-exam-repository";
+import { ActiveAnswerSessionClaimConflictError } from "../repositories/practice-repository";
 
 const now = new Date("2026-05-19T08:00:00.000Z");
 const serverDeadlineAt = new Date("2026-05-19T10:00:00.000Z");
@@ -407,6 +408,134 @@ describe("mock exam service", () => {
           questionCount: 2,
         },
       },
+    });
+  });
+
+  it("returns authoritative existing progress when the repository claim loses a concurrent start", async () => {
+    const service = createMockExamService(
+      createRepository({
+        async createMockExam() {
+          return createMockExam({
+            public_id: "mock_exam_public_concurrent_owner",
+            answered_count: 1,
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_concurrent_owner",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: "2026-05-19T07:59:00.000Z",
+              },
+              answer_revision: 2,
+              client_operation_id: "answer_operation_public_concurrent_owner",
+              client_saved_at: now,
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: { publicId: "mock_exam_public_concurrent_owner" },
+        answerRecords: [
+          {
+            publicId: "answer_record_public_concurrent_owner",
+            answerRevision: 2,
+          },
+        ],
+      },
+    });
+  });
+
+  it("converges independent service callers without duplicating the authoritative deadline claim", async () => {
+    let authoritativeMockExam: MockExamRow | null = null;
+    let claimCalls = 0;
+    let deadlineClaims = 0;
+    const claim = async (
+      input: Parameters<MockExamRepository["createMockExam"]>[0],
+    ) => {
+      claimCalls += 1;
+      if (authoritativeMockExam === null) {
+        deadlineClaims += input.deadlineTaskPublicId === null ? 0 : 1;
+        authoritativeMockExam = createMockExam({
+          public_id: input.publicId,
+          paper_snapshot: input.paperSnapshot,
+          server_deadline_at: input.serverDeadlineAt,
+        });
+      }
+      return authoritativeMockExam;
+    };
+    const firstService = createMockExamService(
+      createRepository({ createMockExam: claim }),
+      clock,
+      createIdFactory(),
+    );
+    const secondService = createMockExamService(
+      createRepository({ createMockExam: claim }),
+      clock,
+      createIdFactory(),
+    );
+
+    const [first, second] = await Promise.all([
+      firstService.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+      secondService.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ]);
+
+    expect(claimCalls).toBe(2);
+    expect(deadlineClaims).toBe(1);
+    expect(first).toMatchObject({
+      code: 0,
+      data: { mockExam: { publicId: "mock_exam_public_1" } },
+    });
+    expect(second).toMatchObject({
+      code: 0,
+      data: { mockExam: { publicId: "mock_exam_public_1" } },
+    });
+  });
+
+  it("fails closed when the authoritative mock exam claim is inconsistent", async () => {
+    const service = createMockExamService(
+      createRepository({
+        async createMockExam() {
+          throw new ActiveAnswerSessionClaimConflictError();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 409319,
+      message: "Active mock exam claim conflicts with this request.",
+      data: null,
     });
   });
 
@@ -1153,16 +1282,11 @@ describe("mock exam service", () => {
         },
       },
     });
-    expect(terminatedInputs).toEqual([
-      {
-        publicId: "mock_exam_public_empty_snapshot",
-        terminatedAt: now,
-        terminationReason: "stale_empty_snapshot",
-      },
-    ]);
+    expect(terminatedInputs).toEqual([]);
     expect(createdInputs).toEqual([
       expect.objectContaining({
         paperSnapshot: createPaperSnapshot(),
+        replaceActivePublicId: "mock_exam_public_empty_snapshot",
       }),
     ]);
   });

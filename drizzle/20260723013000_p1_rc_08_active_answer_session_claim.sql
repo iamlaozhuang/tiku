@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "udx_mock_exam_user_id_paper_id_active" ON "mock_exam" USING btree ("user_id","paper_id") WHERE "mock_exam"."exam_status" = 'in_progress';--> statement-breakpoint
+CREATE UNIQUE INDEX "udx_practice_user_id_paper_id_active" ON "practice" USING btree ("user_id","paper_id") WHERE "practice"."practice_status" = 'in_progress';

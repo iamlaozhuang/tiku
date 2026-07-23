@@ -89,6 +89,7 @@ export type CreateMockExamInput = {
   serverDeadlineAt: Date | null;
   durationMinute: number | null;
   authorizationLineage: AnswerSessionAuthorizationLineage;
+  replaceActivePublicId: string | null;
 };
 
 export type SaveMockExamAnswerInput = {

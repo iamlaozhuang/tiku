@@ -23,6 +23,13 @@ export class AuthorizationStartConflictError extends Error {
   }
 }
 
+export class ActiveAnswerSessionClaimConflictError extends Error {
+  constructor() {
+    super("Active answer session claim conflicts with authoritative state.");
+    this.name = "ActiveAnswerSessionClaimConflictError";
+  }
+}
+
 export type PracticeAuthorizationScopeRow = {
   profession: Profession;
   level: number;
@@ -109,6 +116,7 @@ export type CreatePracticeInput = {
   startedAt: Date;
   expiresAt: Date;
   authorizationLineage: AnswerSessionAuthorizationLineage;
+  replaceActivePublicId: string | null;
 };
 
 export type CreatePracticeAnswerInput = {

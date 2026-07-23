@@ -1,64 +1,32 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22",
-  "objective": "Close F-0008 by persisting the exact server-validated personal_auth or org_auth context that creates each new practice and mock_exam, revalidating that same context without silent source switching, and narrowing org_auth cancellation and organization disable termination to sessions actually bound to the affected organization authorization while preserving legacy all-null sessions under explicit union-authorization compatibility semantics.",
-  "findingIds": ["F-0008"],
+  "taskId": "p1-remediation-rc-08-active-answer-session-claim-2026-07-23",
+  "objective": "Enforce one active practice and one active mock_exam per user and paper through database partial uniqueness plus one transactionally serialized create-or-return-existing claim, preserving exact authorization lineage and returning the authoritative existing progress under concurrent starts.",
+  "status": "validated_candidate_ready_for_conditional_closeout",
+  "branch": "fix/active-answer-session-claim",
+  "baseSha": "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
+  "findingIds": ["F-0026"],
   "candidateRootCauseCluster": "P1-RC-08",
-  "baseSha": "3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3",
-  "branch": "fix/answer-session-authorization-lineage",
-  "riskCategory": "schema_migration_source_database_application_logic_and_permission_semantics_contraction",
+  "riskCategory": "schema_migration_source_and_database_application_logic",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
     "src/db/schema/student-experience.ts",
     "src/db/schema/student-experience.test.ts",
-    "drizzle/20260723003000_p1_rc_08_answer_session_authorization_lineage.sql",
-    "drizzle/meta/20260723003000_snapshot.json",
+    "drizzle/20260723013000_p1_rc_08_active_answer_session_claim.sql",
+    "drizzle/meta/20260723013000_snapshot.json",
     "drizzle/meta/_journal.json",
     "src/server/repositories/practice-repository.ts",
     "src/server/repositories/mock-exam-repository.ts",
     "src/server/repositories/student-flow-runtime-repository.ts",
-    "src/server/services/student-flow-runtime.ts",
     "src/server/services/practice-service.ts",
     "src/server/services/practice-service.test.ts",
     "src/server/services/mock-exam-service.ts",
     "src/server/services/mock-exam-service.test.ts",
-    "src/server/validators/practice.ts",
-    "src/server/validators/practice.test.ts",
-    "src/server/validators/mock-exam.ts",
-    "src/server/validators/mock-exam.test.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-    "src/features/student/home/StudentHomePage.tsx",
-    "src/features/student/practice/StudentPracticePage.tsx",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "src/app/(student)/practice/page.tsx",
-    "src/app/(student)/mock-exam/page.tsx",
-    "src/server/mappers/practice-mapper.test.ts",
-    "src/server/mappers/mock-exam-mapper.test.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "src/server/models/student-experience.test.ts",
     "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
-    "tests/unit/student-home-ui.test.ts",
-    "tests/unit/student-practice-ui.test.ts",
-    "tests/unit/student-mock-exam-report-ui.test.ts",
-    "tests/unit/p1-answer-session-authorization-lineage.test.ts"
-  ],
-  "blockedFiles": [
-    "AGENTS.md",
-    "docs/04-agent-system/sop/**",
-    "scripts/**",
-    ".githooks/**",
-    "any schema or migration beyond the single additive legacy-nullable lineage migration",
-    "migration apply, real database or real data access",
-    "role, entitlement, quota amount, default capability or authorization scope expansion",
-    "dependency or lockfile change",
-    "Provider or external service call/configuration",
-    "secret/env, deployment, PR, force-push, non-canonical remote",
-    "Minimal Safety Kernel, guard/smoke, historical evidence/audit, Subagent",
-    "any finding outside F-0008"
+    "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+    "tests/unit/p1-active-answer-session-claim.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
@@ -66,8 +34,8 @@
     "docs/04-agent-system/state/task-safety.json",
     "src/db/schema/student-experience.ts",
     "src/db/schema/student-experience.test.ts",
-    "drizzle/20260723003000_p1_rc_08_answer_session_authorization_lineage.sql",
-    "drizzle/meta/20260723003000_snapshot.json",
+    "drizzle/20260723013000_p1_rc_08_active_answer_session_claim.sql",
+    "drizzle/meta/20260723013000_snapshot.json",
     "drizzle/meta/_journal.json",
     "src/server/repositories/practice-repository.ts",
     "src/server/repositories/mock-exam-repository.ts",
@@ -76,65 +44,58 @@
     "src/server/services/practice-service.test.ts",
     "src/server/services/mock-exam-service.ts",
     "src/server/services/mock-exam-service.test.ts",
-    "src/server/validators/practice.ts",
-    "src/server/validators/practice.test.ts",
-    "src/server/validators/mock-exam.ts",
-    "src/server/validators/mock-exam.test.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "src/features/student/home/StudentHomePage.tsx",
-    "src/features/student/practice/StudentPracticePage.tsx",
-    "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-    "src/app/(student)/practice/page.tsx",
-    "src/app/(student)/mock-exam/page.tsx",
-    "tests/unit/p1-answer-session-authorization-lineage.test.ts"
+    "tests/unit/p1-active-answer-session-claim.test.ts"
   ],
   "contingencyFiles": [
-    "src/server/services/student-flow-runtime.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-    "src/server/mappers/practice-mapper.test.ts",
-    "src/server/mappers/mock-exam-mapper.test.ts",
-    "src/server/services/exam-report-service.test.ts",
-    "src/server/models/student-experience.test.ts",
     "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-    "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
-    "tests/unit/student-home-ui.test.ts",
-    "tests/unit/student-practice-ui.test.ts",
-    "tests/unit/student-mock-exam-report-ui.test.ts"
+    "tests/unit/p1-answer-session-authorization-lineage.test.ts"
+  ],
+  "blockedFiles": [
+    "AGENTS.md",
+    "docs/04-agent-system/sop/**",
+    "scripts/**",
+    ".husky/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "all dependency and configuration files outside allowedFiles",
+    "all authorization, quota, Provider, secret/env, deployment, PR and force-push surfaces outside allowedFiles",
+    "all historical evidence/audit/task-plan files"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "selected authorization context on StudentHomePage -> practice/mock_exam URL and start command -> validator -> practice/mock service exact effective context selection -> repository transaction and legacy-nullable session lineage -> exact-lineage revalidation -> org_auth cancel/organization disable scoped termination -> DTO/UI and regression tests",
-    "coreFileCount": 26,
-    "contingencyFileCount": 11,
+    "authoritativeChain": "practice/mock_exam start route -> start validator -> service paper and exact authorization selection -> repository transaction -> authorization lineage lock -> deterministic user/paper session-start advisory lock -> active-row recheck -> create-or-return-existing -> partial unique index -> authoritative progress response",
+    "coreFileCount": 16,
+    "contingencyFileCount": 2,
     "directCallersMocksFixturesReviewed": true,
     "validationReferencedTestsPreallowed": true,
-    "bundleDisposition": "F-0008 only; F-0013 remains runtime_hold and F-0026/F-0027 retain separate transaction invariants",
+    "bundleDisposition": "F-0013 remains runtime_hold; F-0026 is a separate confirmed root cause; F-0027 remains separate because answer mutation/scoring atomicity has a different command boundary and validation matrix",
+    "currentMasterEvidence": "the legacy in-process practice promise map cannot protect multiple processes; mock_exam has no equivalent guard; both repository create paths still insert after an out-of-transaction active lookup; neither table has an active user-paper partial unique index",
     "schemaMigrationRequired": true,
-    "permissionSemantics": "strict contraction and source fidelity; no entitlement expansion"
+    "permissionSemantics": "unchanged; the task preserves F-0008 exact authorization lineage and never substitutes authorization sources"
   },
-  "authorizationLineageContract": {
-    "newSession": "server persists exact authorizationSource, authorizationPublicId, organizationPublicId and quota owner snapshot selected from the current user's effective contexts; dual-context requests cannot rely on an ambiguous union",
-    "revalidation": "lineaged sessions require the same exact authorization context to remain effective; another source covering the same profession/level never silently replaces it",
-    "orgAuthCancellation": "terminate only active sessions whose source is org_auth and whose exact authorizationPublicId matches the cancelled org_auth",
-    "organizationDisable": "terminate only active org_auth sessions whose captured organizationPublicId is in the disabled organization set",
-    "employeeDisable": "account disable continues to terminate every active session for that disabled user with account_disabled because no authorization source remains usable",
-    "legacyCompatibility": "pre-migration all-null sessions remain legacy union-authorized and are not guessed as org_auth during bulk cancellation; their next access reuses the existing effective-union check and terminates only when no effective covering authorization remains",
-    "contextChange": "a lineaged active session cannot be silently resumed under a different requested authorization; mismatch fails closed without rewriting lineage",
-    "transactionality": "lineage is inserted atomically with the session and database checks require either all lineage fields null or a coherent complete snapshot"
+  "activeSessionClaimContract": {
+    "databaseInvariant": "at most one practice row with practice_status=in_progress and at most one mock_exam row with exam_status=in_progress for the same user_id and paper_id",
+    "transaction": "after the existing organization authorization serialization boundary, each start transaction acquires one deterministic mode+user+paper advisory lock, rechecks all active rows under the lock, validates exact authorization and published paper facts, and either inserts once or returns the single authoritative existing row",
+    "corruption": "more than one pre-existing active row or an identity/authorization conflict fails closed; no arbitrary first-row selection or silent repair",
+    "concurrentReplay": "all concurrent callers converge on one publicId; the loser does not create a deadline task or second session and receives existing answer progress instead of an empty synthetic response",
+    "authorization": "an existing lineaged session may be resumed only under its exact authorization source/publicId; legacy all-null behavior remains compatible and no lineage is rewritten",
+    "snapshot": "a stale or incompatible existing snapshot is handled by the existing explicit expire/terminate-and-restart rules under the same claim boundary, never by creating a second active row",
+    "migration": "only two additive partial unique indexes and coherent Drizzle snapshot/journal metadata; no backfill, data mutation, destructive DDL or migration apply"
   },
   "acceptance": [
-    "new practice and mock_exam rows persist one coherent server-owned authorization lineage snapshot atomically",
-    "personal_auth-backed sessions survive unrelated org_auth cancellation and organization disable",
-    "org_auth-backed sessions terminate on exact org_auth cancellation or captured organization disable even when personal_auth also covers the same scope; the user may start a new personal-auth session but the system never switches the active session silently",
-    "personal_auth expiry and org_auth expiry/cancel cause exact-lineage revalidation to fail closed without adopting another source",
-    "legacy all-null sessions are not guessed or backfilled and retain explicit union-authorization compatibility behavior",
-    "cross-subject sessions are governed by source identity rather than coarse profession/level guesses",
-    "all termination paths write explicit stable reasons and no unauthorized client-provided lineage is trusted",
-    "migration source is additive and nullable with no backfill, UPDATE, DELETE, destructive DDL, apply or real database access",
-    "no role, entitlement, quota amount, capability, Provider, dependency, mechanism or external boundary changes"
+    "two concurrent practice starts across independent service instances converge on one active practice and one publicId",
+    "two concurrent mock_exam starts converge on one active mock_exam and exactly one deadline task",
+    "database partial unique indexes independently reject a second active row while allowing historical completed, expired or terminated rows",
+    "same user with different papers and different users with the same paper do not contend semantically",
+    "same-scope requests with different explicit authorization lineage fail closed rather than switching or rewriting the active session",
+    "pre-existing duplicate active rows fail closed without choosing one or mutating data",
+    "existing authoritative answer progress is returned for a concurrent replay and is not replaced with an empty response",
+    "F-0008 exact-lineage creation and cancellation regressions remain GREEN",
+    "migration source is additive only and is not applied; no real database proof is claimed",
+    "no permission, entitlement, quota, Provider, dependency, mechanism or external boundary changes"
   ],
   "validationCommands": [
     {
-      "name": "answer-session-authorization-lineage-focused",
+      "name": "active-answer-session-claim-focused",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -143,44 +104,34 @@
         "vitest",
         "run",
         "src/db/schema/student-experience.test.ts",
-        "src/server/validators/practice.test.ts",
-        "src/server/validators/mock-exam.test.ts",
         "src/server/services/practice-service.test.ts",
         "src/server/services/mock-exam-service.test.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-        "src/server/mappers/practice-mapper.test.ts",
-        "src/server/mappers/mock-exam-mapper.test.ts",
-        "src/server/services/exam-report-service.test.ts",
-        "src/server/models/student-experience.test.ts",
         "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts",
-        "tests/unit/student-home-ui.test.ts",
-        "tests/unit/student-practice-ui.test.ts",
-        "tests/unit/student-mock-exam-report-ui.test.ts",
         "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+        "tests/unit/p1-active-answer-session-claim.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "answer-session-authorization-lineage-lint",
+      "name": "active-answer-session-claim-lint",
       "kind": "lint",
       "executable": "npm.cmd",
       "arguments": ["run", "lint"]
     },
     {
-      "name": "answer-session-authorization-lineage-typecheck",
+      "name": "active-answer-session-claim-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@11.9.0", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "answer-session-authorization-lineage-build",
+      "name": "active-answer-session-claim-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@11.9.0", "run", "build"]
     },
     {
-      "name": "answer-session-authorization-lineage-format",
+      "name": "active-answer-session-claim-format",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -191,42 +142,28 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/app/**/page.tsx",
-        "src/db/schema/student-experience.test.ts",
         "src/db/schema/student-experience.ts",
-        "src/features/student/home/StudentHomePage.tsx",
-        "src/features/student/mock-exam/StudentMockExamReportPage.tsx",
-        "src/features/student/practice/StudentPracticePage.tsx",
-        "src/server/mappers/mock-exam-mapper.test.ts",
-        "src/server/mappers/practice-mapper.test.ts",
-        "src/server/models/student-experience.test.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-        "src/server/repositories/mock-exam-repository.ts",
+        "src/db/schema/student-experience.test.ts",
         "src/server/repositories/practice-repository.ts",
+        "src/server/repositories/mock-exam-repository.ts",
         "src/server/repositories/student-flow-runtime-repository.ts",
-        "src/server/services/mock-exam-service.test.ts",
-        "src/server/services/mock-exam-service.ts",
-        "src/server/services/practice-service.test.ts",
         "src/server/services/practice-service.ts",
-        "src/server/validators/mock-exam.test.ts",
-        "src/server/validators/mock-exam.ts",
-        "src/server/validators/practice.test.ts",
-        "src/server/validators/practice.ts",
-        "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+        "src/server/services/practice-service.test.ts",
+        "src/server/services/mock-exam-service.ts",
+        "src/server/services/mock-exam-service.test.ts",
         "tests/unit/phase-7-student-flow-runtime-smoke.test.ts",
-        "tests/unit/student-home-ui.test.ts",
-        "tests/unit/student-mock-exam-report-ui.test.ts",
-        "tests/unit/student-practice-ui.test.ts"
+        "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+        "tests/unit/p1-active-answer-session-claim.test.ts"
       ]
     },
     {
-      "name": "answer-session-authorization-lineage-diff-check",
+      "name": "active-answer-session-claim-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
     },
     {
-      "name": "answer-session-authorization-lineage-state-parse",
+      "name": "active-answer-session-claim-state-parse",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -234,14 +171,14 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+        "tests/unit/p1-active-answer-session-claim.test.ts",
         "-t",
-        "strictly parses state and validates the frozen task contract",
+        "strictly parses the F-0026 task contract and WIP state",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "answer-session-authorization-lineage-schema-source",
+      "name": "active-answer-session-claim-schema-source",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -249,31 +186,17 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-answer-session-authorization-lineage.test.ts",
+        "tests/unit/p1-active-answer-session-claim.test.ts",
         "-t",
-        "allows only the exact additive lineage migration and coherent Drizzle metadata",
+        "allows only the two additive active-session partial unique indexes",
         "--maxWorkers=1"
       ]
     }
   ],
-  "validationCommandMaterializationAmendment": {
-    "status": "approved_validation_contract_materialization_only",
-    "approvalId": "guardian-f0008-validation-command-materialization-amendment-2026-07-23",
-    "approvalFingerprint": "f0008-validation-command-materialization-amendment-aa3afad2-2026-07-23",
-    "invalidatedOneShotApprovalId": "user-f0008-manual-hook-equivalent-one-shot-2026-07-23",
-    "startingCandidateTree": "aa3afad242fe24ad8baa2b933e2723dd8538a64e",
-    "startingStagedDiffHash": "0edf2a7902377e86950ca587fd9c0f2981d14150",
-    "allowedFiles": [
-      "docs/04-agent-system/state/task-safety.json",
-      "tests/unit/p1-answer-session-authorization-lineage.test.ts"
-    ],
-    "nextRequiredAction": "freeze_new_candidate_and_request_fresh_manual_hook_equivalent_tree_binding",
-    "conditionalCloseout": false
-  },
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0008-answer-session-authorization-lineage-2026-07-22",
-    "permission": "guardian-f0008-answer-session-authorization-lineage-2026-07-22",
+    "database": "guardian-f0026-active-answer-session-claim-2026-07-23",
+    "permission": null,
     "deployment": null,
     "secretEnv": null
   },
@@ -283,14 +206,14 @@
   ],
   "pendingApproval": {
     "status": "approved_before_product_RED",
-    "proposedApprovalId": "guardian-f0008-answer-session-authorization-lineage-2026-07-22",
-    "approvalFingerprint": "d6a7a80e5556b4e0f557f46f61b40fa5e066bf2ae108c4cdd2aec9694995c1c8",
-    "riskCategory": "schema_migration_source_database_application_logic_and_permission_semantics_contraction",
-    "baseSha": "3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3",
+    "proposedApprovalId": "guardian-f0026-active-answer-session-claim-2026-07-23",
+    "approvalFingerprint": "3776342f7ccfb92dc14d9ceb79313acaf0aeec7e3ee33f63163aaccf5e4c1a4f",
+    "riskCategory": "schema_migration_source_and_database_application_logic",
+    "baseSha": "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
     "requestedOperations": [
       "additive schema and migration source without apply",
       "offline Drizzle generation",
-      "permission semantics contraction and database application logic",
+      "database application transaction and concurrency logic",
       "TDD implementation and validation",
       "one reviewable commit",
       "ff-only merge",
@@ -302,60 +225,74 @@
   },
   "conditionalCloseout": true,
   "validationEvidence": {
-    "tddRed": "pass_6_expected_failures_across_3_files_25_tests_before_implementation",
-    "focused": "pass_16_files_225_tests",
-    "changedUiFocused": "pass_2_files_74_tests_with_exact_source_identity_payload_assertions",
-    "lint": "pass_all_changed_typescript_and_tsx",
-    "typecheck": "pass",
-    "build": "pass_on_final_product_source_with_preexisting_NFT_warning_only",
-    "formatAndDiff": "pass",
-    "schemaSource": "pass_10_additive_columns_4_indexes_4_checks_no_data_or_destructive_sql",
-    "stateParse": "pass",
-    "runtimeDatabaseProof": "not_claimed_static_and_synthetic_only"
+    "tddRed": "5 expected failures and 73 passes before implementation",
+    "focused": "6 files and 90 tests passed",
+    "lint": "exit 0 with 3 pre-existing warnings outside the changed product files",
+    "typecheck": "tsc --noEmit exit 0",
+    "build": "Next.js production build exit 0 with the existing NFT tracing warning",
+    "format": "exact Prettier check exit 0",
+    "diff": "git diff --check exit 0",
+    "schemaSource": "exact two-statement additive partial-unique-index migration, coherent snapshot and monotonic journal",
+    "databaseRuntime": "not executed; proof is static and synthetic only"
   },
   "adversarialReview": {
-    "status": "pass",
-    "conclusion": "exact_source_revalidation_no_alternate_source_substitution_shared_creation_cancel_disable_serialization_legacy_all_null_excluded_from_bulk_org_termination_no_entitlement_or_quota_expansion",
-    "changedFilesWithinAllowedEnvelope": true,
-    "clientOwnedServerFactsRejected": "organization_and_quota_owner_never_accepted_from_client"
-  },
-  "closeoutProjection": {
-    "current": "validated_reviewed_conditional_closeout_ready",
-    "triggers": "unchanged_base_origin_envelope_and_tree_plus_kernel_commit_ff_only_canonical_push_sync_cleanup",
-    "successProjection": "F0008_closed_then_RC08_residual_JIT",
-    "terminalEvidence": "terminal_only_after_actual_push_sync_and_cleanup"
+    "status": "GREEN",
+    "conclusions": [
+      "authorization serialization lock is acquired before the namespaced mode-user-paper claim lock",
+      "claim transactions re-read every active row and reject duplicate or incompatible authoritative state",
+      "practice and mock_exam are separated in the lock identity and partial unique indexes",
+      "exact F-0008 lineage is preserved while coherent legacy all-null lineage remains read-compatible",
+      "stale snapshot replacement, mock deadline cancellation and fresh creation share one claim transaction",
+      "repository replay returns authoritative answer progress and never synthesizes an empty concurrent response",
+      "migration contains no data mutation, destructive DDL, backfill or apply"
+    ],
+    "residual": "migration apply and real cross-process PostgreSQL concurrency proof remain outside this task"
   },
   "executionMetrics": {
     "mandatoryFreshApprovals": 1,
     "preventableScopeMissApprovals": 0,
     "candidateReapprovals": 0,
     "approvalWaitTurns": 1,
-    "productValueTime": "not_reliably_reconstructable_after_context_compaction",
-    "mechanismOverhead": "focused_validation_review_and_closeout_recorded_without_guard_or_smoke_changes",
+    "productValueTime": "includes JIT root-cause review, TDD, implementation and adversarial correction; exact wall-clock not reconstructed",
+    "mechanismOverhead": "includes three-file contract materialization, offline generation and validation; exact wall-clock not reconstructed",
     "guardSmokeChanges": 0
   },
+  "candidateFreezeAdjustment": {
+    "count": 1,
+    "cause": "mandatory lint-staged normalized only the generated Drizzle snapshot before Kernel token validation",
+    "scope": "drizzle/meta/20260723013000_snapshot.json formatting only; product code, schema source and migration SQL unchanged",
+    "disposition": "old tree token discarded; complete validation and adversarial review rerun before binding a new final tree",
+    "manualCandidateReapproval": false
+  },
+  "conditionalCloseoutProjection": {
+    "currentState": "validated_uncommitted_candidate",
+    "trigger": "unchanged final index tree plus one fresh database token bound to this approvalId, taskId and candidateTree; pre-commit Kernel/full GREEN",
+    "successProjection": "one commit, ff-only master, one canonical origin/master ordinary push, sync verification and short-branch cleanup",
+    "notYetFacts": ["commit", "merge", "push", "remote sync", "branch cleanup"]
+  },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-residual-static-disposition-2026-07-22",
-    "findingIds": ["F-0154", "F-0158"],
-    "commit": "3c55bcf0b5d0164a2b2bb5543bdce448f75c49a3",
+    "taskId": "p1-remediation-rc-08-answer-session-authorization-lineage-2026-07-22",
+    "findingIds": ["F-0008"],
+    "commit": "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "findingStatus": "runtime_hold_static_coverage_verified",
+    "findingStatus": "closed_static_without_migration_apply_or_runtime_database_proof",
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true
   },
+  "residualDisposition": {
+    "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
+    "F-0026": "separate_current_WIP_cross_process_active_session_claim",
+    "F-0027": "separate_mock_save_submit_scoring_partially_covered_by_P0_but_practice_answer_and_legacy_scoring_transaction_residual_remain"
+  },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentFindingId": "F-0008",
-    "nextReviewHints": [
-      "F-0013_runtime_hold",
-      "F-0026_separate",
-      "F-0027_separate"
-    ]
+    "currentFindingId": "F-0026",
+    "nextReviewHints": ["F-0027_separate_after_F0026"]
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0008-answer-session-authorization-lineage-2026-07-22"
+    "approvalId": "guardian-f0026-active-answer-session-claim-2026-07-23"
   }
 }

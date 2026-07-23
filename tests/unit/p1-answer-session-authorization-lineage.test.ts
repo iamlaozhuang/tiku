@@ -159,6 +159,29 @@ describe("F-0008 answer session authorization lineage", () => {
       "docs/04-agent-system/state/task-queue.yaml",
     );
 
+    if (taskSafety.taskId !== TASK_ID) {
+      expect(projectState).toMatchObject({
+        p1RemediationSerialProgram: {
+          taskStatusById: { [TASK_ID]: "closed" },
+        },
+      });
+      expect(taskQueue).toMatchObject({
+        p1RemediationSerialProgram: {
+          taskStatusById: { [TASK_ID]: "closed" },
+        },
+        activeTasks: expect.arrayContaining([
+          expect.objectContaining({
+            id: TASK_ID,
+            status: "closed",
+            closeoutEvidence: expect.objectContaining({
+              commit: "b6fdab26fde7213f547d579e9fa18b0d34bd243c",
+            }),
+          }),
+        ]),
+      });
+      return;
+    }
+
     expect(taskSafety).toMatchObject({
       taskId: TASK_ID,
       baseSha: BASE_SHA,
@@ -337,9 +360,13 @@ describe("F-0008 answer session authorization lineage", () => {
     const previousSnapshot = parseRepositoryJson<DrizzleSnapshot>(
       "drizzle/meta/20260722234500_snapshot.json",
     );
-    const previousJournalEntry = journal.entries.at(-2);
-    const currentJournalEntry = journal.entries.at(-1);
+    const currentJournalIndex = journal.entries.findIndex(
+      (entry) => entry.tag === MIGRATION_TAG,
+    );
+    const previousJournalEntry = journal.entries[currentJournalIndex - 1];
+    const currentJournalEntry = journal.entries[currentJournalIndex];
 
+    expect(currentJournalIndex).toBeGreaterThan(0);
     expect(previousJournalEntry).toBeDefined();
     expect(currentJournalEntry).toEqual({
       idx: previousJournalEntry!.idx + 1,

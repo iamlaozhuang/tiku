@@ -191,8 +191,15 @@ describe("student experience schema baseline", () => {
     expect(getIndexNames(practice)).toEqual(
       expect.arrayContaining([
         "udx_practice_public_id",
+        "udx_practice_user_id_paper_id_active",
         "idx_practice_user_id",
         "idx_practice_user_id_paper_id_practice_status",
+      ]),
+    );
+    expect(getIndexNames(mockExam)).toEqual(
+      expect.arrayContaining([
+        "udx_mock_exam_public_id",
+        "udx_mock_exam_user_id_paper_id_active",
       ]),
     );
     expect(getIndexNames(answerRecord)).toEqual(

@@ -137,6 +137,9 @@ export const practice = pgTable(
   },
   (table) => [
     uniqueIndex("udx_practice_public_id").on(table.public_id),
+    uniqueIndex("udx_practice_user_id_paper_id_active")
+      .on(table.user_id, table.paper_id)
+      .where(sql`${table.practice_status} = 'in_progress'`),
     index("idx_practice_user_id").on(table.user_id),
     index("idx_practice_paper_id").on(table.paper_id),
     index("idx_practice_user_id_paper_id_practice_status").on(
@@ -197,6 +200,9 @@ export const mockExam = pgTable(
   },
   (table) => [
     uniqueIndex("udx_mock_exam_public_id").on(table.public_id),
+    uniqueIndex("udx_mock_exam_user_id_paper_id_active")
+      .on(table.user_id, table.paper_id)
+      .where(sql`${table.exam_status} = 'in_progress'`),
     index("idx_mock_exam_user_id").on(table.user_id),
     index("idx_mock_exam_paper_id").on(table.paper_id),
     index("idx_mock_exam_exam_status").on(table.exam_status),

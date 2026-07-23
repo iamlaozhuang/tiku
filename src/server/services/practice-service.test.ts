@@ -11,6 +11,7 @@ import type {
   PracticeRepository,
   PracticeRow,
 } from "../repositories/practice-repository";
+import { ActiveAnswerSessionClaimConflictError } from "../repositories/practice-repository";
 
 const now = new Date("2026-05-19T08:00:00.000Z");
 const expiresAt = new Date("2026-06-03T08:00:00.000Z");
@@ -537,6 +538,123 @@ describe("practice service", () => {
     ]);
   });
 
+  it("returns authoritative existing progress when the repository claim loses a concurrent start", async () => {
+    const service = createPracticeService(
+      createRepository({
+        async createPractice() {
+          return createPractice({
+            public_id: "practice_public_concurrent_owner",
+            last_answered_at: now,
+          });
+        },
+        async listAnswerRecordsByPractice() {
+          return [
+            {
+              public_id: "answer_record_public_concurrent_owner",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "scored",
+              is_correct: true,
+              score: "1.0",
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        practice: { publicId: "practice_public_concurrent_owner" },
+        answerRecords: [
+          {
+            publicId: "answer_record_public_concurrent_owner",
+            paperQuestionPublicId: "paper_question_public_123",
+          },
+        ],
+      },
+    });
+  });
+
+  it("converges separate service instances through authoritative repository replay", async () => {
+    let authoritativePractice: PracticeRow | null = null;
+    let claimCalls = 0;
+    const claim = async (
+      input: Parameters<PracticeRepository["createPractice"]>[0],
+    ) => {
+      claimCalls += 1;
+      authoritativePractice ??= createPractice({
+        public_id: input.publicId,
+        paper_snapshot: input.paperSnapshot,
+      });
+      return authoritativePractice;
+    };
+    const firstService = createPracticeService(
+      createRepository({ createPractice: claim }),
+      clock,
+      createIdFactory(),
+    );
+    const secondService = createPracticeService(
+      createRepository({ createPractice: claim }),
+      clock,
+      createIdFactory(),
+    );
+
+    const first = await firstService.startPractice(userContext, {
+      paperPublicId: "paper_public_123",
+    });
+    const second = await secondService.startPractice(userContext, {
+      paperPublicId: "paper_public_123",
+    });
+
+    expect(claimCalls).toBe(2);
+    expect(first).toMatchObject({
+      code: 0,
+      data: { practice: { publicId: "practice_public_1" } },
+    });
+    expect(second).toMatchObject({
+      code: 0,
+      data: { practice: { publicId: "practice_public_1" } },
+    });
+  });
+
+  it("fails closed when the authoritative repository claim is inconsistent", async () => {
+    const service = createPracticeService(
+      createRepository({
+        async createPractice() {
+          throw new ActiveAnswerSessionClaimConflictError();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 409305,
+      message: "Active practice claim conflicts with this request.",
+      data: null,
+    });
+  });
+
   it("fails closed when multiple same-scope authorizations are not explicitly selected", async () => {
     let createCalled = false;
     const service = createPracticeService(
@@ -823,6 +941,7 @@ describe("practice service", () => {
     });
 
     const expiredInputs: unknown[] = [];
+    const restartedInputs: unknown[] = [];
     const restartedService = createPracticeService(
       createRepository({
         async findActivePracticeByPaper() {
@@ -833,6 +952,13 @@ describe("practice service", () => {
         },
         async expirePractice(input) {
           expiredInputs.push(input);
+        },
+        async createPractice(input) {
+          restartedInputs.push(input);
+          return createPractice({
+            public_id: input.publicId,
+            paper_snapshot: input.paperSnapshot,
+          });
         },
       }),
       clock,
@@ -851,11 +977,11 @@ describe("practice service", () => {
         },
       },
     });
-    expect(expiredInputs).toEqual([
-      {
-        publicId: "practice_public_expired",
-        expiredAt: now,
-      },
+    expect(expiredInputs).toEqual([]);
+    expect(restartedInputs).toEqual([
+      expect.objectContaining({
+        replaceActivePublicId: "practice_public_expired",
+      }),
     ]);
   });
 
@@ -899,15 +1025,11 @@ describe("practice service", () => {
         },
       },
     });
-    expect(expiredInputs).toEqual([
-      {
-        publicId: "practice_public_empty_snapshot",
-        expiredAt: now,
-      },
-    ]);
+    expect(expiredInputs).toEqual([]);
     expect(createdInputs).toEqual([
       expect.objectContaining({
         paperSnapshot: createPaperSnapshot(),
+        replaceActivePublicId: "practice_public_empty_snapshot",
       }),
     ]);
   });

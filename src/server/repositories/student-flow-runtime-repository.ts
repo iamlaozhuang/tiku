@@ -35,7 +35,10 @@ import type {
   PracticeRepository,
   PracticeRow,
 } from "./practice-repository";
-import { AuthorizationStartConflictError } from "./practice-repository";
+import {
+  ActiveAnswerSessionClaimConflictError,
+  AuthorizationStartConflictError,
+} from "./practice-repository";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 import {
   createOrgAuthCoversOrganizationCondition,
@@ -48,6 +51,8 @@ import type {
 } from "./student-paper-repository";
 
 type StudentFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
+
+const ACTIVE_ANSWER_SESSION_CLAIM_LOCK_NAMESPACE = 200115;
 
 export type StudentFlowRuntimeRepositoryOptions = {
   createDatabase?: () => StudentFlowRuntimeDatabase;
@@ -320,6 +325,60 @@ function createPostgresPracticeRepository(
           transactionalDatabase,
           input.paperPublicId,
         );
+        await lockActiveAnswerSessionClaim(
+          transactionalDatabase,
+          "practice",
+          userId,
+          paperId,
+        );
+        const activeRows = await transaction
+          .select()
+          .from(practice)
+          .where(
+            and(
+              eq(practice.user_id, userId),
+              eq(practice.paper_id, paperId),
+              eq(practice.practice_status, "in_progress"),
+            ),
+          )
+          .for("update");
+
+        if (activeRows.length > 1) {
+          throw new ActiveAnswerSessionClaimConflictError();
+        }
+
+        const activeRow = activeRows[0];
+
+        if (activeRow !== undefined) {
+          if (!isCompatiblePracticeClaim(activeRow, input)) {
+            throw new ActiveAnswerSessionClaimConflictError();
+          }
+
+          if (activeRow.public_id !== input.replaceActivePublicId) {
+            return mapPracticeRow(activeRow);
+          }
+
+          const [expiredRow] = await transaction
+            .update(practice)
+            .set({
+              practice_status: "expired",
+              updated_at: input.startedAt,
+            })
+            .where(
+              and(
+                eq(practice.id, activeRow.id),
+                eq(practice.practice_status, "in_progress"),
+              ),
+            )
+            .returning({ id: practice.id });
+
+          if (expiredRow === undefined) {
+            throw new ActiveAnswerSessionClaimConflictError();
+          }
+        } else if (input.replaceActivePublicId !== null) {
+          throw new ActiveAnswerSessionClaimConflictError();
+        }
+
         const [row] = await transaction
           .insert(practice)
           .values({
@@ -347,13 +406,33 @@ function createPostgresPracticeRepository(
             quota_owner_public_id:
               input.authorizationLineage.quotaOwnerPublicId,
           })
+          .onConflictDoNothing()
           .returning();
 
-        if (row === undefined) {
-          throw new Error("Practice insert did not return a row.");
+        if (row !== undefined) {
+          return mapPracticeRow(row);
         }
 
-        return mapPracticeRow(row);
+        const concurrentActiveRows = await transaction
+          .select()
+          .from(practice)
+          .where(
+            and(
+              eq(practice.user_id, userId),
+              eq(practice.paper_id, paperId),
+              eq(practice.practice_status, "in_progress"),
+            ),
+          )
+          .for("update");
+
+        if (
+          concurrentActiveRows.length !== 1 ||
+          !isCompatiblePracticeClaim(concurrentActiveRows[0]!, input)
+        ) {
+          throw new ActiveAnswerSessionClaimConflictError();
+        }
+
+        return mapPracticeRow(concurrentActiveRows[0]!);
       });
     },
     async expirePractice(input) {
@@ -709,6 +788,76 @@ function createPostgresMockExamRepository(
           transactionalDatabase,
           input.paperPublicId,
         );
+        await lockActiveAnswerSessionClaim(
+          transactionalDatabase,
+          "mock_exam",
+          userId,
+          paperId,
+        );
+        const activeRows = await transaction
+          .select()
+          .from(mockExam)
+          .where(
+            and(
+              eq(mockExam.user_id, userId),
+              eq(mockExam.paper_id, paperId),
+              eq(mockExam.exam_status, "in_progress"),
+            ),
+          )
+          .for("update");
+
+        if (activeRows.length > 1) {
+          throw new ActiveAnswerSessionClaimConflictError();
+        }
+
+        const activeRow = activeRows[0];
+
+        if (activeRow !== undefined) {
+          if (!isCompatibleMockExamClaim(activeRow, input)) {
+            throw new ActiveAnswerSessionClaimConflictError();
+          }
+
+          if (activeRow.public_id !== input.replaceActivePublicId) {
+            return mapMockExamRow(
+              activeRow,
+              await countMockExamAnswers(transactionalDatabase, activeRow.id),
+            );
+          }
+
+          const [terminatedRow] = await transaction
+            .update(mockExam)
+            .set({
+              exam_status: "terminated",
+              terminated_at: input.startedAt,
+              termination_reason: "stale_empty_snapshot",
+              updated_at: input.startedAt,
+            })
+            .where(
+              and(
+                eq(mockExam.id, activeRow.id),
+                eq(mockExam.exam_status, "in_progress"),
+              ),
+            )
+            .returning({ id: mockExam.id });
+
+          if (terminatedRow === undefined) {
+            throw new ActiveAnswerSessionClaimConflictError();
+          }
+
+          await transaction
+            .update(mockExamDeadlineTask)
+            .set({
+              task_status: "cancelled",
+              lease_expires_at: null,
+              worker_public_id: null,
+              completed_at: input.startedAt,
+              updated_at: input.startedAt,
+            })
+            .where(eq(mockExamDeadlineTask.mock_exam_id, activeRow.id));
+        } else if (input.replaceActivePublicId !== null) {
+          throw new ActiveAnswerSessionClaimConflictError();
+        }
+
         const [row] = await transaction
           .insert(mockExam)
           .values({
@@ -740,10 +889,36 @@ function createPostgresMockExamRepository(
             quota_owner_public_id:
               input.authorizationLineage.quotaOwnerPublicId,
           })
+          .onConflictDoNothing()
           .returning();
 
         if (row === undefined) {
-          throw new Error("Mock exam insert did not return a row.");
+          const concurrentActiveRows = await transaction
+            .select()
+            .from(mockExam)
+            .where(
+              and(
+                eq(mockExam.user_id, userId),
+                eq(mockExam.paper_id, paperId),
+                eq(mockExam.exam_status, "in_progress"),
+              ),
+            )
+            .for("update");
+
+          if (
+            concurrentActiveRows.length !== 1 ||
+            !isCompatibleMockExamClaim(concurrentActiveRows[0]!, input)
+          ) {
+            throw new ActiveAnswerSessionClaimConflictError();
+          }
+
+          return mapMockExamRow(
+            concurrentActiveRows[0]!,
+            await countMockExamAnswers(
+              transactionalDatabase,
+              concurrentActiveRows[0]!.id,
+            ),
+          );
         }
 
         if (
@@ -1983,6 +2158,96 @@ function createPostgresExamReportRepository(
         );
     },
   };
+}
+
+async function lockActiveAnswerSessionClaim(
+  database: StudentFlowRuntimeDatabase,
+  mode: "practice" | "mock_exam",
+  userId: number,
+  paperId: number,
+): Promise<void> {
+  const claimIdentity = `${mode}:${userId}:${paperId}`;
+
+  await database.execute(
+    sql`select pg_advisory_xact_lock(${ACTIVE_ANSWER_SESSION_CLAIM_LOCK_NAMESPACE}, hashtext(${claimIdentity}))`,
+  );
+}
+
+function canonicalizeJson(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(canonicalizeJson);
+  }
+
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .map(([key, entryValue]) => [key, canonicalizeJson(entryValue)]),
+    );
+  }
+
+  return value;
+}
+
+function hasCompatibleAuthorizationLineage(
+  row: {
+    authorization_source: string | null;
+    authorization_public_id: string | null;
+    authorization_organization_public_id: string | null;
+    quota_owner_type: string | null;
+    quota_owner_public_id: string | null;
+  },
+  lineage: AnswerSessionAuthorizationLineage,
+): boolean {
+  if (row.authorization_source === null) {
+    return (
+      row.authorization_public_id === null &&
+      row.authorization_organization_public_id === null &&
+      row.quota_owner_type === null &&
+      row.quota_owner_public_id === null
+    );
+  }
+
+  return (
+    row.authorization_source === lineage.authorizationSource &&
+    row.authorization_public_id === lineage.authorizationPublicId &&
+    row.authorization_organization_public_id === lineage.organizationPublicId &&
+    row.quota_owner_type === lineage.quotaOwnerType &&
+    row.quota_owner_public_id === lineage.quotaOwnerPublicId
+  );
+}
+
+function isCompatiblePracticeClaim(
+  row: typeof practice.$inferSelect,
+  input: Parameters<PracticeRepository["createPractice"]>[0],
+): boolean {
+  return (
+    row.paper_public_id === input.paperPublicId &&
+    row.profession === input.profession &&
+    row.level === input.level &&
+    row.subject === input.subject &&
+    hasCompatibleAuthorizationLineage(row, input.authorizationLineage) &&
+    (row.public_id === input.replaceActivePublicId ||
+      JSON.stringify(canonicalizeJson(row.paper_snapshot)) ===
+        JSON.stringify(canonicalizeJson(input.paperSnapshot)))
+  );
+}
+
+function isCompatibleMockExamClaim(
+  row: typeof mockExam.$inferSelect,
+  input: Parameters<MockExamRepository["createMockExam"]>[0],
+): boolean {
+  return (
+    row.paper_public_id === input.paperPublicId &&
+    row.profession === input.profession &&
+    row.level === input.level &&
+    row.subject === input.subject &&
+    row.duration_minute === input.durationMinute &&
+    hasCompatibleAuthorizationLineage(row, input.authorizationLineage) &&
+    (row.public_id === input.replaceActivePublicId ||
+      JSON.stringify(canonicalizeJson(row.paper_snapshot)) ===
+        JSON.stringify(canonicalizeJson(input.paperSnapshot)))
+  );
 }
 
 async function validateAndLockAuthorizationLineageForStart(

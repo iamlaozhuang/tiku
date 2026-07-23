@@ -24,7 +24,10 @@ import type {
   MockExamRow,
 } from "../repositories/mock-exam-repository";
 import type { AnswerSessionAuthorizationLineage } from "../repositories/practice-repository";
-import { AuthorizationStartConflictError } from "../repositories/practice-repository";
+import {
+  ActiveAnswerSessionClaimConflictError,
+  AuthorizationStartConflictError,
+} from "../repositories/practice-repository";
 import type { EnqueueAiScoringTaskInput } from "../repositories/ai-scoring-task-repository";
 import {
   normalizeMockExamAnswerInput,
@@ -1402,7 +1405,8 @@ async function createFreshMockExam(
   paper: MockExamPaperRow,
   startedAt: Date,
   authorizationScope: MockExamAuthorizationScopeRow,
-): Promise<MockExamRow | null | "authorization_invalid"> {
+  replaceActivePublicId: string | null,
+): Promise<MockExamRow | null | "authorization_invalid" | "claim_conflict"> {
   const serverDeadlineAt = addDurationMinute(startedAt, paper.duration_minute);
 
   try {
@@ -1422,6 +1426,7 @@ async function createFreshMockExam(
       serverDeadlineAt,
       durationMinute: paper.duration_minute,
       authorizationLineage: toAuthorizationLineage(authorizationScope),
+      replaceActivePublicId,
     });
   } catch (error) {
     if (error instanceof Error && error.name === "PaperStartConflictError") {
@@ -1429,6 +1434,9 @@ async function createFreshMockExam(
     }
     if (error instanceof AuthorizationStartConflictError) {
       return "authorization_invalid";
+    }
+    if (error instanceof ActiveAnswerSessionClaimConflictError) {
+      return "claim_conflict";
     }
     throw error;
   }
@@ -1554,12 +1562,6 @@ export function createMockExamService(
           );
         }
         if (shouldReplaceMockExamSnapshot(activeMockExam, paper)) {
-          await repository.terminateMockExam({
-            publicId: activeMockExam.public_id,
-            terminatedAt: now,
-            terminationReason: "stale_empty_snapshot",
-          });
-
           const mockExam = await createFreshMockExam(
             repository,
             publicIdFactory,
@@ -1567,6 +1569,7 @@ export function createMockExamService(
             paper,
             now,
             authorizationScope,
+            activeMockExam.public_id,
           );
 
           if (mockExam === "authorization_invalid") {
@@ -1581,11 +1584,16 @@ export function createMockExamService(
               "Mock exam paper is no longer published.",
             );
           }
+          if (mockExam === "claim_conflict") {
+            return createErrorResponse(
+              409319,
+              "Active mock exam claim conflicts with this request.",
+            );
+          }
 
-          return createSuccessResponse({
-            mockExam: mapMockExamToApi(mockExam, now),
-            answerRecords: [],
-          });
+          return createSuccessResponse(
+            await buildMockExamResult(repository, userContext, mockExam, now),
+          );
         }
 
         if (isDeadlineReached(activeMockExam, now)) {
@@ -1628,6 +1636,7 @@ export function createMockExamService(
         paper,
         now,
         authorizationScope,
+        null,
       );
 
       if (mockExam === "authorization_invalid") {
@@ -1642,11 +1651,16 @@ export function createMockExamService(
           "Mock exam paper is no longer published.",
         );
       }
+      if (mockExam === "claim_conflict") {
+        return createErrorResponse(
+          409319,
+          "Active mock exam claim conflicts with this request.",
+        );
+      }
 
-      return createSuccessResponse({
-        mockExam: mapMockExamToApi(mockExam, now),
-        answerRecords: [],
-      });
+      return createSuccessResponse(
+        await buildMockExamResult(repository, userContext, mockExam, now),
+      );
     },
 
     async getMockExam(userContext, publicId) {

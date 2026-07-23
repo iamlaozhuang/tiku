@@ -22,7 +22,10 @@ import type {
   PracticeRepository,
   PracticeRow,
 } from "../repositories/practice-repository";
-import { AuthorizationStartConflictError } from "../repositories/practice-repository";
+import {
+  ActiveAnswerSessionClaimConflictError,
+  AuthorizationStartConflictError,
+} from "../repositories/practice-repository";
 import {
   normalizePracticeAnswerInput,
   normalizePracticeQuestionFavoriteInput,
@@ -757,8 +760,9 @@ async function createFreshPractice(
   paper: PracticePaperRow,
   startedAt: Date,
   authorizationScope: PracticeAuthorizationScopeRow,
-): Promise<PracticeRow | null | "authorization_invalid"> {
-  const startKey = `${userContext.userPublicId}\u0000${paper.public_id}\u0000${authorizationScope.authorization_source}\u0000${authorizationScope.authorization_public_id}`;
+  replaceActivePublicId: string | null,
+): Promise<PracticeRow | null | "authorization_invalid" | "claim_conflict"> {
+  const startKey = `${userContext.userPublicId}\u0000${paper.public_id}\u0000${authorizationScope.authorization_source}\u0000${authorizationScope.authorization_public_id}\u0000${replaceActivePublicId ?? ""}`;
   const inFlightPractice = inFlightFreshPracticeByUserPaper.get(startKey);
 
   if (inFlightPractice !== undefined) {
@@ -776,6 +780,7 @@ async function createFreshPractice(
     startedAt,
     expiresAt: addPracticeRetentionWindow(startedAt),
     authorizationLineage: toAuthorizationLineage(authorizationScope),
+    replaceActivePublicId,
   });
 
   inFlightFreshPracticeByUserPaper.set(startKey, practicePromise);
@@ -788,6 +793,9 @@ async function createFreshPractice(
     }
     if (error instanceof AuthorizationStartConflictError) {
       return "authorization_invalid";
+    }
+    if (error instanceof ActiveAnswerSessionClaimConflictError) {
+      return "claim_conflict";
     }
     throw error;
   } finally {
@@ -906,11 +914,6 @@ export function createPracticeService(
           );
         }
         if (shouldReplacePracticeSnapshot(activePractice, paper)) {
-          await repository.expirePractice({
-            publicId: activePractice.public_id,
-            expiredAt: now,
-          });
-
           const practice = await createFreshPractice(
             repository,
             publicIdFactory,
@@ -918,6 +921,7 @@ export function createPracticeService(
             paper,
             now,
             authorizationScope,
+            activePractice.public_id,
           );
 
           if (practice === "authorization_invalid") {
@@ -932,11 +936,16 @@ export function createPracticeService(
               "Practice paper is no longer published.",
             );
           }
+          if (practice === "claim_conflict") {
+            return createErrorResponse(
+              409305,
+              "Active practice claim conflicts with this request.",
+            );
+          }
 
-          return createSuccessResponse({
-            practice: mapPracticeToApi(practice),
-            answerRecords: [],
-          });
+          return createSuccessResponse(
+            await createPracticeResult(repository, userContext, practice),
+          );
         }
 
         return createSuccessResponse({
@@ -948,13 +957,6 @@ export function createPracticeService(
         });
       }
 
-      if (activePractice !== null) {
-        await repository.expirePractice({
-          publicId: activePractice.public_id,
-          expiredAt: now,
-        });
-      }
-
       const practice = await createFreshPractice(
         repository,
         publicIdFactory,
@@ -962,6 +964,7 @@ export function createPracticeService(
         paper,
         now,
         authorizationScope,
+        activePractice?.public_id ?? null,
       );
 
       if (practice === "authorization_invalid") {
@@ -976,11 +979,16 @@ export function createPracticeService(
           "Practice paper is no longer published.",
         );
       }
+      if (practice === "claim_conflict") {
+        return createErrorResponse(
+          409305,
+          "Active practice claim conflicts with this request.",
+        );
+      }
 
-      return createSuccessResponse({
-        practice: mapPracticeToApi(practice),
-        answerRecords: [],
-      });
+      return createSuccessResponse(
+        await createPracticeResult(repository, userContext, practice),
+      );
     },
 
     async getPractice(userContext, publicId) {
@@ -1256,6 +1264,7 @@ export function createPracticeService(
         },
         now,
         authorizationScope,
+        null,
       );
 
       if (freshPractice === "authorization_invalid") {
@@ -1270,11 +1279,16 @@ export function createPracticeService(
           "Practice paper is no longer published.",
         );
       }
+      if (freshPractice === "claim_conflict") {
+        return createErrorResponse(
+          409305,
+          "Active practice claim conflicts with this request.",
+        );
+      }
 
-      return createSuccessResponse({
-        practice: mapPracticeToApi(freshPractice),
-        answerRecords: [],
-      });
+      return createSuccessResponse(
+        await createPracticeResult(repository, userContext, freshPractice),
+      );
     },
 
     async terminatePractice(userContext, publicId) {
