@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { promptTemplateDefinitions } from "@/ai/prompts/templates";
+import {
+  aiQuestionDraftSchemaVersion,
+  promptTemplateDefinitions,
+} from "@/ai/prompts/templates";
 
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
 import {
@@ -91,8 +94,8 @@ const questionGovernanceContext: AiGenerationRouteIntegratedGovernanceContext =
       timeoutSecond: 30,
       maxRetryCount: 0,
       fallbackModelConfigPublicId: null,
-      promptTemplateKey: "ai_question_generation_v1",
-      promptTemplateVersion: 1,
+      promptTemplateKey: questionPromptTemplate.promptTemplateKey,
+      promptTemplateVersion: questionPromptTemplate.version,
     },
     promptTemplate: {
       ...questionPromptTemplate,
@@ -572,10 +575,21 @@ describe("personal AI generation route-integrated provider execution service", (
           providerErrorSummary: null,
           visibleGeneratedContent: {
             content: JSON.stringify({
-              questions: Array.from({ length: 10 }, () => ({
+              schemaVersion: aiQuestionDraftSchemaVersion,
+              kind: "question_set",
+              questions: Array.from({ length: 10 }, (_, index) => ({
                 questionType: "single_choice",
                 difficulty: "medium",
-                knowledgeNodeLabels: ["redacted_knowledge_node"],
+                knowledgeNodeLabels: [`redacted_knowledge_node_${index + 1}`],
+                questionStem: `synthetic question stem ${index + 1}`,
+                questionOptions: [
+                  { optionLabel: "A", optionText: "synthetic correct option" },
+                  { optionLabel: "B", optionText: "synthetic distractor" },
+                ],
+                standardAnswer: "A",
+                analysis: `synthetic analysis ${index + 1}`,
+                scoringPoints: [],
+                fillBlankAnswers: [],
               })),
             }),
             contentVisibility: "transient_response_only",

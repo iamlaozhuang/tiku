@@ -1776,6 +1776,122 @@ describe("StudentPersonalAiGenerationPage", () => {
     });
   });
 
+  it("submits every visible learner AI question parameter exactly as displayed", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = createPersonalAiGenerationFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题科目")).toHaveValue("理论");
+    expect(screen.getByLabelText("AI出题题型")).toHaveValue("单选题");
+    expect(screen.getByLabelText("AI出题难度")).toHaveValue("中等");
+    expect(screen.getByLabelText("AI出题学习目标")).toHaveValue("弱项巩固");
+
+    fireEvent.change(screen.getByLabelText("AI出题科目"), {
+      target: { value: "技能" },
+    });
+    fireEvent.change(screen.getByLabelText("AI出题题型"), {
+      target: { value: "多选题" },
+    });
+    fireEvent.change(screen.getByLabelText("AI出题题目数量"), {
+      target: { value: "7" },
+    });
+    fireEvent.change(screen.getByLabelText("AI出题难度"), {
+      target: { value: "提高" },
+    });
+    fireEvent.change(screen.getByLabelText("AI出题学习目标"), {
+      target: { value: "综合辨析训练" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(
+          (call) =>
+            String(call[0]) === "/api/v1/personal-ai-generation-requests" &&
+            call[1]?.method === "POST",
+        ),
+      ).toBe(true);
+    });
+    const postCall = fetchMock.mock.calls.find(
+      (call) =>
+        String(call[0]) === "/api/v1/personal-ai-generation-requests" &&
+        call[1]?.method === "POST",
+    );
+    const requestBody = JSON.parse(String(postCall?.[1]?.body)) as {
+      generationParameters?: Record<string, unknown>;
+    };
+
+    expect(requestBody.generationParameters).toMatchObject({
+      subject: "skill",
+      questionType: "multi_choice",
+      questionCount: 7,
+      difficulty: "hard",
+      learningObjective: "综合辨析训练",
+    });
+  });
+
+  it("submits every supported learner AI paper parameter and hides unsupported duration", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = createPersonalAiGenerationFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    expect(screen.queryByLabelText("AI组卷时长目标")).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("AI组卷科目"), {
+      target: { value: "技能" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷题目数量"), {
+      target: { value: "45" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷题型分布"), {
+      target: { value: "单选50% / 多选25% / 判断25%" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷大题结构"), {
+      target: { value: "按知识点分大题" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷难度"), {
+      target: { value: "基础" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷学习目标"), {
+      target: { value: "阶段技能自测" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(
+          (call) =>
+            String(call[0]) === "/api/v1/personal-ai-generation-requests" &&
+            call[1]?.method === "POST",
+        ),
+      ).toBe(true);
+    });
+    const postCall = fetchMock.mock.calls.find(
+      (call) =>
+        String(call[0]) === "/api/v1/personal-ai-generation-requests" &&
+        call[1]?.method === "POST",
+    );
+    const requestBody = JSON.parse(String(postCall?.[1]?.body)) as {
+      generationParameters?: Record<string, unknown>;
+    };
+
+    expect(requestBody.generationParameters).toMatchObject({
+      subject: "skill",
+      questionCount: 45,
+      questionTypeDistribution: "single_50_multi_25_true_false_25",
+      paperStructure: "by_knowledge_node",
+      difficulty: "easy",
+      learningObjective: "阶段技能自测",
+    });
+  });
+
   it("submits learner AI knowledge supplement as a structured soft constraint", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = createPersonalAiGenerationFetchMock();
@@ -2775,7 +2891,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI组卷知识点补充说明")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷大题结构")).toHaveValue("按题型分大题");
     expect(screen.getByLabelText("AI组卷难度")).toHaveValue("中等");
-    expect(screen.getByLabelText("AI组卷时长目标")).toBeInTheDocument();
+    expect(screen.queryByLabelText("AI组卷时长目标")).toBeNull();
     expect(screen.getByLabelText("AI组卷学习目标")).toHaveValue("阶段自测");
     expect(
       screen.getByRole("button", { name: employeePaperButtonLabel }),

@@ -893,28 +893,28 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22
-  title: Formal question generated knowledge confirmation
-  phase: p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22
+  id: p1-remediation-rc-07-student-ai-generation-parameter-lineage-2026-07-22
+  title: Student AI generation parameter lineage
+  phase: p1-remediation-rc-07-student-ai-generation-parameter-lineage-2026-07-22
   status: in_progress
   priority: p1
-  taskKind: schema_migration_source_and_database_application_logic
-  productClosureContribution: partial_F0154_generated_label_confirmation_partition
-  branch: fix/formal-question-generated-knowledge-confirmation
+  taskKind: low_risk_UI_parameter_lineage
+  productClosureContribution: closes_F0159
+  branch: fix/student-ai-generation-parameter-lineage
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0154
+    - F-0159
   candidateRootCauseCluster: P1-RC-07
-  objective: persist unresolved generated-label review candidates and require exact content-admin mapping to eligible scoped knowledge_node public ids before formal question draft creation
+  objective: bind every editable learner AI question and paper parameter to typed state and the exact submitted generationParameters while removing unsupported duration pseudo-input
   executionStage: validated_and_adversarially_reviewed_ready_for_conditional_closeout
-  findingStatus: open_partitioned
-  findingDisposition: F0154_open_partitioned_current_generated_label_confirmation_partition_legacy_backfill_and_runtime_acceptance_residual
+  findingStatus: in_progress
+  findingDisposition: F0159_current_UI_to_request_parameter_lineage_root_cause
   riskBoundary:
-    category: schema_migration_source_and_database_application_logic
-    approvalId: guardian-f0154-generated-knowledge-confirmation-2026-07-22
-    approvedBaseSha: 18a5325561c362993a1c081a0dc64f94a0e1ffd7
-    requestedBaseSha: 18a5325561c362993a1c081a0dc64f94a0e1ffd7
-    schemaOrMigrationChange: true_additive_source_only
+    category: low_risk_UI_parameter_lineage
+    approvalId: current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20
+    approvedBaseSha: b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56
+    requestedBaseSha: b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56
+    schemaOrMigrationChange: false
     persistentDatabaseExecution: false
     authorizationOrEntitlementExpansion: false
     providerOrRealExternalCall: false
@@ -922,41 +922,47 @@ currentTask:
     dependencyChange: false
     conditionalCloseout: true
   preRedImpactScan:
-    chain: persisted_structured_preview_to_unresolved_candidate_to_admin_mapping_to_scoped_DB_resolution_to_adoption_snapshot_digest_to_resolved_formal_draft
-    coreFiles: 18
-    contingencyFiles: 12
-    preflightTestFiles: 11
+    chain: learner_detail_controls_to_typed_form_state_to_generationParameters_to_existing_validator_route_snapshot_Provider_context_and_history
+    coreFiles: 4
+    contingencyFiles: 5
+    preflightTestFiles: 5
     directCallerCalleeMocksFixturesReviewed: true
-    confirmedRootCause: balanced_and_comprehensive_generated_labels_have_no_immutable_candidate_manual_public_id_resolution_or_idempotent_adoption_binding
-    bundleDisposition: F0154_generated_label_confirmation_only_legacy_backfill_and_runtime_acceptance_separate
+    confirmedRootCause: editable_static_control_descriptors_do_not_own_state_while_request_builder_hardcodes_different_values_and_duration_has_no_contract_field
+    bundleDisposition: F0159_single_UI_parameter_lineage_task
+  expectedAcceptance:
+    - all_editable_question_and_paper_parameters_are_controlled_and_submitted_exactly_as_displayed
+    - unsupported_paper_duration_pseudo_control_is_removed
+    - authorization_owned_profession_level_and_knowledge_scope_are_unchanged
+    - existing_validator_snapshot_Provider_context_and_history_lineage_remain_green
+    - F0159_closes_without_schema_permission_Provider_dependency_or_mechanism_change
   validationEvidence:
-    red: candidate_mapping_schema_service_UI_and_label_normalization_failures_reproduced_before_each_minimal_GREEN
-    focused: 11_files_220_tests_passed_exit_0_29s
-    lint: targeted_9_product_files_exit_0_6s
-    typecheck: tsc_noEmit_exit_0_11s
-    build: next_build_exit_0_76s_with_preexisting_NFT_trace_warning
-    formatAndDiff: formatter_applied_generated_SQL_excluded_and_covered_by_structure_test
-    stateContractParse: strict_JSON_and_YAML_parse_exit_0_after_final_state_update
-    adversarialReview: pass_exact_mapping_server_owned_digest_transactional_scope_recheck_cross_KB_rejection_control_label_rejection_no_client_content_source
-    prohibitedScope: no_migration_apply_real_DB_permission_Provider_dependency_backfill_AI_paper_behavior_or_full_F0154_claim
+    red: 3_expected_failures_proved_default_difficulty_display_request_divergence_unbound_parameters_and_unsupported_duration_control
+    focused: 5_files_153_tests_passed_exit_0_22s
+    lint: targeted_student_page_exit_0_after_formatter
+    typecheck: tsc_noEmit_exit_0_9s
+    build: next_build_exit_0_70s_with_preexisting_NFT_trace_warning
+    formatAndDiff: scoped_prettier_and_git_diff_check_exit_0
+    stateContractParse: strict_JSON_and_YAML_parse_exit_0
+    adversarialReview: pass_all_editable_parameters_controlled_explicit_mapping_invalid_option_ignored_auth_and_knowledge_scope_unchanged_no_duration_pseudo_contract
+    testOnlyFixtureUpdate: current_question_prompt_v2_and_strict_question_set_fixture_restored_existing_Provider_boundary_regression_without_weakened_assertions
   closeoutProjection:
-    current: validated_reviewed_exact_30_file_envelope_ready_for_kernel_commit_and_closeout
-    triggers: fresh_approval_then_RED_GREEN_offline_generation_validation_review_kernel_commit_ff_only_canonical_push_sync_cleanup
-    successProjection: F0154_remains_open_partitioned_then_resume_legacy_backfill_and_runtime_acceptance_review
+    current: focused_build_and_adversarial_review_GREEN_ready_for_kernel_commit
+    triggers: focused_validation_adversarial_review_kernel_single_commit_ff_only_canonical_push_sync_cleanup
+    successProjection: F0159_closed_then_resume_F0158_F0168_F0169_residual_review
     terminalEvidence: terminal_only_after_actual_push_sync_and_cleanup
   executionMetrics:
-    mandatoryFreshApprovals: 1_schema_source_requested
+    mandatoryFreshApprovals: 0_low_risk_standing_closeout
     preventableScopeMissApprovals: 0
     candidateReapprovals: 0
-    approvalWaitTurns: 1
-    productValueTime: JIT_generated_label_confirmation_chain_and_atomicity_analysis
-    mechanismOverhead: task_contract_materialization_and_single_high_risk_request
+    approvalWaitTurns: 0
+    productValueTime: JIT_UI_parameter_lineage_analysis_and_TDD
+    mechanismOverhead: task_contract_materialization
     guardSmokeChanges: 0
   previousTaskCloseout:
-    taskId: p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22
+    taskId: p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22
     findingIds:
       - F-0154
-    commit: 18a5325561c362993a1c081a0dc64f94a0e1ffd7
+    commit: b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
     findingStatus: open_partitioned
     masterOriginSync: pass

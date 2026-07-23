@@ -1,42 +1,21 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22",
-  "objective": "Complete the generated-label confirmation partition of F-0154 by persisting an immutable unresolved formal-question review candidate, requiring a content administrator to map every generated knowledge label to one currently eligible in-scope knowledge_node public id, binding that exact mapping to the formal adoption record, and creating the disabled formal question only from the server-validated resolution. Selected-mode public ids remain unchanged. F-0154 remains open for legacy backfill/runtime acceptance.",
-  "findingIds": ["F-0154"],
+  "taskId": "p1-remediation-rc-07-student-ai-generation-parameter-lineage-2026-07-22",
+  "objective": "Close F-0159 by making every editable learner AI question/paper parameter use one typed controlled form state and flow unchanged into generationParameters, while removing the unsupported paper-duration pseudo-control. Preserve authorization-owned profession/level, knowledge scope, Provider execution, and server-side validation semantics.",
+  "findingIds": ["F-0159"],
   "candidateRootCauseCluster": "P1-RC-07",
-  "baseSha": "18a5325561c362993a1c081a0dc64f94a0e1ffd7",
-  "branch": "fix/formal-question-generated-knowledge-confirmation",
+  "baseSha": "b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56",
+  "branch": "fix/student-ai-generation-parameter-lineage",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260722233000_p1_rc_07_formal_question_knowledge_confirmation.sql",
-    "drizzle/meta/20260722233000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/lib/admin-ai-generation-formal-draft-payload.ts",
-    "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
-    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
-    "src/server/models/admin-ai-generation-formal-adoption.ts",
-    "src/server/validators/admin-ai-generation-formal-adoption.ts",
-    "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
-    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts"
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts",
+    "src/server/validators/personal-ai-generation-request.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts"
   ],
   "blockedFiles": [
     "AGENTS.md",
@@ -45,65 +24,43 @@
     ".githooks/**",
     "package.json",
     "pnpm-lock.yaml",
-    "migration apply, real database/data access, Provider/external calls, permission/entitlement changes, dependency, secret/env, deployment, PR, force-push, non-canonical remote, legacy backfill, AI paper behavior, or full F-0154 closure"
+    "schema/migration, database execution, permission/authorization changes, Provider behavior/configuration, dependency, secret/env, deployment, PR, force-push, non-canonical remote, or any finding other than F-0159"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260722233000_p1_rc_07_formal_question_knowledge_confirmation.sql",
-    "drizzle/meta/20260722233000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/lib/admin-ai-generation-formal-draft-payload.ts",
-    "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
-    "src/server/models/admin-ai-generation-formal-adoption.ts",
-    "src/server/validators/admin-ai-generation-formal-adoption.ts",
-    "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx"
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx"
   ],
   "contingencyFiles": [
-    "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
-    "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-    "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-    "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-    "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.ts",
-    "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-    "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-    "tests/unit/admin-ai-generation-entry-surface.test.ts"
+    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+    "tests/unit/student-personal-ai-generation-ui.test.ts",
+    "src/server/validators/personal-ai-generation-request.test.ts",
+    "src/server/services/personal-ai-generation-request-route.test.ts",
+    "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts"
   ],
   "preRedImpactScan": {
-    "authoritativeChain": "persisted structured question preview -> immutable unresolved formal review candidate -> content-admin label-to-public-id confirmation -> adoption repository exact eligible knowledge_node resolution -> persisted resolution snapshot/digest -> resolved server-owned formal draft -> existing disabled question writer",
+    "authoritativeChain": "learner AI detail controls -> typed local form state -> createStudentGenerationParameters -> personal generation POST body -> existing request validator/route -> persisted input snapshot -> existing Provider request context and history lineage",
     "directCallersReviewed": true,
     "directTestsMocksFixturesReviewed": true,
-    "coreFileCount": 18,
-    "contingencyFileCount": 12,
+    "coreFileCount": 4,
+    "contingencyFileCount": 5,
     "validationReferencedTestsPreallowed": true,
-    "confirmedRootCause": "Balanced and comprehensive content AI question results preserve generated knowledge labels only in the visible preview; the persisted formal reviewed draft currently exists only for selected mode, so there is no immutable candidate, reviewer mapping, server scope validation, or idempotent adoption binding from labels to knowledge_node public ids.",
-    "findingDisposition": "F-0154_open_partitioned_generated_label_confirmation_current_legacy_backfill_and_runtime_acceptance_residual"
+    "confirmedRootCause": "Static detail-control descriptors render editable subject, question type, difficulty, learning objective, and duration fields without controlled state, while createStudentGenerationParameters hard-codes different values and the contract has no duration field.",
+    "findingDisposition": "F-0159_current_single_UI_parameter_lineage_root_cause"
   },
   "acceptance": [
-    "balanced and comprehensive question results persist an immutable unresolved candidate containing canonical difficulty and exact generated labels without treating labels as knowledge ids",
-    "selected mode preserves its already authorized public ids and does not require generated-label mapping",
-    "approved unresolved candidates require an exact one-to-one confirmation for every unique generated label; missing, extra, duplicate, stale, cross-profession, wrong-level, disabled, or non-recommendable nodes fail closed before question creation",
-    "the adoption record stores an immutable canonical resolution snapshot and SHA-256 digest; replay is allowed only for the exact same source digest, decision, and resolution",
-    "formal draft creation consumes only the server-resolved snapshot; unresolved candidates can never reach the question writer",
-    "the UI loads current eligible nodes for the historical candidate scope, requires every label mapping, and sends no client-authored question content",
-    "migration source is additive and legacy-safe; no migration is applied and no real database is accessed",
-    "F-0154 remains open for legacy backfill and runtime acceptance"
+    "question subject, question type, difficulty, learning objective, and count are controlled and submitted exactly as displayed",
+    "paper subject, count, distribution, structure, difficulty, and learning objective are controlled and submitted exactly as displayed",
+    "unsupported paper duration is not rendered as an editable control",
+    "authorization-owned profession and level remain server-authoritative and knowledge-scope behavior is unchanged",
+    "retry reuses the exact unchanged intent and a changed visible parameter produces a new intent identity",
+    "existing request validation, persisted input snapshot, Provider context, and history lineage regressions remain green",
+    "no schema, database, permission, Provider, dependency, mechanism, or external behavior change"
   ],
   "validationCommands": [
     {
-      "name": "formal-question-generated-knowledge-confirmation-test",
+      "name": "student-ai-generation-parameter-lineage-test",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -111,53 +68,39 @@
         "exec",
         "vitest",
         "run",
-        "src/db/schema/ai-rag.test.ts",
-        "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
-        "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+        "tests/unit/student-personal-ai-generation-ui.test.ts",
+        "src/server/validators/personal-ai-generation-request.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts",
         "--maxWorkers=1"
       ]
     },
     {
-      "name": "formal-question-generated-knowledge-confirmation-lint",
+      "name": "student-ai-generation-parameter-lineage-lint",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
         "pnpm@10.34.4",
         "exec",
         "eslint",
-        "src/lib/admin-ai-generation-formal-draft-payload.ts",
-        "src/server/validators/admin-ai-generation-formal-adoption.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx"
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx"
       ]
     },
     {
-      "name": "formal-question-generated-knowledge-confirmation-typecheck",
+      "name": "student-ai-generation-parameter-lineage-typecheck",
       "kind": "typecheck",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "exec", "tsc", "--noEmit"]
     },
     {
-      "name": "formal-question-generated-knowledge-confirmation-build",
+      "name": "student-ai-generation-parameter-lineage-build",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": ["pnpm@10.34.4", "run", "build"]
     },
     {
-      "name": "formal-question-generated-knowledge-confirmation-format",
+      "name": "student-ai-generation-parameter-lineage-format",
       "kind": "other",
       "executable": "corepack.cmd",
       "arguments": [
@@ -168,36 +111,16 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "drizzle/meta/20260722233000_snapshot.json",
-        "drizzle/meta/_journal.json",
-        "src/lib/admin-ai-generation-formal-draft-payload.ts",
-        "src/lib/admin-ai-generation-formal-draft-payload.test.ts",
-        "src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts",
-        "src/server/models/admin-ai-generation-formal-adoption.ts",
-        "src/server/validators/admin-ai-generation-formal-adoption.ts",
-        "src/server/validators/admin-ai-generation-formal-adoption.test.ts",
-        "src/server/contracts/admin-ai-generation-formal-adoption-contract.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts",
-        "src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-service.test.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.ts",
-        "src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.ts",
-        "src/server/services/admin-ai-generation-formal-draft-adapter.test.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.ts",
-        "src/server/services/admin-ai-generation-local-contract-route.test.ts",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
-        "src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx",
-        "tests/unit/admin-ai-generation-entry-surface.test.ts"
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
+        "tests/unit/student-personal-ai-generation-ui.test.ts",
+        "src/server/validators/personal-ai-generation-request.test.ts",
+        "src/server/services/personal-ai-generation-request-route.test.ts",
+        "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts"
       ]
     },
     {
-      "name": "formal-question-generated-knowledge-confirmation-diff-check",
+      "name": "student-ai-generation-parameter-lineage-diff-check",
       "kind": "other",
       "executable": "git",
       "arguments": ["diff", "--check"]
@@ -205,20 +128,14 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0154-generated-knowledge-confirmation-2026-07-22",
+    "database": null,
     "permission": null,
     "deployment": null,
     "secretEnv": null
   },
-  "pendingApproval": {
-    "approvalId": "guardian-f0154-generated-knowledge-confirmation-2026-07-22",
-    "risk": "schema_migration_source_and_database_application_logic",
-    "conditionalCloseoutRequested": true,
-    "status": "granted"
-  },
   "riskClassification": {
-    "category": "schema_migration_source_and_database_application_logic",
-    "schemaOrMigrationChange": true,
+    "category": "low_risk_UI_parameter_lineage",
+    "schemaOrMigrationChange": false,
     "persistentDatabaseExecution": false,
     "permissionOrEntitlementExpansion": false,
     "providerOrRealExternalCall": false,
@@ -226,9 +143,9 @@
   },
   "conditionalCloseout": true,
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-07-formal-question-manual-difficulty-editor-2026-07-22",
+    "taskId": "p1-remediation-rc-07-formal-question-generated-knowledge-confirmation-2026-07-22",
     "findingIds": ["F-0154"],
-    "commit": "18a5325561c362993a1c081a0dc64f94a0e1ffd7",
+    "commit": "b0d405c8ffe656ac57b2d7a8a09babde7a1f6c56",
     "status": "closed_committed_ff_only_merged_pushed_synced_and_cleaned",
     "findingStatus": "open_partitioned",
     "masterOriginSync": true,
@@ -237,12 +154,12 @@
   },
   "resumeAnchor": {
     "candidateRootCauseCluster": "P1-RC-07",
-    "currentFindings": ["F-0154"],
-    "nextResidualReview": "F-0154_legacy_backfill_and_runtime_acceptance_after_generated_label_confirmation"
+    "currentFindings": ["F-0159"],
+    "nextResidualReview": "F-0158_F-0168_F-0169_after_F-0159_closeout"
   },
   "push": {
     "target": "origin/master",
     "canonicalUrl": "https://github.com/iamlaozhuang/tiku.git",
-    "approvalId": "guardian-f0154-generated-knowledge-confirmation-2026-07-22"
+    "approvalId": "current-user-low-risk-p1-goal-closeout-standing-approval-2026-07-20"
   }
 }
