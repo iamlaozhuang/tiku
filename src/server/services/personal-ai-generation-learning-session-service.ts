@@ -20,7 +20,10 @@ import {
   createPersonalAiLearningSessionQuestionFromPaperSource,
   normalizePersonalAiLearningLabels,
 } from "../validators/personal-ai-generation-learning-session";
-import { projectPersonalAiLearningSessionForLearner } from "@/lib/learner-content-projection";
+import {
+  projectPersonalAiLearningQuestionForLearner,
+  projectPersonalAiLearningSessionForLearner,
+} from "@/lib/learner-content-projection";
 import { isAiGenerationReviewRequiredQuestionType } from "./ai-generation-question-type-contract";
 
 export function createPersonalAiGenerationLearningSessionService(input: {
@@ -35,6 +38,12 @@ export function createPersonalAiGenerationLearningSessionService(input: {
       submitLearningSessionAnswer(input.repository, answerInput),
     getLearningSessionProgress: (progressInput) =>
       getLearningSessionProgress(input.repository, progressInput),
+    completeLearningSession: (completeInput) =>
+      Promise.resolve(input.repository.completeSession(completeInput)),
+    listLearningSessionHistory: (historyInput) =>
+      Promise.resolve(input.repository.listSessionHistory(historyInput)),
+    getLearningSessionStatistics: (statisticsInput) =>
+      Promise.resolve(input.repository.getSessionStatistics(statisticsInput)),
   };
 }
 
@@ -91,12 +100,20 @@ async function createLearningSession(
     ownerType: input.ownerType,
     ownerPublicId: input.ownerPublicId,
     actorPublicId: input.actorPublicId,
+    lifecycleAvailability: "current",
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    sessionStatus: "in_progress",
+    sessionRevision: 1,
+    completedAt: null,
+    completionSummary: null,
     evidenceStatus: input.evidenceStatus,
     citationCount: input.citationCount,
     questionCount: questions.length,
     questions,
     formalWriteBoundary: createBlockedPersonalAiLearningFormalWriteBoundary(),
     createdAt: input.createdAt.toISOString(),
+    updatedAt: input.createdAt.toISOString(),
   };
 
   const saveResult = await repository.saveSession(session);
@@ -147,12 +164,20 @@ async function createLearningSessionFromPaperAssembly(
     ownerType: input.ownerType,
     ownerPublicId: input.ownerPublicId,
     actorPublicId: input.actorPublicId,
+    lifecycleAvailability: "current",
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    sessionStatus: "in_progress",
+    sessionRevision: 1,
+    completedAt: null,
+    completionSummary: null,
     evidenceStatus: input.evidenceStatus,
     citationCount: input.citationCount,
     questionCount: questions.length,
     questions,
     formalWriteBoundary: createBlockedPersonalAiLearningFormalWriteBoundary(),
     createdAt: input.createdAt.toISOString(),
+    updatedAt: input.createdAt.toISOString(),
   };
 
   const saveResult = await repository.saveSession(session);
@@ -177,6 +202,8 @@ async function reuseExistingLearningSession(
     | "ownerType"
     | "ownerPublicId"
     | "actorPublicId"
+    | "authorizationSource"
+    | "authorizationPublicId"
   >,
   expectedQuestions?: PersonalAiGenerationLearningSessionQuestionDto[],
 ): Promise<PersonalAiGenerationLearningSessionCreationResultDto | null> {
@@ -194,6 +221,9 @@ async function reuseExistingLearningSession(
     existingSession.ownerType !== input.ownerType ||
     existingSession.ownerPublicId !== input.ownerPublicId ||
     existingSession.actorPublicId !== input.actorPublicId ||
+    existingSession.lifecycleAvailability !== "current" ||
+    existingSession.authorizationSource !== input.authorizationSource ||
+    existingSession.authorizationPublicId !== input.authorizationPublicId ||
     (expectedQuestions !== undefined &&
       JSON.stringify(existingSession.questions) !==
         JSON.stringify(expectedQuestions))
@@ -384,6 +414,22 @@ async function submitLearningSessionAnswer(
     });
   }
 
+  if (
+    session.lifecycleAvailability !== "current" ||
+    session.sessionStatus !== "in_progress" ||
+    session.authorizationSource !== input.authorizationSource ||
+    session.authorizationPublicId !== input.authorizationPublicId
+  ) {
+    return createBlockedAnswerFeedback({
+      input,
+      submittedAt: fallbackSubmittedAt,
+      blockReason:
+        session.lifecycleAvailability === "current"
+          ? "actor_not_allowed"
+          : "answer_history_unavailable",
+    });
+  }
+
   const question = session.questions.find(
     (sessionQuestion) =>
       sessionQuestion.sessionQuestionPublicId === input.sessionQuestionPublicId,
@@ -452,6 +498,8 @@ async function submitLearningSessionAnswer(
 
     const saveResult = await repository.saveAnswerFeedback({
       expectedAnswerRevision: input.expectedAnswerRevision,
+      authorizationSource: input.authorizationSource,
+      authorizationPublicId: input.authorizationPublicId,
       answerFeedback,
     });
 
@@ -489,6 +537,8 @@ async function submitLearningSessionAnswer(
 
   const saveResult = await repository.saveAnswerFeedback({
     expectedAnswerRevision: input.expectedAnswerRevision,
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
     answerFeedback,
   });
 
@@ -506,7 +556,8 @@ async function getLearningSessionProgress(
   input: {
     sessionPublicId: string;
     actorPublicId: string;
-    viewedAt: Date;
+    authorizationSource: "personal_auth" | "org_auth";
+    authorizationPublicId: string;
   },
 ): Promise<PersonalAiGenerationLearningSessionProgressResultDto> {
   const session = await repository.findSessionByPublicId(input.sessionPublicId);
@@ -527,12 +578,73 @@ async function getLearningSessionProgress(
     };
   }
 
+  if (
+    session.lifecycleAvailability === "current" &&
+    (session.authorizationSource !== input.authorizationSource ||
+      session.authorizationPublicId !== input.authorizationPublicId)
+  ) {
+    return {
+      status: "blocked",
+      blockReason: "actor_not_allowed",
+      progress: null,
+    };
+  }
+
+  let persistedAnswerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
+  try {
+    persistedAnswerFeedbacks =
+      await repository.listAnswerFeedbackBySessionPublicId(
+        input.sessionPublicId,
+      );
+  } catch {
+    return {
+      status: "blocked",
+      blockReason: "answer_history_unavailable",
+      progress: null,
+    };
+  }
+
+  if (
+    session.lifecycleAvailability === "current" &&
+    !hasValidCurrentAnswerProgress(session, persistedAnswerFeedbacks)
+  ) {
+    return {
+      status: "blocked",
+      blockReason: "answer_history_unavailable",
+      progress: null,
+    };
+  }
+
   const answerFeedbacks = selectLatestAnswerFeedbacks({
     session,
-    answerFeedbacks: await repository.listAnswerFeedbackBySessionPublicId(
-      input.sessionPublicId,
-    ),
+    answerFeedbacks: persistedAnswerFeedbacks,
   });
+
+  if (
+    session.lifecycleAvailability === "current" &&
+    session.sessionStatus === "completed"
+  ) {
+    try {
+      if (
+        !(await repository.validateCompletedSessionSummary({
+          session,
+          answerFeedbacks: persistedAnswerFeedbacks,
+        }))
+      ) {
+        return {
+          status: "blocked",
+          blockReason: "answer_history_unavailable",
+          progress: null,
+        };
+      }
+    } catch {
+      return {
+        status: "blocked",
+        blockReason: "answer_history_unavailable",
+        progress: null,
+      };
+    }
+  }
 
   return {
     status: "ready",
@@ -545,21 +657,66 @@ async function getLearningSessionProgress(
       ownerType: session.ownerType,
       ownerPublicId: session.ownerPublicId,
       actorPublicId: session.actorPublicId,
+      lifecycleAvailability: session.lifecycleAvailability,
+      sessionStatus: session.sessionStatus,
+      sessionRevision: session.sessionRevision,
+      completedAt: session.completedAt,
+      completionSummary: session.completionSummary,
       persistenceStatus: "repository_persisted",
       resumeStatus: "resumable",
       evidenceStatus: session.evidenceStatus,
       citationCount: session.citationCount,
       questionCount: session.questionCount,
+      questions: session.questions.map(
+        projectPersonalAiLearningQuestionForLearner,
+      ),
       answerFeedbacks,
       statistics: createLearningSessionStatistics({
         answerFeedbacks,
         questions: session.questions,
-        updatedAt: input.viewedAt,
+        updatedAt: new Date(session.updatedAt),
       }),
       formalWriteBoundary: session.formalWriteBoundary,
       createdAt: session.createdAt,
     },
   };
+}
+
+function hasValidCurrentAnswerProgress(
+  session: PersonalAiGenerationLearningSessionDto,
+  answerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[],
+): boolean {
+  const questionByPublicId = new Map(
+    session.questions.map((question) => [
+      question.sessionQuestionPublicId,
+      question,
+    ]),
+  );
+  const observedQuestionPublicIds = new Set<string>();
+
+  return answerFeedbacks.every((answerFeedback) => {
+    const question = questionByPublicId.get(
+      answerFeedback.sessionQuestionPublicId,
+    );
+    if (
+      question === undefined ||
+      observedQuestionPublicIds.has(answerFeedback.sessionQuestionPublicId) ||
+      answerFeedback.sessionPublicId !== session.sessionPublicId ||
+      answerFeedback.actorPublicId !== session.actorPublicId ||
+      answerFeedback.answerRevision === null ||
+      answerFeedback.status === "blocked" ||
+      answerFeedback.maxScore !== question.maxScore ||
+      JSON.stringify(answerFeedback.standardAnswerLabels) !==
+        JSON.stringify(question.standardAnswerLabels) ||
+      answerFeedback.standardAnswerText !== question.standardAnswerText ||
+      answerFeedback.analysis !== question.analysis
+    ) {
+      return false;
+    }
+
+    observedQuestionPublicIds.add(answerFeedback.sessionQuestionPublicId);
+    return true;
+  });
 }
 
 function blockCreation(

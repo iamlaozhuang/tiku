@@ -1,6 +1,5 @@
 import { createLocalSessionRuntime } from "@/server/auth/local-session-runtime";
 import { createPostgresPersonalAiGenerationLearningSessionRepository } from "@/server/repositories/personal-ai-generation-learning-session-repository";
-import { createPostgresPersonalAiGenerationResultRepository } from "@/server/repositories/personal-ai-generation-result-repository";
 import { createPostgresStudentAuthorizationRedeemRuntimeRepositories } from "@/server/repositories/student-authorization-redeem-runtime-repository";
 import { createEffectiveAuthorizationService } from "@/server/services/effective-authorization-service";
 import { createPersonalAiGenerationResultUserResolver } from "@/server/services/personal-ai-generation-result-route";
@@ -14,7 +13,6 @@ const personalAiGenerationLearningSessionRouteHandlers =
     createPersonalAiGenerationResultUserResolver(createLocalSessionRuntime()),
     {
       repository: createPostgresPersonalAiGenerationLearningSessionRepository(),
-      resultRepository: createPostgresPersonalAiGenerationResultRepository(),
       authorizationRepository:
         studentAuthorizationRedeemRuntimeRepositories.effectiveAuthorizationRepository,
       effectiveAuthorizationService: createEffectiveAuthorizationService(
@@ -23,7 +21,5 @@ const personalAiGenerationLearningSessionRouteHandlers =
     },
   );
 
-export const POST =
-  personalAiGenerationLearningSessionRouteHandlers.collection.POST;
 export const GET =
-  personalAiGenerationLearningSessionRouteHandlers.collection.GET;
+  personalAiGenerationLearningSessionRouteHandlers.statistics.GET;

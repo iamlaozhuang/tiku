@@ -1,4 +1,8 @@
-import type { PersonalAiGenerationLearningSessionDto } from "@/server/contracts/personal-ai-generation-learning-session-contract";
+import type {
+  PersonalAiGenerationLearningSessionDto,
+  PersonalAiGenerationLearningSessionPublicQuestionDto,
+  PersonalAiGenerationLearningSessionQuestionDto,
+} from "@/server/contracts/personal-ai-generation-learning-session-contract";
 
 const TEACHER_ONLY_QUESTION_KEYS = new Set([
   "analysis",
@@ -48,7 +52,7 @@ export function projectPersonalAiLearningSessionForLearner(
   return {
     ...session,
     questions: session.questions.map((question) => ({
-      ...question,
+      ...projectPersonalAiLearningQuestionForLearner(question),
       questionOptions: question.questionOptions.map((questionOption) => ({
         ...questionOption,
         isCorrect: null,
@@ -57,5 +61,37 @@ export function projectPersonalAiLearningSessionForLearner(
       standardAnswerText: null,
       analysis: null,
     })),
+  };
+}
+
+export function projectPersonalAiLearningQuestionForLearner(
+  question: PersonalAiGenerationLearningSessionQuestionDto,
+): PersonalAiGenerationLearningSessionPublicQuestionDto {
+  return {
+    sessionQuestionPublicId: question.sessionQuestionPublicId,
+    sourceDraftNumber: question.sourceDraftNumber,
+    questionType: question.questionType,
+    difficulty: question.difficulty,
+    knowledgeNodeLabels: [...question.knowledgeNodeLabels],
+    questionStem: question.questionStem,
+    questionOptions: question.questionOptions.map((questionOption) => ({
+      optionLabel: questionOption.optionLabel,
+      optionText: questionOption.optionText,
+    })),
+    maxScore: question.maxScore,
+    reviewStatus: question.reviewStatus,
+    ...(question.questionGroup === null || question.questionGroup === undefined
+      ? {}
+      : {
+          questionGroup: {
+            ...question.questionGroup,
+            materialSnapshot: {
+              ...question.questionGroup.materialSnapshot,
+            },
+            memberQuestionPublicIds: [
+              ...question.questionGroup.memberQuestionPublicIds,
+            ],
+          },
+        }),
   };
 }

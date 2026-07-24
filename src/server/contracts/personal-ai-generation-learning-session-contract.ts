@@ -8,15 +8,19 @@ import type {
 import type {
   PersonalAiGenerationLearningAnswerBlockReason,
   PersonalAiGenerationLearningAnswerFeedbackStatus,
+  PersonalAiGenerationLearningSessionAuthorizationSource,
+  PersonalAiGenerationLearningSessionCompleteBlockReason,
   PersonalAiGenerationLearningContentDomain,
   PersonalAiGenerationLearningFormalWriteStatus,
   PersonalAiGenerationLearningPersistenceStatus,
   PersonalAiGenerationLearningResumeStatus,
   PersonalAiGenerationLearningSessionCreationBlockReason,
   PersonalAiGenerationLearningSessionCreationStatus,
+  PersonalAiGenerationLearningSessionLifecycleAvailability,
   PersonalAiGenerationLearningSessionOwnerType,
   PersonalAiGenerationLearningSessionProgressStatus,
   PersonalAiGenerationLearningSessionQuestionType,
+  PersonalAiGenerationLearningSessionStatus,
 } from "../models/personal-ai-generation-learning-session";
 
 export type PersonalAiGenerationLearningPaperQuestionSourceKind = Exclude<
@@ -31,6 +35,19 @@ export type PersonalAiGenerationLearningFormalWriteBoundaryDto = {
   answerRecordWriteStatus: PersonalAiGenerationLearningFormalWriteStatus;
   examReportWriteStatus: PersonalAiGenerationLearningFormalWriteStatus;
   mistakeBookWriteStatus: PersonalAiGenerationLearningFormalWriteStatus;
+};
+
+export type PersonalAiGenerationLearningCompletionSummarySnapshotDto = {
+  schemaVersion: 1;
+  questionCount: number;
+  submittedCount: number;
+  correctCount: number;
+  incorrectCount: number;
+  reviewRequiredCount: number;
+  completionRate: number;
+  accuracyRate: number | null;
+  score: string;
+  maxScore: string;
 };
 
 export type PersonalAiGenerationLearningSessionQuestionOptionDto = {
@@ -77,12 +94,20 @@ export type PersonalAiGenerationLearningSessionDto = {
   ownerType: PersonalAiGenerationLearningSessionOwnerType;
   ownerPublicId: string;
   actorPublicId: string;
+  lifecycleAvailability: PersonalAiGenerationLearningSessionLifecycleAvailability;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource | null;
+  authorizationPublicId: string | null;
+  sessionStatus: PersonalAiGenerationLearningSessionStatus | null;
+  sessionRevision: number | null;
+  completedAt: string | null;
+  completionSummary: PersonalAiGenerationLearningCompletionSummarySnapshotDto | null;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   questionCount: number;
   questions: PersonalAiGenerationLearningSessionQuestionDto[];
   formalWriteBoundary: PersonalAiGenerationLearningFormalWriteBoundaryDto;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type PersonalAiGenerationLearningSessionPublicQuestionDto = Omit<
@@ -97,7 +122,7 @@ export type PersonalAiGenerationLearningSessionPublicQuestionDto = Omit<
 
 export type PersonalAiGenerationLearningSessionPublicDto = Omit<
   PersonalAiGenerationLearningSessionDto,
-  "questions"
+  "authorizationPublicId" | "questions"
 > & {
   questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
 };
@@ -109,6 +134,8 @@ export type PersonalAiGenerationLearningSessionCreationInputDto = {
   ownerType: PersonalAiGenerationLearningSessionOwnerType;
   ownerPublicId: string;
   actorPublicId: string;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+  authorizationPublicId: string;
   questionDraftSnapshot: PersonalAiGenerationPrivateQuestionDraftSnapshotDto;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
@@ -122,6 +149,8 @@ export type PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto = {
   ownerType: PersonalAiGenerationLearningSessionOwnerType;
   ownerPublicId: string;
   actorPublicId: string;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+  authorizationPublicId: string;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   paperAssemblyContainer: AiPaperPlanAndSelectContainerDto;
@@ -163,6 +192,8 @@ export type PersonalAiGenerationLearningSessionAnswerInputDto = {
   sessionPublicId: string;
   sessionQuestionPublicId: string;
   actorPublicId: string;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+  authorizationPublicId: string;
   expectedAnswerRevision: number;
   selectedOptionLabels: string[];
   textAnswer: string | null;
@@ -226,11 +257,17 @@ export type PersonalAiGenerationLearningSessionProgressDto = {
   ownerType: PersonalAiGenerationLearningSessionOwnerType;
   ownerPublicId: string;
   actorPublicId: string;
+  lifecycleAvailability: PersonalAiGenerationLearningSessionLifecycleAvailability;
+  sessionStatus: PersonalAiGenerationLearningSessionStatus | null;
+  sessionRevision: number | null;
+  completedAt: string | null;
+  completionSummary: PersonalAiGenerationLearningCompletionSummarySnapshotDto | null;
   persistenceStatus: PersonalAiGenerationLearningPersistenceStatus;
   resumeStatus: PersonalAiGenerationLearningResumeStatus;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   questionCount: number;
+  questions: PersonalAiGenerationLearningSessionPublicQuestionDto[];
   answerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
   statistics: PersonalAiGenerationLearningSessionStatisticsDto;
   formalWriteBoundary: PersonalAiGenerationLearningFormalWriteBoundaryDto;
@@ -240,7 +277,86 @@ export type PersonalAiGenerationLearningSessionProgressDto = {
 export type PersonalAiGenerationLearningSessionProgressInputDto = {
   sessionPublicId: string;
   actorPublicId: string;
-  viewedAt: Date;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+  authorizationPublicId: string;
+};
+
+export type PersonalAiGenerationLearningSessionCompleteInputDto = {
+  sessionPublicId: string;
+  actorPublicId: string;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+  authorizationPublicId: string;
+  expectedSessionRevision: number;
+  completedAt: Date;
+};
+
+export type PersonalAiGenerationLearningSessionCompleteResultDto =
+  | {
+      status: "completed" | "replayed";
+      blockReason: null;
+      sessionRevision: number;
+      completedAt: string;
+      completionSummary: PersonalAiGenerationLearningCompletionSummarySnapshotDto;
+    }
+  | {
+      status: "blocked";
+      blockReason: PersonalAiGenerationLearningSessionCompleteBlockReason;
+      sessionRevision: null;
+      completedAt: null;
+      completionSummary: null;
+    };
+
+export type PersonalAiGenerationLearningSessionHistoryQueryDto = {
+  actorPublicId: string;
+  ownerType: PersonalAiGenerationLearningSessionOwnerType;
+  ownerPublicId: string;
+  authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+  authorizationPublicId: string;
+  page: number;
+  pageSize: number;
+};
+
+export type PersonalAiGenerationLearningSessionHistoryItemDto = {
+  sessionPublicId: string;
+  sourceResultPublicId: string | null;
+  sourceTaskPublicId: string;
+  lifecycleAvailability: PersonalAiGenerationLearningSessionLifecycleAvailability;
+  sessionStatus: PersonalAiGenerationLearningSessionStatus | null;
+  sessionRevision: number | null;
+  questionCount: number;
+  submittedCount: number | null;
+  completionRate: number | null;
+  score: string | null;
+  maxScore: string | null;
+  canResume: boolean;
+  canReview: boolean;
+  canComplete: boolean;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+};
+
+export type PersonalAiGenerationLearningSessionHistoryDto = {
+  sessions: PersonalAiGenerationLearningSessionHistoryItemDto[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
+export type PersonalAiGenerationLearningSessionAggregateStatisticsDto = {
+  attemptCount: number;
+  inProgressCount: number;
+  completedCount: number;
+  completedQuestionCount: number;
+  submittedCount: number;
+  correctCount: number;
+  incorrectCount: number;
+  reviewRequiredCount: number;
+  completionRate: number | null;
+  accuracyRate: number | null;
+  score: string;
+  maxScore: string;
 };
 
 export type PersonalAiGenerationLearningSessionProgressResultDto =
@@ -259,7 +375,7 @@ export type PersonalAiGenerationLearningSessionProgressResultDto =
       >;
       blockReason: Extract<
         PersonalAiGenerationLearningAnswerBlockReason,
-        "session_not_found" | "actor_not_allowed"
+        "session_not_found" | "actor_not_allowed" | "answer_history_unavailable"
       >;
       progress: null;
     };
@@ -273,7 +389,7 @@ export type PersonalAiGenerationLearningSessionSaveResultDto =
       status: "blocked";
       blockReason: Extract<
         PersonalAiGenerationLearningSessionCreationBlockReason,
-        "source_result_not_found"
+        "source_result_not_found" | "session_context_mismatch"
       >;
     };
 
@@ -291,6 +407,8 @@ export type PersonalAiGenerationLearningSessionRepository = {
     | null;
   saveAnswerFeedback(input: {
     expectedAnswerRevision: number;
+    authorizationSource: PersonalAiGenerationLearningSessionAuthorizationSource;
+    authorizationPublicId: string;
     answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
   }):
     | Promise<PersonalAiGenerationLearningSessionAnswerSaveResultDto>
@@ -300,6 +418,30 @@ export type PersonalAiGenerationLearningSessionRepository = {
   ):
     | Promise<PersonalAiGenerationLearningSessionAnswerFeedbackDto[]>
     | PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
+  validateCompletedSessionSummary(input: {
+    session: PersonalAiGenerationLearningSessionDto;
+    answerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
+  }): Promise<boolean> | boolean;
+  completeSession(
+    input: PersonalAiGenerationLearningSessionCompleteInputDto,
+  ):
+    | Promise<PersonalAiGenerationLearningSessionCompleteResultDto>
+    | PersonalAiGenerationLearningSessionCompleteResultDto;
+  listSessionHistory(
+    input: PersonalAiGenerationLearningSessionHistoryQueryDto,
+  ):
+    | Promise<PersonalAiGenerationLearningSessionHistoryDto | null>
+    | PersonalAiGenerationLearningSessionHistoryDto
+    | null;
+  getSessionStatistics(
+    input: Omit<
+      PersonalAiGenerationLearningSessionHistoryQueryDto,
+      "page" | "pageSize"
+    >,
+  ):
+    | Promise<PersonalAiGenerationLearningSessionAggregateStatisticsDto | null>
+    | PersonalAiGenerationLearningSessionAggregateStatisticsDto
+    | null;
 };
 
 export type PersonalAiGenerationLearningSessionService = {
@@ -315,4 +457,16 @@ export type PersonalAiGenerationLearningSessionService = {
   getLearningSessionProgress(
     input: PersonalAiGenerationLearningSessionProgressInputDto,
   ): Promise<PersonalAiGenerationLearningSessionProgressResultDto>;
+  completeLearningSession(
+    input: PersonalAiGenerationLearningSessionCompleteInputDto,
+  ): Promise<PersonalAiGenerationLearningSessionCompleteResultDto>;
+  listLearningSessionHistory(
+    input: PersonalAiGenerationLearningSessionHistoryQueryDto,
+  ): Promise<PersonalAiGenerationLearningSessionHistoryDto | null>;
+  getLearningSessionStatistics(
+    input: Omit<
+      PersonalAiGenerationLearningSessionHistoryQueryDto,
+      "page" | "pageSize"
+    >,
+  ): Promise<PersonalAiGenerationLearningSessionAggregateStatisticsDto | null>;
 };

@@ -6,22 +6,76 @@ import type {
   PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
   PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+  PersonalAiGenerationLearningSessionAnswerInputDto,
+  PersonalAiGenerationLearningSessionCreationInputDto,
   PersonalAiGenerationLearningSessionDto,
+  PersonalAiGenerationLearningSessionProgressInputDto,
   PersonalAiGenerationLearningSessionRepository,
-  PersonalAiGenerationLearningSessionService,
 } from "../contracts/personal-ai-generation-learning-session-contract";
-import { createPersonalAiGenerationLearningSessionService } from "./personal-ai-generation-learning-session-service";
+import { createPersonalAiGenerationLearningSessionService as createProductionPersonalAiGenerationLearningSessionService } from "./personal-ai-generation-learning-session-service";
 import { personalAiGenerationLearningSessionQuestionTypeValues } from "../models/personal-ai-generation-learning-session";
 import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
 
-type PaperAssemblyLearningSessionService =
-  PersonalAiGenerationLearningSessionService & {
+const TEST_AUTHORIZATION_CONTEXT = {
+  authorizationSource: "personal_auth" as const,
+  authorizationPublicId: "personal_auth_public_learning_test",
+};
+
+function createPersonalAiGenerationLearningSessionService(input: {
+  repository: PersonalAiGenerationLearningSessionRepository;
+}) {
+  const service =
+    createProductionPersonalAiGenerationLearningSessionService(input);
+
+  return {
+    ...service,
+    createLearningSession(
+      creationInput: Omit<
+        PersonalAiGenerationLearningSessionCreationInputDto,
+        "authorizationSource" | "authorizationPublicId"
+      >,
+    ) {
+      return service.createLearningSession({
+        ...creationInput,
+        ...TEST_AUTHORIZATION_CONTEXT,
+      });
+    },
     createLearningSessionFromPaperAssembly(
-      input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
-    ): ReturnType<
-      PersonalAiGenerationLearningSessionService["createLearningSession"]
-    >;
+      creationInput: Omit<
+        PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+        "authorizationSource" | "authorizationPublicId"
+      >,
+    ) {
+      return service.createLearningSessionFromPaperAssembly({
+        ...creationInput,
+        ...TEST_AUTHORIZATION_CONTEXT,
+      });
+    },
+    submitLearningSessionAnswer(
+      answerInput: Omit<
+        PersonalAiGenerationLearningSessionAnswerInputDto,
+        "authorizationSource" | "authorizationPublicId"
+      >,
+    ) {
+      return service.submitLearningSessionAnswer({
+        ...answerInput,
+        ...TEST_AUTHORIZATION_CONTEXT,
+      });
+    },
+    getLearningSessionProgress(
+      progressInput: Omit<
+        PersonalAiGenerationLearningSessionProgressInputDto,
+        "authorizationSource" | "authorizationPublicId"
+      > & { viewedAt?: Date },
+    ) {
+      return service.getLearningSessionProgress({
+        sessionPublicId: progressInput.sessionPublicId,
+        actorPublicId: progressInput.actorPublicId,
+        ...TEST_AUTHORIZATION_CONTEXT,
+      });
+    },
   };
+}
 
 it("preserves all seven glossary question types in the learning model", () => {
   expect(personalAiGenerationLearningSessionQuestionTypeValues).toEqual([
@@ -58,6 +112,17 @@ function createInMemoryRepository(): PersonalAiGenerationLearningSessionReposito
         `${answerFeedback.sessionPublicId}:${answerFeedback.sessionQuestionPublicId}`,
         answerFeedback,
       );
+      const session = sessions.get(answerFeedback.sessionPublicId);
+
+      if (session !== undefined) {
+        sessions.set(answerFeedback.sessionPublicId, {
+          ...session,
+          updatedAt:
+            answerFeedback.submittedAt > session.updatedAt
+              ? answerFeedback.submittedAt
+              : session.updatedAt,
+        });
+      }
 
       return {
         status: "saved",
@@ -69,6 +134,24 @@ function createInMemoryRepository(): PersonalAiGenerationLearningSessionReposito
       return Array.from(answerFeedbacks.values()).filter(
         (answerFeedback) => answerFeedback.sessionPublicId === sessionPublicId,
       );
+    },
+    async validateCompletedSessionSummary() {
+      return true;
+    },
+    async completeSession() {
+      return {
+        status: "blocked",
+        blockReason: "session_lifecycle_unavailable",
+        sessionRevision: null,
+        completedAt: null,
+        completionSummary: null,
+      };
+    },
+    async listSessionHistory() {
+      return null;
+    },
+    async getSessionStatistics() {
+      return null;
     },
   };
 
@@ -395,7 +478,7 @@ describe("personal AI generation learning session service", () => {
     });
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),
-    }) as PaperAssemblyLearningSessionService;
+    });
 
     const result = await service.createLearningSessionFromPaperAssembly({
       sessionPublicId: "ai_learning_group_session_001",
@@ -452,7 +535,7 @@ describe("personal AI generation learning session service", () => {
     Object.assign(sourceQuestions[0]!, { questionGroup: group });
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),
-    }) as PaperAssemblyLearningSessionService;
+    });
 
     const result = await service.createLearningSessionFromPaperAssembly({
       sessionPublicId: "ai_learning_group_session_incomplete",
@@ -526,6 +609,7 @@ describe("personal AI generation learning session service", () => {
 
         await baseRepository.saveAnswerFeedback({
           expectedAnswerRevision: 0,
+          ...TEST_AUTHORIZATION_CONTEXT,
           answerFeedback: persistedAnswerFeedback,
         });
 
@@ -719,7 +803,7 @@ describe("personal AI generation learning session service", () => {
     const repository = createInMemoryRepository();
     const service = createPersonalAiGenerationLearningSessionService({
       repository,
-    }) as PaperAssemblyLearningSessionService;
+    });
     const firstInput = {
       sessionPublicId: "ai_learning_session_reuse_001",
       sourceResultPublicId: "ai_generation_result_reuse_001",
@@ -755,7 +839,7 @@ describe("personal AI generation learning session service", () => {
     const repository = createInMemoryRepository();
     const service = createPersonalAiGenerationLearningSessionService({
       repository,
-    }) as PaperAssemblyLearningSessionService;
+    });
     const input = {
       sessionPublicId: "ai_learning_session_collision_001",
       sourceResultPublicId: "ai_generation_result_collision_001",
@@ -786,7 +870,7 @@ describe("personal AI generation learning session service", () => {
   it("creates answerable learner sessions from locally selected paper assemblies and formal source question content", async () => {
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),
-    }) as PaperAssemblyLearningSessionService;
+    });
 
     expect(service.createLearningSessionFromPaperAssembly).toEqual(
       expect.any(Function),
@@ -892,7 +976,7 @@ describe("personal AI generation learning session service", () => {
     const repository = createInMemoryRepository();
     const service = createPersonalAiGenerationLearningSessionService({
       repository,
-    }) as PaperAssemblyLearningSessionService;
+    });
 
     expect(service.createLearningSessionFromPaperAssembly).toEqual(
       expect.any(Function),
@@ -1009,6 +1093,13 @@ describe("personal AI generation learning session service", () => {
           ownerType: "personal",
           ownerPublicId: "student_concurrent_001",
           actorPublicId: "student_concurrent_001",
+          lifecycleAvailability: "current",
+          authorizationSource: "personal_auth",
+          authorizationPublicId: "personal_auth_public_learning_test",
+          sessionStatus: "in_progress",
+          sessionRevision: 1,
+          completedAt: null,
+          completionSummary: null,
           evidenceStatus: "sufficient",
           citationCount: 2,
           questionCount: 1,
@@ -1037,6 +1128,7 @@ describe("personal AI generation learning session service", () => {
             mistakeBookWriteStatus: "blocked",
           },
           createdAt: "2026-07-05T12:00:00.000Z",
+          updatedAt: "2026-07-05T12:00:00.000Z",
         };
       },
       async saveAnswerFeedback() {
@@ -1048,6 +1140,24 @@ describe("personal AI generation learning session service", () => {
       },
       async listAnswerFeedbackBySessionPublicId() {
         return [];
+      },
+      async validateCompletedSessionSummary() {
+        return false;
+      },
+      async completeSession() {
+        return {
+          status: "blocked",
+          blockReason: "session_lifecycle_unavailable",
+          sessionRevision: null,
+          completedAt: null,
+          completionSummary: null,
+        };
+      },
+      async listSessionHistory() {
+        return null;
+      },
+      async getSessionStatistics() {
+        return null;
       },
     };
     const service = createPersonalAiGenerationLearningSessionService({
@@ -1222,7 +1332,7 @@ describe("personal AI generation learning session service", () => {
           accuracyRate: 1,
           score: "2.0",
           maxScore: "2.0",
-          updatedAt: "2026-07-05T12:04:00.000Z",
+          updatedAt: "2026-07-05T12:03:00.000Z",
         },
         formalWriteBoundary: {
           practiceWriteStatus: "blocked",
@@ -1238,6 +1348,60 @@ describe("personal AI generation learning session service", () => {
       selectedOptionLabels: ["FALSE"],
       isCorrect: true,
       submittedAt: "2026-07-05T12:03:00.000Z",
+    });
+  });
+
+  it("fails closed when a current session contains legacy answer revision facts", async () => {
+    const baseRepository = createInMemoryRepository();
+    const baseService = createPersonalAiGenerationLearningSessionService({
+      repository: baseRepository,
+    });
+    const sessionPublicId = "ai_learning_session_legacy_answer_progress_001";
+
+    await baseService.createLearningSession({
+      sessionPublicId,
+      sourceResultPublicId: "ai_generation_result_legacy_answer_progress_001",
+      sourceTaskPublicId: "ai_generation_task_legacy_answer_progress_001",
+      ownerType: "personal",
+      ownerPublicId: "student_legacy_answer_progress_001",
+      actorPublicId: "student_legacy_answer_progress_001",
+      questionDraftSnapshot: createQuestionSnapshot(
+        createQuestionSetPreview(),
+        "ai_generation_task_legacy_answer_progress_001",
+        "student_legacy_answer_progress_001",
+      ),
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      createdAt: new Date("2026-07-24T08:00:00.000Z"),
+    });
+    const currentFeedback = await baseService.submitLearningSessionAnswer({
+      sessionPublicId,
+      sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+      actorPublicId: "student_legacy_answer_progress_001",
+      expectedAnswerRevision: 0,
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-24T08:01:00.000Z"),
+    });
+    const repository: PersonalAiGenerationLearningSessionRepository = {
+      ...baseRepository,
+      async listAnswerFeedbackBySessionPublicId() {
+        return [{ ...currentFeedback, answerRevision: null }];
+      },
+    };
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    });
+
+    await expect(
+      service.getLearningSessionProgress({
+        sessionPublicId,
+        actorPublicId: "student_legacy_answer_progress_001",
+      }),
+    ).resolves.toEqual({
+      status: "blocked",
+      blockReason: "answer_history_unavailable",
+      progress: null,
     });
   });
 
@@ -1307,6 +1471,75 @@ describe("personal AI generation learning session service", () => {
     expect(blockedProgressResult).toEqual({
       status: "blocked",
       blockReason: "actor_not_allowed",
+      progress: null,
+    });
+  });
+
+  it("fails completed progress closed when immutable completion facts do not validate", async () => {
+    const baseRepository = createInMemoryRepository();
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: {
+        ...baseRepository,
+        async findSessionByPublicId() {
+          return {
+            sessionPublicId: "ai_learning_session_completed_drift_001",
+            contentDomain: "personal_ai_learning",
+            sourceResultPublicId: "ai_generation_result_completed_drift_001",
+            sourceTaskPublicId: "ai_generation_task_completed_drift_001",
+            ownerType: "personal",
+            ownerPublicId: "student_completed_drift_001",
+            actorPublicId: "student_completed_drift_001",
+            lifecycleAvailability: "current",
+            authorizationSource: "personal_auth",
+            authorizationPublicId: "personal_auth_public_learning_test",
+            sessionStatus: "completed",
+            sessionRevision: 2,
+            completedAt: "2026-07-24T08:00:00.000Z",
+            completionSummary: {
+              schemaVersion: 1,
+              questionCount: 0,
+              submittedCount: 0,
+              correctCount: 0,
+              incorrectCount: 0,
+              reviewRequiredCount: 0,
+              completionRate: 0,
+              accuracyRate: null,
+              score: "0.0",
+              maxScore: "0.0",
+            },
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+            questionCount: 0,
+            questions: [],
+            formalWriteBoundary: {
+              questionWriteStatus: "blocked",
+              paperWriteStatus: "blocked",
+              practiceWriteStatus: "blocked",
+              answerRecordWriteStatus: "blocked",
+              examReportWriteStatus: "blocked",
+              mistakeBookWriteStatus: "blocked",
+            },
+            createdAt: "2026-07-24T07:00:00.000Z",
+            updatedAt: "2026-07-24T08:00:00.000Z",
+          };
+        },
+        async listAnswerFeedbackBySessionPublicId() {
+          return [];
+        },
+        async validateCompletedSessionSummary() {
+          return false;
+        },
+      },
+    });
+
+    await expect(
+      service.getLearningSessionProgress({
+        sessionPublicId: "ai_learning_session_completed_drift_001",
+        actorPublicId: "student_completed_drift_001",
+      }),
+    ).resolves.toEqual({
+      status: "blocked",
+      blockReason: "answer_history_unavailable",
       progress: null,
     });
   });

@@ -332,6 +332,39 @@ function createProgressGetRequest(sessionPublicId: string): Request {
   );
 }
 
+function createHistoryGetRequest(
+  authorizationPublicId = personalAuthorizationPublicId,
+): Request {
+  return new Request(
+    `http://localhost/api/v1/personal-ai-generation-learning-sessions?authorizationPublicId=${authorizationPublicId}&page=1&pageSize=10`,
+    { method: "GET" },
+  );
+}
+
+function createStatisticsGetRequest(
+  authorizationPublicId = personalAuthorizationPublicId,
+): Request {
+  return new Request(
+    `http://localhost/api/v1/personal-ai-generation-learning-sessions/statistics?authorizationPublicId=${authorizationPublicId}`,
+    { method: "GET" },
+  );
+}
+
+function createCompletePostRequest(
+  sessionPublicId: string,
+  expectedSessionRevision: number,
+  authorizationPublicId = personalAuthorizationPublicId,
+): Request {
+  return new Request(
+    `http://localhost/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/complete?authorizationPublicId=${authorizationPublicId}`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ expectedSessionRevision }),
+    },
+  );
+}
+
 function createLearningSessionRepository(): PersonalAiGenerationLearningSessionRepository & {
   savedSessions: PersonalAiGenerationLearningSessionDto[];
   savedAnswerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
@@ -371,6 +404,24 @@ function createLearningSessionRepository(): PersonalAiGenerationLearningSessionR
       return savedAnswerFeedbacks.filter(
         (answerFeedback) => answerFeedback.sessionPublicId === sessionPublicId,
       );
+    },
+    async validateCompletedSessionSummary() {
+      return true;
+    },
+    async completeSession() {
+      return {
+        status: "blocked",
+        blockReason: "session_lifecycle_unavailable",
+        sessionRevision: null,
+        completedAt: null,
+        completionSummary: null,
+      };
+    },
+    async listSessionHistory() {
+      return null;
+    },
+    async getSessionStatistics() {
+      return null;
     },
   };
 }
@@ -637,6 +688,18 @@ function getLearningSessionCollectionPostHandler(collection: unknown) {
   return postHandler as (request: Request) => Promise<Response>;
 }
 
+function getLearningSessionCollectionGetHandler(collection: unknown) {
+  const getHandler = (
+    collection as {
+      GET?: (request: Request) => Promise<Response>;
+    }
+  ).GET;
+
+  expect(getHandler).toEqual(expect.any(Function));
+
+  return getHandler as (request: Request) => Promise<Response>;
+}
+
 function getLearningSessionProgressGetHandler(progress: unknown) {
   const getHandler = (
     progress as {
@@ -671,6 +734,36 @@ function getLearningSessionAnswerPostHandler(answers: unknown) {
     request: Request,
     context: { params: Promise<{ publicId: string }> },
   ) => Promise<Response>;
+}
+
+function getLearningSessionCompletePostHandler(complete: unknown) {
+  const postHandler = (
+    complete as {
+      POST?: (
+        request: Request,
+        context: { params: Promise<{ publicId: string }> },
+      ) => Promise<Response>;
+    }
+  ).POST;
+
+  expect(postHandler).toEqual(expect.any(Function));
+
+  return postHandler as (
+    request: Request,
+    context: { params: Promise<{ publicId: string }> },
+  ) => Promise<Response>;
+}
+
+function getLearningSessionStatisticsGetHandler(statistics: unknown) {
+  const getHandler = (
+    statistics as {
+      GET?: (request: Request) => Promise<Response>;
+    }
+  ).GET;
+
+  expect(getHandler).toEqual(expect.any(Function));
+
+  return getHandler as (request: Request) => Promise<Response>;
 }
 
 describe("personal AI generation learning session route handlers", () => {
@@ -809,6 +902,12 @@ describe("personal AI generation learning session route handlers", () => {
       "listAnswerFeedbackBySessionPublicId",
     );
     const saveAnswerFeedbackSpy = vi.spyOn(repository, "saveAnswerFeedback");
+    const completeSessionSpy = vi.spyOn(repository, "completeSession");
+    const listSessionHistorySpy = vi.spyOn(repository, "listSessionHistory");
+    const getSessionStatisticsSpy = vi.spyOn(
+      repository,
+      "getSessionStatistics",
+    );
 
     const ineffectiveHandlers =
       createBasePersonalAiGenerationLearningSessionRouteHandlers(
@@ -870,8 +969,25 @@ describe("personal AI generation learning session route handlers", () => {
     )(createProgressGetRequest(sessionPublicId), {
       params: Promise.resolve({ publicId: sessionPublicId }),
     });
+    const completeResponse = await getLearningSessionCompletePostHandler(
+      ineffectiveHandlers.complete,
+    )(createCompletePostRequest(sessionPublicId, 1), {
+      params: Promise.resolve({ publicId: sessionPublicId }),
+    });
+    const historyResponse = await getLearningSessionCollectionGetHandler(
+      ineffectiveHandlers.collection,
+    )(createHistoryGetRequest());
+    const statisticsResponse = await getLearningSessionStatisticsGetHandler(
+      ineffectiveHandlers.statistics,
+    )(createStatisticsGetRequest());
 
-    for (const response of [answerResponse, progressResponse]) {
+    for (const response of [
+      answerResponse,
+      progressResponse,
+      completeResponse,
+      historyResponse,
+      statisticsResponse,
+    ]) {
       await expect(response.json()).resolves.toEqual({
         code: 403057,
         message:
@@ -880,9 +996,136 @@ describe("personal AI generation learning session route handlers", () => {
       });
     }
     expect(repository.savedAnswerFeedbacks).toEqual([]);
-    expect(findSessionSpy).toHaveBeenCalledTimes(2);
+    expect(findSessionSpy).not.toHaveBeenCalled();
     expect(listAnswerFeedbackSpy).not.toHaveBeenCalled();
     expect(saveAnswerFeedbackSpy).not.toHaveBeenCalled();
+    expect(completeSessionSpy).not.toHaveBeenCalled();
+    expect(listSessionHistorySpy).not.toHaveBeenCalled();
+    expect(getSessionStatisticsSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns only allowlisted completion, history and aggregate facts", async () => {
+    const repository = createLearningSessionRepository();
+    const sourceResultPublicId = "ai_generation_result_lifecycle_public_001";
+    const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+    const completedAt = "2026-07-24T08:00:00.000Z";
+    const completionSummary = {
+      schemaVersion: 1 as const,
+      questionCount: 1,
+      submittedCount: 1,
+      correctCount: 1,
+      incorrectCount: 0,
+      reviewRequiredCount: 0,
+      completionRate: 1,
+      accuracyRate: 1,
+      score: "1.0",
+      maxScore: "1.0",
+    };
+    Reflect.set(
+      repository,
+      "completeSession",
+      vi.fn(async () => ({
+        status: "completed" as const,
+        blockReason: null,
+        sessionRevision: 2,
+        completedAt,
+        completionSummary,
+      })),
+    );
+    const listSessionHistory = vi.fn(async () => ({
+      sessions: [
+        {
+          sessionPublicId,
+          sourceResultPublicId,
+          sourceTaskPublicId: `task_${sourceResultPublicId}`,
+          lifecycleAvailability: "current" as const,
+          sessionStatus: "completed" as const,
+          sessionRevision: 2,
+          questionCount: 1,
+          submittedCount: 1,
+          completionRate: 1,
+          score: "1.0",
+          maxScore: "1.0",
+          canResume: false,
+          canReview: true,
+          canComplete: false,
+          createdAt: "2026-07-24T07:00:00.000Z",
+          updatedAt: completedAt,
+          completedAt,
+        },
+      ],
+      page: 1,
+      pageSize: 10,
+      total: 1,
+      totalPages: 1,
+    }));
+    Reflect.set(repository, "listSessionHistory", listSessionHistory);
+    const getSessionStatistics = vi.fn(async () => ({
+      attemptCount: 1,
+      inProgressCount: 0,
+      completedCount: 1,
+      completedQuestionCount: 1,
+      submittedCount: 1,
+      correctCount: 1,
+      incorrectCount: 0,
+      reviewRequiredCount: 0,
+      completionRate: 1,
+      accuracyRate: 1,
+      score: "1.0",
+      maxScore: "1.0",
+    }));
+    Reflect.set(repository, "getSessionStatistics", getSessionStatistics);
+    const handlers = createPersonalAiGenerationLearningSessionRouteHandlers(
+      async () => personalUserContext,
+      { repository },
+    );
+
+    await getLearningSessionCollectionPostHandler(handlers.collection)(
+      createPostRequest({ sourceResultPublicId }),
+    );
+    const responses = [
+      await getLearningSessionCompletePostHandler(handlers.complete)(
+        createCompletePostRequest(sessionPublicId, 1),
+        { params: Promise.resolve({ publicId: sessionPublicId }) },
+      ),
+      await getLearningSessionCollectionGetHandler(handlers.collection)(
+        new Request(
+          `${createHistoryGetRequest().url}&ownerType=organization&ownerPublicId=client_owner_must_be_ignored`,
+          { method: "GET" },
+        ),
+      ),
+      await getLearningSessionStatisticsGetHandler(handlers.statistics)(
+        new Request(
+          `${createStatisticsGetRequest().url}&ownerType=organization&ownerPublicId=client_owner_must_be_ignored`,
+          { method: "GET" },
+        ),
+      ),
+    ];
+
+    for (const response of responses) {
+      const serialized = JSON.stringify(await response.json());
+      expect(serialized).not.toContain("authorizationPublicId");
+      expect(serialized).not.toContain(personalAuthorizationPublicId);
+      expect(serialized).not.toContain("answerCommandDigest");
+      expect(serialized).not.toContain("standardAnswer");
+      expect(serialized).not.toContain("questionSnapshot");
+    }
+    expect(listSessionHistory).toHaveBeenCalledWith({
+      actorPublicId: personalUserContext.userPublicId,
+      ownerType: "personal",
+      ownerPublicId: personalUserContext.userPublicId,
+      authorizationSource: "personal_auth",
+      authorizationPublicId: personalAuthorizationPublicId,
+      page: 1,
+      pageSize: 10,
+    });
+    expect(getSessionStatistics).toHaveBeenCalledWith({
+      actorPublicId: personalUserContext.userPublicId,
+      ownerType: "personal",
+      ownerPublicId: personalUserContext.userPublicId,
+      authorizationSource: "personal_auth",
+      authorizationPublicId: personalAuthorizationPublicId,
+    });
   });
 
   it.each([

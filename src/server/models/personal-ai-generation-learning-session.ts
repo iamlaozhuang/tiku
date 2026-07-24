@@ -6,6 +6,26 @@ export const personalAiGenerationLearningSessionOwnerTypeValues = [
 export type PersonalAiGenerationLearningSessionOwnerType =
   (typeof personalAiGenerationLearningSessionOwnerTypeValues)[number];
 
+export const personalAiGenerationLearningSessionAuthorizationSourceValues = [
+  "personal_auth",
+  "org_auth",
+] as const;
+
+export type PersonalAiGenerationLearningSessionAuthorizationSource =
+  (typeof personalAiGenerationLearningSessionAuthorizationSourceValues)[number];
+
+export const personalAiGenerationLearningSessionStatusValues = [
+  "in_progress",
+  "completed",
+] as const;
+
+export type PersonalAiGenerationLearningSessionStatus =
+  (typeof personalAiGenerationLearningSessionStatusValues)[number];
+
+export type PersonalAiGenerationLearningSessionLifecycleAvailability =
+  | "current"
+  | "legacy_unavailable";
+
 export const personalAiGenerationLearningSessionQuestionTypeValues = [
   "single_choice",
   "multi_choice",
@@ -63,3 +83,11 @@ export type PersonalAiGenerationLearningAnswerBlockReason =
 export type PersonalAiGenerationLearningSessionProgressStatus =
   | "ready"
   | "blocked";
+
+export type PersonalAiGenerationLearningSessionCompleteBlockReason =
+  | "session_not_found"
+  | "actor_not_allowed"
+  | "session_revision_conflict"
+  | "session_lifecycle_unavailable"
+  | "session_answer_set_incomplete"
+  | "session_integrity_unavailable";

@@ -829,12 +829,18 @@ function createLearningSessionCreatedResponse(input: {
         ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
         actorPublicId: input.actorPublicId,
+        lifecycleAvailability: "current",
+        sessionStatus: "in_progress",
+        sessionRevision: 1,
+        completedAt: null,
+        completionSummary: null,
         evidenceStatus: "sufficient",
         citationCount: 2,
         questionCount: questions.length,
         questions,
         formalWriteBoundary: createLearningSessionFormalWriteBoundary(),
         createdAt: "2026-07-06T03:50:00.000Z",
+        updatedAt: "2026-07-06T03:50:00.000Z",
       },
     },
   };
@@ -936,6 +942,11 @@ function createLearningProgressResponse(input: {
         ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
         actorPublicId: input.actorPublicId,
+        lifecycleAvailability: "current",
+        sessionStatus: "in_progress",
+        sessionRevision: 1,
+        completedAt: null,
+        completionSummary: null,
         persistenceStatus: "repository_persisted",
         resumeStatus: "resumable",
         evidenceStatus: "sufficient",
@@ -1474,7 +1485,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       serverHistoryResponse.data[0].aiCallLogPublicId,
     ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 
   it("switches between AI出题 and AI组卷 tabs without submitting a generation request", async () => {
@@ -1525,6 +1536,8 @@ describe("StudentPersonalAiGenerationPage", () => {
       screen.getByRole("button", { name: paperButtonLabel }),
     ).toBeInTheDocument();
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
       "GET",
       "GET",
       "GET",
@@ -2493,7 +2506,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       screen.getByText("依据或正式题源不足时请调整参数后重试生成"),
     ).toBeInTheDocument();
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(10));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
     expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
@@ -2504,16 +2517,24 @@ describe("StudentPersonalAiGenerationPage", () => {
       "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
     expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[3]?.[0])).toBe("/api/v1/sessions");
+    expect(String(fetchMock.mock.calls[3]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-learning-sessions?authorizationPublicId=authorization-context-ui-001&page=1&pageSize=10",
+    );
     expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[4]?.[0])).toBe("/api/v1/authorizations");
+    expect(String(fetchMock.mock.calls[4]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-learning-sessions/statistics?authorizationPublicId=authorization-context-ui-001",
+    );
     expect(fetchMock.mock.calls[4]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[5]?.[0])).toBe(
+    expect(String(fetchMock.mock.calls[5]?.[0])).toBe("/api/v1/sessions");
+    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[6]?.[0])).toBe("/api/v1/authorizations");
+    expect(fetchMock.mock.calls[6]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[7]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests",
     );
-    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("POST");
+    expect(fetchMock.mock.calls[7]?.[1]?.method).toBe("POST");
     expect(
-      JSON.parse(String(fetchMock.mock.calls[5]?.[1]?.body)),
+      JSON.parse(String(fetchMock.mock.calls[7]?.[1]?.body)),
     ).toMatchObject({
       generationParameters: {
         profession: "monopoly",
@@ -2522,17 +2543,17 @@ describe("StudentPersonalAiGenerationPage", () => {
         questionCount: 3,
       },
     });
-    expect(String(fetchMock.mock.calls[6]?.[0])).toBe(
+    expect(String(fetchMock.mock.calls[8]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
-    expect(fetchMock.mock.calls[6]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[7]?.[0])).toBe(
+    expect(fetchMock.mock.calls[8]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[9]?.[0])).toBe(
       "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     );
-    expect(fetchMock.mock.calls[7]?.[1]?.method).toBe("GET");
+    expect(fetchMock.mock.calls[9]?.[1]?.method).toBe("GET");
 
     const requestBody = JSON.parse(
-      String(fetchMock.mock.calls[5]?.[1]?.body),
+      String(fetchMock.mock.calls[7]?.[1]?.body),
     ) as Record<string, unknown>;
 
     expect(requestBody).toEqual({
@@ -2961,8 +2982,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "查看解析" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeDisabled();
-    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock).toHaveBeenCalledTimes(7);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
       "GET",
       "GET",
       "GET",
@@ -3279,11 +3302,13 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(10));
     expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
       "/api/v1/authorizations",
       "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
       "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
+      "/api/v1/personal-ai-generation-learning-sessions?authorizationPublicId=authorization-context-ui-001&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-learning-sessions/statistics?authorizationPublicId=authorization-context-ui-001",
       "/api/v1/sessions",
       "/api/v1/authorizations",
       "/api/v1/personal-ai-generation-requests",
@@ -3291,6 +3316,8 @@ describe("StudentPersonalAiGenerationPage", () => {
       "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10&authorizationPublicId=authorization-context-ui-001",
     ]);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
       "GET",
       "GET",
       "GET",
@@ -3679,7 +3706,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(10));
   });
 
   it("renders a true unauthorized state after the cookie-backed session probe fails when no local token exists", async () => {
@@ -3776,7 +3803,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain(
       COOKIE_BACKED_SESSION_MARKER,
     );
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
   });
 
   it("renders the local contract blocked state without provider content", async () => {

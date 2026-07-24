@@ -7,11 +7,13 @@ import type {
   PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
   PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerInputDto,
+  PersonalAiGenerationLearningSessionCompleteInputDto,
   PersonalAiGenerationLearningSessionCreationInputDto,
   PersonalAiGenerationLearningSessionCreationResultDto,
   PersonalAiGenerationLearningSessionPublicCreationResultDto,
   PersonalAiGenerationLearningSessionRepository,
 } from "../contracts/personal-ai-generation-learning-session-contract";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { PersonalAiGenerationResultSelectedAuthorizationLookupRepository } from "../repositories/personal-ai-generation-result-repository";
 import type {
@@ -69,6 +71,24 @@ const emptyLearningSessionRepository: PersonalAiGenerationLearningSessionReposit
     listAnswerFeedbackBySessionPublicId() {
       return [];
     },
+    validateCompletedSessionSummary() {
+      return false;
+    },
+    completeSession() {
+      return {
+        status: "blocked",
+        blockReason: "session_lifecycle_unavailable",
+        sessionRevision: null,
+        completedAt: null,
+        completionSummary: null,
+      };
+    },
+    listSessionHistory() {
+      return null;
+    },
+    getSessionStatistics() {
+      return null;
+    },
   };
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -84,11 +104,14 @@ function projectLearningSessionCreationForApi(
     return result;
   }
 
+  const { authorizationPublicId, ...publicSession } = result.session;
+  void authorizationPublicId;
+
   return {
     status: "created",
     blockReason: null,
     session: {
-      ...result.session,
+      ...publicSession,
       questions: result.session.questions.map((question) => ({
         sessionQuestionPublicId: question.sessionQuestionPublicId,
         sourceDraftNumber: question.sourceDraftNumber,
@@ -368,6 +391,8 @@ async function createPersistedLearningSessionInput(input: {
         evidenceStatus: result.evidenceReference.evidenceStatus,
         citationCount: result.evidenceReference.citationCount,
         createdAt: input.now(),
+        authorizationSource: authorizationContext.authorizationSource,
+        authorizationPublicId: authorizationContext.authorizationPublicId,
         ...ownerScope,
       },
     };
@@ -443,6 +468,8 @@ async function createPersistedLearningSessionInput(input: {
       paperAssemblyContainer: paperAssembly.container,
       sourceQuestions,
       createdAt: input.now(),
+      authorizationSource: authorizationContext.authorizationSource,
+      authorizationPublicId: authorizationContext.authorizationPublicId,
       ...ownerScope,
     },
   };
@@ -536,7 +563,18 @@ async function resolveLearningSessionAuthorization(input: {
     EffectiveAuthorizationService,
     "listEffectiveAuthorizations"
   >;
-}): Promise<boolean> {
+}): Promise<EffectiveAuthorizationContextDto | null> {
+  const collectionAuthorizationContext = await resolveCollectionAuthorization({
+    authorizationPublicId: input.authorizationPublicId,
+    userContext: input.userContext,
+    authorizationRepository: input.authorizationRepository,
+    effectiveAuthorizationService: input.effectiveAuthorizationService,
+  });
+
+  if (collectionAuthorizationContext === null) {
+    return null;
+  }
+
   const session = await input.repository.findSessionByPublicId(
     input.sessionPublicId,
   );
@@ -550,7 +588,7 @@ async function resolveLearningSessionAuthorization(input: {
     (session.ownerType === "organization" &&
       session.ownerPublicId !== input.userContext.organizationPublicId)
   ) {
-    return false;
+    return null;
   }
 
   const result = await input.resultRepository.findDraftResultByPublicId({
@@ -562,7 +600,7 @@ async function resolveLearningSessionAuthorization(input: {
   });
 
   if (result === null) {
-    return false;
+    return null;
   }
 
   const authorizationContext =
@@ -575,11 +613,75 @@ async function resolveLearningSessionAuthorization(input: {
       effectiveAuthorizationService: input.effectiveAuthorizationService,
     });
 
-  return (
-    authorizationContext !== null &&
+  return authorizationContext !== null &&
+    authorizationContext.authorizationSource ===
+      collectionAuthorizationContext.authorizationSource &&
+    authorizationContext.authorizationPublicId ===
+      collectionAuthorizationContext.authorizationPublicId &&
     authorizationContext.ownerType === session.ownerType &&
-    authorizationContext.ownerPublicId === session.ownerPublicId
+    authorizationContext.ownerPublicId === session.ownerPublicId &&
+    (session.lifecycleAvailability !== "current" ||
+      (authorizationContext.authorizationSource ===
+        session.authorizationSource &&
+        authorizationContext.authorizationPublicId ===
+          session.authorizationPublicId))
+    ? authorizationContext
+    : null;
+}
+
+async function resolveCollectionAuthorization(input: {
+  authorizationPublicId: string;
+  userContext: PersonalAiGenerationResultUserContext;
+  authorizationRepository: PersonalAiGenerationAuthorizationOwnershipRepository;
+  effectiveAuthorizationService: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >;
+}): Promise<
+  | (EffectiveAuthorizationContextDto & {
+      ownerType: "personal" | "organization";
+    })
+  | null
+> {
+  const contexts = await Promise.all(
+    (["ai_question_generation", "ai_paper_generation"] as const).map(
+      (taskType) =>
+        resolveEffectivePersonalAiGenerationAuthorizationContext({
+          authorizationPublicId: input.authorizationPublicId,
+          requestedScope: null,
+          taskType,
+          userContext: input.userContext,
+          authorizationRepository: input.authorizationRepository,
+          effectiveAuthorizationService: input.effectiveAuthorizationService,
+        }),
+    ),
   );
+  const availableContexts = contexts.filter(
+    (
+      context,
+    ): context is EffectiveAuthorizationContextDto & {
+      ownerType: "personal" | "organization";
+    } =>
+      context !== null &&
+      (context.ownerType === "personal" ||
+        context.ownerType === "organization"),
+  );
+
+  if (availableContexts.length === 0) {
+    return null;
+  }
+
+  const [firstContext] = availableContexts;
+
+  return availableContexts.every(
+    (context) =>
+      context.authorizationSource === firstContext.authorizationSource &&
+      context.authorizationPublicId === firstContext.authorizationPublicId &&
+      context.ownerType === firstContext.ownerType &&
+      context.ownerPublicId === firstContext.ownerPublicId,
+  )
+    ? firstContext
+    : null;
 }
 
 async function createAnswerInput(input: {
@@ -587,7 +689,10 @@ async function createAnswerInput(input: {
   context: LearningSessionRouteContext;
   userContext: PersonalAiGenerationResultUserContext;
   now: () => Date;
-}): Promise<PersonalAiGenerationLearningSessionAnswerInputDto | null> {
+}): Promise<Omit<
+  PersonalAiGenerationLearningSessionAnswerInputDto,
+  "authorizationSource" | "authorizationPublicId"
+> | null> {
   const body = await readJsonObject(input.request);
 
   if (body === null) {
@@ -627,6 +732,61 @@ async function createAnswerInput(input: {
   };
 }
 
+function readStrictPositiveInteger(
+  value: string | null,
+  maximum: number,
+): number | null {
+  if (value === null || !/^[1-9][0-9]*$/.test(value)) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isSafeInteger(parsedValue) && parsedValue <= maximum
+    ? parsedValue
+    : null;
+}
+
+async function createCompleteInput(input: {
+  request: Request;
+  context: LearningSessionRouteContext;
+  userContext: PersonalAiGenerationResultUserContext;
+  authorizationContext: EffectiveAuthorizationContextDto;
+  now: () => Date;
+}): Promise<PersonalAiGenerationLearningSessionCompleteInputDto | null> {
+  const body = await readJsonObject(input.request);
+
+  if (
+    body === null ||
+    Object.keys(body).length !== 1 ||
+    !Object.hasOwn(body, "expectedSessionRevision")
+  ) {
+    return null;
+  }
+
+  const expectedSessionRevision = body.expectedSessionRevision;
+
+  if (
+    typeof expectedSessionRevision !== "number" ||
+    !Number.isInteger(expectedSessionRevision) ||
+    expectedSessionRevision < 1 ||
+    expectedSessionRevision >= 2_147_483_647
+  ) {
+    return null;
+  }
+
+  const { publicId } = await input.context.params;
+
+  return {
+    sessionPublicId: publicId,
+    actorPublicId: input.userContext.userPublicId,
+    authorizationSource: input.authorizationContext.authorizationSource,
+    authorizationPublicId: input.authorizationContext.authorizationPublicId,
+    expectedSessionRevision,
+    completedAt: input.now(),
+  };
+}
+
 export function createPersonalAiGenerationLearningSessionRouteHandlers(
   resolveUserContext: PersonalAiGenerationResultUserResolver,
   dependencies: PersonalAiGenerationLearningSessionRouteDependencies = {},
@@ -640,6 +800,71 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (request: Request): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
+
+          if (!isPersonalAiGenerationResultUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
+
+          const authorizationPublicId = readAuthorizationPublicId(request);
+          const requestUrl = new URL(request.url);
+          const page = readStrictPositiveInteger(
+            requestUrl.searchParams.get("page"),
+            1_000_000,
+          );
+          const pageSize = readStrictPositiveInteger(
+            requestUrl.searchParams.get("pageSize"),
+            100,
+          );
+
+          if (
+            authorizationPublicId === null ||
+            page === null ||
+            pageSize === null ||
+            dependencies.authorizationRepository === undefined ||
+            dependencies.effectiveAuthorizationService === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext = await resolveCollectionAuthorization({
+            authorizationPublicId,
+            userContext,
+            authorizationRepository: dependencies.authorizationRepository,
+            effectiveAuthorizationService:
+              dependencies.effectiveAuthorizationService,
+          });
+
+          if (authorizationContext === null) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const history =
+            await learningSessionService.listLearningSessionHistory({
+              actorPublicId: userContext.userPublicId,
+              ownerType: authorizationContext.ownerType,
+              ownerPublicId: authorizationContext.ownerPublicId,
+              authorizationSource: authorizationContext.authorizationSource,
+              authorizationPublicId: authorizationContext.authorizationPublicId,
+              page,
+              pageSize,
+            });
+
+          return history === null
+            ? createJsonResponse(
+                createErrorResponse(
+                  409060,
+                  "Personal AI learning session history is temporarily unavailable.",
+                ),
+              )
+            : createJsonResponse(createSuccessResponse(history));
+        },
+      ),
       POST: createRouteHandlerWithErrorEnvelope(
         async (request: Request): Promise<Response> => {
           const userContext = await resolveRequiredUserContext(
@@ -714,8 +939,13 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
             authorizationPublicId === null ||
             dependencies.resultRepository === undefined ||
             dependencies.authorizationRepository === undefined ||
-            dependencies.effectiveAuthorizationService === undefined ||
-            !(await resolveLearningSessionAuthorization({
+            dependencies.effectiveAuthorizationService === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext =
+            await resolveLearningSessionAuthorization({
               authorizationPublicId,
               sessionPublicId: publicId,
               userContext,
@@ -724,8 +954,9 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
               authorizationRepository: dependencies.authorizationRepository,
               effectiveAuthorizationService:
                 dependencies.effectiveAuthorizationService,
-            }))
-          ) {
+            });
+
+          if (authorizationContext === null) {
             return createJsonResponse(createAuthorizationUnavailableResponse());
           }
 
@@ -734,7 +965,9 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
               await learningSessionService.getLearningSessionProgress({
                 sessionPublicId: publicId,
                 actorPublicId: userContext.userPublicId,
-                viewedAt: now(),
+                authorizationSource: authorizationContext.authorizationSource,
+                authorizationPublicId:
+                  authorizationContext.authorizationPublicId,
               }),
             ),
           );
@@ -778,8 +1011,13 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
             authorizationPublicId === null ||
             dependencies.resultRepository === undefined ||
             dependencies.authorizationRepository === undefined ||
-            dependencies.effectiveAuthorizationService === undefined ||
-            !(await resolveLearningSessionAuthorization({
+            dependencies.effectiveAuthorizationService === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext =
+            await resolveLearningSessionAuthorization({
               authorizationPublicId,
               sessionPublicId: answerInput.sessionPublicId,
               userContext,
@@ -788,18 +1026,144 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
               authorizationRepository: dependencies.authorizationRepository,
               effectiveAuthorizationService:
                 dependencies.effectiveAuthorizationService,
-            }))
-          ) {
+            });
+
+          if (authorizationContext === null) {
             return createJsonResponse(createAuthorizationUnavailableResponse());
           }
 
           return createJsonResponse(
             createSuccessResponse(
-              await learningSessionService.submitLearningSessionAnswer(
-                answerInput,
-              ),
+              await learningSessionService.submitLearningSessionAnswer({
+                ...answerInput,
+                authorizationSource: authorizationContext.authorizationSource,
+                authorizationPublicId:
+                  authorizationContext.authorizationPublicId,
+              }),
             ),
           );
+        },
+      ),
+    },
+    complete: {
+      POST: createRouteHandlerWithErrorEnvelope(
+        async (
+          request: Request,
+          context: LearningSessionRouteContext,
+        ): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
+
+          if (!isPersonalAiGenerationResultUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
+
+          const { publicId } = await context.params;
+          const authorizationPublicId = readAuthorizationPublicId(request);
+
+          if (
+            authorizationPublicId === null ||
+            dependencies.resultRepository === undefined ||
+            dependencies.authorizationRepository === undefined ||
+            dependencies.effectiveAuthorizationService === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext =
+            await resolveLearningSessionAuthorization({
+              authorizationPublicId,
+              sessionPublicId: publicId,
+              userContext,
+              repository,
+              resultRepository: dependencies.resultRepository,
+              authorizationRepository: dependencies.authorizationRepository,
+              effectiveAuthorizationService:
+                dependencies.effectiveAuthorizationService,
+            });
+
+          if (authorizationContext === null) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const completeInput = await createCompleteInput({
+            request,
+            context,
+            userContext,
+            authorizationContext,
+            now,
+          });
+
+          return completeInput === null
+            ? createJsonResponse(
+                createErrorResponse(
+                  400058,
+                  "Invalid personal AI learning session completion input.",
+                ),
+              )
+            : createJsonResponse(
+                createSuccessResponse(
+                  await learningSessionService.completeLearningSession(
+                    completeInput,
+                  ),
+                ),
+              );
+        },
+      ),
+    },
+    statistics: {
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (request: Request): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
+
+          if (!isPersonalAiGenerationResultUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
+
+          const authorizationPublicId = readAuthorizationPublicId(request);
+
+          if (
+            authorizationPublicId === null ||
+            dependencies.authorizationRepository === undefined ||
+            dependencies.effectiveAuthorizationService === undefined
+          ) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const authorizationContext = await resolveCollectionAuthorization({
+            authorizationPublicId,
+            userContext,
+            authorizationRepository: dependencies.authorizationRepository,
+            effectiveAuthorizationService:
+              dependencies.effectiveAuthorizationService,
+          });
+
+          if (authorizationContext === null) {
+            return createJsonResponse(createAuthorizationUnavailableResponse());
+          }
+
+          const statistics =
+            await learningSessionService.getLearningSessionStatistics({
+              actorPublicId: userContext.userPublicId,
+              ownerType: authorizationContext.ownerType,
+              ownerPublicId: authorizationContext.ownerPublicId,
+              authorizationSource: authorizationContext.authorizationSource,
+              authorizationPublicId: authorizationContext.authorizationPublicId,
+            });
+
+          return statistics === null
+            ? createJsonResponse(
+                createErrorResponse(
+                  409061,
+                  "Personal AI learning statistics are temporarily unavailable.",
+                ),
+              )
+            : createJsonResponse(createSuccessResponse(statistics));
         },
       ),
     },

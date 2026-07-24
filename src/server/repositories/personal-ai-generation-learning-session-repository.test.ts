@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import type {
@@ -6,11 +8,59 @@ import type {
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import {
   createLearningAnswerFeedbackInsertValue,
-  createPersonalAiGenerationLearningSessionRepository,
+  createPersonalAiGenerationLearningSessionRepository as createProductionPersonalAiGenerationLearningSessionRepository,
+  hasExactPersonalAiLearningHistoryCandidateBinding,
+  isExactPersonalAiLearningSessionSourceBinding,
+  type PersonalAiLearningHistoryCandidateRow,
+  type PersonalAiGenerationLearningSessionSourceResultRow,
   type PersonalAiGenerationLearningSessionGateway,
   type PersonalAiGenerationLearningSessionRow,
   type PersonalAiLearningAnswerFeedbackRow,
 } from "./personal-ai-generation-learning-session-repository";
+import { createPersonalAiLearningCompletionSummary } from "../validators/personal-ai-generation-learning-session";
+
+function createTestCanonicalDigest(value: unknown): string {
+  function canonicalize(input: unknown): string {
+    if (input === null || typeof input !== "object") {
+      return JSON.stringify(input);
+    }
+    if (Array.isArray(input)) {
+      return `[${input.map(canonicalize).join(",")}]`;
+    }
+    return `{${Object.keys(input)
+      .sort()
+      .map(
+        (key) =>
+          `${JSON.stringify(key)}:${canonicalize(
+            (input as Record<string, unknown>)[key],
+          )}`,
+      )
+      .join(",")}}`;
+  }
+
+  return createHash("sha256").update(canonicalize(value), "utf8").digest("hex");
+}
+
+function createPersonalAiGenerationLearningSessionRepository(
+  gateway: PersonalAiGenerationLearningSessionGateway,
+) {
+  const repository =
+    createProductionPersonalAiGenerationLearningSessionRepository(gateway);
+
+  return {
+    ...repository,
+    saveAnswerFeedback(input: {
+      expectedAnswerRevision: number;
+      answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
+    }) {
+      return repository.saveAnswerFeedback({
+        ...input,
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal_auth_public_repo_001",
+      });
+    },
+  };
+}
 
 function createSession(
   overrides: Partial<PersonalAiGenerationLearningSessionDto> = {},
@@ -23,6 +73,13 @@ function createSession(
     ownerType: "personal",
     ownerPublicId: "student_public_repo_001",
     actorPublicId: "student_public_repo_001",
+    lifecycleAvailability: "current",
+    authorizationSource: "personal_auth",
+    authorizationPublicId: "personal_auth_public_repo_001",
+    sessionStatus: "in_progress",
+    sessionRevision: 1,
+    completedAt: null,
+    completionSummary: null,
     evidenceStatus: "sufficient",
     citationCount: 2,
     questionCount: 1,
@@ -57,6 +114,7 @@ function createSession(
       mistakeBookWriteStatus: "blocked",
     },
     createdAt: "2026-07-06T03:25:00.000Z",
+    updatedAt: "2026-07-06T03:25:00.000Z",
     ...overrides,
   };
 }
@@ -112,8 +170,39 @@ function createSessionRow(
     question_count: session.questionCount,
     question_snapshot: session.questions,
     formal_write_boundary: session.formalWriteBoundary,
+    lifecycle_schema_version:
+      session.lifecycleAvailability === "current" ? 1 : null,
+    authorization_source: session.authorizationSource,
+    authorization_public_id: session.authorizationPublicId,
+    session_status: session.sessionStatus,
+    session_revision: session.sessionRevision,
+    completed_at:
+      session.completedAt === null ? null : new Date(session.completedAt),
+    completion_summary_snapshot: session.completionSummary,
+    completion_summary_digest: null,
     created_at: new Date(session.createdAt),
     updated_at: new Date(session.createdAt),
+  };
+}
+
+function createHistoryCandidateRow(
+  session: PersonalAiGenerationLearningSessionDto = createSession(),
+): PersonalAiLearningHistoryCandidateRow {
+  return {
+    ...createSessionRow(session),
+    authoritative_result_public_id: session.sourceResultPublicId ?? "",
+    authoritative_result_owner_public_id: session.ownerPublicId,
+    authoritative_result_task_public_id: session.sourceTaskPublicId,
+    authoritative_result_task_type: "ai_question_generation",
+    authoritative_task_public_id: session.sourceTaskPublicId,
+    authoritative_task_type: "ai_question_generation",
+    authoritative_task_status: "succeeded",
+    authoritative_task_result_public_id: session.sourceResultPublicId,
+    authoritative_task_actor_public_id: session.actorPublicId,
+    authoritative_task_owner_type: session.ownerType,
+    authoritative_task_owner_public_id: session.ownerPublicId,
+    authoritative_task_authorization_public_id:
+      session.authorizationPublicId ?? "",
   };
 }
 
@@ -172,14 +261,26 @@ function createGateway(
     insertedSessions,
     upsertedFeedbacks,
     sourceResultQueries,
-    async findSourceResultRowByPublicId(query) {
+    async findSourceResultRowByPublicId(
+      query,
+    ): Promise<PersonalAiGenerationLearningSessionSourceResultRow | null> {
       sourceResultQueries.push(query);
 
       return {
         id: 17,
         public_id: "personal_ai_result_public_repo_001",
         owner_public_id: "student_public_repo_001",
+        result_task_public_id: "ai_generation_task_public_repo_001",
+        result_task_type: "ai_question_generation",
+        result_status: "draft",
         actor_public_id: "student_public_repo_001",
+        source_task_public_id: "ai_generation_task_public_repo_001",
+        authorization_public_id: "personal_auth_public_repo_001",
+        task_type: "ai_question_generation",
+        task_status: "succeeded",
+        task_result_public_id: "personal_ai_result_public_repo_001",
+        owner_type: "personal",
+        task_owner_public_id: "student_public_repo_001",
       };
     },
     async insertOrReuseSessionRow(input) {
@@ -200,10 +301,294 @@ function createGateway(
       return [createFeedbackRow(createFeedback())];
     },
     ...overrides,
+    completeSession:
+      overrides.completeSession ??
+      (async () => ({
+        status: "blocked" as const,
+        blockReason: "session_lifecycle_unavailable" as const,
+        sessionRevision: null,
+        completedAt: null,
+        completionSummary: null,
+      })),
+    listSessionHistory: overrides.listSessionHistory ?? (async () => null),
+    getSessionStatistics: overrides.getSessionStatistics ?? (async () => null),
   };
 }
 
 describe("personal AI generation learning session repository", () => {
+  it("validates completed progress against the immutable snapshot, digest, and full answer set", async () => {
+    const answerFeedback = createFeedback();
+    const secondQuestion = {
+      ...createSession().questions[0]!,
+      sessionQuestionPublicId: "ai_learning_session_public_repo_001_q_2",
+      sourceDraftNumber: 2,
+    };
+    const secondAnswerFeedback = createFeedback({
+      sessionQuestionPublicId: secondQuestion.sessionQuestionPublicId,
+    });
+    const seedSession = createSession({
+      sessionStatus: "completed",
+      sessionRevision: 2,
+      completedAt: "2026-07-06T03:27:00.000Z",
+      questionCount: 2,
+      questions: [createSession().questions[0]!, secondQuestion],
+    });
+    const summary = createPersonalAiLearningCompletionSummary({
+      sessionPublicId: seedSession.sessionPublicId,
+      sessionRevision: 2,
+      actorPublicId: seedSession.actorPublicId,
+      ownerType: seedSession.ownerType,
+      ownerPublicId: seedSession.ownerPublicId,
+      authorizationSource: "personal_auth",
+      authorizationPublicId: "personal_auth_public_repo_001",
+      sourceResultPublicId: seedSession.sourceResultPublicId!,
+      sourceTaskPublicId: seedSession.sourceTaskPublicId,
+      questionSnapshotDigest: createTestCanonicalDigest(seedSession.questions),
+      questions: seedSession.questions.map((question) => ({
+        sessionQuestionPublicId: question.sessionQuestionPublicId,
+        maxScore: question.maxScore,
+      })),
+      answerFeedbacks: [
+        {
+          sessionQuestionPublicId: answerFeedback.sessionQuestionPublicId,
+          status: "scored",
+          isCorrect: answerFeedback.isCorrect,
+          score: answerFeedback.score,
+          maxScore: answerFeedback.maxScore,
+        },
+        {
+          sessionQuestionPublicId: secondAnswerFeedback.sessionQuestionPublicId,
+          status: "scored",
+          isCorrect: secondAnswerFeedback.isCorrect,
+          score: secondAnswerFeedback.score,
+          maxScore: secondAnswerFeedback.maxScore,
+        },
+      ],
+    });
+    expect(summary).not.toBeNull();
+    const completedSession = createSession({
+      ...seedSession,
+      completionSummary: summary!.snapshot,
+    });
+    const completedRow = {
+      ...createSessionRow(completedSession),
+      completion_summary_digest: summary!.digest,
+    };
+    const answerRows = [
+      createFeedbackRow(answerFeedback),
+      createFeedbackRow(secondAnswerFeedback),
+    ];
+    const createRepository = (input: {
+      row?: PersonalAiGenerationLearningSessionRow;
+      answerRows?: PersonalAiLearningAnswerFeedbackRow[];
+    }) =>
+      createPersonalAiGenerationLearningSessionRepository(
+        createGateway({
+          async findSessionRowByPublicId() {
+            return input.row ?? completedRow;
+          },
+          async listAnswerFeedbackRowsBySessionPublicId() {
+            return input.answerRows ?? [...answerRows].reverse();
+          },
+        }),
+      );
+
+    await expect(
+      createRepository({}).validateCompletedSessionSummary({
+        session: completedSession,
+        answerFeedbacks: [answerFeedback, secondAnswerFeedback],
+      }),
+    ).resolves.toBe(true);
+    await expect(
+      createRepository({
+        row: {
+          ...completedRow,
+          completion_summary_snapshot: {
+            ...summary!.snapshot,
+            correctCount: 0,
+          },
+        },
+      }).validateCompletedSessionSummary({
+        session: completedSession,
+        answerFeedbacks: [answerFeedback, secondAnswerFeedback],
+      }),
+    ).resolves.toBe(false);
+    await expect(
+      createRepository({
+        row: {
+          ...completedRow,
+          completion_summary_digest: "a".repeat(64),
+        },
+      }).validateCompletedSessionSummary({
+        session: completedSession,
+        answerFeedbacks: [answerFeedback, secondAnswerFeedback],
+      }),
+    ).resolves.toBe(false);
+    await expect(
+      createRepository({
+        answerRows: [
+          createFeedbackRow(createFeedback({ isCorrect: false, score: "0.0" })),
+          createFeedbackRow(secondAnswerFeedback),
+        ],
+      }).validateCompletedSessionSummary({
+        session: completedSession,
+        answerFeedbacks: [answerFeedback, secondAnswerFeedback],
+      }),
+    ).resolves.toBe(false);
+  });
+
+  it.each([
+    ["result status", { result_status: "discarded" }],
+    ["task status", { task_status: "running" }],
+    ["result task identity", { result_task_public_id: "other_task" }],
+    ["result task type", { result_task_type: "ai_paper_generation" }],
+    ["task result link", { task_result_public_id: "other_result" }],
+    [
+      "unsupported task type",
+      { task_type: "organization_training_generation" },
+    ],
+  ])("rejects source binding when %s drifts", async (_label, override) => {
+    const session = createSession();
+    const sourceResult = {
+      id: 17,
+      public_id: session.sourceResultPublicId ?? "",
+      owner_public_id: session.ownerPublicId,
+      result_task_public_id: session.sourceTaskPublicId,
+      result_task_type: "ai_question_generation",
+      result_status: "draft",
+      actor_public_id: session.actorPublicId,
+      source_task_public_id: session.sourceTaskPublicId,
+      authorization_public_id: session.authorizationPublicId ?? "",
+      task_type: "ai_question_generation",
+      task_status: "succeeded",
+      task_result_public_id: session.sourceResultPublicId,
+      owner_type: session.ownerType,
+      task_owner_public_id: session.ownerPublicId,
+      ...override,
+    };
+
+    expect(
+      isExactPersonalAiLearningSessionSourceBinding({
+        sourceResult,
+        session,
+        expectedSourceResultId: 17,
+      }),
+    ).toBe(false);
+
+    const gateway = createGateway({
+      async findSourceResultRowByPublicId() {
+        return sourceResult;
+      },
+    });
+    const repository =
+      createPersonalAiGenerationLearningSessionRepository(gateway);
+
+    await expect(repository.saveSession(session)).resolves.toEqual({
+      status: "blocked",
+      blockReason: "source_result_not_found",
+    });
+    expect(gateway.insertedSessions).toEqual([]);
+  });
+
+  it("uses source task lineage as the history partition and rejects marker drift or partial lifecycle facts", () => {
+    const input = {
+      actorPublicId: "student_public_repo_001",
+      ownerType: "personal" as const,
+      ownerPublicId: "student_public_repo_001",
+      authorizationSource: "personal_auth" as const,
+      authorizationPublicId: "personal_auth_public_repo_001",
+    };
+    const exact = createHistoryCandidateRow();
+
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(exact, input),
+    ).toBe(true);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(
+        {
+          ...exact,
+          authorization_public_id: "personal_auth_public_other",
+        },
+        input,
+      ),
+    ).toBe(false);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(
+        {
+          ...exact,
+          session_revision: null,
+        },
+        input,
+      ),
+    ).toBe(false);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(
+        {
+          ...exact,
+          authoritative_task_authorization_public_id:
+            "personal_auth_public_other",
+        },
+        input,
+      ),
+    ).toBe(false);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(
+        {
+          ...exact,
+          authoritative_task_owner_public_id: "other_owner_public_001",
+        },
+        input,
+      ),
+    ).toBe(false);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(
+        {
+          ...exact,
+          authoritative_task_owner_type: "organization",
+        },
+        input,
+      ),
+    ).toBe(false);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(exact, {
+        ...input,
+        ownerPublicId: "other_owner_public_001",
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects internally consistent organization facts outside the effective authorization owner", () => {
+    const session = createSession({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_b",
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_shared",
+    });
+    const candidate = createHistoryCandidateRow(session);
+
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(candidate, {
+        actorPublicId: session.actorPublicId,
+        ownerType: "organization",
+        ownerPublicId: "organization_public_a",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_shared",
+      }),
+    ).toBe(false);
+    expect(
+      hasExactPersonalAiLearningHistoryCandidateBinding(
+        createHistoryCandidateRow(),
+        {
+          actorPublicId: "student_public_repo_001",
+          ownerType: "personal",
+          ownerPublicId: "other_personal_owner",
+          authorizationSource: "personal_auth",
+          authorizationPublicId: "personal_auth_public_repo_001",
+        },
+      ),
+    ).toBe(false);
+  });
+
   it("saves a learning session against an existing persisted generation result", async () => {
     const gateway = createGateway();
     const repository =
@@ -231,6 +616,9 @@ describe("personal AI generation learning session repository", () => {
         sourceResultPublicId: "personal_ai_result_public_repo_001",
         ownerPublicId: "student_public_repo_001",
         actorPublicId: "student_public_repo_001",
+        sourceTaskPublicId: "ai_generation_task_public_repo_001",
+        authorizationPublicId: "personal_auth_public_repo_001",
+        ownerType: "personal",
       },
     ]);
   });
@@ -260,7 +648,17 @@ describe("personal AI generation learning session repository", () => {
               id: 17,
               public_id: query.sourceResultPublicId,
               owner_public_id: query.ownerPublicId,
+              result_task_public_id: query.sourceTaskPublicId,
+              result_task_type: "ai_question_generation",
+              result_status: "draft",
               actor_public_id: query.actorPublicId,
+              source_task_public_id: query.sourceTaskPublicId,
+              authorization_public_id: query.authorizationPublicId,
+              task_type: "ai_question_generation",
+              task_status: "succeeded",
+              task_result_public_id: query.sourceResultPublicId,
+              owner_type: query.ownerType,
+              task_owner_public_id: query.ownerPublicId,
             }
           : null;
       },
@@ -286,6 +684,9 @@ describe("personal AI generation learning session repository", () => {
         sourceResultPublicId: "personal_ai_result_public_repo_001",
         ownerPublicId: "organization_public_repo_001",
         actorPublicId: "employee_user_public_other",
+        sourceTaskPublicId: "ai_generation_task_public_repo_001",
+        authorizationPublicId: "personal_auth_public_repo_001",
+        ownerType: "organization",
       },
     ]);
   });
@@ -680,6 +1081,35 @@ describe("personal AI generation learning session repository", () => {
           isCorrect: false,
           score: "0.0",
         }),
+      }),
+    ).resolves.toEqual({
+      status: "blocked",
+      blockReason: "answer_history_unavailable",
+      answerFeedback: null,
+    });
+    expect(gateway.upsertedFeedbacks).toEqual([]);
+  });
+
+  it("keeps legacy lifecycle sessions read-only at the answer repository boundary", async () => {
+    const legacySession = createSession({
+      lifecycleAvailability: "legacy_unavailable",
+      authorizationSource: null,
+      authorizationPublicId: null,
+      sessionStatus: null,
+      sessionRevision: null,
+    });
+    const gateway = createGateway({
+      async findSessionRowByPublicId() {
+        return createSessionRow(legacySession);
+      },
+    });
+    const repository =
+      createPersonalAiGenerationLearningSessionRepository(gateway);
+
+    await expect(
+      repository.saveAnswerFeedback({
+        expectedAnswerRevision: 0,
+        answerFeedback: createFeedback(),
       }),
     ).resolves.toEqual({
       status: "blocked",

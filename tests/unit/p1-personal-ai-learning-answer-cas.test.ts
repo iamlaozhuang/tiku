@@ -69,107 +69,22 @@ function createCurrentFeedback(): PersonalAiGenerationLearningSessionAnswerFeedb
 }
 
 describe("F-0163 personal AI learning answer CAS", () => {
-  it("keeps task state and additive migration source exact", () => {
-    const taskSafety = JSON.parse(
-      readRepositoryFile("docs/04-agent-system/state/task-safety.json"),
-    ) as {
-      taskId: string;
-      baseSha: string;
-      branch: string;
-      status: string;
-      approvalId: string;
-      allowedFiles: string[];
-      coreFiles: string[];
-      contingencyFiles: string[];
-      validationCommands: Array<{
-        name: string;
-        kind: string;
-        executable: string;
-        arguments: string[];
-      }>;
-      approvalSources: Record<string, string | null>;
-      conditionalCloseout: { approved: boolean; approvalId: string };
-    };
-
-    expect(taskSafety).toMatchObject({
-      taskId,
-      baseSha,
-      branch: "fix/personal-ai-learning-answer-cas",
-      approvalId,
-      approvalSources: { database: approvalId },
-      conditionalCloseout: { approved: true, approvalId },
-    });
-    expect(taskSafety.allowedFiles).toHaveLength(31);
-    expect(taskSafety.coreFiles).toHaveLength(21);
-    expect(taskSafety.contingencyFiles).toHaveLength(10);
-    expect(new Set(taskSafety.allowedFiles).size).toBe(31);
-    expect(taskSafety.allowedFiles).toEqual([
-      ...taskSafety.coreFiles,
-      ...taskSafety.contingencyFiles,
-    ]);
-    expect(taskSafety.allowedFiles).toContain(migrationPath);
-
-    for (const command of taskSafety.validationCommands) {
-      expect(["test", "lint", "typecheck", "other"]).toContain(command.kind);
-      expect(["corepack.cmd", "npm.cmd", "git.exe"]).toContain(
-        command.executable,
-      );
-      expect(command.arguments.join(" ")).not.toMatch(/[<>]/u);
-    }
-
-    const nonSqlAllowedFiles = taskSafety.allowedFiles.filter(
-      (allowedFile) => !allowedFile.endsWith(".sql"),
-    );
-    const [formatCommand] = taskSafety.validationCommands.filter(
-      (command) => command.name === "format",
-    );
-    expect(formatCommand).toBeDefined();
-    expect(
-      nonSqlAllowedFiles.every((file) =>
-        formatCommand.arguments.includes(file),
-      ),
-    ).toBe(true);
-
+  it("keeps the historical closeout and additive migration source exact", () => {
     const projectState = parseYamlStrictly(
       "docs/04-agent-system/state/project-state.yaml",
-    ) as {
-      currentTask: {
-        id: string;
-        branch: string;
-        executionStage: string;
-        riskBoundary: { requestedBaseSha: string; approvalId: string };
-      };
-    };
+    );
     const taskQueue = parseYamlStrictly(
       "docs/04-agent-system/state/task-queue.yaml",
-    ) as {
-      activeTasks: Array<{
-        id: string;
-        branch: string;
-        status: string;
-        executionStage: string;
-        riskBoundary: { requestedBaseSha: string; approvalId: string };
-      }>;
-    };
-    expect(projectState.currentTask).toMatchObject({
-      id: taskId,
-      branch: taskSafety.branch,
-      executionStage: taskSafety.status,
-      riskBoundary: { requestedBaseSha: baseSha, approvalId },
-    });
-    expect(
-      taskQueue.activeTasks.filter((task) => task.status === "in_progress"),
-    ).toEqual([
-      expect.objectContaining({
-        id: taskId,
-        branch: taskSafety.branch,
-        executionStage: taskSafety.status,
-        riskBoundary: expect.objectContaining({
-          requestedBaseSha: baseSha,
-          approvalId,
-        }),
-      }),
-    ]);
+    );
+    const persistedState = JSON.stringify({ projectState, taskQueue });
+
+    expect(persistedState).toContain(taskId);
+    expect(persistedState).toContain(baseSha);
+    expect(persistedState).toContain(approvalId);
+    expect(persistedState).toContain(
+      "9f2182dee69f66b1aec6e8918c7a05434a04e3ea",
+    );
+    expect(persistedState).toContain("closed_static_product");
 
     const migration = readRepositoryFile(migrationPath).trim();
     const statements = migration
@@ -204,7 +119,13 @@ describe("F-0163 personal AI learning answer CAS", () => {
     ) as { entries: Array<{ idx: number; tag: string }> };
     expect(currentSnapshot.prevId).toBe(previousSnapshot.id);
     expect(currentSnapshot.id).not.toBe(previousSnapshot.id);
-    expect(journal.entries.at(-1)).toEqual(
+    expect(
+      journal.entries.find(
+        (entry) =>
+          entry.tag ===
+          "20260724003000_p1_rc_08_personal_ai_learning_answer_cas",
+      ),
+    ).toEqual(
       expect.objectContaining({
         idx: 59,
         tag: "20260724003000_p1_rc_08_personal_ai_learning_answer_cas",

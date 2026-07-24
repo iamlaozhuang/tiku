@@ -1100,6 +1100,14 @@ export const personalAiLearningSession = pgTable(
     question_count: integer("question_count").default(0).notNull(),
     question_snapshot: jsonb("question_snapshot").notNull(),
     formal_write_boundary: jsonb("formal_write_boundary").notNull(),
+    lifecycle_schema_version: integer("lifecycle_schema_version"),
+    authorization_source: text("authorization_source"),
+    authorization_public_id: text("authorization_public_id"),
+    session_status: text("session_status"),
+    session_revision: integer("session_revision"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    completion_summary_snapshot: jsonb("completion_summary_snapshot"),
+    completion_summary_digest: text("completion_summary_digest"),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -1122,6 +1130,64 @@ export const personalAiLearningSession = pgTable(
     ),
     index("idx_personal_ai_learning_session_source_result").on(
       table.source_result_public_id,
+    ),
+    index("idx_personal_ai_learning_session_actor_auth_created_at").on(
+      table.actor_public_id,
+      table.authorization_source,
+      table.authorization_public_id,
+      table.created_at,
+      table.id,
+    ),
+    check(
+      "chk_personal_ai_learning_session_lifecycle",
+      sql`(
+        (
+          ${table.lifecycle_schema_version} is null
+          and ${table.authorization_source} is null
+          and ${table.authorization_public_id} is null
+          and ${table.session_status} is null
+          and ${table.session_revision} is null
+          and ${table.completed_at} is null
+          and ${table.completion_summary_snapshot} is null
+          and ${table.completion_summary_digest} is null
+        )
+        or
+        (
+          ${table.lifecycle_schema_version} is not null
+          and ${table.authorization_source} is not null
+          and ${table.session_status} is not null
+          and ${table.session_revision} is not null
+          and
+          ${table.lifecycle_schema_version} = 1
+          and (
+            (${table.owner_type} = 'personal' and ${table.authorization_source} = 'personal_auth')
+            or
+            (${table.owner_type} = 'organization' and ${table.authorization_source} = 'org_auth')
+          )
+          and ${table.authorization_public_id} is not null
+          and length(${table.authorization_public_id}) between 1 and 255
+          and ${table.session_status} in ('in_progress', 'completed')
+          and ${table.session_revision} between 1 and 2147483647
+          and (
+            (
+              ${table.session_status} = 'in_progress'
+              and ${table.completed_at} is null
+              and ${table.completion_summary_snapshot} is null
+              and ${table.completion_summary_digest} is null
+            )
+            or
+            (
+              ${table.session_status} = 'completed'
+              and ${table.completed_at} is not null
+              and ${table.completed_at} >= ${table.created_at}
+              and ${table.completion_summary_snapshot} is not null
+              and jsonb_typeof(${table.completion_summary_snapshot}) = 'object'
+              and ${table.completion_summary_digest} is not null
+              and ${table.completion_summary_digest} ~ '^[0-9a-f]{64}$'
+            )
+          )
+        )
+      )`,
     ),
   ],
 );

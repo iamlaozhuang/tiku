@@ -24,6 +24,4 @@ const personalAiGenerationLearningSessionRouteHandlers =
   );
 
 export const POST =
-  personalAiGenerationLearningSessionRouteHandlers.collection.POST;
-export const GET =
-  personalAiGenerationLearningSessionRouteHandlers.collection.GET;
+  personalAiGenerationLearningSessionRouteHandlers.complete.POST;

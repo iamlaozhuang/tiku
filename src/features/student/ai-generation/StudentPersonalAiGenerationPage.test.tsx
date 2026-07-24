@@ -248,6 +248,97 @@ function createDeferred<T>() {
   return { promise, resolve };
 }
 
+function createLearningHistoryQuestion(
+  sessionPublicId: string,
+  questionSuffix = "q_1",
+) {
+  return {
+    sessionQuestionPublicId: `${sessionPublicId}_${questionSuffix}`,
+    sourceDraftNumber: 1,
+    questionType: "single_choice",
+    difficulty: "medium",
+    knowledgeNodeLabels: ["专卖基础"],
+    questionStem: `服务端学习题目 ${sessionPublicId}`,
+    questionOptions: [
+      { optionLabel: "A", optionText: "正确选项" },
+      { optionLabel: "B", optionText: "干扰选项" },
+    ],
+    maxScore: "1.0",
+    reviewStatus: "draft_review_required",
+  };
+}
+
+function createLearningHistorySession(
+  sessionPublicId: string,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    sessionPublicId,
+    sourceResultPublicId: `${sessionPublicId}_result`,
+    sourceTaskPublicId: `${sessionPublicId}_task`,
+    lifecycleAvailability: "current",
+    sessionStatus: "in_progress",
+    sessionRevision: 1,
+    questionCount: 1,
+    submittedCount: 0,
+    completionRate: 0,
+    score: null,
+    maxScore: null,
+    canResume: true,
+    canReview: false,
+    canComplete: false,
+    createdAt: "2026-07-24T08:00:00.000Z",
+    updatedAt: "2026-07-24T08:00:00.000Z",
+    completedAt: null,
+    ...overrides,
+  };
+}
+
+function createLearningProgressResponse(
+  sessionPublicId: string,
+  answerFeedbacks: unknown[] = [],
+) {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      status: "ready",
+      blockReason: null,
+      progress: {
+        sessionPublicId,
+        lifecycleAvailability: "current",
+        sessionStatus: "in_progress",
+        sessionRevision: 1,
+        completedAt: null,
+        completionSummary: null,
+        questions: [createLearningHistoryQuestion(sessionPublicId)],
+        answerFeedbacks,
+      },
+    },
+  };
+}
+
+function createLearningStatisticsResponse() {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      attemptCount: 2,
+      inProgressCount: 2,
+      completedCount: 0,
+      completedQuestionCount: 0,
+      submittedCount: 0,
+      correctCount: 0,
+      incorrectCount: 0,
+      reviewRequiredCount: 0,
+      completionRate: null,
+      accuracyRate: null,
+      score: "0.0",
+      maxScore: "0.0",
+    },
+  };
+}
+
 function createResultDetailPayload(
   unsafeEchoFields: Record<string, string> = {},
 ) {
@@ -454,6 +545,22 @@ describe("StudentPersonalAiGenerationPage", () => {
       'answerResponse.data?.blockReason === "answer_revision_conflict"',
     );
     expect(source).toContain("await refreshAiLearningProgress(");
+  });
+
+  it("funnels authorization selection and invalidation through one atomic lifecycle helper", () => {
+    const source = readFileSync(
+      "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+      "utf8",
+    );
+
+    expect(source).toContain(
+      "const applyPersonalAiAuthorizationSelection = useCallback(",
+    );
+    expect(source.match(/setSelectedAuthorizationPublicId\(/gu)).toHaveLength(
+      1,
+    );
+    expect(source).toContain("aiLearningSessionActionSequenceRef.current += 1");
+    expect(source).toContain("selectedAuthorizationPublicIdRef.current =");
   });
 
   it("routes successful generation refresh through the sequence-invalidating history loader", () => {
@@ -743,6 +850,8 @@ describe("StudentPersonalAiGenerationPage", () => {
   it("ignores delayed personal histories after switching to organization context", async () => {
     const delayedPersonalRequest = createDeferred<unknown>();
     const delayedPersonalResult = createDeferred<unknown>();
+    const delayedPersonalLearningHistory = createDeferred<unknown>();
+    const delayedPersonalLearningStatistics = createDeferred<unknown>();
 
     studentRuntimeApiMock.fetchStudentApi.mockImplementation(
       async (url: string) => {
@@ -760,6 +869,79 @@ describe("StudentPersonalAiGenerationPage", () => {
             message: "ok",
             data: { generationAvailability: "closed" },
           };
+        }
+
+        if (
+          url.startsWith(
+            "/api/v1/personal-ai-generation-learning-sessions/statistics?",
+          )
+        ) {
+          const authorizationPublicId = new URL(
+            url,
+            "https://tiku.local",
+          ).searchParams.get("authorizationPublicId");
+          return authorizationPublicId === "authorization_context_ui_501"
+            ? delayedPersonalLearningStatistics.promise
+            : {
+                code: 0,
+                message: "ok",
+                data: {
+                  attemptCount: 9,
+                  inProgressCount: 1,
+                  completedCount: 8,
+                  completedQuestionCount: 8,
+                  submittedCount: 8,
+                  correctCount: 7,
+                  incorrectCount: 1,
+                  reviewRequiredCount: 0,
+                  completionRate: 1,
+                  accuracyRate: 0.875,
+                  score: "7.0",
+                  maxScore: "8.0",
+                },
+              };
+        }
+
+        if (
+          url.startsWith("/api/v1/personal-ai-generation-learning-sessions?")
+        ) {
+          const authorizationPublicId = new URL(
+            url,
+            "https://tiku.local",
+          ).searchParams.get("authorizationPublicId");
+          return authorizationPublicId === "authorization_context_ui_501"
+            ? delayedPersonalLearningHistory.promise
+            : {
+                code: 0,
+                message: "ok",
+                data: {
+                  sessions: [
+                    {
+                      sessionPublicId: "organization_learning_session_ui_001",
+                      sourceResultPublicId: "organization_result_ui_001",
+                      sourceTaskPublicId: "organization_task_ui_001",
+                      lifecycleAvailability: "current",
+                      sessionStatus: "in_progress",
+                      sessionRevision: 1,
+                      questionCount: 7,
+                      submittedCount: 7,
+                      completionRate: 1,
+                      score: "7.0",
+                      maxScore: "7.0",
+                      canResume: true,
+                      canReview: false,
+                      canComplete: true,
+                      createdAt: "2026-07-24T08:00:00.000Z",
+                      updatedAt: "2026-07-24T08:10:00.000Z",
+                      completedAt: null,
+                    },
+                  ],
+                  page: 1,
+                  pageSize: 10,
+                  total: 1,
+                  totalPages: 1,
+                },
+              };
         }
 
         const authorizationPublicId = new URL(
@@ -807,6 +989,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(organizationContext);
 
     expect(await screen.findByText("organization history")).toBeInTheDocument();
+    expect(await screen.findByText("已提交 7/7 题")).toBeInTheDocument();
+    expect(
+      screen.getByText("共 9 次 · 已完成 8 次 · 进行中 1 次"),
+    ).toBeInTheDocument();
 
     delayedPersonalRequest.resolve({
       code: 0,
@@ -829,6 +1015,55 @@ describe("StudentPersonalAiGenerationPage", () => {
         ],
       },
     });
+    delayedPersonalLearningHistory.resolve({
+      code: 0,
+      message: "ok",
+      data: {
+        sessions: [
+          {
+            sessionPublicId: "stale_personal_learning_session_ui_001",
+            sourceResultPublicId: null,
+            sourceTaskPublicId: "stale_personal_task_ui_001",
+            lifecycleAvailability: "legacy_unavailable",
+            sessionStatus: null,
+            sessionRevision: null,
+            questionCount: 1,
+            submittedCount: null,
+            completionRate: null,
+            score: null,
+            maxScore: null,
+            canResume: false,
+            canReview: false,
+            canComplete: false,
+            createdAt: "2026-07-24T07:00:00.000Z",
+            updatedAt: "2026-07-24T07:00:00.000Z",
+            completedAt: null,
+          },
+        ],
+        page: 1,
+        pageSize: 10,
+        total: 1,
+        totalPages: 1,
+      },
+    });
+    delayedPersonalLearningStatistics.resolve({
+      code: 0,
+      message: "ok",
+      data: {
+        attemptCount: 99,
+        inProgressCount: 99,
+        completedCount: 0,
+        completedQuestionCount: 0,
+        submittedCount: 0,
+        correctCount: 0,
+        incorrectCount: 0,
+        reviewRequiredCount: 0,
+        completionRate: null,
+        accuracyRate: null,
+        score: "0.0",
+        maxScore: "0.0",
+      },
+    });
 
     await waitFor(() => {
       expect(
@@ -836,6 +1071,12 @@ describe("StudentPersonalAiGenerationPage", () => {
       ).not.toBeInTheDocument();
     });
     expect(screen.getByText("organization history")).toBeInTheDocument();
+    expect(
+      screen.queryByText("历史学习记录（状态不可用）"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("共 99 次 · 已完成 0 次 · 进行中 99 次"),
+    ).not.toBeInTheDocument();
   });
 
   it("clears selected personal result and ignores its delayed detail after context switch", async () => {
@@ -1508,6 +1749,11 @@ describe("StudentPersonalAiGenerationPage", () => {
                       ? "organization_public_ui_501"
                       : "student_public_ui_501",
                   actorPublicId: "student_public_ui_501",
+                  lifecycleAvailability: "current",
+                  sessionStatus: "in_progress",
+                  sessionRevision: 1,
+                  completedAt: null,
+                  completionSummary: null,
                   evidenceStatus: "sufficient",
                   citationCount: 2,
                   questionCount: 2,
@@ -1537,8 +1783,105 @@ describe("StudentPersonalAiGenerationPage", () => {
                 status: "ready",
                 blockReason: null,
                 progress: {
+                  sessionPublicId,
+                  lifecycleAvailability: "current",
+                  sessionStatus: "in_progress",
+                  sessionRevision: 1,
+                  completedAt: null,
+                  completionSummary: null,
+                  questions: [sessionQuestion, secondSessionQuestion],
                   answerFeedbacks: [],
                 },
+              },
+            };
+          }
+
+          if (
+            url.startsWith(
+              "/api/v1/personal-ai-generation-learning-sessions/statistics?",
+            )
+          ) {
+            return {
+              code: 0,
+              message: "ok",
+              data: {
+                attemptCount: 1,
+                inProgressCount: 1,
+                completedCount: 0,
+                completedQuestionCount: 0,
+                submittedCount: 0,
+                correctCount: 0,
+                incorrectCount: 0,
+                reviewRequiredCount: 0,
+                completionRate: null,
+                accuracyRate: null,
+                score: "0.0",
+                maxScore: "0.0",
+              },
+            };
+          }
+
+          if (
+            url.startsWith("/api/v1/personal-ai-generation-learning-sessions?")
+          ) {
+            const page = Number(
+              new URL(url, "https://tiku.local").searchParams.get("page"),
+            );
+            const isSecondPage = page === 2;
+            return {
+              code: 0,
+              message: "ok",
+              data: {
+                sessions: [
+                  {
+                    sessionPublicId,
+                    sourceResultPublicId: paperHistory.resultPublicId,
+                    sourceTaskPublicId: paperHistory.taskPublicId,
+                    lifecycleAvailability: "current",
+                    sessionStatus: isSecondPage ? "completed" : "in_progress",
+                    sessionRevision: isSecondPage ? 2 : 1,
+                    questionCount: 2,
+                    submittedCount: 0,
+                    completionRate: 0,
+                    score: null,
+                    maxScore: null,
+                    canResume: !isSecondPage,
+                    canReview: isSecondPage,
+                    canComplete: !isSecondPage,
+                    createdAt: "2026-07-12T10:30:00.000Z",
+                    updatedAt: "2026-07-12T10:30:00.000Z",
+                    completedAt: isSecondPage
+                      ? "2026-07-12T10:40:00.000Z"
+                      : null,
+                  },
+                  ...(isSecondPage
+                    ? [
+                        {
+                          sessionPublicId: `${sessionPublicId}_legacy`,
+                          sourceResultPublicId: null,
+                          sourceTaskPublicId: `${paperHistory.taskPublicId}_legacy`,
+                          lifecycleAvailability: "legacy_unavailable",
+                          sessionStatus: null,
+                          sessionRevision: null,
+                          questionCount: 1,
+                          submittedCount: null,
+                          completionRate: null,
+                          score: null,
+                          maxScore: null,
+                          canResume: false,
+                          canReview: false,
+                          canComplete: false,
+                          createdAt: "2026-07-01T10:30:00.000Z",
+                          updatedAt: "2026-07-01T10:30:00.000Z",
+                          completedAt: null,
+                        },
+                      ]
+                    : []),
+                ],
+                page,
+                pageSize: 10,
+                total: 11,
+                totalPages: 2,
               },
             };
           }
@@ -1560,6 +1903,42 @@ describe("StudentPersonalAiGenerationPage", () => {
       expect(screen.getByText("服务端恢复的自测题目二")).toBeInTheDocument();
       expect(screen.getAllByText("供应链案例题组")).toHaveLength(1);
       expect(screen.getAllByText("服务端冻结的供应链材料正文")).toHaveLength(1);
+      expect(
+        screen.getByRole("button", { name: "完成本次学习" }),
+      ).toBeDisabled();
+      fireEvent.click(screen.getByRole("button", { name: "加载学习记录" }));
+      expect(await screen.findByText("进行中的学习")).toBeInTheDocument();
+      expect(
+        screen.getByText("共 1 次 · 已完成 0 次 · 进行中 1 次"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "继续学习" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "完成学习" }),
+      ).toBeInTheDocument();
+      const learningHistoryPanel = screen.getByTestId(
+        "student-ai-learning-history",
+      );
+      fireEvent.click(
+        within(learningHistoryPanel).getByRole("button", { name: "下一页" }),
+      );
+      expect(
+        await within(learningHistoryPanel).findByText("第 2 / 2 页"),
+      ).toBeInTheDocument();
+      const legacyHistoryRow = within(learningHistoryPanel)
+        .getByText("历史学习记录（状态不可用）")
+        .closest("div");
+      expect(legacyHistoryRow).not.toBeNull();
+      expect(
+        within(legacyHistoryRow!).queryByRole("button"),
+      ).not.toBeInTheDocument();
+      fireEvent.click(
+        within(learningHistoryPanel).getByRole("button", { name: "复核记录" }),
+      );
+      expect(
+        await screen.findByText("服务端恢复的自测题目"),
+      ).toBeInTheDocument();
       expect(postBodies).toEqual([
         {
           authorizationPublicId: "authorization_context_ui_501",
@@ -1573,6 +1952,344 @@ describe("StudentPersonalAiGenerationPage", () => {
       );
     },
   );
+
+  it("keeps only the latest historical learning action when two rows resolve out of order", async () => {
+    const firstSessionPublicId = "learning_history_action_ui_001";
+    const secondSessionPublicId = "learning_history_action_ui_002";
+    const firstProgress = createDeferred<unknown>();
+    const secondProgress = createDeferred<unknown>();
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+        if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
+          return { code: 0, message: "ok", data: [] };
+        }
+        if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+          return {
+            code: 0,
+            message: "ok",
+            data: { ...createResultHistoryPayload(), results: [] },
+          };
+        }
+        if (
+          url.startsWith(
+            "/api/v1/personal-ai-generation-learning-sessions/statistics?",
+          )
+        ) {
+          return createLearningStatisticsResponse();
+        }
+        if (
+          url.startsWith("/api/v1/personal-ai-generation-learning-sessions?")
+        ) {
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              sessions: [
+                createLearningHistorySession(firstSessionPublicId),
+                createLearningHistorySession(secondSessionPublicId),
+              ],
+              page: 1,
+              pageSize: 10,
+              total: 2,
+              totalPages: 1,
+            },
+          };
+        }
+        if (url.includes(`/${firstSessionPublicId}/progress?`)) {
+          return firstProgress.promise;
+        }
+        if (url.includes(`/${secondSessionPublicId}/progress?`)) {
+          return secondProgress.promise;
+        }
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+    const resumeButtons = await screen.findAllByRole("button", {
+      name: "继续学习",
+    });
+    fireEvent.click(resumeButtons[0]!);
+    fireEvent.click(resumeButtons[1]!);
+
+    firstProgress.resolve(createLearningProgressResponse(firstSessionPublicId));
+    await waitFor(() => {
+      expect(resumeButtons[1]).toBeDisabled();
+      expect(
+        screen.queryByText(`服务端学习题目 ${firstSessionPublicId}`),
+      ).not.toBeInTheDocument();
+    });
+
+    secondProgress.resolve(
+      createLearningProgressResponse(secondSessionPublicId),
+    );
+    expect(
+      await screen.findByText(`服务端学习题目 ${secondSessionPublicId}`),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(`服务端学习题目 ${firstSessionPublicId}`),
+    ).not.toBeInTheDocument();
+  });
+
+  it("submits one completion while in flight and refreshes exact progress and lifecycle after a conflict", async () => {
+    const sessionPublicId = "learning_completion_ui_001";
+    const question = createLearningHistoryQuestion(sessionPublicId);
+    const completion = createDeferred<unknown>();
+    let progressReadCount = 0;
+    let historyReadCount = 0;
+    let statisticsReadCount = 0;
+    let completionWriteCount = 0;
+    const answerFeedback = {
+      status: "scored",
+      blockReason: null,
+      sessionPublicId,
+      sessionQuestionPublicId: question.sessionQuestionPublicId,
+      actorPublicId: "student_public_ui_501",
+      answerRevision: 1,
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      isCorrect: true,
+      score: "1.0",
+      maxScore: "1.0",
+      standardAnswerLabels: ["A"],
+      standardAnswerText: null,
+      analysis: "服务端解析",
+      aiScoringStatus: "blocked",
+      formalWriteBoundary: {
+        questionWriteStatus: "blocked",
+        paperWriteStatus: "blocked",
+        practiceWriteStatus: "blocked",
+        answerRecordWriteStatus: "blocked",
+        examReportWriteStatus: "blocked",
+        mistakeBookWriteStatus: "blocked",
+      },
+      mistakeBookPublicId: null,
+      submittedAt: "2026-07-24T08:05:00.000Z",
+    };
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string, _token: string | null, init?: RequestInit) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+        if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
+          return { code: 0, message: "ok", data: [] };
+        }
+        if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+          return {
+            code: 0,
+            message: "ok",
+            data: { ...createResultHistoryPayload(), results: [] },
+          };
+        }
+        if (
+          url.startsWith(
+            "/api/v1/personal-ai-generation-learning-sessions/statistics?",
+          )
+        ) {
+          statisticsReadCount += 1;
+          return createLearningStatisticsResponse();
+        }
+        if (
+          url.startsWith("/api/v1/personal-ai-generation-learning-sessions?")
+        ) {
+          historyReadCount += 1;
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              sessions: [createLearningHistorySession(sessionPublicId)],
+              page: 1,
+              pageSize: 10,
+              total: 1,
+              totalPages: 1,
+            },
+          };
+        }
+        if (url.includes(`/${sessionPublicId}/progress?`)) {
+          progressReadCount += 1;
+          return createLearningProgressResponse(sessionPublicId, [
+            answerFeedback,
+          ]);
+        }
+        if (
+          new URL(url, "https://tiku.local").pathname.endsWith(
+            `/${sessionPublicId}/complete`,
+          ) &&
+          init?.method === "POST"
+        ) {
+          completionWriteCount += 1;
+          return completion.promise;
+        }
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "继续学习" }));
+    const completeButton = await screen.findByRole("button", {
+      name: "完成本次学习",
+    });
+    expect(completeButton).toBeEnabled();
+    fireEvent.click(completeButton);
+    fireEvent.click(completeButton);
+    await waitFor(() => {
+      expect(completionWriteCount).toBe(1);
+    });
+
+    completion.resolve({
+      code: 409019,
+      message: "conflict",
+      data: {
+        status: "blocked",
+        blockReason: "session_revision_conflict",
+        sessionRevision: null,
+        completedAt: null,
+        completionSummary: null,
+      },
+    });
+
+    await waitFor(() => {
+      expect(progressReadCount).toBeGreaterThanOrEqual(2);
+      expect(historyReadCount).toBeGreaterThanOrEqual(2);
+      expect(statisticsReadCount).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it("starts an immutable learning session from an AI question result", async () => {
+    const result = createResultHistoryPayload().results[0];
+    const sessionPublicId = `ai_learning_session_${result.resultPublicId}`;
+    const question = {
+      sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+      sourceDraftNumber: 1,
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["专卖基础"],
+      questionStem: "服务端冻结的 AI 出题练习",
+      questionOptions: [
+        { optionLabel: "A", optionText: "正确选项" },
+        { optionLabel: "B", optionText: "干扰选项" },
+      ],
+      maxScore: "1.0",
+      reviewStatus: "draft_review_required",
+    };
+    const postBodies: unknown[] = [];
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string, _token: string | null, init?: RequestInit) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+        if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
+          return { code: 0, message: "ok", data: [] };
+        }
+        if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+          return { code: 0, message: "ok", data: createResultHistoryPayload() };
+        }
+        if (
+          url === "/api/v1/personal-ai-generation-learning-sessions" &&
+          init?.method === "POST"
+        ) {
+          postBodies.push(JSON.parse(String(init.body)));
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              status: "created",
+              blockReason: null,
+              session: {
+                sessionPublicId,
+                sourceResultPublicId: result.resultPublicId,
+                sourceTaskPublicId: result.taskPublicId,
+                ownerType: "personal",
+                ownerPublicId: "student_public_ui_501",
+                actorPublicId: "student_public_ui_501",
+                lifecycleAvailability: "current",
+                sessionStatus: "in_progress",
+                sessionRevision: 1,
+                completedAt: null,
+                completionSummary: null,
+                questions: [question],
+              },
+            },
+          };
+        }
+        if (url.includes(`/${sessionPublicId}/progress?`)) {
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              status: "ready",
+              blockReason: null,
+              progress: {
+                sessionPublicId,
+                lifecycleAvailability: "current",
+                sessionStatus: "in_progress",
+                sessionRevision: 1,
+                completedAt: null,
+                completionSummary: null,
+                questions: [question],
+                answerFeedbacks: [],
+              },
+            },
+          };
+        }
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "开始或继续自测" }),
+    );
+
+    expect(
+      await screen.findByText("服务端冻结的 AI 出题练习"),
+    ).toBeInTheDocument();
+    expect(postBodies).toEqual([
+      {
+        authorizationPublicId: "authorization_context_ui_501",
+        sourceResultPublicId: result.resultPublicId,
+      },
+    ]);
+  });
 
   it("localizes profession and learner-facing dates", async () => {
     mockAuthorizationAndResultHistoryResponse(

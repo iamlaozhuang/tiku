@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
+  currentTaskId: p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -585,7 +585,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
     - p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
     - p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
+    - p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
   completedTaskIds:
+    - p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
     - p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
     - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
     - p1-remediation-rc-08-residual-jit-review-2026-07-23
@@ -788,7 +790,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-residual-jit-review-2026-07-23: closed
     p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23: closed
     p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24: closed
-    p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24: in_progress
+    p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24: closed
+    p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -995,66 +998,58 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
-  title: F-0163 closeout and F-0164 residual JIT materialization
-  phase: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
+  id: p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
+  title: Personal AI learning session lifecycle, history and statistics
+  phase: p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
   status: in_progress
   priority: p1
-  taskKind: low_risk_state_only_transition
-  productClosureContribution: records_F0163_closeout_and_selects_F0164_as_next_without_product_changes
-  branch: fix/rc-08-f0163-closeout-f0164-jit-materialization
+  taskKind: schema_migration_source_database_application_logic_and_permission_scoped_API_UI_contract
+  productClosureContribution: closes_F0164_session_lifecycle_history_and_statistics_static_product_partition
+  branch: fix/personal-ai-learning-session-lifecycle-history-statistics
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0163
     - F-0164
   candidateRootCauseCluster: P1-RC-08
-  objective: atomically record the delivered F-0163 static closeout while preserving WIP=1 and selecting F-0164 only as the next task pending fresh product approval
-  executionStage: approved_state_only_transition_pending_closeout
-  findingStatus: F0163_closed_static_product_F0164_selected_pending_fresh_schema_database_permission_approval
-  findingDisposition: F0163_closed_static_product; F0164_next_only_not_active; F0013_remains_runtime_hold
+  objective: add exact authorization-lineaged personal AI learning-session lifecycle, serialized completion, immutable summaries, database-paged history and authorization-scoped statistics without expanding permission scope
+  executionStage: implemented_verified_static_pending_final_tree_binding
+  findingStatus: implemented_verified_static_pending_final_tree_binding
+  findingDisposition: F0164_session_lifecycle_history_statistics_implemented_verified_static_after_paged_UI_authoritative_actions_context_isolation_and_completed_summary_integrity_correction_without_migration_apply_real_database_or_browser_runtime_proof_pending_final_tree_binding; F0013_remains_runtime_hold
   riskBoundary:
-    category: low_risk_state_only
+    category: schema_migration_source_database_application_logic_and_permission_scoped_API_UI_contract
     approvalStatus: approved
-    approvalId: guardian-rc08-f0163-closeout-f0164-jit-state-transition-2026-07-24
-    requestedBaseSha: 9f2182dee69f66b1aec6e8918c7a05434a04e3ea
-    allowedFiles: 3
-    coreFiles: 3
-    contingencyFiles: 0
-    productCodeChange: false
-    schemaOrMigrationChange: false
-    databaseOrRealData: false
-    permissionOrEntitlementChange: false
+    approvalId: guardian-f0164-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
+    requestedBaseSha: b9f1675c102bd504b059562a45e162a412c4c3c8
+    allowedFiles: 38
+    coreFiles: 30
+    contingencyFiles: 8
+    schemaMigrationSourceChange: additive_eight_legacy_nullable_fields_checks_and_one_history_index
+    migrationApplyOrRealDatabase: false
+    permissionScopeChange: false
     providerOrExternalCall: false
     dependencyOrMechanismChange: false
     conditionalCloseout: true
+  finalTreeReview:
+    decision: correction_required
+    previousRejectedCandidateTree: a250056195037e3fe5a7b4c4ec7c380afdd134ee
+    previousRejectedRawCachedDiffSha256: 73ea1c952e954d9bd1c5fb1df82580bb15bb505ee45135071e29af53ea9745ef
+    rejectedCandidateTree: 3560d734a27bad6157571225e52609446cecf925
+    rejectedRawCachedDiffSha256: e60f4bf28ee123415305c4908375f73b9a3e226f04f73f46da2fb8a2e59bdc49
+    stagedFileCount: 26
+    tokensIssued: false
+    correctionStatus: corrected_and_verified_pending_fresh_final_tree_binding
+    correctionEvidence: ref_backed_latest_exact_authorization_session_action_guard_double_click_and_conflict_refresh_atomic_authorization_selection_and_order_independent_completed_answer_exact_set_validation
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
-    findingId: F-0163
-    commit: 9f2182dee69f66b1aec6e8918c7a05434a04e3ea
-    parent: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
-    tree: 144084d7857073e1c59049dcd19ad7becc53baa7
-    changedFileCount: 23
-    status: closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned
-    focusedTestFiles: 10
-    focusedTests: 185
-    closeoutKernel: pass
-    prePushKernel: pass
-    masterOriginSync: pass
-    worktreeClean: pass
-    shortBranchCleanup: pass
-    proofBoundary: no_migration_apply_real_database_data_browser_or_runtime_proof
-  nextTask:
-    findingId: F-0164
-    status: selected_pending_fresh_schema_database_permission_approval
-    proposedProductTaskId: p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
-    proposedBranch: fix/personal-ai-learning-session-lifecycle-history-statistics
-    active: false
-    materialized: false
+    taskId: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
+    commit: b9f1675c102bd504b059562a45e162a412c4c3c8
+    parent: 9f2182dee69f66b1aec6e8918c7a05434a04e3ea
+    tree: 26f55c85726e98cb87459e593d74d7f3c19c8c42
+    changedFileCount: 3
+    status: closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned
   jitRevalidation:
     F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
     F-0162: closed_static_product_at_8a7af98590d6b05fde4c31a22cf44ea61ac99513
     F-0163: closed_static_product_at_9f2182dee69f66b1aec6e8918c7a05434a04e3ea
-    F-0164: selected_next_only_pending_fresh_schema_database_permission_approval
+    F-0164: implemented_verified_static_pending_final_tree_binding_without_migration_apply_real_database_or_browser_runtime_proof
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active

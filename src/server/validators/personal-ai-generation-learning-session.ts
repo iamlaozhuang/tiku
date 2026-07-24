@@ -14,7 +14,9 @@ import type { PersonalAiGenerationLearningSessionAnswerFeedbackDto } from "../co
 import { createHash } from "node:crypto";
 
 const PERSONAL_AI_LEARNING_ANSWER_COMMAND_SCHEMA_VERSION = 1;
+const PERSONAL_AI_LEARNING_COMPLETION_SCHEMA_VERSION = 1;
 const MAX_PERSONAL_AI_LEARNING_ANSWER_REVISION = 2_147_483_647;
+const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 
 const questionTypeAliases: Record<
   string,
@@ -157,6 +159,334 @@ export function createPersonalAiLearningAnswerCommandDigest(
   return createHash("sha256")
     .update(JSON.stringify(canonicalCommand), "utf8")
     .digest("hex");
+}
+
+export type PersonalAiLearningCompletionSummarySnapshot = {
+  schemaVersion: 1;
+  questionCount: number;
+  submittedCount: number;
+  correctCount: number;
+  incorrectCount: number;
+  reviewRequiredCount: number;
+  completionRate: number;
+  accuracyRate: number | null;
+  score: string;
+  maxScore: string;
+};
+
+type PersonalAiLearningCompletionInput = {
+  sessionPublicId: string;
+  sessionRevision: number;
+  actorPublicId: string;
+  ownerType: "personal" | "organization";
+  ownerPublicId: string;
+  authorizationSource: "personal_auth" | "org_auth";
+  authorizationPublicId: string;
+  sourceResultPublicId: string;
+  sourceTaskPublicId: string;
+  questionSnapshotDigest: string;
+  questions: Array<{
+    sessionQuestionPublicId: string;
+    maxScore: string;
+  }>;
+  answerFeedbacks: Array<{
+    sessionQuestionPublicId: string;
+    status: "scored" | "submitted_review_required";
+    isCorrect: boolean | null;
+    score: string | null;
+    maxScore: string | null;
+  }>;
+};
+
+export function createPersonalAiLearningCompletionSummary(
+  input: PersonalAiLearningCompletionInput,
+): {
+  snapshot: PersonalAiLearningCompletionSummarySnapshot;
+  digest: string;
+} | null {
+  if (
+    !isNonEmptyBoundedText(input.sessionPublicId) ||
+    !Number.isInteger(input.sessionRevision) ||
+    input.sessionRevision < 1 ||
+    input.sessionRevision > MAX_PERSONAL_AI_LEARNING_ANSWER_REVISION ||
+    !isNonEmptyBoundedText(input.actorPublicId) ||
+    !isNonEmptyBoundedText(input.ownerPublicId) ||
+    !isNonEmptyBoundedText(input.authorizationPublicId) ||
+    !isNonEmptyBoundedText(input.sourceResultPublicId) ||
+    !isNonEmptyBoundedText(input.sourceTaskPublicId) ||
+    !SHA256_PATTERN.test(input.questionSnapshotDigest) ||
+    (input.ownerType !== "personal" && input.ownerType !== "organization") ||
+    (input.authorizationSource !== "personal_auth" &&
+      input.authorizationSource !== "org_auth") ||
+    (input.ownerType === "personal" &&
+      input.authorizationSource !== "personal_auth") ||
+    (input.ownerType === "organization" &&
+      input.authorizationSource !== "org_auth") ||
+    !isDenseArray(input.questions, 1_000) ||
+    !isDenseArray(input.answerFeedbacks, 1_000) ||
+    input.questions.length === 0 ||
+    input.answerFeedbacks.length !== input.questions.length
+  ) {
+    return null;
+  }
+
+  const canonicalQuestions = [...input.questions].sort((left, right) =>
+    compareOrdinal(left.sessionQuestionPublicId, right.sessionQuestionPublicId),
+  );
+  const canonicalAnswers = [...input.answerFeedbacks].sort((left, right) =>
+    compareOrdinal(left.sessionQuestionPublicId, right.sessionQuestionPublicId),
+  );
+  let correctCount = 0;
+  let incorrectCount = 0;
+  let reviewRequiredCount = 0;
+  let score = 0;
+  let maxScore = 0;
+
+  for (let index = 0; index < canonicalQuestions.length; index += 1) {
+    const question = canonicalQuestions[index]!;
+    const answer = canonicalAnswers[index]!;
+    const previousQuestion = canonicalQuestions[index - 1];
+
+    if (
+      !isNonEmptyBoundedText(question.sessionQuestionPublicId) ||
+      (previousQuestion !== undefined &&
+        previousQuestion.sessionQuestionPublicId ===
+          question.sessionQuestionPublicId) ||
+      !isValidScore(question.maxScore) ||
+      Number(question.maxScore) <= 0 ||
+      answer.sessionQuestionPublicId !== question.sessionQuestionPublicId ||
+      answer.maxScore !== question.maxScore
+    ) {
+      return null;
+    }
+
+    maxScore += Number(question.maxScore);
+
+    if (
+      answer.status === "scored" &&
+      typeof answer.isCorrect === "boolean" &&
+      answer.score !== null &&
+      isValidScore(answer.score) &&
+      Number(answer.score) <= Number(question.maxScore)
+    ) {
+      score += Number(answer.score);
+      if (answer.isCorrect) {
+        correctCount += 1;
+      } else {
+        incorrectCount += 1;
+      }
+      continue;
+    }
+
+    if (
+      answer.status === "submitted_review_required" &&
+      answer.isCorrect === null &&
+      answer.score === null
+    ) {
+      reviewRequiredCount += 1;
+      continue;
+    }
+
+    return null;
+  }
+
+  if (!Number.isFinite(score) || !Number.isFinite(maxScore)) {
+    return null;
+  }
+
+  const questionCount = canonicalQuestions.length;
+  const objectiveCount = correctCount + incorrectCount;
+  const snapshot: PersonalAiLearningCompletionSummarySnapshot = {
+    schemaVersion: PERSONAL_AI_LEARNING_COMPLETION_SCHEMA_VERSION,
+    questionCount,
+    submittedCount: canonicalAnswers.length,
+    correctCount,
+    incorrectCount,
+    reviewRequiredCount,
+    completionRate: 1,
+    accuracyRate:
+      objectiveCount === 0
+        ? null
+        : Number((correctCount / objectiveCount).toFixed(4)),
+    score: score.toFixed(1),
+    maxScore: maxScore.toFixed(1),
+  };
+  const privateCanonicalFacts = {
+    schemaVersion: PERSONAL_AI_LEARNING_COMPLETION_SCHEMA_VERSION,
+    sessionPublicId: input.sessionPublicId,
+    sessionRevision: input.sessionRevision,
+    actorPublicId: input.actorPublicId,
+    ownerType: input.ownerType,
+    ownerPublicId: input.ownerPublicId,
+    authorizationSource: input.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    sourceResultPublicId: input.sourceResultPublicId,
+    sourceTaskPublicId: input.sourceTaskPublicId,
+    questionSnapshotDigest: input.questionSnapshotDigest,
+    questions: canonicalQuestions.map((question, index) => ({
+      sessionQuestionPublicId: question.sessionQuestionPublicId,
+      maxScore: question.maxScore,
+      answer: {
+        status: canonicalAnswers[index]!.status,
+        isCorrect: canonicalAnswers[index]!.isCorrect,
+        score: canonicalAnswers[index]!.score,
+      },
+    })),
+    summary: snapshot,
+  };
+
+  return {
+    snapshot: { ...snapshot },
+    digest: createHash("sha256")
+      .update(JSON.stringify(privateCanonicalFacts), "utf8")
+      .digest("hex"),
+  };
+}
+
+export type PersonalAiLearningSessionLifecycle =
+  | { kind: "legacy" }
+  | { kind: "corrupt" }
+  | {
+      kind: "current";
+      authorizationSource: "personal_auth" | "org_auth";
+      authorizationPublicId: string;
+      sessionStatus: "in_progress" | "completed";
+      sessionRevision: number;
+      completedAt: Date | null;
+      completionSummarySnapshot: PersonalAiLearningCompletionSummarySnapshot | null;
+      completionSummaryDigest: string | null;
+    };
+
+export function parsePersonalAiLearningSessionLifecycle(input: {
+  lifecycle_schema_version: unknown;
+  authorization_source: unknown;
+  authorization_public_id: unknown;
+  session_status: unknown;
+  session_revision: unknown;
+  completed_at: unknown;
+  completion_summary_snapshot: unknown;
+  completion_summary_digest: unknown;
+}): PersonalAiLearningSessionLifecycle {
+  const values = Object.values(input);
+  if (values.every((value) => value === null)) {
+    return { kind: "legacy" };
+  }
+
+  if (
+    input.lifecycle_schema_version !== 1 ||
+    (input.authorization_source !== "personal_auth" &&
+      input.authorization_source !== "org_auth") ||
+    !isNonEmptyBoundedText(input.authorization_public_id) ||
+    (input.session_status !== "in_progress" &&
+      input.session_status !== "completed") ||
+    !Number.isInteger(input.session_revision) ||
+    (input.session_revision as number) < 1 ||
+    (input.session_revision as number) >
+      MAX_PERSONAL_AI_LEARNING_ANSWER_REVISION
+  ) {
+    return { kind: "corrupt" };
+  }
+
+  if (
+    input.session_status === "in_progress" &&
+    (input.completed_at !== null ||
+      input.completion_summary_snapshot !== null ||
+      input.completion_summary_digest !== null)
+  ) {
+    return { kind: "corrupt" };
+  }
+
+  if (
+    input.session_status === "completed" &&
+    (!(input.completed_at instanceof Date) ||
+      !Number.isFinite(input.completed_at.getTime()) ||
+      !isCompletionSummarySnapshot(input.completion_summary_snapshot) ||
+      typeof input.completion_summary_digest !== "string" ||
+      !SHA256_PATTERN.test(input.completion_summary_digest))
+  ) {
+    return { kind: "corrupt" };
+  }
+
+  return {
+    kind: "current",
+    authorizationSource: input.authorization_source,
+    authorizationPublicId: input.authorization_public_id,
+    sessionStatus: input.session_status,
+    sessionRevision: input.session_revision as number,
+    completedAt:
+      input.session_status === "completed"
+        ? (input.completed_at as Date)
+        : null,
+    completionSummarySnapshot:
+      input.session_status === "completed"
+        ? (input.completion_summary_snapshot as PersonalAiLearningCompletionSummarySnapshot)
+        : null,
+    completionSummaryDigest:
+      input.session_status === "completed"
+        ? (input.completion_summary_digest as string)
+        : null,
+  };
+}
+
+function isCompletionSummarySnapshot(
+  value: unknown,
+): value is PersonalAiLearningCompletionSummarySnapshot {
+  if (
+    !hasExactKeys(value, [
+      "accuracyRate",
+      "completionRate",
+      "correctCount",
+      "incorrectCount",
+      "maxScore",
+      "questionCount",
+      "reviewRequiredCount",
+      "schemaVersion",
+      "score",
+      "submittedCount",
+    ])
+  ) {
+    return false;
+  }
+
+  const snapshot = value as PersonalAiLearningCompletionSummarySnapshot;
+  return (
+    snapshot.schemaVersion === 1 &&
+    Number.isInteger(snapshot.questionCount) &&
+    snapshot.questionCount > 0 &&
+    Number.isInteger(snapshot.submittedCount) &&
+    snapshot.submittedCount === snapshot.questionCount &&
+    Number.isInteger(snapshot.correctCount) &&
+    Number.isInteger(snapshot.incorrectCount) &&
+    Number.isInteger(snapshot.reviewRequiredCount) &&
+    snapshot.correctCount +
+      snapshot.incorrectCount +
+      snapshot.reviewRequiredCount ===
+      snapshot.submittedCount &&
+    snapshot.completionRate === 1 &&
+    (snapshot.accuracyRate === null ||
+      (Number.isFinite(snapshot.accuracyRate) &&
+        snapshot.accuracyRate >= 0 &&
+        snapshot.accuracyRate <= 1)) &&
+    isValidScore(snapshot.score) &&
+    isValidScore(snapshot.maxScore) &&
+    Number(snapshot.score) <= Number(snapshot.maxScore)
+  );
+}
+
+function isDenseArray(value: unknown[], maxLength: number): boolean {
+  if (value.length > maxLength) {
+    return false;
+  }
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function compareOrdinal(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 function isCanonicalAnswerLabelArray(value: unknown): value is string[] {

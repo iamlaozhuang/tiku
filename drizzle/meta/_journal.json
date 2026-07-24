@@ -421,6 +421,13 @@
       "when": 1784879217204,
       "tag": "20260724003000_p1_rc_08_personal_ai_learning_answer_cas",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1784886991008,
+      "tag": "20260724013000_p1_rc_08_personal_ai_learning_session_lifecycle",
+      "breakpoints": true
     }
   ]
 }

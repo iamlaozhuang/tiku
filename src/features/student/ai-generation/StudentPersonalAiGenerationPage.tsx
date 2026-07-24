@@ -14,7 +14,7 @@ import {
   Sparkles,
   ShieldAlert,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   fetchCurrentStudentSession,
@@ -36,6 +36,9 @@ import type {
 } from "@/server/contracts/personal-ai-generation-result-history-contract";
 import type {
   PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+  PersonalAiGenerationLearningSessionAggregateStatisticsDto,
+  PersonalAiGenerationLearningSessionCompleteResultDto,
+  PersonalAiGenerationLearningSessionHistoryDto,
   PersonalAiGenerationLearningSessionPublicCreationResultDto,
   PersonalAiGenerationLearningSessionProgressResultDto,
   PersonalAiGenerationLearningSessionPublicQuestionDto,
@@ -105,6 +108,13 @@ type StudentAiLearningAnswerFeedbackByQuestion = Record<
 
 type StudentAiLearningSelectedLabelsByQuestion = Record<string, string[]>;
 type StudentAiLearningTextAnswersByQuestion = Record<string, string>;
+type StudentAiLearningSessionAction = "resume" | "review" | "complete";
+type StudentAiLearningSessionActionToken = {
+  sequence: number;
+  authorizationPublicId: string;
+  sessionPublicId: string;
+  action: StudentAiLearningSessionAction;
+};
 
 type StudentSessionRequestToken = string | null;
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
@@ -1275,6 +1285,66 @@ async function fetchPersonalAiLearningSessionProgress(
     {
       method: "GET",
     },
+  );
+}
+
+async function fetchCompletePersonalAiLearningSession(
+  studentSessionValue: StudentSessionRequestToken,
+  sessionPublicId: string,
+  authorizationPublicId: string,
+  expectedSessionRevision: number,
+): Promise<{
+  code: number;
+  message: string;
+  data: PersonalAiGenerationLearningSessionCompleteResultDto | null;
+}> {
+  return fetchStudentApi<PersonalAiGenerationLearningSessionCompleteResultDto>(
+    `/api/v1/personal-ai-generation-learning-sessions/${encodeURIComponent(
+      sessionPublicId,
+    )}/complete?${new URLSearchParams({ authorizationPublicId }).toString()}`,
+    studentSessionValue,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ expectedSessionRevision }),
+    },
+  );
+}
+
+async function fetchPersonalAiLearningSessionHistory(
+  studentSessionValue: StudentSessionRequestToken,
+  authorizationPublicId: string,
+  page: number,
+): Promise<{
+  code: number;
+  message: string;
+  data: PersonalAiGenerationLearningSessionHistoryDto | null;
+}> {
+  return fetchStudentApi<PersonalAiGenerationLearningSessionHistoryDto>(
+    `/api/v1/personal-ai-generation-learning-sessions?${new URLSearchParams({
+      authorizationPublicId,
+      page: String(page),
+      pageSize: "10",
+    }).toString()}`,
+    studentSessionValue,
+    { method: "GET" },
+  );
+}
+
+async function fetchPersonalAiLearningSessionStatistics(
+  studentSessionValue: StudentSessionRequestToken,
+  authorizationPublicId: string,
+): Promise<{
+  code: number;
+  message: string;
+  data: PersonalAiGenerationLearningSessionAggregateStatisticsDto | null;
+}> {
+  return fetchStudentApi<PersonalAiGenerationLearningSessionAggregateStatisticsDto>(
+    `/api/v1/personal-ai-generation-learning-sessions/statistics?${new URLSearchParams(
+      { authorizationPublicId },
+    ).toString()}`,
+    studentSessionValue,
+    { method: "GET" },
   );
 }
 
@@ -2735,6 +2805,9 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
 
 function StudentAiLearningSessionPanel({
   answerFeedbackByQuestion,
+  canComplete,
+  onComplete,
+  sessionStatus,
   onChangeTextAnswer,
   onSelectOptionLabel,
   questions,
@@ -2742,6 +2815,9 @@ function StudentAiLearningSessionPanel({
   textAnswersByQuestion,
 }: {
   answerFeedbackByQuestion: StudentAiLearningAnswerFeedbackByQuestion;
+  canComplete: boolean;
+  onComplete: () => void;
+  sessionStatus: "in_progress" | "completed" | null;
   onChangeTextAnswer: (questionPublicId: string, textAnswer: string) => void;
   onSelectOptionLabel: (
     question: PersonalAiGenerationLearningSessionPublicQuestionDto,
@@ -2777,6 +2853,17 @@ function StudentAiLearningSessionPanel({
             · 正确 {summary.correctCount} 题 · 得分 {summary.score}/
             {summary.maxScore}
           </p>
+          <p className="text-text-secondary mt-1 text-xs">
+            {sessionStatus === "completed" ? "本次学习已完成" : "学习进行中"}
+          </p>
+          <button
+            type="button"
+            className="border-border bg-background text-text-primary mt-2 rounded-lg border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!canComplete}
+            onClick={onComplete}
+          >
+            完成本次学习
+          </button>
         </div>
       </div>
 
@@ -2869,6 +2956,10 @@ function StudentAiLearningSessionPanel({
                             option.optionLabel,
                           )}
                           className="mt-1 size-4 accent-current"
+                          disabled={
+                            sessionStatus === "completed" ||
+                            answerFeedback !== null
+                          }
                           name={`student-ai-learning-answer-${question.sessionQuestionPublicId}`}
                           onChange={() =>
                             onSelectOptionLabel(question, option.optionLabel)
@@ -2891,7 +2982,9 @@ function StudentAiLearningSessionPanel({
                     <textarea
                       aria-label={`题目 ${question.sourceDraftNumber} 主观答案`}
                       className="border-border bg-background text-text-primary mt-2 min-h-28 w-full resize-y rounded-md border px-3 py-2 text-sm leading-6 disabled:cursor-not-allowed disabled:opacity-60"
-                      disabled={answerFeedback !== null}
+                      disabled={
+                        sessionStatus === "completed" || answerFeedback !== null
+                      }
                       maxLength={
                         PERSONAL_AI_GENERATION_LEARNING_TEXT_ANSWER_MAX_LENGTH
                       }
@@ -2949,6 +3042,140 @@ function StudentAiLearningSessionPanel({
           );
         })}
       </div>
+    </section>
+  );
+}
+
+function StudentAiLearningHistoryPanel({
+  history,
+  loadingSessionPublicId,
+  onChangePage,
+  onLoad,
+  onSessionAction,
+  statistics,
+}: {
+  history: PersonalAiGenerationLearningSessionHistoryDto | null;
+  loadingSessionPublicId: string | null;
+  onChangePage: (page: number) => void;
+  onLoad: () => void;
+  onSessionAction: (
+    session: PersonalAiGenerationLearningSessionHistoryDto["sessions"][number],
+    action: "resume" | "review" | "complete",
+  ) => void;
+  statistics: PersonalAiGenerationLearningSessionAggregateStatisticsDto | null;
+}) {
+  return (
+    <section
+      className="border-border bg-surface rounded-xl border p-4"
+      data-testid="student-ai-learning-history"
+    >
+      <h2 className="font-heading text-text-primary text-base font-semibold">
+        AI 学习记录
+      </h2>
+      <button
+        type="button"
+        className="border-border bg-background text-text-primary mt-2 rounded-lg border px-3 py-2 text-sm font-medium"
+        onClick={onLoad}
+      >
+        加载学习记录
+      </button>
+      {statistics === null ? (
+        <p className="text-text-secondary mt-2 text-sm">统计暂不可用</p>
+      ) : (
+        <p className="text-text-secondary mt-2 text-sm">
+          共 {statistics.attemptCount} 次 · 已完成 {statistics.completedCount}{" "}
+          次 · 进行中 {statistics.inProgressCount} 次
+        </p>
+      )}
+      <div className="mt-3 space-y-2">
+        {(history?.sessions ?? []).map((session) => (
+          <div
+            key={session.sessionPublicId}
+            className="border-border bg-background rounded-lg border p-3"
+          >
+            <p className="text-text-primary text-sm font-medium">
+              {session.lifecycleAvailability === "legacy_unavailable"
+                ? "历史学习记录（状态不可用）"
+                : session.sessionStatus === "completed"
+                  ? "已完成学习"
+                  : "进行中的学习"}
+            </p>
+            <p className="text-text-secondary mt-1 text-xs">
+              {session.submittedCount === null
+                ? "提交统计不可用"
+                : `已提交 ${session.submittedCount}/${session.questionCount} 题`}
+            </p>
+            {session.lifecycleAvailability === "current" ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {session.canResume ? (
+                  <button
+                    type="button"
+                    disabled={
+                      loadingSessionPublicId === session.sessionPublicId
+                    }
+                    className="border-border bg-background text-text-primary rounded-lg border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={() => onSessionAction(session, "resume")}
+                  >
+                    继续学习
+                  </button>
+                ) : null}
+                {session.canReview ? (
+                  <button
+                    type="button"
+                    disabled={
+                      loadingSessionPublicId === session.sessionPublicId
+                    }
+                    className="border-border bg-background text-text-primary rounded-lg border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={() => onSessionAction(session, "review")}
+                  >
+                    复核记录
+                  </button>
+                ) : null}
+                {session.canComplete ? (
+                  <button
+                    type="button"
+                    disabled={
+                      loadingSessionPublicId === session.sessionPublicId
+                    }
+                    className="bg-primary text-primary-foreground rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={() => onSessionAction(session, "complete")}
+                  >
+                    完成学习
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      {history !== null ? (
+        <nav
+          aria-label="AI学习记录分页"
+          className="mt-3 flex items-center justify-between gap-3"
+        >
+          <p className="text-text-secondary text-sm">
+            第 {history.page} / {history.totalPages} 页
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="border-border text-text-primary rounded-lg border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={history.page <= 1}
+              onClick={() => onChangePage(history.page - 1)}
+            >
+              上一页
+            </button>
+            <button
+              type="button"
+              className="border-border text-text-primary rounded-lg border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={history.page >= history.totalPages}
+              onClick={() => onChangePage(history.page + 1)}
+            >
+              下一页
+            </button>
+          </div>
+        </nav>
+      ) : null}
     </section>
   );
 }
@@ -3398,7 +3625,7 @@ function StudentPersonalAiGenerationResultHistorySummary({
               />
             ) : null}
             <div className="border-border flex flex-wrap justify-end gap-2 border-t py-3">
-              {canResumeAiPaperResult(resultRow) ? (
+              {canStartOrResumeAiLearningResult(resultRow) ? (
                 <button
                   type="button"
                   disabled={
@@ -3501,18 +3728,23 @@ function StudentPersonalAiGenerationResultHistorySummary({
   );
 }
 
-function canResumeAiPaperResult(
+function canStartOrResumeAiLearningResult(
   result: PersonalAiGenerationResultHistoryDto["results"][number],
 ): boolean {
-  return (
-    result.taskType === "ai_paper_generation" &&
+  if (
     result.status === "draft" &&
     result.evidenceReference.evidenceStatus === "sufficient" &&
-    result.evidenceReference.citationCount > 0 &&
-    result.paperAssembly?.status === "assembled" &&
-    result.paperAssembly.insufficiency === null &&
-    result.paperAssembly.container.selectedQuestionCount > 0
-  );
+    result.evidenceReference.citationCount > 0
+  ) {
+    return result.taskType === "ai_question_generation"
+      ? true
+      : result.taskType === "ai_paper_generation" &&
+          result.paperAssembly?.status === "assembled" &&
+          result.paperAssembly.insufficiency === null &&
+          result.paperAssembly.container.selectedQuestionCount > 0;
+  }
+
+  return false;
 }
 
 function StudentPersonalAiGenerationResultDetailSummary({
@@ -3664,6 +3896,7 @@ export function StudentPersonalAiGenerationPage() {
   const requestHistoryLoadSequenceRef = useRef(0);
   const resultHistoryLoadSequenceRef = useRef(0);
   const resultDetailLoadSequenceRef = useRef(0);
+  const aiLearningLifecycleLoadSequenceRef = useRef(0);
   const idempotencyIntentRef = useRef<{
     fingerprint: string;
     identifiers: ReturnType<
@@ -3700,6 +3933,20 @@ export function StudentPersonalAiGenerationPage() {
     useState(false);
   const [activeAiLearningSessionPublicId, setActiveAiLearningSessionPublicId] =
     useState<string | null>(null);
+  const [activeAiLearningSessionStatus, setActiveAiLearningSessionStatus] =
+    useState<"in_progress" | "completed" | null>(null);
+  const [activeAiLearningSessionRevision, setActiveAiLearningSessionRevision] =
+    useState<number | null>(null);
+  const [aiLearningSessionHistory, setAiLearningSessionHistory] =
+    useState<PersonalAiGenerationLearningSessionHistoryDto | null>(null);
+  const [aiLearningSessionStatistics, setAiLearningSessionStatistics] =
+    useState<PersonalAiGenerationLearningSessionAggregateStatisticsDto | null>(
+      null,
+    );
+  const [
+    aiLearningHistoryActionSessionPublicId,
+    setAiLearningHistoryActionSessionPublicId,
+  ] = useState<string | null>(null);
   const [learningSessionResultPublicId, setLearningSessionResultPublicId] =
     useState<string | null>(null);
   const [
@@ -3731,10 +3978,97 @@ export function StudentPersonalAiGenerationPage() {
   );
   const [selectedAuthorizationPublicId, setSelectedAuthorizationPublicId] =
     useState<string | null>(requestedAuthorizationPublicIdAtMount);
+  const selectedAuthorizationPublicIdRef = useRef<string | null>(
+    requestedAuthorizationPublicIdAtMount,
+  );
+  const aiLearningSessionActionSequenceRef = useRef(0);
+  const aiLearningSessionActionRef =
+    useRef<StudentAiLearningSessionActionToken | null>(null);
   const [studentAiKnowledgeNodeOptions, setStudentAiKnowledgeNodeOptions] =
     useState<StudentAiKnowledgeNodeOption[]>([]);
   const [studentAiKnowledgeNodeLoadState, setStudentAiKnowledgeNodeLoadState] =
     useState<StudentAiKnowledgeNodeLoadState>("idle");
+
+  const applyPersonalAiAuthorizationSelection = useCallback(
+    (
+      authorizationPublicId: string | null,
+      options: { writeLocation?: boolean } = {},
+    ) => {
+      aiLearningLifecycleLoadSequenceRef.current += 1;
+      aiLearningSessionActionSequenceRef.current += 1;
+      aiLearningSessionActionRef.current = null;
+      selectedAuthorizationPublicIdRef.current = authorizationPublicId;
+      setSelectedAuthorizationPublicId(authorizationPublicId);
+      setAiLearningSessionHistory(null);
+      setAiLearningSessionStatistics(null);
+      setAiLearningHistoryActionSessionPublicId(null);
+      setIsAiLearningSessionStarted(false);
+      setActiveAiLearningSessionPublicId(null);
+      setActiveAiLearningSessionStatus(null);
+      setActiveAiLearningSessionRevision(null);
+      setLearningSessionResultPublicId(null);
+      setServerAiLearningSessionQuestions([]);
+      setSelectedAiLearningAnswerLabelsByQuestion({});
+      setSelectedAiLearningTextAnswersByQuestion({});
+      setAiLearningAnswerFeedbackByQuestion({});
+
+      if (authorizationPublicId !== null && options.writeLocation === true) {
+        writeAuthorizationPublicIdToLocation(authorizationPublicId);
+      }
+    },
+    [],
+  );
+
+  function beginAiLearningSessionAction(input: {
+    authorizationPublicId: string;
+    sessionPublicId: string;
+    action: StudentAiLearningSessionAction;
+  }): StudentAiLearningSessionActionToken | null {
+    const currentAction = aiLearningSessionActionRef.current;
+    if (
+      currentAction !== null &&
+      currentAction.authorizationPublicId === input.authorizationPublicId &&
+      currentAction.sessionPublicId === input.sessionPublicId &&
+      currentAction.action === input.action
+    ) {
+      return null;
+    }
+
+    const actionToken = {
+      ...input,
+      sequence: aiLearningSessionActionSequenceRef.current + 1,
+    };
+    aiLearningSessionActionSequenceRef.current = actionToken.sequence;
+    aiLearningSessionActionRef.current = actionToken;
+    setAiLearningHistoryActionSessionPublicId(input.sessionPublicId);
+    return actionToken;
+  }
+
+  function isCurrentAiLearningSessionAction(
+    actionToken: StudentAiLearningSessionActionToken,
+  ): boolean {
+    const currentAction = aiLearningSessionActionRef.current;
+    return (
+      currentAction !== null &&
+      currentAction.sequence === actionToken.sequence &&
+      currentAction.authorizationPublicId ===
+        actionToken.authorizationPublicId &&
+      currentAction.sessionPublicId === actionToken.sessionPublicId &&
+      currentAction.action === actionToken.action &&
+      selectedAuthorizationPublicIdRef.current ===
+        actionToken.authorizationPublicId
+    );
+  }
+
+  function finishAiLearningSessionAction(
+    actionToken: StudentAiLearningSessionActionToken,
+  ) {
+    if (!isCurrentAiLearningSessionAction(actionToken)) {
+      return;
+    }
+    aiLearningSessionActionRef.current = null;
+    setAiLearningHistoryActionSessionPublicId(null);
+  }
 
   useEffect(() => {
     const sessionRequestToken = readStudentSessionRequestToken();
@@ -3754,7 +4088,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetail(null);
       setSelectedResultPublicId(null);
       setAuthorizationContexts([]);
-      setSelectedAuthorizationPublicId(null);
+      applyPersonalAiAuthorizationSelection(null);
     }
 
     function markUnavailable() {
@@ -3770,7 +4104,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetail(null);
       setSelectedResultPublicId(null);
       setAuthorizationContexts([]);
-      setSelectedAuthorizationPublicId(null);
+      applyPersonalAiAuthorizationSelection(null);
     }
 
     async function markUnauthorizedOrUnavailable() {
@@ -3883,7 +4217,9 @@ export function StudentPersonalAiGenerationPage() {
         soleAuthorizationContext?.authorizationPublicId ??
         null;
       setAuthorizationContexts(selectableAuthorizationContexts);
-      setSelectedAuthorizationPublicId(initialAuthorizationPublicId);
+      applyPersonalAiAuthorizationSelection(initialAuthorizationPublicId, {
+        writeLocation: initialAuthorizationPublicId !== null,
+      });
 
       if (initialAuthorizationPublicId === null) {
         setHistoryState("empty");
@@ -3892,8 +4228,6 @@ export function StudentPersonalAiGenerationPage() {
         setResultHistoryState("empty");
         setResultHistory(null);
         setResultHistoryPagination(null);
-      } else {
-        writeAuthorizationPublicIdToLocation(initialAuthorizationPublicId);
       }
 
       return initialAuthorizationPublicId;
@@ -4058,6 +4392,7 @@ export function StudentPersonalAiGenerationPage() {
 
       void fetchInitialRequestHistory(initialAuthorizationPublicId);
       void fetchInitialResultHistory(initialAuthorizationPublicId);
+      void loadAiLearningLifecycle(initialAuthorizationPublicId, 1);
     }
 
     void loadInitialData();
@@ -4065,7 +4400,51 @@ export function StudentPersonalAiGenerationPage() {
     return () => {
       isCancelled = true;
     };
-  }, [requestedAuthorizationPublicIdAtMount]);
+  }, [
+    applyPersonalAiAuthorizationSelection,
+    requestedAuthorizationPublicIdAtMount,
+  ]);
+
+  async function loadAiLearningLifecycle(
+    authorizationPublicId: string,
+    page = 1,
+  ): Promise<void> {
+    const loadSequence = ++aiLearningLifecycleLoadSequenceRef.current;
+    try {
+      const [historyResponse, statisticsResponse] = await Promise.all([
+        fetchPersonalAiLearningSessionHistory(
+          readStudentSessionRequestToken(),
+          authorizationPublicId,
+          page,
+        ),
+        fetchPersonalAiLearningSessionStatistics(
+          readStudentSessionRequestToken(),
+          authorizationPublicId,
+        ),
+      ]);
+      if (
+        loadSequence !== aiLearningLifecycleLoadSequenceRef.current ||
+        authorizationPublicId !== selectedAuthorizationPublicIdRef.current
+      ) {
+        return;
+      }
+      setAiLearningSessionHistory(
+        historyResponse.code === 0 ? historyResponse.data : null,
+      );
+      setAiLearningSessionStatistics(
+        statisticsResponse.code === 0 ? statisticsResponse.data : null,
+      );
+    } catch {
+      if (
+        loadSequence !== aiLearningLifecycleLoadSequenceRef.current ||
+        authorizationPublicId !== selectedAuthorizationPublicIdRef.current
+      ) {
+        return;
+      }
+      setAiLearningSessionHistory(null);
+      setAiLearningSessionStatistics(null);
+    }
+  }
 
   async function handleSubmitPersonalAiGenerationRequest(
     taskType: StudentPersonalAiGenerationTaskType,
@@ -4089,7 +4468,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetail(null);
       setSelectedResultPublicId(null);
       setAuthorizationContexts([]);
-      setSelectedAuthorizationPublicId(null);
+      applyPersonalAiAuthorizationSelection(null);
     }
 
     function markUnavailable() {
@@ -4105,13 +4484,15 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetail(null);
       setSelectedResultPublicId(null);
       setAuthorizationContexts([]);
-      setSelectedAuthorizationPublicId(null);
+      applyPersonalAiAuthorizationSelection(null);
     }
 
     setLastSubmittedTaskType(taskType);
     setPracticeFeedbackState("waiting");
     setIsAiLearningSessionStarted(false);
     setActiveAiLearningSessionPublicId(null);
+    setActiveAiLearningSessionStatus(null);
+    setActiveAiLearningSessionRevision(null);
     setLearningSessionResultPublicId(null);
     setServerAiLearningSessionQuestions([]);
     setSelectedAiLearningAnswerLabelsByQuestion({});
@@ -4184,9 +4565,21 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
-      setSelectedAuthorizationPublicId(
-        generationAuthorizationContext.authorizationPublicId,
-      );
+      if (
+        generationAuthorizationContext.authorizationPublicId !==
+        selectedAuthorizationPublicIdRef.current
+      ) {
+        applyPersonalAiAuthorizationSelection(
+          generationAuthorizationContext.authorizationPublicId,
+          {
+            writeLocation: true,
+          },
+        );
+        void loadAiLearningLifecycle(
+          generationAuthorizationContext.authorizationPublicId,
+          1,
+        );
+      }
 
       const generationQuestionCount =
         taskType === "ai_question_generation"
@@ -4343,6 +4736,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
+      applyPersonalAiAuthorizationSelection(null);
     }
 
     function markUnavailable() {
@@ -4355,6 +4749,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("idle");
       setResultDetail(null);
       setSelectedResultPublicId(null);
+      applyPersonalAiAuthorizationSelection(null);
     }
 
     setHasSessionToken(true);
@@ -4493,6 +4888,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultHistoryState("unauthorized");
       setResultHistory(null);
       setResultHistoryPagination(null);
+      applyPersonalAiAuthorizationSelection(null);
       return;
     }
 
@@ -4505,6 +4901,7 @@ export function StudentPersonalAiGenerationPage() {
       setResultHistoryState("unauthorized");
       setResultHistory(null);
       setResultHistoryPagination(null);
+      applyPersonalAiAuthorizationSelection(null);
       return;
     }
 
@@ -4562,6 +4959,8 @@ export function StudentPersonalAiGenerationPage() {
     setPracticeFeedbackState("waiting");
     setIsAiLearningSessionStarted(false);
     setActiveAiLearningSessionPublicId(null);
+    setActiveAiLearningSessionStatus(null);
+    setActiveAiLearningSessionRevision(null);
     setLearningSessionResultPublicId(null);
     setServerAiLearningSessionQuestions([]);
     setSelectedAiLearningAnswerLabelsByQuestion({});
@@ -4580,8 +4979,9 @@ export function StudentPersonalAiGenerationPage() {
       return;
     }
 
-    setSelectedAuthorizationPublicId(authorizationPublicId);
-    writeAuthorizationPublicIdToLocation(authorizationPublicId);
+    applyPersonalAiAuthorizationSelection(authorizationPublicId, {
+      writeLocation: true,
+    });
     setAiQuestionKnowledgeScope((currentState) => ({
       ...currentState,
       includeDescendants: false,
@@ -4598,6 +4998,7 @@ export function StudentPersonalAiGenerationPage() {
       PERSONAL_AI_GENERATION_HISTORY_PAGE,
       authorizationPublicId,
     );
+    void loadAiLearningLifecycle(authorizationPublicId, 1);
   }
 
   function handleChangeAiQuestionForm(
@@ -4939,6 +5340,8 @@ export function StudentPersonalAiGenerationPage() {
     !canRetryCurrentGeneratedPractice(experience);
   const canSubmitAiLearningAnswers =
     !isAiLearningAnswerSubmissionInFlight &&
+    activeAiLearningSessionStatus === "in_progress" &&
+    activeAiLearningSessionRevision !== null &&
     Object.values(aiLearningAnswerFeedbackByQuestion).every(
       (answerFeedback) => answerFeedback.answerRevision !== null,
     ) &&
@@ -4987,7 +5390,8 @@ export function StudentPersonalAiGenerationPage() {
     requestBody: PersonalAiLearningSessionRequestBody,
     resultPublicId: string,
   ): Promise<PersonalAiGenerationLearningSessionPublicQuestionDto[] | null> {
-    if (selectedAuthorizationPublicId === null) {
+    const authorizationPublicId = selectedAuthorizationPublicIdRef.current;
+    if (authorizationPublicId === null) {
       return null;
     }
 
@@ -4998,11 +5402,12 @@ export function StudentPersonalAiGenerationPage() {
         readStudentSessionRequestToken(),
         {
           ...requestBody,
-          authorizationPublicId: selectedAuthorizationPublicId,
+          authorizationPublicId,
         },
       );
 
       if (
+        authorizationPublicId !== selectedAuthorizationPublicIdRef.current ||
         sessionResponse.code !== 0 ||
         sessionResponse.data === null ||
         sessionResponse.data.status !== "created" ||
@@ -5010,6 +5415,8 @@ export function StudentPersonalAiGenerationPage() {
       ) {
         setServerAiLearningSessionQuestions([]);
         setActiveAiLearningSessionPublicId(null);
+        setActiveAiLearningSessionStatus(null);
+        setActiveAiLearningSessionRevision(null);
         setIsAiLearningSessionStarted(false);
         setPracticeFeedbackState("insufficient");
         return null;
@@ -5019,6 +5426,8 @@ export function StudentPersonalAiGenerationPage() {
       const sessionQuestions = session.questions;
       setServerAiLearningSessionQuestions(sessionQuestions);
       setActiveAiLearningSessionPublicId(session.sessionPublicId);
+      setActiveAiLearningSessionStatus(session.sessionStatus);
+      setActiveAiLearningSessionRevision(session.sessionRevision);
       setIsAiLearningSessionStarted(true);
       setSelectedAiLearningAnswerLabelsByQuestion({});
       setSelectedAiLearningTextAnswersByQuestion({});
@@ -5029,13 +5438,20 @@ export function StudentPersonalAiGenerationPage() {
         const progressResponse = await fetchPersonalAiLearningSessionProgress(
           readStudentSessionRequestToken(),
           session.sessionPublicId,
-          selectedAuthorizationPublicId,
+          authorizationPublicId,
         );
 
         if (
+          authorizationPublicId === selectedAuthorizationPublicIdRef.current &&
           progressResponse.code === 0 &&
           progressResponse.data?.status === "ready"
         ) {
+          setActiveAiLearningSessionStatus(
+            progressResponse.data.progress.sessionStatus,
+          );
+          setActiveAiLearningSessionRevision(
+            progressResponse.data.progress.sessionRevision,
+          );
           const answerFeedbacks =
             progressResponse.data.progress.answerFeedbacks;
           applyAiLearningProgress(answerFeedbacks);
@@ -5048,19 +5464,106 @@ export function StudentPersonalAiGenerationPage() {
     } catch {
       setServerAiLearningSessionQuestions([]);
       setActiveAiLearningSessionPublicId(null);
+      setActiveAiLearningSessionStatus(null);
+      setActiveAiLearningSessionRevision(null);
       setIsAiLearningSessionStarted(false);
       setPracticeFeedbackState("insufficient");
       return null;
     } finally {
-      setLearningSessionResultPublicId(null);
+      if (authorizationPublicId === selectedAuthorizationPublicIdRef.current) {
+        setLearningSessionResultPublicId(null);
+      }
     }
   }
 
-  async function handleStartOrResumeHistoricalAiPaper(resultPublicId: string) {
+  async function handleStartOrResumeHistoricalAiResult(resultPublicId: string) {
     await startOrResumeAiLearningSession(
       { sourceResultPublicId: resultPublicId },
       resultPublicId,
     );
+  }
+
+  async function handleHistoricalAiLearningSessionAction(
+    historySession: PersonalAiGenerationLearningSessionHistoryDto["sessions"][number],
+    action: StudentAiLearningSessionAction,
+  ): Promise<void> {
+    const authorizationPublicId = selectedAuthorizationPublicIdRef.current;
+    if (
+      authorizationPublicId === null ||
+      historySession.lifecycleAvailability !== "current"
+    ) {
+      return;
+    }
+
+    const actionToken = beginAiLearningSessionAction({
+      authorizationPublicId,
+      sessionPublicId: historySession.sessionPublicId,
+      action,
+    });
+    if (actionToken === null) {
+      return;
+    }
+
+    try {
+      const progressResponse = await fetchPersonalAiLearningSessionProgress(
+        readStudentSessionRequestToken(),
+        historySession.sessionPublicId,
+        authorizationPublicId,
+      );
+      if (
+        !isCurrentAiLearningSessionAction(actionToken) ||
+        progressResponse.code !== 0 ||
+        progressResponse.data?.status !== "ready"
+      ) {
+        if (isCurrentAiLearningSessionAction(actionToken)) {
+          await refreshAiLearningSessionAfterAction(actionToken);
+        }
+        return;
+      }
+
+      const progress = progressResponse.data.progress;
+      setServerAiLearningSessionQuestions(progress.questions);
+      setActiveAiLearningSessionPublicId(progress.sessionPublicId);
+      setActiveAiLearningSessionStatus(progress.sessionStatus);
+      setActiveAiLearningSessionRevision(progress.sessionRevision);
+      setIsAiLearningSessionStarted(true);
+      applyAiLearningProgress(progress.answerFeedbacks);
+
+      if (
+        action === "complete" &&
+        progress.sessionStatus === "in_progress" &&
+        progress.sessionRevision !== null &&
+        progress.answerFeedbacks.length === progress.questions.length
+      ) {
+        const completionResponse = await fetchCompletePersonalAiLearningSession(
+          readStudentSessionRequestToken(),
+          progress.sessionPublicId,
+          authorizationPublicId,
+          progress.sessionRevision,
+        );
+        if (
+          isCurrentAiLearningSessionAction(actionToken) &&
+          completionResponse.code === 0 &&
+          completionResponse.data !== null &&
+          completionResponse.data.status !== "blocked"
+        ) {
+          setActiveAiLearningSessionStatus("completed");
+          setActiveAiLearningSessionRevision(
+            completionResponse.data.sessionRevision,
+          );
+          await loadAiLearningLifecycle(authorizationPublicId, 1);
+        } else if (isCurrentAiLearningSessionAction(actionToken)) {
+          await refreshAiLearningSessionAfterAction(actionToken);
+        }
+      }
+    } catch {
+      if (isCurrentAiLearningSessionAction(actionToken)) {
+        setPracticeFeedbackState("insufficient");
+        await refreshAiLearningSessionAfterAction(actionToken);
+      }
+    } finally {
+      finishAiLearningSessionAction(actionToken);
+    }
   }
 
   async function handleStartAiLearningSession() {
@@ -5121,6 +5624,7 @@ export function StudentPersonalAiGenerationPage() {
     );
 
     if (
+      authorizationPublicId !== selectedAuthorizationPublicIdRef.current ||
       progressResponse.code !== 0 ||
       progressResponse.data === null ||
       progressResponse.data.status !== "ready"
@@ -5129,9 +5633,58 @@ export function StudentPersonalAiGenerationPage() {
       return false;
     }
 
+    setActiveAiLearningSessionStatus(
+      progressResponse.data.progress.sessionStatus,
+    );
+    setActiveAiLearningSessionRevision(
+      progressResponse.data.progress.sessionRevision,
+    );
+
     return applyAiLearningProgress(
       progressResponse.data.progress.answerFeedbacks,
     );
+  }
+
+  async function refreshAiLearningSessionAfterAction(
+    actionToken: StudentAiLearningSessionActionToken,
+  ): Promise<void> {
+    try {
+      const progressResponse = await fetchPersonalAiLearningSessionProgress(
+        readStudentSessionRequestToken(),
+        actionToken.sessionPublicId,
+        actionToken.authorizationPublicId,
+      );
+
+      if (!isCurrentAiLearningSessionAction(actionToken)) {
+        return;
+      }
+
+      if (
+        progressResponse.code === 0 &&
+        progressResponse.data?.status === "ready"
+      ) {
+        const progress = progressResponse.data.progress;
+        setServerAiLearningSessionQuestions(progress.questions);
+        setActiveAiLearningSessionPublicId(progress.sessionPublicId);
+        setActiveAiLearningSessionStatus(progress.sessionStatus);
+        setActiveAiLearningSessionRevision(progress.sessionRevision);
+        setIsAiLearningSessionStarted(true);
+        applyAiLearningProgress(progress.answerFeedbacks);
+      } else {
+        setPracticeFeedbackState("insufficient");
+      }
+    } catch {
+      if (isCurrentAiLearningSessionAction(actionToken)) {
+        setPracticeFeedbackState("insufficient");
+      }
+    }
+
+    if (isCurrentAiLearningSessionAction(actionToken)) {
+      await loadAiLearningLifecycle(
+        actionToken.authorizationPublicId,
+        aiLearningSessionHistory?.page ?? 1,
+      );
+    }
   }
 
   async function handleSubmitAiLearningAnswer() {
@@ -5150,6 +5703,8 @@ export function StudentPersonalAiGenerationPage() {
       sessionQuestions === null ||
       activeAiLearningSessionPublicId === null ||
       selectedAuthorizationPublicId === null ||
+      activeAiLearningSessionStatus !== "in_progress" ||
+      activeAiLearningSessionRevision === null ||
       !hasCompleteStudentAiLearningAnswers({
         questions: sessionQuestions,
         selectedOptionLabelsByQuestion:
@@ -5163,13 +5718,16 @@ export function StudentPersonalAiGenerationPage() {
       return;
     }
 
+    const authorizationPublicId = selectedAuthorizationPublicId;
+    const sessionPublicId = activeAiLearningSessionPublicId;
+
     try {
       const answerResponses = await Promise.all(
         sessionQuestions.map((question) =>
           fetchSubmitPersonalAiLearningAnswer(
             readStudentSessionRequestToken(),
-            activeAiLearningSessionPublicId,
-            selectedAuthorizationPublicId,
+            sessionPublicId,
+            authorizationPublicId,
             {
               sessionQuestionPublicId: question.sessionQuestionPublicId,
               expectedAnswerRevision:
@@ -5189,6 +5747,10 @@ export function StudentPersonalAiGenerationPage() {
           ),
         ),
       );
+
+      if (authorizationPublicId !== selectedAuthorizationPublicIdRef.current) {
+        return;
+      }
       const answerFeedbackByQuestion =
         answerResponses.reduce<StudentAiLearningAnswerFeedbackByQuestion>(
           (feedbackByQuestion, answerResponse) => {
@@ -5219,8 +5781,8 @@ export function StudentPersonalAiGenerationPage() {
           )
         ) {
           await refreshAiLearningProgress(
-            activeAiLearningSessionPublicId,
-            selectedAuthorizationPublicId,
+            sessionPublicId,
+            authorizationPublicId,
           );
           return;
         }
@@ -5235,6 +5797,66 @@ export function StudentPersonalAiGenerationPage() {
     } finally {
       isAiLearningAnswerSubmissionInFlightRef.current = false;
       setIsAiLearningAnswerSubmissionInFlight(false);
+    }
+  }
+
+  async function handleCompleteAiLearningSession() {
+    if (
+      activeAiLearningSessionPublicId === null ||
+      activeAiLearningSessionStatus !== "in_progress" ||
+      activeAiLearningSessionRevision === null ||
+      selectedAuthorizationPublicId === null ||
+      Object.keys(aiLearningAnswerFeedbackByQuestion).length !==
+        activeAiLearningSessionQuestions.length
+    ) {
+      return;
+    }
+
+    const sessionPublicId = activeAiLearningSessionPublicId;
+    const authorizationPublicId = selectedAuthorizationPublicId;
+    const sessionRevision = activeAiLearningSessionRevision;
+    const actionToken = beginAiLearningSessionAction({
+      authorizationPublicId,
+      sessionPublicId,
+      action: "complete",
+    });
+    if (actionToken === null) {
+      return;
+    }
+
+    try {
+      const completionResponse = await fetchCompletePersonalAiLearningSession(
+        readStudentSessionRequestToken(),
+        sessionPublicId,
+        authorizationPublicId,
+        sessionRevision,
+      );
+
+      if (!isCurrentAiLearningSessionAction(actionToken)) {
+        return;
+      }
+
+      if (
+        completionResponse.code !== 0 ||
+        completionResponse.data === null ||
+        completionResponse.data.status === "blocked"
+      ) {
+        await refreshAiLearningSessionAfterAction(actionToken);
+        return;
+      }
+
+      setActiveAiLearningSessionStatus("completed");
+      setActiveAiLearningSessionRevision(
+        completionResponse.data.sessionRevision,
+      );
+      await loadAiLearningLifecycle(authorizationPublicId);
+    } catch {
+      if (isCurrentAiLearningSessionAction(actionToken)) {
+        setPracticeFeedbackState("insufficient");
+        await refreshAiLearningSessionAfterAction(actionToken);
+      }
+    } finally {
+      finishAiLearningSessionAction(actionToken);
     }
   }
 
@@ -5253,11 +5875,11 @@ export function StudentPersonalAiGenerationPage() {
       return;
     }
 
+    const sessionPublicId = activeAiLearningSessionPublicId;
+    const authorizationPublicId = selectedAuthorizationPublicId;
+
     try {
-      await refreshAiLearningProgress(
-        activeAiLearningSessionPublicId,
-        selectedAuthorizationPublicId,
-      );
+      await refreshAiLearningProgress(sessionPublicId, authorizationPublicId);
     } catch {
       setPracticeFeedbackState("insufficient");
     }
@@ -5269,6 +5891,26 @@ export function StudentPersonalAiGenerationPage() {
         data-testid="student-ai-zone-result-history"
         className="flex flex-col gap-5"
       >
+        <StudentAiLearningHistoryPanel
+          history={aiLearningSessionHistory}
+          loadingSessionPublicId={aiLearningHistoryActionSessionPublicId}
+          onChangePage={(page) => {
+            const authorizationPublicId =
+              selectedAuthorizationPublicIdRef.current;
+            if (authorizationPublicId !== null) {
+              void loadAiLearningLifecycle(authorizationPublicId, page);
+            }
+          }}
+          onLoad={() => {
+            if (selectedAuthorizationPublicId !== null) {
+              void loadAiLearningLifecycle(selectedAuthorizationPublicId);
+            }
+          }}
+          onSessionAction={(session, action) => {
+            void handleHistoricalAiLearningSessionAction(session, action);
+          }}
+          statistics={aiLearningSessionStatistics}
+        />
         {hasLocalAiGenerationExperience && experience !== null ? (
           <StudentPersonalAiGenerationVisibleGeneratedContent
             visibleGeneratedContent={
@@ -5303,6 +5945,15 @@ export function StudentPersonalAiGenerationPage() {
         activeAiLearningSessionQuestions.length > 0 ? (
           <StudentAiLearningSessionPanel
             answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
+            canComplete={
+              aiLearningHistoryActionSessionPublicId === null &&
+              activeAiLearningSessionStatus === "in_progress" &&
+              activeAiLearningSessionRevision !== null &&
+              Object.keys(aiLearningAnswerFeedbackByQuestion).length ===
+                activeAiLearningSessionQuestions.length
+            }
+            onComplete={() => void handleCompleteAiLearningSession()}
+            sessionStatus={activeAiLearningSessionStatus}
             onChangeTextAnswer={(questionPublicId, textAnswer) => {
               setSelectedAiLearningTextAnswersByQuestion(
                 (currentTextAnswers) => ({
@@ -5399,7 +6050,7 @@ export function StudentPersonalAiGenerationPage() {
           resultHistory={resultHistory}
           isResultDetailLoading={resultDetailState === "loading"}
           onStartOrResumeLearningSession={(resultPublicId) =>
-            void handleStartOrResumeHistoricalAiPaper(resultPublicId)
+            void handleStartOrResumeHistoricalAiResult(resultPublicId)
           }
           onOpenResultDetail={(resultPublicId) =>
             void handleOpenPersonalAiGenerationResultDetail(resultPublicId)

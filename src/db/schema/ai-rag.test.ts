@@ -978,6 +978,14 @@ describe("personal AI learning session persistence schema", () => {
         "question_count",
         "question_snapshot",
         "formal_write_boundary",
+        "lifecycle_schema_version",
+        "authorization_source",
+        "authorization_public_id",
+        "session_status",
+        "session_revision",
+        "completed_at",
+        "completion_summary_snapshot",
+        "completion_summary_digest",
         "created_at",
         "updated_at",
       ]),
@@ -1053,6 +1061,7 @@ describe("personal AI learning session persistence schema", () => {
         "idx_personal_ai_learning_session_actor_created_at",
         "idx_personal_ai_learning_session_owner_created_at",
         "idx_personal_ai_learning_session_source_result",
+        "idx_personal_ai_learning_session_actor_auth_created_at",
       ]),
     );
     expect(getIndexNames(personalAiLearningAnswerFeedback)).toEqual(
@@ -1075,6 +1084,18 @@ describe("personal AI learning session persistence schema", () => {
         ...getForeignKeyNames(personalAiLearningAnswerFeedback),
       ].every((foreignKeyName) => foreignKeyName.length <= 63),
     ).toBe(true);
+  });
+
+  it("keeps legacy session lifecycle rows all-null and current lifecycle facts coherent", () => {
+    expect(personalAiLearningSession).toBeDefined();
+
+    if (personalAiLearningSession === undefined) {
+      return;
+    }
+
+    expect(getCheckNames(personalAiLearningSession)).toContain(
+      "chk_personal_ai_learning_session_lifecycle",
+    );
   });
 
   it("keeps legacy answer rows all-null and current answer CAS facts complete", () => {
