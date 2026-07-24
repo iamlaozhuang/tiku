@@ -1,26 +1,36 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24",
-  "findingIds": ["F-0164"],
-  "candidateRootCauseCluster": "P1-RC-08",
-  "objective": "Atomically record the delivered F-0164 static closeout, preserve F-0013 runtime hold, dispose RC-08 static residuals, and select RC-09 residual JIT review only as the next task pending fresh approval.",
+  "taskId": "p1-remediation-rc-09-residual-jit-review-2026-07-24",
+  "findingIds": [],
+  "candidateRootCauseCluster": "P1-RC-09",
+  "objective": "Atomically close the delivered RC-08 state-only transition and select F-0012 as the only next product candidate pending fresh database approval.",
   "taskKind": "low_risk_state_only_transition",
   "status": "approved_state_only_transition_pending_final_tree_binding",
-  "branch": "fix/rc-08-f0164-closeout-static-residual-disposition",
-  "baseSha": "e3d812bac133db24721d11d9eb7852ab2e9d17b9",
+  "branch": "fix/rc-09-residual-jit-review",
+  "baseSha": "3df9475e95621f1c3946be6693afd7ab9667cdae",
   "riskCategory": "low_risk_state_only",
   "approvalStatus": "approved",
-  "approvalId": "guardian-rc08-f0164-closeout-static-residual-disposition-2026-07-24",
+  "approvalId": "guardian-rc09-residual-jit-f0012-selection-state-transition-2026-07-24",
   "approvalRequestSource": "P1_GUARDIAN_STATE_ONLY_PRE_WRITE_APPROVAL_V1",
+  "scopeAmendments": [
+    {
+      "approvalId": "guardian-rc09-residual-jit-state-transition-test-amendment-2026-07-24",
+      "decision": "approved_exact_test_only_scope_amendment",
+      "invalidatedFinalTreeBindingApprovalId": "guardian-rc09-residual-jit-f0012-final-tree-b54b1089-2026-07-24",
+      "correction": "replace_unsafe_inline_tsx_state_contract_with_kernel_allowed_exact_vitest_test"
+    }
+  ],
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json"
+    "docs/04-agent-system/state/task-safety.json",
+    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
   ],
   "contingencyFiles": [],
   "blockedFiles": [
@@ -28,14 +38,26 @@
     "all files outside allowedFiles"
   ],
   "requiredSemantics": {
-    "f0164Closeout": "F-0164 is closed_static_product at commit e3d812bac133db24721d11d9eb7852ab2e9d17b9 and tree 57ba3566948eca3cc1803c990e15bd0133785593.",
-    "proofBoundary": "No migration apply, real database, real data, browser or runtime proof is claimed.",
-    "wip": "Exactly one in-progress P1 task exists and it is this state-only transition task.",
-    "rc08Disposition": "All eligible RC-08 static product partitions are closed, but RC-08 runtime closure is not claimed.",
-    "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007 and is not statically closed.",
-    "nextTask": "P1-RC-09 residual JIT review is selected only as nextTask and remains inactive and unmaterialized pending fresh approval."
+    "previousCloseout": "The RC-08 F-0164 state-only closeout task is closed and completed at commit 3df9475e95621f1c3946be6693afd7ab9667cdae and tree 5d9bbc0b47a577c2db18392cbe56c8414b51fe8c.",
+    "wip": "Exactly one in-progress P1 task exists and it is this state-only RC-09 residual JIT review.",
+    "f0012NextOnly": "F-0012 is the only selected next product candidate, inactive and unmaterialized pending fresh database approval.",
+    "otherRc09Findings": "All other RC-09 findings retain their existing disposition and are not bundled, ordered or closed by this task.",
+    "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007 and is not statically closed."
   },
   "validationCommands": [
+    {
+      "name": "state-contract",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@11.9.0",
+        "exec",
+        "vitest",
+        "run",
+        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
+        "--maxWorkers=1"
+      ]
+    },
     {
       "name": "state-format",
       "kind": "lint",
@@ -47,7 +69,8 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json"
+        "docs/04-agent-system/state/task-safety.json",
+        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
       ]
     },
     {
@@ -70,66 +93,58 @@
   },
   "conditionalCloseout": {
     "approved": true,
-    "approvalId": "guardian-rc08-f0164-closeout-static-residual-disposition-2026-07-24",
+    "approvalId": "guardian-rc09-residual-jit-f0012-selection-state-transition-2026-07-24",
     "conditions": [
       "strict JSON and YAML unique-key parsing succeeds",
       "WIP=1 and the current state-only task identity agree across all three state files",
-      "F-0164 is closed and completed while F-0013 remains runtime_hold RV-0007",
-      "all eligible RC-08 static product partitions are closed without claiming runtime closure",
-      "RC-09 is next-only and not active, materialized or in progress",
-      "HEAD, master and origin/master remain at the F-0164 closeout commit",
-      "the diff is limited to the three allowed state files",
+      "the previous RC-08 state-only task is closed and completed at the approved commit and tree",
+      "F-0012 is next-only and not active, materialized or in progress",
+      "all other RC-09 findings retain their existing disposition",
+      "F-0013 remains runtime_hold RV-0007",
+      "HEAD, master and origin/master remain at the approved base",
+      "the diff is limited to the four allowed state and test files",
       "the final state tree receives explicit guardian binding before Kernel, commit or push"
     ]
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24",
-    "findingIds": ["F-0164"],
-    "commit": "e3d812bac133db24721d11d9eb7852ab2e9d17b9",
-    "parent": "b9f1675c102bd504b059562a45e162a412c4c3c8",
-    "tree": "57ba3566948eca3cc1803c990e15bd0133785593",
-    "changedFileCount": 26,
-    "status": "closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "focusedTestFiles": 13,
-    "focusedTests": 238,
+    "taskId": "p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24",
+    "commit": "3df9475e95621f1c3946be6693afd7ab9667cdae",
+    "parent": "e3d812bac133db24721d11d9eb7852ab2e9d17b9",
+    "tree": "5d9bbc0b47a577c2db18392cbe56c8414b51fe8c",
+    "changedFileCount": 3,
+    "status": "closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned",
     "closeoutKernel": true,
-    "lint": true,
-    "typecheck": true,
-    "build": true,
-    "format": true,
-    "stateSchema": true,
     "prePushKernel": true,
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true,
-    "proofBoundary": "no_migration_apply_real_database_data_browser_or_runtime_proof"
+    "proofBoundary": "state_only_no_product_schema_migration_database_permission_provider_dependency_or_mechanism_change"
   },
-  "rc08ResidualDisposition": {
-    "eligibleStaticProductPartitions": "closed",
-    "runtimeClosure": false,
-    "runtimeHoldFinding": "F-0013",
-    "runtimeHoldStatus": "runtime_evidence_required_runtime_hold_RV0007"
+  "rc09ResidualReview": {
+    "selectedFindingId": "F-0012",
+    "selectedFindingStatus": "revalidated_reachable_next_only",
+    "otherFindingDisposition": "unchanged_pending_independent_revalidation"
   },
   "nextTask": {
-    "nextTaskId": "p1-remediation-rc-09-residual-jit-review-2026-07-24",
-    "status": "selected_pending_fresh_state_or_product_approval",
-    "candidateRootCauseCluster": "P1-RC-09",
+    "proposedProductTaskId": "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24",
+    "proposedBranch": "fix/employee-disable-active-flow-equivalence",
+    "findingId": "F-0012",
+    "status": "selected_pending_fresh_database_approval",
     "active": false,
     "materialized": false
   },
-  "jitRevalidation": {
-    "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
-    "F-0162": "closed_static_product_at_8a7af98590d6b05fde4c31a22cf44ea61ac99513",
-    "F-0163": "closed_static_product_at_9f2182dee69f66b1aec6e8918c7a05434a04e3ea",
-    "F-0164": "closed_static_product_at_e3d812bac133db24721d11d9eb7852ab2e9d17b9_without_migration_apply_real_database_or_browser_runtime_proof"
+  "runtimeHold": {
+    "findingId": "F-0013",
+    "status": "runtime_evidence_required_runtime_hold_RV0007"
   },
   "resumeAnchor": {
-    "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentTaskId": "p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24",
-    "currentPartition": "state_only_closeout_and_static_residual_disposition",
+    "currentCandidateRootCauseCluster": "P1-RC-09",
+    "currentTaskId": "p1-remediation-rc-09-residual-jit-review-2026-07-24",
+    "currentPartition": "state_only_residual_jit_review_and_next_selection",
     "nextReviewHints": [
-      "close out this state-only task before materializing RC-09 residual review",
-      "keep F-0013 on runtime hold and do not claim RC-08 runtime closure"
+      "close out this state-only task before materializing the F-0012 product task",
+      "obtain fresh database approval before F-0012 RED or product writes",
+      "keep F-0013 on runtime hold"
     ]
   }
 }
