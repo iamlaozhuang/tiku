@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
+  currentTaskId: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -338,7 +338,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-residual-jit-review-2026-07-23
     - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
     - p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
+    - p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
   completedTaskIds:
+    - p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
     - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
     - p1-remediation-rc-08-residual-jit-review-2026-07-23
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
@@ -608,12 +610,73 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: closed
     p1-remediation-rc-08-residual-jit-review-2026-07-23: closed
     p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23: closed
-    p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24: in_progress
+    p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24: closed
+    p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24: in_progress
 activeTasks:
+  - id: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
+    title: F-0163 closeout and F-0164 residual JIT materialization
+    phase: p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
+    status: in_progress
+    priority: p1
+    taskKind: low_risk_state_only_transition
+    productClosureContribution: records_F0163_closeout_and_selects_F0164_as_next_without_product_changes
+    branch: fix/rc-08-f0163-closeout-f0164-jit-materialization
+    objective: atomically record the delivered F-0163 static closeout while preserving WIP=1 and selecting F-0164 only as the next task pending fresh product approval
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-08
+    findingIds:
+      - F-0163
+      - F-0164
+    executionStage: approved_state_only_transition_pending_closeout
+    findingStatus: F0163_closed_static_product_F0164_selected_pending_fresh_schema_database_permission_approval
+    findingDisposition: F0163_closed_static_product; F0164_next_only_not_active; F0013_remains_runtime_hold
+    riskBoundary:
+      category: low_risk_state_only
+      approvalStatus: approved
+      approvalId: guardian-rc08-f0163-closeout-f0164-jit-state-transition-2026-07-24
+      requestedBaseSha: 9f2182dee69f66b1aec6e8918c7a05434a04e3ea
+      allowedFiles: 3
+      coreFiles: 3
+      contingencyFiles: 0
+      productCodeChange: false
+      schemaOrMigrationChange: false
+      databaseOrRealData: false
+      permissionOrEntitlementChange: false
+      providerOrExternalCall: false
+      dependencyOrMechanismChange: false
+      conditionalCloseout: true
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
+      findingId: F-0163
+      commit: 9f2182dee69f66b1aec6e8918c7a05434a04e3ea
+      parent: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
+      tree: 144084d7857073e1c59049dcd19ad7becc53baa7
+      changedFileCount: 23
+      status: closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned
+      focusedTestFiles: 10
+      focusedTests: 185
+      closeoutKernel: pass
+      prePushKernel: pass
+      masterOriginSync: pass
+      worktreeClean: pass
+      shortBranchCleanup: pass
+      proofBoundary: no_migration_apply_real_database_data_browser_or_runtime_proof
+    nextTask:
+      findingId: F-0164
+      status: selected_pending_fresh_schema_database_permission_approval
+      proposedProductTaskId: p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
+      proposedBranch: fix/personal-ai-learning-session-lifecycle-history-statistics
+      active: false
+      materialized: false
+    jitRevalidation:
+      F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
+      F-0162: closed_static_product_at_8a7af98590d6b05fde4c31a22cf44ea61ac99513
+      F-0163: closed_static_product_at_9f2182dee69f66b1aec6e8918c7a05434a04e3ea
+      F-0164: selected_next_only_pending_fresh_schema_database_permission_approval
   - id: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
     title: Personal AI learning answer revision CAS
     phase: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: schema_migration_source_database_application_logic_and_api_ui_concurrency_contract
     productClosureContribution: closes_remaining_F0163_answer_write_stale_overwrite_and_local_loser_response
@@ -623,8 +686,8 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-08
     findingIds:
       - F-0163
-    executionStage: implemented_verified_static_pending_final_tree_binding
-    findingStatus: implemented_verified_static_pending_final_tree_binding
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed_static_product
     findingDisposition: F0163_answer_revision_CAS_authoritative_response_replay_and_UI_conflict_recovery_verified_static; F0164_lifecycle_history_statistics_remains_separate_pending; F0013_remains_runtime_hold
     riskBoundary:
       category: schema_migration_source_database_application_logic_and_api_ui_concurrency_contract
@@ -642,11 +705,13 @@ activeTasks:
       dependencyOrMechanismChange: false
       conditionalCloseout: true
     finalTreeReview:
-      decision: correction_required
-      status: correction_applied_verified_pending_new_binding
-      rejectedCandidateTree: 367881a722039c3ff57bc814412793cb0a8adac2
-      rejectedRawCachedDiffSha256: fe686c8fa8d14cb63c994131febe505ab8d3915a5b6b1fb52dcc21bc120074eb
-      tokensIssued: false
+      decision: final_tree_binding_approved
+      status: consumed_in_closed_product_commit
+      previousRejectedCandidateTree: 367881a722039c3ff57bc814412793cb0a8adac2
+      previousRejectedRawCachedDiffSha256: fe686c8fa8d14cb63c994131febe505ab8d3915a5b6b1fb52dcc21bc120074eb
+      finalCandidateTree: 144084d7857073e1c59049dcd19ad7becc53baa7
+      finalRawCachedDiffSha256: 738d9c1682981e99982b7e143739c2271d1693ce059ce7ae2ce9e2706584765b
+      databaseToken: consumed_once
       correction: fixed_order_formal_write_boundary_projection_shared_by_digest_and_full_fact_replay
     validationEvidence:
       focused: pass_10_files_185_tests
@@ -672,8 +737,21 @@ activeTasks:
     jitRevalidation:
       F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
       F-0162: closed_static_product_at_8a7af98590d6b05fde4c31a22cf44ea61ac99513
-      F-0163: reachable_answer_write_CAS_and_monotonicity_residual_selected_as_only_current_WIP
-      F-0164: reachable_separate_session_lifecycle_history_and_statistics_residual_after_F0163
+      F-0163: closed_static_product_at_9f2182dee69f66b1aec6e8918c7a05434a04e3ea
+      F-0164: selected_as_next_only_by_following_state_transition
+    closeoutEvidence:
+      commit: 9f2182dee69f66b1aec6e8918c7a05434a04e3ea
+      parent: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
+      tree: 144084d7857073e1c59049dcd19ad7becc53baa7
+      changedFiles: 23
+      focusedTestFiles: 10
+      focusedTests: 185
+      closeoutKernel: pass
+      prePushKernel: pass
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      proofBoundary: no_migration_apply_real_database_data_browser_or_runtime_proof
   - id: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     title: AI generation canonical seven question type contract
     phase: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23

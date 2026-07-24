@@ -1,178 +1,43 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24",
-  "findingIds": ["F-0163"],
+  "taskId": "p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24",
+  "findingIds": ["F-0163", "F-0164"],
   "candidateRootCauseCluster": "P1-RC-08",
-  "status": "implemented_verified_static_pending_final_tree_binding",
-  "branch": "fix/personal-ai-learning-answer-cas",
-  "baseSha": "8a7af98590d6b05fde4c31a22cf44ea61ac99513",
-  "objective": "Close the remaining reachable F-0163 answer-write failure by replacing unconditional personal AI learning answer upserts with one authoritative revision-and-command-digest CAS contract that returns persisted facts, rejects stale devices and preserves response-loss replay without changing authorization, scoring or F-0164 lifecycle semantics.",
-  "riskCategory": "schema_migration_source_database_application_logic_and_api_ui_concurrency_contract",
-  "requestFingerprint": "7a02cd5404f79b7ce9d7e988760842dd3f4984251ac4fdd5283d5fcfb6405e4e",
+  "objective": "Atomically record the delivered F-0163 static closeout, preserve WIP=1, and select F-0164 only as the next task pending a fresh product approval.",
+  "taskKind": "low_risk_state_only_transition",
+  "status": "approved_state_only_transition_pending_closeout",
+  "branch": "fix/rc-08-f0163-closeout-f0164-jit-materialization",
+  "baseSha": "9f2182dee69f66b1aec6e8918c7a05434a04e3ea",
+  "riskCategory": "low_risk_state_only",
   "approvalStatus": "approved",
-  "approvalId": "guardian-f0163-personal-ai-learning-answer-cas-2026-07-24",
-  "approvalRequestSource": "P1_GUARDIAN_TASK_BOUND_APPROVAL_V1",
+  "approvalId": "guardian-rc08-f0163-closeout-f0164-jit-state-transition-2026-07-24",
+  "approvalRequestSource": "P1_GUARDIAN_STATE_ONLY_APPROVAL_V2",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260724003000_p1_rc_08_personal_ai_learning_answer_cas.sql",
-    "drizzle/meta/20260724003000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
-    "src/server/models/personal-ai-generation-learning-session.ts",
-    "src/server/validators/personal-ai-generation-learning-session.ts",
-    "src/server/repositories/personal-ai-generation-learning-session-repository.ts",
-    "src/server/repositories/personal-ai-generation-learning-session-repository.test.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-    "src/server/services/personal-ai-generation-learning-session-route.ts",
-    "src/server/services/personal-ai-generation-learning-session-route.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-    "tests/unit/student-personal-ai-generation-ui.test.ts",
-    "tests/unit/p1-personal-ai-learning-answer-cas.test.ts",
-    "src/app/api/v1/personal-ai-generation-learning-sessions/[publicId]/answers/route.ts",
-    "src/app/api/v1/personal-ai-generation-learning-sessions/[publicId]/progress/route.ts",
-    "src/app/api/v1/personal-ai-generation-learning-sessions/route.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
-    "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
-    "tests/unit/p1-personal-ai-paper-result-question-snapshot.test.ts",
-    "src/server/services/personal-ai-generation-request-route.test.ts",
-    "src/server/repositories/personal-ai-generation-result-repository.test.ts",
-    "src/server/services/personal-ai-generation-request-route.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
-    "docs/04-agent-system/state/task-safety.json",
-    "src/db/schema/ai-rag.ts",
-    "src/db/schema/ai-rag.test.ts",
-    "drizzle/20260724003000_p1_rc_08_personal_ai_learning_answer_cas.sql",
-    "drizzle/meta/20260724003000_snapshot.json",
-    "drizzle/meta/_journal.json",
-    "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
-    "src/server/models/personal-ai-generation-learning-session.ts",
-    "src/server/validators/personal-ai-generation-learning-session.ts",
-    "src/server/repositories/personal-ai-generation-learning-session-repository.ts",
-    "src/server/repositories/personal-ai-generation-learning-session-repository.test.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.ts",
-    "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-    "src/server/services/personal-ai-generation-learning-session-route.ts",
-    "src/server/services/personal-ai-generation-learning-session-route.test.ts",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-    "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-    "tests/unit/student-personal-ai-generation-ui.test.ts",
-    "tests/unit/p1-personal-ai-learning-answer-cas.test.ts"
+    "docs/04-agent-system/state/task-safety.json"
   ],
-  "contingencyFiles": [
-    "src/app/api/v1/personal-ai-generation-learning-sessions/[publicId]/answers/route.ts",
-    "src/app/api/v1/personal-ai-generation-learning-sessions/[publicId]/progress/route.ts",
-    "src/app/api/v1/personal-ai-generation-learning-sessions/route.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
-    "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
-    "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
-    "tests/unit/p1-personal-ai-paper-result-question-snapshot.test.ts",
-    "src/server/services/personal-ai-generation-request-route.test.ts",
-    "src/server/repositories/personal-ai-generation-result-repository.test.ts",
-    "src/server/services/personal-ai-generation-request-route.ts"
-  ],
+  "contingencyFiles": [],
   "blockedFiles": [
-    "AGENTS.md",
-    "docs/04-agent-system/sop/**",
-    "scripts/**",
-    ".husky/**",
-    "docs/05-execution-logs/**",
-    "package.json",
-    "pnpm-lock.yaml",
-    "all files outside allowedFiles",
-    "any migration apply, real database/data, Provider/network call, permission, entitlement, quota, Prompt, dependency, deployment, secret/env, PR, force-push or mechanism change"
+    "all product, schema, migration, database, permission, Provider, dependency, deployment, mechanism, hook, kernel, guard and smoke files",
+    "all files outside allowedFiles"
   ],
-  "preRedImpactScan": {
-    "authoritativeChain": "authorized answer request -> immutable owned learning session and exact question -> canonical server-scored feedback -> database revision and command-digest CAS -> persisted authoritative feedback response and progress",
-    "currentVulnerableSink": "personal_ai_learning_answer_feedback uses an unconditional session-question upsert; a stale or concurrent request can overwrite newer feedback and service returns the pre-persistence local object instead of the authoritative row",
-    "alreadyCovered": "session creation now rereads and returns the unique persisted winner with exact context matching; F-0162 makes first paper-session input immutable, so only the answer-write CAS and monotonicity half of F-0163 remains reachable",
-    "securityInvariant": "route authorization and object masking happen before answer facts are read or mutated; actor, session and question identity remain server-validated and no cross-owner state is disclosed",
-    "legitimateBehavior": "first answer starts at revision 1; an exact response-loss replay is read-only; a client that has reloaded the latest revision may intentionally submit a new answer; stale or conflicting revisions never mutate persisted feedback",
-    "coreFileCount": 21,
-    "contingencyFileCount": 10,
-    "directCallersMocksFixturesReviewed": true,
-    "schemaMigrationRequired": true,
-    "migrationApplyOrRealDatabaseRequired": false,
-    "providerOrNetworkRequired": false,
-    "authorizationSemanticsChanged": false,
-    "bundleDisposition": "F-0163 answer CAS is selected independently; F-0164 lifecycle, history and statistics remains pending after this prerequisite; F-0013 remains runtime_hold"
-  },
   "requiredSemantics": {
-    "schema": "add exactly two legacy-nullable answer feedback fields, answer_revision and answer_command_digest, with one strict all-null legacy or complete-current CHECK; current revision is a positive database integer and digest is lowercase sha256; no default, backfill, data SQL or destructive DDL",
-    "request": "current answer requests carry an exact nonnegative expectedAnswerRevision; missing, negative, fractional, unsafe, overflow, string, null, unknown-field or otherwise malformed values fail before repository mutation; legacy aliases and defaults are forbidden",
-    "canonicalCommand": "one versioned canonicalizer derives the command digest only from the server-normalized persisted answer facts plus exact session, question, actor and expected revision; submittedAt is excluded so response-loss retries remain stable; order, sparse arrays, duplicate labels and mutable references cannot change the preimage ambiguously",
-    "cas": "new row insert requires expected revision 0 and persists revision 1; update requires current complete revision exactly equal to expected and atomically advances exactly once; current incomplete and legacy rows are never silently upgraded; integer exhaustion fails closed",
-    "concurrency": "two different commands with one expected revision yield one winner and one stable conflict; two identical commands yield one mutation and one exact read-only replay; later updates cannot be overwritten by delayed older requests",
-    "replay": "only current revision equal to expected plus one and exact persisted command digest/facts may be returned as a response-loss replay; any later revision, different answer, actor, session or question is a conflict with zero write",
-    "authoritativeResponse": "repository returns the inserted, updated or replayed persisted row; service and route never return a locally constructed loser or new timestamp; progress and submit responses expose server-owned answerRevision and original persisted submittedAt",
-    "time": "accepted revision timestamps are nondecreasing even if the injected wall clock regresses; stale, replay, invalid authorization, invalid question, malformed answer, corrupt row or CAS conflict does not change submittedAt or updatedAt",
-    "ui": "the learner UI stores each server answerRevision, sends 0 only for a question with no persisted feedback, sends the exact latest revision for an intentional edit, prevents double-submit while in flight and reloads exact progress after a conflict; no client timestamp is authoritative",
-    "unchanged": "authorization, scoring rules, seven question types, subjective review-required behavior, F-0162 immutable session source, public-id boundaries, F-0164 lifecycle/history/statistics and Provider/quota behavior remain unchanged"
+    "f0163Closeout": "F-0163 is closed_static_product at commit 9f2182dee69f66b1aec6e8918c7a05434a04e3ea and tree 144084d7857073e1c59049dcd19ad7becc53baa7.",
+    "proofBoundary": "No migration apply, real database, real data, browser or runtime proof is claimed.",
+    "wip": "Exactly one in-progress P1 task exists and it is this state-only transition task.",
+    "nextTask": "F-0164 is selected only as nextTaskId and remains inactive and unmaterialized pending fresh schema, database and permission approval.",
+    "runtimeHold": "F-0013 remains runtime_hold and is not changed by this state transition.",
+    "nextAction": "After state-only closeout ACK, request fresh task-bound approval for the proposed F-0164 product task before RED or product writes."
   },
-  "minimumAdversarialTests": [
-    "two concurrent first submissions with different answers produce one revision-1 row and one conflict; exactly one mutation occurs",
-    "two identical concurrent or response-loss submissions produce one mutation and one read-only replay with the same revision, submittedAt and feedback snapshot",
-    "revision 1 to 2 succeeds only with expected 1; delayed expected 0 and competing expected 1 cannot overwrite the committed winner",
-    "current partial markers, legacy all-null rows, duplicate or corrupt rows, wrong actor/session/question and revision overflow fail closed with zero write",
-    "repository insert/update returning cardinality 0 or greater than 1, digest mismatch and post-conflict reread mismatch do not become success",
-    "submittedAt and updatedAt never regress under injected clock rollback; replay preserves the original persisted time",
-    "route rejects malformed or missing expectedAnswerRevision before mutation and preserves authorization/not-found masking",
-    "UI restores revisions from progress, sends the exact expected revision, blocks double submit and refetches progress after conflict",
-    "concurrent session creation still returns only the database winner and F-0162 paper snapshot, seven-type and subjective-answer regressions remain GREEN",
-    "migration contains only two nullable columns and one coherence CHECK with no UPDATE, DELETE, DROP, TRUNCATE, backfill or apply"
-  ],
   "validationCommands": [
     {
-      "name": "personal-ai-learning-answer-cas-focused",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@11.9.0",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-personal-ai-learning-answer-cas.test.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "src/server/repositories/personal-ai-generation-learning-session-repository.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-route.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts",
-        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
-        "tests/unit/p1-personal-ai-paper-result-question-snapshot.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
-        "--maxWorkers=1"
-      ]
-    },
-    {
-      "name": "repository-lint",
-      "kind": "lint",
-      "executable": "npm.cmd",
-      "arguments": ["run", "lint"]
-    },
-    {
-      "name": "typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@11.9.0", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "build",
-      "kind": "other",
-      "executable": "npm.cmd",
-      "arguments": ["run", "build"]
-    },
-    {
-      "name": "format",
+      "name": "state-format",
       "kind": "lint",
       "executable": "corepack.cmd",
       "arguments": [
@@ -182,78 +47,19 @@
         "--check",
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/04-agent-system/state/task-safety.json",
-        "src/db/schema/ai-rag.ts",
-        "src/db/schema/ai-rag.test.ts",
-        "drizzle/meta/20260724003000_snapshot.json",
-        "drizzle/meta/_journal.json",
-        "src/server/contracts/personal-ai-generation-learning-session-contract.ts",
-        "src/server/models/personal-ai-generation-learning-session.ts",
-        "src/server/validators/personal-ai-generation-learning-session.ts",
-        "src/server/repositories/personal-ai-generation-learning-session-repository.ts",
-        "src/server/repositories/personal-ai-generation-learning-session-repository.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-service.ts",
-        "src/server/services/personal-ai-generation-learning-session-service.test.ts",
-        "src/server/services/personal-ai-generation-learning-session-route.ts",
-        "src/server/services/personal-ai-generation-learning-session-route.test.ts",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
-        "src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx",
-        "tests/unit/student-personal-ai-generation-ui.test.ts",
-        "tests/unit/p1-personal-ai-learning-answer-cas.test.ts",
-        "src/app/api/v1/personal-ai-generation-learning-sessions/[publicId]/answers/route.ts",
-        "src/app/api/v1/personal-ai-generation-learning-sessions/[publicId]/progress/route.ts",
-        "src/app/api/v1/personal-ai-generation-learning-sessions/route.ts",
-        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.ts",
-        "src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts",
-        "tests/unit/p1-personal-ai-learning-subjective-answer.test.ts",
-        "tests/unit/p1-personal-ai-paper-result-question-snapshot.test.ts",
-        "src/server/services/personal-ai-generation-request-route.test.ts",
-        "src/server/repositories/personal-ai-generation-result-repository.test.ts",
-        "src/server/services/personal-ai-generation-request-route.ts"
+        "docs/04-agent-system/state/task-safety.json"
       ]
     },
     {
-      "name": "diff-check",
+      "name": "state-diff-check",
       "kind": "other",
       "executable": "git.exe",
       "arguments": ["diff", "--check"]
-    },
-    {
-      "name": "state-schema-source-contract",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@11.9.0",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-personal-ai-learning-answer-cas.test.ts",
-        "-t",
-        "keeps task state and additive migration source exact",
-        "--maxWorkers=1"
-      ]
     }
   ],
-  "validationEvidence": {
-    "focused": "pass_10_files_185_tests",
-    "lint": "pass_exit_0_with_3_unrelated_existing_warnings",
-    "typecheck": "pass",
-    "build": "pass_100_pages",
-    "formatDiffStateSchema": "pass",
-    "adversarialReview": "pass_fixed_order_nested_canonical_facts_JSONB_reordered_replay_boundary_value_drift_fail_closed_strict_partial_null_database_check_revision_CAS_monotonic_snapshot_time_authorization_before_feedback_UI_conflict_refresh",
-    "proofBoundary": "no_migration_apply_real_database_data_or_browser_runtime_proof"
-  },
-  "finalTreeReview": {
-    "decision": "correction_required",
-    "status": "correction_applied_verified_pending_new_binding",
-    "rejectedCandidateTree": "367881a722039c3ff57bc814412793cb0a8adac2",
-    "rejectedRawCachedDiffSha256": "fe686c8fa8d14cb63c994131febe505ab8d3915a5b6b1fb52dcc21bc120074eb",
-    "tokensIssued": false,
-    "correction": "fixed_order_formal_write_boundary_projection_shared_by_digest_and_full_fact_replay"
-  },
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0163-personal-ai-learning-answer-cas-2026-07-24",
+    "database": null,
     "permission": null,
     "provider": null,
     "deployment": null,
@@ -264,49 +70,54 @@
   },
   "conditionalCloseout": {
     "approved": true,
-    "approvalId": "guardian-f0163-personal-ai-learning-answer-cas-2026-07-24",
+    "approvalId": "guardian-rc08-f0163-closeout-f0164-jit-state-transition-2026-07-24",
     "conditions": [
-      "fresh task-bound database approval is received before RED or product writes",
-      "one offline additive migration source is generated and never applied",
-      "all validation commands and one main-thread adversarial review are GREEN",
-      "final diff stays inside the approved allowed-file envelope",
-      "a fresh database token binds the final candidate tree before Kernel/full",
-      "base, origin, risk and semantics remain unchanged"
+      "strict JSON and YAML unique-key parsing succeeds",
+      "WIP=1 and the current state-only task identity agree across all three state files",
+      "F-0163 is closed and completed while F-0164 is next-only and not active",
+      "HEAD, master and origin/master remain at the F-0163 closeout commit",
+      "the diff is limited to the three allowed state files",
+      "the final state tree receives explicit guardian binding before Kernel, commit or push"
     ]
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23",
-    "findingId": "F-0162",
-    "commit": "8a7af98590d6b05fde4c31a22cf44ea61ac99513",
-    "parent": "2fa26362377f3099f6d794deacb64be73b220530",
-    "tree": "065fd18e308357a4166f56d2dd3e5b6d11697c0b",
-    "changedFileCount": 29,
+    "taskId": "p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24",
+    "findingIds": ["F-0163"],
+    "commit": "9f2182dee69f66b1aec6e8918c7a05434a04e3ea",
+    "parent": "8a7af98590d6b05fde4c31a22cf44ea61ac99513",
+    "tree": "144084d7857073e1c59049dcd19ad7becc53baa7",
+    "changedFileCount": 23,
     "status": "closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "focusedTestFiles": 10,
+    "focusedTests": 185,
     "closeoutKernel": true,
     "prePushKernel": true,
     "masterOriginSync": true,
+    "worktreeClean": true,
     "shortBranchCleanup": true,
-    "proofBoundary": "no migration apply, real database/data or browser/runtime proof"
+    "proofBoundary": "no_migration_apply_real_database_data_browser_or_runtime_proof"
+  },
+  "nextTask": {
+    "findingId": "F-0164",
+    "status": "selected_pending_fresh_schema_database_permission_approval",
+    "proposedProductTaskId": "p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24",
+    "proposedBranch": "fix/personal-ai-learning-session-lifecycle-history-statistics",
+    "active": false,
+    "materialized": false
   },
   "jitRevalidation": {
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
     "F-0162": "closed_static_product_at_8a7af98590d6b05fde4c31a22cf44ea61ac99513",
-    "F-0163": "reachable_answer_write_CAS_and_monotonicity_residual_selected_as_only_current_WIP",
-    "F-0164": "reachable_separate_session_lifecycle_history_and_statistics_residual_after_F0163"
+    "F-0163": "closed_static_product_at_9f2182dee69f66b1aec6e8918c7a05434a04e3ea",
+    "F-0164": "selected_next_only_pending_fresh_schema_database_permission_approval"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-08",
-    "currentTaskId": "p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24",
-    "currentPartition": "F-0163_answer_revision_command_digest_CAS",
+    "currentTaskId": "p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24",
+    "currentPartition": "state_only_closeout_and_next_task_selection",
     "nextReviewHints": [
-      "request fresh schema/database approval before RED",
-      "keep F-0164 pending as an independent lifecycle/history/statistics task"
+      "close out this state-only task before materializing the F-0164 product task",
+      "freeze the F-0164 product envelope and request fresh schema, database and permission approval before RED"
     ]
-  },
-  "verificationEvidence": {
-    "jitReadOnlyReview": "F0163 creation-loser response is already covered by persisted-winner reread and exact context matching; unconditional answer upsert remains reachable and selected; F0164 remains independent",
-    "stateParse": "pass_strict_json_yaml_unique_keys_four_way_task_identity_and_WIP_one",
-    "format": "pass_exact_three_state_files",
-    "diffCheck": "pass"
   }
 }
