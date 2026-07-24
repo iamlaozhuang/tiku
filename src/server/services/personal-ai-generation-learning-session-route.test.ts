@@ -16,7 +16,10 @@ import type {
 } from "../repositories/effective-authorization-repository";
 import { createPersonalAiGenerationLearningSessionRouteHandlers as createBasePersonalAiGenerationLearningSessionRouteHandlers } from "./personal-ai-generation-learning-session-route";
 import type { PersonalAiGenerationLearningSessionRouteDependencies } from "./personal-ai-generation-learning-session-route";
-import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+import {
+  createPersonalAiGenerationPrivatePaperQuestionSnapshot,
+  createPersonalAiGenerationPrivateQuestionDraftSnapshot,
+} from "../validators/personal-ai-generation-result-persistence";
 
 const personalUserContext = {
   userPublicId: "learner_route_student_public_001",
@@ -108,6 +111,14 @@ function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
       enterpriseTrainingSnapshotCount: 0,
     },
     matchQuality: "fully_matched",
+    constraintLineage: {
+      request: { difficulty: "medium", knowledgeNodePublicIds: [] },
+      plan: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: [],
+        parentKnowledgeNodePublicIds: [],
+      },
+    },
     sections: [
       {
         sectionKey: "single-choice",
@@ -121,6 +132,13 @@ function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
             sourceKind: "platform_formal_question",
             matchTier: "exact",
             score: 2,
+            constraintMatchBasis: {
+              difficulty: "medium",
+              knowledgeNodePublicIds: [],
+              parentKnowledgeNodePublicIds: [],
+              ancestorKnowledgeNodePublicIds: [],
+              matchTier: "exact",
+            },
             questionGroup: { ...questionGroupBase, questionSortOrder: 1 },
           },
           {
@@ -128,6 +146,13 @@ function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
             sourceKind: "platform_formal_question",
             matchTier: "exact",
             score: 2,
+            constraintMatchBasis: {
+              difficulty: "medium",
+              knowledgeNodePublicIds: [],
+              parentKnowledgeNodePublicIds: [],
+              ancestorKnowledgeNodePublicIds: [],
+              matchTier: "exact",
+            },
             questionGroup: { ...questionGroupBase, questionSortOrder: 2 },
           },
         ],
@@ -385,6 +410,68 @@ function createDefaultPrivateQuestionSnapshot(
   return snapshot;
 }
 
+function createDefaultPrivatePaperSnapshot(
+  result: PersonalAiGenerationResultDto,
+  ownerType: "personal" | "organization",
+  ownerPublicId: string,
+) {
+  const paperAssemblyContainer = result.paperAssembly?.container;
+
+  if (paperAssemblyContainer === undefined) {
+    throw new Error("test paper assembly must exist");
+  }
+
+  const snapshot = createPersonalAiGenerationPrivatePaperQuestionSnapshot({
+    resultPublicId: result.resultPublicId,
+    taskPublicId: result.taskPublicId,
+    ownerType,
+    ownerPublicId,
+    paperAssemblyContainer,
+    sourceQuestions: createPaperSourceQuestions().map((question) => ({
+      questionPublicId: question.questionPublicId,
+      sourceKind: question.sourceKind,
+      sourceVersion: {
+        kind: "platform_question_updated_at" as const,
+        updatedAt: "2026-07-12T09:00:00.000Z",
+      },
+      profession: paperAssemblyContainer.profession,
+      level: paperAssemblyContainer.level,
+      subject: paperAssemblyContainer.subject,
+      questionType: question.questionType,
+      difficulty: question.difficulty,
+      knowledgeNodePublicIds: [],
+      parentKnowledgeNodePublicIds: [],
+      ancestorKnowledgeNodePublicIds: [],
+      questionStem: question.questionStem,
+      questionOptions: question.questionOptions.map((questionOption) => ({
+        optionLabel: questionOption.optionLabel,
+        optionText: questionOption.optionText,
+        isCorrect: requireTestBoolean(questionOption.isCorrect),
+      })),
+      standardAnswerLabels: [...question.standardAnswerLabels],
+      standardAnswerText: question.standardAnswerText,
+      analysis: question.analysis,
+      scoringPoints: [],
+      fillBlankAnswers: [],
+      questionGroup: question.questionGroup ?? null,
+    })),
+  });
+
+  if (snapshot === null) {
+    throw new Error("test private paper snapshot must be valid");
+  }
+
+  return snapshot;
+}
+
+function requireTestBoolean(value: boolean | null): boolean {
+  if (value === null) {
+    throw new Error("test private paper option correctness must be complete");
+  }
+
+  return value;
+}
+
 function createEffectiveAuthorizationContext(input: {
   authorizationPublicId: string;
   authorizationSource: "personal_auth" | "org_auth";
@@ -464,6 +551,15 @@ function createPersonalAiGenerationLearningSessionRouteHandlers(
     async findPrivateQuestionDraftSnapshotByPublicId(query) {
       return createDefaultPrivateQuestionSnapshot(
         createDefaultLearningResult(query.resultPublicId),
+        query.ownerPublicId,
+      );
+    },
+    async findPrivatePaperQuestionSnapshotByPublicId(query) {
+      const result = createPersistedPaperResult(query.resultPublicId);
+
+      return createDefaultPrivatePaperSnapshot(
+        result,
+        query.ownerType ?? "personal",
         query.ownerPublicId,
       );
     },
@@ -613,8 +709,14 @@ describe("personal AI generation learning session route handlers", () => {
 
   it("rejects an ineffective selected authorization before creating a learning session", async () => {
     const repository = createLearningSessionRepository();
+    const privatePaperSnapshotLookup = vi.fn(async () => {
+      throw new Error("private snapshot must not be read before authorization");
+    });
     const dependencies = {
       repository,
+      resultRepository: {
+        findPrivatePaperQuestionSnapshotByPublicId: privatePaperSnapshotLookup,
+      },
       authorizationRepository: {
         async listPersonalAuthsByUserPublicId() {
           return [
@@ -671,6 +773,7 @@ describe("personal AI generation learning session route handlers", () => {
       data: null,
     });
     expect(repository.savedSessions).toEqual([]);
+    expect(privatePaperSnapshotLookup).not.toHaveBeenCalled();
   });
 
   it("rejects progress and answer consumption after the selected authorization becomes ineffective", async () => {
@@ -786,7 +889,6 @@ describe("personal AI generation learning session route handlers", () => {
       const resultPublicId = `persisted_paper_result_${ownerType}_001`;
       const persistedResult = createPersistedPaperResult(resultPublicId);
       const resultLookupQueries: unknown[] = [];
-      const resolverInputs: unknown[] = [];
       const { collection } =
         createPersonalAiGenerationLearningSessionRouteHandlers(
           async () => userContext,
@@ -805,10 +907,6 @@ describe("personal AI generation learning session route handlers", () => {
               },
             },
             now: () => new Date("2026-07-12T10:30:00.000Z"),
-            paperSourceQuestionResolver: async (resolverInput) => {
-              resolverInputs.push(resolverInput);
-              return createPaperSourceQuestions();
-            },
           },
         );
 
@@ -874,18 +972,6 @@ describe("personal AI generation learning session route handlers", () => {
               },
             ],
       );
-      expect(resolverInputs).toEqual([
-        expect.objectContaining({
-          ownerScope: {
-            ownerType,
-            ownerPublicId,
-            actorPublicId: userContext.userPublicId,
-          },
-          sourceResultPublicId: resultPublicId,
-          sourceTaskPublicId: persistedResult.taskPublicId,
-          paperAssemblyContainer: persistedResult.paperAssembly?.container,
-        }),
-      ]);
     },
   );
 
@@ -911,7 +997,6 @@ describe("personal AI generation learning session route handlers", () => {
             },
           },
           now: () => new Date("2026-07-12T10:31:00.000Z"),
-          paperSourceQuestionResolver: async () => createPaperSourceQuestions(),
         },
       );
 
@@ -962,7 +1047,13 @@ describe("personal AI generation learning session route handlers", () => {
     const repository = createLearningSessionRepository();
     const resultPublicId = "persisted_paper_result_resume_001";
     const persistedResult = createPersistedPaperResult(resultPublicId);
-    let resolverCallCount = 0;
+    const privatePaperSnapshotLookup = vi.fn(async () =>
+      createDefaultPrivatePaperSnapshot(
+        persistedResult,
+        "personal",
+        personalUserContext.userPublicId,
+      ),
+    );
     const { collection } =
       createPersonalAiGenerationLearningSessionRouteHandlers(
         async () => personalUserContext,
@@ -972,17 +1063,10 @@ describe("personal AI generation learning session route handlers", () => {
             async findDraftResultByPublicId() {
               return persistedResult;
             },
+            findPrivatePaperQuestionSnapshotByPublicId:
+              privatePaperSnapshotLookup,
           },
           now: () => new Date("2026-07-12T10:30:00.000Z"),
-          paperSourceQuestionResolver: async () => {
-            resolverCallCount += 1;
-
-            if (resolverCallCount > 1) {
-              throw new Error("current source must not be resolved for resume");
-            }
-
-            return createPaperSourceQuestions();
-          },
         },
       );
     const postHandler = getLearningSessionCollectionPostHandler(collection);
@@ -1007,12 +1091,11 @@ describe("personal AI generation learning session route handlers", () => {
         },
       },
     });
-    expect(resolverCallCount).toBe(1);
+    expect(privatePaperSnapshotLookup).toHaveBeenCalledTimes(1);
   });
 
   it("creates an AI组卷 learning session from server-resolved formal source questions and ignores client-sent source content", async () => {
     const repository = createLearningSessionRepository();
-    const resolverCalls: AiPaperPlanAndSelectContainerDto[] = [];
     const { collection } =
       createPersonalAiGenerationLearningSessionRouteHandlers(
         async () => employeeUserContext,
@@ -1026,10 +1109,6 @@ describe("personal AI generation learning session route handlers", () => {
             },
           },
           now: () => new Date("2026-07-06T04:00:00.000Z"),
-          paperSourceQuestionResolver: async ({ paperAssemblyContainer }) => {
-            resolverCalls.push(paperAssemblyContainer);
-            return createPaperSourceQuestions();
-          },
         },
       );
 
@@ -1052,7 +1131,6 @@ describe("personal AI generation learning session route handlers", () => {
     );
     const payload = await response.json();
 
-    expect(resolverCalls).toHaveLength(1);
     expect(payload).toMatchObject({
       code: 0,
       data: {
@@ -1119,10 +1197,11 @@ describe("personal AI generation learning session route handlers", () => {
                 ? createPersistedPaperResult(query.resultPublicId)
                 : null;
             },
+            async findPrivatePaperQuestionSnapshotByPublicId() {
+              return null;
+            },
           },
           now: () => new Date("2026-07-06T04:01:00.000Z"),
-          paperSourceQuestionResolver: async () =>
-            createPaperSourceQuestions().slice(0, 1),
         },
       );
 
@@ -1137,29 +1216,29 @@ describe("personal AI generation learning session route handlers", () => {
       }),
     );
 
-    await expect(response.json()).resolves.toMatchObject({
-      code: 0,
-      data: {
-        status: "blocked",
-        blockReason: "selected_question_source_missing",
-        session: null,
-      },
+    await expect(response.json()).resolves.toEqual({
+      code: 400056,
+      message: "Invalid personal AI learning session input.",
+      data: null,
     });
     expect(repository.savedSessions).toHaveLength(0);
   });
 
-  it("keeps the AI出题 learning session route from invoking the paper source resolver", async () => {
+  it("keeps the AI出题 learning session route independent from paper snapshot lookup", async () => {
     const repository = createLearningSessionRepository();
-    const resolverCalls: string[] = [];
+    const privatePaperSnapshotLookup = vi.fn();
     const { collection } =
       createPersonalAiGenerationLearningSessionRouteHandlers(
         async () => personalUserContext,
         {
           repository,
           now: () => new Date("2026-07-06T04:02:00.000Z"),
-          paperSourceQuestionResolver: async () => {
-            resolverCalls.push("called");
-            return [];
+          resultRepository: {
+            async findDraftResultByPublicId(query) {
+              return createDefaultLearningResult(query.resultPublicId);
+            },
+            findPrivatePaperQuestionSnapshotByPublicId:
+              privatePaperSnapshotLookup,
           },
         },
       );
@@ -1183,7 +1262,7 @@ describe("personal AI generation learning session route handlers", () => {
         },
       },
     });
-    expect(resolverCalls).toHaveLength(0);
+    expect(privatePaperSnapshotLookup).not.toHaveBeenCalled();
   });
 
   it("creates a persisted learner AI session under the personal owner scope", async () => {

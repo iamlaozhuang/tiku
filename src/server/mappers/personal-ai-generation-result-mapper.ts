@@ -22,6 +22,9 @@ export type PersonalAiGenerationResultPersistenceRow = {
   question_draft_schema_version?: string | null;
   question_draft_snapshot?: unknown;
   question_draft_digest?: string | null;
+  paper_question_snapshot_schema_version?: string | null;
+  paper_question_snapshot?: unknown;
+  paper_question_snapshot_digest?: string | null;
   citation_redacted_snapshot: RedactedJsonObject | null;
   evidence_status: EvidenceStatus;
   citation_count: number;

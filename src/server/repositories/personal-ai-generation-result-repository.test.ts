@@ -17,7 +17,10 @@ import {
   persistPersonalAiGenerationDraftResultAndCompleteTask,
 } from "./personal-ai-generation-result-repository";
 import type { RuntimeDatabase } from "./runtime-database";
-import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+import {
+  createPersonalAiGenerationPrivatePaperQuestionSnapshot,
+  createPersonalAiGenerationPrivateQuestionDraftSnapshot,
+} from "../validators/personal-ai-generation-result-persistence";
 
 function createPrivateQuestionDraftSnapshot(
   taskPublicId: string,
@@ -49,6 +52,108 @@ function createPrivateQuestionDraftSnapshot(
 
   if (snapshot === null) {
     throw new Error("test question snapshot must be valid");
+  }
+
+  return snapshot;
+}
+
+function createPrivatePaperQuestionSnapshot(
+  resultPublicId: string,
+  taskPublicId: string,
+  ownerPublicId: string,
+  questionStem = "不可变试卷题干",
+) {
+  const paperAssemblyContainer = {
+    title: "不可变试卷",
+    profession: "marketing" as const,
+    level: 3,
+    subject: "theory" as const,
+    requestedQuestionCount: 1,
+    selectedQuestionCount: 1,
+    sourceComposition: {
+      platformFormalQuestionCount: 1,
+      enterpriseTrainingSnapshotCount: 0,
+    },
+    matchQuality: "fully_matched" as const,
+    constraintLineage: {
+      request: { difficulty: "medium", knowledgeNodePublicIds: [] },
+      plan: {
+        difficulty: "medium",
+        knowledgeNodePublicIds: [],
+        parentKnowledgeNodePublicIds: [],
+      },
+    },
+    sections: [
+      {
+        sectionKey: "single_choice",
+        title: "单选题",
+        questionType: "single_choice" as const,
+        targetQuestionCount: 1,
+        selectedQuestionCount: 1,
+        selectedQuestions: [
+          {
+            questionPublicId: "question_public_paper_snapshot",
+            sourceKind: "platform_formal_question" as const,
+            matchTier: "exact" as const,
+            score: 2,
+            constraintMatchBasis: {
+              difficulty: "medium",
+              knowledgeNodePublicIds: [],
+              parentKnowledgeNodePublicIds: [],
+              ancestorKnowledgeNodePublicIds: [],
+              matchTier: "exact" as const,
+            },
+            questionGroup: null,
+          },
+        ],
+        degradationSummary: {
+          exactCount: 1,
+          descendantCount: 0,
+          nearbyKnowledgeCount: 0,
+          sameScopeCount: 0,
+        },
+      },
+    ],
+  };
+  const snapshot = createPersonalAiGenerationPrivatePaperQuestionSnapshot({
+    resultPublicId,
+    taskPublicId,
+    ownerType: "personal",
+    ownerPublicId,
+    paperAssemblyContainer,
+    sourceQuestions: [
+      {
+        questionPublicId: "question_public_paper_snapshot",
+        sourceKind: "platform_formal_question",
+        sourceVersion: {
+          kind: "platform_question_updated_at",
+          updatedAt: "2026-07-23T12:00:00.000Z",
+        },
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        questionType: "single_choice",
+        difficulty: "medium",
+        knowledgeNodePublicIds: [],
+        parentKnowledgeNodePublicIds: [],
+        ancestorKnowledgeNodePublicIds: [],
+        questionStem,
+        questionOptions: [
+          { optionLabel: "A", optionText: "正确", isCorrect: true },
+          { optionLabel: "B", optionText: "错误", isCorrect: false },
+        ],
+        standardAnswerLabels: ["A"],
+        standardAnswerText: "A",
+        analysis: "不可变解析",
+        scoringPoints: [],
+        fillBlankAnswers: [],
+        questionGroup: null,
+      },
+    ],
+  });
+
+  if (snapshot === null) {
+    throw new Error("test paper snapshot must be valid");
   }
 
   return snapshot;
@@ -139,6 +244,15 @@ function createPersistenceRow(
 function createAtomicPersistenceInput(
   row: PersonalAiGenerationResultPersistenceRow,
 ) {
+  const privatePaperQuestionSnapshot =
+    row.task_type === "ai_paper_generation"
+      ? createPrivatePaperQuestionSnapshot(
+          row.public_id,
+          row.task_public_id,
+          row.owner_public_id,
+        )
+      : null;
+
   return {
     result: {
       resultPublicId: row.public_id,
@@ -160,6 +274,7 @@ function createAtomicPersistenceInput(
               row.owner_public_id,
             )
           : null,
+      privatePaperQuestionSnapshot,
       citationRedactedSnapshot: row.citation_redacted_snapshot,
       evidenceStatus: row.evidence_status,
       citationCount: row.citation_count,
@@ -418,6 +533,83 @@ describe("personal AI generation result repository", () => {
     expect(containsText(updateConditions[0], "estimated")).toBe(true);
     expect(containsText(updateConditions[0], "client_observed")).toBe(true);
     expect(result).toEqual(insertedRow);
+  });
+
+  it("persists the paper snapshot in the same result and task completion transaction", async () => {
+    const paperSnapshot = createPrivatePaperQuestionSnapshot(
+      "personal_ai_result_paper_atomic",
+      "ai_generation_task_paper_atomic",
+      "student_public_paper_atomic",
+    );
+    const insertedRow = createPersistenceRow({
+      public_id: paperSnapshot.snapshot.resultPublicId,
+      task_public_id: paperSnapshot.snapshot.taskPublicId,
+      owner_public_id: paperSnapshot.snapshot.ownerPublicId,
+      task_type: "ai_paper_generation",
+      ai_call_log_public_id: "ai-call-log-paper-atomic",
+      question_draft_schema_version: null,
+      question_draft_snapshot: null,
+      question_draft_digest: null,
+      paper_question_snapshot_schema_version: paperSnapshot.schemaVersion,
+      paper_question_snapshot: paperSnapshot.snapshot,
+      paper_question_snapshot_digest: paperSnapshot.digest,
+    });
+    let insertedValues: Record<string, unknown> | null = null;
+    let updateCallCount = 0;
+    const transactionDatabase = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            for: vi.fn(() => ({
+              limit: vi.fn(async () => [{ aiCallLogId: 801 }]),
+            })),
+          })),
+        })),
+      })),
+      insert: vi.fn(() => ({
+        values: vi.fn((values: Record<string, unknown>) => {
+          insertedValues = values;
+
+          return {
+            onConflictDoNothing: vi.fn(() => ({
+              returning: vi.fn(async () => [insertedRow]),
+            })),
+          };
+        }),
+      })),
+      update: vi.fn(() => {
+        updateCallCount += 1;
+        return {
+          set: vi.fn(() => ({
+            where: vi.fn(() => ({
+              returning: vi.fn(async () =>
+                updateCallCount === 1
+                  ? [createMeasuredAiCallLogRow(801)]
+                  : [{ public_id: insertedRow.task_public_id }],
+              ),
+            })),
+          })),
+        };
+      }),
+    };
+
+    await persistPersonalAiGenerationDraftResultAndCompleteTask(
+      {
+        transaction: async (callback: (database: unknown) => unknown) =>
+          callback(transactionDatabase),
+      } as unknown as RuntimeDatabase,
+      createAtomicPersistenceInput(insertedRow),
+    );
+
+    expect(insertedValues).toMatchObject({
+      question_draft_schema_version: null,
+      question_draft_snapshot: null,
+      question_draft_digest: null,
+      paper_question_snapshot_schema_version: "paper_question_snapshot_v1",
+      paper_question_snapshot: paperSnapshot.snapshot,
+      paper_question_snapshot_digest: paperSnapshot.digest,
+    });
+    expect(updateCallCount).toBe(2);
   });
 
   it("rolls back when the owner-scoped task cannot be completed", async () => {
@@ -711,6 +903,48 @@ describe("personal AI generation result repository", () => {
     ).resolves.toBeNull();
   });
 
+  it("keeps the persisted private paper snapshot out of the public result projection", async () => {
+    const resultPublicId = "personal_ai_result_private_projection";
+    const taskPublicId = "ai_generation_task_private_projection";
+    const ownerPublicId = "student_public_private_projection";
+    const privateSnapshot = createPrivatePaperQuestionSnapshot(
+      resultPublicId,
+      taskPublicId,
+      ownerPublicId,
+      "SENSITIVE_PRIVATE_PAPER_STEM",
+    );
+    const row = createPersistenceRow({
+      public_id: resultPublicId,
+      task_public_id: taskPublicId,
+      owner_public_id: ownerPublicId,
+      actor_public_id: ownerPublicId,
+      task_type: "ai_paper_generation",
+      question_draft_schema_version: null,
+      question_draft_snapshot: null,
+      question_draft_digest: null,
+      paper_question_snapshot_schema_version: privateSnapshot.schemaVersion,
+      paper_question_snapshot: privateSnapshot.snapshot,
+      paper_question_snapshot_digest: privateSnapshot.digest,
+    });
+    const repository = createPersonalAiGenerationResultRepository(
+      createGateway({ rows: [row] }).gateway,
+    );
+
+    const result = await repository.findDraftResultByPublicId({
+      ownerType: "personal",
+      ownerPublicId,
+      actorPublicId: ownerPublicId,
+      resultPublicId,
+    });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).not.toBeNull();
+    expect(serializedResult).not.toContain("SENSITIVE_PRIVATE_PAPER_STEM");
+    expect(serializedResult).not.toMatch(
+      /paperQuestionSnapshot|paper_question_snapshot|standardAnswer|scoringPoints/u,
+    );
+  });
+
   it("lists owner draft results newest first without exposing internal ids or snapshots", async () => {
     const { gateway, listResultRows } = createGateway({
       rows: [
@@ -878,6 +1112,7 @@ describe("personal AI generation result repository", () => {
         "ai_generation_task_public_existing",
         "student_public_173",
       ),
+      privatePaperQuestionSnapshot: null,
       citationRedactedSnapshot: null,
       evidenceStatus: "weak",
       citationCount: 1,
@@ -924,6 +1159,7 @@ describe("personal AI generation result repository", () => {
           existingRow.owner_public_id,
           "冲突答案",
         ),
+        privatePaperQuestionSnapshot: null,
         citationRedactedSnapshot: null,
         evidenceStatus: "weak",
         citationCount: 1,
@@ -934,6 +1170,85 @@ describe("personal AI generation result repository", () => {
           retryCount: 0,
           startedAt: new Date("2026-06-13T13:29:00.123Z"),
         },
+      }),
+    ).rejects.toThrow("snapshot conflicted");
+    expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
+  });
+
+  it("reuses only the exact persisted paper snapshot and rejects changed private facts", async () => {
+    const resultPublicId = "personal_ai_result_paper_replay";
+    const taskPublicId = "ai_generation_task_paper_replay";
+    const ownerPublicId = "student_public_paper_replay";
+    const persistedSnapshot = createPrivatePaperQuestionSnapshot(
+      resultPublicId,
+      taskPublicId,
+      ownerPublicId,
+    );
+    const existingRow = createPersistenceRow({
+      public_id: resultPublicId,
+      task_public_id: taskPublicId,
+      owner_public_id: ownerPublicId,
+      task_type: "ai_paper_generation",
+      question_draft_schema_version: null,
+      question_draft_snapshot: null,
+      question_draft_digest: null,
+      paper_question_snapshot_schema_version: persistedSnapshot.schemaVersion,
+      paper_question_snapshot: persistedSnapshot.snapshot,
+      paper_question_snapshot_digest: persistedSnapshot.digest,
+    });
+    const { gateway, insertDraftResultAndCompleteTask } = createGateway({
+      existingRow,
+    });
+    const repository = createPersonalAiGenerationResultRepository(gateway);
+    const baseInput = {
+      resultPublicId,
+      taskPublicId,
+      ownerType: "personal" as const,
+      ownerPublicId,
+      actorPublicId: ownerPublicId,
+      taskType: "ai_paper_generation" as const,
+      contentRedactedSnapshot: existingRow.content_redacted_snapshot,
+      contentDigest: existingRow.content_digest,
+      contentPreviewMasked: existingRow.content_preview_masked,
+      privateQuestionDraftSnapshot: null,
+      citationRedactedSnapshot: null,
+      evidenceStatus: "weak" as const,
+      citationCount: 1,
+      aiCallLogPublicId: null,
+      createdAt: new Date("2026-07-23T12:30:00.000Z"),
+      attempt: {
+        taskPublicId,
+        retryCount: 0,
+        startedAt: new Date("2026-07-23T12:29:00.123Z"),
+      },
+    };
+
+    await expect(
+      repository.createOrReuseDraftResult({
+        ...baseInput,
+        privatePaperQuestionSnapshot: persistedSnapshot,
+      }),
+    ).resolves.toMatchObject({ persistenceStatus: "reused" });
+    expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
+
+    await expect(
+      repository.createOrReuseDraftResult({
+        ...baseInput,
+        contentDigest: "sha256:changed-paper-content",
+        privatePaperQuestionSnapshot: persistedSnapshot,
+      }),
+    ).rejects.toThrow("snapshot conflicted");
+    expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
+
+    await expect(
+      repository.createOrReuseDraftResult({
+        ...baseInput,
+        privatePaperQuestionSnapshot: createPrivatePaperQuestionSnapshot(
+          resultPublicId,
+          taskPublicId,
+          ownerPublicId,
+          "漂移后的题干",
+        ),
       }),
     ).rejects.toThrow("snapshot conflicted");
     expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
@@ -979,6 +1294,7 @@ describe("personal AI generation result repository", () => {
         "ai_generation_task_public_created",
         "student_public_174",
       ),
+      privatePaperQuestionSnapshot: null,
       citationRedactedSnapshot: null,
       evidenceStatus: "sufficient",
       citationCount: 2,

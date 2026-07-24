@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-residual-jit-review-2026-07-23
+  currentTaskId: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -336,7 +336,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     - p1-remediation-rc-08-residual-jit-review-2026-07-23
+    - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-residual-jit-review-2026-07-23
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
@@ -602,59 +604,77 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23: closed
     p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23: closed
     p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: closed
-    p1-remediation-rc-08-residual-jit-review-2026-07-23: in_progress
+    p1-remediation-rc-08-residual-jit-review-2026-07-23: closed
+    p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23: in_progress
 activeTasks:
-  - id: p1-remediation-rc-08-residual-jit-review-2026-07-23
-    title: RC-08 residual JIT review
-    phase: p1-remediation-rc-08-residual-jit-review-2026-07-23
+  - id: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
+    title: Personal AI paper result immutable question snapshot
+    phase: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
     status: in_progress
     priority: p1
-    taskKind: low_risk_state_only_residual_jit_review
-    productClosureContribution: reconciles_F0157_closeout_and_revalidates_remaining_RC08_findings_without_product_changes
-    branch: fix/rc-08-residual-jit-state-closeout
-    objective: atomically record the delivered F-0157 static closeout, preserve WIP=1 and perform read-only residual JIT revalidation before selecting exactly one next product task
+    taskKind: schema_migration_source_and_database_application_logic
+    productClosureContribution: closes_F0162_result_to_first_learning_session_mutable_source_drift
+    branch: fix/personal-ai-paper-result-question-snapshot
+    objective: persist one strict private versioned paper-question snapshot from the exact server-owned source facts used by AI paper selection and create the first learning session only from that immutable result snapshot
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-08
     findingIds:
       - F-0162
-      - F-0163
-      - F-0164
-    executionStage: state_closeout_and_read_only_residual_revalidation
-    findingStatus: F0157_closed_static_product_F0162_F0163_F0164_pending_revalidation
-    findingDisposition: F0013_remains_runtime_hold; F0162_F0163_F0164_are_not_closed_and_require_independent_JIT_ordering
+    executionStage: implemented_verified_static_pending_final_tree_binding
+    findingStatus: implemented_verified_static_pending_final_tree_binding
+    findingDisposition: F0162_is_reachable_and_selected_independently; F0163_answer_CAS_and_F0164_lifecycle_history_statistics_remain_separate_pending_residuals; F0013_remains_runtime_hold
     riskBoundary:
-      category: low_risk_state_only
+      category: schema_migration_source_and_database_application_logic
       approvalStatus: approved
-      approvalId: guardian-rc08-f0157-state-closeout-residual-jit-2026-07-23
-      requestedBaseSha: 76345102fee8a42ea67ea63427f0ce188192009a
-      allowedFiles: 3
-      productCodeChange: false
-      schemaOrMigrationChange: false
-      databaseOrRealData: false
+      approvalId: guardian-f0162-personal-ai-paper-result-question-snapshot-2026-07-23
+      requestFingerprint: f088a8915cd04f9c7554b87f74cded05253c0394b3e8e32bc3d5befd0f2c3ac2
+      requestedBaseSha: 2fa26362377f3099f6d794deacb64be73b220530
+      allowedFiles: 43
+      coreFiles: 33
+      contingencyFiles: 10
+      schemaMigrationSourceChange: additive_legacy_nullable_only
+      migrationApplyOrRealDatabase: false
       permissionOrEntitlementChange: false
       providerOrExternalCall: false
       dependencyOrMechanismChange: false
       conditionalCloseout: true
     previousTaskCloseout:
-      taskId: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
-      findingIds:
-        - F-0157
-      commit: 76345102fee8a42ea67ea63427f0ce188192009a
-      tree: 852ed1432be129d90df0ff1f4f76856bb3874623
-      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-      findingStatus: closed_static_product_without_DDL_migration_apply_real_database_provider_or_browser_runtime_proof
-      focusedTests: 645
-      focusedTestFiles: 27
+      taskId: p1-remediation-rc-08-residual-jit-review-2026-07-23
+      commit: 2fa26362377f3099f6d794deacb64be73b220530
+      parent: 76345102fee8a42ea67ea63427f0ce188192009a
+      tree: 5d9670141b1521fe74d4b3e1e4e376250d994642
+      changedFileCount: 3
+      status: closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned
       closeoutKernel: pass
       prePushKernel: pass
       masterOriginSync: pass
-      worktreeCleanBeforeBranch: true
       shortBranchCleanup: pass
+    verificationEvidence:
+      tddRed: pass_initial_missing_private_snapshot_contract_then_correction_expected_3_failures_for_1000_candidates_content_digest_replay_and_identical_duplicate_source
+      focused: pass_15_files_237_tests
+      lint: pass_0_errors_3_unrelated_baseline_warnings
+      typecheck: pass
+      build: pass_with_existing_turbopack_trace_warning
+      format: pass
+      diffCheck: pass
+      stateSchemaSource: pass
+      migrationStatementWhitelist: pass_exact_3_add_columns_and_2_add_constraints_no_data_or_destructive_sql
+      sourceScan: pass_no_first_session_current_question_or_training_repository_reread_and_no_private_network_projection
+      mainThreadAdversarialReview: passed_atomic_snapshot_result_log_task_boundary_owner_authorization_before_private_read_exact_replay_including_paper_content_digest_legacy_fail_closed_1000_candidate_subset_and_duplicate_source_rejection
+    correctionDecision:
+      decision: correction_required
+      rejectedCandidateTree: 841825f068c9a1ad6fce2c899b32ae81dfdeb315
+      rejectedRawCachedDiffSha256: 691f0aa7b09edb2998dfaf8fd7f87dc2c456c8763887f07c1a7e218c14a87e25
+      tokensIssued: false
+      corrections:
+        - accept_the_authoritative_1000_candidate_collection_while_snapshotting_only_the_bounded_selected_subset
+        - bind_ai_paper_generation_replay_to_the_persisted_content_digest_without_changing_ai_question_generation_replay_semantics
+        - reject_every_duplicate_platform_source_public_id_including_byte_identical_rows
     jitRevalidation:
       F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
-      F-0162: pending_read_only_revalidation_before_task_selection
-      F-0163: pending_read_only_revalidation_before_task_selection
-      F-0164: pending_read_only_revalidation_before_task_selection
+      F-0162: reachable_selected_as_only_current_WIP
+      F-0163: reachable_separate_answer_write_CAS_and_monotonicity_residual
+      F-0164: reachable_separate_session_lifecycle_history_and_statistics_residual_after_prerequisites
   - id: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     title: AI generation canonical seven question type contract
     phase: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23

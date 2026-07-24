@@ -56,7 +56,10 @@ import {
   type PersonalAiGenerationAuthorizationOwnershipRepository,
 } from "./personal-ai-generation-authorization-context";
 import { normalizePersonalAiGenerationRequestInput } from "../validators/personal-ai-generation-request";
-import { createPersonalAiGenerationPrivateQuestionDraftSnapshot } from "../validators/personal-ai-generation-result-persistence";
+import {
+  createPersonalAiGenerationPrivatePaperQuestionSnapshot,
+  createPersonalAiGenerationPrivateQuestionDraftSnapshot,
+} from "../validators/personal-ai-generation-result-persistence";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -102,7 +105,10 @@ export type PersonalAiGenerationRequestRouteDependencies = {
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
-  >;
+  > &
+    Partial<
+      Pick<OrganizationTrainingRepository, "findCanonicalQuestionsByVersion">
+    >;
   createResultPublicId?: (
     input: PersonalAiGenerationResultPublicIdInput,
   ) => string;
@@ -883,6 +889,7 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
     createResultMaterialization: ({
       executionOutcome,
       paperAssembly,
+      privatePaperSourceQuestions,
       requestFlow,
     }) => {
       const visibleGeneratedContent = executionOutcome.visibleGeneratedContent;
@@ -928,10 +935,33 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
               questions: structuredPreview.draftSummaries,
             })
           : null;
+      const privatePaperQuestionSnapshot =
+        requestFlow.resultReference.taskType === "ai_paper_generation" &&
+        paperAssembly !== null &&
+        privatePaperSourceQuestions !== null
+          ? createPersonalAiGenerationPrivatePaperQuestionSnapshot({
+              resultPublicId,
+              taskPublicId: requestFlow.resultReference.taskPublicId,
+              ownerType:
+                requestFlow.taskRequest.ownerType === "organization"
+                  ? "organization"
+                  : "personal",
+              ownerPublicId: requestFlow.taskRequest.ownerPublicId,
+              paperAssemblyContainer: paperAssembly.container,
+              sourceQuestions: privatePaperSourceQuestions,
+            })
+          : null;
 
       if (
         requestFlow.resultReference.taskType === "ai_question_generation" &&
         privateQuestionDraftSnapshot === null
+      ) {
+        return null;
+      }
+
+      if (
+        requestFlow.resultReference.taskType === "ai_paper_generation" &&
+        privatePaperQuestionSnapshot === null
       ) {
         return null;
       }
@@ -947,6 +977,7 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
           visibleGeneratedContent,
         ),
         privateQuestionDraftSnapshot,
+        privatePaperQuestionSnapshot,
         paperAssemblyRedactedSnapshot:
           createPersonalAiGenerationPaperAssemblyRedactedSnapshot(
             paperAssembly,

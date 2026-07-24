@@ -1018,6 +1018,11 @@ export const personalAiGenerationResult = pgTable(
     question_draft_schema_version: text("question_draft_schema_version"),
     question_draft_snapshot: jsonb("question_draft_snapshot"),
     question_draft_digest: text("question_draft_digest"),
+    paper_question_snapshot_schema_version: text(
+      "paper_question_snapshot_schema_version",
+    ),
+    paper_question_snapshot: jsonb("paper_question_snapshot"),
+    paper_question_snapshot_digest: text("paper_question_snapshot_digest"),
     citation_redacted_snapshot: jsonb("citation_redacted_snapshot"),
     evidence_status: evidenceStatusEnum("evidence_status")
       .default("none")
@@ -1038,6 +1043,14 @@ export const personalAiGenerationResult = pgTable(
     check(
       "personal_ai_generation_result_question_draft_task_type_check",
       sql`((${table.task_type} = 'ai_question_generation') and (((${table.question_draft_schema_version} is null) and (${table.question_draft_snapshot} is null) and (${table.question_draft_digest} is null)) or ((${table.question_draft_schema_version} is not null) and (${table.question_draft_snapshot} is not null) and (${table.question_draft_digest} is not null)))) or ((${table.task_type} <> 'ai_question_generation') and (${table.question_draft_schema_version} is null) and (${table.question_draft_snapshot} is null) and (${table.question_draft_digest} is null))`,
+    ),
+    check(
+      "personal_ai_generation_result_paper_question_snapshot_coherence_check",
+      sql`((${table.paper_question_snapshot_schema_version} is null) and (${table.paper_question_snapshot} is null) and (${table.paper_question_snapshot_digest} is null)) or ((${table.paper_question_snapshot_schema_version} = 'paper_question_snapshot_v1') and (jsonb_typeof(${table.paper_question_snapshot}) = 'object') and (${table.paper_question_snapshot_digest} ~ '^[a-f0-9]{64}$'))`,
+    ),
+    check(
+      "personal_ai_generation_result_paper_question_snapshot_task_type_check",
+      sql`((${table.task_type} = 'ai_paper_generation') and (((${table.paper_question_snapshot_schema_version} is null) and (${table.paper_question_snapshot} is null) and (${table.paper_question_snapshot_digest} is null)) or ((${table.paper_question_snapshot_schema_version} is not null) and (${table.paper_question_snapshot} is not null) and (${table.paper_question_snapshot_digest} is not null)))) or ((${table.task_type} <> 'ai_paper_generation') and (${table.paper_question_snapshot_schema_version} is null) and (${table.paper_question_snapshot} is null) and (${table.paper_question_snapshot_digest} is null))`,
     ),
     foreignKey({
       columns: [table.ai_generation_task_id],

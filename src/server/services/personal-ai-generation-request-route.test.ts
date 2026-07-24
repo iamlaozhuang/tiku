@@ -788,6 +788,7 @@ function createAssembledPaperRouteResult(
         ancestorKnowledgeNodePublicIds: [],
         matchTier: "exact" as const,
       },
+      questionGroup: null,
     })),
     ...Array.from({ length: input.enterpriseQuestionCount }, (_, index) => ({
       questionPublicId: `enterprise_question_public_${index + 1}`,
@@ -801,11 +802,12 @@ function createAssembledPaperRouteResult(
         ancestorKnowledgeNodePublicIds: [],
         matchTier: "same_scope" as const,
       },
+      questionGroup: null,
     })),
   ];
   const selectedQuestionCount = selectedQuestions.length;
 
-  return {
+  const result: AiPaperRoutePlanSelectWiringResult = {
     status: "assembled",
     sourceDiagnostics: {
       role: input.role,
@@ -851,6 +853,7 @@ function createAssembledPaperRouteResult(
             selectedQuestions,
             degradationSummary: {
               exactCount: input.platformQuestionCount,
+              descendantCount: 0,
               nearbyKnowledgeCount: 0,
               sameScopeCount: input.enterpriseQuestionCount,
             },
@@ -861,6 +864,47 @@ function createAssembledPaperRouteResult(
     },
     rejection: null,
   };
+
+  Object.defineProperty(result, "privateSourceQuestions", {
+    enumerable: false,
+    value: selectedQuestions.map((question) => ({
+      questionPublicId: question.questionPublicId,
+      sourceKind: question.sourceKind,
+      sourceVersion:
+        question.sourceKind === "platform_formal_question"
+          ? {
+              kind: "platform_question_updated_at" as const,
+              updatedAt: "2026-07-23T10:00:00.000Z",
+            }
+          : {
+              kind: "organization_training_version" as const,
+              trainingVersionPublicId: "training_version_public_route_test",
+              trainingVersionNumber: 1,
+              publishedAt: "2026-07-23T09:00:00.000Z",
+            },
+      profession: "monopoly" as const,
+      level: 3,
+      subject: "theory" as const,
+      questionType: "single_choice" as const,
+      difficulty: "medium",
+      knowledgeNodePublicIds: ["knowledge_node_public_a"],
+      parentKnowledgeNodePublicIds: [],
+      ancestorKnowledgeNodePublicIds: [],
+      questionStem: `private source ${question.questionPublicId}`,
+      questionOptions: [
+        { optionLabel: "A", optionText: "正确", isCorrect: true },
+        { optionLabel: "B", optionText: "错误", isCorrect: false },
+      ],
+      standardAnswerLabels: ["A"],
+      standardAnswerText: "A",
+      analysis: "private analysis",
+      scoringPoints: [],
+      fillBlankAnswers: [],
+      questionGroup: null,
+    })),
+  });
+
+  return result;
 }
 
 function createRejectedPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
@@ -3015,6 +3059,12 @@ describe("personal AI generation request route handlers", () => {
         requestRepository: createRequestRepository(),
         resultRepository,
         createResultPublicId: () => "personal_ai_result_public_paper_route",
+        paperAssemblyResolver: async () =>
+          createAssembledPaperRouteResult({
+            role: "org_advanced_employee",
+            platformQuestionCount: 50,
+            enterpriseQuestionCount: 0,
+          }),
         runtimeBridgeControl: {
           bridgeMode: "controlled_runner",
           explicitLocalSwitchPresent: true,
@@ -3361,7 +3411,9 @@ describe("personal AI generation request route handlers", () => {
     };
     const organizationTrainingRepository: Pick<
       OrganizationTrainingRepository,
-      "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+      | "listAdminLifecycleVersions"
+      | "listEmployeeVisibleVersions"
+      | "findCanonicalQuestionsByVersion"
     > = {
       async listAdminLifecycleVersions() {
         throw new Error("admin lifecycle repository should not be called");
@@ -3381,6 +3433,21 @@ describe("personal AI generation request route handlers", () => {
               },
             ],
           }),
+        ];
+      },
+      async findCanonicalQuestionsByVersion() {
+        return [
+          {
+            ...createTrainingQuestion("enterprise_question_public_employee_a"),
+            materialTitle: null,
+            materialContent: null,
+            scoringPoints: [],
+            fillBlankAnswers: [],
+            standardAnswer: "A",
+            analysisSummary: "SENSITIVE_ENTERPRISE_ANALYSIS",
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+          },
         ];
       },
     };

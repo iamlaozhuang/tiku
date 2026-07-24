@@ -6,6 +6,7 @@ import {
 import { and, asc, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import type {
+  PersonalAiGenerationPrivatePaperQuestionSnapshotDto,
   PersonalAiGenerationPrivateQuestionDraftSnapshotDto,
   PersonalAiGenerationResultPersistenceDto,
 } from "../contracts/personal-ai-generation-result-persistence-contract";
@@ -33,6 +34,8 @@ import {
 } from "./runtime-database";
 import {
   normalizePersonalAiGenerationPrivateQuestionDraftSnapshot,
+  normalizePersonalAiGenerationPrivatePaperQuestionSnapshot,
+  serializePersonalAiGenerationPaperQuestionSnapshot,
   serializePersonalAiGenerationQuestionDraftSnapshot,
 } from "../validators/personal-ai-generation-result-persistence";
 
@@ -133,6 +136,9 @@ export type PersonalAiGenerationResultSelectedAuthorizationLookupRepository = {
   findPrivateQuestionDraftSnapshotByPublicId?(
     query: GetPersonalAiGenerationResultQuery,
   ): Promise<PersonalAiGenerationPrivateQuestionDraftSnapshotDto | null>;
+  findPrivatePaperQuestionSnapshotByPublicId?(
+    query: GetPersonalAiGenerationResultQuery,
+  ): Promise<PersonalAiGenerationPrivatePaperQuestionSnapshotDto | null>;
 };
 
 export type PersonalAiGenerationResultTaskGateway = {
@@ -198,6 +204,11 @@ const personalAiGenerationResultSelection = {
     personalAiGenerationResult.question_draft_schema_version,
   question_draft_snapshot: personalAiGenerationResult.question_draft_snapshot,
   question_draft_digest: personalAiGenerationResult.question_draft_digest,
+  paper_question_snapshot_schema_version:
+    personalAiGenerationResult.paper_question_snapshot_schema_version,
+  paper_question_snapshot: personalAiGenerationResult.paper_question_snapshot,
+  paper_question_snapshot_digest:
+    personalAiGenerationResult.paper_question_snapshot_digest,
   citation_redacted_snapshot:
     personalAiGenerationResult.citation_redacted_snapshot,
   evidence_status: personalAiGenerationResult.evidence_status,
@@ -310,6 +321,11 @@ export function createPersonalAiGenerationResultRepository(
 
       return row === null ? null : readPrivateQuestionDraftSnapshot(row);
     },
+    async findPrivatePaperQuestionSnapshotByPublicId(query) {
+      const row = await gateway.findResultByPublicId(query);
+
+      return row === null ? null : readPrivatePaperQuestionSnapshot(row);
+    },
     async listDraftResults(query) {
       const page = resolveResultHistoryPage(query.page);
       const pageSize = resolveResultHistoryLimit(query.pageSize ?? query.limit);
@@ -340,7 +356,7 @@ export function createPersonalAiGenerationResultRepository(
       });
 
       if (existingRow !== null) {
-        assertReusablePrivateQuestionDraftSnapshot(existingRow, input);
+        assertReusablePrivateSnapshots(existingRow, input);
         return {
           persistenceStatus: "reused",
           result: mapPersonalAiGenerationResultRowToDto(existingRow),
@@ -392,7 +408,7 @@ export function createPersonalAiGenerationResultRepository(
       if (resolvedRow === null) {
         throw new Error("personal AI generation result persistence failed.");
       }
-      assertReusablePrivateQuestionDraftSnapshot(resolvedRow, input);
+      assertReusablePrivateSnapshots(resolvedRow, input);
 
       return {
         persistenceStatus: insertedRow === null ? "reused" : "created",
@@ -619,6 +635,12 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
           input.result.privateQuestionDraftSnapshot?.snapshot ?? null,
         question_draft_digest:
           input.result.privateQuestionDraftSnapshot?.digest ?? null,
+        paper_question_snapshot_schema_version:
+          input.result.privatePaperQuestionSnapshot?.schemaVersion ?? null,
+        paper_question_snapshot:
+          input.result.privatePaperQuestionSnapshot?.snapshot ?? null,
+        paper_question_snapshot_digest:
+          input.result.privatePaperQuestionSnapshot?.digest ?? null,
         citation_redacted_snapshot: input.result.citationRedactedSnapshot,
         evidence_status: input.result.evidenceStatus,
         citation_count: input.result.citationCount,
@@ -695,18 +717,40 @@ function readPrivateQuestionDraftSnapshot(
   });
 }
 
-function assertReusablePrivateQuestionDraftSnapshot(
+function readPrivatePaperQuestionSnapshot(
+  row: PersonalAiGenerationResultPersistenceRow,
+): PersonalAiGenerationPrivatePaperQuestionSnapshotDto | null {
+  if (
+    row.paper_question_snapshot_schema_version == null &&
+    row.paper_question_snapshot == null &&
+    row.paper_question_snapshot_digest == null
+  ) {
+    return null;
+  }
+
+  return normalizePersonalAiGenerationPrivatePaperQuestionSnapshot({
+    schemaVersion: row.paper_question_snapshot_schema_version,
+    snapshot: row.paper_question_snapshot,
+    digest: row.paper_question_snapshot_digest,
+  });
+}
+
+function assertReusablePrivateSnapshots(
   row: PersonalAiGenerationResultPersistenceRow,
   input: CreatePersonalAiGenerationResultInput,
 ): void {
   const existingSnapshot = readPrivateQuestionDraftSnapshot(row);
   const requestedSnapshot = input.privateQuestionDraftSnapshot;
+  const existingPaperSnapshot = readPrivatePaperQuestionSnapshot(row);
+  const requestedPaperSnapshot = input.privatePaperQuestionSnapshot;
 
   if (
     row.public_id !== input.resultPublicId ||
     row.task_public_id !== input.taskPublicId ||
     row.owner_public_id !== input.ownerPublicId ||
     row.task_type !== input.taskType ||
+    (row.task_type === "ai_paper_generation" &&
+      row.content_digest !== input.contentDigest) ||
     (requestedSnapshot === null
       ? existingSnapshot !== null
       : existingSnapshot === null ||
@@ -716,6 +760,16 @@ function assertReusablePrivateQuestionDraftSnapshot(
         ) !==
           serializePersonalAiGenerationQuestionDraftSnapshot(
             requestedSnapshot.snapshot,
+          )) ||
+    (requestedPaperSnapshot === null
+      ? existingPaperSnapshot !== null
+      : existingPaperSnapshot === null ||
+        existingPaperSnapshot.digest !== requestedPaperSnapshot.digest ||
+        serializePersonalAiGenerationPaperQuestionSnapshot(
+          existingPaperSnapshot.snapshot,
+        ) !==
+          serializePersonalAiGenerationPaperQuestionSnapshot(
+            requestedPaperSnapshot.snapshot,
           ))
   ) {
     throw new Error("personal AI generation result snapshot conflicted.");

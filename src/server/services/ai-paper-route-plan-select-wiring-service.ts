@@ -6,6 +6,7 @@ import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
+import type { PersonalAiGenerationPaperQuestionSourceDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type { AiPaperQuestionSourceRepository } from "../repositories/question-repository";
 import {
@@ -32,7 +33,10 @@ export type AiPaperRoutePlanSelectWiringInput = {
   organizationTrainingRepository?: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
-  >;
+  > &
+    Partial<
+      Pick<OrganizationTrainingRepository, "findCanonicalQuestionsByVersion">
+    >;
 };
 
 export type AiPaperRoutePlanSelectWiringResult =
@@ -40,12 +44,16 @@ export type AiPaperRoutePlanSelectWiringResult =
       status: "assembled" | "insufficient";
       sourceDiagnostics: AiPaperRouteSourceResolutionDiagnostics;
       assembly: AiPaperPlanAndSelectResult;
+      privateSourceQuestions?:
+        | PersonalAiGenerationPaperQuestionSourceDto[]
+        | null;
       rejection: null;
     }
   | {
       status: "rejected";
       sourceDiagnostics: AiPaperRouteSourceResolutionDiagnostics;
       assembly: null;
+      privateSourceQuestions?: [];
       rejection: {
         failureCategory: AiPaperRoutePlanSelectWiringFailureCategory;
       };
@@ -90,10 +98,19 @@ export async function resolveAndAssembleAiPaperFromRoute(
     };
   }
 
-  return {
+  const result: AiPaperRoutePlanSelectWiringResult = {
     status: assemblyResult.status,
     sourceDiagnostics: sourceResolution.diagnostics,
     assembly: assemblyResult.assembly,
     rejection: null,
   };
+
+  Object.defineProperty(result, "privateSourceQuestions", {
+    value: sourceResolution.privateSourceQuestions ?? null,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+
+  return result;
 }

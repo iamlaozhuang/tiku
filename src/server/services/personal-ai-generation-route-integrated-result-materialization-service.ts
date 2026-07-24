@@ -1,6 +1,7 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
 import type {
+  PersonalAiGenerationPrivatePaperQuestionSnapshotDto,
   PersonalAiGenerationPrivateQuestionDraftSnapshotDto,
   PersonalAiGenerationResultPaperAssemblySnapshotDto,
   PersonalAiGenerationResultPersistenceDto,
@@ -19,6 +20,7 @@ export type PersonalAiGenerationRouteIntegratedResultMaterializationControl = {
   contentDigest: string;
   contentPreviewMasked: string;
   privateQuestionDraftSnapshot?: PersonalAiGenerationPrivateQuestionDraftSnapshotDto | null;
+  privatePaperQuestionSnapshot?: PersonalAiGenerationPrivatePaperQuestionSnapshotDto | null;
   paperAssemblyRedactedSnapshot?: PersonalAiGenerationResultPaperAssemblySnapshotDto | null;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
@@ -88,9 +90,11 @@ export async function materializeRouteIntegratedRedactedResult(
 
   if (
     (requestFlow.resultReference.taskType === "ai_question_generation" &&
-      control.privateQuestionDraftSnapshot == null) ||
+      (control.privateQuestionDraftSnapshot == null ||
+        control.privatePaperQuestionSnapshot != null)) ||
     (requestFlow.resultReference.taskType === "ai_paper_generation" &&
-      control.privateQuestionDraftSnapshot != null)
+      (control.privateQuestionDraftSnapshot != null ||
+        control.privatePaperQuestionSnapshot == null))
   ) {
     return createBlockedMaterializationSummary("persistence_unavailable");
   }
@@ -109,6 +113,7 @@ export async function materializeRouteIntegratedRedactedResult(
     contentDigest: control.contentDigest,
     contentPreviewMasked: control.contentPreviewMasked,
     privateQuestionDraftSnapshot: control.privateQuestionDraftSnapshot ?? null,
+    privatePaperQuestionSnapshot: control.privatePaperQuestionSnapshot ?? null,
     paperAssemblyRedactedSnapshot:
       control.paperAssemblyRedactedSnapshot ?? null,
     citationRedactedSnapshot:

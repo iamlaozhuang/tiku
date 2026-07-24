@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { OrganizationTrainingQuestionSnapshotValue } from "@/db/schema";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type {
   OrganizationTrainingAdminLifecycleListInput,
@@ -136,6 +137,32 @@ function createTrainingVersion(
   };
 }
 
+function createCanonicalTrainingQuestion(
+  override: Partial<OrganizationTrainingQuestionSnapshotValue> = {},
+): OrganizationTrainingQuestionSnapshotValue {
+  return {
+    publicId: "enterprise_question_public_a",
+    sequenceNumber: 1,
+    questionType: "single_choice",
+    materialTitle: "SENSITIVE_ENTERPRISE_MATERIAL_TITLE",
+    materialContent: "SENSITIVE_ENTERPRISE_MATERIAL_CONTENT",
+    stem: "SENSITIVE_ENTERPRISE_STEM_MARKER",
+    options: [
+      {
+        publicId: "enterprise_option_public_a",
+        label: "A",
+        content: "SENSITIVE_ENTERPRISE_OPTION_MARKER",
+      },
+    ],
+    score: 1,
+    standardAnswer: "A",
+    analysisSummary: "SENSITIVE_ENTERPRISE_ANALYSIS_MARKER",
+    evidenceStatus: "sufficient",
+    citationCount: 1,
+    ...override,
+  };
+}
+
 describe("AI组卷 route source resolution", () => {
   it.each(["personal_advanced_student", "content_admin"] as const)(
     "resolves %s from platform formal questions only",
@@ -237,6 +264,32 @@ describe("AI组卷 route source resolution", () => {
     ]);
   });
 
+  it("rejects byte-identical duplicate platform source rows instead of deduplicating them", async () => {
+    const duplicate = createQuestionRow({
+      public_id: "platform_question_exact_duplicate",
+    });
+    const questionRepository: AiPaperQuestionSourceRepository = {
+      async listAvailableAiPaperSourceQuestions() {
+        return [duplicate, duplicate];
+      },
+    };
+
+    const result = await resolveAiPaperRouteQuestionSources({
+      role: "content_admin",
+      organizationPublicId: null,
+      employeePublicId: null,
+      generationParameters,
+      questionRepository,
+      organizationTrainingRepository:
+        createThrowingOrganizationTrainingRepository(),
+    });
+
+    expect(result).toMatchObject({
+      status: "rejected",
+      rejection: { failureCategory: "private_source_integrity_unavailable" },
+    });
+  });
+
   it("queries each selected platform knowledge node when descendants are not requested", async () => {
     let capturedQuestionQueries: AiPaperSourceQuestionListInput[] = [];
     const questionRepository: AiPaperQuestionSourceRepository = {
@@ -281,14 +334,10 @@ describe("AI组卷 route source resolution", () => {
         createThrowingOrganizationTrainingRepository(),
     });
 
-    expect(result.status).toBe("resolved");
-    expect(
-      result.platformQuestions.map((question) => question.publicId),
-    ).toEqual([
-      "platform_question_child",
-      "platform_question_duplicate",
-      "platform_question_sibling",
-    ]);
+    expect(result).toMatchObject({
+      status: "rejected",
+      rejection: { failureCategory: "private_source_integrity_unavailable" },
+    });
     expect(
       capturedQuestionQueries.map((query) => query.knowledgeNodePublicIds),
     ).toEqual([
@@ -345,6 +394,71 @@ describe("AI组卷 route source resolution", () => {
     expect(serializedResult).not.toContain(
       "SENSITIVE_ENTERPRISE_OPTION_MARKER",
     );
+  });
+
+  it("captures exact immutable enterprise facts privately and rejects a public/canonical mismatch", async () => {
+    let canonicalQuestions = [createCanonicalTrainingQuestion()];
+    const organizationTrainingRepository = {
+      async listAdminLifecycleVersions() {
+        return [createTrainingVersion()];
+      },
+      async listEmployeeVisibleVersions() {
+        throw new Error("employee repository should not be called");
+      },
+      async findCanonicalQuestionsByVersion() {
+        return canonicalQuestions;
+      },
+    } satisfies Pick<
+      OrganizationTrainingRepository,
+      | "listAdminLifecycleVersions"
+      | "listEmployeeVisibleVersions"
+      | "findCanonicalQuestionsByVersion"
+    >;
+    const resolve = () =>
+      resolveAiPaperRouteQuestionSources({
+        role: "org_advanced_admin",
+        organizationPublicId: "organization_public_a",
+        employeePublicId: null,
+        generationParameters,
+        questionRepository: createQuestionRepository([createQuestionRow()]),
+        organizationTrainingRepository,
+      });
+
+    const result = await resolve();
+
+    expect(result.status).toBe("resolved");
+    expect(result.privateSourceQuestions).toEqual([
+      expect.objectContaining({
+        sourceKind: "platform_formal_question",
+        questionPublicId: "platform_question_public_a",
+      }),
+      expect.objectContaining({
+        sourceKind: "enterprise_training_snapshot",
+        questionPublicId: "enterprise_question_public_a",
+        standardAnswerLabels: ["A"],
+        analysis: "SENSITIVE_ENTERPRISE_ANALYSIS_MARKER",
+      }),
+    ]);
+    expect(JSON.stringify(result)).not.toContain(
+      "SENSITIVE_ENTERPRISE_ANALYSIS_MARKER",
+    );
+
+    canonicalQuestions = [
+      createCanonicalTrainingQuestion({
+        options: [
+          {
+            publicId: "enterprise_option_public_a",
+            label: "A",
+            content: "mismatched immutable option content",
+          },
+        ],
+      }),
+    ];
+
+    await expect(resolve()).resolves.toMatchObject({
+      status: "rejected",
+      rejection: { failureCategory: "private_source_integrity_unavailable" },
+    });
   });
 
   it("resolves organization employee sources from employee-visible training snapshots", async () => {

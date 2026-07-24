@@ -857,6 +857,9 @@ describe("personal learning AI generated content result schema", () => {
         "question_draft_schema_version",
         "question_draft_snapshot",
         "question_draft_digest",
+        "paper_question_snapshot_schema_version",
+        "paper_question_snapshot",
+        "paper_question_snapshot_digest",
         "citation_redacted_snapshot",
         "evidence_status",
         "citation_count",
@@ -870,6 +873,8 @@ describe("personal learning AI generated content result schema", () => {
       expect.arrayContaining([
         "personal_ai_generation_result_question_draft_snapshot_coherence_check",
         "personal_ai_generation_result_question_draft_task_type_check",
+        "personal_ai_generation_result_paper_question_snapshot_coherence_check",
+        "personal_ai_generation_result_paper_question_snapshot_task_type_check",
       ]),
     );
   });

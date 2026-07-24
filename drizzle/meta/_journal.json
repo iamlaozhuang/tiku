@@ -407,6 +407,13 @@
       "when": 1784841900313,
       "tag": "20260723053000_p1_rc_08_ai_call_observation_provenance",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1784872955379,
+      "tag": "20260723063000_p1_rc_08_personal_ai_paper_question_snapshot",
+      "breakpoints": true
     }
   ]
 }

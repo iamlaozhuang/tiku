@@ -2,6 +2,7 @@ import type { AiGenerationTaskType } from "./ai-generation-task";
 import type { AiGenerationTaskRequestOwnerType } from "./ai-generation-task-request";
 import type { EvidenceStatus, RedactedJsonObject } from "./ai-rag";
 import type {
+  PersonalAiGenerationPrivatePaperQuestionSnapshotDto,
   PersonalAiGenerationPrivateQuestionDraftSnapshotDto,
   PersonalAiGenerationResultPaperAssemblySnapshotDto,
 } from "../contracts/personal-ai-generation-result-persistence-contract";
@@ -41,6 +42,7 @@ export type PersonalAiGenerationResultPersistenceInput = {
   contentDigest: string;
   contentPreviewMasked: string;
   privateQuestionDraftSnapshot: PersonalAiGenerationPrivateQuestionDraftSnapshotDto | null;
+  privatePaperQuestionSnapshot: PersonalAiGenerationPrivatePaperQuestionSnapshotDto | null;
   paperAssemblyRedactedSnapshot?: PersonalAiGenerationResultPaperAssemblySnapshotDto | null;
   citationRedactedSnapshot: RedactedJsonObject | null;
   evidenceStatus: EvidenceStatus;

@@ -8,6 +8,7 @@ import type {
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type { AiPaperAssemblyRole } from "../contracts/ai-paper-plan-and-select-contract";
+import type { PersonalAiGenerationPaperQuestionSourceDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import { createAiCallLogRedactedSnapshots } from "../models/ai-rag";
 import {
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
@@ -44,10 +45,14 @@ type PersonalAiGenerationPaperAssemblyResolveResult =
   | {
       status: "resolved" | "not_applicable";
       paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto;
+      privatePaperSourceQuestions:
+        | PersonalAiGenerationPaperQuestionSourceDto[]
+        | null;
     }
   | {
       status: "rejected";
       paperAssembly: null;
+      privatePaperSourceQuestions: null;
     };
 
 export type PersonalAiGenerationRuntimeBridgeControl = {
@@ -58,6 +63,9 @@ export type PersonalAiGenerationRuntimeBridgeControl = {
   createResultMaterialization?: (input: {
     executionOutcome: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome;
     paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto;
+    privatePaperSourceQuestions:
+      | PersonalAiGenerationPaperQuestionSourceDto[]
+      | null;
     requestFlow: PersonalAiGenerationRequestFlowDto;
   }) =>
     | PersonalAiGenerationRouteIntegratedResultMaterializationControl
@@ -240,6 +248,8 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
           : await createResultMaterializationControl({
               executionOutcome,
               paperAssembly: paperAssemblyResult.paperAssembly,
+              privatePaperSourceQuestions:
+                paperAssemblyResult.privatePaperSourceQuestions,
               requestFlow,
             })));
   const resultMaterializationSummary =
@@ -367,6 +377,7 @@ async function resolvePersonalAiGenerationPaperAssembly(input: {
     return {
       status: "not_applicable",
       paperAssembly: null,
+      privatePaperSourceQuestions: null,
     };
   }
 
@@ -383,11 +394,13 @@ async function resolvePersonalAiGenerationPaperAssembly(input: {
     return {
       status: "rejected",
       paperAssembly: null,
+      privatePaperSourceQuestions: null,
     };
   }
 
   return {
     status: "resolved",
+    privatePaperSourceQuestions: result.privateSourceQuestions ?? null,
     paperAssembly: {
       status: result.status,
       sourceDiagnostics: {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
 import {
@@ -129,6 +129,33 @@ function createControl(
 }
 
 describe("personal AI route-integrated result materialization service", () => {
+  it("fails closed before persistence when a paper result has no private question snapshot", async () => {
+    const persistDraftResult = vi.fn(createControl().persistDraftResult);
+    const requestFlow = createRequestFlow();
+    const paperRequestFlow: PersonalAiGenerationRequestFlowDto = {
+      ...requestFlow,
+      resultReference: {
+        ...requestFlow.resultReference,
+        taskType: "ai_paper_generation",
+      },
+    };
+
+    const summary = await materializeRouteIntegratedRedactedResult(
+      paperRequestFlow,
+      createControl({
+        privateQuestionDraftSnapshot: null,
+        privatePaperQuestionSnapshot: null,
+        persistDraftResult,
+      }),
+    );
+
+    expect(summary).toMatchObject({
+      materializationStatus: "blocked",
+      failureCategory: "persistence_unavailable",
+    });
+    expect(persistDraftResult).not.toHaveBeenCalled();
+  });
+
   it("persists only redacted snapshot, digest, and masked preview inputs", async () => {
     const persistedInputs: unknown[] = [];
 
