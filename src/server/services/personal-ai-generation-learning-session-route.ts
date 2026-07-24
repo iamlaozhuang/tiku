@@ -29,6 +29,7 @@ import {
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
 import { mapPrivatePaperQuestionSnapshotToLearningSourceQuestions } from "./personal-ai-generation-learning-session-paper-source-resolver";
+import { normalizePersonalAiLearningLabels } from "../validators/personal-ai-generation-learning-session";
 
 export type PersonalAiGenerationLearningSessionRouteDependencies = {
   repository?: PersonalAiGenerationLearningSessionRepository;
@@ -58,7 +59,13 @@ const emptyLearningSessionRepository: PersonalAiGenerationLearningSessionReposit
     findSessionByPublicId() {
       return null;
     },
-    saveAnswerFeedback() {},
+    saveAnswerFeedback() {
+      return {
+        status: "blocked",
+        blockReason: "answer_history_unavailable",
+        answerFeedback: null,
+      };
+    },
     listAnswerFeedbackBySessionPublicId() {
       return [];
     },
@@ -174,14 +181,49 @@ function readSelectedOptionLabels(
 ): string[] | null {
   const value = body.selectedOptionLabels;
 
-  if (
-    !Array.isArray(value) ||
-    !value.every((item) => typeof item === "string")
-  ) {
+  if (!Array.isArray(value) || value.length > 100) {
     return null;
   }
 
-  return value;
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index) || typeof value[index] !== "string") {
+      return null;
+    }
+  }
+
+  const normalizedLabels = normalizePersonalAiLearningLabels(value as string[]);
+
+  return normalizedLabels.length === value.length &&
+    normalizedLabels.every((label, index) => label === value[index])
+    ? normalizedLabels
+    : null;
+}
+
+function readExpectedAnswerRevision(
+  body: Record<string, unknown>,
+): number | null {
+  const value = body.expectedAnswerRevision;
+
+  return typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= 2_147_483_647
+    ? value
+    : null;
+}
+
+function hasExactAnswerInputKeys(body: Record<string, unknown>): boolean {
+  const expectedKeys = [
+    "expectedAnswerRevision",
+    "selectedOptionLabels",
+    "sessionQuestionPublicId",
+    "textAnswer",
+  ];
+
+  return (
+    Object.keys(body).length === expectedKeys.length &&
+    expectedKeys.every((key) => Object.hasOwn(body, key))
+  );
 }
 
 type LearningSessionCreationRouteInput =
@@ -552,14 +594,25 @@ async function createAnswerInput(input: {
     return null;
   }
 
+  if (!hasExactAnswerInputKeys(body)) {
+    return null;
+  }
+
   const { publicId } = await input.context.params;
   const sessionQuestionPublicId = readRequiredString(
     body,
     "sessionQuestionPublicId",
   );
   const selectedOptionLabels = readSelectedOptionLabels(body);
+  const expectedAnswerRevision = readExpectedAnswerRevision(body);
+  const textAnswerValue = body.textAnswer;
 
-  if (sessionQuestionPublicId === null || selectedOptionLabels === null) {
+  if (
+    sessionQuestionPublicId === null ||
+    selectedOptionLabels === null ||
+    expectedAnswerRevision === null ||
+    (textAnswerValue !== null && typeof textAnswerValue !== "string")
+  ) {
     return null;
   }
 
@@ -567,6 +620,7 @@ async function createAnswerInput(input: {
     sessionPublicId: publicId,
     sessionQuestionPublicId,
     actorPublicId: input.userContext.userPublicId,
+    expectedAnswerRevision,
     selectedOptionLabels,
     textAnswer: readNullableString(body, "textAnswer"),
     submittedAt: input.now(),

@@ -397,6 +397,14 @@ async function submitLearningSessionAnswer(
     });
   }
 
+  if (input.expectedAnswerRevision === 2_147_483_647) {
+    return createBlockedAnswerFeedback({
+      input,
+      submittedAt: fallbackSubmittedAt,
+      blockReason: "answer_revision_conflict",
+    });
+  }
+
   const selectedOptionLabels = normalizePersonalAiLearningLabels(
     input.selectedOptionLabels,
   );
@@ -442,9 +450,18 @@ async function submitLearningSessionAnswer(
       score: null,
     });
 
-    await repository.saveAnswerFeedback(answerFeedback);
+    const saveResult = await repository.saveAnswerFeedback({
+      expectedAnswerRevision: input.expectedAnswerRevision,
+      answerFeedback,
+    });
 
-    return answerFeedback;
+    return saveResult.status === "blocked"
+      ? createBlockedAnswerFeedback({
+          input,
+          submittedAt: fallbackSubmittedAt,
+          blockReason: saveResult.blockReason,
+        })
+      : saveResult.answerFeedback;
   }
 
   if ((input.textAnswer?.trim().length ?? 0) > 0) {
@@ -470,9 +487,18 @@ async function submitLearningSessionAnswer(
     score: isCorrect ? question.maxScore : "0.0",
   });
 
-  await repository.saveAnswerFeedback(answerFeedback);
+  const saveResult = await repository.saveAnswerFeedback({
+    expectedAnswerRevision: input.expectedAnswerRevision,
+    answerFeedback,
+  });
 
-  return answerFeedback;
+  return saveResult.status === "blocked"
+    ? createBlockedAnswerFeedback({
+        input,
+        submittedAt: fallbackSubmittedAt,
+        blockReason: saveResult.blockReason,
+      })
+    : saveResult.answerFeedback;
 }
 
 async function getLearningSessionProgress(
@@ -567,6 +593,7 @@ function createAnswerFeedback(input: {
     sessionPublicId: input.input.sessionPublicId,
     sessionQuestionPublicId: input.input.sessionQuestionPublicId,
     actorPublicId: input.input.actorPublicId,
+    answerRevision: input.input.expectedAnswerRevision + 1,
     selectedOptionLabels: input.selectedOptionLabels,
     textAnswer: input.input.textAnswer?.trim() || null,
     isCorrect: input.isCorrect,
@@ -596,6 +623,7 @@ function createBlockedAnswerFeedback(input: {
     sessionPublicId: input.input.sessionPublicId,
     sessionQuestionPublicId: input.input.sessionQuestionPublicId,
     actorPublicId: input.input.actorPublicId,
+    answerRevision: null,
     selectedOptionLabels: normalizePersonalAiLearningLabels(
       input.input.selectedOptionLabels,
     ),

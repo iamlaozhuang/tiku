@@ -441,6 +441,21 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
   });
 
+  it("keeps answer revision ownership in progress and refreshes a CAS conflict", () => {
+    const source = readFileSync(
+      "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+      "utf8",
+    );
+
+    expect(source).toContain("answerFeedback.answerRevision === null");
+    expect(source).toMatch(/\?\.answerRevision \?\? 0/u);
+    expect(source).toContain("isAiLearningAnswerSubmissionInFlightRef.current");
+    expect(source).toContain(
+      'answerResponse.data?.blockReason === "answer_revision_conflict"',
+    );
+    expect(source).toContain("await refreshAiLearningProgress(");
+  });
+
   it("routes successful generation refresh through the sequence-invalidating history loader", () => {
     const source = readFileSync(
       "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",

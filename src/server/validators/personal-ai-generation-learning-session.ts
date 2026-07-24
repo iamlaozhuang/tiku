@@ -10,6 +10,11 @@ import type {
   PersonalAiGenerationLearningSessionQuestionOptionDto,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { PersonalAiGenerationLearningSessionQuestionType } from "../models/personal-ai-generation-learning-session";
+import type { PersonalAiGenerationLearningSessionAnswerFeedbackDto } from "../contracts/personal-ai-generation-learning-session-contract";
+import { createHash } from "node:crypto";
+
+const PERSONAL_AI_LEARNING_ANSWER_COMMAND_SCHEMA_VERSION = 1;
+const MAX_PERSONAL_AI_LEARNING_ANSWER_REVISION = 2_147_483_647;
 
 const questionTypeAliases: Record<
   string,
@@ -54,7 +59,238 @@ export function normalizePersonalAiLearningLabels(labels: string[]): string[] {
         .map((label) => label.trim().toUpperCase())
         .filter((label) => label.length > 0),
     ),
-  ).sort((left, right) => left.localeCompare(right));
+  ).sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
+}
+
+type PersonalAiLearningAnswerCommandInput = {
+  expectedAnswerRevision: number;
+  answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
+};
+
+export function createPersonalAiLearningAnswerCommandCanonicalFacts(
+  input: PersonalAiLearningAnswerCommandInput,
+) {
+  const { answerFeedback, expectedAnswerRevision } = input;
+  const formalWriteBoundary = projectBlockedFormalWriteBoundary(
+    answerFeedback.formalWriteBoundary,
+  );
+
+  if (
+    !hasExactKeys(answerFeedback, [
+      "actorPublicId",
+      "aiScoringStatus",
+      "analysis",
+      "answerRevision",
+      "blockReason",
+      "formalWriteBoundary",
+      "isCorrect",
+      "maxScore",
+      "mistakeBookPublicId",
+      "score",
+      "selectedOptionLabels",
+      "sessionPublicId",
+      "sessionQuestionPublicId",
+      "standardAnswerLabels",
+      "standardAnswerText",
+      "status",
+      "submittedAt",
+      "textAnswer",
+    ]) ||
+    !Number.isInteger(expectedAnswerRevision) ||
+    expectedAnswerRevision < 0 ||
+    expectedAnswerRevision >= MAX_PERSONAL_AI_LEARNING_ANSWER_REVISION ||
+    answerFeedback.answerRevision !== expectedAnswerRevision + 1 ||
+    answerFeedback.status === "blocked" ||
+    answerFeedback.blockReason !== null ||
+    !isNonEmptyBoundedText(answerFeedback.sessionPublicId) ||
+    !isNonEmptyBoundedText(answerFeedback.sessionQuestionPublicId) ||
+    !isNonEmptyBoundedText(answerFeedback.actorPublicId) ||
+    !isCanonicalAnswerLabelArray(answerFeedback.selectedOptionLabels) ||
+    !isCanonicalAnswerLabelArray(answerFeedback.standardAnswerLabels) ||
+    !isNullableBoundedText(answerFeedback.textAnswer) ||
+    !isNullableBoundedText(answerFeedback.standardAnswerText) ||
+    !isNullableBoundedText(answerFeedback.analysis) ||
+    !isNullableBoundedText(answerFeedback.score) ||
+    !isNullableBoundedText(answerFeedback.maxScore) ||
+    !isValidAnswerFeedbackSemantics(answerFeedback) ||
+    !isValidIsoTimestamp(answerFeedback.submittedAt) ||
+    answerFeedback.aiScoringStatus !== "blocked" ||
+    answerFeedback.mistakeBookPublicId !== null ||
+    formalWriteBoundary === null
+  ) {
+    return null;
+  }
+
+  return {
+    schemaVersion: PERSONAL_AI_LEARNING_ANSWER_COMMAND_SCHEMA_VERSION,
+    sessionPublicId: answerFeedback.sessionPublicId,
+    sessionQuestionPublicId: answerFeedback.sessionQuestionPublicId,
+    actorPublicId: answerFeedback.actorPublicId,
+    expectedAnswerRevision,
+    answer: {
+      selectedOptionLabels: [...answerFeedback.selectedOptionLabels],
+      textAnswer: answerFeedback.textAnswer,
+      feedbackStatus: answerFeedback.status,
+      isCorrect: answerFeedback.isCorrect,
+      score: answerFeedback.score,
+      maxScore: answerFeedback.maxScore,
+      standardAnswerLabels: [...answerFeedback.standardAnswerLabels],
+      standardAnswerText: answerFeedback.standardAnswerText,
+      analysis: answerFeedback.analysis,
+      aiScoringStatus: answerFeedback.aiScoringStatus,
+      formalWriteBoundary,
+      mistakeBookPublicId: answerFeedback.mistakeBookPublicId,
+    },
+  };
+}
+
+export function createPersonalAiLearningAnswerCommandDigest(
+  input: PersonalAiLearningAnswerCommandInput,
+): string | null {
+  const canonicalCommand =
+    createPersonalAiLearningAnswerCommandCanonicalFacts(input);
+
+  if (canonicalCommand === null) {
+    return null;
+  }
+
+  return createHash("sha256")
+    .update(JSON.stringify(canonicalCommand), "utf8")
+    .digest("hex");
+}
+
+function isCanonicalAnswerLabelArray(value: unknown): value is string[] {
+  if (!Array.isArray(value) || value.length > 100) {
+    return false;
+  }
+
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) {
+      return false;
+    }
+
+    const label = value[index];
+
+    if (
+      typeof label !== "string" ||
+      label.length === 0 ||
+      label.length > 100 ||
+      label !== label.trim().toUpperCase()
+    ) {
+      return false;
+    }
+
+    if (index > 0 && value[index - 1]! >= label) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isNonEmptyBoundedText(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 4_000 &&
+    value === value.trim()
+  );
+}
+
+function isNullableBoundedText(value: unknown): value is string | null {
+  return value === null || (typeof value === "string" && value.length <= 4_000);
+}
+
+function projectBlockedFormalWriteBoundary(
+  value: PersonalAiGenerationLearningSessionAnswerFeedbackDto["formalWriteBoundary"],
+):
+  | PersonalAiGenerationLearningSessionAnswerFeedbackDto["formalWriteBoundary"]
+  | null {
+  if (
+    !hasExactKeys(value, [
+      "answerRecordWriteStatus",
+      "examReportWriteStatus",
+      "mistakeBookWriteStatus",
+      "paperWriteStatus",
+      "practiceWriteStatus",
+      "questionWriteStatus",
+    ]) ||
+    value.questionWriteStatus !== "blocked" ||
+    value.paperWriteStatus !== "blocked" ||
+    value.practiceWriteStatus !== "blocked" ||
+    value.answerRecordWriteStatus !== "blocked" ||
+    value.examReportWriteStatus !== "blocked" ||
+    value.mistakeBookWriteStatus !== "blocked"
+  ) {
+    return null;
+  }
+
+  return {
+    questionWriteStatus: value.questionWriteStatus,
+    paperWriteStatus: value.paperWriteStatus,
+    practiceWriteStatus: value.practiceWriteStatus,
+    answerRecordWriteStatus: value.answerRecordWriteStatus,
+    examReportWriteStatus: value.examReportWriteStatus,
+    mistakeBookWriteStatus: value.mistakeBookWriteStatus,
+  };
+}
+
+function isValidAnswerFeedbackSemantics(
+  answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+): boolean {
+  if (answerFeedback.status === "scored") {
+    return (
+      typeof answerFeedback.isCorrect === "boolean" &&
+      answerFeedback.textAnswer === null &&
+      answerFeedback.score !== null &&
+      answerFeedback.maxScore !== null &&
+      isValidScore(answerFeedback.score) &&
+      isValidScore(answerFeedback.maxScore) &&
+      Number(answerFeedback.score) <= Number(answerFeedback.maxScore)
+    );
+  }
+
+  return (
+    answerFeedback.status === "submitted_review_required" &&
+    answerFeedback.isCorrect === null &&
+    answerFeedback.selectedOptionLabels.length === 0 &&
+    answerFeedback.textAnswer !== null &&
+    answerFeedback.textAnswer.trim().length > 0 &&
+    answerFeedback.score === null &&
+    answerFeedback.maxScore !== null &&
+    isValidScore(answerFeedback.maxScore)
+  );
+}
+
+function isValidScore(value: string): boolean {
+  const score = Number(value);
+
+  return Number.isFinite(score) && score >= 0;
+}
+
+function isValidIsoTimestamp(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    Number.isFinite(Date.parse(value)) &&
+    new Date(value).toISOString() === value
+  );
+}
+
+function hasExactKeys(
+  value: unknown,
+  expectedKeys: readonly string[],
+): boolean {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const actualKeys = Object.keys(value).sort();
+  const sortedExpectedKeys = [...expectedKeys].sort();
+
+  return (
+    actualKeys.length === sortedExpectedKeys.length &&
+    actualKeys.every((key, index) => key === sortedExpectedKeys[index])
+  );
 }
 
 export function collectPersonalAiLearningQuestionDrafts(

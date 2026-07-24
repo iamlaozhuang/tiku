@@ -89,6 +89,7 @@ type StudentPersonalAiGenerationPracticeFeedbackState =
   | "feedback_ready";
 
 type StudentAiLearningAnswerFeedback = {
+  answerRevision: number | null;
   isCorrect: boolean | null;
   score: string | null;
   maxScore: string;
@@ -1232,6 +1233,7 @@ async function fetchSubmitPersonalAiLearningAnswer(
   sessionPublicId: string,
   authorizationPublicId: string,
   input: {
+    expectedAnswerRevision: number;
     sessionQuestionPublicId: string;
     selectedOptionLabels: string[];
     textAnswer: string | null;
@@ -3068,6 +3070,7 @@ function mapLearningAnswerFeedbackToStudentFeedback(
   answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
 ): StudentAiLearningAnswerFeedback {
   return {
+    answerRevision: answerFeedback.answerRevision,
     isCorrect: answerFeedback.isCorrect,
     score: answerFeedback.score,
     maxScore: answerFeedback.maxScore ?? "0.0",
@@ -3715,6 +3718,11 @@ export function StudentPersonalAiGenerationPage() {
     aiLearningAnswerFeedbackByQuestion,
     setAiLearningAnswerFeedbackByQuestion,
   ] = useState<StudentAiLearningAnswerFeedbackByQuestion>({});
+  const [
+    isAiLearningAnswerSubmissionInFlight,
+    setIsAiLearningAnswerSubmissionInFlight,
+  ] = useState(false);
+  const isAiLearningAnswerSubmissionInFlightRef = useRef(false);
   const [authorizationContexts, setAuthorizationContexts] = useState<
     EffectiveAuthorizationContextDto[]
   >([]);
@@ -4929,11 +4937,16 @@ export function StudentPersonalAiGenerationPage() {
     isAiGenerationActionDisabled ||
     !hasLocalAiGenerationExperience ||
     !canRetryCurrentGeneratedPractice(experience);
-  const canSubmitAiLearningAnswers = hasCompleteStudentAiLearningAnswers({
-    questions: activeAiLearningSessionQuestions,
-    selectedOptionLabelsByQuestion: selectedAiLearningAnswerLabelsByQuestion,
-    textAnswersByQuestion: selectedAiLearningTextAnswersByQuestion,
-  });
+  const canSubmitAiLearningAnswers =
+    !isAiLearningAnswerSubmissionInFlight &&
+    Object.values(aiLearningAnswerFeedbackByQuestion).every(
+      (answerFeedback) => answerFeedback.answerRevision !== null,
+    ) &&
+    hasCompleteStudentAiLearningAnswers({
+      questions: activeAiLearningSessionQuestions,
+      selectedOptionLabelsByQuestion: selectedAiLearningAnswerLabelsByQuestion,
+      textAnswersByQuestion: selectedAiLearningTextAnswersByQuestion,
+    });
 
   async function ensureAiLearningSessionStarted(): Promise<
     PersonalAiGenerationLearningSessionPublicQuestionDto[] | null
@@ -5025,33 +5038,7 @@ export function StudentPersonalAiGenerationPage() {
         ) {
           const answerFeedbacks =
             progressResponse.data.progress.answerFeedbacks;
-          setSelectedAiLearningAnswerLabelsByQuestion(
-            Object.fromEntries(
-              answerFeedbacks.map((answerFeedback) => [
-                answerFeedback.sessionQuestionPublicId,
-                answerFeedback.selectedOptionLabels,
-              ]),
-            ),
-          );
-          setSelectedAiLearningTextAnswersByQuestion(
-            Object.fromEntries(
-              answerFeedbacks.map((answerFeedback) => [
-                answerFeedback.sessionQuestionPublicId,
-                answerFeedback.textAnswer ?? "",
-              ]),
-            ),
-          );
-          setAiLearningAnswerFeedbackByQuestion(
-            Object.fromEntries(
-              answerFeedbacks.map((answerFeedback) => [
-                answerFeedback.sessionQuestionPublicId,
-                mapLearningAnswerFeedbackToStudentFeedback(answerFeedback),
-              ]),
-            ),
-          );
-          setPracticeFeedbackState(
-            answerFeedbacks.length === 0 ? "practice_ready" : "feedback_ready",
-          );
+          applyAiLearningProgress(answerFeedbacks);
         }
       } catch {
         setPracticeFeedbackState("practice_ready");
@@ -5080,7 +5067,80 @@ export function StudentPersonalAiGenerationPage() {
     await ensureAiLearningSessionStarted();
   }
 
+  function applyAiLearningProgress(
+    answerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[],
+  ): boolean {
+    setSelectedAiLearningAnswerLabelsByQuestion(
+      Object.fromEntries(
+        answerFeedbacks.map((answerFeedback) => [
+          answerFeedback.sessionQuestionPublicId,
+          answerFeedback.selectedOptionLabels,
+        ]),
+      ),
+    );
+    setSelectedAiLearningTextAnswersByQuestion(
+      Object.fromEntries(
+        answerFeedbacks.map((answerFeedback) => [
+          answerFeedback.sessionQuestionPublicId,
+          answerFeedback.textAnswer ?? "",
+        ]),
+      ),
+    );
+    setAiLearningAnswerFeedbackByQuestion(
+      Object.fromEntries(
+        answerFeedbacks.map((answerFeedback) => [
+          answerFeedback.sessionQuestionPublicId,
+          mapLearningAnswerFeedbackToStudentFeedback(answerFeedback),
+        ]),
+      ),
+    );
+
+    if (
+      answerFeedbacks.some(
+        (answerFeedback) => answerFeedback.answerRevision === null,
+      )
+    ) {
+      setPracticeFeedbackState("insufficient");
+      return false;
+    }
+
+    setPracticeFeedbackState(
+      answerFeedbacks.length === 0 ? "practice_ready" : "feedback_ready",
+    );
+    return true;
+  }
+
+  async function refreshAiLearningProgress(
+    sessionPublicId: string,
+    authorizationPublicId: string,
+  ): Promise<boolean> {
+    const progressResponse = await fetchPersonalAiLearningSessionProgress(
+      readStudentSessionRequestToken(),
+      sessionPublicId,
+      authorizationPublicId,
+    );
+
+    if (
+      progressResponse.code !== 0 ||
+      progressResponse.data === null ||
+      progressResponse.data.status !== "ready"
+    ) {
+      setPracticeFeedbackState("insufficient");
+      return false;
+    }
+
+    return applyAiLearningProgress(
+      progressResponse.data.progress.answerFeedbacks,
+    );
+  }
+
   async function handleSubmitAiLearningAnswer() {
+    if (isAiLearningAnswerSubmissionInFlightRef.current) {
+      return;
+    }
+    isAiLearningAnswerSubmissionInFlightRef.current = true;
+    setIsAiLearningAnswerSubmissionInFlight(true);
+
     const sessionQuestions =
       activeAiLearningSessionQuestions.length > 0
         ? activeAiLearningSessionQuestions
@@ -5098,6 +5158,8 @@ export function StudentPersonalAiGenerationPage() {
       })
     ) {
       setPracticeFeedbackState("insufficient");
+      isAiLearningAnswerSubmissionInFlightRef.current = false;
+      setIsAiLearningAnswerSubmissionInFlight(false);
       return;
     }
 
@@ -5110,6 +5172,10 @@ export function StudentPersonalAiGenerationPage() {
             selectedAuthorizationPublicId,
             {
               sessionQuestionPublicId: question.sessionQuestionPublicId,
+              expectedAnswerRevision:
+                aiLearningAnswerFeedbackByQuestion[
+                  question.sessionQuestionPublicId
+                ]?.answerRevision ?? 0,
               selectedOptionLabels:
                 selectedAiLearningAnswerLabelsByQuestion[
                   question.sessionQuestionPublicId
@@ -5146,6 +5212,18 @@ export function StudentPersonalAiGenerationPage() {
       if (
         Object.keys(answerFeedbackByQuestion).length !== sessionQuestions.length
       ) {
+        if (
+          answerResponses.some(
+            (answerResponse) =>
+              answerResponse.data?.blockReason === "answer_revision_conflict",
+          )
+        ) {
+          await refreshAiLearningProgress(
+            activeAiLearningSessionPublicId,
+            selectedAuthorizationPublicId,
+          );
+          return;
+        }
         setPracticeFeedbackState("insufficient");
         return;
       }
@@ -5154,6 +5232,9 @@ export function StudentPersonalAiGenerationPage() {
       setPracticeFeedbackState("answer_submitted");
     } catch {
       setPracticeFeedbackState("insufficient");
+    } finally {
+      isAiLearningAnswerSubmissionInFlightRef.current = false;
+      setIsAiLearningAnswerSubmissionInFlight(false);
     }
   }
 
@@ -5173,35 +5254,9 @@ export function StudentPersonalAiGenerationPage() {
     }
 
     try {
-      const progressResponse = await fetchPersonalAiLearningSessionProgress(
-        readStudentSessionRequestToken(),
+      await refreshAiLearningProgress(
         activeAiLearningSessionPublicId,
         selectedAuthorizationPublicId,
-      );
-
-      if (
-        progressResponse.code !== 0 ||
-        progressResponse.data === null ||
-        progressResponse.data.status !== "ready"
-      ) {
-        setPracticeFeedbackState("insufficient");
-        return;
-      }
-
-      setAiLearningAnswerFeedbackByQuestion(
-        Object.fromEntries(
-          progressResponse.data.progress.answerFeedbacks.map(
-            (answerFeedback) => [
-              answerFeedback.sessionQuestionPublicId,
-              mapLearningAnswerFeedbackToStudentFeedback(answerFeedback),
-            ],
-          ),
-        ),
-      );
-      setPracticeFeedbackState(
-        progressResponse.data.progress.answerFeedbacks.length === 0
-          ? "practice_ready"
-          : "feedback_ready",
       );
     } catch {
       setPracticeFeedbackState("insufficient");

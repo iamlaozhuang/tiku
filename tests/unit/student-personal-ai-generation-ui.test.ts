@@ -845,6 +845,7 @@ function createLearningAnswerFeedbackResponse(input: {
   actorPublicId: string;
   question: PersonalAiGenerationLearningSessionQuestionDto;
   selectedOptionLabels: string[];
+  answerRevision?: number;
   textAnswer?: string | null;
 }): {
   code: 0;
@@ -867,6 +868,7 @@ function createLearningAnswerFeedbackResponse(input: {
     data: {
       status: isSubjective ? "submitted_review_required" : "scored",
       blockReason: null,
+      answerRevision: input.answerRevision ?? 1,
       sessionPublicId: input.sessionPublicId,
       sessionQuestionPublicId: input.question.sessionQuestionPublicId,
       actorPublicId: input.actorPublicId,
@@ -1118,6 +1120,7 @@ async function handlePersonalAiLearningSessionFetch(input: {
       : [];
     const response = createLearningAnswerFeedbackResponse({
       actorPublicId: session.actorPublicId,
+      answerRevision: Number(body.expectedAnswerRevision) + 1,
       question,
       selectedOptionLabels,
       sessionPublicId,
@@ -4881,13 +4884,26 @@ describe("StudentPersonalAiGenerationPage", () => {
           return {
             ok: true,
             status: 200,
-            json: async () =>
-              createLearningAnswerFeedbackResponse({
+            json: async () => {
+              const response = createLearningAnswerFeedbackResponse({
                 sessionPublicId,
                 actorPublicId: localSessionUserPublicId,
                 question: learningSessionQuestion,
                 selectedOptionLabels: ["A"],
-              }),
+              });
+
+              return {
+                ...response,
+                data: {
+                  ...response.data,
+                  status: "blocked" as const,
+                  blockReason: "answer_revision_conflict" as const,
+                  answerRevision: null,
+                  isCorrect: null,
+                  score: null,
+                },
+              };
+            },
           };
         }
 
@@ -4914,7 +4930,9 @@ describe("StudentPersonalAiGenerationPage", () => {
                 ownerType: "personal",
                 ownerPublicId: "student-public-ui-001",
                 actorPublicId: localSessionUserPublicId,
-                answerFeedback,
+                answerFeedback:
+                  progressUrls.length > 1 ? answerFeedback : undefined,
+                questionCount: 1,
               }),
           };
         }
@@ -4953,9 +4971,14 @@ describe("StudentPersonalAiGenerationPage", () => {
         name: /A synthetic server personal correct option/,
       }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    const submitAnswerButton = screen.getByRole("button", {
+      name: "提交作答",
+    });
+    fireEvent.click(submitAnswerButton);
+    fireEvent.click(submitAnswerButton);
     await waitFor(() => expect(answerSubmitBodies).toHaveLength(1));
     expect(answerSubmitBodies[0]).toMatchObject({
+      expectedAnswerRevision: 0,
       sessionQuestionPublicId: `${sessionPublicId}_q_1`,
       selectedOptionLabels: ["A"],
       textAnswer: null,
@@ -4965,6 +4988,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "查看解析" }));
     await waitFor(() =>
       expect(progressUrls).toEqual([
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=authorization-context-ui-001`,
         `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=authorization-context-ui-001`,
         `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress?authorizationPublicId=authorization-context-ui-001`,
       ]),
@@ -5072,6 +5096,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     await waitFor(() => expect(answerSubmitBodies).toHaveLength(1));
     expect(answerSubmitBodies[0]).toMatchObject({
+      expectedAnswerRevision: 0,
       selectedOptionLabels: [],
       textAnswer: "synthetic learner subjective answer",
     });
@@ -5572,6 +5597,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
     await waitFor(() => expect(answerSubmitBodies).toHaveLength(1));
     expect(answerSubmitBodies[0]).toMatchObject({
+      expectedAnswerRevision: 0,
       sessionQuestionPublicId: `${sessionPublicId}_q_1`,
       selectedOptionLabels: ["B"],
       textAnswer: null,

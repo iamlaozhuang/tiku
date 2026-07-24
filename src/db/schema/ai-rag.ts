@@ -1137,6 +1137,8 @@ export const personalAiLearningAnswerFeedback = pgTable(
     learning_session_public_id: text("learning_session_public_id").notNull(),
     session_question_public_id: text("session_question_public_id").notNull(),
     actor_public_id: text("actor_public_id").notNull(),
+    answer_revision: integer("answer_revision"),
+    answer_command_digest: text("answer_command_digest"),
     feedback_status: text("feedback_status").notNull(),
     selected_option_labels: jsonb("selected_option_labels").notNull(),
     text_answer: text("text_answer"),
@@ -1168,6 +1170,19 @@ export const personalAiLearningAnswerFeedback = pgTable(
     index("idx_personal_ai_learning_answer_feedback_actor_submitted_at").on(
       table.actor_public_id,
       table.submitted_at,
+    ),
+    check(
+      "personal_ai_learning_answer_feedback_revision_check",
+      sql`(
+        (${table.answer_revision} is null and ${table.answer_command_digest} is null)
+        or
+        (
+          ${table.answer_revision} is not null
+          and ${table.answer_command_digest} is not null
+          and ${table.answer_revision} between 1 and 2147483647
+          and ${table.answer_command_digest} ~ '^[0-9a-f]{64}$'
+        )
+      )`,
     ),
   ],
 );

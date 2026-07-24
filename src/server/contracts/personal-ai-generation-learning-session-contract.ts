@@ -163,6 +163,7 @@ export type PersonalAiGenerationLearningSessionAnswerInputDto = {
   sessionPublicId: string;
   sessionQuestionPublicId: string;
   actorPublicId: string;
+  expectedAnswerRevision: number;
   selectedOptionLabels: string[];
   textAnswer: string | null;
   submittedAt: Date;
@@ -174,6 +175,7 @@ export type PersonalAiGenerationLearningSessionAnswerFeedbackDto = {
   sessionPublicId: string;
   sessionQuestionPublicId: string;
   actorPublicId: string;
+  answerRevision: number | null;
   selectedOptionLabels: string[];
   textAnswer: string | null;
   isCorrect: boolean | null;
@@ -187,6 +189,21 @@ export type PersonalAiGenerationLearningSessionAnswerFeedbackDto = {
   mistakeBookPublicId: string | null;
   submittedAt: string;
 };
+
+export type PersonalAiGenerationLearningSessionAnswerSaveResultDto =
+  | {
+      status: "saved" | "replayed";
+      blockReason: null;
+      answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
+    }
+  | {
+      status: "blocked";
+      blockReason: Extract<
+        PersonalAiGenerationLearningAnswerBlockReason,
+        "answer_revision_conflict" | "answer_history_unavailable"
+      >;
+      answerFeedback: null;
+    };
 
 export type PersonalAiGenerationLearningSessionStatisticsDto = {
   questionCount: number;
@@ -272,9 +289,12 @@ export type PersonalAiGenerationLearningSessionRepository = {
     | Promise<PersonalAiGenerationLearningSessionDto | null>
     | PersonalAiGenerationLearningSessionDto
     | null;
-  saveAnswerFeedback(
-    answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
-  ): Promise<void> | void;
+  saveAnswerFeedback(input: {
+    expectedAnswerRevision: number;
+    answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
+  }):
+    | Promise<PersonalAiGenerationLearningSessionAnswerSaveResultDto>
+    | PersonalAiGenerationLearningSessionAnswerSaveResultDto;
   listAnswerFeedbackBySessionPublicId(
     sessionPublicId: string,
   ):

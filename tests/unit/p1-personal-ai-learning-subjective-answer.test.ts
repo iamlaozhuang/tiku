@@ -6,8 +6,6 @@ import { describe, expect, it } from "vitest";
 
 const TASK_ID =
   "p1-remediation-rc-08-personal-ai-learning-subjective-answer-2026-07-23";
-const BASE_SHA = "ecfe6a1e1a36492d05d2547609f5d4fb99b82362";
-const BRANCH = "fix/personal-ai-learning-subjective-answer";
 
 function readRepositoryFile(path: string): string {
   return readFileSync(resolve(process.cwd(), path), "utf8");
@@ -35,47 +33,46 @@ function parseRepositoryYaml(path: string): unknown {
 
 describe("F-0161 personal AI learning subjective answer", () => {
   it("strictly parses the F-0161 task contract and WIP state", () => {
-    const contract = JSON.parse(
+    const currentContract = JSON.parse(
       readRepositoryFile("docs/04-agent-system/state/task-safety.json"),
     ) as {
       taskId: string;
-      baseSha: string;
-      branch: string;
-      allowedFiles: string[];
-      coreFiles: string[];
-      contingencyFiles: string[];
-      conditionalCloseout: boolean;
       validationCommands: Array<{ executable: string; arguments: string[] }>;
     };
     const projectState = parseRepositoryYaml(
       "docs/04-agent-system/state/project-state.yaml",
     ) as {
       currentTask: { id: string; status: string };
-      p1RemediationSerialProgram: { currentTaskId: string };
+      p1RemediationSerialProgram: {
+        currentTaskId: string;
+        taskStatusById: Record<string, string>;
+      };
     };
     const queue = parseRepositoryYaml(
       "docs/04-agent-system/state/task-queue.yaml",
-    ) as { activeTasks: Array<{ id: string; status: string }> };
+    ) as {
+      activeTasks: Array<{ id: string; status: string }>;
+      p1RemediationSerialProgram: { taskStatusById: Record<string, string> };
+    };
 
-    expect(contract).toMatchObject({
-      taskId: TASK_ID,
-      baseSha: BASE_SHA,
-      branch: BRANCH,
-      conditionalCloseout: true,
-    });
-    expect(contract.allowedFiles).toHaveLength(11);
-    expect(contract.coreFiles).toHaveLength(9);
-    expect(contract.contingencyFiles).toHaveLength(2);
-    expect(projectState.currentTask).toMatchObject({
-      id: TASK_ID,
-      status: "in_progress",
-    });
-    expect(projectState.p1RemediationSerialProgram.currentTaskId).toBe(TASK_ID);
+    expect(
+      projectState.p1RemediationSerialProgram.taskStatusById[TASK_ID],
+    ).toBe("closed");
+    expect(queue.p1RemediationSerialProgram.taskStatusById[TASK_ID]).toBe(
+      "closed",
+    );
     expect(
       queue.activeTasks.filter((task) => task.status === "in_progress"),
-    ).toEqual([expect.objectContaining({ id: TASK_ID })]);
+    ).toEqual([expect.objectContaining({ id: currentContract.taskId })]);
+    expect(projectState.currentTask).toMatchObject({
+      id: currentContract.taskId,
+      status: "in_progress",
+    });
+    expect(projectState.p1RemediationSerialProgram.currentTaskId).toBe(
+      currentContract.taskId,
+    );
 
-    for (const command of contract.validationCommands) {
+    for (const command of currentContract.validationCommands) {
       expect(command.executable).not.toMatch(/[<>]/u);
       expect(command.arguments.join(" ")).not.toMatch(/<[^>]+>/u);
     }
@@ -99,9 +96,7 @@ describe("F-0161 personal AI learning subjective answer", () => {
     );
     expect(
       serviceSource.indexOf('blockReason: "answer_required"'),
-    ).toBeLessThan(
-      serviceSource.indexOf("repository.saveAnswerFeedback(answerFeedback)"),
-    );
+    ).toBeLessThan(serviceSource.indexOf("repository.saveAnswerFeedback({"));
     expect(pageSource).toContain("selectedAiLearningTextAnswersByQuestion");
     expect(pageSource).toContain("<textarea");
     expect(pageSource).not.toContain("textAnswer: null,");

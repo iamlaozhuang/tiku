@@ -4,7 +4,7 @@ import {
   personalAiLearningAnswerFeedback,
   personalAiLearningSession,
 } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import type { EvidenceStatus } from "../models/ai-rag";
 import type {
@@ -25,6 +25,10 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import {
+  createPersonalAiLearningAnswerCommandCanonicalFacts,
+  createPersonalAiLearningAnswerCommandDigest,
+} from "../validators/personal-ai-generation-learning-session";
 
 type PersonalAiLearningSessionInsertValue =
   typeof personalAiLearningSession.$inferInsert;
@@ -65,6 +69,8 @@ export type PersonalAiLearningAnswerFeedbackRow = {
   learning_session_public_id: string;
   session_question_public_id: string;
   actor_public_id: string;
+  answer_revision: number | null;
+  answer_command_digest: string | null;
   feedback_status: string;
   selected_option_labels: unknown;
   text_answer: string | null;
@@ -91,10 +97,17 @@ export type PersonalAiGenerationLearningSessionGateway = {
   findSessionRowByPublicId(
     sessionPublicId: string,
   ): Promise<PersonalAiGenerationLearningSessionRow | null>;
-  upsertAnswerFeedbackRow(input: {
+  trySaveAnswerFeedbackRows(input: {
     sessionId: number;
+    expectedAnswerRevision: number;
+    expectedCurrentAnswerCommandDigest: string | null;
+    answerCommandDigest: string;
     answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
-  }): Promise<PersonalAiLearningAnswerFeedbackRow>;
+  }): Promise<PersonalAiLearningAnswerFeedbackRow[]>;
+  findAnswerFeedbackRowsBySessionQuestion(query: {
+    sessionPublicId: string;
+    sessionQuestionPublicId: string;
+  }): Promise<PersonalAiLearningAnswerFeedbackRow[]>;
   listAnswerFeedbackRowsBySessionPublicId(
     sessionPublicId: string,
   ): Promise<PersonalAiLearningAnswerFeedbackRow[]>;
@@ -130,6 +143,8 @@ const personalAiLearningAnswerFeedbackSelection = {
   session_question_public_id:
     personalAiLearningAnswerFeedback.session_question_public_id,
   actor_public_id: personalAiLearningAnswerFeedback.actor_public_id,
+  answer_revision: personalAiLearningAnswerFeedback.answer_revision,
+  answer_command_digest: personalAiLearningAnswerFeedback.answer_command_digest,
   feedback_status: personalAiLearningAnswerFeedback.feedback_status,
   selected_option_labels:
     personalAiLearningAnswerFeedback.selected_option_labels,
@@ -192,19 +207,206 @@ export function createPersonalAiGenerationLearningSessionRepository(
 
       return row === null ? null : mapLearningSessionRowToDto(row);
     },
-    async saveAnswerFeedback(answerFeedback) {
+    async saveAnswerFeedback(input) {
       const sessionRow = await gateway.findSessionRowByPublicId(
-        answerFeedback.sessionPublicId,
+        input.answerFeedback.sessionPublicId,
       );
 
-      if (sessionRow === null) {
-        throw new Error("personal AI learning session was not found.");
+      if (
+        sessionRow === null ||
+        sessionRow.actor_public_id !== input.answerFeedback.actorPublicId
+      ) {
+        return {
+          status: "blocked",
+          blockReason: "answer_history_unavailable",
+          answerFeedback: null,
+        };
       }
 
-      await gateway.upsertAnswerFeedbackRow({
+      const answerCommandDigest =
+        createPersonalAiLearningAnswerCommandDigest(input);
+
+      if (answerCommandDigest === null) {
+        return {
+          status: "blocked",
+          blockReason: "answer_history_unavailable",
+          answerFeedback: null,
+        };
+      }
+
+      let expectedCurrentAnswerCommandDigest: string | null = null;
+      let answerFeedbackForPersistence = input.answerFeedback;
+
+      if (input.expectedAnswerRevision > 0) {
+        const currentRows =
+          await gateway.findAnswerFeedbackRowsBySessionQuestion({
+            sessionPublicId: input.answerFeedback.sessionPublicId,
+            sessionQuestionPublicId:
+              input.answerFeedback.sessionQuestionPublicId,
+          });
+
+        if (currentRows.length !== 1) {
+          return {
+            status: "blocked",
+            blockReason:
+              currentRows.length === 0
+                ? "answer_revision_conflict"
+                : "answer_history_unavailable",
+            answerFeedback: null,
+          };
+        }
+
+        const currentAnswerFeedback = tryMapLearningAnswerFeedbackRowToDto(
+          currentRows[0]!,
+        );
+
+        if (
+          currentAnswerFeedback === null ||
+          currentAnswerFeedback.answerRevision === null ||
+          currentRows[0]!.answer_command_digest === null
+        ) {
+          return {
+            status: "blocked",
+            blockReason: "answer_history_unavailable",
+            answerFeedback: null,
+          };
+        }
+
+        if (
+          currentAnswerFeedback.answerRevision !== input.expectedAnswerRevision
+        ) {
+          if (
+            currentAnswerFeedback.answerRevision ===
+              input.expectedAnswerRevision + 1 &&
+            currentRows[0]!.answer_command_digest === answerCommandDigest &&
+            hasSameAnswerCommandFacts(
+              currentAnswerFeedback,
+              input.answerFeedback,
+            )
+          ) {
+            return {
+              status: "replayed",
+              blockReason: null,
+              answerFeedback: currentAnswerFeedback,
+            };
+          }
+
+          return {
+            status: "blocked",
+            blockReason: "answer_revision_conflict",
+            answerFeedback: null,
+          };
+        }
+
+        expectedCurrentAnswerCommandDigest =
+          currentRows[0]!.answer_command_digest;
+        if (
+          Date.parse(currentAnswerFeedback.submittedAt) >
+          Date.parse(input.answerFeedback.submittedAt)
+        ) {
+          answerFeedbackForPersistence = {
+            ...input.answerFeedback,
+            submittedAt: currentAnswerFeedback.submittedAt,
+          };
+        }
+      }
+
+      const savedRows = await gateway.trySaveAnswerFeedbackRows({
         sessionId: sessionRow.id,
-        answerFeedback,
+        expectedAnswerRevision: input.expectedAnswerRevision,
+        expectedCurrentAnswerCommandDigest,
+        answerCommandDigest,
+        answerFeedback: answerFeedbackForPersistence,
       });
+
+      if (savedRows.length === 1) {
+        const persistedAnswerFeedback = tryMapLearningAnswerFeedbackRowToDto(
+          savedRows[0]!,
+        );
+
+        if (
+          persistedAnswerFeedback === null ||
+          persistedAnswerFeedback.answerRevision !==
+            input.expectedAnswerRevision + 1 ||
+          !hasSameAnswerCommandFacts(
+            persistedAnswerFeedback,
+            input.answerFeedback,
+          )
+        ) {
+          return {
+            status: "blocked",
+            blockReason: "answer_history_unavailable",
+            answerFeedback: null,
+          };
+        }
+
+        return {
+          status: "saved",
+          blockReason: null,
+          answerFeedback: persistedAnswerFeedback,
+        };
+      }
+
+      if (savedRows.length !== 0) {
+        return {
+          status: "blocked",
+          blockReason: "answer_history_unavailable",
+          answerFeedback: null,
+        };
+      }
+
+      const currentRows = await gateway.findAnswerFeedbackRowsBySessionQuestion(
+        {
+          sessionPublicId: input.answerFeedback.sessionPublicId,
+          sessionQuestionPublicId: input.answerFeedback.sessionQuestionPublicId,
+        },
+      );
+
+      if (currentRows.length !== 1) {
+        return {
+          status: "blocked",
+          blockReason:
+            currentRows.length === 0
+              ? "answer_revision_conflict"
+              : "answer_history_unavailable",
+          answerFeedback: null,
+        };
+      }
+
+      const currentAnswerFeedback = tryMapLearningAnswerFeedbackRowToDto(
+        currentRows[0]!,
+      );
+
+      if (
+        currentAnswerFeedback === null ||
+        currentAnswerFeedback.answerRevision === null
+      ) {
+        return {
+          status: "blocked",
+          blockReason: "answer_history_unavailable",
+          answerFeedback: null,
+        };
+      }
+
+      if (
+        currentAnswerFeedback !== null &&
+        currentAnswerFeedback.answerRevision ===
+          input.expectedAnswerRevision + 1 &&
+        currentRows[0]!.answer_command_digest === answerCommandDigest &&
+        hasSameAnswerCommandFacts(currentAnswerFeedback, input.answerFeedback)
+      ) {
+        return {
+          status: "replayed",
+          blockReason: null,
+          answerFeedback: currentAnswerFeedback,
+        };
+      }
+
+      return {
+        status: "blocked",
+        blockReason: "answer_revision_conflict",
+        answerFeedback: null,
+      };
     },
     async listAnswerFeedbackBySessionPublicId(sessionPublicId) {
       const rows =
@@ -277,26 +479,88 @@ export function createPostgresPersonalAiGenerationLearningSessionRepository(
     async findSessionRowByPublicId(sessionPublicId) {
       return findLearningSessionRowByPublicId(getDatabase(), sessionPublicId);
     },
-    async upsertAnswerFeedbackRow(input) {
-      const [row] = await getDatabase()
-        .insert(personalAiLearningAnswerFeedback)
-        .values(createLearningAnswerFeedbackInsertValue(input))
-        .onConflictDoUpdate({
-          target: [
-            personalAiLearningAnswerFeedback.learning_session_public_id,
-            personalAiLearningAnswerFeedback.session_question_public_id,
-          ],
-          set: createLearningAnswerFeedbackUpdateValue(input.answerFeedback),
-        })
-        .returning(personalAiLearningAnswerFeedbackSelection);
+    async trySaveAnswerFeedbackRows(input) {
+      const database = getDatabase();
 
-      if (row === undefined) {
-        throw new Error(
-          "personal AI learning answer feedback persistence failed.",
-        );
+      if (
+        (input.expectedAnswerRevision === 0 &&
+          input.expectedCurrentAnswerCommandDigest !== null) ||
+        (input.expectedAnswerRevision > 0 &&
+          input.expectedCurrentAnswerCommandDigest === null)
+      ) {
+        throw new Error("invalid personal AI learning answer CAS boundary.");
       }
 
-      return normalizeLearningAnswerFeedbackRow(row);
+      const rows =
+        input.expectedAnswerRevision === 0
+          ? await database
+              .insert(personalAiLearningAnswerFeedback)
+              .values(createLearningAnswerFeedbackInsertValue(input))
+              .onConflictDoNothing({
+                target: [
+                  personalAiLearningAnswerFeedback.learning_session_public_id,
+                  personalAiLearningAnswerFeedback.session_question_public_id,
+                ],
+              })
+              .returning(personalAiLearningAnswerFeedbackSelection)
+          : await database
+              .update(personalAiLearningAnswerFeedback)
+              .set(
+                createLearningAnswerFeedbackUpdateValue(
+                  input.answerFeedback,
+                  input.answerCommandDigest,
+                ),
+              )
+              .where(
+                and(
+                  eq(
+                    personalAiLearningAnswerFeedback.personal_ai_learning_session_id,
+                    input.sessionId,
+                  ),
+                  eq(
+                    personalAiLearningAnswerFeedback.learning_session_public_id,
+                    input.answerFeedback.sessionPublicId,
+                  ),
+                  eq(
+                    personalAiLearningAnswerFeedback.session_question_public_id,
+                    input.answerFeedback.sessionQuestionPublicId,
+                  ),
+                  eq(
+                    personalAiLearningAnswerFeedback.actor_public_id,
+                    input.answerFeedback.actorPublicId,
+                  ),
+                  eq(
+                    personalAiLearningAnswerFeedback.answer_revision,
+                    input.expectedAnswerRevision,
+                  ),
+                  eq(
+                    personalAiLearningAnswerFeedback.answer_command_digest,
+                    input.expectedCurrentAnswerCommandDigest!,
+                  ),
+                ),
+              )
+              .returning(personalAiLearningAnswerFeedbackSelection);
+
+      return rows.map(normalizeLearningAnswerFeedbackRow);
+    },
+    async findAnswerFeedbackRowsBySessionQuestion(query) {
+      const rows = await getDatabase()
+        .select(personalAiLearningAnswerFeedbackSelection)
+        .from(personalAiLearningAnswerFeedback)
+        .where(
+          and(
+            eq(
+              personalAiLearningAnswerFeedback.learning_session_public_id,
+              query.sessionPublicId,
+            ),
+            eq(
+              personalAiLearningAnswerFeedback.session_question_public_id,
+              query.sessionQuestionPublicId,
+            ),
+          ),
+        );
+
+      return rows.map(normalizeLearningAnswerFeedbackRow);
     },
     async listAnswerFeedbackRowsBySessionPublicId(sessionPublicId) {
       const rows = await getDatabase()
@@ -348,6 +612,16 @@ export function createLearningAnswerFeedbackInsertValue(input: {
   answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
 }): PersonalAiLearningAnswerFeedbackInsertValue {
   const submittedAt = new Date(input.answerFeedback.submittedAt);
+  const answerRevision = input.answerFeedback.answerRevision;
+  const answerCommandDigest = createPersonalAiLearningAnswerCommandDigest({
+    expectedAnswerRevision:
+      answerRevision === null ? Number.NaN : answerRevision - 1,
+    answerFeedback: input.answerFeedback,
+  });
+
+  if (answerRevision === null || answerCommandDigest === null) {
+    throw new Error("invalid personal AI learning answer command.");
+  }
 
   return {
     public_id: createLearningAnswerFeedbackPublicId(input.answerFeedback),
@@ -355,6 +629,8 @@ export function createLearningAnswerFeedbackInsertValue(input: {
     learning_session_public_id: input.answerFeedback.sessionPublicId,
     session_question_public_id: input.answerFeedback.sessionQuestionPublicId,
     actor_public_id: input.answerFeedback.actorPublicId,
+    answer_revision: answerRevision,
+    answer_command_digest: answerCommandDigest,
     feedback_status: input.answerFeedback.status,
     selected_option_labels: input.answerFeedback.selectedOptionLabels,
     text_answer: input.answerFeedback.textAnswer,
@@ -371,11 +647,14 @@ export function createLearningAnswerFeedbackInsertValue(input: {
 
 function createLearningAnswerFeedbackUpdateValue(
   answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
-): Partial<PersonalAiLearningAnswerFeedbackInsertValue> {
+  answerCommandDigest: string,
+) {
   const submittedAt = new Date(answerFeedback.submittedAt);
 
   return {
     actor_public_id: answerFeedback.actorPublicId,
+    answer_revision: sql`${personalAiLearningAnswerFeedback.answer_revision} + 1`,
+    answer_command_digest: answerCommandDigest,
     feedback_status: answerFeedback.status,
     selected_option_labels: answerFeedback.selectedOptionLabels,
     text_answer: answerFeedback.textAnswer,
@@ -384,8 +663,8 @@ function createLearningAnswerFeedbackUpdateValue(
     max_score: answerFeedback.maxScore,
     answer_feedback_snapshot: answerFeedback,
     formal_write_boundary: answerFeedback.formalWriteBoundary,
-    submitted_at: submittedAt,
-    updated_at: submittedAt,
+    submitted_at: sql`greatest(${personalAiLearningAnswerFeedback.submitted_at}, ${submittedAt})`,
+    updated_at: sql`greatest(${personalAiLearningAnswerFeedback.updated_at}, ${submittedAt})`,
   };
 }
 
@@ -432,14 +711,16 @@ function mapLearningAnswerFeedbackRowToDto(
   row: PersonalAiLearningAnswerFeedbackRow,
 ): PersonalAiGenerationLearningSessionAnswerFeedbackDto {
   const snapshot = toAnswerFeedbackSnapshot(row.answer_feedback_snapshot);
+  const answerRevision = readAnswerRevision(row);
 
-  return {
+  const answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto = {
     ...snapshot,
     status: toFeedbackStatus(row.feedback_status),
     blockReason: toAnswerBlockReason(snapshot.blockReason),
     sessionPublicId: row.learning_session_public_id,
     sessionQuestionPublicId: row.session_question_public_id,
     actorPublicId: row.actor_public_id,
+    answerRevision,
     selectedOptionLabels: toStringArray(row.selected_option_labels),
     textAnswer: row.text_answer,
     isCorrect: row.is_correct,
@@ -448,6 +729,73 @@ function mapLearningAnswerFeedbackRowToDto(
     formalWriteBoundary: toFormalWriteBoundary(row.formal_write_boundary),
     submittedAt: row.submitted_at.toISOString(),
   };
+
+  if (
+    answerRevision !== null &&
+    createPersonalAiLearningAnswerCommandDigest({
+      expectedAnswerRevision: answerRevision - 1,
+      answerFeedback,
+    }) !== row.answer_command_digest
+  ) {
+    throw new Error("invalid personal AI learning answer command digest.");
+  }
+
+  return answerFeedback;
+}
+
+function tryMapLearningAnswerFeedbackRowToDto(
+  row: PersonalAiLearningAnswerFeedbackRow,
+): PersonalAiGenerationLearningSessionAnswerFeedbackDto | null {
+  try {
+    return mapLearningAnswerFeedbackRowToDto(row);
+  } catch {
+    return null;
+  }
+}
+
+function readAnswerRevision(
+  row: PersonalAiLearningAnswerFeedbackRow,
+): number | null {
+  if (row.answer_revision === null && row.answer_command_digest === null) {
+    return null;
+  }
+
+  if (
+    Number.isInteger(row.answer_revision) &&
+    row.answer_revision !== null &&
+    row.answer_revision >= 1 &&
+    row.answer_revision <= 2_147_483_647 &&
+    typeof row.answer_command_digest === "string" &&
+    /^[a-f0-9]{64}$/u.test(row.answer_command_digest)
+  ) {
+    return row.answer_revision;
+  }
+
+  throw new Error("invalid personal AI learning answer revision facts.");
+}
+
+function hasSameAnswerCommandFacts(
+  left: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+  right: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+): boolean {
+  if (left.answerRevision === null || right.answerRevision === null) {
+    return false;
+  }
+
+  const leftFacts = createPersonalAiLearningAnswerCommandCanonicalFacts({
+    expectedAnswerRevision: left.answerRevision - 1,
+    answerFeedback: left,
+  });
+  const rightFacts = createPersonalAiLearningAnswerCommandCanonicalFacts({
+    expectedAnswerRevision: right.answerRevision - 1,
+    answerFeedback: right,
+  });
+
+  return (
+    leftFacts !== null &&
+    rightFacts !== null &&
+    JSON.stringify(leftFacts) === JSON.stringify(rightFacts)
+  );
 }
 
 function normalizeLearningSessionRow(

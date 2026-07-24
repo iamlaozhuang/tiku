@@ -358,8 +358,14 @@ function createLearningSessionRepository(): PersonalAiGenerationLearningSessionR
         ) ?? null
       );
     },
-    async saveAnswerFeedback(answerFeedback) {
+    async saveAnswerFeedback({ answerFeedback }) {
       savedAnswerFeedbacks.push(answerFeedback);
+
+      return {
+        status: "saved",
+        blockReason: null,
+        answerFeedback,
+      };
     },
     async listAnswerFeedbackBySessionPublicId(sessionPublicId) {
       return savedAnswerFeedbacks.filter(
@@ -797,6 +803,12 @@ describe("personal AI generation learning session route handlers", () => {
 
     expect((await creationResponse.json()).code).toBe(0);
     expect(repository.savedSessions).toHaveLength(1);
+    const findSessionSpy = vi.spyOn(repository, "findSessionByPublicId");
+    const listAnswerFeedbackSpy = vi.spyOn(
+      repository,
+      "listAnswerFeedbackBySessionPublicId",
+    );
+    const saveAnswerFeedbackSpy = vi.spyOn(repository, "saveAnswerFeedback");
 
     const ineffectiveHandlers =
       createBasePersonalAiGenerationLearningSessionRouteHandlers(
@@ -847,6 +859,7 @@ describe("personal AI generation learning session route handlers", () => {
     )(
       createAnswerPostRequest(sessionPublicId, {
         sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+        expectedAnswerRevision: 0,
         selectedOptionLabels: ["A"],
         textAnswer: null,
       }),
@@ -867,6 +880,9 @@ describe("personal AI generation learning session route handlers", () => {
       });
     }
     expect(repository.savedAnswerFeedbacks).toEqual([]);
+    expect(findSessionSpy).toHaveBeenCalledTimes(2);
+    expect(listAnswerFeedbackSpy).not.toHaveBeenCalled();
+    expect(saveAnswerFeedbackSpy).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -1481,6 +1497,7 @@ describe("personal AI generation learning session route handlers", () => {
     const answerResponse = await getLearningSessionAnswerPostHandler(answers)(
       createAnswerPostRequest(sessionPublicId, {
         sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+        expectedAnswerRevision: 0,
         selectedOptionLabels: ["A"],
         textAnswer: null,
       }),
@@ -1529,6 +1546,62 @@ describe("personal AI generation learning session route handlers", () => {
       },
     });
   });
+
+  it.each([
+    ["missing", {}],
+    ["null", { expectedAnswerRevision: null }],
+    ["string", { expectedAnswerRevision: "0" }],
+    ["negative", { expectedAnswerRevision: -1 }],
+    ["fractional", { expectedAnswerRevision: 0.5 }],
+    ["overflow", { expectedAnswerRevision: 2_147_483_648 }],
+    ["unknown field", { expectedAnswerRevision: 0, currentRevision: 0 }],
+    ["non-string text answer", { expectedAnswerRevision: 0, textAnswer: 42 }],
+    [
+      "duplicate option label",
+      { expectedAnswerRevision: 0, selectedOptionLabels: ["A", "A"] },
+    ],
+    [
+      "non-canonical option label",
+      { expectedAnswerRevision: 0, selectedOptionLabels: [" a "] },
+    ],
+  ])(
+    "rejects %s answer command input before feedback persistence",
+    async (_label, revisionInput) => {
+      const repository = createLearningSessionRepository();
+      const { collection, answers } =
+        createPersonalAiGenerationLearningSessionRouteHandlers(
+          async () => personalUserContext,
+          {
+            repository,
+            now: () => new Date("2026-07-24T07:00:00.000Z"),
+          },
+        );
+      const sourceResultPublicId =
+        "ai_generation_result_route_revision_validation_001";
+      const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+
+      await getLearningSessionCollectionPostHandler(collection)(
+        createPostRequest({ sourceResultPublicId }),
+      );
+
+      const response = await getLearningSessionAnswerPostHandler(answers)(
+        createAnswerPostRequest(sessionPublicId, {
+          sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+          selectedOptionLabels: ["A"],
+          textAnswer: null,
+          ...revisionInput,
+        }),
+        { params: Promise.resolve({ publicId: sessionPublicId }) },
+      );
+
+      await expect(response.json()).resolves.toEqual({
+        code: 400057,
+        message: "Invalid personal AI learning answer input.",
+        data: null,
+      });
+      expect(repository.savedAnswerFeedbacks).toEqual([]);
+    },
+  );
 
   it("returns the standard unauthorized response when user context is missing", async () => {
     const { collection } =

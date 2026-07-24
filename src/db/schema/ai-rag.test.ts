@@ -1076,6 +1076,21 @@ describe("personal AI learning session persistence schema", () => {
       ].every((foreignKeyName) => foreignKeyName.length <= 63),
     ).toBe(true);
   });
+
+  it("keeps legacy answer rows all-null and current answer CAS facts complete", () => {
+    expect(personalAiLearningAnswerFeedback).toBeDefined();
+
+    if (personalAiLearningAnswerFeedback === undefined) {
+      return;
+    }
+
+    expect(getColumnNames(personalAiLearningAnswerFeedback)).toEqual(
+      expect.arrayContaining(["answer_revision", "answer_command_digest"]),
+    );
+    expect(getCheckNames(personalAiLearningAnswerFeedback)).toContain(
+      "personal_ai_learning_answer_feedback_revision_check",
+    );
+  });
 });
 
 describe("admin AI generated content result schema", () => {

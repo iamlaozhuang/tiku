@@ -56,7 +56,9 @@ export type PersonalAiGenerationLearningAnswerBlockReason =
   | "question_not_found"
   | "answer_required"
   | "answer_too_long"
-  | "answer_shape_invalid";
+  | "answer_shape_invalid"
+  | "answer_revision_conflict"
+  | "answer_history_unavailable";
 
 export type PersonalAiGenerationLearningSessionProgressStatus =
   | "ready"

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type { AiGenerationRouteIntegratedStructuredPreview } from "../contracts/route-integrated-provider-execution-contract";
@@ -53,11 +53,17 @@ function createInMemoryRepository(): PersonalAiGenerationLearningSessionReposito
     async findSessionByPublicId(sessionPublicId) {
       return sessions.get(sessionPublicId) ?? null;
     },
-    async saveAnswerFeedback(answerFeedback) {
+    async saveAnswerFeedback({ answerFeedback }) {
       answerFeedbacks.set(
         `${answerFeedback.sessionPublicId}:${answerFeedback.sessionQuestionPublicId}`,
         answerFeedback,
       );
+
+      return {
+        status: "saved",
+        blockReason: null,
+        answerFeedback,
+      };
     },
     async listAnswerFeedbackBySessionPublicId(sessionPublicId) {
       return Array.from(answerFeedbacks.values()).filter(
@@ -495,6 +501,7 @@ describe("personal AI generation learning session service", () => {
         sessionPublicId: "ai_learning_session_public_seven_types",
         sessionQuestionPublicId: `ai_learning_session_public_seven_types_q_${questionNumber}`,
         actorPublicId: "student_public_seven_types",
+        expectedAnswerRevision: 0,
         selectedOptionLabels: [],
         textAnswer: "synthetic learner answer",
         submittedAt: new Date("2026-07-22T12:01:00.000Z"),
@@ -505,15 +512,124 @@ describe("personal AI generation learning session service", () => {
     }
   });
 
+  it("returns the authoritative persisted feedback instead of the local pre-persistence snapshot", async () => {
+    const baseRepository = createInMemoryRepository();
+    const persistedSubmittedAt = "2026-07-24T07:06:00.000Z";
+    const repository: PersonalAiGenerationLearningSessionRepository = {
+      ...baseRepository,
+      async saveAnswerFeedback({ answerFeedback }) {
+        const persistedAnswerFeedback = {
+          ...answerFeedback,
+          answerRevision: 1,
+          submittedAt: persistedSubmittedAt,
+        };
+
+        await baseRepository.saveAnswerFeedback({
+          expectedAnswerRevision: 0,
+          answerFeedback: persistedAnswerFeedback,
+        });
+
+        return {
+          status: "saved" as const,
+          blockReason: null,
+          answerFeedback: persistedAnswerFeedback,
+        };
+      },
+    };
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    });
+
+    await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_authoritative_feedback_001",
+      sourceResultPublicId: "ai_generation_result_authoritative_feedback_001",
+      sourceTaskPublicId: "ai_generation_task_authoritative_feedback_001",
+      ownerType: "personal",
+      ownerPublicId: "student_authoritative_feedback_001",
+      actorPublicId: "student_authoritative_feedback_001",
+      questionDraftSnapshot: createSevenTypeQuestionSnapshot(),
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+      createdAt: new Date("2026-07-24T07:00:00.000Z"),
+    });
+
+    const feedback = await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_authoritative_feedback_001",
+      sessionQuestionPublicId:
+        "ai_learning_session_authoritative_feedback_001_q_1",
+      actorPublicId: "student_authoritative_feedback_001",
+      expectedAnswerRevision: 0,
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-24T07:05:00.000Z"),
+    });
+
+    expect(feedback).toMatchObject({
+      status: "scored",
+      blockReason: null,
+      answerRevision: 1,
+      submittedAt: persistedSubmittedAt,
+    });
+  });
+
+  it("rejects revision overflow without persistence or internal conflict facts", async () => {
+    const baseRepository = createInMemoryRepository();
+    const saveAnswerFeedback = vi.fn(baseRepository.saveAnswerFeedback);
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: {
+        ...baseRepository,
+        saveAnswerFeedback,
+      },
+    });
+
+    await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_revision_overflow_001",
+      sourceResultPublicId: "ai_generation_result_revision_overflow_001",
+      sourceTaskPublicId: "ai_generation_task_revision_overflow_001",
+      ownerType: "personal",
+      ownerPublicId: "student_revision_overflow_001",
+      actorPublicId: "student_revision_overflow_001",
+      questionDraftSnapshot: createSevenTypeQuestionSnapshot(),
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+      createdAt: new Date("2026-07-24T07:00:00.000Z"),
+    });
+
+    const feedback = await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_revision_overflow_001",
+      sessionQuestionPublicId: "ai_learning_session_revision_overflow_001_q_1",
+      actorPublicId: "student_revision_overflow_001",
+      expectedAnswerRevision: 2_147_483_647,
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-24T07:05:00.000Z"),
+    });
+
+    expect(feedback).toMatchObject({
+      status: "blocked",
+      blockReason: "answer_revision_conflict",
+      answerRevision: null,
+    });
+    expect(feedback).not.toHaveProperty("answerCommandDigest");
+    expect(saveAnswerFeedback).not.toHaveBeenCalled();
+  });
+
   it("rejects blank or oversized subjective answers before persistence and restores one bounded answer", async () => {
     const persistedAnswerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[] =
       [];
     const baseRepository = createInMemoryRepository();
     const repository: PersonalAiGenerationLearningSessionRepository = {
       ...baseRepository,
-      async saveAnswerFeedback(answerFeedback) {
+      async saveAnswerFeedback(input) {
+        const { answerFeedback } = input;
         persistedAnswerFeedbacks.push(answerFeedback);
-        await baseRepository.saveAnswerFeedback(answerFeedback);
+        await baseRepository.saveAnswerFeedback(input);
+
+        return {
+          status: "saved",
+          blockReason: null,
+          answerFeedback,
+        };
       },
     };
     const service = createPersonalAiGenerationLearningSessionService({
@@ -537,6 +653,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_subjective_boundary",
       sessionQuestionPublicId: "ai_learning_session_subjective_boundary_q_5",
       actorPublicId: "student_subjective_boundary",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: [],
       textAnswer: "   \n  ",
       submittedAt: new Date("2026-07-23T10:01:00.000Z"),
@@ -545,6 +662,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_subjective_boundary",
       sessionQuestionPublicId: "ai_learning_session_subjective_boundary_q_5",
       actorPublicId: "student_subjective_boundary",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: [],
       textAnswer: "x".repeat(4_001),
       submittedAt: new Date("2026-07-23T10:02:00.000Z"),
@@ -571,6 +689,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_subjective_boundary",
       sessionQuestionPublicId: "ai_learning_session_subjective_boundary_q_5",
       actorPublicId: "student_subjective_boundary",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: [],
       textAnswer: "  synthetic bounded learner answer  ",
       submittedAt: new Date("2026-07-23T10:04:00.000Z"),
@@ -751,6 +870,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_paper_learning_session_public_001",
       sessionQuestionPublicId: "ai_paper_learning_session_public_001_q_1",
       actorPublicId: "employee_public_paper_001",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: ["A"],
       textAnswer: null,
       submittedAt: new Date("2026-07-06T12:01:00.000Z"),
@@ -919,7 +1039,13 @@ describe("personal AI generation learning session service", () => {
           createdAt: "2026-07-05T12:00:00.000Z",
         };
       },
-      async saveAnswerFeedback() {},
+      async saveAnswerFeedback() {
+        return {
+          status: "blocked",
+          blockReason: "answer_history_unavailable",
+          answerFeedback: null,
+        };
+      },
       async listAnswerFeedbackBySessionPublicId() {
         return [];
       },
@@ -978,6 +1104,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_public_002",
       sessionQuestionPublicId: "ai_learning_session_public_002_q_1",
       actorPublicId: "employee_public_001",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: ["A"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:01:00.000Z"),
@@ -986,6 +1113,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_public_002",
       sessionQuestionPublicId: "ai_learning_session_public_002_q_2",
       actorPublicId: "employee_public_001",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: ["A"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:02:00.000Z"),
@@ -1043,6 +1171,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_public_progress_001",
       sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_1",
       actorPublicId: "student_public_progress_001",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: ["A"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:01:00.000Z"),
@@ -1051,6 +1180,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_public_progress_001",
       sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
       actorPublicId: "student_public_progress_001",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: ["A"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:02:00.000Z"),
@@ -1059,6 +1189,7 @@ describe("personal AI generation learning session service", () => {
       sessionPublicId: "ai_learning_session_public_progress_001",
       sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
       actorPublicId: "student_public_progress_001",
+      expectedAnswerRevision: 1,
       selectedOptionLabels: ["FALSE"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:03:00.000Z"),
@@ -1138,6 +1269,7 @@ describe("personal AI generation learning session service", () => {
       sessionQuestionPublicId:
         "ai_learning_session_public_org_progress_001_q_1",
       actorPublicId: "employee_public_progress_001",
+      expectedAnswerRevision: 0,
       selectedOptionLabels: ["B"],
       textAnswer: null,
       submittedAt: new Date("2026-07-05T12:01:00.000Z"),

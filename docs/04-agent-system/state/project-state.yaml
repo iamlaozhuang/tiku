@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
+  currentTaskId: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -583,7 +583,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     - p1-remediation-rc-08-residual-jit-review-2026-07-23
     - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
+    - p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
   completedTaskIds:
+    - p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
     - p1-remediation-rc-08-residual-jit-review-2026-07-23
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
@@ -782,7 +784,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23: closed
     p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: closed
     p1-remediation-rc-08-residual-jit-review-2026-07-23: closed
-    p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23: in_progress
+    p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23: closed
+    p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -808,6 +811,12 @@ p1RemediationSerialProgram:
     p1-remediation-rc-04-organization-portal-employee-roster-2026-07-21: closed
     p1-remediation-rc-04-organization-analytics-database-pagination-2026-07-21: in_progress
   closeoutCheckpoints:
+    p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
     p1-remediation-rc-08-practice-answer-atomic-command-2026-07-23:
       taskCommit: pass
       masterMerge: pass
@@ -983,74 +992,70 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
-  title: Personal AI paper result immutable question snapshot
-  phase: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
+  id: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
+  title: Personal AI learning answer revision CAS
+  phase: p1-remediation-rc-08-personal-ai-learning-answer-cas-2026-07-24
   status: in_progress
   priority: p1
-  taskKind: schema_migration_source_and_database_application_logic
-  productClosureContribution: closes_F0162_result_to_first_learning_session_mutable_source_drift
-  branch: fix/personal-ai-paper-result-question-snapshot
+  taskKind: schema_migration_source_database_application_logic_and_api_ui_concurrency_contract
+  productClosureContribution: closes_remaining_F0163_answer_write_stale_overwrite_and_local_loser_response
+  branch: fix/personal-ai-learning-answer-cas
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0162
+    - F-0163
   candidateRootCauseCluster: P1-RC-08
-  objective: persist one strict private versioned paper-question snapshot from the exact server-owned source facts used by AI paper selection and create the first learning session only from that immutable result snapshot
+  objective: replace unconditional personal AI learning answer upserts with one authoritative revision-and-command-digest CAS contract that returns persisted facts, rejects stale devices and preserves exact response-loss replay
   executionStage: implemented_verified_static_pending_final_tree_binding
   findingStatus: implemented_verified_static_pending_final_tree_binding
-  findingDisposition: F0162_is_reachable_and_selected_independently; F0163_answer_CAS_and_F0164_lifecycle_history_statistics_remain_separate_pending_residuals; F0013_remains_runtime_hold
+  findingDisposition: F0163_answer_revision_CAS_authoritative_response_replay_and_UI_conflict_recovery_verified_static; F0164_lifecycle_history_statistics_remains_separate_pending; F0013_remains_runtime_hold
   riskBoundary:
-    category: schema_migration_source_and_database_application_logic
+    category: schema_migration_source_database_application_logic_and_api_ui_concurrency_contract
     approvalStatus: approved
-    approvalId: guardian-f0162-personal-ai-paper-result-question-snapshot-2026-07-23
-    requestFingerprint: f088a8915cd04f9c7554b87f74cded05253c0394b3e8e32bc3d5befd0f2c3ac2
-    requestedBaseSha: 2fa26362377f3099f6d794deacb64be73b220530
-    allowedFiles: 43
-    coreFiles: 33
+    approvalId: guardian-f0163-personal-ai-learning-answer-cas-2026-07-24
+    requestFingerprint: 7a02cd5404f79b7ce9d7e988760842dd3f4984251ac4fdd5283d5fcfb6405e4e
+    requestedBaseSha: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
+    allowedFiles: 31
+    coreFiles: 21
     contingencyFiles: 10
-    schemaMigrationSourceChange: additive_legacy_nullable_only
+    schemaMigrationSourceChange: additive_legacy_nullable_revision_and_command_digest_only
     migrationApplyOrRealDatabase: false
     permissionOrEntitlementChange: false
     providerOrExternalCall: false
     dependencyOrMechanismChange: false
     conditionalCloseout: true
+  finalTreeReview:
+    decision: correction_required
+    status: correction_applied_verified_pending_new_binding
+    rejectedCandidateTree: 367881a722039c3ff57bc814412793cb0a8adac2
+    rejectedRawCachedDiffSha256: fe686c8fa8d14cb63c994131febe505ab8d3915a5b6b1fb52dcc21bc120074eb
+    tokensIssued: false
+    correction: fixed_order_formal_write_boundary_projection_shared_by_digest_and_full_fact_replay
+  validationEvidence:
+    focused: pass_10_files_185_tests
+    lint: pass_exit_0_with_3_unrelated_existing_warnings
+    typecheck: pass
+    build: pass_100_pages
+    formatDiffStateSchema: pass
+    adversarialReview: pass_fixed_order_nested_canonical_facts_JSONB_reordered_replay_boundary_value_drift_fail_closed_strict_partial_null_database_check_revision_CAS_monotonic_snapshot_time_authorization_before_feedback_UI_conflict_refresh
+    proofBoundary: no_migration_apply_real_database_data_or_browser_runtime_proof
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-residual-jit-review-2026-07-23
-    commit: 2fa26362377f3099f6d794deacb64be73b220530
-    parent: 76345102fee8a42ea67ea63427f0ce188192009a
-    tree: 5d9670141b1521fe74d4b3e1e4e376250d994642
-    changedFileCount: 3
-    status: closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned
+    taskId: p1-remediation-rc-08-personal-ai-paper-result-question-snapshot-2026-07-23
+    findingId: F-0162
+    commit: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
+    parent: 2fa26362377f3099f6d794deacb64be73b220530
+    tree: 065fd18e308357a4166f56d2dd3e5b6d11697c0b
+    changedFileCount: 29
+    status: closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned
     closeoutKernel: pass
     prePushKernel: pass
     masterOriginSync: pass
     shortBranchCleanup: pass
-  verificationEvidence:
-    tddRed: pass_initial_missing_private_snapshot_contract_then_correction_expected_3_failures_for_1000_candidates_content_digest_replay_and_identical_duplicate_source
-    focused: pass_15_files_237_tests
-    lint: pass_0_errors_3_unrelated_baseline_warnings
-    typecheck: pass
-    build: pass_with_existing_turbopack_trace_warning
-    format: pass
-    diffCheck: pass
-    stateSchemaSource: pass
-    migrationStatementWhitelist: pass_exact_3_add_columns_and_2_add_constraints_no_data_or_destructive_sql
-    sourceScan: pass_no_first_session_current_question_or_training_repository_reread_and_no_private_network_projection
-    mainThreadAdversarialReview: passed_atomic_snapshot_result_log_task_boundary_owner_authorization_before_private_read_exact_replay_including_paper_content_digest_legacy_fail_closed_1000_candidate_subset_and_duplicate_source_rejection
-  correctionDecision:
-    decision: correction_required
-    rejectedCandidateTree: 841825f068c9a1ad6fce2c899b32ae81dfdeb315
-    rejectedRawCachedDiffSha256: 691f0aa7b09edb2998dfaf8fd7f87dc2c456c8763887f07c1a7e218c14a87e25
-    tokensIssued: false
-    corrections:
-      - accept_the_authoritative_1000_candidate_collection_while_snapshotting_only_the_bounded_selected_subset
-      - bind_ai_paper_generation_replay_to_the_persisted_content_digest_without_changing_ai_question_generation_replay_semantics
-      - reject_every_duplicate_platform_source_public_id_including_byte_identical_rows
+    proofBoundary: no_migration_apply_real_database_data_or_browser_runtime_proof
   jitRevalidation:
     F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
-    F-0162: reachable_selected_as_only_current_WIP
-    F-0163: reachable_separate_answer_write_CAS_and_monotonicity_residual
-    F-0164: reachable_separate_session_lifecycle_history_and_statistics_residual_after_prerequisites
+    F-0162: closed_static_product_at_8a7af98590d6b05fde4c31a22cf44ea61ac99513
+    F-0163: reachable_answer_write_CAS_and_monotonicity_residual_selected_as_only_current_WIP
+    F-0164: reachable_separate_session_lifecycle_history_and_statistics_residual_after_F0163
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active
@@ -1060,9 +1065,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: 2fa26362377f3099f6d794deacb64be73b220530
-  lastKnownOriginMasterSha: 2fa26362377f3099f6d794deacb64be73b220530
-  lastKnownRemoteMasterSha: 2fa26362377f3099f6d794deacb64be73b220530
+  lastKnownMasterSha: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
+  lastKnownOriginMasterSha: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
+  lastKnownRemoteMasterSha: 8a7af98590d6b05fde4c31a22cf44ea61ac99513
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass
