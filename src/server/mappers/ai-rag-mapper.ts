@@ -10,8 +10,10 @@ import type {
   KnowledgeNodeRow,
   ResourceRow,
 } from "../models/ai-rag";
+import { normalizeAiCallObservation } from "../services/ai-call-observation";
 
 export function mapAiCallLogToApi(aiCallLog: AiCallLogRow): AiCallLogDto {
+  const observation = mapAiCallLogObservation(aiCallLog);
   return {
     publicId: aiCallLog.public_id,
     userPublicId: aiCallLog.user_public_id,
@@ -27,6 +29,10 @@ export function mapAiCallLogToApi(aiCallLog: AiCallLogRow): AiCallLogDto {
     responseRedactedSnapshot: aiCallLog.response_redacted_snapshot,
     errorRedactedSnapshot: aiCallLog.error_redacted_snapshot,
     citationRedactedSnapshot: aiCallLog.citation_redacted_snapshot,
+    observationSchemaVersion: observation.observationSchemaVersion,
+    tokenCountSource: observation.tokenCountSource,
+    tokenEstimationMethod: observation.tokenEstimationMethod,
+    latencySource: observation.latencySource,
     promptTokenCount: aiCallLog.prompt_token_count,
     completionTokenCount: aiCallLog.completion_token_count,
     totalTokenCount: aiCallLog.total_token_count,
@@ -34,6 +40,48 @@ export function mapAiCallLogToApi(aiCallLog: AiCallLogRow): AiCallLogDto {
     startedAt: aiCallLog.started_at.toISOString(),
     completedAt: aiCallLog.completed_at?.toISOString() ?? null,
     createdAt: aiCallLog.created_at.toISOString(),
+  };
+}
+
+function mapAiCallLogObservation(
+  aiCallLog: AiCallLogRow,
+): Pick<
+  AiCallLogDto,
+  | "observationSchemaVersion"
+  | "tokenCountSource"
+  | "tokenEstimationMethod"
+  | "latencySource"
+> {
+  const markerValues = [
+    aiCallLog.observation_schema_version,
+    aiCallLog.token_count_source,
+    aiCallLog.token_estimation_method,
+    aiCallLog.latency_source,
+  ];
+  if (markerValues.every((value) => value === null)) {
+    return {
+      observationSchemaVersion: null,
+      tokenCountSource: "legacy",
+      tokenEstimationMethod: null,
+      latencySource: "legacy",
+    };
+  }
+
+  const observation = normalizeAiCallObservation({
+    schemaVersion: aiCallLog.observation_schema_version,
+    tokenSource: aiCallLog.token_count_source,
+    tokenEstimationMethod: aiCallLog.token_estimation_method,
+    promptTokenCount: aiCallLog.prompt_token_count,
+    completionTokenCount: aiCallLog.completion_token_count,
+    totalTokenCount: aiCallLog.total_token_count,
+    latencySource: aiCallLog.latency_source,
+    latencyMs: aiCallLog.latency_ms,
+  });
+  return {
+    observationSchemaVersion: observation.schemaVersion,
+    tokenCountSource: observation.tokenSource,
+    tokenEstimationMethod: observation.tokenEstimationMethod,
+    latencySource: observation.latencySource,
   };
 }
 

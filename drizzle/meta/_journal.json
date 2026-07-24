@@ -400,6 +400,13 @@
       "when": 1784838364764,
       "tag": "20260723043000_p1_rc_08_learning_suggestion_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1784841900313,
+      "tag": "20260723053000_p1_rc_08_ai_call_observation_provenance",
+      "breakpoints": true
     }
   ]
 }

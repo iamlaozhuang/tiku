@@ -35,6 +35,7 @@ import {
   normalizeModelProviderInput,
 } from "../validators/ai-rag";
 import { attachModelConfigRuntimeAlignment } from "./model-config-runtime";
+import { createUnavailableAiCallObservation } from "./ai-call-observation";
 import {
   runModelConfigConnectionTest,
   type ModelConfigConnectionTestExecutor,
@@ -627,6 +628,10 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
       promptTemplateVersion,
     });
 
+    const observation = createUnavailableAiCallObservation({
+      latencyMs: input.connectionTest.durationMs,
+    });
+
     await repositories.appendAiCallLog({
       userPublicId: null,
       answerRecordPublicId: null,
@@ -669,6 +674,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
       completionTokenCount: null,
       totalTokenCount: null,
       latencyMs: input.connectionTest.durationMs,
+      observation,
       startedAt: input.testedAt,
       completedAt: input.testedAt,
     });

@@ -108,12 +108,26 @@ describe("phase 12 local mock model config runtime", () => {
             completionTokenCount: 1,
             totalTokenCount: 2,
             latencyMs: 3,
+            observation: {
+              schemaVersion: 1,
+              tokenSource: "estimated",
+              tokenEstimationMethod:
+                "canonical_json_unicode_code_point_ceiling_v1",
+              promptTokenCount: 1,
+              completionTokenCount: 1,
+              totalTokenCount: 2,
+              latencySource: "client_observed",
+              latencyMs: 3,
+            },
           };
         },
       },
       aiCallLogRepository: {
         async appendAiCallLog(input) {
           appendedInputs.push(input);
+          if (input.observation === undefined) {
+            throw new Error("Current observation is required.");
+          }
 
           return {
             publicId: "ai-call-log-public-local-mock",
@@ -132,6 +146,10 @@ describe("phase 12 local mock model config runtime", () => {
             totalTokenCount: input.totalTokenCount,
             estimatedCostCny: "0.00",
             latencyMs: input.latencyMs,
+            observationSchemaVersion: input.observation.schemaVersion,
+            tokenCountSource: input.observation.tokenSource,
+            tokenEstimationMethod: input.observation.tokenEstimationMethod,
+            latencySource: input.observation.latencySource,
             startedAt: input.startedAt.toISOString(),
             completedAt: input.completedAt?.toISOString() ?? null,
           };

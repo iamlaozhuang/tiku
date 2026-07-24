@@ -24,6 +24,13 @@ import {
   type AiScoringQuestionContext,
   type AiScoringQuestionContextScope,
 } from "./ai-scoring-question-context";
+import {
+  createSuccessfulAiCallObservation,
+  createUnavailableAiCallObservation,
+  measureClientObservedLatency,
+  normalizeProviderTokenUsageAtAdapterEdge,
+  type AiCallObservation,
+} from "./ai-call-observation";
 
 export type AiScoringStatus =
   | "scored"
@@ -55,6 +62,8 @@ export type AiScoringRunnerResult = {
   improvementSuggestion: string | null;
   providerRequestPayload: unknown;
   providerResponsePayload: unknown;
+  providerUsage?: unknown;
+  providerLatencyMs?: unknown;
 };
 
 export type AiScoringRunner = (
@@ -81,6 +90,9 @@ export type AiScoringCallLogDraft = {
   responseRedactedSnapshot: RedactedJsonObject | null;
   errorRedactedSnapshot: RedactedJsonObject | null;
   citationRedactedSnapshot: RedactedJsonObject | null;
+  observation: AiCallObservation;
+  startedAt: Date;
+  completedAt: Date;
 };
 
 export type AiScoringAttemptDraft = {
@@ -139,6 +151,8 @@ export type AiScoringService = {
 
 export type AiScoringServiceDependencies = {
   runner: AiScoringRunner;
+  now?: () => Date;
+  monotonicNow?: () => number;
 };
 
 const scoringMaxRetryCount = 3;
@@ -179,6 +193,9 @@ function createAiCallLogDraft(input: {
   providerResponsePayload: unknown;
   providerErrorPayload: unknown;
   citations: RagCitationDto[];
+  observation: AiCallObservation;
+  startedAt: Date;
+  completedAt: Date;
 }): AiScoringCallLogDraft {
   const redactedSnapshots = createAiCallLogRedactedSnapshots({
     prompt: createPromptSnapshot(input.context),
@@ -244,6 +261,9 @@ function createAiCallLogDraft(input: {
       citations: redactedSnapshots.citations,
       evidenceSummary: input.context.ragRetrievalResult.evidenceSummary,
     },
+    observation: input.observation,
+    startedAt: input.startedAt,
+    completedAt: input.completedAt,
   };
 }
 
@@ -354,6 +374,9 @@ function canAttemptScoring(retryCount: number): boolean {
 export function createAiScoringService(
   dependencies: AiScoringServiceDependencies,
 ): AiScoringService {
+  const now = dependencies.now ?? (() => new Date());
+  const monotonicNow = dependencies.monotonicNow ?? (() => performance.now());
+
   return {
     async scoreSubjectiveAnswer(context) {
       if (hasReusableSuccessfulResult(context.existingResult)) {
@@ -400,6 +423,7 @@ export function createAiScoringService(
       }
 
       if (isUnanswered(context.studentAnswer)) {
+        const observedAt = now();
         return createBaseResult(context, {
           scoringStatus: "scored",
           retryCount,
@@ -425,6 +449,9 @@ export function createAiScoringService(
             providerResponsePayload: null,
             providerErrorPayload: null,
             citations: [],
+            observation: createUnavailableAiCallObservation(),
+            startedAt: observedAt,
+            completedAt: observedAt,
           }),
         });
       }
@@ -444,17 +471,21 @@ export function createAiScoringService(
         return createInvalidScoringQuestionContextResult(context, retryCount);
       }
 
+      const runnerInput: AiScoringRunnerInput = {
+        questionContext,
+        questionText: context.questionText,
+        standardAnswer: context.standardAnswer,
+        studentAnswer: context.studentAnswer,
+        scoringPoints: context.scoringPoints,
+        ragRetrievalResult: context.ragRetrievalResult,
+        modelConfigSnapshot: context.modelConfigSnapshot,
+        promptTemplate: context.promptTemplate,
+      };
+      const attemptStartedAt = now();
+      const attemptStartedMonotonicMs = monotonicNow();
+
       try {
-        const runnerResult = await dependencies.runner({
-          questionContext,
-          questionText: context.questionText,
-          standardAnswer: context.standardAnswer,
-          studentAnswer: context.studentAnswer,
-          scoringPoints: context.scoringPoints,
-          ragRetrievalResult: context.ragRetrievalResult,
-          modelConfigSnapshot: context.modelConfigSnapshot,
-          promptTemplate: context.promptTemplate,
-        });
+        const runnerResult = await dependencies.runner(runnerInput);
         const { scoringPoints, totalScore } = normalizeAiScoringPointResults({
           expectedScoringPoints: context.scoringPoints,
           actualScoringPoints: runnerResult.scoringPoints,
@@ -466,6 +497,11 @@ export function createAiScoringService(
           overallComment: runnerResult.overallComment,
           improvementSuggestion: runnerResult.improvementSuggestion,
         };
+        const completedAt = now();
+        const clientLatencyMs = measureClientObservedLatency(
+          attemptStartedMonotonicMs,
+          monotonicNow(),
+        );
 
         return createBaseResult(context, {
           scoringStatus: "scored",
@@ -486,6 +522,17 @@ export function createAiScoringService(
             providerResponsePayload: runnerResult.providerResponsePayload,
             providerErrorPayload: null,
             citations: context.ragRetrievalResult.citations,
+            observation: createSuccessfulAiCallObservation({
+              providerUsage: normalizeProviderTokenUsageAtAdapterEdge(
+                runnerResult.providerUsage,
+              ),
+              providerLatencyMs: runnerResult.providerLatencyMs,
+              clientLatencyMs,
+              serializedProviderRequest: runnerResult.providerRequestPayload,
+              normalizedProviderResponse: resultSnapshot,
+            }),
+            startedAt: attemptStartedAt,
+            completedAt,
           }),
           aiScoringAttemptDraft: createAiScoringAttemptDraft({
             context,
@@ -496,6 +543,11 @@ export function createAiScoringService(
           }),
         });
       } catch (error) {
+        const completedAt = now();
+        const clientLatencyMs = measureClientObservedLatency(
+          attemptStartedMonotonicMs,
+          monotonicNow(),
+        );
         const nextRetryCount = retryCount + 1;
         const failureReason =
           error instanceof AiScoringResultContractError
@@ -528,6 +580,11 @@ export function createAiScoringService(
             providerResponsePayload: null,
             providerErrorPayload,
             citations: [],
+            observation: createUnavailableAiCallObservation({
+              latencyMs: clientLatencyMs,
+            }),
+            startedAt: attemptStartedAt,
+            completedAt,
           }),
         });
       }

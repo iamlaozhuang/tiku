@@ -19,6 +19,7 @@ import type {
   AiGenerationRouteIntegratedGroundingSummary,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { normalizeProviderTokenUsageAtAdapterEdge } from "./ai-call-observation";
 import {
   createAiGenerationSharedTaskStructuredPreviewOptions,
   getAiGenerationSharedTaskSpec,
@@ -130,20 +131,10 @@ export function ensureRouteIntegratedProviderExecutionSummaryRedacted(
 export function summarizeRouteIntegratedProviderUsage(
   usage: unknown,
 ): AiGenerationRouteIntegratedProviderUsageSummary {
-  if (!usage || typeof usage !== "object") {
+  if (usage === null || usage === undefined) {
     return null;
   }
-
-  const numericUsageEntries = Object.entries(usage).filter(
-    ([usageKey, usageValue]) =>
-      /token|tokens|call|calls/i.test(usageKey) &&
-      typeof usageValue === "number" &&
-      Number.isFinite(usageValue),
-  );
-
-  return numericUsageEntries.length > 0
-    ? Object.fromEntries(numericUsageEntries)
-    : null;
+  return normalizeProviderTokenUsageAtAdapterEdge(usage);
 }
 
 export function createRouteIntegratedVisibleGeneratedContent(

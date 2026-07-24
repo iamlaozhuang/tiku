@@ -54,6 +54,10 @@ describe("AI/RAG API mappers", () => {
       response_redacted_snapshot: null,
       error_redacted_snapshot: { message: { redactionStatus: "redacted" } },
       citation_redacted_snapshot: { citations: [] },
+      observation_schema_version: null,
+      token_count_source: null,
+      token_estimation_method: null,
+      latency_source: null,
       prompt_token_count: 100,
       completion_token_count: null,
       total_token_count: null,
@@ -85,6 +89,10 @@ describe("AI/RAG API mappers", () => {
       completionTokenCount: null,
       totalTokenCount: null,
       latencyMs: 1000,
+      observationSchemaVersion: null,
+      tokenCountSource: "legacy",
+      tokenEstimationMethod: null,
+      latencySource: "legacy",
       startedAt: "2026-05-20T08:00:00.000Z",
       completedAt: "2026-05-20T08:00:01.000Z",
       createdAt: "2026-05-20T08:00:00.000Z",
@@ -92,6 +100,8 @@ describe("AI/RAG API mappers", () => {
     expect(dto).not.toHaveProperty("id");
     expect(dto).not.toHaveProperty("modelConfigId");
     expect(dto).not.toHaveProperty("promptTemplateId");
+    expect(dto.tokenCountSource).toBe("legacy");
+    expect(dto.latencySource).toBe("legacy");
   });
 
   it("maps RAG resource and knowledge rows to camelCase DTOs without numeric ids", () => {

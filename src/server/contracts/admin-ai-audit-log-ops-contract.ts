@@ -249,6 +249,18 @@ export type AiCallLogSummaryDto = {
   totalTokenCount: number | null;
   estimatedCostCny: string | null;
   latencyMs: number | null;
+  observationSchemaVersion: 1 | null;
+  tokenCountSource:
+    | "provider_reported"
+    | "estimated"
+    | "unavailable"
+    | "legacy";
+  tokenEstimationMethod: "canonical_json_unicode_code_point_ceiling_v1" | null;
+  latencySource:
+    | "provider_reported"
+    | "client_observed"
+    | "unavailable"
+    | "legacy";
   startedAt: string;
   completedAt: string | null;
 };
@@ -266,8 +278,12 @@ export type AiCallLogCostSummaryDto = {
   callCount: number;
   successCount: number;
   failedCount: number;
-  totalTokenCount: number;
-  estimatedCostCny: string;
+  providerReportedTokenCount: number;
+  providerReportedTokenDerivedCostCny: string | null;
+  estimatedTokenCount: number;
+  estimatedTokenDerivedCostCny: string | null;
+  unavailableObservationCount: number;
+  legacyObservationCount: number;
 };
 
 export type AiCallLogSummaryListDto = {

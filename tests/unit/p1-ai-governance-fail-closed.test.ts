@@ -8,6 +8,7 @@ import {
   type AppendAiCallLogInput,
 } from "@/server/repositories/admin-ai-audit-log-runtime-repository";
 import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
+import { createProviderReportedAiCallObservation } from "@/server/services/ai-call-observation";
 import type { SessionService } from "@/server/services/session-service";
 
 function createDatabase(execute: (query: SQL) => Promise<unknown[]>) {
@@ -57,6 +58,14 @@ function createAppendAiCallLogInput(): AppendAiCallLogInput {
     completionTokenCount: 20,
     totalTokenCount: 30,
     latencyMs: 50,
+    observation: createProviderReportedAiCallObservation({
+      usage: {
+        inputTokenCount: 10,
+        outputTokenCount: 20,
+        totalTokenCount: 30,
+      },
+      latency: { source: "client_observed", latencyMs: 50 },
+    }),
     startedAt: new Date("2026-07-22T00:00:00.000Z"),
     completedAt: new Date("2026-07-22T00:00:00.050Z"),
   };
@@ -113,6 +122,19 @@ function createRuntimeRepositories(
 }
 
 describe("F-0039/F-0104 AI governance fail-closed persistence", () => {
+  it("binds the synthetic append fixture to one exact current observation", () => {
+    expect(createAppendAiCallLogInput().observation).toEqual({
+      schemaVersion: 1,
+      tokenSource: "provider_reported",
+      tokenEstimationMethod: null,
+      promptTokenCount: 10,
+      completionTokenCount: 20,
+      totalTokenCount: 30,
+      latencySource: "client_observed",
+      latencyMs: 50,
+    });
+  });
+
   it.each([
     ["model provider", "listModelProviders", "42P01"],
     ["model config", "listModelConfigs", "42703"],

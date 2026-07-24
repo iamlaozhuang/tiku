@@ -17,7 +17,11 @@ import type {
   PersonalAiGenerationResultTaskType,
 } from "../models/personal-ai-generation-result";
 import type { AiGenerationTaskAttemptIdentity } from "./ai-generation-task-lifecycle-repository";
-import { createRunningAttemptCondition } from "./ai-generation-task-lifecycle-repository";
+import {
+  createCurrentMeasuredAiCallObservationCondition,
+  createRunningAttemptCondition,
+  normalizePersistedCurrentMeasuredAiCallObservation,
+} from "./ai-generation-task-lifecycle-repository";
 import {
   mapPersonalAiGenerationResultRowToDto,
   type PersonalAiGenerationResultPersistenceRow,
@@ -570,9 +574,21 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
           eq(aiCallLog.id, boundAiCallLogId),
           eq(aiCallLog.public_id, input.result.aiCallLogPublicId),
           sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+          createCurrentMeasuredAiCallObservationCondition(),
         ),
       )
-      .returning({ id: aiCallLog.id });
+      .returning({
+        id: aiCallLog.id,
+        observationSchemaVersion: aiCallLog.observation_schema_version,
+        tokenSource: aiCallLog.token_count_source,
+        tokenEstimationMethod: aiCallLog.token_estimation_method,
+        promptTokenCount: aiCallLog.prompt_token_count,
+        completionTokenCount: aiCallLog.completion_token_count,
+        totalTokenCount: aiCallLog.total_token_count,
+        estimatedCostCny: aiCallLog.estimated_cost_cny,
+        latencySource: aiCallLog.latency_source,
+        latencyMs: aiCallLog.latency_ms,
+      });
 
     if (
       finalizedLogs.length !== 1 ||
@@ -582,6 +598,7 @@ export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
         "personal AI generation ai_call_log finalization was lost.",
       );
     }
+    normalizePersistedCurrentMeasuredAiCallObservation(finalizedLogs[0]);
 
     const insertedRows = await transaction
       .insert(personalAiGenerationResult)

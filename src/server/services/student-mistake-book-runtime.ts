@@ -259,11 +259,8 @@ export function createGovernedMistakeBookAiExplanationRuntime(input: {
             promptTokenCount: aiCallLogDraft.promptTokenCount,
             completionTokenCount: aiCallLogDraft.completionTokenCount,
             totalTokenCount: aiCallLogDraft.totalTokenCount,
-            latencyMs: Math.max(
-              1,
-              aiCallLogDraft.completedAt.getTime() -
-                aiCallLogDraft.startedAt.getTime(),
-            ),
+            latencyMs: aiCallLogDraft.observation.latencyMs,
+            observation: aiCallLogDraft.observation,
             startedAt: aiCallLogDraft.startedAt,
             completedAt: aiCallLogDraft.completedAt,
           });

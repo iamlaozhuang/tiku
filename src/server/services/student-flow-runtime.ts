@@ -307,10 +307,6 @@ function createDefaultStudentFlowRagRetrievalRuntime(
   };
 }
 
-function estimateTokenCount(value: string): number {
-  return Math.max(1, Math.ceil(value.length / 4));
-}
-
 export function createDefaultAiScoringRuntime(
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
   ragRetrievalRuntime: StudentFlowRagRetrievalRuntime = createDefaultStudentFlowRagRetrievalRuntime(),
@@ -408,14 +404,14 @@ export function createDefaultAiScoringRuntime(
           errorRedactedSnapshot: result.aiCallLogDraft.errorRedactedSnapshot,
           citationRedactedSnapshot:
             result.aiCallLogDraft.citationRedactedSnapshot,
-          promptTokenCount: estimateTokenCount(context.questionText),
-          completionTokenCount: estimateTokenCount(result.overallComment),
-          totalTokenCount:
-            estimateTokenCount(context.questionText) +
-            estimateTokenCount(result.overallComment),
-          latencyMs: Math.max(1, completedAt.getTime() - startedAt.getTime()),
-          startedAt,
-          completedAt,
+          promptTokenCount: result.aiCallLogDraft.observation.promptTokenCount,
+          completionTokenCount:
+            result.aiCallLogDraft.observation.completionTokenCount,
+          totalTokenCount: result.aiCallLogDraft.observation.totalTokenCount,
+          latencyMs: result.aiCallLogDraft.observation.latencyMs,
+          observation: result.aiCallLogDraft.observation,
+          startedAt: result.aiCallLogDraft.startedAt,
+          completedAt: result.aiCallLogDraft.completedAt,
         });
 
         aiCallLogPublicId = aiCallLog.publicId;

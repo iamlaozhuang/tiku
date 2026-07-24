@@ -31,6 +31,7 @@ import {
   summarizeRouteIntegratedProviderError,
   summarizeRouteIntegratedProviderUsage,
 } from "./route-integrated-provider-execution-service";
+import { measureClientObservedLatency } from "./ai-call-observation";
 import { createRouteIntegratedProviderInstruction } from "./route-integrated-provider-instruction-service";
 
 export type PersonalAiGenerationRouteIntegratedProviderMetadata =
@@ -262,9 +263,13 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
     providerErrorSummary: executionResult.providerErrorSummary,
   };
   const executionSummary = visibleContentCheck.redactionViolationFound
-    ? createBlockedRouteIntegratedProviderExecutionSummary(
-        "redaction_violation",
-      )
+    ? {
+        ...createBlockedRouteIntegratedProviderExecutionSummary(
+          "redaction_violation",
+        ),
+        requestCount: executionResult.requestCount,
+        durationMs: executionResult.durationMs,
+      }
     : ensureRouteIntegratedProviderExecutionSummaryRedacted(
         {
           ...executionResultSummaryFields,
@@ -320,7 +325,8 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
 export async function executeQwenRouteIntegratedProviderRequest(
   input: PersonalAiGenerationRouteIntegratedProviderExecutionInput,
 ): Promise<PersonalAiGenerationRouteIntegratedProviderExecutionResult> {
-  const startedAt = Date.now();
+  const monotonicNow = input.monotonicNow ?? (() => performance.now());
+  let startedAt: number | null = null;
 
   try {
     const { generateText } = await import("ai");
@@ -344,6 +350,7 @@ export async function executeQwenRouteIntegratedProviderRequest(
       input.governanceContext,
       input.groundingContext,
     );
+    startedAt = monotonicNow();
     const result = await generateText({
       model: providerModel,
       system: instructions.systemInstruction,
@@ -352,41 +359,44 @@ export async function executeQwenRouteIntegratedProviderRequest(
       maxRetries: input.limits.maxRetries,
       abortSignal,
     });
+    const usageSummary = summarizeRouteIntegratedProviderUsage(result.usage);
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(result.text, {
+        groundingSummary:
+          input.groundingContext === null ||
+          input.groundingContext === undefined
+            ? undefined
+            : createRouteIntegratedGroundingSummary(input.groundingContext),
+        structuredPreview: createRouteIntegratedStructuredPreviewOptionsForTask(
+          input.requestContext.taskType,
+          {
+            generationParameters:
+              input.requestContext.generationParameters ??
+              input.groundingContext?.generationParameters,
+          },
+        ),
+      });
+    const durationMs = measureClientObservedLatency(startedAt, monotonicNow());
 
     return {
       requestCount: 1,
       resultStatus: "pass",
       failureCategory: null,
-      durationMs: Math.max(0, Date.now() - startedAt),
-      usageSummary: summarizeRouteIntegratedProviderUsage(result.usage),
+      durationMs,
+      usageSummary,
       providerErrorSummary: null,
-      visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
-        result.text,
-        {
-          groundingSummary:
-            input.groundingContext === null ||
-            input.groundingContext === undefined
-              ? undefined
-              : createRouteIntegratedGroundingSummary(input.groundingContext),
-          structuredPreview:
-            createRouteIntegratedStructuredPreviewOptionsForTask(
-              input.requestContext.taskType,
-              {
-                generationParameters:
-                  input.requestContext.generationParameters ??
-                  input.groundingContext?.generationParameters,
-              },
-            ),
-        },
-      ),
+      visibleGeneratedContent,
     };
   } catch (providerError) {
     return {
-      requestCount: 1,
+      requestCount: startedAt === null ? 0 : 1,
       resultStatus: "fail",
       failureCategory:
         resolveRouteIntegratedProviderFailureCategory(providerError),
-      durationMs: Math.max(0, Date.now() - startedAt),
+      durationMs:
+        startedAt === null
+          ? 0
+          : measureClientObservedLatency(startedAt, monotonicNow()),
       usageSummary: null,
       providerErrorSummary:
         summarizeRouteIntegratedProviderError(providerError),

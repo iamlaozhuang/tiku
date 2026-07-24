@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { aiQuestionDraftSchemaVersion } from "@/ai/prompts/templates";
 import type {
   AdminAiGenerationResultPersistenceRepository,
   AdminAiGenerationResultPersistenceResult,
@@ -39,6 +40,58 @@ import {
 import type { AiPaperRoutePlanSelectWiringResult } from "../services/ai-paper-route-plan-select-wiring-service";
 import type { SessionService } from "../services/session-service";
 
+const syntheticQuotaAvailabilityHarness = vi.hoisted(() => ({
+  isEnabled: false,
+  preservedEveryNonQuotaFact: false,
+}));
+
+vi.mock(
+  "../services/ai-generation-task-request-service",
+  async (importOriginal) => {
+    const original =
+      await importOriginal<
+        typeof import("../services/ai-generation-task-request-service")
+      >();
+
+    return {
+      ...original,
+      buildAiGenerationTaskRequestPolicyReadModel(input: unknown) {
+        if (
+          syntheticQuotaAvailabilityHarness.isEnabled &&
+          typeof input === "object" &&
+          input !== null
+        ) {
+          const overriddenInput = { ...input, isQuotaAvailable: true };
+          const originalWithoutQuota = Object.entries(input).filter(
+            ([key]) => key !== "isQuotaAvailable",
+          );
+          const overriddenWithoutQuota = Object.entries(overriddenInput).filter(
+            ([key]) => key !== "isQuotaAvailable",
+          );
+          syntheticQuotaAvailabilityHarness.preservedEveryNonQuotaFact =
+            JSON.stringify(originalWithoutQuota) ===
+            JSON.stringify(overriddenWithoutQuota);
+          return original.buildAiGenerationTaskRequestPolicyReadModel(
+            overriddenInput,
+          );
+        }
+
+        return original.buildAiGenerationTaskRequestPolicyReadModel(input);
+      },
+    };
+  },
+);
+
+afterEach(() => {
+  syntheticQuotaAvailabilityHarness.isEnabled = false;
+  syntheticQuotaAvailabilityHarness.preservedEveryNonQuotaFact = false;
+});
+
+function enableSyntheticQuotaAvailabilityForDownstreamContractTest(): void {
+  expect(syntheticQuotaAvailabilityHarness.isEnabled).toBe(false);
+  syntheticQuotaAvailabilityHarness.isEnabled = true;
+}
+
 const defaultAdminGenerationParameters: AiGenerationRouteIntegratedGenerationParameters =
   {
     profession: "marketing",
@@ -77,10 +130,21 @@ function createStructuredAdminProviderContent(
 ): string {
   if (generationKind === "question") {
     return JSON.stringify({
-      questions: Array.from({ length: 10 }, () => ({
+      schemaVersion: aiQuestionDraftSchemaVersion,
+      kind: "question_set",
+      questions: Array.from({ length: 10 }, (_, index) => ({
         questionType: "single_choice",
         difficulty: "medium",
         knowledgeNodeLabels: ["redacted_knowledge_node"],
+        questionStem: `脱敏题干 ${index + 1}`,
+        questionOptions: [
+          { optionLabel: "A", optionText: `脱敏正确选项 ${index + 1}` },
+          { optionLabel: "B", optionText: `脱敏干扰选项 ${index + 1}` },
+        ],
+        standardAnswer: "A",
+        analysis: `脱敏解析 ${index + 1}`,
+        scoringPoints: [],
+        fillBlankAnswers: [],
       })),
     });
   }
@@ -127,9 +191,9 @@ function createRepositoryTestProviderRuntimeBridgeControl(): AdminAiGenerationRu
         failureCategory: null,
         durationMs: 21,
         usageSummary: {
-          promptTokens: 5,
-          completionTokens: 2,
-          totalTokens: 7,
+          inputTokenCount: 5,
+          outputTokenCount: 2,
+          totalTokenCount: 7,
         },
         providerErrorSummary: null,
         visibleGeneratedContent: {
@@ -678,6 +742,7 @@ describe("admin AI generation task persistence repository", () => {
   });
 
   it("creates a platform-owned pending task input for content admin AI question local contracts", async () => {
+    enableSyntheticQuotaAvailabilityForDownstreamContractTest();
     const localContract = await createAcceptedLocalContract({
       workspace: "content",
       adminRoles: ["content_admin"],
@@ -758,9 +823,13 @@ describe("admin AI generation task persistence repository", () => {
     expect(JSON.stringify(gateway.insertInputs[0])).not.toContain(
       "OMITTED_CLIENT_FIXTURE_C",
     );
+    expect(syntheticQuotaAvailabilityHarness.preservedEveryNonQuotaFact).toBe(
+      true,
+    );
   });
 
   it("creates an organization-owned pending task input for advanced organization admin AI paper local contracts", async () => {
+    enableSyntheticQuotaAvailabilityForDownstreamContractTest();
     const localContract = await createAcceptedLocalContract({
       workspace: "organization",
       adminRoles: ["org_advanced_admin"],
@@ -805,6 +874,7 @@ describe("admin AI generation task persistence repository", () => {
   });
 
   it("persists only safe Provider status metadata for provider-enabled local contracts", async () => {
+    enableSyntheticQuotaAvailabilityForDownstreamContractTest();
     const visibleProviderContent = "后台草稿正文只允许留在响应中";
     const localContract = await createAcceptedLocalContract({
       workspace: "content",
@@ -825,9 +895,9 @@ describe("admin AI generation task persistence repository", () => {
           failureCategory: null,
           durationMs: 42,
           usageSummary: {
-            promptTokens: 9,
-            completionTokens: 14,
-            totalTokens: 23,
+            inputTokenCount: 9,
+            outputTokenCount: 14,
+            totalTokenCount: 23,
           },
           providerErrorSummary: null,
           redactionStatus: "redacted",
@@ -870,6 +940,7 @@ describe("admin AI generation task persistence repository", () => {
   });
 
   it("reuses an existing admin generation task by owner and idempotency key", async () => {
+    enableSyntheticQuotaAvailabilityForDownstreamContractTest();
     const localContract = await createAcceptedLocalContract({
       workspace: "content",
       adminRoles: ["content_admin"],
@@ -942,6 +1013,7 @@ describe("admin AI generation task persistence repository", () => {
   });
 
   it("rejects unsafe local contracts before gateway insertion", async () => {
+    enableSyntheticQuotaAvailabilityForDownstreamContractTest();
     const localContract = await createAcceptedLocalContract({
       workspace: "content",
       adminRoles: ["content_admin"],

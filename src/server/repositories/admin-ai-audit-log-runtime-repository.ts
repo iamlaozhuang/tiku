@@ -37,6 +37,10 @@ import type {
   NormalizedModelProviderInput,
   NormalizedPromptTemplateInput,
 } from "../validators/ai-rag";
+import {
+  normalizeAiCallObservation,
+  type AiCallObservation,
+} from "../services/ai-call-observation";
 
 export type PersistedModelProviderInput = Omit<
   NormalizedModelProviderInput,
@@ -80,6 +84,7 @@ export type AppendAiCallLogInput = {
   completionTokenCount: number | null;
   totalTokenCount: number | null;
   latencyMs: number | null;
+  observation: AiCallObservation;
   startedAt: Date;
   completedAt: Date | null;
 };
@@ -238,6 +243,10 @@ type AiCallLogDatabaseRow = {
   total_token_count: number | null;
   estimated_cost_cny: string | null;
   latency_ms: number | null;
+  observation_schema_version: number | null;
+  token_count_source: string | null;
+  token_estimation_method: string | null;
+  latency_source: string | null;
   started_at: Date | string;
   completed_at: Date | string | null;
 };
@@ -250,8 +259,13 @@ type AiCallLogSummaryDatabaseRow = {
   call_count: number;
   success_count: number;
   failed_count: number;
-  total_token_count: number;
-  estimated_cost_cny: string;
+  provider_reported_token_count: number | string;
+  provider_reported_token_derived_cost_cny: string | null;
+  estimated_token_count: number | string;
+  estimated_token_derived_cost_cny: string | null;
+  unavailable_observation_count: number;
+  legacy_observation_count: number;
+  invalid_observation_count: number;
 };
 
 type CountDatabaseRow = {
@@ -970,10 +984,12 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
     async appendAiCallLog(input) {
       const database = getDatabase();
       const publicId = `ai-call-log-${randomUUID()}`;
+      const observation = normalizeAiCallObservation(input.observation);
+      assertObservationProjectionMatches(input, observation);
       const estimatedCostCny = calculateEstimatedCostCny({
         modelConfigSnapshot: input.modelConfigSnapshot,
-        promptTokenCount: input.promptTokenCount,
-        completionTokenCount: input.completionTokenCount,
+        promptTokenCount: observation.promptTokenCount,
+        completionTokenCount: observation.completionTokenCount,
       });
 
       const insertedRows = await executeSql<{ public_id: string }>(
@@ -1004,6 +1020,10 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               total_token_count,
               estimated_cost_cny,
               latency_ms,
+              observation_schema_version,
+              token_count_source,
+              token_estimation_method,
+              latency_source,
               started_at,
               completed_at,
               created_at
@@ -1028,11 +1048,15 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               ${JSON.stringify(input.responseRedactedSnapshot)}::jsonb,
               ${JSON.stringify(input.errorRedactedSnapshot)}::jsonb,
               ${JSON.stringify(input.citationRedactedSnapshot)}::jsonb,
-              ${input.promptTokenCount},
-              ${input.completionTokenCount},
-              ${input.totalTokenCount},
+              ${observation.promptTokenCount},
+              ${observation.completionTokenCount},
+              ${observation.totalTokenCount},
               ${estimatedCostCny}::numeric,
-              ${input.latencyMs},
+              ${observation.latencyMs},
+              ${observation.schemaVersion},
+              ${observation.tokenSource},
+              ${observation.tokenEstimationMethod},
+              ${observation.latencySource},
               ${input.startedAt.toISOString()},
               ${input.completedAt?.toISOString() ?? null},
               now()
@@ -1055,12 +1079,17 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         insertedRows[0].public_id,
         input,
         estimatedCostCny,
+        observation,
       );
     },
 
     async updateRunningAiCallLogObservation(input) {
       const database = getDatabase();
       const observation = input.observation;
+      const currentObservation = normalizeAiCallObservation(
+        observation.observation,
+      );
+      assertObservationProjectionMatches(observation, currentObservation);
       const updatedRows = await executeSql<{ public_id: string }>(
         database,
         sql`
@@ -1069,11 +1098,19 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             response_redacted_snapshot = ${JSON.stringify(observation.responseRedactedSnapshot)}::jsonb,
             error_redacted_snapshot = ${JSON.stringify(observation.errorRedactedSnapshot)}::jsonb,
             citation_redacted_snapshot = ${JSON.stringify(observation.citationRedactedSnapshot)}::jsonb,
-            prompt_token_count = ${observation.promptTokenCount},
-            completion_token_count = ${observation.completionTokenCount},
-            total_token_count = ${observation.totalTokenCount},
-            estimated_cost_cny = null,
-            latency_ms = ${observation.latencyMs}
+            prompt_token_count = ${currentObservation.promptTokenCount},
+            completion_token_count = ${currentObservation.completionTokenCount},
+            total_token_count = ${currentObservation.totalTokenCount},
+            estimated_cost_cny = ${calculateEstimatedCostCny({
+              modelConfigSnapshot: observation.modelConfigSnapshot,
+              promptTokenCount: currentObservation.promptTokenCount,
+              completionTokenCount: currentObservation.completionTokenCount,
+            })}::numeric,
+            latency_ms = ${currentObservation.latencyMs},
+            observation_schema_version = ${currentObservation.schemaVersion},
+            token_count_source = ${currentObservation.tokenSource},
+            token_estimation_method = ${currentObservation.tokenEstimationMethod},
+            latency_source = ${currentObservation.latencySource}
           where call_log.public_id = ${input.publicId}
             and call_log.call_status = 'running'
             and call_log.completed_at is null
@@ -1224,6 +1261,10 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               total_token_count,
               estimated_cost_cny,
               latency_ms,
+              observation_schema_version,
+              token_count_source,
+              token_estimation_method,
+              latency_source,
               started_at,
               completed_at
             from ai_call_log
@@ -1316,6 +1357,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         bucketType === "month"
           ? sql`date_trunc('month', started_at)`
           : sql`date_trunc('day', started_at)`;
+      const observationIntegrityCondition =
+        createAiCallObservationIntegritySqlCondition();
 
       const rows = await executeSql<AiCallLogSummaryDatabaseRow>(
         database,
@@ -1328,8 +1371,29 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               count(*)::int as call_count,
               count(*) filter (where call_status = 'success')::int as success_count,
               count(*) filter (where call_status = 'failed')::int as failed_count,
-              coalesce(sum(total_token_count), 0)::int as total_token_count,
-              coalesce(sum(estimated_cost_cny), 0)::text as estimated_cost_cny
+              coalesce(sum(total_token_count) filter (where token_count_source = 'provider_reported'), 0)::text as provider_reported_token_count,
+              case
+                when count(*) filter (
+                  where token_count_source = 'provider_reported'
+                    and estimated_cost_cny is null
+                ) > 0 then null
+                else sum(estimated_cost_cny) filter (
+                  where token_count_source = 'provider_reported'
+                )::text
+              end as provider_reported_token_derived_cost_cny,
+              coalesce(sum(total_token_count) filter (where token_count_source = 'estimated'), 0)::text as estimated_token_count,
+              case
+                when count(*) filter (
+                  where token_count_source = 'estimated'
+                    and estimated_cost_cny is null
+                ) > 0 then null
+                else sum(estimated_cost_cny) filter (
+                  where token_count_source = 'estimated'
+                )::text
+              end as estimated_token_derived_cost_cny,
+              count(*) filter (where observation_schema_version = 1 and token_count_source = 'unavailable')::int as unavailable_observation_count,
+              count(*) filter (where observation_schema_version is null)::int as legacy_observation_count,
+              count(*) filter (where (${observationIntegrityCondition}) is not true)::int as invalid_observation_count
             from ai_call_log
             where call_status in ('success', 'failed')
               and ${keywordCondition}
@@ -1377,6 +1441,10 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           `,
       );
 
+      if (rows.some((row) => row.invalid_observation_count !== 0)) {
+        throw new Error("AI call observation summary is invalid.");
+      }
+
       return {
         dailySummaries: rows.map((row) => ({
           bucket: row.bucket,
@@ -1387,13 +1455,69 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           callCount: row.call_count,
           successCount: row.success_count,
           failedCount: row.failed_count,
-          totalTokenCount: row.total_token_count,
-          estimatedCostCny: row.estimated_cost_cny,
+          providerReportedTokenCount: parseSafeAggregateCount(
+            row.provider_reported_token_count,
+          ),
+          providerReportedTokenDerivedCostCny:
+            row.provider_reported_token_derived_cost_cny,
+          estimatedTokenCount: parseSafeAggregateCount(
+            row.estimated_token_count,
+          ),
+          estimatedTokenDerivedCostCny: row.estimated_token_derived_cost_cny,
+          unavailableObservationCount: row.unavailable_observation_count,
+          legacyObservationCount: row.legacy_observation_count,
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
     },
   };
+}
+
+function createAiCallObservationIntegritySqlCondition(): SQL {
+  return sql`(
+    (
+      observation_schema_version is null
+      and token_count_source is null
+      and token_estimation_method is null
+      and latency_source is null
+    )
+    or (
+      observation_schema_version = 1
+      and (
+        (
+          token_count_source = 'unavailable'
+          and token_estimation_method is null
+          and prompt_token_count is null
+          and completion_token_count is null
+          and total_token_count is null
+          and estimated_cost_cny is null
+        )
+        or (
+          token_count_source = 'provider_reported'
+          and token_estimation_method is null
+          and prompt_token_count between 0 and 2147483647
+          and completion_token_count between 0 and 2147483647
+          and total_token_count between 0 and 2147483647
+          and total_token_count = prompt_token_count + completion_token_count
+        )
+        or (
+          token_count_source = 'estimated'
+          and token_estimation_method = 'canonical_json_unicode_code_point_ceiling_v1'
+          and prompt_token_count between 0 and 2147483647
+          and completion_token_count between 0 and 2147483647
+          and total_token_count between 0 and 2147483647
+          and total_token_count = prompt_token_count + completion_token_count
+        )
+      )
+      and (
+        (latency_source = 'unavailable' and latency_ms is null)
+        or (
+          latency_source in ('provider_reported', 'client_observed')
+          and latency_ms between 0 and 2147483647
+        )
+      )
+    )
+  )`;
 }
 
 async function executeSql<TRow extends Record<string, unknown>>(
@@ -1556,6 +1680,7 @@ function mapAppendInputToSummary(
   publicId: string,
   input: AppendAiCallLogInput,
   estimatedCostCny: string | null,
+  observation: AiCallObservation,
 ): AiCallLogSummaryDto {
   return {
     publicId,
@@ -1572,11 +1697,15 @@ function mapAppendInputToSummary(
       input.callStatus === "success"
         ? "redacted learning suggestion snapshot"
         : "redacted provider error snapshot",
-    promptTokenCount: input.promptTokenCount,
-    completionTokenCount: input.completionTokenCount,
-    totalTokenCount: input.totalTokenCount,
+    promptTokenCount: observation.promptTokenCount,
+    completionTokenCount: observation.completionTokenCount,
+    totalTokenCount: observation.totalTokenCount,
     estimatedCostCny,
-    latencyMs: input.latencyMs,
+    latencyMs: observation.latencyMs,
+    observationSchemaVersion: observation.schemaVersion,
+    tokenCountSource: observation.tokenSource,
+    tokenEstimationMethod: observation.tokenEstimationMethod,
+    latencySource: observation.latencySource,
     startedAt: input.startedAt.toISOString(),
     completedAt: input.completedAt?.toISOString() ?? null,
   };
@@ -1584,6 +1713,7 @@ function mapAppendInputToSummary(
 
 function mapAiCallLogRow(row: AiCallLogDatabaseRow): AiCallLogSummaryDto {
   const modelConfigSnapshot = row.model_config_snapshot;
+  const observation = readPersistedAiCallObservation(row);
 
   return {
     publicId: row.public_id,
@@ -1600,14 +1730,113 @@ function mapAiCallLogRow(row: AiCallLogDatabaseRow): AiCallLogSummaryDto {
       row.call_status === "success"
         ? "redacted learning suggestion snapshot"
         : "redacted provider error snapshot",
-    promptTokenCount: row.prompt_token_count,
-    completionTokenCount: row.completion_token_count,
-    totalTokenCount: row.total_token_count,
+    promptTokenCount: observation.promptTokenCount,
+    completionTokenCount: observation.completionTokenCount,
+    totalTokenCount: observation.totalTokenCount,
     estimatedCostCny: row.estimated_cost_cny,
-    latencyMs: row.latency_ms,
+    latencyMs: observation.latencyMs,
+    observationSchemaVersion: observation.observationSchemaVersion,
+    tokenCountSource: observation.tokenCountSource,
+    tokenEstimationMethod: observation.tokenEstimationMethod,
+    latencySource: observation.latencySource,
     startedAt: toIsoString(row.started_at),
     completedAt:
       row.completed_at === null ? null : toIsoString(row.completed_at),
+  };
+}
+
+function parseSafeAggregateCount(value: number | string): number {
+  const normalized = typeof value === "number" ? value : Number(value);
+  if (
+    !Number.isSafeInteger(normalized) ||
+    normalized < 0 ||
+    (typeof value === "string" && !/^(0|[1-9]\d*)$/u.test(value))
+  ) {
+    throw new Error("AI call aggregate count is invalid.");
+  }
+
+  return normalized;
+}
+
+function assertObservationProjectionMatches(
+  projection: Pick<
+    AppendAiCallLogInput,
+    | "promptTokenCount"
+    | "completionTokenCount"
+    | "totalTokenCount"
+    | "latencyMs"
+  >,
+  observation: AiCallObservation,
+): void {
+  if (
+    projection.promptTokenCount !== observation.promptTokenCount ||
+    projection.completionTokenCount !== observation.completionTokenCount ||
+    projection.totalTokenCount !== observation.totalTokenCount ||
+    projection.latencyMs !== observation.latencyMs
+  ) {
+    throw new Error("AI call observation projection is inconsistent.");
+  }
+}
+
+function readPersistedAiCallObservation(row: AiCallLogDatabaseRow): {
+  observationSchemaVersion: 1 | null;
+  tokenCountSource: AiCallLogSummaryDto["tokenCountSource"];
+  tokenEstimationMethod: AiCallLogSummaryDto["tokenEstimationMethod"];
+  latencySource: AiCallLogSummaryDto["latencySource"];
+  promptTokenCount: number | null;
+  completionTokenCount: number | null;
+  totalTokenCount: number | null;
+  latencyMs: number | null;
+} {
+  if (
+    row.observation_schema_version === null &&
+    row.token_count_source === null &&
+    row.token_estimation_method === null &&
+    row.latency_source === null
+  ) {
+    return {
+      observationSchemaVersion: null,
+      tokenCountSource: "legacy",
+      tokenEstimationMethod: null,
+      latencySource: "legacy",
+      promptTokenCount: row.prompt_token_count,
+      completionTokenCount: row.completion_token_count,
+      totalTokenCount: row.total_token_count,
+      latencyMs: null,
+    };
+  }
+
+  const observation = normalizeAiCallObservation({
+    schemaVersion: row.observation_schema_version,
+    tokenSource: row.token_count_source,
+    tokenEstimationMethod: row.token_estimation_method,
+    promptTokenCount: row.prompt_token_count,
+    completionTokenCount: row.completion_token_count,
+    totalTokenCount: row.total_token_count,
+    latencySource: row.latency_source,
+    latencyMs: row.latency_ms,
+  });
+  if (
+    observation.tokenSource === "unavailable" &&
+    row.estimated_cost_cny !== null
+  ) {
+    throw new Error("Unavailable AI call observation cannot carry cost.");
+  }
+  if (
+    row.estimated_cost_cny !== null &&
+    !/^(0|[1-9]\d{0,11})(?:\.\d{1,6})?$/u.test(row.estimated_cost_cny)
+  ) {
+    throw new Error("AI call token-derived cost is invalid.");
+  }
+  return {
+    observationSchemaVersion: observation.schemaVersion,
+    tokenCountSource: observation.tokenSource,
+    tokenEstimationMethod: observation.tokenEstimationMethod,
+    latencySource: observation.latencySource,
+    promptTokenCount: observation.promptTokenCount,
+    completionTokenCount: observation.completionTokenCount,
+    totalTokenCount: observation.totalTokenCount,
+    latencyMs: observation.latencyMs,
   };
 }
 

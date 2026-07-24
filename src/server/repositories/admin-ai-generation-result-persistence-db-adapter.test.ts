@@ -111,6 +111,36 @@ function protectedAiTerms(): string[] {
   ];
 }
 
+function containsText(value: unknown, text: string, seen = new Set()): boolean {
+  if (typeof value === "string") {
+    return value.includes(text);
+  }
+  if (typeof value !== "object" || value === null || seen.has(value)) {
+    return false;
+  }
+  seen.add(value);
+  return Object.values(value).some((item) => containsText(item, text, seen));
+}
+
+function createMeasuredAiCallLogRow(
+  id: number,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    id,
+    observationSchemaVersion: 1,
+    tokenSource: "provider_reported",
+    tokenEstimationMethod: null,
+    promptTokenCount: 10,
+    completionTokenCount: 20,
+    totalTokenCount: 30,
+    estimatedCostCny: "0.001000",
+    latencySource: "client_observed",
+    latencyMs: 50,
+    ...overrides,
+  };
+}
+
 describe("admin AI generation result persistence DB adapter", () => {
   it("rolls back the inserted result when the exact running attempt loses the success CAS", async () => {
     const input = createDraftResultInput();
@@ -145,7 +175,8 @@ describe("admin AI generation result persistence DB adapter", () => {
           set: () => ({
             where: () => ({
               returning: async () => {
-                if (updateCallCount === 1) return [{ id: 801 }];
+                if (updateCallCount === 1)
+                  return [createMeasuredAiCallLogRow(801)];
                 if (updateCallCount === 2)
                   return [
                     {
@@ -182,6 +213,7 @@ describe("admin AI generation result persistence DB adapter", () => {
       ...createAdminAiGenerationResultInsertValue(input),
     };
     const updateValues: unknown[] = [];
+    const updateConditions: unknown[] = [];
     const insertValues: unknown[] = [];
     let updateCallCount = 0;
     const transactionDatabase = {
@@ -213,23 +245,27 @@ describe("admin AI generation result persistence DB adapter", () => {
           set: (values: unknown) => {
             updateValues.push(values);
             return {
-              where: () => ({
-                returning: async () => {
-                  if (updateCallCount === 1) return [{ id: 801 }];
-                  if (updateCallCount === 2)
-                    return [
-                      {
-                        ...insertedRow,
-                        current_review_draft_public_id:
-                          "admin_ai_review_draft_initial_success_test",
-                        current_review_draft_revision: 0,
-                        current_review_draft_digest:
-                          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                      },
-                    ];
-                  return [{ public_id: input.taskPublicId }];
-                },
-              }),
+              where: (condition: unknown) => {
+                updateConditions.push(condition);
+                return {
+                  returning: async () => {
+                    if (updateCallCount === 1)
+                      return [createMeasuredAiCallLogRow(801)];
+                    if (updateCallCount === 2)
+                      return [
+                        {
+                          ...insertedRow,
+                          current_review_draft_public_id:
+                            "admin_ai_review_draft_initial_success_test",
+                          current_review_draft_revision: 0,
+                          current_review_draft_digest:
+                            "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        },
+                      ];
+                    return [{ public_id: input.taskPublicId }];
+                  },
+                };
+              },
             };
           },
         };
@@ -262,6 +298,12 @@ describe("admin AI generation result persistence DB adapter", () => {
       predecessor_digest: null,
       editor_public_id: null,
     });
+    expect(
+      containsText(updateConditions[0], "observation_schema_version"),
+    ).toBe(true);
+    expect(containsText(updateConditions[0], "provider_reported")).toBe(true);
+    expect(containsText(updateConditions[0], "estimated")).toBe(true);
+    expect(containsText(updateConditions[0], "client_observed")).toBe(true);
     expect(result?.ai_call_log_public_id).toBe(input.aiCallLogPublicId);
   });
 
@@ -277,7 +319,12 @@ describe("admin AI generation result persistence DB adapter", () => {
       }),
       update: () => ({
         set: () => ({
-          where: () => ({ returning: async () => [{ id: 801 }, { id: 802 }] }),
+          where: () => ({
+            returning: async () => [
+              createMeasuredAiCallLogRow(801),
+              createMeasuredAiCallLogRow(802),
+            ],
+          }),
         }),
       }),
     };
@@ -293,6 +340,63 @@ describe("admin AI generation result persistence DB adapter", () => {
     ).rejects.toThrow("ai_call_log finalization was lost");
   });
 
+  it("rolls back before result insertion when the finalized log is not current measured provenance", async () => {
+    const input = createDraftResultInput();
+    const invalidObservations = [
+      createMeasuredAiCallLogRow(801, {
+        tokenSource: "unavailable",
+        promptTokenCount: null,
+        completionTokenCount: null,
+        totalTokenCount: null,
+        estimatedCostCny: null,
+      }),
+      createMeasuredAiCallLogRow(801, {
+        observationSchemaVersion: null,
+        tokenSource: null,
+        tokenEstimationMethod: null,
+        latencySource: null,
+      }),
+      createMeasuredAiCallLogRow(801, {
+        tokenSource: null,
+      }),
+      createMeasuredAiCallLogRow(801, {
+        totalTokenCount: 31,
+      }),
+    ];
+
+    for (const invalidObservation of invalidObservations) {
+      const insert = vi.fn();
+      const transactionDatabase = {
+        select: () => ({
+          from: () => ({
+            where: () => ({
+              for: () => ({
+                limit: async () => [{ id: 701, aiCallLogId: 801 }],
+              }),
+            }),
+          }),
+        }),
+        update: () => ({
+          set: () => ({
+            where: () => ({ returning: async () => [invalidObservation] }),
+          }),
+        }),
+        insert,
+      };
+
+      await expect(
+        persistAdminAiGenerationDraftResultAndCompleteTask(
+          {
+            transaction: async (callback: (database: unknown) => unknown) =>
+              callback(transactionDatabase),
+          } as unknown as RuntimeDatabase,
+          input,
+        ),
+      ).rejects.toThrow("AI call observation is invalid.");
+      expect(insert).not.toHaveBeenCalled();
+    }
+  });
+
   it("rolls back the finalized log when result insertion conflicts", async () => {
     const input = createDraftResultInput();
     const transactionDatabase = {
@@ -305,7 +409,9 @@ describe("admin AI generation result persistence DB adapter", () => {
       }),
       update: () => ({
         set: () => ({
-          where: () => ({ returning: async () => [{ id: 801 }] }),
+          where: () => ({
+            returning: async () => [createMeasuredAiCallLogRow(801)],
+          }),
         }),
       }),
       insert: () => ({

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryAiCallLogRepository } from "@/server/repositories/ai-call-log/in-memory-ai-call-log-repository";
+import type { AiCallLogRecord } from "@/server/contracts/ai-call-log/log-governance-contract";
+import { summarizeAiCallLogRecords } from "@/server/mappers/ai-call-log/ai-call-log-mapper";
 import { createInMemoryAuditLogRepository } from "@/server/repositories/audit-log/in-memory-audit-log-repository";
 import {
   createAiCallLogRouteHandlers,
@@ -69,6 +71,53 @@ function createCookieBackedAdminRequest(url: string) {
 }
 
 describe("admin log retention, redaction, and layering repair", () => {
+  it("keeps token-derived cost unavailable when any measured row lacks pricing", () => {
+    const measuredRecord = {
+      aiFuncType: "ai_scoring",
+      callStatus: "success",
+      completedAt: "2026-06-14T10:00:01.000Z",
+      completionTokenCount: 20,
+      estimatedCostCny: "0.010000",
+      evidenceStatus: "sufficient",
+      latencyMs: 10,
+      latencySource: "client_observed",
+      level: 3,
+      modelAlias: "local-model",
+      observationSchemaVersion: 1,
+      organizationPublicId: null,
+      outputSummary: null,
+      profession: "marketing",
+      promptSummary: null,
+      promptTokenCount: 10,
+      providerDisplayName: "Local Mock",
+      publicId: "ai-call-log-public-cost-001",
+      startedAt: "2026-06-14T10:00:00.000Z",
+      tokenCountSource: "provider_reported",
+      tokenEstimationMethod: null,
+      totalTokenCount: 30,
+      userPublicId: "user-public-001",
+    } satisfies AiCallLogRecord;
+
+    expect(
+      summarizeAiCallLogRecords([
+        measuredRecord,
+        {
+          ...measuredRecord,
+          publicId: "ai-call-log-public-cost-002",
+          estimatedCostCny: null,
+        },
+      ]),
+    ).toEqual([
+      expect.objectContaining({
+        providerReportedTokenCount: 60,
+        providerReportedTokenDerivedCostCny: null,
+      }),
+    ]);
+    expect(() =>
+      summarizeAiCallLogRecords([{ ...measuredRecord, totalTokenCount: 31 }]),
+    ).toThrow("AI call observation is invalid.");
+  });
+
   it("returns scoped audit_log list responses with retention governance and redacted DTOs", async () => {
     const repository = createInMemoryAuditLogRepository({
       auditLogs: [
@@ -220,6 +269,7 @@ describe("admin log retention, redaction, and layering repair", () => {
           evidenceStatus: "sufficient",
           internalNumericId: 2001,
           latencyMs: 1000,
+          latencySource: "client_observed",
           level: 3,
           modelAlias: "local-model",
           organizationPublicId: "organization-public-001",
@@ -227,6 +277,9 @@ describe("admin log retention, redaction, and layering repair", () => {
           profession: "marketing",
           promptSummary: "redacted prompt summary",
           promptTokenCount: 10,
+          observationSchemaVersion: 1,
+          tokenCountSource: "provider_reported",
+          tokenEstimationMethod: null,
           providerDisplayName: "Local Mock",
           providerResponse: rawSensitiveMarker,
           publicId: "ai-call-log-public-001",
@@ -317,12 +370,16 @@ describe("admin log retention, redaction, and layering repair", () => {
               sufficient: 1,
               weak: 0,
             },
-            estimatedCostCny: "0.01",
             failedCount: 0,
             modelAlias: "local-model",
             providerDisplayName: "Local Mock",
             successCount: 1,
-            totalTokenCount: 30,
+            providerReportedTokenCount: 30,
+            providerReportedTokenDerivedCostCny: "0.010000",
+            estimatedTokenCount: 0,
+            estimatedTokenDerivedCostCny: null,
+            unavailableObservationCount: 0,
+            legacyObservationCount: 0,
           },
         ],
         governance: createBlockedAiCallLogGovernanceHandoff(),

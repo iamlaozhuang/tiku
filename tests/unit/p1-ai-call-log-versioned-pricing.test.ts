@@ -14,6 +14,7 @@ import {
   type AdminAiAuditLogRuntimeRepositoryOptions,
 } from "@/server/repositories/admin-ai-audit-log-runtime-repository";
 import { normalizeModelConfigInput } from "@/server/validators/ai-rag";
+import { createProviderReportedAiCallObservation } from "@/server/services/ai-call-observation";
 
 type CapturedSql = SQL & { queryChunks?: unknown[] };
 
@@ -274,6 +275,14 @@ describe("F-0038 versioned AI call pricing", () => {
       mockExamPublicId: null,
       modelConfigSnapshot: createPricedSnapshot(),
       organizationPublicId: null,
+      observation: createProviderReportedAiCallObservation({
+        usage: {
+          inputTokenCount: 1_000_000,
+          outputTokenCount: 500_000,
+          totalTokenCount: 1_500_000,
+        },
+        latency: { source: "client_observed", latencyMs: 1_000 },
+      }),
       profession: null,
       promptTemplateKey: "ai-scoring-v2",
       promptTemplateVersion: 2,

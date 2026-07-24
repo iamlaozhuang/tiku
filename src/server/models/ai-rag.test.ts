@@ -72,6 +72,8 @@ describe("AI/RAG domain models", () => {
       "hint",
       "kn_recommendation",
       "learning_suggestion",
+      "ai_question_generation",
+      "ai_paper_generation",
     ]);
   });
 
@@ -257,6 +259,10 @@ describe("AI/RAG domain models", () => {
       },
       error_redacted_snapshot: null,
       citation_redacted_snapshot: { citations: [] },
+      observation_schema_version: null,
+      token_count_source: null,
+      token_estimation_method: null,
+      latency_source: null,
       prompt_token_count: 100,
       completion_token_count: 20,
       total_token_count: 120,
@@ -270,6 +276,10 @@ describe("AI/RAG domain models", () => {
     expect(callLogRow).not.toHaveProperty("publicId");
     expect(callLogRow).not.toHaveProperty("callStatus");
     expect(callLogRow).not.toHaveProperty("modelConfigSnapshot");
+    expect(callLogRow.observation_schema_version).toBeNull();
+    expect(callLogRow.token_count_source).toBeNull();
+    expect(callLogRow.token_estimation_method).toBeNull();
+    expect(callLogRow.latency_source).toBeNull();
   });
 
   it("keeps AI scoring attempt rows in snake_case storage shape", () => {

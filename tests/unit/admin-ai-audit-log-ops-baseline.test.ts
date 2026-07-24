@@ -154,7 +154,12 @@ describe("admin ai and audit log ops baseline", () => {
       aiFuncType: "ai_scoring",
       providerDisplayName: expect.any(String),
       callCount: 12,
-      estimatedCostCny: "3.60",
+      providerReportedTokenCount: 20400,
+      providerReportedTokenDerivedCostCny: "3.60",
+      estimatedTokenCount: 0,
+      estimatedTokenDerivedCostCny: null,
+      unavailableObservationCount: 1,
+      legacyObservationCount: 0,
     });
     expect(connectionTest.data?.connectionTest).toMatchObject({
       modelConfigPublicId: "model-config-public-001",
@@ -345,7 +350,10 @@ describe("admin ai and audit log ops baseline", () => {
       data: {
         dailySummaries: [
           expect.objectContaining({
-            estimatedCostCny: "3.60",
+            providerReportedTokenDerivedCostCny: "3.60",
+            estimatedTokenDerivedCostCny: null,
+            unavailableObservationCount: 1,
+            legacyObservationCount: 0,
           }),
         ],
       },

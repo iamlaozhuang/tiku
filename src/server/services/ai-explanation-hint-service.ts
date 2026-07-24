@@ -10,6 +10,13 @@ import {
   type RedactedJsonObject,
 } from "../models/ai-rag";
 import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
+import {
+  createSuccessfulAiCallObservation,
+  createUnavailableAiCallObservation,
+  measureClientObservedLatency,
+  normalizeProviderTokenUsageAtAdapterEdge,
+  type AiCallObservation,
+} from "./ai-call-observation";
 
 export type AiExplanationStatus = "explained" | "explanation_unavailable";
 
@@ -35,6 +42,8 @@ export type AiExplanationRunnerResult = {
   learningSuggestion: string | null;
   providerRequestPayload: unknown;
   providerResponsePayload: unknown;
+  providerUsage?: unknown;
+  providerLatencyMs?: unknown;
 };
 
 export type AiHintRunnerResult = {
@@ -42,6 +51,8 @@ export type AiHintRunnerResult = {
   improvementDirections: string[];
   providerRequestPayload: unknown;
   providerResponsePayload: unknown;
+  providerUsage?: unknown;
+  providerLatencyMs?: unknown;
 };
 
 export type AiExplanationRunnerInput = {
@@ -102,9 +113,10 @@ export type AiExplanationCallLogDraft = {
   citationRedactedSnapshot: RedactedJsonObject | null;
   startedAt: Date;
   completedAt: Date;
-  promptTokenCount: number;
-  completionTokenCount: number;
-  totalTokenCount: number;
+  promptTokenCount: number | null;
+  completionTokenCount: number | null;
+  totalTokenCount: number | null;
+  observation: AiCallObservation;
 };
 
 export type AiHintCallLogDraft = AiExplanationCallLogDraft;
@@ -187,6 +199,8 @@ export type AiExplanationHintServiceDependencies = {
   explanationRunner: AiExplanationRunner;
   hintRunner: AiHintRunner;
   onAttemptComplete?: (draft: AiExplanationCallLogDraft) => Promise<void>;
+  now?: () => Date;
+  monotonicNow?: () => number;
 };
 
 const insufficientEvidenceMessage =
@@ -217,10 +231,6 @@ class AiExplanationHintAttemptLogPersistenceError extends Error {
     super("AI explanation or hint attempt log persistence failed.");
     this.name = "AiExplanationHintAttemptLogPersistenceError";
   }
-}
-
-function estimateTokenCount(value: string): number {
-  return Math.max(1, Math.ceil(value.length / 4));
 }
 
 async function persistAttemptLog(
@@ -389,8 +399,7 @@ function createAiCallLogDraft(input: {
   citations: RagCitationDto[];
   startedAt: Date;
   completedAt: Date;
-  promptTokenCount: number;
-  completionTokenCount: number;
+  observation: AiCallObservation;
 }): AiExplanationCallLogDraft {
   const promptSnapshot = createPromptSnapshot({
     promptTemplateKey: input.promptTemplateKey,
@@ -457,15 +466,16 @@ function createAiCallLogDraft(input: {
     },
     startedAt: input.startedAt,
     completedAt: input.completedAt,
-    promptTokenCount: input.promptTokenCount,
-    completionTokenCount: input.completionTokenCount,
-    totalTokenCount: input.promptTokenCount + input.completionTokenCount,
+    promptTokenCount: input.observation.promptTokenCount,
+    completionTokenCount: input.observation.completionTokenCount,
+    totalTokenCount: input.observation.totalTokenCount,
+    observation: input.observation,
   };
 }
 
 function createExplanationRequestContext(
   context: AiExplanationContext,
-): unknown {
+): Record<string, unknown> {
   return {
     questionText: context.questionText,
     standardAnswer: context.standardAnswer,
@@ -477,7 +487,9 @@ function createExplanationRequestContext(
   };
 }
 
-function createHintRequestContext(context: AiHintContext): unknown {
+function createHintRequestContext(
+  context: AiHintContext,
+): Record<string, unknown> {
   return {
     questionText: context.questionText,
     standardAnswer: context.standardAnswer,
@@ -502,6 +514,9 @@ function sanitizeHintText(hintText: string, standardAnswer: string): string {
 export function createAiExplanationHintService(
   dependencies: AiExplanationHintServiceDependencies,
 ): AiExplanationHintService {
+  const now = dependencies.now ?? (() => new Date());
+  const monotonicNow = dependencies.monotonicNow ?? (() => performance.now());
+
   return {
     async generateObjectiveExplanation(context) {
       const citations = getAttachableCitations(context.ragRetrievalResult);
@@ -520,7 +535,9 @@ export function createAiExplanationHintService(
       const aiCallLogDrafts: AiExplanationCallLogDraft[] = [];
 
       for (const [attemptIndex, attempt] of attempts.entries()) {
-        const attemptStartedAt = new Date();
+        const attemptStartedAt = now();
+        const attemptStartedMonotonicMs = monotonicNow();
+        const requestContext = createExplanationRequestContext(context);
 
         try {
           const runnerResult = await dependencies.explanationRunner({
@@ -539,6 +556,11 @@ export function createAiExplanationHintService(
             keyPoints: runnerResult.keyPoints,
             learningSuggestion: runnerResult.learningSuggestion,
           };
+          const completedAt = now();
+          const clientLatencyMs = measureClientObservedLatency(
+            attemptStartedMonotonicMs,
+            monotonicNow(),
+          );
           const successDraft = createAiCallLogDraft({
             modelConfigSnapshot: attempt.modelConfigSnapshot,
             promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
@@ -548,7 +570,7 @@ export function createAiExplanationHintService(
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "success",
             userAnswer: context.learnerAnswer,
-            requestContext: createExplanationRequestContext(context),
+            requestContext,
             modelOutput,
             providerRequestPayload: runnerResult.providerRequestPayload,
             providerResponsePayload: runnerResult.providerResponsePayload,
@@ -556,11 +578,16 @@ export function createAiExplanationHintService(
             ragRetrievalResult: context.ragRetrievalResult,
             citations,
             startedAt: attemptStartedAt,
-            completedAt: new Date(),
-            promptTokenCount: estimateTokenCount(context.learnerAnswer),
-            completionTokenCount: estimateTokenCount(
-              runnerResult.explanationText,
-            ),
+            completedAt,
+            observation: createSuccessfulAiCallObservation({
+              providerUsage: normalizeProviderTokenUsageAtAdapterEdge(
+                runnerResult.providerUsage,
+              ),
+              providerLatencyMs: runnerResult.providerLatencyMs,
+              clientLatencyMs,
+              serializedProviderRequest: runnerResult.providerRequestPayload,
+              normalizedProviderResponse: modelOutput,
+            }),
           });
 
           aiCallLogDrafts.push(successDraft);
@@ -587,6 +614,11 @@ export function createAiExplanationHintService(
             throw error;
           }
 
+          const completedAt = now();
+          const clientLatencyMs = measureClientObservedLatency(
+            attemptStartedMonotonicMs,
+            monotonicNow(),
+          );
           const failedDraft = createAiCallLogDraft({
             modelConfigSnapshot: attempt.modelConfigSnapshot,
             promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
@@ -596,7 +628,7 @@ export function createAiExplanationHintService(
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "failed",
             userAnswer: context.learnerAnswer,
-            requestContext: createExplanationRequestContext(context),
+            requestContext,
             modelOutput: null,
             providerRequestPayload: null,
             providerResponsePayload: null,
@@ -607,9 +639,10 @@ export function createAiExplanationHintService(
             ragRetrievalResult: context.ragRetrievalResult,
             citations: [],
             startedAt: attemptStartedAt,
-            completedAt: new Date(),
-            promptTokenCount: estimateTokenCount(context.learnerAnswer),
-            completionTokenCount: 0,
+            completedAt,
+            observation: createUnavailableAiCallObservation({
+              latencyMs: clientLatencyMs,
+            }),
           });
 
           aiCallLogDrafts.push(failedDraft);
@@ -661,7 +694,9 @@ export function createAiExplanationHintService(
       const aiCallLogDrafts: AiHintCallLogDraft[] = [];
 
       for (const [attemptIndex, attempt] of attempts.entries()) {
-        const attemptStartedAt = new Date();
+        const attemptStartedAt = now();
+        const attemptStartedMonotonicMs = monotonicNow();
+        const requestContext = createHintRequestContext(context);
 
         try {
           const runnerResult = await dependencies.hintRunner({
@@ -680,6 +715,11 @@ export function createAiExplanationHintService(
             hintText,
             improvementDirections: runnerResult.improvementDirections,
           };
+          const completedAt = now();
+          const clientLatencyMs = measureClientObservedLatency(
+            attemptStartedMonotonicMs,
+            monotonicNow(),
+          );
           const successDraft = createAiCallLogDraft({
             modelConfigSnapshot: attempt.modelConfigSnapshot,
             promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
@@ -689,7 +729,7 @@ export function createAiExplanationHintService(
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "success",
             userAnswer: context.studentAnswer,
-            requestContext: createHintRequestContext(context),
+            requestContext,
             modelOutput,
             providerRequestPayload: runnerResult.providerRequestPayload,
             providerResponsePayload: runnerResult.providerResponsePayload,
@@ -697,9 +737,16 @@ export function createAiExplanationHintService(
             ragRetrievalResult: context.ragRetrievalResult,
             citations,
             startedAt: attemptStartedAt,
-            completedAt: new Date(),
-            promptTokenCount: estimateTokenCount(context.studentAnswer),
-            completionTokenCount: estimateTokenCount(hintText),
+            completedAt,
+            observation: createSuccessfulAiCallObservation({
+              providerUsage: normalizeProviderTokenUsageAtAdapterEdge(
+                runnerResult.providerUsage,
+              ),
+              providerLatencyMs: runnerResult.providerLatencyMs,
+              clientLatencyMs,
+              serializedProviderRequest: runnerResult.providerRequestPayload,
+              normalizedProviderResponse: modelOutput,
+            }),
           });
 
           aiCallLogDrafts.push(successDraft);
@@ -725,6 +772,11 @@ export function createAiExplanationHintService(
             throw error;
           }
 
+          const completedAt = now();
+          const clientLatencyMs = measureClientObservedLatency(
+            attemptStartedMonotonicMs,
+            monotonicNow(),
+          );
           const failedDraft = createAiCallLogDraft({
             modelConfigSnapshot: attempt.modelConfigSnapshot,
             promptTemplateKey: attempt.promptTemplate.promptTemplateKey,
@@ -734,7 +786,7 @@ export function createAiExplanationHintService(
             answerRecordPublicId: context.answerRecordPublicId,
             callStatus: "failed",
             userAnswer: context.studentAnswer,
-            requestContext: createHintRequestContext(context),
+            requestContext,
             modelOutput: null,
             providerRequestPayload: null,
             providerResponsePayload: null,
@@ -745,9 +797,10 @@ export function createAiExplanationHintService(
             ragRetrievalResult: context.ragRetrievalResult,
             citations: [],
             startedAt: attemptStartedAt,
-            completedAt: new Date(),
-            promptTokenCount: estimateTokenCount(context.studentAnswer),
-            completionTokenCount: 0,
+            completedAt,
+            observation: createUnavailableAiCallObservation({
+              latencyMs: clientLatencyMs,
+            }),
           });
 
           aiCallLogDrafts.push(failedDraft);

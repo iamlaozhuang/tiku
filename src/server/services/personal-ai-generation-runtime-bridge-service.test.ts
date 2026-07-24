@@ -370,9 +370,9 @@ describe("personal AI generation runtime bridge service", () => {
                 failureCategory: null,
                 durationMs: 44,
                 usageSummary: {
-                  inputTokens: 16,
-                  outputTokens: 22,
-                  totalTokens: 38,
+                  inputTokenCount: 16,
+                  outputTokenCount: 22,
+                  totalTokenCount: 38,
                 },
                 providerErrorSummary: null,
                 visibleGeneratedContent: {
@@ -429,9 +429,9 @@ describe("personal AI generation runtime bridge service", () => {
                 failureCategory: null,
                 durationMs: 44,
                 usageSummary: {
-                  inputTokens: 16,
-                  outputTokens: 22,
-                  totalTokens: 38,
+                  inputTokenCount: 16,
+                  outputTokenCount: 22,
+                  totalTokenCount: 38,
                 },
                 providerErrorSummary: null,
                 visibleGeneratedContent: {

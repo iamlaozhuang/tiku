@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
+currentPhase: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
 updatedAt: "2026-07-23T00:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
+  currentTaskId: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -579,7 +579,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
+    - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
     - p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23
     - p1-remediation-rc-08-ai-scoring-question-context-2026-07-23
@@ -770,7 +772,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-ai-scoring-question-context-2026-07-23: closed
     p1-remediation-rc-08-organization-analytics-eligible-denominator-2026-07-23: closed
     p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23: closed
-    p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23: in_progress
+    p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23: closed
+    p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -971,28 +974,34 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
-  title: Learning suggestion durable lifecycle and recovery
-  phase: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
+  id: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
+  title: AI call usage and latency provenance
+  phase: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
   status: in_progress
   priority: p1
   taskKind: schema_migration_source_database_application_logic_and_provider_adapter_pure_logic
-  productClosureContribution: closes_F0065_static_durable_lifecycle_automatic_attempt_failure_projection_and_manual_recovery_gap
-  branch: fix/learning-suggestion-lifecycle-recovery
+  productClosureContribution: closes_F0177_static_fake_token_and_latency_measurement_gap
+  branch: fix/ai-call-log-usage-provenance
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0065
+    - F-0177
   candidateRootCauseCluster: P1-RC-08
-  objective: persist a strict learning_suggestion lifecycle on the exact exam_report revision, automatically attempt once after completed report creation, recover stale or failed attempts without duplicate Provider work, and expose safe authoritative retry state in the learner report UI
+  objective: establish one strict versioned AI call observation contract that distinguishes provider-reported, estimated and unavailable token usage, records truthful provider-boundary latency provenance, and prevents operations summaries from mixing incomparable facts
   executionStage: implemented_verified_static_pending_closeout
-  findingStatus: closed_static_product_pending_closeout_without_migration_apply_real_database_provider_or_browser_runtime_proof
-  findingDisposition: F0065_static_lifecycle_partition_is_implemented_with_pending_running_succeeded_failed_state_exact_revision_attempt_CAS_orphan_pending_manual_recovery_provider_timeout_and_truthful_UI; runtime_migration_and_real_provider_acceptance_remain_out_of_scope
+  findingStatus: implemented_verified_static_pending_closeout
+  findingDisposition: F0177_static_product_boundary_closes_fake_or_partial_token_and_latency_facts_with_one_versioned_observation_contract; migration_apply_real_database_provider_and_browser_runtime_proof_remain_out_of_scope
   riskBoundary:
     category: schema_migration_source_database_application_logic_and_provider_adapter_pure_logic
-    approvalId: guardian-f0065-learning-suggestion-lifecycle-recovery-2026-07-23
-    approvalFingerprint: e91668822e8b699876e25056031b2308af3613c8cd62f567368d6cfc70bb0767
-    requestFingerprint: e91668822e8b699876e25056031b2308af3613c8cd62f567368d6cfc70bb0767
-    requestedBaseSha: b91ee5d3ae1982198b945e50cea521392c74c9cd
+    approvalId: guardian-f0177-ai-call-usage-latency-provenance-2026-07-23
+    scopeAmendmentApprovalId: guardian-f0177-legacy-ai-call-row-fixtures-amendment-01-2026-07-23
+    testExpectationAmendmentApprovalId: guardian-f0177-ai-func-type-expectation-amendment-02-2026-07-23
+    directTestCallerAmendmentApprovalId: guardian-f0177-direct-test-callers-amendment-03-2026-07-23
+    baselineFixtureAlignmentAmendmentApprovalId: guardian-f0177-baseline-fixture-alignment-amendment-04-2026-07-23
+    adminPersistenceQuotaHarnessAmendmentApprovalId: guardian-f0177-admin-persistence-quota-harness-amendment-05-2026-07-23
+    governanceAppendLogCallerAmendmentApprovalId: guardian-f0177-governance-append-log-caller-amendment-06-2026-07-23
+    generationLogLifecycleProvenanceAmendmentApprovalId: guardian-f0177-generation-log-lifecycle-provenance-amendment-07-2026-07-23
+    requestFingerprint: 9b3d2ea112d82f2ec29ac48d51c785059d4e460dd6368c2a231eb436f59a88fe
+    requestedBaseSha: 8a27e66f134d3afeff0f8c03a92c911ae438cb3b
     schemaOrMigrationChange: true
     migrationApplyOrRealDatabase: false
     authorizationOrEntitlementExpansion: false
@@ -1001,33 +1010,28 @@ currentTask:
     dependencyChange: false
     conditionalCloseoutRequested: true
   preRedImpactScan:
-    chain: authorized_completed_exam_report_to_versioned_lifecycle_claim_to_whole_report_input_to_provider_attempt_to_attempt_bound_terminal_CAS_to_safe_UI_projection
-    coreFiles: 30
-    contingencyFiles: 9
+    chain: provider_attempt_boundary_to_strict_observation_v1_to_ai_call_log_to_provenance_aware_ops_list_and_disjoint_summary
+    coreFiles: 34
+    contingencyFiles: 38
     directCallerCalleeMocksFixturesReviewed: true
-    bundleDisposition: F0176_whole_report_input_and_F0175_blocked_gate_are_closed_prerequisites; F0177_usage_provenance_remains_independent
+    bundleDisposition: F0177_is_the_only_remaining_independent_static_RC08_product_finding; F0013_remains_runtime_hold
   requiredSemantics:
-    lifecycle: legacy_nullable_discriminator_then_pending_running_succeeded_failed_with_strict_coherence_attempt_cap_and_safe_failure_category
-    automaticAttempt: completed_report_create_or_authoritative_rebuild_persists_pending_before_one_claimed_attempt_without_blocking_score_report_on_generation_failure
-    concurrency: authorization_first_then_exact_user_report_revision_row_lock_or_CAS; one attempt winner; late_or_stale_results_cannot_overwrite_new_revision_or_attempt
-    recovery: bounded_hard_timeout_plus_abort_cleanup_below_stale_reclaim_window; response_loss_success_replay_zero_provider; stale_running_failed_and_overdue_pending_retry_are_durable_and_bounded; GET_detail_history_have_zero_side_effect
-    projection: server_owned_status_failure_category_and_canRetry; UI_never_infers_state_from_null_snapshot_and_only_retries_exact_report_publicId
-    unchanged: no_real_database_or_provider_migration_apply_permission_quota_dependency_prompt_or_mechanism_change
-  validationEvidence:
-    focused: 13_files_135_tests_green
-    lint: repository_lint_green_with_only_preexisting_unrelated_warnings
-    typecheck: green
-    build: green
-    migrationSource: one_additive_enum_six_columns_one_index_one_check_no_apply_or_data_SQL
-    adversarialReview: green_for_orphan_pending_recovery_exact_attempt_revision_CAS_provider_timeout_success_log_boundary_GET_zero_side_effect_and_UI_truthfulness
+    observation: versioned_allowlist_with_provider_reported_estimated_or_unavailable_token_source_and_provider_reported_or_client_observed_latency_source
+    tokenIntegrity: exact_nonnegative_safe_integer_input_output_total_tuple_with_total_equal_sum; no_partial_alias_guessing_or_fake_zero
+    estimation: only_successful_complete_request_and_response_can_use_one_named_deterministic_full_payload_estimator; failures_without_usage_are_unavailable
+    latency: clock_starts_immediately_before_each_provider_runner_attempt_and_ends_after_output_validation; no_fixed_or_post_execution_zero_time
+    aggregation: provider_reported_and_estimated_tokens_and_costs_are_separate_database_aggregates; unavailable_and_legacy_rows_are_counted_not_coerced_to_zero
+    migration: additive_legacy_nullable_marker_and_source_columns_with_one_strict_coherence_CHECK_no_backfill_or_apply
+    privacy: observation_contains_only_counts_sources_method_and_duration; no_prompt_answer_RAG_provider_payload_error_secret_or_internal_id
+    unchanged: no_real_database_provider_network_prompt_permission_quota_dependency_UI_capability_or_mechanism_change
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
+    taskId: p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
     findingIds:
-      - F-0176
-    commit: b91ee5d3ae1982198b945e50cea521392c74c9cd
-    tree: f7565b90a72db5cf4517dc019cc574e61696cbfe
+      - F-0065
+    commit: 8a27e66f134d3afeff0f8c03a92c911ae438cb3b
+    tree: 98d23dcf1a8758f1060f4c11785e8619250da301
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_bounded_product_partition_without_real_database_provider_or_browser_runtime_proof
+    findingStatus: closed_static_product_without_migration_apply_real_database_provider_or_browser_runtime_proof
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
@@ -1041,9 +1045,9 @@ p1ExecutionPolicy:
     status: superseded
     ref: docs/04-agent-system/state/task-queue.yaml#p1ExecutionPolicy.supersededPolicies
 repositoryCheckpoint:
-  lastKnownMasterSha: b91ee5d3ae1982198b945e50cea521392c74c9cd
-  lastKnownOriginMasterSha: b91ee5d3ae1982198b945e50cea521392c74c9cd
-  lastKnownRemoteMasterSha: b91ee5d3ae1982198b945e50cea521392c74c9cd
+  lastKnownMasterSha: 8a27e66f134d3afeff0f8c03a92c911ae438cb3b
+  lastKnownOriginMasterSha: 8a27e66f134d3afeff0f8c03a92c911ae438cb3b
+  lastKnownRemoteMasterSha: 8a27e66f134d3afeff0f8c03a92c911ae438cb3b
   masterWorktreeCleanBeforeCurrentBranch: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

@@ -11,6 +11,7 @@ import {
   type PersonalAiGenerationRouteIntegratedProviderExecutionInput,
 } from "./personal-ai-generation-route-integrated-provider-execution-service";
 import type {
+  AiGenerationRouteIntegratedProviderExecutionResult,
   AiGenerationRouteIntegratedGovernanceContext,
   AiGenerationRouteIntegratedGroundingContext,
 } from "../contracts/route-integrated-provider-execution-contract";
@@ -153,29 +154,7 @@ function createExecutionControl(
     readProviderCredential?: () => Promise<string | null> | string | null;
     executeProviderRequest?: (
       input: PersonalAiGenerationRouteIntegratedProviderExecutionInput,
-    ) => Promise<{
-      requestCount: 0 | 1;
-      resultStatus: "pass" | "fail" | "blocked";
-      failureCategory:
-        | "provider_call_blocked"
-        | "missing_provider_credential"
-        | "provider_error"
-        | "timeout"
-        | "redaction_violation"
-        | null;
-      durationMs: number;
-      usageSummary: Record<string, number> | null;
-      providerErrorSummary: {
-        httpStatus: number | null;
-        providerErrorCode: string | null;
-      } | null;
-      visibleGeneratedContent?: {
-        content: string;
-        contentVisibility: "transient_response_only";
-        persistenceStatus: "not_persisted";
-        safetyStatus: "checked";
-      } | null;
-    }>;
+    ) => Promise<AiGenerationRouteIntegratedProviderExecutionResult>;
     resolveGroundingContext?: () =>
       | Promise<AiGenerationRouteIntegratedGroundingContext>
       | AiGenerationRouteIntegratedGroundingContext;
@@ -260,7 +239,8 @@ describe("personal AI generation route-integrated provider execution service", (
       usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 },
     });
 
-    await executeQwenRouteIntegratedProviderRequest({
+    const monotonicTimes = [200, 212.2];
+    const result = await executeQwenRouteIntegratedProviderRequest({
       providerMetadata: {
         modelProvider: "openai_compatible",
         providerName: "alibaba-qwen",
@@ -299,6 +279,7 @@ describe("personal AI generation route-integrated provider execution service", (
       },
       governanceContext: questionGovernanceContext,
       providerCredential: "synthetic-provider-credential",
+      monotonicNow: () => monotonicTimes.shift() ?? Number.NaN,
     });
 
     const providerCall = generateTextMock.mock.calls.at(-1)?.[0] as {
@@ -309,6 +290,8 @@ describe("personal AI generation route-integrated provider execution service", (
     expect(providerCall.system).not.toContain(adversarialChunk);
     expect(providerCall.prompt).toContain(adversarialChunk);
     expect(providerCall.prompt).toContain("untrusted_grounding_data");
+    expect(result.durationMs).toBe(13);
+    expect(monotonicTimes).toEqual([]);
   });
 
   it("blocks before credential access when grounding evidence is insufficient", async () => {
@@ -470,9 +453,9 @@ describe("personal AI generation route-integrated provider execution service", (
             failureCategory: null,
             durationMs: 25,
             usageSummary: {
-              inputTokens: 10,
-              outputTokens: 2,
-              totalTokens: 12,
+              inputTokenCount: 10,
+              outputTokenCount: 2,
+              totalTokenCount: 12,
             },
             providerErrorSummary: null,
           };
@@ -517,9 +500,9 @@ describe("personal AI generation route-integrated provider execution service", (
         failureCategory: null,
         durationMs: 25,
         usageSummary: {
-          inputTokens: 10,
-          outputTokens: 2,
-          totalTokens: 12,
+          inputTokenCount: 10,
+          outputTokenCount: 2,
+          totalTokenCount: 12,
         },
         providerErrorSummary: null,
         redactionStatus: "redacted",
@@ -656,9 +639,9 @@ describe("personal AI generation route-integrated provider execution service", (
           failureCategory: null,
           durationMs: 31,
           usageSummary: {
-            inputTokens: 12,
-            outputTokens: 18,
-            totalTokens: 30,
+            inputTokenCount: 12,
+            outputTokenCount: 18,
+            totalTokenCount: 30,
           },
           providerErrorSummary: null,
           visibleGeneratedContent: {
@@ -712,9 +695,9 @@ describe("personal AI generation route-integrated provider execution service", (
     );
 
     expect(outcome).toMatchObject({
-      providerCallExecuted: false,
+      providerCallExecuted: true,
       executionSummary: {
-        requestCount: 0,
+        requestCount: 1,
         resultStatus: "blocked",
         failureCategory: "redaction_violation",
       },

@@ -10,6 +10,7 @@ import {
   isRouteIntegratedVisibleGeneratedContentAcceptableForDraft,
   qwenRouteIntegratedProviderLimits,
   qwenRouteIntegratedProviderMetadata,
+  summarizeRouteIntegratedProviderUsage,
 } from "./route-integrated-provider-execution-service";
 
 function createStrictQuestionSetContent(
@@ -38,6 +39,31 @@ function createStrictQuestionSetContent(
 }
 
 describe("shared route-integrated Provider execution primitives", () => {
+  it("normalizes the Qwen usage alias only at the Provider edge", () => {
+    expect(
+      summarizeRouteIntegratedProviderUsage({
+        inputTokens: 10,
+        outputTokens: 5,
+        totalTokens: 15,
+      }),
+    ).toEqual({
+      inputTokenCount: 10,
+      outputTokenCount: 5,
+      totalTokenCount: 15,
+    });
+    expect(
+      summarizeRouteIntegratedProviderUsage({ inputTokens: 10 }),
+    ).toBeNull();
+    expect(() =>
+      summarizeRouteIntegratedProviderUsage({
+        inputTokens: 10,
+        outputTokens: 5,
+        totalTokens: 15,
+        total_tokens: 15,
+      }),
+    ).toThrow();
+  });
+
   it("rejects legacy questions-only and plaintext question drafts", () => {
     const legacyJson = createRouteIntegratedVisibleGeneratedContent(
       JSON.stringify({

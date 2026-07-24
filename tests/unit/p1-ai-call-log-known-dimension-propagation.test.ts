@@ -11,6 +11,9 @@ describe("P1 F-0038 AI call log known dimension propagation", () => {
       aiCallLogRepository: {
         async appendAiCallLog(input) {
           appended.push(input);
+          if (input.observation === undefined) {
+            throw new Error("Current observation is required.");
+          }
 
           return {
             publicId: "ai-call-log-public-001",
@@ -29,6 +32,10 @@ describe("P1 F-0038 AI call log known dimension propagation", () => {
             totalTokenCount: input.totalTokenCount,
             estimatedCostCny: null,
             latencyMs: input.latencyMs,
+            observationSchemaVersion: input.observation.schemaVersion,
+            tokenCountSource: input.observation.tokenSource,
+            tokenEstimationMethod: input.observation.tokenEstimationMethod,
+            latencySource: input.observation.latencySource,
             startedAt: input.startedAt.toISOString(),
             completedAt: input.completedAt?.toISOString() ?? null,
           };
@@ -131,6 +138,11 @@ describe("P1 F-0038 AI call log known dimension propagation", () => {
     });
 
     expect(appended).toHaveLength(1);
+    expect(appended[0]?.observation).toMatchObject({
+      schemaVersion: 1,
+      tokenSource: "unavailable",
+      latencySource: "client_observed",
+    });
     expect(appended[0]).toMatchObject({
       organizationPublicId: "organization-public-001",
       profession: "logistics",

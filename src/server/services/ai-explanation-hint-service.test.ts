@@ -175,6 +175,12 @@ describe("ai explanation and hint service", () => {
       providerResponsePayload: {
         output: "raw explanation output must be redacted",
       },
+      providerUsage: {
+        input_tokens: 8,
+        output_tokens: 4,
+        total_tokens: 12,
+      },
+      providerLatencyMs: 19,
     });
     const hintRunner = createHintRunner({
       hintText: "should not be called",
@@ -199,6 +205,14 @@ describe("ai explanation and hint service", () => {
       }),
     );
     expect(hintRunner).not.toHaveBeenCalled();
+    expect(result.aiCallLogDraft?.observation).toMatchObject({
+      tokenSource: "provider_reported",
+      promptTokenCount: 8,
+      completionTokenCount: 4,
+      totalTokenCount: 12,
+      latencySource: "provider_reported",
+      latencyMs: 19,
+    });
     expect(result).toMatchObject({
       explanationStatus: "explained",
       explanationText: "答错原因是忽略了事实清楚与证据充分。",
@@ -623,6 +637,12 @@ describe("ai explanation and hint service", () => {
       providerResponsePayload: {
         output: "raw hint output must be redacted",
       },
+      providerUsage: {
+        inputTokens: 7,
+        outputTokens: 3,
+        totalTokens: 10,
+      },
+      providerLatencyMs: 17,
     });
     const service = createAiExplanationHintService({
       explanationRunner: createExplanationRunner({
@@ -650,6 +670,14 @@ describe("ai explanation and hint service", () => {
       },
     });
     expect(result.hintText).not.toContain(hintContext.standardAnswer);
+    expect(result.aiCallLogDraft?.observation).toMatchObject({
+      tokenSource: "provider_reported",
+      promptTokenCount: 7,
+      completionTokenCount: 3,
+      totalTokenCount: 10,
+      latencySource: "provider_reported",
+      latencyMs: 17,
+    });
     expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
       hintContext.studentAnswer,
     );

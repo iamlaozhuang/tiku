@@ -16,10 +16,11 @@ export type AiGenerationRouteIntegratedProviderLimits = {
   timeoutMs: number;
 };
 
-export type AiGenerationRouteIntegratedProviderUsageSummary = Record<
-  string,
-  number
-> | null;
+export type AiGenerationRouteIntegratedProviderUsageSummary = {
+  inputTokenCount: number;
+  outputTokenCount: number;
+  totalTokenCount: number;
+} | null;
 
 export type AiGenerationRouteIntegratedProviderErrorSummary = {
   httpStatus: number | null;
@@ -81,6 +82,7 @@ export type AiGenerationRouteIntegratedProviderExecutionInput<
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null;
   governanceContext: AiGenerationRouteIntegratedGovernanceContext;
   providerCredential: string;
+  monotonicNow?: () => number;
 };
 
 export type AiGenerationRouteIntegratedProviderExecutor<

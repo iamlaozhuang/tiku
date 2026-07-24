@@ -43,7 +43,11 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
-import { createRunningAttemptCondition } from "./ai-generation-task-lifecycle-repository";
+import {
+  createCurrentMeasuredAiCallObservationCondition,
+  createRunningAttemptCondition,
+  normalizePersistedCurrentMeasuredAiCallObservation,
+} from "./ai-generation-task-lifecycle-repository";
 import {
   createAdminAiGenerationReviewDraftDigest,
   createAdminAiGenerationReviewDraftPublicId,
@@ -381,9 +385,21 @@ export async function persistAdminAiGenerationDraftResultAndCompleteTask(
           eq(aiCallLog.id, boundAiCallLogId),
           eq(aiCallLog.public_id, input.aiCallLogPublicId),
           sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+          createCurrentMeasuredAiCallObservationCondition(),
         ),
       )
-      .returning({ id: aiCallLog.id });
+      .returning({
+        id: aiCallLog.id,
+        observationSchemaVersion: aiCallLog.observation_schema_version,
+        tokenSource: aiCallLog.token_count_source,
+        tokenEstimationMethod: aiCallLog.token_estimation_method,
+        promptTokenCount: aiCallLog.prompt_token_count,
+        completionTokenCount: aiCallLog.completion_token_count,
+        totalTokenCount: aiCallLog.total_token_count,
+        estimatedCostCny: aiCallLog.estimated_cost_cny,
+        latencySource: aiCallLog.latency_source,
+        latencyMs: aiCallLog.latency_ms,
+      });
 
     if (
       finalizedLogs.length !== 1 ||
@@ -391,6 +407,7 @@ export async function persistAdminAiGenerationDraftResultAndCompleteTask(
     ) {
       throw new Error("admin AI generation ai_call_log finalization was lost.");
     }
+    normalizePersistedCurrentMeasuredAiCallObservation(finalizedLogs[0]);
 
     const insertedRows = await transaction
       .insert(adminAiGenerationResult)

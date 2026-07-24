@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  promptTemplateDefinitions,
+  promptTemplateKeysByFuncType as activePromptTemplateKeyByAiFuncType,
+} from "@/ai/prompts/templates";
 import { createModelConfigSnapshot } from "../models/ai-rag";
 import type { ModelConfigRuntimeCatalog } from "./model-config-runtime";
 import {
@@ -8,8 +12,21 @@ import {
   resolveRouteIntegratedProviderGovernanceContext,
 } from "./route-integrated-provider-governance-service";
 
-const generationPromptTemplateHash =
-  "15c72c7c0267c4720038d797909a4bfe2aae95a3d8662bbf95dfaa3e8a3a8148";
+const generationPromptTemplates = promptTemplateDefinitions.filter(
+  (definition) =>
+    definition.promptTemplateKey ===
+    activePromptTemplateKeyByAiFuncType.ai_question_generation,
+);
+if (generationPromptTemplates.length !== 1) {
+  throw new Error(
+    "Expected exactly one active question generation prompt definition.",
+  );
+}
+const generationPromptTemplate = generationPromptTemplates[0];
+if (generationPromptTemplate === undefined) {
+  throw new Error("Missing active question generation prompt definition.");
+}
+const generationPromptTemplateHash = generationPromptTemplate.templateHash;
 
 function createCatalog(
   overrides: Partial<ModelConfigRuntimeCatalog["records"][number]> = {},
@@ -32,12 +49,12 @@ function createCatalog(
           timeoutSecond: 60,
           maxRetryCount: 0,
           fallbackModelConfigPublicId: null,
-          promptTemplateKey: "ai_question_generation_v1",
-          promptTemplateVersion: 1,
+          promptTemplateKey: generationPromptTemplate.promptTemplateKey,
+          promptTemplateVersion: generationPromptTemplate.version,
         }),
         promptTemplate: {
-          promptTemplateKey: "ai_question_generation_v1",
-          version: 1,
+          promptTemplateKey: generationPromptTemplate.promptTemplateKey,
+          version: generationPromptTemplate.version,
           templateHash: generationPromptTemplateHash,
         },
         isEnabled: true,
@@ -60,13 +77,13 @@ describe("route-integrated Provider governance service", () => {
       modelConfigSnapshot: {
         modelConfigPublicId: "model-config-question-public-001",
         aiFuncType: "ai_question_generation",
-        promptTemplateKey: "ai_question_generation_v1",
-        promptTemplateVersion: 1,
+        promptTemplateKey: generationPromptTemplate.promptTemplateKey,
+        promptTemplateVersion: generationPromptTemplate.version,
       },
       promptTemplate: {
-        promptTemplateKey: "ai_question_generation_v1",
+        promptTemplateKey: generationPromptTemplate.promptTemplateKey,
         aiFuncType: "ai_question_generation",
-        version: 1,
+        version: generationPromptTemplate.version,
         templateHash: generationPromptTemplateHash,
       },
     });
@@ -84,8 +101,8 @@ describe("route-integrated Provider governance service", () => {
         taskType: "ai_question_generation",
         catalog: createCatalog({
           promptTemplate: {
-            promptTemplateKey: "ai_question_generation_v1",
-            version: 1,
+            promptTemplateKey: generationPromptTemplate.promptTemplateKey,
+            version: generationPromptTemplate.version,
             templateHash: "stale-or-unregistered-hash",
           },
         }),
@@ -122,8 +139,8 @@ describe("route-integrated Provider governance service", () => {
         taskType: "ai_question_generation",
         catalog: createCatalog({
           promptTemplate: {
-            promptTemplateKey: "ai_question_generation_v1",
-            version: 2,
+            promptTemplateKey: generationPromptTemplate.promptTemplateKey,
+            version: generationPromptTemplate.version + 1,
             templateHash: generationPromptTemplateHash,
           },
         }),
@@ -177,9 +194,9 @@ describe("route-integrated Provider governance service", () => {
         failureCategory: null,
         durationMs: 321,
         usageSummary: {
-          inputTokens: 120,
-          outputTokens: 40,
-          totalTokens: 160,
+          inputTokenCount: 120,
+          outputTokenCount: 40,
+          totalTokenCount: 160,
         },
         providerErrorSummary: null,
         redactionStatus: "redacted",
@@ -195,8 +212,8 @@ describe("route-integrated Provider governance service", () => {
       level: 3,
       aiFuncType: "ai_question_generation",
       callStatus: "success",
-      promptTemplateKey: "ai_question_generation_v1",
-      promptTemplateVersion: 1,
+      promptTemplateKey: generationPromptTemplate.promptTemplateKey,
+      promptTemplateVersion: generationPromptTemplate.version,
       promptTokenCount: 120,
       completionTokenCount: 40,
       totalTokenCount: 160,
@@ -229,6 +246,55 @@ describe("route-integrated Provider governance service", () => {
     ]) {
       expect(serialized).not.toContain(forbidden);
     }
+
+    const preCallFailureLogInput = createRouteIntegratedAiCallLogInput({
+      requestContext: {
+        actorPublicId: "user-public-001",
+        ownerType: "organization",
+        ownerPublicId: "organization-public-001",
+        organizationPublicId: "organization-public-001",
+        taskPublicId: "task-public-001",
+        taskType: "ai_question_generation",
+        questionPublicId: null,
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodeMode: "balanced",
+          knowledgeNodePublicIds: [],
+          includeDescendants: false,
+          knowledgeNodeSupplement: null,
+          sourcePreference: null,
+          questionType: "single_choice",
+          questionCount: 5,
+          difficulty: "medium",
+          learningObjective: null,
+        },
+      },
+      governanceContext,
+      groundingSummary: {
+        evidenceStatus: "none",
+        citationCount: 0,
+      },
+      executionSummary: {
+        requestCount: 0,
+        resultStatus: "fail",
+        failureCategory: "missing_provider_credential",
+        durationMs: 0,
+        usageSummary: null,
+        providerErrorSummary: null,
+        redactionStatus: "redacted",
+      },
+      startedAt: new Date("2026-07-22T12:00:00.000Z"),
+      completedAt: new Date("2026-07-22T12:00:00.000Z"),
+    });
+
+    expect(preCallFailureLogInput.observation).toMatchObject({
+      tokenSource: "unavailable",
+      latencySource: "unavailable",
+      latencyMs: null,
+    });
   });
 
   it("reserves one deterministic running log identity for the exact database attempt before Provider execution", () => {

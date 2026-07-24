@@ -11,6 +11,11 @@ import type {
   AiGenerationRouteIntegratedProviderExecutionSummary,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type { AppendAiCallLogInput } from "../repositories/admin-ai-audit-log-runtime-repository";
+import {
+  AiCallObservationIntegrityError,
+  createProviderReportedAiCallObservation,
+  createUnavailableAiCallObservation,
+} from "./ai-call-observation";
 import type { ModelConfigSnapshot } from "../models/ai-rag";
 import {
   createModelConfigRuntimeResolver,
@@ -111,6 +116,26 @@ export function createRouteIntegratedAiCallLogInput(input: {
 }): AppendAiCallLogInput {
   const { executionSummary, governanceContext, requestContext } = input;
   const succeeded = executionSummary.resultStatus === "pass";
+  if (
+    executionSummary.usageSummary !== null &&
+    executionSummary.requestCount !== 1
+  ) {
+    throw new AiCallObservationIntegrityError();
+  }
+  const observation =
+    executionSummary.usageSummary === null
+      ? executionSummary.requestCount === 0
+        ? createUnavailableAiCallObservation()
+        : createUnavailableAiCallObservation({
+            latencyMs: executionSummary.durationMs,
+          })
+      : createProviderReportedAiCallObservation({
+          usage: executionSummary.usageSummary,
+          latency: {
+            source: "client_observed",
+            latencyMs: executionSummary.durationMs,
+          },
+        });
 
   return {
     userPublicId: requestContext.actorPublicId,
@@ -151,23 +176,11 @@ export function createRouteIntegratedAiCallLogInput(input: {
       citationCount: input.groundingSummary.citationCount,
       redactionStatus: "redacted",
     },
-    promptTokenCount: readTokenCount(executionSummary.usageSummary, [
-      "inputTokens",
-      "inputTokenCount",
-      "promptTokens",
-      "promptTokenCount",
-    ]),
-    completionTokenCount: readTokenCount(executionSummary.usageSummary, [
-      "outputTokens",
-      "outputTokenCount",
-      "completionTokens",
-      "completionTokenCount",
-    ]),
-    totalTokenCount: readTokenCount(executionSummary.usageSummary, [
-      "totalTokens",
-      "totalTokenCount",
-    ]),
-    latencyMs: executionSummary.durationMs,
+    promptTokenCount: observation.promptTokenCount,
+    completionTokenCount: observation.completionTokenCount,
+    totalTokenCount: observation.totalTokenCount,
+    latencyMs: observation.latencyMs,
+    observation,
     startedAt: input.startedAt,
     completedAt: input.completedAt,
   };
@@ -185,6 +198,7 @@ export function createRouteIntegratedAiCallLogReservation(input: {
   publicId: string;
 } {
   const { attempt, governanceContext, requestContext } = input;
+  const observation = createUnavailableAiCallObservation();
   const identityDigest = createHash("sha256")
     .update(
       [
@@ -230,26 +244,8 @@ export function createRouteIntegratedAiCallLogReservation(input: {
     totalTokenCount: null,
     estimatedCostCny: null,
     latencyMs: null,
+    observation,
     startedAt: input.startedAt,
     completedAt: null,
   };
-}
-
-function readTokenCount(
-  usageSummary: Record<string, number> | null,
-  keys: readonly string[],
-): number | null {
-  if (usageSummary === null) {
-    return null;
-  }
-
-  for (const key of keys) {
-    const value = usageSummary[key];
-
-    if (Number.isSafeInteger(value) && (value ?? -1) >= 0) {
-      return value ?? null;
-    }
-  }
-
-  return null;
 }

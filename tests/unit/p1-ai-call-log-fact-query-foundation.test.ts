@@ -64,7 +64,13 @@ function createDatabaseCapture(capturedQueries: CapturedSql[]) {
               ai_func_type: "scoring",
               bucket: "2026-07-01",
               call_count: 2,
-              estimated_cost_cny: "0.420000",
+              provider_reported_token_count: "2100",
+              provider_reported_token_derived_cost_cny: "0.420000",
+              estimated_token_count: "0",
+              estimated_token_derived_cost_cny: null,
+              unavailable_observation_count: 0,
+              legacy_observation_count: 0,
+              invalid_observation_count: 0,
               failed_count: 1,
               model_alias: "qwen-plus",
               provider_display_name: "Qwen",
@@ -99,6 +105,10 @@ function createDatabaseCapture(capturedQueries: CapturedSql[]) {
               response_redacted_snapshot: {},
               error_redacted_snapshot: null,
               citation_redacted_snapshot: null,
+              observation_schema_version: 1,
+              token_count_source: "provider_reported",
+              token_estimation_method: null,
+              latency_source: "client_observed",
               prompt_token_count: 1200,
               completion_token_count: 900,
               total_token_count: 2100,
@@ -176,7 +186,7 @@ describe("F-0038 AI call log fact and query foundation", () => {
       createDatabase: createDatabaseCapture(capturedQueries),
     });
 
-    const result = await repositories.appendAiCallLog({
+    const input = {
       userPublicId: "user-public-001",
       organizationPublicId: "organization-public-001",
       profession: "marketing",
@@ -207,13 +217,24 @@ describe("F-0038 AI call log fact and query foundation", () => {
       responseRedactedSnapshot: {},
       errorRedactedSnapshot: null,
       citationRedactedSnapshot: null,
+      observation: {
+        schemaVersion: 1,
+        tokenSource: "provider_reported",
+        tokenEstimationMethod: null,
+        promptTokenCount: 1200,
+        completionTokenCount: 900,
+        totalTokenCount: 2100,
+        latencySource: "client_observed",
+        latencyMs: 840,
+      },
       promptTokenCount: 1200,
       completionTokenCount: 900,
       totalTokenCount: 2100,
       latencyMs: 840,
       startedAt: new Date("2026-07-01T01:00:00.000Z"),
       completedAt: new Date("2026-07-01T01:00:00.840Z"),
-    } as never);
+    };
+    const result = await repositories.appendAiCallLog(input as never);
     const insertSql = flattenSqlQuery(capturedQueries[0]);
 
     expect(insertSql).toContain("organization_public_id");
@@ -224,6 +245,13 @@ describe("F-0038 AI call log fact and query foundation", () => {
       level: 3,
       estimatedCostCny: "0.420000",
     });
+    await expect(
+      repositories.appendAiCallLog({
+        ...input,
+        promptTokenCount: input.promptTokenCount + 1,
+      } as never),
+    ).rejects.toThrow("AI call observation projection is inconsistent.");
+    expect(capturedQueries).toHaveLength(1);
   });
 
   it("pushes every fact and time filter into both page and authoritative count SQL", async () => {
@@ -265,6 +293,9 @@ describe("F-0038 AI call log fact and query foundation", () => {
           profession: "marketing",
           level: 3,
           estimatedCostCny: "0.420000",
+          observationSchemaVersion: 1,
+          tokenCountSource: "provider_reported",
+          latencySource: "client_observed",
         },
       ],
       pagination: { total: 1 },
@@ -289,6 +320,17 @@ describe("F-0038 AI call log fact and query foundation", () => {
 
     expect(summarySql).toContain("date_trunc('month', started_at)");
     expect(summarySql).toContain("sum(estimated_cost_cny)");
+    expect(summarySql).toContain("token_count_source = 'provider_reported'");
+    expect(summarySql).toContain("token_count_source = 'estimated'");
+    expect(summarySql.match(/estimated_cost_cny is null/gu)).toHaveLength(3);
+    expect(summarySql).toContain("invalid_observation_count");
+    expect(summarySql).toContain("is not true");
+    expect(summarySql).toContain(
+      "sum(total_token_count) filter (where token_count_source = 'provider_reported'), 0)::text",
+    );
+    expect(summarySql).toContain(
+      "sum(total_token_count) filter (where token_count_source = 'estimated'), 0)::text",
+    );
     expect(summarySql).toContain(
       "organization_public_id = organization-public-001",
     );
@@ -300,11 +342,97 @@ describe("F-0038 AI call log fact and query foundation", () => {
           bucket: "2026-07-01",
           bucketType: "month",
           callCount: 2,
-          estimatedCostCny: "0.420000",
+          providerReportedTokenCount: 2100,
+          providerReportedTokenDerivedCostCny: "0.420000",
+          estimatedTokenCount: 0,
+          estimatedTokenDerivedCostCny: null,
+          unavailableObservationCount: 0,
+          legacyObservationCount: 0,
         },
       ],
       pagination: { total: 1 },
     });
+  });
+
+  it("fails closed when a token aggregate exceeds JavaScript safe integer precision", async () => {
+    const repositories = createPostgresAdminAiAuditLogRuntimeRepositories({
+      createDatabase: () =>
+        ({
+          async execute(query: CapturedSql) {
+            const queryText = flattenSqlQuery(query);
+            if (queryText.includes("as bucket")) {
+              return [
+                {
+                  ai_func_type: "scoring",
+                  bucket: "2026-07-01",
+                  call_count: 2,
+                  provider_reported_token_count: "9007199254740992",
+                  provider_reported_token_derived_cost_cny: null,
+                  estimated_token_count: "0",
+                  estimated_token_derived_cost_cny: null,
+                  unavailable_observation_count: 0,
+                  legacy_observation_count: 0,
+                  invalid_observation_count: 0,
+                  failed_count: 0,
+                  model_alias: "qwen-plus",
+                  provider_display_name: "Qwen",
+                  success_count: 2,
+                },
+              ];
+            }
+
+            return [{ value: 1 }];
+          },
+        }) as ReturnType<
+          NonNullable<AdminAiAuditLogRuntimeRepositoryOptions["createDatabase"]>
+        >,
+    });
+
+    await expect(
+      repositories.summarizeAiCallLogs({
+        ...createAdminAiAuditLogListQuery({ page: 1, pageSize: 20 }),
+        bucketType: "day",
+      } as never),
+    ).rejects.toThrow("AI call aggregate count is invalid.");
+  });
+
+  it("fails closed when a summary bucket contains a partial observation marker", async () => {
+    const repositories = createPostgresAdminAiAuditLogRuntimeRepositories({
+      createDatabase: () =>
+        ({
+          async execute(query: CapturedSql) {
+            const queryText = flattenSqlQuery(query);
+            if (queryText.includes("as bucket")) {
+              return [
+                {
+                  ai_func_type: "scoring",
+                  bucket: "2026-07-01",
+                  call_count: 1,
+                  provider_reported_token_count: "0",
+                  provider_reported_token_derived_cost_cny: null,
+                  estimated_token_count: "0",
+                  estimated_token_derived_cost_cny: null,
+                  unavailable_observation_count: 0,
+                  legacy_observation_count: 0,
+                  invalid_observation_count: 1,
+                  failed_count: 0,
+                  model_alias: "qwen-plus",
+                  provider_display_name: "Qwen",
+                  success_count: 1,
+                },
+              ];
+            }
+            return [{ value: 1 }];
+          },
+        }) as never,
+    });
+
+    await expect(
+      repositories.summarizeAiCallLogs({
+        ...createAdminAiAuditLogListQuery({ page: 1, pageSize: 20 }),
+        bucketType: "day",
+      } as never),
+    ).rejects.toThrow("AI call observation summary is invalid.");
   });
 
   it("makes the canonical summary route delegate to repository aggregation", async () => {

@@ -9,6 +9,12 @@ import {
 } from "../models/ai-rag";
 import type { KnowledgeNodeSnapshot } from "../models/ai-rag";
 import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
+import {
+  createSuccessfulAiCallObservation,
+  createUnavailableAiCallObservation,
+  measureClientObservedLatency,
+  type AiCallObservation,
+} from "./ai-call-observation";
 
 export type KnowledgeRecommendationStatus =
   | "recommended"
@@ -62,6 +68,9 @@ export type KnowledgeRecommendationCallLogDraft = {
   responseRedactedSnapshot: RedactedJsonObject | null;
   errorRedactedSnapshot: RedactedJsonObject | null;
   citationRedactedSnapshot: RedactedJsonObject | null;
+  observation: AiCallObservation;
+  startedAt: Date;
+  completedAt: Date;
 };
 
 export type KnowledgeRecommendationContext = {
@@ -104,6 +113,8 @@ export type KnowledgeRecommendationService = {
 
 export type KnowledgeRecommendationServiceDependencies = {
   runner: KnowledgeRecommendationRunner;
+  now?: () => Date;
+  monotonicNow?: () => number;
 };
 
 const maxRecommendationCount = 5;
@@ -190,6 +201,9 @@ function createAiCallLogDraft(input: {
   providerRequestPayload: unknown;
   providerResponsePayload: unknown;
   providerErrorPayload: unknown;
+  observation: AiCallObservation;
+  startedAt: Date;
+  completedAt: Date;
 }): KnowledgeRecommendationCallLogDraft {
   const redactedSnapshots = createAiCallLogRedactedSnapshots({
     prompt: createPromptSnapshot({
@@ -242,6 +256,9 @@ function createAiCallLogDraft(input: {
     citationRedactedSnapshot: {
       knowledgeNodeSnapshots: redactedSnapshots.citations,
     },
+    observation: input.observation,
+    startedAt: input.startedAt,
+    completedAt: input.completedAt,
   };
 }
 
@@ -305,6 +322,9 @@ function createRecommendationItems(
 export function createKnowledgeRecommendationService(
   dependencies: KnowledgeRecommendationServiceDependencies,
 ): KnowledgeRecommendationService {
+  const now = dependencies.now ?? (() => new Date());
+  const monotonicNow = dependencies.monotonicNow ?? (() => performance.now());
+
   return {
     async recommendKnowledgeNodes(context) {
       const eligibleKnowledgeNodeSnapshots =
@@ -318,20 +338,28 @@ export function createKnowledgeRecommendationService(
         });
       }
 
+      const runnerInput: KnowledgeRecommendationRunnerInput = {
+        questionText: context.questionText,
+        analysis: context.analysis,
+        standardAnswer: context.standardAnswer,
+        profession: context.profession,
+        level: context.level,
+        knowledgeNodeSnapshots: eligibleKnowledgeNodeSnapshots,
+        modelConfigSnapshot: context.modelConfigSnapshot,
+        promptTemplate: context.promptTemplate,
+      };
+      const startedAt = now();
+      const startedMonotonicMs = monotonicNow();
       try {
-        const runnerResult = await dependencies.runner({
-          questionText: context.questionText,
-          analysis: context.analysis,
-          standardAnswer: context.standardAnswer,
-          profession: context.profession,
-          level: context.level,
-          knowledgeNodeSnapshots: eligibleKnowledgeNodeSnapshots,
-          modelConfigSnapshot: context.modelConfigSnapshot,
-          promptTemplate: context.promptTemplate,
-        });
+        const runnerResult = await dependencies.runner(runnerInput);
         const recommendations = createRecommendationItems(
           runnerResult,
           eligibleKnowledgeNodeSnapshots,
+        );
+        const completedAt = now();
+        const latencyMs = measureClientObservedLatency(
+          startedMonotonicMs,
+          monotonicNow(),
         );
 
         return createBaseResult(context, {
@@ -347,9 +375,23 @@ export function createKnowledgeRecommendationService(
             providerRequestPayload: runnerResult.providerRequestPayload,
             providerResponsePayload: runnerResult.providerResponsePayload,
             providerErrorPayload: null,
+            observation: createSuccessfulAiCallObservation({
+              providerUsage: null,
+              providerLatencyMs: undefined,
+              clientLatencyMs: latencyMs,
+              serializedProviderRequest: runnerResult.providerRequestPayload,
+              normalizedProviderResponse: { recommendations },
+            }),
+            startedAt,
+            completedAt,
           }),
         });
       } catch (error) {
+        const completedAt = now();
+        const latencyMs = measureClientObservedLatency(
+          startedMonotonicMs,
+          monotonicNow(),
+        );
         return createBaseResult(context, {
           recommendationStatus: "recommendation_failed",
           recommendations: [],
@@ -365,6 +407,9 @@ export function createKnowledgeRecommendationService(
               error instanceof Error
                 ? { message: error.message, name: error.name }
                 : error,
+            observation: createUnavailableAiCallObservation({ latencyMs }),
+            startedAt,
+            completedAt,
           }),
         });
       }

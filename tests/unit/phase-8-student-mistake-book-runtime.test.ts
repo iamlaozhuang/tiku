@@ -16,11 +16,19 @@ import type {
   MistakeBookRow,
   UpdateMistakeBookStateInput,
 } from "@/server/repositories/mistake-book-repository";
+import type { AppendAiCallLogInput } from "@/server/repositories/admin-ai-audit-log-runtime-repository";
 import { SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
 
 const now = new Date("2026-05-22T05:00:00.000Z");
 const latestWrongAt = new Date("2026-05-21T05:00:00.000Z");
 const scopeExpiresAt = new Date("2027-05-21T05:00:00.000Z");
+
+function requireCurrentObservation(input: AppendAiCallLogInput) {
+  if (input.observation === undefined) {
+    throw new Error("Current observation is required.");
+  }
+  return input.observation;
+}
 
 function createStudentSession(): ApiResponse<AuthContextDto> {
   return {
@@ -167,6 +175,7 @@ function createHandlers(
     mistakeBookRepository: options.repository ?? createRepository(),
     aiCallLogRepository: {
       async appendAiCallLog(input) {
+        const observation = requireCurrentObservation(input);
         return {
           publicId: "ai-call-log-public-default",
           userPublicId: input.userPublicId,
@@ -184,6 +193,10 @@ function createHandlers(
           totalTokenCount: input.totalTokenCount,
           estimatedCostCny: "0.00",
           latencyMs: input.latencyMs,
+          observationSchemaVersion: observation.schemaVersion,
+          tokenCountSource: observation.tokenSource,
+          tokenEstimationMethod: observation.tokenEstimationMethod,
+          latencySource: observation.latencySource,
           startedAt: input.startedAt.toISOString(),
           completedAt: input.completedAt?.toISOString() ?? null,
         };
@@ -428,7 +441,8 @@ describe("phase 8 student mistake_book runtime", () => {
     const aiCallLogEntries: Array<{
       callStatus: string;
       modelConfigPublicId: string;
-      completionTokenCount: number;
+      completionTokenCount: number | null;
+      tokenSource: "provider_reported" | "estimated" | "unavailable";
       latencyMs: number;
     }> = [];
     const runtime = createGovernedMistakeBookAiExplanationRuntime({
@@ -453,10 +467,12 @@ describe("phase 8 student mistake_book runtime", () => {
       },
       aiCallLogRepository: {
         async appendAiCallLog(input) {
+          const observation = requireCurrentObservation(input);
           aiCallLogEntries.push({
             callStatus: input.callStatus,
             modelConfigPublicId: input.modelConfigSnapshot.modelConfigPublicId,
-            completionTokenCount: input.completionTokenCount ?? 0,
+            completionTokenCount: input.completionTokenCount,
+            tokenSource: observation.tokenSource,
             latencyMs: input.latencyMs ?? 0,
           });
 
@@ -477,6 +493,10 @@ describe("phase 8 student mistake_book runtime", () => {
             totalTokenCount: input.totalTokenCount,
             estimatedCostCny: "0.00",
             latencyMs: input.latencyMs,
+            observationSchemaVersion: observation.schemaVersion,
+            tokenCountSource: observation.tokenSource,
+            tokenEstimationMethod: observation.tokenEstimationMethod,
+            latencySource: observation.latencySource,
             startedAt: input.startedAt.toISOString(),
             completedAt: input.completedAt?.toISOString() ?? null,
           };
@@ -527,13 +547,15 @@ describe("phase 8 student mistake_book runtime", () => {
       {
         callStatus: "failed",
         modelConfigPublicId: "model-config-dev-ai-explanation",
-        completionTokenCount: 0,
+        completionTokenCount: null,
+        tokenSource: "unavailable",
         latencyMs: expect.any(Number),
       },
       {
         callStatus: "success",
         modelConfigPublicId: "model-config-dev-ai-explanation-fallback",
-        completionTokenCount: 5,
+        completionTokenCount: null,
+        tokenSource: "unavailable",
         latencyMs: expect.any(Number),
       },
     ]);
@@ -562,6 +584,7 @@ describe("phase 8 student mistake_book runtime", () => {
       }),
       aiCallLogRepository: {
         async appendAiCallLog(input) {
+          const observation = requireCurrentObservation(input);
           return {
             publicId: "ai-call-log-public-redaction",
             userPublicId: input.userPublicId,
@@ -579,6 +602,10 @@ describe("phase 8 student mistake_book runtime", () => {
             totalTokenCount: input.totalTokenCount,
             estimatedCostCny: null,
             latencyMs: input.latencyMs,
+            observationSchemaVersion: observation.schemaVersion,
+            tokenCountSource: observation.tokenSource,
+            tokenEstimationMethod: observation.tokenEstimationMethod,
+            latencySource: observation.latencySource,
             startedAt: input.startedAt.toISOString(),
             completedAt: input.completedAt?.toISOString() ?? null,
           };
@@ -731,6 +758,7 @@ describe("phase 8 student mistake_book runtime", () => {
       }),
       aiCallLogRepository: {
         async appendAiCallLog(input) {
+          const observation = requireCurrentObservation(input);
           aiCallLogEntries.push(input);
 
           return {
@@ -750,6 +778,10 @@ describe("phase 8 student mistake_book runtime", () => {
             totalTokenCount: input.totalTokenCount,
             estimatedCostCny: "0.00",
             latencyMs: input.latencyMs,
+            observationSchemaVersion: observation.schemaVersion,
+            tokenCountSource: observation.tokenSource,
+            tokenEstimationMethod: observation.tokenEstimationMethod,
+            latencySource: observation.latencySource,
             startedAt: input.startedAt.toISOString(),
             completedAt: input.completedAt?.toISOString() ?? null,
           };

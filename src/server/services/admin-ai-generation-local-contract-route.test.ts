@@ -629,9 +629,9 @@ function createFakeProviderRuntimeBridgeControl(
           failureCategory: null,
           durationMs: 21,
           usageSummary: {
-            promptTokens: 5,
-            completionTokens: 2,
-            totalTokens: 7,
+            inputTokenCount: 5,
+            outputTokenCount: 2,
+            totalTokenCount: 7,
           },
           providerErrorSummary: null,
           visibleGeneratedContent: {
@@ -3413,9 +3413,9 @@ describe("admin AI generation local contract route handlers", () => {
               failureCategory: null,
               durationMs: 21,
               usageSummary: {
-                promptTokens: 5,
-                completionTokens: 2,
-                totalTokens: 7,
+                inputTokenCount: 5,
+                outputTokenCount: 2,
+                totalTokenCount: 7,
               },
               providerErrorSummary: null,
               redactionStatus: "redacted",

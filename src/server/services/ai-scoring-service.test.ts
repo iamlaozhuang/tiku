@@ -270,6 +270,12 @@ describe("ai scoring service", () => {
       providerResponsePayload: {
         output: "raw model output must be redacted",
       },
+      providerUsage: {
+        prompt_tokens: 10,
+        completion_tokens: 5,
+        total_tokens: 15,
+      },
+      providerLatencyMs: 21,
     });
     const service = createAiScoringService({ runner });
 
@@ -304,6 +310,14 @@ describe("ai scoring service", () => {
       evidenceStatus: "sufficient",
     });
     expect(result.totalScore).toBeLessThanOrEqual(context.maxScore);
+    expect(result.aiCallLogDraft?.observation).toMatchObject({
+      tokenSource: "provider_reported",
+      promptTokenCount: 10,
+      completionTokenCount: 5,
+      totalTokenCount: 15,
+      latencySource: "provider_reported",
+      latencyMs: 21,
+    });
     expect(result.aiCallLogDraft?.requestRedactedSnapshot).toMatchObject({
       prompt: {
         redactionStatus: "redacted",

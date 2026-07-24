@@ -1,13 +1,24 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { describe, expect, it, vi } from "vitest";
 
+import { createModelConfigSnapshot } from "../models/ai-rag";
+import { createUnavailableAiCallObservation } from "../services/ai-call-observation";
 import { qwenRouteIntegratedProviderLimits } from "../services/route-integrated-provider-execution-service";
 import {
   AI_GENERATION_TASK_MAX_RETRY_COUNT,
   AI_GENERATION_TASK_STALE_AFTER_MS,
   createAiGenerationTaskLifecycleRepository,
+  createPostgresAiGenerationTaskLifecycleRepository,
+  normalizePersistedAiCallLogObservation,
+  normalizePersistedAiCallLogReservationObservation,
+  normalizePersistedCurrentMeasuredAiCallObservation,
   type AiGenerationTaskLifecycleGateway,
   type AiGenerationTaskLifecycleRow,
+  type PersistedAiCallLogObservation,
 } from "./ai-generation-task-lifecycle-repository";
+import type { RuntimeDatabase } from "./runtime-database";
 
 const taskPublicId = "ai_generation_task_public_lifecycle_001";
 const ownerPublicId = "student_public_lifecycle_001";
@@ -104,7 +115,328 @@ const scope = {
   taskTypes: ["ai_question_generation", "ai_paper_generation"] as const,
 };
 
+function createPersistedObservation(
+  overrides: Partial<PersistedAiCallLogObservation> = {},
+): PersistedAiCallLogObservation {
+  return {
+    observationSchemaVersion: 1,
+    tokenSource: "unavailable",
+    tokenEstimationMethod: null,
+    promptTokenCount: null,
+    completionTokenCount: null,
+    totalTokenCount: null,
+    estimatedCostCny: null,
+    latencySource: "unavailable",
+    latencyMs: null,
+    ...overrides,
+  };
+}
+
+function createReservationInput() {
+  return {
+    scope,
+    attempt: { taskPublicId, retryCount: 0, startedAt },
+    promptTemplateHash: "sha256:reservation-template",
+    log: {
+      publicId: "ai-call-log-generation-reservation-001",
+      userPublicId: ownerPublicId,
+      organizationPublicId: null,
+      profession: null,
+      level: null,
+      answerRecordPublicId: null,
+      mockExamPublicId: null,
+      questionPublicId: null,
+      aiFuncType: "ai_question_generation" as const,
+      callStatus: "running" as const,
+      modelConfigSnapshot: createModelConfigSnapshot({
+        providerPublicId: "provider-public-reservation",
+        providerKey: "qwen",
+        providerDisplayName: "Qwen",
+        modelConfigPublicId: "model-config-public-reservation",
+        aiFuncType: "ai_question_generation",
+        modelName: "qwen-reservation",
+        displayName: "Qwen reservation",
+        configVersion: 1,
+        timeoutSecond: 60,
+        maxRetryCount: 2,
+        fallbackModelConfigPublicId: null,
+        promptTemplateKey: "ai_question_generation_v2",
+        promptTemplateVersion: 2,
+      }),
+      promptTemplateKey: "ai_question_generation_v2",
+      promptTemplateVersion: 2,
+      requestRedactedSnapshot: { redactionStatus: "redacted" },
+      responseRedactedSnapshot: null,
+      errorRedactedSnapshot: null,
+      citationRedactedSnapshot: null,
+      promptTokenCount: null,
+      completionTokenCount: null,
+      totalTokenCount: null,
+      estimatedCostCny: null,
+      latencyMs: null,
+      observation: createUnavailableAiCallObservation(),
+      startedAt,
+      completedAt: null,
+    },
+  };
+}
+
 describe("AI generation task lifecycle repository", () => {
+  it("persists and revalidates current unavailable reservation provenance before terminal mutations", () => {
+    const source = readFileSync(
+      resolve(
+        process.cwd(),
+        "src/server/repositories/ai-generation-task-lifecycle-repository.ts",
+      ),
+      "utf8",
+    );
+
+    expect(source).toMatch(
+      /normalizeAiGenerationRunningReservationObservation\(\s*input\.log\.observation/gu,
+    );
+    expect(source).toContain(
+      "observation_schema_version: reservationObservation.schemaVersion",
+    );
+    expect(source).toContain(
+      "token_count_source: reservationObservation.tokenSource",
+    );
+    expect(source).toContain(
+      "latency_source: reservationObservation.latencySource",
+    );
+    expect(source).toContain(
+      "normalizePersistedAiCallLogReservationObservation(existingLogs[0])",
+    );
+    expect(
+      source.match(/createTerminalAiCallObservationCondition\(\),/gu),
+    ).toHaveLength(3);
+  });
+
+  it("accepts only exact current-unavailable reservation observations", () => {
+    expect(
+      normalizePersistedAiCallLogReservationObservation(
+        createPersistedObservation(),
+      ),
+    ).toMatchObject({
+      schemaVersion: 1,
+      tokenSource: "unavailable",
+      latencySource: "unavailable",
+    });
+
+    for (const invalid of [
+      createPersistedObservation({ observationSchemaVersion: null }),
+      createPersistedObservation({
+        latencySource: "client_observed",
+        latencyMs: 1,
+      }),
+      createPersistedObservation({ estimatedCostCny: "0.000001" }),
+      createPersistedObservation({
+        tokenSource: "provider_reported",
+        promptTokenCount: 1,
+        completionTokenCount: 2,
+        totalTokenCount: 3,
+      }),
+    ]) {
+      expect(() =>
+        normalizePersistedAiCallLogReservationObservation(invalid),
+      ).toThrow("AI call observation is invalid.");
+    }
+  });
+
+  it("writes the exact current-unavailable observation when reserving a new log", async () => {
+    let selectCallCount = 0;
+    let insertedValue: Record<string, unknown> | null = null;
+    const transactionDatabase = {
+      select: () => {
+        selectCallCount += 1;
+        return selectCallCount === 1
+          ? {
+              from: () => ({
+                where: () => ({
+                  for: () => ({
+                    limit: async () => [
+                      {
+                        id: 701,
+                        aiCallLogId: null,
+                        aiCallLogPublicId: null,
+                      },
+                    ],
+                  }),
+                }),
+              }),
+            }
+          : {
+              from: () => ({
+                innerJoin: () => ({
+                  where: () => ({
+                    limit: async () => [
+                      { modelConfigId: 801, promptTemplateId: 901 },
+                    ],
+                  }),
+                }),
+              }),
+            };
+      },
+      insert: () => ({
+        values: (value: Record<string, unknown>) => {
+          insertedValue = value;
+          return {
+            onConflictDoNothing: () => ({
+              returning: async () => [{ id: 1_001 }],
+            }),
+          };
+        },
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({
+            returning: async () => [{ publicId: taskPublicId }],
+          }),
+        }),
+      }),
+    };
+    const database = {
+      transaction: async (callback: (transaction: unknown) => unknown) =>
+        callback(transactionDatabase),
+    } as unknown as RuntimeDatabase;
+    const repository = createPostgresAiGenerationTaskLifecycleRepository({
+      createDatabase: () => database,
+    });
+
+    await expect(
+      repository.reserveAiCallLog?.(createReservationInput()),
+    ).resolves.toEqual({ publicId: "ai-call-log-generation-reservation-001" });
+    expect(insertedValue).toMatchObject({
+      prompt_token_count: null,
+      completion_token_count: null,
+      total_token_count: null,
+      estimated_cost_cny: null,
+      latency_ms: null,
+      observation_schema_version: 1,
+      token_count_source: "unavailable",
+      token_estimation_method: null,
+      latency_source: "unavailable",
+    });
+  });
+
+  it("replays only an exact current-unavailable bound reservation and rejects legacy or partial rows", async () => {
+    const rows = [
+      createPersistedObservation(),
+      createPersistedObservation({
+        observationSchemaVersion: null,
+        tokenSource: null,
+        latencySource: null,
+      }),
+      createPersistedObservation({ tokenSource: null }),
+    ];
+
+    for (const [index, observation] of rows.entries()) {
+      let selectCallCount = 0;
+      const insert = vi.fn();
+      const transactionDatabase = {
+        select: () => {
+          selectCallCount += 1;
+          return {
+            from: () => ({
+              where: () =>
+                selectCallCount === 1
+                  ? {
+                      for: () => ({
+                        limit: async () => [
+                          {
+                            id: 701,
+                            aiCallLogId: 1_001,
+                            aiCallLogPublicId:
+                              "ai-call-log-generation-reservation-001",
+                          },
+                        ],
+                      }),
+                    }
+                  : {
+                      limit: async () => [{ id: 1_001, ...observation }],
+                    },
+            }),
+          };
+        },
+        insert,
+      };
+      const database = {
+        transaction: async (callback: (transaction: unknown) => unknown) =>
+          callback(transactionDatabase),
+      } as unknown as RuntimeDatabase;
+      const repository = createPostgresAiGenerationTaskLifecycleRepository({
+        createDatabase: () => database,
+      });
+      const replay = repository.reserveAiCallLog?.(createReservationInput());
+
+      if (index === 0) {
+        await expect(replay).resolves.toEqual({
+          publicId: "ai-call-log-generation-reservation-001",
+        });
+      } else {
+        await expect(replay).rejects.toThrow("AI call observation is invalid.");
+      }
+      expect(insert).not.toHaveBeenCalled();
+    }
+  });
+
+  it("keeps legacy terminal observations distinct and only accepts measured current success", () => {
+    expect(
+      normalizePersistedAiCallLogObservation(
+        createPersistedObservation({
+          observationSchemaVersion: null,
+          tokenSource: null,
+          latencySource: null,
+        }),
+      ),
+    ).toEqual({ kind: "legacy", observation: null });
+
+    const providerReported = createPersistedObservation({
+      tokenSource: "provider_reported",
+      promptTokenCount: 10,
+      completionTokenCount: 20,
+      totalTokenCount: 30,
+      latencySource: "client_observed",
+      latencyMs: 50,
+    });
+    const estimated = createPersistedObservation({
+      tokenSource: "estimated",
+      tokenEstimationMethod: "canonical_json_unicode_code_point_ceiling_v1",
+      promptTokenCount: 12,
+      completionTokenCount: 18,
+      totalTokenCount: 30,
+      latencySource: "provider_reported",
+      latencyMs: 40,
+    });
+    expect(
+      normalizePersistedCurrentMeasuredAiCallObservation(providerReported),
+    ).toMatchObject({ tokenSource: "provider_reported", totalTokenCount: 30 });
+    expect(
+      normalizePersistedCurrentMeasuredAiCallObservation(estimated),
+    ).toMatchObject({ tokenSource: "estimated", totalTokenCount: 30 });
+
+    for (const invalid of [
+      createPersistedObservation(),
+      createPersistedObservation({
+        observationSchemaVersion: null,
+        tokenSource: null,
+        latencySource: null,
+      }),
+      createPersistedObservation({ tokenSource: "provider_reported" }),
+      createPersistedObservation({
+        tokenSource: "provider_reported",
+        promptTokenCount: 10,
+        completionTokenCount: 20,
+        totalTokenCount: 31,
+        latencySource: "client_observed",
+        latencyMs: 50,
+      }),
+    ]) {
+      expect(() =>
+        normalizePersistedCurrentMeasuredAiCallObservation(invalid),
+      ).toThrow("AI call observation is invalid.");
+    }
+  });
+
   it("claims pending work before execution with database-returned attempt identity", async () => {
     const { gateway } = createGateway(createRow());
     const repository = createAiGenerationTaskLifecycleRepository(gateway);

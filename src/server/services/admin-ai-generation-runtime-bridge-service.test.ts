@@ -124,7 +124,8 @@ describe("admin AI generation runtime bridge service", () => {
       usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 },
     });
 
-    await executeQwenAdminRouteIntegratedProviderRequest({
+    const monotonicTimes = [100, 112.2];
+    const result = await executeQwenAdminRouteIntegratedProviderRequest({
       providerMetadata: {
         modelProvider: "openai_compatible",
         providerName: "alibaba-qwen",
@@ -164,6 +165,7 @@ describe("admin AI generation runtime bridge service", () => {
       },
       governanceContext: createAdminGovernanceContext("ai_question_generation"),
       providerCredential: "synthetic-admin-provider-credential",
+      monotonicNow: () => monotonicTimes.shift() ?? Number.NaN,
     });
 
     const providerCall = generateTextMock.mock.calls.at(-1)?.[0] as {
@@ -174,6 +176,8 @@ describe("admin AI generation runtime bridge service", () => {
     expect(providerCall.system).not.toContain(adversarialChunk);
     expect(providerCall.prompt).toContain(adversarialChunk);
     expect(providerCall.prompt).toContain("untrusted_grounding_data");
+    expect(result.durationMs).toBe(13);
+    expect(monotonicTimes).toEqual([]);
   });
 
   it("defaults content admin workflow to a provider-disabled redacted bridge", () => {
@@ -306,9 +310,9 @@ describe("admin AI generation runtime bridge service", () => {
                 failureCategory: null,
                 durationMs: 13,
                 usageSummary: {
-                  promptTokens: 3,
-                  completionTokens: 1,
-                  totalTokens: 4,
+                  inputTokenCount: 3,
+                  outputTokenCount: 1,
+                  totalTokenCount: 4,
                 },
                 providerErrorSummary: null,
                 visibleGeneratedContent: {
@@ -375,9 +379,9 @@ describe("admin AI generation runtime bridge service", () => {
         failureCategory: null,
         durationMs: 13,
         usageSummary: {
-          promptTokens: 3,
-          completionTokens: 1,
-          totalTokens: 4,
+          inputTokenCount: 3,
+          outputTokenCount: 1,
+          totalTokenCount: 4,
         },
         providerErrorSummary: null,
         redactionStatus: "redacted",
@@ -414,6 +418,10 @@ describe("admin AI generation runtime bridge service", () => {
         generationParameters: {
           ...adminSufficientGroundingContext.generationParameters,
           questionCount: 50,
+          knowledgeNodePublicIds: [
+            "redacted_knowledge_node_a",
+            "redacted_knowledge_node_b",
+          ],
         },
       },
       {

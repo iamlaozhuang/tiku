@@ -72,6 +72,25 @@ function containsText(value: unknown, text: string, seen = new Set()): boolean {
   return Object.values(value).some((item) => containsText(item, text, seen));
 }
 
+function createMeasuredAiCallLogRow(
+  id: number,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    id,
+    observationSchemaVersion: 1,
+    tokenSource: "estimated",
+    tokenEstimationMethod: "canonical_json_unicode_code_point_ceiling_v1",
+    promptTokenCount: 12,
+    completionTokenCount: 18,
+    totalTokenCount: 30,
+    estimatedCostCny: "0.002000",
+    latencySource: "provider_reported",
+    latencyMs: 40,
+    ...overrides,
+  };
+}
+
 function createPersistenceRow(
   overrides: Partial<PersonalAiGenerationResultPersistenceRow> = {},
 ): PersonalAiGenerationResultPersistenceRow {
@@ -335,6 +354,7 @@ describe("personal AI generation result repository", () => {
       ai_call_log_public_id: "ai-call-log-personal-170",
     });
     const updateValues: unknown[] = [];
+    const updateConditions: unknown[] = [];
     let updateCallCount = 0;
     const insertReturning = vi.fn(async () => [insertedRow]);
     const insertOnConflict = vi.fn(() => ({ returning: insertReturning }));
@@ -358,13 +378,16 @@ describe("personal AI generation result repository", () => {
           set: vi.fn((values: unknown) => {
             updateValues.push(values);
             return {
-              where: vi.fn(() => ({
-                returning: vi.fn(async () =>
-                  updateCallCount === 1
-                    ? [{ id: 801 }]
-                    : [{ public_id: insertedRow.task_public_id }],
-                ),
-              })),
+              where: vi.fn((condition: unknown) => {
+                updateConditions.push(condition);
+                return {
+                  returning: vi.fn(async () =>
+                    updateCallCount === 1
+                      ? [createMeasuredAiCallLogRow(801)]
+                      : [{ public_id: insertedRow.task_public_id }],
+                  ),
+                };
+              }),
             };
           }),
         };
@@ -388,6 +411,12 @@ describe("personal AI generation result repository", () => {
         ai_call_log_public_id: insertedRow.ai_call_log_public_id,
       }),
     ]);
+    expect(
+      containsText(updateConditions[0], "observation_schema_version"),
+    ).toBe(true);
+    expect(containsText(updateConditions[0], "provider_reported")).toBe(true);
+    expect(containsText(updateConditions[0], "estimated")).toBe(true);
+    expect(containsText(updateConditions[0], "client_observed")).toBe(true);
     expect(result).toEqual(insertedRow);
   });
 
@@ -419,7 +448,7 @@ describe("personal AI generation result repository", () => {
           set: vi.fn(() => ({
             where: vi.fn(() => ({
               returning: vi.fn(async () =>
-                updateCallCount === 1 ? [{ id: 801 }] : [],
+                updateCallCount === 1 ? [createMeasuredAiCallLogRow(801)] : [],
               ),
             })),
           })),
@@ -457,7 +486,10 @@ describe("personal AI generation result repository", () => {
       update: vi.fn(() => ({
         set: vi.fn(() => ({
           where: vi.fn(() => ({
-            returning: vi.fn(async () => [{ id: 801 }, { id: 802 }]),
+            returning: vi.fn(async () => [
+              createMeasuredAiCallLogRow(801),
+              createMeasuredAiCallLogRow(802),
+            ]),
           })),
         })),
       })),
@@ -472,6 +504,68 @@ describe("personal AI generation result repository", () => {
         createAtomicPersistenceInput(insertedRow),
       ),
     ).rejects.toThrow("ai_call_log finalization was lost");
+  });
+
+  it("rolls back before personal result insertion for unavailable legacy partial or malformed measured provenance", async () => {
+    const insertedRow = createPersistenceRow({
+      ai_call_log_public_id: "ai-call-log-personal-170",
+    });
+    const invalidObservations = [
+      createMeasuredAiCallLogRow(801, {
+        tokenSource: "unavailable",
+        tokenEstimationMethod: null,
+        promptTokenCount: null,
+        completionTokenCount: null,
+        totalTokenCount: null,
+        estimatedCostCny: null,
+      }),
+      createMeasuredAiCallLogRow(801, {
+        observationSchemaVersion: null,
+        tokenSource: null,
+        tokenEstimationMethod: null,
+        latencySource: null,
+      }),
+      createMeasuredAiCallLogRow(801, {
+        latencySource: null,
+      }),
+      createMeasuredAiCallLogRow(801, {
+        tokenEstimationMethod: "unsupported_method",
+      }),
+    ];
+
+    for (const invalidObservation of invalidObservations) {
+      const insert = vi.fn();
+      const transactionDatabase = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(() => ({
+              for: vi.fn(() => ({
+                limit: vi.fn(async () => [{ aiCallLogId: 801 }]),
+              })),
+            })),
+          })),
+        })),
+        update: vi.fn(() => ({
+          set: vi.fn(() => ({
+            where: vi.fn(() => ({
+              returning: vi.fn(async () => [invalidObservation]),
+            })),
+          })),
+        })),
+        insert,
+      };
+
+      await expect(
+        persistPersonalAiGenerationDraftResultAndCompleteTask(
+          {
+            transaction: async (callback: (database: unknown) => unknown) =>
+              callback(transactionDatabase),
+          } as unknown as RuntimeDatabase,
+          createAtomicPersistenceInput(insertedRow),
+        ),
+      ).rejects.toThrow("AI call observation is invalid.");
+      expect(insert).not.toHaveBeenCalled();
+    }
   });
 
   it("rolls back the personal log when result insertion conflicts", async () => {
@@ -490,7 +584,9 @@ describe("personal AI generation result repository", () => {
       })),
       update: vi.fn(() => ({
         set: vi.fn(() => ({
-          where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 801 }]) })),
+          where: vi.fn(() => ({
+            returning: vi.fn(async () => [createMeasuredAiCallLogRow(801)]),
+          })),
         })),
       })),
       insert: vi.fn(() => ({

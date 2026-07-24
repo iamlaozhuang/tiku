@@ -168,6 +168,9 @@ function createRepositories(): AdminAiAuditLogRuntimeRepositories {
       };
     },
     async appendAiCallLog(input: AppendAiCallLogInput) {
+      if (input.observation === undefined) {
+        throw new Error("Current observation is required.");
+      }
       const aiCallLog = {
         publicId: "ai-call-log-dev-mock-001",
         userPublicId: input.userPublicId,
@@ -185,6 +188,10 @@ function createRepositories(): AdminAiAuditLogRuntimeRepositories {
         totalTokenCount: input.totalTokenCount,
         estimatedCostCny: "0.00",
         latencyMs: input.latencyMs,
+        observationSchemaVersion: input.observation.schemaVersion,
+        tokenCountSource: input.observation.tokenSource,
+        tokenEstimationMethod: input.observation.tokenEstimationMethod,
+        latencySource: input.observation.latencySource,
         startedAt: input.startedAt.toISOString(),
         completedAt: input.completedAt?.toISOString() ?? null,
       } satisfies AiCallLogSummaryDto;
@@ -223,12 +230,30 @@ function createRepositories(): AdminAiAuditLogRuntimeRepositories {
                 failedCount: aiCallLogs.filter(
                   (aiCallLog) => aiCallLog.callStatus === "failed",
                 ).length,
-                totalTokenCount: aiCallLogs.reduce(
+                providerReportedTokenCount: aiCallLogs.reduce(
                   (totalTokenCount, aiCallLog) =>
-                    totalTokenCount + (aiCallLog.totalTokenCount ?? 0),
+                    totalTokenCount +
+                    (aiCallLog.tokenCountSource === "provider_reported"
+                      ? (aiCallLog.totalTokenCount ?? 0)
+                      : 0),
                   0,
                 ),
-                estimatedCostCny: "0.00",
+                providerReportedTokenDerivedCostCny: null,
+                estimatedTokenCount: aiCallLogs.reduce(
+                  (totalTokenCount, aiCallLog) =>
+                    totalTokenCount +
+                    (aiCallLog.tokenCountSource === "estimated"
+                      ? (aiCallLog.totalTokenCount ?? 0)
+                      : 0),
+                  0,
+                ),
+                estimatedTokenDerivedCostCny: "0.00",
+                unavailableObservationCount: aiCallLogs.filter(
+                  (aiCallLog) => aiCallLog.tokenCountSource === "unavailable",
+                ).length,
+                legacyObservationCount: aiCallLogs.filter(
+                  (aiCallLog) => aiCallLog.tokenCountSource === "legacy",
+                ).length,
               },
             ];
 
@@ -417,7 +442,9 @@ describe("phase 7 AI mock provider and log runtime smoke", () => {
             callCount: 1,
             successCount: 1,
             failedCount: 0,
-            estimatedCostCny: "0.00",
+            estimatedTokenDerivedCostCny: "0.00",
+            unavailableObservationCount: 0,
+            legacyObservationCount: 0,
           },
         ],
       },

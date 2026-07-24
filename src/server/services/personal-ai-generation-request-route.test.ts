@@ -2793,9 +2793,9 @@ describe("personal AI generation request route handlers", () => {
                 failureCategory: null,
                 durationMs: 37,
                 usageSummary: {
-                  inputTokens: 12,
-                  outputTokens: 3,
-                  totalTokens: 15,
+                  inputTokenCount: 12,
+                  outputTokenCount: 3,
+                  totalTokenCount: 15,
                 },
                 providerErrorSummary: null,
                 visibleGeneratedContent: {
@@ -2862,9 +2862,9 @@ describe("personal AI generation request route handlers", () => {
             failureCategory: null,
             durationMs: 37,
             usageSummary: {
-              inputTokens: 12,
-              outputTokens: 3,
-              totalTokens: 15,
+              inputTokenCount: 12,
+              outputTokenCount: 3,
+              totalTokenCount: 15,
             },
             providerErrorSummary: null,
             redactionStatus: "redacted",
@@ -2914,9 +2914,9 @@ describe("personal AI generation request route handlers", () => {
               failureCategory: null,
               durationMs: 42,
               usageSummary: {
-                inputTokens: 18,
-                outputTokens: 9,
-                totalTokens: 27,
+                inputTokenCount: 18,
+                outputTokenCount: 9,
+                totalTokenCount: 27,
               },
               providerErrorSummary: null,
               visibleGeneratedContent: {
@@ -3033,9 +3033,9 @@ describe("personal AI generation request route handlers", () => {
               failureCategory: null,
               durationMs: 42,
               usageSummary: {
-                inputTokens: 18,
-                outputTokens: 9,
-                totalTokens: 27,
+                inputTokenCount: 18,
+                outputTokenCount: 9,
+                totalTokenCount: 27,
               },
               providerErrorSummary: null,
               visibleGeneratedContent: {
@@ -3174,9 +3174,9 @@ describe("personal AI generation request route handlers", () => {
               failureCategory: null,
               durationMs: 42,
               usageSummary: {
-                inputTokens: 18,
-                outputTokens: 9,
-                totalTokens: 27,
+                inputTokenCount: 18,
+                outputTokenCount: 9,
+                totalTokenCount: 27,
               },
               providerErrorSummary: null,
               visibleGeneratedContent: {

@@ -207,6 +207,45 @@ function formatAdminOpsDisplayValue(value: string) {
   return adminOpsDisplayValueMap[value] ?? value;
 }
 
+function formatAiCallTokenUsage(
+  aiCallLog: AiCallLogListDto["aiCallLogs"][number],
+): string {
+  if (
+    aiCallLog.tokenCountSource === "provider_reported" &&
+    aiCallLog.totalTokenCount !== null
+  ) {
+    return `供应商报告用量：${aiCallLog.totalTokenCount}`;
+  }
+  if (
+    aiCallLog.tokenCountSource === "estimated" &&
+    aiCallLog.totalTokenCount !== null
+  ) {
+    return `估算用量：${aiCallLog.totalTokenCount}`;
+  }
+  return aiCallLog.tokenCountSource === "legacy"
+    ? "历史用量不可用"
+    : "用量不可用";
+}
+
+function formatAiCallCostSummary(costSummary: AiCallLogCostSummaryDto): string {
+  const providerCost =
+    costSummary.providerReportedTokenDerivedCostCny === null
+      ? "不可用"
+      : `${costSummary.providerReportedTokenDerivedCostCny} 元`;
+  const estimatedCost =
+    costSummary.estimatedTokenDerivedCostCny === null
+      ? "不可用"
+      : `${costSummary.estimatedTokenDerivedCostCny} 元`;
+  return [
+    `供应商报告 token：${costSummary.providerReportedTokenCount}`,
+    `供应商报告 token 本地估算成本：${providerCost}`,
+    `估算 token：${costSummary.estimatedTokenCount}`,
+    `估算 token 本地估算成本：${estimatedCost}`,
+    `观测不可用：${costSummary.unavailableObservationCount}`,
+    `历史观测：${costSummary.legacyObservationCount}`,
+  ].join(" / ");
+}
+
 function formatAuditActionType(value: string) {
   return adminOpsDisplayValueMap[value] ?? "其他操作";
 }
@@ -326,6 +365,10 @@ const staticRuntimeData: AdminAiAuditRuntimeData = {
       totalTokenCount: 1700,
       estimatedCostCny: "3.60",
       latencyMs: 1200,
+      observationSchemaVersion: 1,
+      tokenCountSource: "provider_reported",
+      tokenEstimationMethod: null,
+      latencySource: "client_observed",
       startedAt: "2026-05-21T08:00:00.000Z",
       completedAt: "2026-05-21T08:00:01.200Z",
     },
@@ -340,8 +383,12 @@ const staticRuntimeData: AdminAiAuditRuntimeData = {
       callCount: 12,
       successCount: 12,
       failedCount: 0,
-      totalTokenCount: 1700,
-      estimatedCostCny: "3.60",
+      providerReportedTokenCount: 1700,
+      providerReportedTokenDerivedCostCny: "3.60",
+      estimatedTokenCount: 0,
+      estimatedTokenDerivedCostCny: null,
+      unavailableObservationCount: 0,
+      legacyObservationCount: 0,
     },
   ],
 };
@@ -953,7 +1000,7 @@ export function AdminAiAuditLogOpsBaseline({
                 aiCallLog.providerDisplayName,
                 aiCallLog.modelAlias,
                 formatAdminOpsDisplayValue(aiCallLog.callStatus),
-                `用量：${aiCallLog.totalTokenCount ?? 0}`,
+                formatAiCallTokenUsage(aiCallLog),
                 aiCallLog.promptSummary ?? "输入摘要不可用",
               ].join(" / ")}
               publicId={aiCallLog.publicId}
@@ -987,7 +1034,7 @@ export function AdminAiAuditLogOpsBaseline({
                 costSummary.providerDisplayName,
                 costSummary.modelAlias,
                 `调用次数：${costSummary.callCount}`,
-                `预估成本：${costSummary.estimatedCostCny} 元`,
+                formatAiCallCostSummary(costSummary),
               ].join(" / ")}
               publicId={`${costSummary.bucket}-${costSummary.aiFuncType}`}
             />
@@ -2326,7 +2373,7 @@ function AdminAiCallLogTable({
                 {aiCallLog.promptSummary ?? "输入摘要不可用"}
               </td>
               <td className="text-text-secondary px-4 py-3">
-                {aiCallLog.totalTokenCount ?? 0}
+                {formatAiCallTokenUsage(aiCallLog)}
               </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end">
@@ -2377,7 +2424,7 @@ function AdminAiCallCostSummaryPanel({
                 costSummary.modelAlias,
                 `调用次数：${costSummary.callCount}`,
                 `失败：${costSummary.failedCount}`,
-                `预估成本：${costSummary.estimatedCostCny} 元`,
+                formatAiCallCostSummary(costSummary),
               ].join(" / ")}
               publicId={`${costSummary.bucket}-${costSummary.aiFuncType}`}
             />
@@ -2738,7 +2785,7 @@ function AdminAiCallLogDetailPanel({
           />
           <AdminOpsReadonlyDetail
             label="用量"
-            value={String(aiCallLog.totalTokenCount ?? 0)}
+            value={formatAiCallTokenUsage(aiCallLog)}
           />
           <AdminOpsReadonlyDetail
             label="预估成本"

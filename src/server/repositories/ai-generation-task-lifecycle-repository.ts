@@ -4,7 +4,18 @@ import {
   modelConfig,
   promptTemplate,
 } from "@/db/schema";
-import { and, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 
 import type {
   AiGenerationTaskFailureCategory,
@@ -13,6 +24,14 @@ import type {
 } from "../models/ai-generation-task";
 import { isRetryableAiGenerationTaskFailureCategory } from "../models/ai-generation-task";
 import type { AiGenerationTaskRequestOwnerType } from "../models/ai-generation-task-request";
+import {
+  AI_CALL_METRIC_INTEGER_MAX,
+  AI_CALL_TOKEN_ESTIMATION_METHOD,
+  AiCallObservationIntegrityError,
+  normalizeAiCallObservation,
+  type AiCallObservation,
+  type AiCallMeasuredObservation,
+} from "../services/ai-call-observation";
 import type { AppendAiCallLogInput } from "./admin-ai-audit-log-runtime-repository";
 import {
   createLazyRuntimeDatabaseGetter,
@@ -152,6 +171,30 @@ const lifecycleSelection = {
   finishedAt: aiGenerationTask.finished_at,
   resultPublicId: aiGenerationTask.result_public_id,
   aiCallLogPublicId: aiGenerationTask.ai_call_log_public_id,
+};
+
+const aiCallLogObservationSelection = {
+  observationSchemaVersion: aiCallLog.observation_schema_version,
+  tokenSource: aiCallLog.token_count_source,
+  tokenEstimationMethod: aiCallLog.token_estimation_method,
+  promptTokenCount: aiCallLog.prompt_token_count,
+  completionTokenCount: aiCallLog.completion_token_count,
+  totalTokenCount: aiCallLog.total_token_count,
+  estimatedCostCny: aiCallLog.estimated_cost_cny,
+  latencySource: aiCallLog.latency_source,
+  latencyMs: aiCallLog.latency_ms,
+};
+
+export type PersistedAiCallLogObservation = {
+  observationSchemaVersion: number | null;
+  tokenSource: string | null;
+  tokenEstimationMethod: string | null;
+  promptTokenCount: number | null;
+  completionTokenCount: number | null;
+  totalTokenCount: number | null;
+  estimatedCostCny: string | null;
+  latencySource: string | null;
+  latencyMs: number | null;
 };
 
 export function createAiGenerationTaskLifecycleRepository(
@@ -358,13 +401,18 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
                   eq(aiCallLog.id, staleTask.aiCallLogId),
                   eq(aiCallLog.public_id, staleTask.aiCallLogPublicId),
                   sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+                  createTerminalAiCallObservationCondition(),
                 ),
               )
-              .returning({ id: aiCallLog.id });
+              .returning({
+                id: aiCallLog.id,
+                ...aiCallLogObservationSelection,
+              });
 
             if (finalizedLogs.length !== 1) {
               throw new Error("stale AI generation log finalization was lost");
             }
+            normalizePersistedAiCallLogObservation(finalizedLogs[0]);
           }
         }
 
@@ -444,13 +492,15 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
                 eq(aiCallLog.id, task.aiCallLogId),
                 eq(aiCallLog.public_id, requestedLogPublicId),
                 sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+                createTerminalAiCallObservationCondition(),
               ),
             )
-            .returning({ id: aiCallLog.id });
+            .returning({ id: aiCallLog.id, ...aiCallLogObservationSelection });
 
           if (finalizedLogs.length !== 1) {
             throw new Error("AI generation failure log finalization was lost");
           }
+          normalizePersistedAiCallLogObservation(finalizedLogs[0]);
         }
 
         const rows = await transaction
@@ -533,15 +583,17 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
                 eq(aiCallLog.id, task.aiCallLogId),
                 eq(aiCallLog.public_id, task.aiCallLogPublicId),
                 sql`${aiCallLog.call_status} = 'running'::ai_call_status`,
+                createTerminalAiCallObservationCondition(),
               ),
             )
-            .returning({ id: aiCallLog.id });
+            .returning({ id: aiCallLog.id, ...aiCallLogObservationSelection });
 
           if (finalizedLogs.length !== 1) {
             throw new Error(
               "AI generation cancellation log finalization was lost",
             );
           }
+          normalizePersistedAiCallLogObservation(finalizedLogs[0]);
         }
 
         const rows = await transaction
@@ -580,6 +632,11 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
   return {
     ...lifecycleRepository,
     async reserveAiCallLog(input) {
+      const reservationObservation =
+        normalizeAiGenerationRunningReservationObservation(
+          input.log.observation,
+        );
+
       return getDatabase().transaction(async (transaction) => {
         const [taskRow] = await transaction
           .select({
@@ -614,7 +671,10 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
           const boundAiCallLogId = taskRow.aiCallLogId;
 
           const existingLogs = await transaction
-            .select({ id: aiCallLog.id })
+            .select({
+              id: aiCallLog.id,
+              ...aiCallLogObservationSelection,
+            })
             .from(aiCallLog)
             .where(
               and(
@@ -630,6 +690,8 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
               "AI generation attempt log replay is inconsistent.",
             );
           }
+
+          normalizePersistedAiCallLogReservationObservation(existingLogs[0]);
 
           return { publicId: input.log.publicId };
         }
@@ -694,11 +756,16 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
             response_redacted_snapshot: null,
             error_redacted_snapshot: null,
             citation_redacted_snapshot: input.log.citationRedactedSnapshot,
-            prompt_token_count: null,
-            completion_token_count: null,
-            total_token_count: null,
+            prompt_token_count: reservationObservation.promptTokenCount,
+            completion_token_count: reservationObservation.completionTokenCount,
+            total_token_count: reservationObservation.totalTokenCount,
             estimated_cost_cny: null,
-            latency_ms: null,
+            latency_ms: reservationObservation.latencyMs,
+            observation_schema_version: reservationObservation.schemaVersion,
+            token_count_source: reservationObservation.tokenSource,
+            token_estimation_method:
+              reservationObservation.tokenEstimationMethod,
+            latency_source: reservationObservation.latencySource,
             started_at: input.log.startedAt,
             completed_at: null,
           })
@@ -735,6 +802,171 @@ export function createPostgresAiGenerationTaskLifecycleRepository(
       });
     },
   };
+}
+
+export function createCurrentMeasuredAiCallObservationCondition(): SQL {
+  return and(
+    eq(aiCallLog.observation_schema_version, 1),
+    createMeasuredAiCallTokenCondition(),
+    createMeasuredAiCallLatencyCondition(),
+  ) as SQL;
+}
+
+export function createTerminalAiCallObservationCondition(): SQL {
+  return or(
+    and(
+      isNull(aiCallLog.observation_schema_version),
+      isNull(aiCallLog.token_count_source),
+      isNull(aiCallLog.token_estimation_method),
+      isNull(aiCallLog.latency_source),
+    ),
+    and(
+      eq(aiCallLog.observation_schema_version, 1),
+      createCurrentAiCallTokenCondition(),
+      createCurrentAiCallLatencyCondition(),
+    ),
+  ) as SQL;
+}
+
+function normalizeAiGenerationRunningReservationObservation(
+  input: unknown,
+): AiCallObservation {
+  const observation = normalizeAiCallObservation(input);
+  if (
+    observation.tokenSource !== "unavailable" ||
+    observation.latencySource !== "unavailable"
+  ) {
+    throw new AiCallObservationIntegrityError();
+  }
+  return observation;
+}
+
+export function normalizePersistedAiCallLogReservationObservation(
+  row: PersistedAiCallLogObservation,
+): AiCallObservation {
+  const persisted = normalizePersistedAiCallLogObservation(row);
+  if (persisted.kind !== "current" || row.estimatedCostCny !== null) {
+    throw new AiCallObservationIntegrityError();
+  }
+  return normalizeAiGenerationRunningReservationObservation(
+    persisted.observation,
+  );
+}
+
+export function normalizePersistedCurrentMeasuredAiCallObservation(
+  row: PersistedAiCallLogObservation,
+): AiCallMeasuredObservation {
+  const persisted = normalizePersistedAiCallLogObservation(row);
+  if (
+    persisted.kind !== "current" ||
+    persisted.observation.tokenSource === "unavailable" ||
+    persisted.observation.latencySource === "unavailable" ||
+    persisted.observation.promptTokenCount === null ||
+    persisted.observation.completionTokenCount === null ||
+    persisted.observation.totalTokenCount === null ||
+    persisted.observation.latencyMs === null
+  ) {
+    throw new AiCallObservationIntegrityError();
+  }
+  return {
+    ...persisted.observation,
+    promptTokenCount: persisted.observation.promptTokenCount,
+    completionTokenCount: persisted.observation.completionTokenCount,
+    totalTokenCount: persisted.observation.totalTokenCount,
+    latencySource: persisted.observation.latencySource,
+    latencyMs: persisted.observation.latencyMs,
+  };
+}
+
+export function normalizePersistedAiCallLogObservation(
+  row: PersistedAiCallLogObservation,
+):
+  | { kind: "legacy"; observation: null }
+  | { kind: "current"; observation: AiCallObservation } {
+  if (
+    row.observationSchemaVersion === null &&
+    row.tokenSource === null &&
+    row.tokenEstimationMethod === null &&
+    row.latencySource === null
+  ) {
+    return { kind: "legacy", observation: null };
+  }
+
+  const observation = normalizeAiCallObservation({
+    schemaVersion: row.observationSchemaVersion,
+    tokenSource: row.tokenSource,
+    tokenEstimationMethod: row.tokenEstimationMethod,
+    promptTokenCount: row.promptTokenCount,
+    completionTokenCount: row.completionTokenCount,
+    totalTokenCount: row.totalTokenCount,
+    latencySource: row.latencySource,
+    latencyMs: row.latencyMs,
+  });
+  if (
+    observation.tokenSource === "unavailable" &&
+    row.estimatedCostCny !== null
+  ) {
+    throw new AiCallObservationIntegrityError();
+  }
+  return { kind: "current", observation };
+}
+
+function createCurrentAiCallTokenCondition(): SQL {
+  return or(
+    and(
+      eq(aiCallLog.token_count_source, "unavailable"),
+      isNull(aiCallLog.token_estimation_method),
+      isNull(aiCallLog.prompt_token_count),
+      isNull(aiCallLog.completion_token_count),
+      isNull(aiCallLog.total_token_count),
+      isNull(aiCallLog.estimated_cost_cny),
+    ),
+    createMeasuredAiCallTokenCondition(),
+  ) as SQL;
+}
+
+function createMeasuredAiCallTokenCondition(): SQL {
+  return and(
+    or(
+      and(
+        eq(aiCallLog.token_count_source, "provider_reported"),
+        isNull(aiCallLog.token_estimation_method),
+      ),
+      and(
+        eq(aiCallLog.token_count_source, "estimated"),
+        eq(aiCallLog.token_estimation_method, AI_CALL_TOKEN_ESTIMATION_METHOD),
+      ),
+    ),
+    isNotNull(aiCallLog.prompt_token_count),
+    isNotNull(aiCallLog.completion_token_count),
+    isNotNull(aiCallLog.total_token_count),
+    gte(aiCallLog.prompt_token_count, 0),
+    lte(aiCallLog.prompt_token_count, AI_CALL_METRIC_INTEGER_MAX),
+    gte(aiCallLog.completion_token_count, 0),
+    lte(aiCallLog.completion_token_count, AI_CALL_METRIC_INTEGER_MAX),
+    gte(aiCallLog.total_token_count, 0),
+    lte(aiCallLog.total_token_count, AI_CALL_METRIC_INTEGER_MAX),
+    sql`${aiCallLog.total_token_count} = ${aiCallLog.prompt_token_count} + ${aiCallLog.completion_token_count}`,
+  ) as SQL;
+}
+
+function createCurrentAiCallLatencyCondition(): SQL {
+  return or(
+    and(
+      eq(aiCallLog.latency_source, "unavailable"),
+      isNull(aiCallLog.latency_ms),
+    ),
+    createMeasuredAiCallLatencyCondition(),
+  ) as SQL;
+}
+
+function createMeasuredAiCallLatencyCondition(): SQL {
+  return and(
+    inArray(aiCallLog.latency_source, ["provider_reported", "client_observed"]),
+    isNotNull(aiCallLog.latency_ms),
+    gte(aiCallLog.latency_ms, 0),
+    lte(aiCallLog.latency_ms, AI_CALL_METRIC_INTEGER_MAX),
+  ) as SQL;
 }
 
 export function createRunningAttemptCondition(input: {

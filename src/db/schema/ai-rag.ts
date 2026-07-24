@@ -423,6 +423,10 @@ export const aiCallLog = pgTable(
       scale: 6,
     }),
     latency_ms: integer("latency_ms"),
+    observation_schema_version: integer("observation_schema_version"),
+    token_count_source: text("token_count_source"),
+    token_estimation_method: text("token_estimation_method"),
+    latency_source: text("latency_source"),
     started_at: timestampColumn("started_at"),
     completed_at: nullableTimestampColumn("completed_at"),
     created_at: createdAtColumn(),
@@ -443,6 +447,59 @@ export const aiCallLog = pgTable(
       table.call_status,
     ),
     index("idx_ai_call_log_started_at").on(table.started_at),
+    check(
+      "chk_ai_call_log_observation_v1",
+      sql`(
+        ${table.observation_schema_version} is null
+        and ${table.token_count_source} is null
+        and ${table.token_estimation_method} is null
+        and ${table.latency_source} is null
+      ) or (
+        ${table.observation_schema_version} is not null
+        and ${table.observation_schema_version} = 1
+        and ${table.token_count_source} is not null
+        and ${table.latency_source} is not null
+        and (
+          (
+            ${table.token_count_source} = 'unavailable'
+            and ${table.token_estimation_method} is null
+            and ${table.prompt_token_count} is null
+            and ${table.completion_token_count} is null
+            and ${table.total_token_count} is null
+            and ${table.estimated_cost_cny} is null
+          ) or (
+            ${table.token_count_source} = 'provider_reported'
+            and ${table.token_estimation_method} is null
+            and ${table.prompt_token_count} is not null
+            and ${table.completion_token_count} is not null
+            and ${table.total_token_count} is not null
+            and ${table.prompt_token_count} between 0 and 2147483647
+            and ${table.completion_token_count} between 0 and 2147483647
+            and ${table.total_token_count} between 0 and 2147483647
+            and ${table.total_token_count} = ${table.prompt_token_count} + ${table.completion_token_count}
+          ) or (
+            ${table.token_count_source} = 'estimated'
+            and ${table.token_estimation_method} is not null
+            and ${table.token_estimation_method} = 'canonical_json_unicode_code_point_ceiling_v1'
+            and ${table.prompt_token_count} is not null
+            and ${table.completion_token_count} is not null
+            and ${table.total_token_count} is not null
+            and ${table.prompt_token_count} between 0 and 2147483647
+            and ${table.completion_token_count} between 0 and 2147483647
+            and ${table.total_token_count} between 0 and 2147483647
+            and ${table.total_token_count} = ${table.prompt_token_count} + ${table.completion_token_count}
+          )
+        )
+        and (
+          (${table.latency_source} = 'unavailable' and ${table.latency_ms} is null)
+          or (
+            ${table.latency_source} in ('provider_reported', 'client_observed')
+            and ${table.latency_ms} is not null
+            and ${table.latency_ms} between 0 and 2147483647
+          )
+        )
+      )`,
+    ),
   ],
 );
 

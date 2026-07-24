@@ -171,6 +171,10 @@ function createRepositories(input: {
       totalTokenCount: 120,
       estimatedCostCny: "0.00",
       latencyMs: 32,
+      observationSchemaVersion: 1,
+      tokenCountSource: "provider_reported",
+      tokenEstimationMethod: null,
+      latencySource: "client_observed",
       startedAt: now,
       completedAt: now,
     },
@@ -191,6 +195,10 @@ function createRepositories(input: {
       totalTokenCount: 600,
       estimatedCostCny: "0.10",
       latencyMs: 88,
+      observationSchemaVersion: 1,
+      tokenCountSource: "provider_reported",
+      tokenEstimationMethod: null,
+      latencySource: "client_observed",
       startedAt: now,
       completedAt: now,
     },
@@ -205,8 +213,12 @@ function createRepositories(input: {
       callCount: 1,
       successCount: 0,
       failedCount: 1,
-      totalTokenCount: 120,
-      estimatedCostCny: "0.00",
+      providerReportedTokenCount: 120,
+      providerReportedTokenDerivedCostCny: "0.00",
+      estimatedTokenCount: 0,
+      estimatedTokenDerivedCostCny: null,
+      unavailableObservationCount: 0,
+      legacyObservationCount: 0,
     },
     {
       bucket: "2026-05-24",
@@ -217,8 +229,12 @@ function createRepositories(input: {
       callCount: 1,
       successCount: 1,
       failedCount: 0,
-      totalTokenCount: 600,
-      estimatedCostCny: "0.10",
+      providerReportedTokenCount: 600,
+      providerReportedTokenDerivedCostCny: "0.10",
+      estimatedTokenCount: 0,
+      estimatedTokenDerivedCostCny: null,
+      unavailableObservationCount: 0,
+      legacyObservationCount: 0,
     },
   ];
 
@@ -477,6 +493,9 @@ describe("phase 11 ai_call_log coverage hardening", () => {
       aiCallLogRepository: {
         async appendAiCallLog(aiCallLogInput) {
           aiCallLogEntries.push(aiCallLogInput);
+          if (aiCallLogInput.observation === undefined) {
+            throw new Error("Current observation is required.");
+          }
 
           return {
             publicId: "ai-call-log-public-rag",
@@ -496,6 +515,11 @@ describe("phase 11 ai_call_log coverage hardening", () => {
             totalTokenCount: aiCallLogInput.totalTokenCount,
             estimatedCostCny: "0.00",
             latencyMs: aiCallLogInput.latencyMs,
+            observationSchemaVersion: aiCallLogInput.observation.schemaVersion,
+            tokenCountSource: aiCallLogInput.observation.tokenSource,
+            tokenEstimationMethod:
+              aiCallLogInput.observation.tokenEstimationMethod,
+            latencySource: aiCallLogInput.observation.latencySource,
             startedAt: aiCallLogInput.startedAt.toISOString(),
             completedAt: aiCallLogInput.completedAt?.toISOString() ?? null,
           };
@@ -565,12 +589,18 @@ describe("phase 11 ai_call_log coverage hardening", () => {
       data: {
         aiExplanation: {
           evidenceStatus: "sufficient",
-          citations: expect.arrayContaining([
-            expect.objectContaining({
-              resourcePublicId: "resource-public-001",
+          citations: [
+            {
               resourceTitle: "Local Citation Resource",
-            }),
-          ]),
+              headingPath: ["Marketing Citation"],
+              isStale: null,
+            },
+            {
+              resourceTitle: "Local Citation Resource",
+              headingPath: ["Retail Rule"],
+              isStale: null,
+            },
+          ],
           insufficientEvidenceMessage: null,
         },
       },

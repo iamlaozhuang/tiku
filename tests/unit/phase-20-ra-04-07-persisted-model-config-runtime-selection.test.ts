@@ -125,6 +125,9 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
       {
         async appendAiCallLog(input) {
           appendedAiCallLogs.push(input);
+          if (input.observation === undefined) {
+            throw new Error("Current observation is required.");
+          }
 
           return {
             publicId: "ai-call-log-public-admin-config",
@@ -143,6 +146,10 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
             totalTokenCount: input.totalTokenCount,
             estimatedCostCny: "0.00",
             latencyMs: input.latencyMs,
+            observationSchemaVersion: input.observation.schemaVersion,
+            tokenCountSource: input.observation.tokenSource,
+            tokenEstimationMethod: input.observation.tokenEstimationMethod,
+            latencySource: input.observation.latencySource,
             startedAt: input.startedAt.toISOString(),
             completedAt: input.completedAt?.toISOString() ?? null,
           };

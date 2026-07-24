@@ -175,6 +175,7 @@ export function createAiMockProviderRuntime(
         completionTokenCount: providerResult.completionTokenCount,
         totalTokenCount: providerResult.totalTokenCount,
         latencyMs: providerResult.latencyMs,
+        observation: providerResult.observation,
         startedAt,
         completedAt,
       } satisfies AppendAiCallLogInput;

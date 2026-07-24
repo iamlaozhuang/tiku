@@ -66,6 +66,18 @@ export type AiCallLogRecord = {
   evidenceStatus: EvidenceStatus;
   internalNumericId?: number;
   latencyMs: number | null;
+  observationSchemaVersion?: 1 | null;
+  tokenCountSource?:
+    | "provider_reported"
+    | "estimated"
+    | "unavailable"
+    | "legacy";
+  tokenEstimationMethod?: "canonical_json_unicode_code_point_ceiling_v1" | null;
+  latencySource?:
+    | "provider_reported"
+    | "client_observed"
+    | "unavailable"
+    | "legacy";
   level: number | null;
   modelAlias: string;
   organizationPublicId: string | null;
@@ -90,6 +102,10 @@ export type AiCallLogDto = {
   estimatedCostCny: string | null;
   evidenceStatus: EvidenceStatus;
   latencyMs: number | null;
+  observationSchemaVersion: 1 | null;
+  tokenCountSource: NonNullable<AiCallLogRecord["tokenCountSource"]>;
+  tokenEstimationMethod: "canonical_json_unicode_code_point_ceiling_v1" | null;
+  latencySource: NonNullable<AiCallLogRecord["latencySource"]>;
   level: number | null;
   modelAlias: string;
   organizationPublicId: string | null;
@@ -112,13 +128,17 @@ export type AiCallLogDailySummaryDto = {
   bucket: string;
   bucketType: "day";
   callCount: number;
-  estimatedCostCny: string;
+  providerReportedTokenDerivedCostCny: string | null;
+  estimatedTokenDerivedCostCny: string | null;
   evidenceStatusCounts: Record<EvidenceStatus, number>;
   failedCount: number;
   modelAlias: string;
   providerDisplayName: string;
   successCount: number;
-  totalTokenCount: number;
+  providerReportedTokenCount: number;
+  estimatedTokenCount: number;
+  unavailableObservationCount: number;
+  legacyObservationCount: number;
 };
 
 export type AiCallLogListDto = {

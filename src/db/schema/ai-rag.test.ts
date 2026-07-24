@@ -281,6 +281,10 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "total_token_count",
         "estimated_cost_cny",
         "latency_ms",
+        "observation_schema_version",
+        "token_count_source",
+        "token_estimation_method",
+        "latency_source",
         "started_at",
         "completed_at",
         "created_at",
@@ -297,6 +301,9 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "idx_ai_call_log_ai_func_type_call_status",
         "idx_ai_call_log_started_at",
       ]),
+    );
+    expect(getCheckNames(aiCallLog)).toContain(
+      "chk_ai_call_log_observation_v1",
     );
   });
 

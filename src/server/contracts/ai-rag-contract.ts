@@ -78,6 +78,18 @@ export type AiCallLogDto = {
   responseRedactedSnapshot: RedactedJsonObject | null;
   errorRedactedSnapshot: RedactedJsonObject | null;
   citationRedactedSnapshot: RedactedJsonObject | null;
+  observationSchemaVersion: 1 | null;
+  tokenCountSource:
+    | "provider_reported"
+    | "estimated"
+    | "unavailable"
+    | "legacy";
+  tokenEstimationMethod: "canonical_json_unicode_code_point_ceiling_v1" | null;
+  latencySource:
+    | "provider_reported"
+    | "client_observed"
+    | "unavailable"
+    | "legacy";
   promptTokenCount: number | null;
   completionTokenCount: number | null;
   totalTokenCount: number | null;

@@ -278,6 +278,11 @@ function createAdminAiAuditLogRepositories(): AdminAiAuditLogRuntimeRepositories
             totalTokenCount: 100,
             estimatedCostCny: "0.00",
             latencyMs: 80,
+            observationSchemaVersion: 1,
+            tokenCountSource: "estimated",
+            tokenEstimationMethod:
+              "canonical_json_unicode_code_point_ceiling_v1",
+            latencySource: "client_observed",
             startedAt: now,
             completedAt: now,
           },
@@ -297,8 +302,12 @@ function createAdminAiAuditLogRepositories(): AdminAiAuditLogRuntimeRepositories
             callCount: 1,
             successCount: 1,
             failedCount: 0,
-            totalTokenCount: 100,
-            estimatedCostCny: "0.00",
+            providerReportedTokenCount: 0,
+            providerReportedTokenDerivedCostCny: null,
+            estimatedTokenCount: 100,
+            estimatedTokenDerivedCostCny: "0.00",
+            unavailableObservationCount: 0,
+            legacyObservationCount: 0,
           },
         ],
         pagination: createPagination("startedAt"),
@@ -550,10 +559,28 @@ describe("phase 9 multi-client REST contract verification", () => {
       dailySummaries: [
         expect.objectContaining({
           bucket: "2026-05-23",
-          estimatedCostCny: "0.00",
+          estimatedTokenDerivedCostCny: "0.00",
+          unavailableObservationCount: 0,
+          legacyObservationCount: 0,
         }),
       ],
     });
+    const dailySummaryData = payloads[3].data;
+    if (
+      dailySummaryData === null ||
+      typeof dailySummaryData !== "object" ||
+      !("dailySummaries" in dailySummaryData) ||
+      !Array.isArray(dailySummaryData.dailySummaries) ||
+      dailySummaryData.dailySummaries.length !== 1
+    ) {
+      throw new Error("Expected one daily summary.");
+    }
+    const dailySummary = dailySummaryData.dailySummaries[0];
+    if (dailySummary === null || typeof dailySummary !== "object") {
+      throw new Error("Expected a daily summary object.");
+    }
+    expect(dailySummary).not.toHaveProperty("totalTokenCount");
+    expect(dailySummary).not.toHaveProperty("estimatedCostCny");
     expect(auditLogInputs).toEqual([
       expect.objectContaining({
         actionType: "audit_log.list",
