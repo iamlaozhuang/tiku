@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
+  currentTaskId: p1-remediation-rc-08-residual-jit-review-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -335,7 +335,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
+    - p1-remediation-rc-08-residual-jit-review-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
@@ -599,12 +601,64 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23: closed
     p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23: closed
     p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23: closed
-    p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: in_progress
+    p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: closed
+    p1-remediation-rc-08-residual-jit-review-2026-07-23: in_progress
 activeTasks:
+  - id: p1-remediation-rc-08-residual-jit-review-2026-07-23
+    title: RC-08 residual JIT review
+    phase: p1-remediation-rc-08-residual-jit-review-2026-07-23
+    status: in_progress
+    priority: p1
+    taskKind: low_risk_state_only_residual_jit_review
+    productClosureContribution: reconciles_F0157_closeout_and_revalidates_remaining_RC08_findings_without_product_changes
+    branch: fix/rc-08-residual-jit-state-closeout
+    objective: atomically record the delivered F-0157 static closeout, preserve WIP=1 and perform read-only residual JIT revalidation before selecting exactly one next product task
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-08
+    findingIds:
+      - F-0162
+      - F-0163
+      - F-0164
+    executionStage: state_closeout_and_read_only_residual_revalidation
+    findingStatus: F0157_closed_static_product_F0162_F0163_F0164_pending_revalidation
+    findingDisposition: F0013_remains_runtime_hold; F0162_F0163_F0164_are_not_closed_and_require_independent_JIT_ordering
+    riskBoundary:
+      category: low_risk_state_only
+      approvalStatus: approved
+      approvalId: guardian-rc08-f0157-state-closeout-residual-jit-2026-07-23
+      requestedBaseSha: 76345102fee8a42ea67ea63427f0ce188192009a
+      allowedFiles: 3
+      productCodeChange: false
+      schemaOrMigrationChange: false
+      databaseOrRealData: false
+      permissionOrEntitlementChange: false
+      providerOrExternalCall: false
+      dependencyOrMechanismChange: false
+      conditionalCloseout: true
+    previousTaskCloseout:
+      taskId: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
+      findingIds:
+        - F-0157
+      commit: 76345102fee8a42ea67ea63427f0ce188192009a
+      tree: 852ed1432be129d90df0ff1f4f76856bb3874623
+      status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+      findingStatus: closed_static_product_without_DDL_migration_apply_real_database_provider_or_browser_runtime_proof
+      focusedTests: 645
+      focusedTestFiles: 27
+      closeoutKernel: pass
+      prePushKernel: pass
+      masterOriginSync: pass
+      worktreeCleanBeforeBranch: true
+      shortBranchCleanup: pass
+    jitRevalidation:
+      F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
+      F-0162: pending_read_only_revalidation_before_task_selection
+      F-0163: pending_read_only_revalidation_before_task_selection
+      F-0164: pending_read_only_revalidation_before_task_selection
   - id: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     title: AI generation canonical seven question type contract
     phase: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: schema_source_type_database_application_logic_provider_adapter_pure_logic_prompt_registry_and_UI_contract
     productClosureContribution: closes_F0157_static_question_type_alias_downgrade_and_four_type_consumer_gap
@@ -614,8 +668,8 @@ activeTasks:
     candidateRootCauseCluster: P1-RC-08
     findingIds:
       - F-0157
-    executionStage: implemented_verified_static_pending_final_tree_binding
-    findingStatus: implemented_verified_static_pending_final_tree_binding
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed_static_product
     findingDisposition: F0157_independent_static_product_residual; F0013_remains_runtime_hold; F0162_F0163_F0164_remain_separate_following_residuals
     riskBoundary:
       category: schema_source_type_database_application_logic_provider_adapter_pure_logic_prompt_registry_and_UI_contract
@@ -667,6 +721,19 @@ activeTasks:
       worktreeCleanBeforeBranch: true
       shortBranchCleanup: pass
       closeoutKernel: pass
+    closeoutEvidence:
+      commit: 76345102fee8a42ea67ea63427f0ce188192009a
+      parent: 14c1575faa8fba3ea43a12f8b0c0d862b1595713
+      tree: 852ed1432be129d90df0ff1f4f76856bb3874623
+      changedFiles: 54
+      focusedTests: 645
+      focusedTestFiles: 27
+      closeoutKernel: pass
+      prePushKernel: pass
+      masterOriginSync: pass
+      worktreeClean: true
+      shortBranchCleanup: pass
+      proofBoundary: no_DDL_migration_apply_real_database_provider_network_or_browser_runtime_proof
   - id: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     title: AI call usage and latency provenance
     phase: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23

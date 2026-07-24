@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
+  currentTaskId: p1-remediation-rc-08-residual-jit-review-2026-07-23
   currentCandidateClusterId: P1-RC-08
   candidateClusterOrder:
     - P1-RC-01
@@ -581,7 +581,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
+    - p1-remediation-rc-08-residual-jit-review-2026-07-23
   completedTaskIds:
+    - p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     - p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23
     - p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23
@@ -776,7 +778,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-learning-suggestion-whole-report-input-2026-07-23: closed
     p1-remediation-rc-08-learning-suggestion-lifecycle-recovery-2026-07-23: closed
     p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23: closed
-    p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: in_progress
+    p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23: closed
+    p1-remediation-rc-08-residual-jit-review-2026-07-23: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -977,72 +980,57 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
-  title: AI generation canonical seven question type contract
-  phase: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
+  id: p1-remediation-rc-08-residual-jit-review-2026-07-23
+  title: RC-08 residual JIT review
+  phase: p1-remediation-rc-08-residual-jit-review-2026-07-23
   status: in_progress
   priority: p1
-  taskKind: schema_source_type_database_application_logic_provider_adapter_pure_logic_prompt_registry_and_UI_contract
-  productClosureContribution: closes_F0157_static_question_type_alias_downgrade_and_four_type_consumer_gap
-  branch: fix/ai-generation-seven-question-type-contract
+  taskKind: low_risk_state_only_residual_jit_review
+  productClosureContribution: reconciles_F0157_closeout_and_revalidates_remaining_RC08_findings_without_product_changes
+  branch: fix/rc-08-residual-jit-state-closeout
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
   findingIds:
-    - F-0157
+    - F-0162
+    - F-0163
+    - F-0164
   candidateRootCauseCluster: P1-RC-08
-  objective: make every AI question generation, paper planning, formal adoption, organization training and personal learning consumer preserve the same seven canonical question types without alias emission, silent short_answer fallback or four-type filtering
-  executionStage: implemented_verified_static_pending_final_tree_binding
-  findingStatus: implemented_verified_static_pending_final_tree_binding
-  findingDisposition: F0157_independent_static_product_residual; F0013_remains_runtime_hold; F0162_F0163_F0164_remain_separate_following_residuals
+  objective: atomically record the delivered F-0157 static closeout, preserve WIP=1 and perform read-only residual JIT revalidation before selecting exactly one next product task
+  executionStage: state_closeout_and_read_only_residual_revalidation
+  findingStatus: F0157_closed_static_product_F0162_F0163_F0164_pending_revalidation
+  findingDisposition: F0013_remains_runtime_hold; F0162_F0163_F0164_are_not_closed_and_require_independent_JIT_ordering
   riskBoundary:
-    category: schema_source_type_database_application_logic_provider_adapter_pure_logic_prompt_registry_and_UI_contract
-    approvalId: guardian-f0157-ai-generation-seven-question-type-contract-2026-07-23
-    requestFingerprint: 01e97dad76f43555610f0f9683e0ce9e00ef1fa3b814fbf78bc6c979b40ecfdd
-    requestedBaseSha: 14c1575faa8fba3ea43a12f8b0c0d862b1595713
-    schemaOrMigrationChange: schema_type_source_only_no_DDL_or_migration
-    migrationApplyOrRealDatabase: false
-    authorizationOrEntitlementExpansion: false
-    providerOrRealExternalCall: false
-    providerAdapterPureLogic: true
-    promptRegistrySemanticChange: ai_paper_generation_requires_version_and_hash_upgrade
-    dependencyChange: false
-    approvedBaseSha: 14c1575faa8fba3ea43a12f8b0c0d862b1595713
-    approvedAllowedFiles: 72
-    previousAmendmentApprovalId: guardian-f0157-admin-result-question-type-caller-amendment-01-2026-07-23
-    amendmentApprovalId: guardian-f0157-canonical-generation-parameter-callers-amendment-02-2026-07-23
-    previousFinalTreeCorrectionDecision: P1_GUARDIAN_CORRECTION_REQUIRED_V1_rejected_tree_cd5a723851e9343910966b4f216d8ea9fb97d604
-    finalTreeCorrectionDecision: P1_GUARDIAN_CORRECTION_REQUIRED_V1_rejected_tree_f29a7b7ea5318c9c548e05d0c71a4109232d77c2
-    databaseApprovalId: guardian-f0157-ai-generation-seven-question-type-contract-2026-07-23
-    providerApprovalId: guardian-f0157-ai-generation-seven-question-type-contract-2026-07-23
+    category: low_risk_state_only
+    approvalStatus: approved
+    approvalId: guardian-rc08-f0157-state-closeout-residual-jit-2026-07-23
+    requestedBaseSha: 76345102fee8a42ea67ea63427f0ce188192009a
+    allowedFiles: 3
+    productCodeChange: false
+    schemaOrMigrationChange: false
+    databaseOrRealData: false
+    permissionOrEntitlementChange: false
+    providerOrExternalCall: false
+    dependencyOrMechanismChange: false
     conditionalCloseout: true
-  preRedImpactScan:
-    chain: admin_and_student_UI_to_canonical_request_type_to_versioned_prompt_and_strict_provider_parser_to_formal_adoption_organization_training_paper_source_and_personal_learning_consumers
-    coreFiles: 46
-    contingencyFiles: 26
-    directCallerCalleeMocksFixturesReviewed: true
-    confirmedReachableFailures: admin_multiple_choice_alias_mismatch_and_silent_short_answer_fallback; three_missing_UI_types; objective_only_paper_defaults; four_type_personal_learning_and_enterprise_source_filters
-    bundleDisposition: one_F0157_end_to_end_type_identity_contract; F0162_result_snapshot_F0163_answer_concurrency_and_F0164_training_history_are_independent
-  requiredSemantics:
-    ssot: single_choice_multi_choice_true_false_fill_blank_short_answer_case_analysis_calculation_from_questionTypeValues
-    canonicalBoundary: new_requests_provider_outputs_DTOs_snapshots_and_UI_emit_only_canonical_values
-    compatibility: approved_legacy_aliases_are_normalized_once_at_an_explicit_input_or_persisted_read_edge_and_never_reemitted
-    exactTypeSemantics: options_answers_fill_blank_scoring_points_and_subjective_review_behavior_remain_type_correct_without_short_answer_fallback
-    paperPlanning: new_UI_defaults_use_advisory_section_structure_capable_of_all_seven_types_while_legacy_objective_distribution_snapshots_remain_read_compatible
-    promptProvenance: ai_paper_generation_contract_semantic_change_requires_new_registry_key_version_body_and_SHA256_and_persisted_config_fail_closed_until_updated
-    organizationTraining: JSON_snapshot_model_validation_summary_scoring_and_admin_employee_projection_preserve_all_seven_types_without_DDL
-    privateLearning: platform_and_enterprise_selected_questions_preserve_exact_type_and_exact_count_without_filtering
-    unchanged: no_migration_real_database_provider_network_permission_quota_dependency_or_formal_question_schema_change
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-ai-call-usage-latency-provenance-2026-07-23
+    taskId: p1-remediation-rc-08-ai-generation-seven-question-type-contract-2026-07-23
     findingIds:
-      - F-0177
-    commit: 14c1575faa8fba3ea43a12f8b0c0d862b1595713
-    tree: cd5a296981405d720dc8625e994a8607afba3212
+      - F-0157
+    commit: 76345102fee8a42ea67ea63427f0ce188192009a
+    tree: 852ed1432be129d90df0ff1f4f76856bb3874623
     status: closed_committed_ff_only_merged_pushed_synced_and_cleaned
-    findingStatus: closed_static_product_without_migration_apply_real_database_provider_or_browser_runtime_proof
+    findingStatus: closed_static_product_without_DDL_migration_apply_real_database_provider_or_browser_runtime_proof
+    focusedTests: 645
+    focusedTestFiles: 27
+    closeoutKernel: pass
+    prePushKernel: pass
     masterOriginSync: pass
     worktreeCleanBeforeBranch: true
     shortBranchCleanup: pass
-    closeoutKernel: pass
+  jitRevalidation:
+    F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
+    F-0162: pending_read_only_revalidation_before_task_selection
+    F-0163: pending_read_only_revalidation_before_task_selection
+    F-0164: pending_read_only_revalidation_before_task_selection
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active
