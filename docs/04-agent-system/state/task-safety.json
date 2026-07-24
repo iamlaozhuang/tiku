@@ -1,84 +1,48 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24",
-  "findingIds": ["F-0012"],
+  "taskId": "p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24",
+  "findingIds": [],
   "candidateRootCauseCluster": "P1-RC-09",
-  "objective": "Close F-0012 by making generic user and employee account disable consume one atomic lifecycle transaction command with exact active-flow termination, server-derived redacted success audit facts, and unchanged permission scope.",
-  "taskKind": "database_application_logic_and_permission_path_classified_without_scope_expansion",
-  "status": "implemented_verified_static_pending_final_tree_binding",
-  "branch": "fix/employee-disable-active-flow-equivalence",
-  "baseSha": "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-  "riskCategory": "database_application_logic_and_permission_path_classified_without_scope_expansion",
+  "objective": "Atomically materialize the acknowledged F-0012 static product closeout and select F-0028 as the only inactive, unmaterialized next candidate pending an independent read-only revalidation approval.",
+  "taskKind": "low_risk_state_only_plus_existing_state_contract_test",
+  "status": "approved_state_only_transition_pending_final_tree_binding",
+  "branch": "fix/rc-09-f0012-closeout-f0028-jit-materialization",
+  "baseSha": "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
+  "riskCategory": "low_risk_state_only_plus_existing_state_contract_test",
   "approvalStatus": "approved",
-  "approvalId": "guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24",
-  "approvalRequestSource": "P1_GUARDIAN_TASK_BOUND_APPROVAL_V2",
+  "approvalId": "guardian-rc09-f0012-closeout-f0028-jit-state-transition-2026-07-24",
+  "approvalRequestSource": "P1_GUARDIAN_STATE_ONLY_PRE_WRITE_APPROVAL_V1",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
-    "src/server/repositories/employee-org-auth-quota-repository.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "src/server/services/admin-organization-org-auth-runtime.ts",
-    "tests/unit/p1-employee-disable-active-flow-equivalence.test.ts",
-    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-    "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-    "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/admin-flow-runtime-repository.test.ts",
-    "src/server/services/admin-flow-runtime.ts",
-    "src/server/services/admin-flow-runtime.test.ts",
-    "tests/unit/p1-org-auth-closure-actions.test.ts"
+    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
-    "src/server/repositories/employee-org-auth-quota-repository.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-    "src/server/services/admin-organization-org-auth-runtime.ts",
-    "tests/unit/p1-employee-disable-active-flow-equivalence.test.ts",
-    "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-    "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-    "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-    "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-    "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts"
+    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
   ],
-  "contingencyFiles": [
-    "src/server/repositories/admin-flow-runtime-repository.ts",
-    "src/server/repositories/admin-flow-runtime-repository.test.ts",
-    "src/server/services/admin-flow-runtime.ts",
-    "src/server/services/admin-flow-runtime.test.ts",
-    "tests/unit/p1-org-auth-closure-actions.test.ts"
-  ],
+  "contingencyFiles": [],
   "blockedFiles": [
-    "AGENTS.md",
-    "docs/04-agent-system/sop/**",
-    "scripts/**",
-    ".husky/**",
-    "docs/05-execution-logs/**",
-    "package.json",
-    "pnpm-lock.yaml",
     "all files outside allowedFiles",
-    "any schema, migration, migration apply, real database/data, permission expansion, quota, Provider, dependency, deployment, secret/env or mechanism change"
+    "any product, schema, migration, database, permission, Provider, dependency or mechanism file",
+    "F-0028 product changes or closure",
+    "F-0013 runtime execution or closure",
+    "any other RC-09 finding disposition"
   ],
   "requiredSemantics": {
-    "previousCloseout": "The RC-09 residual JIT state-only task is closed and completed at commit a61da4c2e46968b117ab984874c888ea81ebc5e7, parent 3df9475e95621f1c3946be6693afd7ab9667cdae and tree a9453d1a769b5b248febbd3ec1e8eca9d2f856a2.",
-    "wip": "Exactly one in-progress P1 task exists and it is this F-0012 product task.",
-    "sharedCommand": "Generic user disable and employee-specific disable consume one shared account lifecycle transaction command; no second active-flow termination algorithm remains.",
-    "employeeIdentity": "The employee path resolves and locks exact server-owned employee, user and current organization identity inside the transaction and never accepts a client-supplied user identity.",
-    "atomicOrder": "One lifecycleChangedAt anchors the fixed transaction order: scope and identity locks, quota release, user disable, session revocation, practice termination, mock exam termination, exact employee-organization training read-only transition, and redacted success audit last.",
-    "audit": "The shared command derives employee.disable, employee target identity, success result and fixed redacted metadata; any audit or intermediate failure rolls back the transaction and the service never appends success audit after commit.",
-    "effectiveRole": "The server selects super_admin when present and otherwise ops_admin; content_admin alone is denied before repository facts or mutation and role ordering cannot corrupt the audit actor role.",
-    "compatibility": "Generic user disable, quota rules, transfer and unbind, organization and org_auth closure, API response and redaction remain unchanged; repeated or concurrent disable cannot underflow quota or overwrite terminal flows.",
-    "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007 and all other RC-09 findings remain unchanged."
+    "previousCloseout": "F-0012 is closed_static_product at commit 5aa62c7e9573d1d065efe37d97e4e7b10294ad8e, parent a61da4c2e46968b117ab984874c888ea81ebc5e7 and tree f53240ac20f22598304284232905405a2fabdc72 with 12 changed files.",
+    "proofBoundary": "The F-0012 closeout is static product evidence only, without real database, data, browser or runtime proof and without permission scope expansion.",
+    "wip": "Exactly one in-progress task exists and it is this state-only transition task.",
+    "nextOnly": "F-0028 is selected only as an inactive and unmaterialized next candidate pending a fresh independent read-only revalidation approval.",
+    "unchangedFindings": "All other RC-09 findings remain unchanged and unclosed.",
+    "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007."
   },
   "validationCommands": [
     {
-      "name": "employee-disable-focused",
+      "name": "state-contract",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -86,33 +50,9 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-employee-disable-active-flow-equivalence.test.ts",
-        "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-        "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-        "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
         "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
         "--maxWorkers=1"
       ]
-    },
-    {
-      "name": "repository-lint",
-      "kind": "lint",
-      "executable": "npm.cmd",
-      "arguments": ["run", "lint"]
-    },
-    {
-      "name": "typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@11.9.0", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "build",
-      "kind": "other",
-      "executable": "npm.cmd",
-      "arguments": ["run", "build"]
     },
     {
       "name": "format",
@@ -126,21 +66,7 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
-        "src/server/repositories/employee-org-auth-quota-repository.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
-        "src/server/services/admin-organization-org-auth-runtime.ts",
-        "tests/unit/p1-employee-disable-active-flow-equivalence.test.ts",
-        "tests/unit/p1-lifecycle-command-atomicity.test.ts",
-        "tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts",
-        "tests/unit/phase-11-system-ops-user-management-loop.test.ts",
-        "src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts",
-        "tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts",
-        "src/server/repositories/admin-flow-runtime-repository.ts",
-        "src/server/repositories/admin-flow-runtime-repository.test.ts",
-        "src/server/services/admin-flow-runtime.ts",
-        "src/server/services/admin-flow-runtime.test.ts",
-        "tests/unit/p1-org-auth-closure-actions.test.ts"
+        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
       ]
     },
     {
@@ -148,25 +74,12 @@
       "kind": "other",
       "executable": "git.exe",
       "arguments": ["diff", "--check"]
-    },
-    {
-      "name": "state-contract",
-      "kind": "test",
-      "executable": "corepack.cmd",
-      "arguments": [
-        "pnpm@11.9.0",
-        "exec",
-        "vitest",
-        "run",
-        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
-        "--maxWorkers=1"
-      ]
     }
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24",
-    "permission": "guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24",
+    "database": null,
+    "permission": null,
     "provider": null,
     "deployment": null,
     "secretEnv": null
@@ -176,64 +89,47 @@
   },
   "conditionalCloseout": {
     "approved": true,
-    "approvalId": "guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24",
-    "conditions": [
-      "all focused and affected tests, lint, typecheck, build, exact format, diff and state validation are GREEN",
-      "one main-thread adversarial review confirms one shared command, exact atomic order, truthful effective role and no post-commit success audit",
-      "the final diff stays inside the approved 18-file envelope with no schema or migration",
-      "fresh database and permission tokens bind the final candidate tree before Kernel/full",
-      "base, origin, risk, permission scope and semantics remain unchanged"
-    ]
-  },
-  "verificationEvidence": {
-    "tddRed": "pass_expected_3_failures_of_3_before_product_implementation",
-    "focused": "pass_7_files_38_tests",
-    "lint": "pass_0_errors_3_pre_existing_warnings",
-    "typecheck": "pass",
-    "build": "pass",
-    "format": "pass_exact_18_file_envelope",
-    "diffStateSourceReview": "pass_main_thread_adversarial_review_and_envelope_scan",
-    "schemaMigrationChange": false,
-    "realDatabaseOrData": false,
-    "permissionScopeExpansion": false
-  },
-  "guardianReview": {
-    "decision": "correction_required",
-    "rejectedCandidateTree": "703122fa21242c1a870dfbf60893387845026254",
-    "rejectedRawCachedDiffSha256": "05ed93e2cb023ab482e1a1b84e6f0012d5b5c01ba25582ae2f148f2ddc1b063d",
-    "tokensIssued": false,
-    "correctionStatus": "applied_verified_pending_fresh_final_tree_binding",
-    "corrections": [
-      "keep employee timestamp mutation exclusive to the employee-specific branch",
-      "validate the authoritative organization row inside the employee transaction",
-      "directly test missing organization, audit rollback and generic user zero employee mutation"
-    ]
+    "approvalId": "guardian-rc09-f0012-closeout-f0028-jit-state-transition-2026-07-24"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-09-residual-jit-review-2026-07-24",
-    "commit": "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-    "parent": "3df9475e95621f1c3946be6693afd7ab9667cdae",
-    "tree": "a9453d1a769b5b248febbd3ec1e8eca9d2f856a2",
-    "changedFileCount": 4,
-    "status": "closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned",
-    "closeoutKernel": true,
-    "prePushKernel": true,
-    "masterOriginSync": true,
+    "taskId": "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24",
+    "commit": "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
+    "parent": "a61da4c2e46968b117ab984874c888ea81ebc5e7",
+    "tree": "f53240ac20f22598304284232905405a2fabdc72",
+    "changedFileCount": 12,
+    "focusedTestFiles": 7,
+    "focusedTests": 38,
+    "status": "closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "closeoutKernel": "pass",
+    "prePushKernel": "pass",
+    "masterOriginSync": "pass",
     "worktreeClean": true,
-    "shortBranchCleanup": true,
-    "proofBoundary": "state_only_no_product_schema_migration_database_permission_provider_dependency_or_mechanism_change"
+    "shortBranchCleanup": "pass",
+    "databaseToken": "consumed_once",
+    "permissionToken": "consumed_once",
+    "manualCompatibilityApproval": "consumed_once",
+    "proofBoundary": "closed_static_product_without_real_database_data_browser_or_runtime_proof_and_without_permission_scope_expansion"
+  },
+  "nextTask": {
+    "taskId": "p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24",
+    "branch": "fix/rc-09-organization-training-answer-cas-revalidation",
+    "findingId": "F-0028",
+    "status": "selected_pending_fresh_state_only_revalidation_approval",
+    "active": false,
+    "materialized": false
   },
   "jitRevalidation": {
-    "F-0012": "active_product_task_root_cause_revalidated_reachable",
+    "F-0012": "closed_static_product_at_5aa62c7e_without_real_database_data_or_runtime_proof",
+    "F-0028": "selected_next_only_pending_fresh_read_only_revalidation",
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
     "otherRc09Findings": "unchanged_pending_independent_revalidation"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-09",
-    "currentTaskId": "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24",
-    "currentPartition": "F-0012_employee_disable_active_flow_equivalence",
+    "currentTaskId": "p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24",
+    "currentPartition": "F0012_closeout_and_F0028_next_only_state_transition",
     "nextReviewHints": [
-      "write adversarial RED before product code",
+      "obtain independent state-only closeout ACK before materializing F-0028",
       "keep F-0013 runtime_hold and all other RC-09 findings unchanged"
     ]
   }

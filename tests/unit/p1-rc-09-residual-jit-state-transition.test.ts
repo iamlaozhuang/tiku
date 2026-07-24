@@ -4,16 +4,28 @@ import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
 const CURRENT_TASK_ID =
+  "p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24";
+const PREVIOUS_TASK_ID =
   "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24";
-const PREVIOUS_TASK_ID = "p1-remediation-rc-09-residual-jit-review-2026-07-24";
+const NEXT_TASK_ID =
+  "p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24";
 const APPROVAL_ID =
-  "guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24";
+  "guardian-rc09-f0012-closeout-f0028-jit-state-transition-2026-07-24";
 
 type ProgramState = {
   currentTaskId: string;
   materializedTaskIds: string[];
   completedTaskIds: string[];
   taskStatusById: Record<string, string | undefined>;
+};
+
+type NextTask = {
+  taskId: string;
+  branch: string;
+  findingId: string;
+  status: string;
+  active: boolean;
+  materialized: boolean;
 };
 
 type TaskProjection = {
@@ -27,9 +39,16 @@ type TaskProjection = {
     parent: string;
     tree: string;
     changedFileCount: number;
+    focusedTestFiles: number;
+    focusedTests: number;
+    databaseToken: string;
+    permissionToken: string;
+    manualCompatibilityApproval: string;
   };
+  nextTask: NextTask;
   jitRevalidation: {
     "F-0012": string;
+    "F-0028": string;
     "F-0013": string;
     otherRc09Findings: string;
   };
@@ -41,7 +60,6 @@ type TaskProjection = {
     allowedFiles: number;
     coreFiles: number;
     contingencyFiles: number;
-    permissionPathClassifiedWithoutScopeExpansion: boolean;
   };
 };
 
@@ -67,11 +85,8 @@ type TaskSafety = {
   allowedFiles: string[];
   coreFiles: string[];
   contingencyFiles: string[];
-  approvalSources: {
-    database: string | null;
-    permission: string | null;
-  };
   previousTaskCloseout: TaskProjection["previousTaskCloseout"];
+  nextTask: NextTask;
   jitRevalidation: TaskProjection["jitRevalidation"];
   validationCommands: Array<{
     name: string;
@@ -107,45 +122,61 @@ function assertProgramState(program: ProgramState): void {
   expect(program.currentTaskId).toBe(CURRENT_TASK_ID);
   expect(program.taskStatusById[CURRENT_TASK_ID]).toBe("in_progress");
   expect(program.taskStatusById[PREVIOUS_TASK_ID]).toBe("closed");
+  expect(program.taskStatusById[NEXT_TASK_ID]).toBeUndefined();
   expect(program.materializedTaskIds).toContain(CURRENT_TASK_ID);
+  expect(program.materializedTaskIds).not.toContain(NEXT_TASK_ID);
   expect(program.completedTaskIds).toContain(PREVIOUS_TASK_ID);
+  expect(program.completedTaskIds).not.toContain(NEXT_TASK_ID);
 }
 
 function assertCurrentTask(task: TaskProjection): void {
   expect(task).toMatchObject({
     id: CURRENT_TASK_ID,
     status: "in_progress",
-    executionStage: "implemented_verified_static_pending_final_tree_binding",
-    findingIds: ["F-0012"],
+    executionStage: "approved_state_only_transition_pending_final_tree_binding",
+    findingIds: [],
     previousTaskCloseout: {
       taskId: PREVIOUS_TASK_ID,
-      commit: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-      parent: "3df9475e95621f1c3946be6693afd7ab9667cdae",
-      tree: "a9453d1a769b5b248febbd3ec1e8eca9d2f856a2",
-      changedFileCount: 4,
+      commit: "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
+      parent: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
+      tree: "f53240ac20f22598304284232905405a2fabdc72",
+      changedFileCount: 12,
+      focusedTestFiles: 7,
+      focusedTests: 38,
+      databaseToken: "consumed_once",
+      permissionToken: "consumed_once",
+      manualCompatibilityApproval: "consumed_once",
+    },
+    nextTask: {
+      taskId: NEXT_TASK_ID,
+      branch: "fix/rc-09-organization-training-answer-cas-revalidation",
+      findingId: "F-0028",
+      status: "selected_pending_fresh_state_only_revalidation_approval",
+      active: false,
+      materialized: false,
     },
     jitRevalidation: {
-      "F-0012": "active_product_task_root_cause_revalidated_reachable",
+      "F-0012":
+        "closed_static_product_at_5aa62c7e_without_real_database_data_or_runtime_proof",
+      "F-0028": "selected_next_only_pending_fresh_read_only_revalidation",
       "F-0013":
         "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
       otherRc09Findings: "unchanged_pending_independent_revalidation",
     },
     riskBoundary: {
-      category:
-        "database_application_logic_and_permission_path_classified_without_scope_expansion",
+      category: "low_risk_state_only_plus_existing_state_contract_test",
       approvalStatus: "approved",
       approvalId: APPROVAL_ID,
-      requestedBaseSha: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-      allowedFiles: 18,
-      coreFiles: 13,
-      contingencyFiles: 5,
-      permissionPathClassifiedWithoutScopeExpansion: true,
+      requestedBaseSha: "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
+      allowedFiles: 4,
+      coreFiles: 4,
+      contingencyFiles: 0,
     },
   });
 }
 
-describe("RC-09 F-0012 product task materialization", () => {
-  it("closes the prior state task and keeps exactly one current F-0012 WIP", () => {
+describe("RC-09 F-0012 closeout and F-0028 next-only materialization", () => {
+  it("closes F-0012 and keeps exactly one state-only WIP", () => {
     const project = parseYamlStrictly(
       "docs/04-agent-system/state/project-state.yaml",
     ) as StateProjection;
@@ -166,51 +197,48 @@ describe("RC-09 F-0012 product task materialization", () => {
     assertCurrentTask(inProgressTasks[0]!);
     expect(safety).toMatchObject({
       taskId: CURRENT_TASK_ID,
-      findingIds: ["F-0012"],
-      status: "implemented_verified_static_pending_final_tree_binding",
-      branch: "fix/employee-disable-active-flow-equivalence",
-      baseSha: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-      riskCategory:
-        "database_application_logic_and_permission_path_classified_without_scope_expansion",
+      findingIds: [],
+      status: "approved_state_only_transition_pending_final_tree_binding",
+      branch: "fix/rc-09-f0012-closeout-f0028-jit-materialization",
+      baseSha: "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
+      riskCategory: "low_risk_state_only_plus_existing_state_contract_test",
       approvalStatus: "approved",
       approvalId: APPROVAL_ID,
-      previousTaskCloseout: {
-        taskId: PREVIOUS_TASK_ID,
-        commit: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-        parent: "3df9475e95621f1c3946be6693afd7ab9667cdae",
-        tree: "a9453d1a769b5b248febbd3ec1e8eca9d2f856a2",
-        changedFileCount: 4,
-      },
+      previousTaskCloseout: project.currentTask.previousTaskCloseout,
+      nextTask: project.currentTask.nextTask,
       jitRevalidation: project.currentTask.jitRevalidation,
     });
   });
 
-  it("binds the exact 18-file envelope and both classified risk sources", () => {
+  it("keeps F-0028 next-only and binds the exact Kernel-safe four-file contract", () => {
+    const project = parseYamlStrictly(
+      "docs/04-agent-system/state/project-state.yaml",
+    ) as StateProjection;
+    const queue = parseYamlStrictly(
+      "docs/04-agent-system/state/task-queue.yaml",
+    ) as QueueProjection;
     const safety = JSON.parse(
       readFileSync("docs/04-agent-system/state/task-safety.json", "utf8"),
     ) as TaskSafety;
-    const focusedValidation = safety.validationCommands.find(
-      (command) => command.name === "employee-disable-focused",
-    );
     const stateValidation = safety.validationCommands.find(
       (command) => command.name === "state-contract",
     );
+    const serializedPrograms = JSON.stringify([
+      project.p1RemediationSerialProgram,
+      queue.p1RemediationSerialProgram,
+      queue.activeTasks.map((task) => task.id),
+    ]);
 
-    expect(safety.allowedFiles).toHaveLength(18);
-    expect(new Set(safety.allowedFiles).size).toBe(18);
-    expect(safety.coreFiles).toHaveLength(13);
-    expect(safety.contingencyFiles).toHaveLength(5);
-    expect(
-      safety.coreFiles.filter((path) => safety.contingencyFiles.includes(path)),
-    ).toEqual([]);
-    expect(safety.approvalSources).toMatchObject({
-      database: APPROVAL_ID,
-      permission: APPROVAL_ID,
-    });
-    expect(focusedValidation).toMatchObject({
-      kind: "test",
-      executable: "corepack.cmd",
-    });
+    expect(serializedPrograms).not.toContain(NEXT_TASK_ID);
+    expect(project.currentTask.nextTask).toEqual(safety.nextTask);
+    expect(safety.allowedFiles).toEqual([
+      "docs/04-agent-system/state/project-state.yaml",
+      "docs/04-agent-system/state/task-queue.yaml",
+      "docs/04-agent-system/state/task-safety.json",
+      "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
+    ]);
+    expect(safety.coreFiles).toEqual(safety.allowedFiles);
+    expect(safety.contingencyFiles).toEqual([]);
     expect(stateValidation).toEqual({
       name: "state-contract",
       kind: "test",
@@ -226,7 +254,7 @@ describe("RC-09 F-0012 product task materialization", () => {
     });
     expect(JSON.stringify(safety.validationCommands)).not.toContain("tsx");
     expect(safety.push).toEqual({ target: "origin/master" });
-    expect(safety.conditionalCloseout).toMatchObject({
+    expect(safety.conditionalCloseout).toEqual({
       approved: true,
       approvalId: APPROVAL_ID,
     });
