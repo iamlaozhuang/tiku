@@ -1,43 +1,45 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24",
-  "findingIds": [],
+  "taskId": "p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24",
+  "findingIds": ["F-0028"],
   "candidateRootCauseCluster": "P1-RC-09",
-  "objective": "Atomically materialize the acknowledged F-0012 static product closeout and select F-0028 as the only inactive, unmaterialized next candidate pending an independent read-only revalidation approval.",
-  "taskKind": "low_risk_state_only_plus_existing_state_contract_test",
-  "status": "approved_state_only_transition_pending_final_tree_binding",
-  "branch": "fix/rc-09-f0012-closeout-f0028-jit-materialization",
-  "baseSha": "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
-  "riskCategory": "low_risk_state_only_plus_existing_state_contract_test",
+  "objective": "Record that the original F-0028 unconditional organization training answer upsert failure mode is statically closed by the existing transaction and revision CAS implementation while preserving independent RC-09 residuals.",
+  "taskKind": "low_risk_state_only_read_only_revalidation",
+  "status": "approved_state_only_revalidation_pending_final_tree_binding",
+  "branch": "fix/rc-09-organization-training-answer-cas-revalidation",
+  "baseSha": "6a4b4daacf87e90764ebcac190a20c8b8535dd5a",
+  "riskCategory": "low_risk_state_only_read_only_revalidation",
   "approvalStatus": "approved",
-  "approvalId": "guardian-rc09-f0012-closeout-f0028-jit-state-transition-2026-07-24",
-  "approvalRequestSource": "P1_GUARDIAN_STATE_ONLY_PRE_WRITE_APPROVAL_V1",
+  "approvalId": "guardian-rc09-f0028-read-only-revalidation-state-2026-07-24",
+  "approvalRequestSource": "P1_GUARDIAN_STATE_ONLY_PRE_WRITE_APPROVAL_V1_WITH_ANCHOR_CORRECTION_AND_READ_ONLY_SUPPLEMENT",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
+    "tests/unit/p1-rc-09-f0028-read-only-revalidation-state-transition.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
+    "tests/unit/p1-rc-09-f0028-read-only-revalidation-state-transition.test.ts"
   ],
   "contingencyFiles": [],
   "blockedFiles": [
     "all files outside allowedFiles",
     "any product, schema, migration, database, permission, Provider, dependency or mechanism file",
-    "F-0028 product changes or closure",
-    "F-0013 runtime execution or closure",
-    "any other RC-09 finding disposition"
+    "F-0125 or any other RC-09 finding disposition",
+    "F-0013 runtime execution or closure"
   ],
   "requiredSemantics": {
-    "previousCloseout": "F-0012 is closed_static_product at commit 5aa62c7e9573d1d065efe37d97e4e7b10294ad8e, parent a61da4c2e46968b117ab984874c888ea81ebc5e7 and tree f53240ac20f22598304284232905405a2fabdc72 with 12 changed files.",
-    "proofBoundary": "The F-0012 closeout is static product evidence only, without real database, data, browser or runtime proof and without permission scope expansion.",
-    "wip": "Exactly one in-progress task exists and it is this state-only transition task.",
-    "nextOnly": "F-0028 is selected only as an inactive and unmaterialized next candidate pending a fresh independent read-only revalidation approval.",
-    "unchangedFindings": "All other RC-09 findings remain unchanged and unclosed.",
+    "previousCloseout": "The immediately preceding state-only task is closed at commit 6a4b4daacf87e90764ebcac190a20c8b8535dd5a, parent 5aa62c7e9573d1d065efe37d97e4e7b10294ad8e and tree 08e531d2dae275bcdeb825ec2efcf0a1d9b6c9e2 with four changed files.",
+    "f0028Disposition": "F-0028 is closed_static_product_existing_fix by covering commit e136ca28acde82282a17c65ccfb828a01e872c0b, verified at the current base with focused three files and 146 tests.",
+    "transactionAuthority": "The production repository facade requires and exclusively calls saveEmployeeAnswerDraftTransaction and submitEmployeeAnswerTransaction; missing transaction gateways fail closed.",
+    "legacyCompatibility": "The retained upsertEmployeeAnswer methods are private unreachable compatibility definitions with no production callers and are not changed or described as deleted.",
+    "proofBoundary": "The F-0028 disposition is static product evidence only, without real database, browser or runtime proof.",
+    "independentResidual": "F-0125 takedown and answer lifecycle behavior remains independent and pending read-only revalidation.",
+    "wip": "Exactly one in-progress task exists and it is this state-only revalidation task.",
+    "nextOnly": "The next task is only an inactive and unmaterialized RC-09 residual JIT review pending fresh state-only approval.",
     "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007."
   },
   "validationCommands": [
@@ -50,7 +52,22 @@
         "exec",
         "vitest",
         "run",
-        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
+        "tests/unit/p1-rc-09-f0028-read-only-revalidation-state-transition.test.ts",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "name": "focused",
+      "kind": "test",
+      "executable": "corepack.cmd",
+      "arguments": [
+        "pnpm@11.9.0",
+        "exec",
+        "vitest",
+        "run",
+        "src/server/repositories/organization-training-repository.test.ts",
+        "src/server/services/organization-training-service.test.ts",
+        "src/server/services/organization-training-route.test.ts",
         "--maxWorkers=1"
       ]
     },
@@ -66,7 +83,7 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts"
+        "tests/unit/p1-rc-09-f0028-read-only-revalidation-state-transition.test.ts"
       ]
     },
     {
@@ -89,48 +106,57 @@
   },
   "conditionalCloseout": {
     "approved": true,
-    "approvalId": "guardian-rc09-f0012-closeout-f0028-jit-state-transition-2026-07-24"
+    "approvalId": "guardian-rc09-f0028-read-only-revalidation-state-2026-07-24"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24",
-    "commit": "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
-    "parent": "a61da4c2e46968b117ab984874c888ea81ebc5e7",
-    "tree": "f53240ac20f22598304284232905405a2fabdc72",
-    "changedFileCount": 12,
-    "focusedTestFiles": 7,
-    "focusedTests": 38,
-    "status": "closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "taskId": "p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24",
+    "commit": "6a4b4daacf87e90764ebcac190a20c8b8535dd5a",
+    "parent": "5aa62c7e9573d1d065efe37d97e4e7b10294ad8e",
+    "tree": "08e531d2dae275bcdeb825ec2efcf0a1d9b6c9e2",
+    "changedFileCount": 4,
+    "stateContractTestFiles": 1,
+    "stateContractTests": 2,
+    "status": "closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned",
     "closeoutKernel": "pass",
     "prePushKernel": "pass",
     "masterOriginSync": "pass",
     "worktreeClean": true,
     "shortBranchCleanup": "pass",
-    "databaseToken": "consumed_once",
-    "permissionToken": "consumed_once",
-    "manualCompatibilityApproval": "consumed_once",
-    "proofBoundary": "closed_static_product_without_real_database_data_browser_or_runtime_proof_and_without_permission_scope_expansion"
+    "proofBoundary": "state_and_test_only_without_product_schema_migration_database_permission_provider_dependency_or_mechanism_change"
+  },
+  "revalidationEvidence": {
+    "coveringCommit": "e136ca28acde82282a17c65ccfb828a01e872c0b",
+    "verifiedAtHead": "6a4b4daacf87e90764ebcac190a20c8b8535dd5a",
+    "focusedTestFiles": 3,
+    "focusedTests": 146,
+    "transactionGateways": "saveEmployeeAnswerDraftTransaction_and_submitEmployeeAnswerTransaction",
+    "serialization": "shared_advisory_lock_and_select_for_update",
+    "cas": "exact_in_progress_status_and_revision_with_terminal_submit",
+    "replay": "exact_operation_id_and_payload_digest_returns_authoritative_row",
+    "legacyUpsertStatus": "private_unreachable_compatibility_definitions_without_production_callers",
+    "proofBoundary": "closed_static_product_existing_fix_without_real_database_browser_or_runtime_proof"
   },
   "nextTask": {
-    "taskId": "p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24",
-    "branch": "fix/rc-09-organization-training-answer-cas-revalidation",
-    "findingId": "F-0028",
-    "status": "selected_pending_fresh_state_only_revalidation_approval",
+    "taskId": "p1-remediation-rc-09-post-f0028-residual-jit-review-2026-07-24",
+    "branch": "fix/rc-09-post-f0028-residual-jit-review",
+    "candidateRootCauseCluster": "P1-RC-09",
+    "status": "selected_pending_fresh_state_only_approval",
     "active": false,
     "materialized": false
   },
   "jitRevalidation": {
-    "F-0012": "closed_static_product_at_5aa62c7e_without_real_database_data_or_runtime_proof",
-    "F-0028": "selected_next_only_pending_fresh_read_only_revalidation",
+    "F-0028": "closed_static_product_existing_fix_at_e136ca28_verified_at_6a4b4daa_without_real_database_browser_or_runtime_proof",
+    "F-0125": "independent_pending_read_only_revalidation",
     "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
     "otherRc09Findings": "unchanged_pending_independent_revalidation"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-09",
-    "currentTaskId": "p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24",
-    "currentPartition": "F0012_closeout_and_F0028_next_only_state_transition",
+    "currentTaskId": "p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24",
+    "currentPartition": "F0028_read_only_revalidation_existing_fix_static_closeout",
     "nextReviewHints": [
-      "obtain independent state-only closeout ACK before materializing F-0028",
-      "keep F-0013 runtime_hold and all other RC-09 findings unchanged"
+      "obtain independent final tree binding before state-only closeout",
+      "keep F-0125 independent and F-0013 on runtime_hold"
     ]
   }
 }

@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
+  currentTaskId: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
   currentCandidateClusterId: P1-RC-09
   candidateClusterOrder:
     - P1-RC-01
@@ -590,7 +590,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-09-residual-jit-review-2026-07-24
     - p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
     - p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
+    - p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
   completedTaskIds:
+    - p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
     - p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
     - p1-remediation-rc-09-residual-jit-review-2026-07-24
     - p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24
@@ -803,7 +805,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24: closed
     p1-remediation-rc-09-residual-jit-review-2026-07-24: closed
     p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24: closed
-    p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24: in_progress
+    p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24: closed
+    p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -1010,58 +1013,67 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
-  title: F-0012 closeout and F-0028 next-only JIT materialization
-  phase: p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
+  id: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
+  title: F-0028 organization training answer CAS read-only revalidation
+  phase: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
   status: in_progress
   priority: p1
-  taskKind: low_risk_state_only_plus_existing_state_contract_test
-  branch: fix/rc-09-f0012-closeout-f0028-jit-materialization
+  taskKind: low_risk_state_only_read_only_revalidation
+  branch: fix/rc-09-organization-training-answer-cas-revalidation
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-  findingIds: []
+  findingIds:
+    - F-0028
   candidateRootCauseCluster: P1-RC-09
-  objective: atomically materialize the acknowledged F-0012 static product closeout and select F-0028 as the only inactive, unmaterialized next candidate pending independent read-only revalidation approval
-  executionStage: approved_state_only_transition_pending_final_tree_binding
-  findingStatus: F0012_closed_static_product_and_F0028_selected_next_only
-  findingDisposition: F0012_closed_static_product; F0028_next_only_not_materialized_or_closed; other_RC09_findings_unchanged; F0013_runtime_hold_RV0007
+  objective: record that the original F-0028 unconditional answer upsert failure mode is statically closed by the existing transaction and revision CAS implementation while preserving independent RC-09 residuals
+  executionStage: approved_state_only_revalidation_pending_final_tree_binding
+  findingStatus: closed_static_product_existing_fix
+  findingDisposition: F0028_closed_static_product_existing_fix_at_e136ca28_without_real_database_browser_or_runtime_proof; F0125_independent_pending_revalidation; other_RC09_findings_unchanged; F0013_runtime_hold_RV0007
   riskBoundary:
-    category: low_risk_state_only_plus_existing_state_contract_test
+    category: low_risk_state_only_read_only_revalidation
     approvalStatus: approved
-    approvalId: guardian-rc09-f0012-closeout-f0028-jit-state-transition-2026-07-24
-    requestedBaseSha: 5aa62c7e9573d1d065efe37d97e4e7b10294ad8e
+    approvalId: guardian-rc09-f0028-read-only-revalidation-state-2026-07-24
+    requestedBaseSha: 6a4b4daacf87e90764ebcac190a20c8b8535dd5a
     allowedFiles: 4
     coreFiles: 4
     contingencyFiles: 0
     productSchemaMigrationDatabasePermissionProviderChange: false
     conditionalCloseout: true
   previousTaskCloseout:
-    taskId: p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
-    commit: 5aa62c7e9573d1d065efe37d97e4e7b10294ad8e
-    parent: a61da4c2e46968b117ab984874c888ea81ebc5e7
-    tree: f53240ac20f22598304284232905405a2fabdc72
-    changedFileCount: 12
-    focusedTestFiles: 7
-    focusedTests: 38
-    status: closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned
+    taskId: p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
+    commit: 6a4b4daacf87e90764ebcac190a20c8b8535dd5a
+    parent: 5aa62c7e9573d1d065efe37d97e4e7b10294ad8e
+    tree: 08e531d2dae275bcdeb825ec2efcf0a1d9b6c9e2
+    changedFileCount: 4
+    stateContractTestFiles: 1
+    stateContractTests: 2
+    status: closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned
     closeoutKernel: pass
     prePushKernel: pass
     masterOriginSync: pass
     worktreeClean: true
     shortBranchCleanup: pass
-    databaseToken: consumed_once
-    permissionToken: consumed_once
-    manualCompatibilityApproval: consumed_once
-    proofBoundary: closed_static_product_without_real_database_data_browser_or_runtime_proof_and_without_permission_scope_expansion
+    proofBoundary: state_and_test_only_without_product_schema_migration_database_permission_provider_dependency_or_mechanism_change
+  revalidationEvidence:
+    coveringCommit: e136ca28acde82282a17c65ccfb828a01e872c0b
+    verifiedAtHead: 6a4b4daacf87e90764ebcac190a20c8b8535dd5a
+    focusedTestFiles: 3
+    focusedTests: 146
+    transactionGateways: saveEmployeeAnswerDraftTransaction_and_submitEmployeeAnswerTransaction
+    serialization: shared_advisory_lock_and_select_for_update
+    cas: exact_in_progress_status_and_revision_with_terminal_submit
+    replay: exact_operation_id_and_payload_digest_returns_authoritative_row
+    legacyUpsertStatus: private_unreachable_compatibility_definitions_without_production_callers
+    proofBoundary: closed_static_product_existing_fix_without_real_database_browser_or_runtime_proof
   nextTask:
-    taskId: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
-    branch: fix/rc-09-organization-training-answer-cas-revalidation
-    findingId: F-0028
-    status: selected_pending_fresh_state_only_revalidation_approval
+    taskId: p1-remediation-rc-09-post-f0028-residual-jit-review-2026-07-24
+    branch: fix/rc-09-post-f0028-residual-jit-review
+    candidateRootCauseCluster: P1-RC-09
+    status: selected_pending_fresh_state_only_approval
     active: false
     materialized: false
   jitRevalidation:
-    F-0012: closed_static_product_at_5aa62c7e_without_real_database_data_or_runtime_proof
-    F-0028: selected_next_only_pending_fresh_read_only_revalidation
+    F-0028: closed_static_product_existing_fix_at_e136ca28_verified_at_6a4b4daa_without_real_database_browser_or_runtime_proof
+    F-0125: independent_pending_read_only_revalidation
     F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
     otherRc09Findings: unchanged_pending_independent_revalidation
 p1ExecutionPolicy:
