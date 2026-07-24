@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
+  currentTaskId: p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24
   currentCandidateClusterId: P1-RC-09
   candidateClusterOrder:
     - P1-RC-01
@@ -346,7 +346,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
     - p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
     - p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
+    - p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24
   completedTaskIds:
+    - p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
     - p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
     - p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24
     - p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
@@ -632,78 +634,101 @@ p1RemediationSerialProgram:
     p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24: closed
     p1-remediation-rc-09-f0012-closeout-f0028-jit-materialization-2026-07-24: closed
     p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24: closed
-    p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24: in_progress
+    p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24: closed
+    p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24: in_progress
 activeTasks:
-  - id: p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
-    title: F-0125 organization training takedown answer history
-    phase: p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
+  - id: p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24
+    title: F-0125 closeout and F-0146 next-only JIT materialization
+    phase: p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24
     status: in_progress
     priority: p1
-    taskKind: database_application_logic_and_permission_scoped_employee_history_UI_contract
-    branch: fix/organization-training-takedown-answer-history
-    objective: serialize organization training takedown with answer writes and preserve exact authorization-scoped employee answer history as read-only
+    taskKind: low_risk_state_only_plus_exact_test
+    branch: fix/rc-09-f0125-closeout-f0146-jit-materialization
+    objective: atomically materialize the acknowledged F-0125 static product closeout and select F-0146 as the only inactive, unmaterialized next candidate pending fresh database and permission approval
     taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
     candidateRootCauseCluster: P1-RC-09
-    findingIds:
-      - F-0125
-    executionStage: implemented_verified_static_pending_final_tree_binding
-    findingStatus: implemented_verified_static_pending_final_tree_binding
-    findingDisposition: F0125_implemented_verified_static_pending_final_tree_binding; F0028_closed_static_product_existing_fix; other_RC09_findings_unchanged; F0013_runtime_hold_RV0007
+    findingIds: []
+    executionStage: approved_state_only_transition_pending_final_tree_binding
+    findingStatus: state_only_transition_approved_pending_final_tree_binding
+    findingDisposition: F0125_closed_static_product; F0146_selected_next_only; other_RC09_findings_unchanged; F0013_runtime_hold_RV0007
     riskBoundary:
-      category: database_application_logic_and_permission_scoped_employee_history_UI_contract
+      category: low_risk_state_only_plus_exact_test
       approvalStatus: approved
-      approvalId: guardian-f0125-organization-training-takedown-answer-history-2026-07-24
-      requestedBaseSha: c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e
-      allowedFiles: 18
-      coreFiles: 11
-      contingencyFiles: 7
+      approvalId: guardian-rc09-f0125-closeout-f0146-jit-state-transition-2026-07-24
+      requestedBaseSha: 13df5565f0076bc6088c553e87972892bb8b7d3b
+      allowedFiles: 4
+      coreFiles: 4
+      contingencyFiles: 0
+      productChange: false
       schemaOrMigrationChange: false
       realDatabaseOrData: false
       permissionScopeChange: false
       conditionalCloseout: true
-    guardianCorrection:
-      decision: second_correction_required_resolved_pending_fresh_final_tree_binding
-      priorRejectedCandidateTree: beeb252d9b659be88b8a3a5e626791504a054887
-      priorRejectedRawCachedDiffSha256: 12d2a5c48d62aa1e1e15dd252b257885a6d53757fd56ce1fb27586e74de6f1e0
-      rejectedCandidateTree: c26b5b67e3a5de777803c05f61a42dd479a90646
-      rejectedRawCachedDiffSha256: 4803d5ada17c804344a733e08052f4032b8bda5babcb8ffc812e3726f285fbcf
-      tokensIssued: false
-      corrections: exact_authorization_partition_full_answer_identity_coherent_replay_behavioral_transaction_tests_and_postgres_safe_lock_returning_materialization
     previousTaskCloseout:
-      taskId: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
-      commit: c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e
-      parent: 6a4b4daacf87e90764ebcac190a20c8b8535dd5a
-      tree: db0aa60350db9dbc9457da222ad5154e13aaf8b7
-      changedFileCount: 4
-      stateContractTestFiles: 1
-      stateContractTests: 3
-      focusedTestFiles: 3
-      focusedTests: 146
-      status: closed_state_and_test_only_committed_ff_only_merged_pushed_synced_and_cleaned
-      closeoutKernel: pass
-      prePushKernel: pass
-      masterOriginSync: pass
+      taskId: p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
+      commit: 13df5565f0076bc6088c553e87972892bb8b7d3b
+      parent: c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e
+      tree: 6fa6d70ec0bea2a87c4e4af6384be4e5332e2f20
+      changedFileCount: 11
+      focusedTestFiles: 7
+      focusedTests: 236
+      status: closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned
+      closeoutKernel: true
+      prePushKernel: true
+      masterOriginSync: true
       worktreeClean: true
-      shortBranchCleanup: pass
-      proofBoundary: F0028_closed_static_product_existing_fix_without_real_database_browser_or_runtime_proof
-    verificationEvidence:
-      tddRed: 4_files_7_expected_failures_155_passed_before_product_implementation
-      guardianCorrectionRed: 2_files_8_expected_failures_102_passed
-      guardianSqlMaterializationRed: 1_file_1_expected_failure_61_passed
-      focused: 7_files_236_tests_green
-      lint: pass_0_errors_3_unrelated_warnings
-      typecheck: pass
-      build: pass
-      exactPrettier: pass
-      diffCheck: pass
-      strictStateParse: pass
-      mainThreadAdversarialReview: postgres_safe_target_only_answer_lock_separate_authoritative_identity_locks_target_only_returning_exact_zero_to_N_transition_exact_selected_authorization_coherent_replay_and_read_only_UI_confirmed
-      proofBoundary: static_and_synthetic_only_without_real_database_data_browser_or_runtime_proof
+      shortBranchCleanup: true
+      databaseToken: consumed_once
+      permissionToken: consumed_once
+      proofBoundary: F0125_closed_static_product_without_real_database_data_browser_runtime_or_permission_expansion_proof
+    nextTask:
+      taskId: p1-remediation-rc-09-organization-training-submitted-history-retention-2026-07-24
+      branch: fix/organization-training-submitted-history-retention
+      findingId: F-0146
+      status: selected_pending_fresh_database_and_permission_approval
+      active: false
+      materialized: false
     jitRevalidation:
-      F-0028: closed_static_product_existing_fix_at_e136ca28_with_state_closeout_c1f7f283
-      F-0125: active_product_task_root_cause_revalidated_reachable
+      F-0012: closed_static_product
+      F-0028: closed_static_product_existing_fix
+      F-0033: unchanged_pending_independent_revalidation
+      F-0099: unchanged_pending_independent_revalidation
+      F-0122: unchanged_pending_independent_revalidation
+      F-0124: unchanged_pending_independent_revalidation
+      F-0125: closed_static_product_at_13df5565
+      F-0127: unchanged_pending_independent_revalidation
+      F-0146: selected_next_only_pending_fresh_database_and_permission_approval
+      F-0147: unchanged_pending_independent_revalidation
       F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
-      otherRc09Findings: unchanged_pending_independent_revalidation
+  - id: p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
+    title: F-0125 organization training takedown answer history
+    phase: p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24
+    status: closed
+    priority: p1
+    taskKind: database_application_logic_and_permission_scoped_employee_history_UI_contract
+    branch: fix/organization-training-takedown-answer-history
+    taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
+    candidateRootCauseCluster: P1-RC-09
+    findingIds:
+      - F-0125
+    executionStage: closed_committed_ff_only_merged_pushed_synced_and_cleaned
+    findingStatus: closed_static_product
+    findingDisposition: F0125_closed_static_product_without_real_database_data_browser_runtime_or_permission_expansion_proof
+    closeout:
+      commit: 13df5565f0076bc6088c553e87972892bb8b7d3b
+      parent: c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e
+      tree: 6fa6d70ec0bea2a87c4e4af6384be4e5332e2f20
+      changedFileCount: 11
+      focusedTestFiles: 7
+      focusedTests: 236
+      closeoutKernel: true
+      prePushKernel: true
+      masterOriginSync: true
+      worktreeClean: true
+      shortBranchCleanup: true
+      databaseToken: consumed_once
+      permissionToken: consumed_once
+      proofBoundary: static_and_synthetic_only_without_real_database_data_browser_runtime_or_permission_expansion_proof
   - id: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24
     title: F-0028 organization training answer CAS read-only revalidation
     phase: p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24

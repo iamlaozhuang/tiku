@@ -1,59 +1,30 @@
 {
   "schemaVersion": 1,
-  "taskId": "p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24",
-  "findingIds": ["F-0125"],
+  "taskId": "p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24",
+  "findingIds": [],
   "candidateRootCauseCluster": "P1-RC-09",
-  "objective": "Close F-0125 by serializing organization training takedown with answer writes, preserving exact employee answer history under the selected authorization, and projecting taken-down attempts as read-only without expanding permission scope.",
-  "taskKind": "database_application_logic_and_permission_scoped_employee_history_UI_contract",
-  "status": "implemented_verified_static_pending_final_tree_binding",
-  "branch": "fix/organization-training-takedown-answer-history",
-  "baseSha": "c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e",
-  "riskCategory": "database_application_logic_and_permission_scoped_employee_history_UI_contract",
+  "objective": "Atomically materialize the acknowledged F-0125 static product closeout and select F-0146 as the only inactive, unmaterialized next candidate pending fresh database and permission approval.",
+  "taskKind": "low_risk_state_only_plus_exact_test",
+  "status": "approved_state_only_transition_pending_final_tree_binding",
+  "branch": "fix/rc-09-f0125-closeout-f0146-jit-materialization",
+  "baseSha": "13df5565f0076bc6088c553e87972892bb8b7d3b",
+  "riskCategory": "low_risk_state_only_plus_exact_test",
   "approvalStatus": "approved",
-  "approvalId": "guardian-f0125-organization-training-takedown-answer-history-2026-07-24",
-  "approvalRequestSource": "P1_GUARDIAN_TASK_BOUND_PRE_RED_APPROVAL_V1",
+  "approvalId": "guardian-rc09-f0125-closeout-f0146-jit-state-transition-2026-07-24",
+  "approvalRequestSource": "P1_GUARDIAN_STATE_ONLY_PRE_WRITE_APPROVAL_V1",
   "allowedFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/services/organization-training-service.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
-    "tests/unit/organization-training-employee-entry-surface.test.ts",
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/mappers/organization-training-mapper.ts",
-    "src/server/mappers/organization-training-mapper.test.ts",
-    "src/server/models/organization-training.ts",
-    "src/server/validators/organization-training.ts",
-    "src/server/validators/organization-training.test.ts",
-    "tests/unit/organization-training-admin-entry-surface.test.ts"
+    "tests/unit/p1-rc-09-f0125-closeout-f0146-jit-state-transition.test.ts"
   ],
   "coreFiles": [
     "docs/04-agent-system/state/project-state.yaml",
     "docs/04-agent-system/state/task-queue.yaml",
     "docs/04-agent-system/state/task-safety.json",
-    "src/server/repositories/organization-training-repository.ts",
-    "src/server/repositories/organization-training-repository.test.ts",
-    "src/server/services/organization-training-service.ts",
-    "src/server/services/organization-training-service.test.ts",
-    "src/server/services/organization-training-route.ts",
-    "src/server/services/organization-training-route.test.ts",
-    "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
-    "tests/unit/organization-training-employee-entry-surface.test.ts"
+    "tests/unit/p1-rc-09-f0125-closeout-f0146-jit-state-transition.test.ts"
   ],
-  "contingencyFiles": [
-    "src/server/contracts/organization-training-contract.ts",
-    "src/server/mappers/organization-training-mapper.ts",
-    "src/server/mappers/organization-training-mapper.test.ts",
-    "src/server/models/organization-training.ts",
-    "src/server/validators/organization-training.ts",
-    "src/server/validators/organization-training.test.ts",
-    "tests/unit/organization-training-admin-entry-surface.test.ts"
-  ],
+  "contingencyFiles": [],
   "blockedFiles": [
     "AGENTS.md",
     "docs/04-agent-system/sop/**",
@@ -63,22 +34,19 @@
     "package.json",
     "pnpm-lock.yaml",
     "all files outside allowedFiles",
-    "any schema, migration, migration apply, real database/data, permission expansion, quota, Provider, Prompt, dependency, deployment, secret/env or mechanism change"
+    "any product, schema, migration, database, permission logic, Provider, dependency or mechanism change"
   ],
   "requiredSemantics": {
-    "previousCloseout": "F-0028 is closed_static_product_existing_fix at state commit c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e, parent 6a4b4daacf87e90764ebcac190a20c8b8535dd5a and tree db0aa60350db9dbc9457da222ad5154e13aaf8b7, with covering product commit e136ca28acde82282a17c65ccfb828a01e872c0b.",
-    "wip": "Exactly one in-progress P1 task exists and it is this F-0125 product task.",
-    "serialization": "Save, submit and takedown lock the exact version first, then employee and answer facts, so no answer can cross the published-to-taken-down boundary.",
-    "takedown": "Takedown locks and validates the exact in-progress answer set, changes those rows to read_only and requires UPDATE RETURNING to match the complete locked set; legal set cardinality is zero through N.",
-    "replay": "An exact repeated takedown returns the persisted version without rewriting answers, while a conflicting reason or identity fails closed.",
-    "history": "Employee history binds the server-resolved exact authorizationPublicId together with employee, organization and scope, and exposes taken-down versions only when the employee has submitted, scoring, scoring_failed or read_only facts.",
-    "ui": "Taken-down, scoring, scoring_failed and read_only attempts only enter the employee read-only summary and never fall back to start or continue training.",
-    "proofBoundary": "The task may close only with static and synthetic product evidence, without real database, data, browser or runtime proof.",
-    "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007 and all other RC-09 findings remain unchanged."
+    "previousCloseout": "F-0125 is closed_static_product at commit 13df5565f0076bc6088c553e87972892bb8b7d3b, parent c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e and tree 6fa6d70ec0bea2a87c4e4af6384be4e5332e2f20.",
+    "wip": "Exactly one in-progress P1 task exists and it is this state-only transition task.",
+    "nextOnly": "F-0146 is selected only as an inactive, unmaterialized next candidate pending fresh database and permission approval.",
+    "residuals": "F-0033, F-0099, F-0122, F-0124, F-0127 and F-0147 remain unchanged pending independent revalidation.",
+    "runtimeHold": "F-0013 remains runtime_evidence_required on runtime_hold RV-0007.",
+    "proofBoundary": "The transition changes only state and its exact contract test; it performs no product, database, permission, schema, migration or runtime work."
   },
   "validationCommands": [
     {
-      "name": "focused",
+      "name": "state-contract",
       "kind": "test",
       "executable": "corepack.cmd",
       "arguments": [
@@ -86,33 +54,9 @@
         "exec",
         "vitest",
         "run",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "tests/unit/organization-training-employee-entry-surface.test.ts",
-        "src/server/mappers/organization-training-mapper.test.ts",
-        "src/server/validators/organization-training.test.ts",
-        "tests/unit/organization-training-admin-entry-surface.test.ts",
+        "tests/unit/p1-rc-09-f0125-closeout-f0146-jit-state-transition.test.ts",
         "--maxWorkers=1"
       ]
-    },
-    {
-      "name": "lint",
-      "kind": "lint",
-      "executable": "npm.cmd",
-      "arguments": ["run", "lint"]
-    },
-    {
-      "name": "typecheck",
-      "kind": "typecheck",
-      "executable": "corepack.cmd",
-      "arguments": ["pnpm@11.9.0", "exec", "tsc", "--noEmit"]
-    },
-    {
-      "name": "build",
-      "kind": "other",
-      "executable": "npm.cmd",
-      "arguments": ["run", "build"]
     },
     {
       "name": "format",
@@ -126,21 +70,7 @@
         "docs/04-agent-system/state/project-state.yaml",
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/04-agent-system/state/task-safety.json",
-        "src/server/repositories/organization-training-repository.ts",
-        "src/server/repositories/organization-training-repository.test.ts",
-        "src/server/services/organization-training-service.ts",
-        "src/server/services/organization-training-service.test.ts",
-        "src/server/services/organization-training-route.ts",
-        "src/server/services/organization-training-route.test.ts",
-        "src/features/student/organization-training/StudentOrganizationTrainingPage.tsx",
-        "tests/unit/organization-training-employee-entry-surface.test.ts",
-        "src/server/contracts/organization-training-contract.ts",
-        "src/server/mappers/organization-training-mapper.ts",
-        "src/server/mappers/organization-training-mapper.test.ts",
-        "src/server/models/organization-training.ts",
-        "src/server/validators/organization-training.ts",
-        "src/server/validators/organization-training.test.ts",
-        "tests/unit/organization-training-admin-entry-surface.test.ts"
+        "tests/unit/p1-rc-09-f0125-closeout-f0146-jit-state-transition.test.ts"
       ]
     },
     {
@@ -152,8 +82,8 @@
   ],
   "approvalSources": {
     "dependency": null,
-    "database": "guardian-f0125-organization-training-takedown-answer-history-2026-07-24",
-    "permission": "guardian-f0125-organization-training-takedown-answer-history-2026-07-24",
+    "database": null,
+    "permission": null,
     "provider": null,
     "deployment": null,
     "secretEnv": null
@@ -163,70 +93,54 @@
   },
   "conditionalCloseout": {
     "approved": true,
-    "approvalId": "guardian-f0125-organization-training-takedown-answer-history-2026-07-24",
-    "conditions": [
-      "TDD RED precedes product implementation",
-      "focused and affected tests, lint, typecheck, build, exact format, diff, strict state and source review are GREEN",
-      "one main-thread adversarial review confirms version-first serialization, exact set transition, exact authorization history and read-only UI",
-      "the final diff stays inside the approved 18-file envelope with no schema or migration",
-      "fresh database and permission tokens bind the final candidate tree before Kernel/full",
-      "base, origin, risk, permission scope and semantics remain unchanged"
-    ]
-  },
-  "guardianCorrection": {
-    "decision": "second_correction_required_resolved_pending_fresh_final_tree_binding",
-    "priorRejectedCandidateTree": "beeb252d9b659be88b8a3a5e626791504a054887",
-    "priorRejectedRawCachedDiffSha256": "12d2a5c48d62aa1e1e15dd252b257885a6d53757fd56ce1fb27586e74de6f1e0",
-    "rejectedCandidateTree": "c26b5b67e3a5de777803c05f61a42dd479a90646",
-    "rejectedRawCachedDiffSha256": "4803d5ada17c804344a733e08052f4032b8bda5babcb8ffc812e3726f285fbcf",
-    "tokensIssued": false,
-    "corrections": "exact_authorization_partition_full_answer_identity_coherent_replay_behavioral_transaction_tests_and_postgres_safe_lock_returning_materialization"
+    "approvalId": "guardian-rc09-f0125-closeout-f0146-jit-state-transition-2026-07-24"
   },
   "previousTaskCloseout": {
-    "taskId": "p1-remediation-rc-09-organization-training-answer-cas-read-only-revalidation-2026-07-24",
-    "commit": "c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e",
-    "parent": "6a4b4daacf87e90764ebcac190a20c8b8535dd5a",
-    "tree": "db0aa60350db9dbc9457da222ad5154e13aaf8b7",
-    "changedFileCount": 4,
-    "stateContractTestFiles": 1,
-    "stateContractTests": 3,
-    "focusedTestFiles": 3,
-    "focusedTests": 146,
-    "status": "closed_state_and_test_only_committed_ff_only_merged_pushed_synced_and_cleaned",
+    "taskId": "p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24",
+    "commit": "13df5565f0076bc6088c553e87972892bb8b7d3b",
+    "parent": "c1f7f2839c9bbd3f5b7cdf4ca3857b0a0fa27f9e",
+    "tree": "6fa6d70ec0bea2a87c4e4af6384be4e5332e2f20",
+    "changedFileCount": 11,
+    "focusedTestFiles": 7,
+    "focusedTests": 236,
+    "status": "closed_static_product_committed_ff_only_merged_pushed_synced_and_cleaned",
     "closeoutKernel": true,
     "prePushKernel": true,
     "masterOriginSync": true,
     "worktreeClean": true,
     "shortBranchCleanup": true,
-    "proofBoundary": "F0028_closed_static_product_existing_fix_without_real_database_browser_or_runtime_proof"
+    "databaseToken": "consumed_once",
+    "permissionToken": "consumed_once",
+    "proofBoundary": "F0125_closed_static_product_without_real_database_data_browser_runtime_or_permission_expansion_proof"
   },
-  "verificationEvidence": {
-    "tddRed": "4_files_7_expected_failures_155_passed_before_product_implementation",
-    "guardianCorrectionRed": "2_files_8_expected_failures_102_passed",
-    "guardianSqlMaterializationRed": "1_file_1_expected_failure_61_passed",
-    "focused": "7_files_236_tests_green",
-    "lint": "pass_0_errors_3_unrelated_warnings",
-    "typecheck": "pass",
-    "build": "pass",
-    "exactPrettier": "pass",
-    "diffCheck": "pass",
-    "strictStateParse": "pass",
-    "mainThreadAdversarialReview": "postgres_safe_target_only_answer_lock_separate_authoritative_identity_locks_target_only_returning_exact_zero_to_N_transition_exact_selected_authorization_coherent_replay_and_read_only_UI_confirmed",
-    "proofBoundary": "static_and_synthetic_only_without_real_database_data_browser_or_runtime_proof"
+  "nextTask": {
+    "taskId": "p1-remediation-rc-09-organization-training-submitted-history-retention-2026-07-24",
+    "branch": "fix/organization-training-submitted-history-retention",
+    "findingId": "F-0146",
+    "status": "selected_pending_fresh_database_and_permission_approval",
+    "active": false,
+    "materialized": false
   },
   "jitRevalidation": {
-    "F-0028": "closed_static_product_existing_fix_at_e136ca28_with_state_closeout_c1f7f283",
-    "F-0125": "active_product_task_root_cause_revalidated_reachable",
-    "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
-    "otherRc09Findings": "unchanged_pending_independent_revalidation"
+    "F-0012": "closed_static_product",
+    "F-0028": "closed_static_product_existing_fix",
+    "F-0033": "unchanged_pending_independent_revalidation",
+    "F-0099": "unchanged_pending_independent_revalidation",
+    "F-0122": "unchanged_pending_independent_revalidation",
+    "F-0124": "unchanged_pending_independent_revalidation",
+    "F-0125": "closed_static_product_at_13df5565",
+    "F-0127": "unchanged_pending_independent_revalidation",
+    "F-0146": "selected_next_only_pending_fresh_database_and_permission_approval",
+    "F-0147": "unchanged_pending_independent_revalidation",
+    "F-0013": "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization"
   },
   "resumeAnchor": {
     "currentCandidateRootCauseCluster": "P1-RC-09",
-    "currentTaskId": "p1-remediation-rc-09-organization-training-takedown-answer-history-2026-07-24",
-    "currentPartition": "F-0125_organization_training_takedown_answer_history",
+    "currentTaskId": "p1-remediation-rc-09-f0125-closeout-f0146-jit-materialization-2026-07-24",
+    "currentPartition": "F-0125_closeout_F-0146_next_only",
     "nextReviewHints": [
-      "write adversarial RED before product code",
-      "keep F-0013 runtime_hold and all other RC-09 findings unchanged"
+      "freeze this four-file state candidate before requesting final binding",
+      "do not enter F-0146 RED or implementation before fresh product approval"
     ]
   }
 }
