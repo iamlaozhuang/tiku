@@ -12,7 +12,10 @@ import type {
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type { Profession, QuestionType, Subject } from "../models/paper";
-import { questionTypeValues } from "../models/paper";
+import {
+  parseCurrentAiGenerationQuestionType,
+  parseCurrentAiGenerationQuestionTypeList,
+} from "./ai-generation-question-type-contract";
 import {
   assembleAiPaperFromPlan,
   validateAiPaperAssemblyPlan,
@@ -50,8 +53,6 @@ export type AiPaperRouteAssemblyInput = {
   platformQuestions: AiPaperSelectableQuestionDto[];
   enterpriseQuestions: AiPaperSelectableQuestionDto[];
 };
-
-const allowedQuestionTypes = new Set<string>(questionTypeValues);
 
 export function assembleAiPaperFromRouteVisiblePlan(
   input: AiPaperRouteAssemblyInput,
@@ -496,6 +497,7 @@ function areRoutePlanSectionsCompatibleWithStructure(
 
       return (
         questionType !== null &&
+        questionTypes !== null &&
         questionTypes.length <= 1 &&
         (questionTypes.length === 0 || questionTypes[0] === questionType)
       );
@@ -515,32 +517,35 @@ function areRoutePlanSectionsCompatibleWithStructure(
 function readRoutePlanSectionQuestionType(
   section: Record<string, unknown>,
 ): QuestionType | null {
-  return normalizeQuestionType(
-    readNonEmptyString(section, [
-      "questionType",
-      "question_type",
-      "paperSectionType",
-      "paper_section_type",
-      "type",
-    ]),
-  );
+  const keys = [
+    "questionType",
+    "question_type",
+    "paperSectionType",
+    "paper_section_type",
+    "type",
+  ] as const;
+  const presentKeys = keys.filter((key) => Object.hasOwn(section, key));
+  return presentKeys.length === 1
+    ? parseCurrentAiGenerationQuestionType(section[presentKeys[0]])
+    : null;
 }
 
 function readRoutePlanSectionQuestionTypes(
   section: Record<string, unknown>,
-): QuestionType[] {
-  const questionTypes = readStringArray(section, [
+): QuestionType[] | null {
+  const keys = [
     "questionTypes",
     "question_types",
     "questionTypeList",
     "question_type_list",
-  ])
-    .map(normalizeQuestionType)
-    .filter(
-      (questionType): questionType is QuestionType => questionType !== null,
-    );
-
-  return Array.from(new Set(questionTypes));
+  ] as const;
+  const presentKeys = keys.filter((key) => Object.hasOwn(section, key));
+  if (presentKeys.length === 0) {
+    return [];
+  }
+  return presentKeys.length === 1
+    ? parseCurrentAiGenerationQuestionTypeList(section[presentKeys[0]])
+    : null;
 }
 
 function hasExplicitRoutePlanSectionKnowledgeScope(
@@ -723,11 +728,7 @@ function readSourcePreference(
 }
 
 function normalizeQuestionType(value: string | null): QuestionType | null {
-  const normalizedValue = value === "judge" ? "true_false" : value;
-
-  return normalizedValue !== null && allowedQuestionTypes.has(normalizedValue)
-    ? (normalizedValue as QuestionType)
-    : null;
+  return parseCurrentAiGenerationQuestionType(value);
 }
 
 function parseRoutePlanObject(content: string): Record<string, unknown> | null {

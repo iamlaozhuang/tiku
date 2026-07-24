@@ -42,6 +42,7 @@ import type {
 } from "@/server/models/organization-training";
 import type { EvidenceStatus } from "@/server/models/ai-rag";
 import type { Profession, Subject } from "@/server/models/paper";
+import { isAiGenerationReviewRequiredQuestionType } from "@/server/services/ai-generation-question-type-contract";
 
 import {
   createOrganizationTrainingListSearch,
@@ -119,6 +120,12 @@ type PublishQuestionFormValue = {
     label: string;
     content: string;
   }[];
+  scoringPoints: NonNullable<
+    OrganizationTrainingAdminQuestionDetailDto["scoringPoints"]
+  >;
+  fillBlankAnswers: NonNullable<
+    OrganizationTrainingAdminQuestionDetailDto["fillBlankAnswers"]
+  >;
   score: string;
   standardAnswer: string;
   analysisSummary: string;
@@ -463,7 +470,10 @@ function resolvePublishQuestionTypeLabel(
     return "判断题";
   }
 
-  return "简答题";
+  if (questionType === "fill_blank") return "填空题";
+  if (questionType === "short_answer") return "简答题";
+  if (questionType === "case_analysis") return "案例分析题";
+  return "计算题";
 }
 
 function resolveEvidenceStatusLabel(
@@ -586,6 +596,8 @@ function createDefaultPublishQuestionFormValue(
         content: "",
       },
     ],
+    scoringPoints: [],
+    fillBlankAnswers: [],
     score: String(Math.max(1, score)),
     standardAnswer: "",
     analysisSummary: "",
@@ -638,6 +650,13 @@ function createPublishQuestionFormValueFromDetail(
       publicId: option.publicId,
       label: option.label,
       content: option.content,
+    })),
+    scoringPoints: (question.scoringPoints ?? []).map((point) => ({
+      ...point,
+    })),
+    fillBlankAnswers: (question.fillBlankAnswers ?? []).map((answer) => ({
+      ...answer,
+      standardAnswers: [...answer.standardAnswers],
     })),
     score: String(question.score),
     standardAnswer: question.answerAndAnalysis.standardAnswer ?? "",
@@ -739,6 +758,93 @@ function createQuestionOptionPublicId(sequenceNumber: number, label: string) {
   return `${createQuestionPublicId(sequenceNumber)}-option-${label.toLowerCase()}`;
 }
 
+function createDefaultQuestionOptions(
+  sequenceNumber: number,
+): PublishQuestionFormValue["options"] {
+  return [
+    {
+      publicId: createQuestionOptionPublicId(sequenceNumber, "A"),
+      label: "A",
+      content: "",
+    },
+    {
+      publicId: createQuestionOptionPublicId(sequenceNumber, "B"),
+      label: "B",
+      content: "",
+    },
+  ];
+}
+
+function changePublishQuestionType(
+  question: PublishQuestionFormValue,
+  questionType: PublishQuestionFormValue["questionType"],
+): PublishQuestionFormValue {
+  const score = normalizePositiveIntegerInput(question.score) ?? 1;
+  const baseQuestion = {
+    ...question,
+    questionType,
+    options: [],
+    scoringPoints: [],
+    fillBlankAnswers: [],
+  };
+
+  if (questionType === "single_choice" || questionType === "multi_choice") {
+    return {
+      ...baseQuestion,
+      options:
+        question.options.length >= 2
+          ? question.options.map((questionOption) => ({ ...questionOption }))
+          : createDefaultQuestionOptions(question.sequenceNumber),
+    };
+  }
+  if (questionType === "fill_blank") {
+    return {
+      ...baseQuestion,
+      fillBlankAnswers: [
+        {
+          blankKey: "blank_1",
+          standardAnswers: [question.standardAnswer.trim()],
+          score,
+          sortOrder: 1,
+        },
+      ],
+    };
+  }
+  if (isAiGenerationReviewRequiredQuestionType(questionType)) {
+    return {
+      ...baseQuestion,
+      scoringPoints: [
+        {
+          description: "",
+          score,
+          sortOrder: 1,
+        },
+      ],
+    };
+  }
+  return baseQuestion;
+}
+
+function changePublishQuestionScore(
+  question: PublishQuestionFormValue,
+  score: string,
+): PublishQuestionFormValue {
+  const normalizedScore = normalizePositiveIntegerInput(score);
+
+  return {
+    ...question,
+    score,
+    scoringPoints:
+      normalizedScore !== null && question.scoringPoints.length === 1
+        ? [{ ...question.scoringPoints[0], score: normalizedScore }]
+        : question.scoringPoints,
+    fillBlankAnswers:
+      normalizedScore !== null && question.fillBlankAnswers.length === 1
+        ? [{ ...question.fillBlankAnswers[0], score: normalizedScore }]
+        : question.fillBlankAnswers,
+  };
+}
+
 function normalizePublishQuestionFormValue(
   question: PublishQuestionFormValue,
 ): OrganizationTrainingDraftQuestionInput | null {
@@ -749,18 +855,18 @@ function normalizePublishQuestionFormValue(
   );
   const standardAnswer = question.standardAnswer.trim();
   const analysisSummary = question.analysisSummary.trim();
-  const options =
-    question.questionType === "short_answer"
-      ? []
-      : question.options
-          .map((option) => ({
-            publicId: option.publicId,
-            label: option.label.trim(),
-            content: option.content.trim(),
-          }))
-          .filter(
-            (option) => option.label.length > 0 && option.content.length > 0,
-          );
+  const isChoiceQuestion =
+    question.questionType === "single_choice" ||
+    question.questionType === "multi_choice";
+  const options = !isChoiceQuestion
+    ? []
+    : question.options.map((option) => ({
+        publicId: option.publicId,
+        label: option.label.trim(),
+        content: option.content.trim(),
+      }));
+  const optionPublicIds = options.map((option) => option.publicId);
+  const optionLabels = options.map((option) => option.label);
 
   if (
     stem.length === 0 ||
@@ -768,7 +874,17 @@ function normalizePublishQuestionFormValue(
     citationCount === null ||
     standardAnswer.length === 0 ||
     analysisSummary.length === 0 ||
-    (question.questionType !== "short_answer" && options.length === 0)
+    (isChoiceQuestion &&
+      (Object.keys(question.options).length !== question.options.length ||
+        options.length < 2 ||
+        options.some(
+          (option) =>
+            option.publicId.length === 0 ||
+            option.label.length === 0 ||
+            option.content.length === 0,
+        ) ||
+        new Set(optionPublicIds).size !== optionPublicIds.length ||
+        new Set(optionLabels).size !== optionLabels.length))
   ) {
     return null;
   }
@@ -796,6 +912,11 @@ function normalizePublishQuestionFormValue(
       label: option.label,
       content: option.content,
     })),
+    scoringPoints: question.scoringPoints.map((point) => ({ ...point })),
+    fillBlankAnswers: question.fillBlankAnswers.map((answer) => ({
+      ...answer,
+      standardAnswers: [...answer.standardAnswers],
+    })),
     score,
     standardAnswer,
     analysisSummary,
@@ -805,6 +926,9 @@ function normalizePublishQuestionFormValue(
 function normalizePublishQuestionFormValues(
   questions: PublishQuestionFormValue[],
 ): OrganizationTrainingDraftQuestionInput[] | null {
+  if (Object.keys(questions).length !== questions.length) {
+    return null;
+  }
   const normalizedQuestions = questions.map(normalizePublishQuestionFormValue);
 
   if (
@@ -2446,7 +2570,10 @@ function TrainingLifecycleDetailBody({
           单选 {questionTypeSummary.singleChoice} · 多选{" "}
           {questionTypeSummary.multiChoice} · 判断{" "}
           {questionTypeSummary.trueFalse} · 简答{" "}
-          {questionTypeSummary.shortAnswer}
+          {questionTypeSummary.shortAnswer} · 填空{" "}
+          {questionTypeSummary.fillBlank ?? 0} · 案例分析{" "}
+          {questionTypeSummary.caseAnalysis ?? 0} · 计算{" "}
+          {questionTypeSummary.calculation ?? 0}
         </p>
       </section>
       {paperSections.length > 0 ? (
@@ -3074,27 +3201,31 @@ function PublishQuestionPreviewEditor({
             className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
             value={question.questionType}
             onChange={(event) =>
-              onChange(questionIndex, (currentQuestion) => ({
-                ...currentQuestion,
-                questionType: event.target
-                  .value as PublishQuestionFormValue["questionType"],
-              }))
+              onChange(questionIndex, (currentQuestion) =>
+                changePublishQuestionType(
+                  currentQuestion,
+                  event.target
+                    .value as PublishQuestionFormValue["questionType"],
+                ),
+              )
             }
           >
             <option value="single_choice">单选题</option>
             <option value="multi_choice">多选题</option>
             <option value="true_false">判断题</option>
+            <option value="fill_blank">填空题</option>
             <option value="short_answer">简答题</option>
+            <option value="case_analysis">案例分析题</option>
+            <option value="calculation">计算题</option>
           </select>
         </label>
         <NumberField
           label={`${questionLabel}分值`}
           value={question.score}
           onChange={(value) =>
-            onChange(questionIndex, (currentQuestion) => ({
-              ...currentQuestion,
-              score: value,
-            }))
+            onChange(questionIndex, (currentQuestion) =>
+              changePublishQuestionScore(currentQuestion, value),
+            )
           }
         />
         <div className="grid gap-2 text-sm font-medium">
@@ -3107,7 +3238,8 @@ function PublishQuestionPreviewEditor({
           </p>
         </div>
       </div>
-      {question.questionType === "short_answer" ? null : (
+      {question.questionType === "single_choice" ||
+      question.questionType === "multi_choice" ? (
         <div className="grid gap-3 md:grid-cols-2">
           {question.options.map((option, optionIndex) => (
             <TextField
@@ -3128,7 +3260,94 @@ function PublishQuestionPreviewEditor({
             />
           ))}
         </div>
-      )}
+      ) : null}
+      {question.questionType === "fill_blank" ? (
+        <div className="grid gap-3">
+          {question.fillBlankAnswers.map((answer, answerIndex) => (
+            <div className="grid gap-3 md:grid-cols-2" key={answer.blankKey}>
+              <TextField
+                label={`${questionLabel}填空 ${answerIndex + 1} 可接受答案`}
+                value={answer.standardAnswers.join("；")}
+                onChange={(value) =>
+                  onChange(questionIndex, (currentQuestion) => ({
+                    ...currentQuestion,
+                    fillBlankAnswers: currentQuestion.fillBlankAnswers.map(
+                      (currentAnswer, currentAnswerIndex) =>
+                        currentAnswerIndex === answerIndex
+                          ? {
+                              ...currentAnswer,
+                              standardAnswers: value
+                                .split(/[;；]/u)
+                                .map((standardAnswer) => standardAnswer.trim()),
+                            }
+                          : currentAnswer,
+                    ),
+                  }))
+                }
+              />
+              <NumberField
+                label={`${questionLabel}填空 ${answerIndex + 1} 分值`}
+                value={String(answer.score)}
+                onChange={(value) => {
+                  const score = normalizePositiveIntegerInput(value);
+                  if (score === null) return;
+                  onChange(questionIndex, (currentQuestion) => ({
+                    ...currentQuestion,
+                    fillBlankAnswers: currentQuestion.fillBlankAnswers.map(
+                      (currentAnswer, currentAnswerIndex) =>
+                        currentAnswerIndex === answerIndex
+                          ? { ...currentAnswer, score }
+                          : currentAnswer,
+                    ),
+                  }));
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {question.questionType === "short_answer" ||
+      question.questionType === "case_analysis" ||
+      question.questionType === "calculation" ? (
+        <div className="grid gap-3">
+          {question.scoringPoints.map((point, pointIndex) => (
+            <div className="grid gap-3 md:grid-cols-2" key={point.sortOrder}>
+              <TextField
+                label={`${questionLabel}评分点 ${pointIndex + 1} 描述`}
+                value={point.description}
+                onChange={(value) =>
+                  onChange(questionIndex, (currentQuestion) => ({
+                    ...currentQuestion,
+                    scoringPoints: currentQuestion.scoringPoints.map(
+                      (currentPoint, currentPointIndex) =>
+                        currentPointIndex === pointIndex
+                          ? { ...currentPoint, description: value }
+                          : currentPoint,
+                    ),
+                  }))
+                }
+              />
+              <NumberField
+                label={`${questionLabel}评分点 ${pointIndex + 1} 分值`}
+                value={String(point.score)}
+                onChange={(value) => {
+                  const score = normalizePositiveIntegerInput(value);
+                  if (score === null) return;
+                  onChange(questionIndex, (currentQuestion) => ({
+                    ...currentQuestion,
+                    scoringPoints: currentQuestion.scoringPoints.map(
+                      (currentPoint, currentPointIndex) =>
+                        currentPointIndex === pointIndex
+                          ? { ...currentPoint, score }
+                          : currentPoint,
+                    ),
+                  }));
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
       <TextField
         label={`${questionLabel}标准答案`}
         value={question.standardAnswer}
@@ -3168,7 +3387,10 @@ function EmployeePreviewQuestion({
       <p className="text-text-primary mt-2 text-sm leading-6">
         {question.stem}
       </p>
-      {question.questionType === "short_answer" ? (
+      {question.questionType === "true_false" ? (
+        <p className="text-text-secondary mt-2 text-sm">员工选择正确或错误。</p>
+      ) : question.questionType !== "single_choice" &&
+        question.questionType !== "multi_choice" ? (
         <p className="text-text-secondary mt-2 text-sm">员工填写文字作答。</p>
       ) : (
         <ul className="text-text-secondary mt-2 space-y-1 text-sm">

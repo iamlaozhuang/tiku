@@ -31,6 +31,7 @@ import {
   normalizeAiGenerationRouteIntegratedKnowledgeScope,
   type AiGenerationRouteIntegratedGenerationParameters,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { parseLegacyAiGenerationQuestionType } from "../services/ai-generation-question-type-contract";
 
 const DEFAULT_RESULT_HISTORY_LIMIT = 20;
 const MAX_RESULT_HISTORY_LIMIT = 50;
@@ -273,13 +274,6 @@ function resolveFormalAdoptionStatus(
   return "approved_for_formal_adoption";
 }
 
-const organizationTrainingQuestionTypes = [
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "short_answer",
-] as const;
-
 const evidenceStatuses = ["sufficient", "weak", "none"] as const;
 const paperMatchQualities = [
   "fully_matched",
@@ -339,6 +333,10 @@ export function resolveGenerationParametersSnapshot(row: {
   const questionCount = value.questionCount;
   const questionTypeDistribution = value.questionTypeDistribution;
   const paperStructure = value.paperStructure;
+  const questionType =
+    value.questionType === null
+      ? null
+      : parseLegacyAiGenerationQuestionType(value.questionType);
 
   if (
     !generationProfessions.includes(
@@ -351,7 +349,7 @@ export function resolveGenerationParametersSnapshot(row: {
     typeof questionCount !== "number" ||
     !Number.isInteger(questionCount) ||
     questionCount < 1 ||
-    !isNullableString(value.questionType) ||
+    (value.questionType !== null && questionType === null) ||
     !isNullableString(value.difficulty) ||
     !isNullableString(value.learningObjective) ||
     scope === null ||
@@ -377,7 +375,7 @@ export function resolveGenerationParametersSnapshot(row: {
     level,
     subject:
       value.subject as AiGenerationRouteIntegratedGenerationParameters["subject"],
-    questionType: value.questionType,
+    questionType,
     questionCount,
     difficulty: value.difficulty,
     learningObjective: value.learningObjective,
@@ -387,14 +385,6 @@ export function resolveGenerationParametersSnapshot(row: {
     paperStructure:
       paperStructure as AiGenerationRouteIntegratedGenerationParameters["paperStructure"],
   };
-}
-
-function isOrganizationTrainingQuestionType(
-  value: unknown,
-): value is OrganizationTrainingAdminQuestionDetailDto["questionType"] {
-  return organizationTrainingQuestionTypes.includes(
-    value as OrganizationTrainingAdminQuestionDetailDto["questionType"],
-  );
 }
 
 function isEvidenceStatus(
@@ -451,6 +441,119 @@ function normalizeQuestionOptionSnapshot(
   };
 }
 
+function hasDenseArrayEntries(value: readonly unknown[]): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function normalizeCompleteArray<T>(
+  values: readonly unknown[],
+  normalize: (value: unknown) => T | null,
+): T[] | null {
+  if (!hasDenseArrayEntries(values)) return null;
+  const normalizedValues: T[] = [];
+  for (const value of values) {
+    const normalizedValue = normalize(value);
+    if (normalizedValue === null) return null;
+    normalizedValues.push(normalizedValue);
+  }
+  return normalizedValues;
+}
+
+function normalizeQuestionScoringPoints(
+  value: unknown,
+): NonNullable<
+  OrganizationTrainingAdminQuestionDetailDto["scoringPoints"]
+> | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const scoringPoints: NonNullable<
+    OrganizationTrainingAdminQuestionDetailDto["scoringPoints"]
+  > = [];
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) {
+      return null;
+    }
+
+    const item = value[index];
+    if (
+      !isRecord(item) ||
+      typeof item.description !== "string" ||
+      item.description.length === 0 ||
+      typeof item.score !== "number" ||
+      !Number.isFinite(item.score) ||
+      item.score <= 0 ||
+      typeof item.sortOrder !== "number" ||
+      !Number.isInteger(item.sortOrder) ||
+      item.sortOrder !== index + 1
+    ) {
+      return null;
+    }
+
+    scoringPoints.push({
+      description: item.description,
+      score: item.score,
+      sortOrder: item.sortOrder,
+    });
+  }
+
+  return scoringPoints;
+}
+
+function normalizeFillBlankAnswerSnapshots(
+  value: unknown,
+): NonNullable<
+  OrganizationTrainingAdminQuestionDetailDto["fillBlankAnswers"]
+> | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const fillBlankAnswers: NonNullable<
+    OrganizationTrainingAdminQuestionDetailDto["fillBlankAnswers"]
+  > = [];
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) {
+      return null;
+    }
+
+    const item = value[index];
+    if (
+      !isRecord(item) ||
+      typeof item.blankKey !== "string" ||
+      item.blankKey.length === 0 ||
+      !Array.isArray(item.standardAnswers) ||
+      item.standardAnswers.length === 0 ||
+      item.standardAnswers.some(
+        (answer) => typeof answer !== "string" || answer.length === 0,
+      ) ||
+      typeof item.score !== "number" ||
+      !Number.isFinite(item.score) ||
+      item.score <= 0 ||
+      typeof item.sortOrder !== "number" ||
+      !Number.isInteger(item.sortOrder) ||
+      item.sortOrder !== index + 1
+    ) {
+      return null;
+    }
+
+    fillBlankAnswers.push({
+      blankKey: item.blankKey,
+      standardAnswers: [...item.standardAnswers],
+      score: item.score,
+      sortOrder: item.sortOrder,
+    });
+  }
+
+  return fillBlankAnswers;
+}
+
 function normalizeOrganizationTrainingQuestionDetail(
   value: unknown,
 ): OrganizationTrainingAdminQuestionDetailDto | null {
@@ -460,13 +563,16 @@ function normalizeOrganizationTrainingQuestionDetail(
 
   const evidenceSummary = value.evidenceSummary;
   const answerAndAnalysis = value.answerAndAnalysis;
+  const questionType = parseLegacyAiGenerationQuestionType(value.questionType);
+  const hasScoringPoints = Object.hasOwn(value, "scoringPoints");
+  const hasFillBlankAnswers = Object.hasOwn(value, "fillBlankAnswers");
 
   if (
     typeof value.publicId !== "string" ||
     typeof value.sequenceNumber !== "number" ||
     !Number.isInteger(value.sequenceNumber) ||
     value.sequenceNumber < 1 ||
-    !isOrganizationTrainingQuestionType(value.questionType) ||
+    questionType === null ||
     !isNullableString(value.materialTitle) ||
     !isNullableString(value.materialContent) ||
     typeof value.stem !== "string" ||
@@ -485,20 +591,61 @@ function normalizeOrganizationTrainingQuestionDetail(
     return null;
   }
 
-  const options = value.options.map(normalizeQuestionOptionSnapshot);
-
-  if (options.some((option) => option === null)) {
+  const options = normalizeCompleteArray(
+    value.options,
+    normalizeQuestionOptionSnapshot,
+  );
+  if (options === null) {
     return null;
+  }
+
+  if (hasScoringPoints !== hasFillBlankAnswers) {
+    return null;
+  }
+
+  let currentTypeFacts:
+    | {
+        scoringPoints: NonNullable<
+          OrganizationTrainingAdminQuestionDetailDto["scoringPoints"]
+        >;
+        fillBlankAnswers: NonNullable<
+          OrganizationTrainingAdminQuestionDetailDto["fillBlankAnswers"]
+        >;
+      }
+    | undefined;
+  if (hasScoringPoints) {
+    const scoringPoints = normalizeQuestionScoringPoints(value.scoringPoints);
+    const fillBlankAnswers = normalizeFillBlankAnswerSnapshots(
+      value.fillBlankAnswers,
+    );
+    if (scoringPoints === null || fillBlankAnswers === null) {
+      return null;
+    }
+
+    const hasInvalidCurrentTypeFacts =
+      questionType === "fill_blank"
+        ? fillBlankAnswers.length === 0 || scoringPoints.length !== 0
+        : questionType === "short_answer" ||
+            questionType === "case_analysis" ||
+            questionType === "calculation"
+          ? scoringPoints.length === 0 || fillBlankAnswers.length !== 0
+          : scoringPoints.length !== 0 || fillBlankAnswers.length !== 0;
+    if (hasInvalidCurrentTypeFacts) {
+      return null;
+    }
+
+    currentTypeFacts = { scoringPoints, fillBlankAnswers };
   }
 
   return {
     publicId: value.publicId,
     sequenceNumber: value.sequenceNumber,
-    questionType: value.questionType,
+    questionType,
     materialTitle: value.materialTitle,
     materialContent: value.materialContent,
     stem: value.stem,
-    options: options as OrganizationTrainingAdminQuestionDetailDto["options"],
+    options,
+    ...(currentTypeFacts ?? {}),
     score: value.score,
     evidenceSummary: {
       evidenceStatus: evidenceSummary.evidenceStatus,
@@ -533,21 +680,24 @@ export function resolveOrganizationTrainingQuestionDraftSnapshot(
 
   const questions = trainingDraftSnapshot.questions;
 
-  if (!Array.isArray(questions) || questions.length === 0) {
+  if (
+    !Array.isArray(questions) ||
+    questions.length === 0 ||
+    !hasDenseArrayEntries(questions)
+  ) {
     return null;
   }
 
-  const normalizedQuestions = questions.map(
+  const normalizedQuestions = normalizeCompleteArray(
+    questions,
     normalizeOrganizationTrainingQuestionDetail,
   );
-
-  if (normalizedQuestions.some((question) => question === null)) {
+  if (normalizedQuestions === null) {
     return null;
   }
 
   return {
-    questions:
-      normalizedQuestions as OrganizationTrainingAdminQuestionDetailDto[],
+    questions: normalizedQuestions,
   };
 }
 
@@ -632,37 +782,39 @@ function normalizeOrganizationTrainingPaperAssemblySection(
     return null;
   }
 
+  const questionType = parseLegacyAiGenerationQuestionType(value.questionType);
+
   if (
     typeof value.sectionKey !== "string" ||
     typeof value.title !== "string" ||
-    !isOrganizationTrainingQuestionType(value.questionType) ||
+    questionType === null ||
     typeof value.targetQuestionCount !== "number" ||
     !Number.isInteger(value.targetQuestionCount) ||
     value.targetQuestionCount < 1 ||
     typeof value.selectedQuestionCount !== "number" ||
     !Number.isInteger(value.selectedQuestionCount) ||
     value.selectedQuestionCount < 1 ||
-    !Array.isArray(value.selectedQuestions)
+    !Array.isArray(value.selectedQuestions) ||
+    !hasDenseArrayEntries(value.selectedQuestions)
   ) {
     return null;
   }
 
-  const selectedQuestions = value.selectedQuestions.map(
+  const selectedQuestions = normalizeCompleteArray(
+    value.selectedQuestions,
     normalizeSelectedPaperQuestion,
   );
-
-  if (selectedQuestions.some((question) => question === null)) {
+  if (selectedQuestions === null) {
     return null;
   }
 
   return {
     sectionKey: value.sectionKey,
     title: value.title,
-    questionType: value.questionType,
+    questionType,
     targetQuestionCount: value.targetQuestionCount,
     selectedQuestionCount: value.selectedQuestionCount,
-    selectedQuestions:
-      selectedQuestions as AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"],
+    selectedQuestions,
   };
 }
 
@@ -673,10 +825,12 @@ function normalizeOrganizationTrainingPaperSectionDetail(
     return null;
   }
 
+  const questionType = parseLegacyAiGenerationQuestionType(value.questionType);
+
   if (
     typeof value.sectionKey !== "string" ||
     typeof value.title !== "string" ||
-    !isOrganizationTrainingQuestionType(value.questionType) ||
+    questionType === null ||
     typeof value.targetQuestionCount !== "number" ||
     !Number.isInteger(value.targetQuestionCount) ||
     value.targetQuestionCount < 1 ||
@@ -684,27 +838,31 @@ function normalizeOrganizationTrainingPaperSectionDetail(
     !Number.isInteger(value.selectedQuestionCount) ||
     value.selectedQuestionCount < 1 ||
     typeof value.totalScore !== "number" ||
-    !Array.isArray(value.questions)
+    !Array.isArray(value.questions) ||
+    !hasDenseArrayEntries(value.questions)
   ) {
     return null;
   }
 
-  const questions = value.questions.map(
+  const questions = normalizeCompleteArray(
+    value.questions,
     normalizeOrganizationTrainingQuestionDetail,
   );
-
-  if (questions.some((question) => question === null)) {
+  if (
+    questions === null ||
+    questions.some((question) => question.questionType !== questionType)
+  ) {
     return null;
   }
 
   return {
     sectionKey: value.sectionKey,
     title: value.title,
-    questionType: value.questionType,
+    questionType,
     targetQuestionCount: value.targetQuestionCount,
     selectedQuestionCount: value.selectedQuestionCount,
     totalScore: value.totalScore,
-    questions: questions as OrganizationTrainingAdminQuestionDetailDto[],
+    questions,
   };
 }
 
@@ -751,33 +909,46 @@ export function resolveOrganizationTrainingPaperDraftSnapshot(
     return null;
   }
 
+  for (const collection of [
+    paperDraftSnapshot.assemblySections,
+    paperDraftSnapshot.paperSections,
+    paperDraftSnapshot.questions,
+  ]) {
+    if (
+      collection !== undefined &&
+      (!Array.isArray(collection) || !hasDenseArrayEntries(collection))
+    ) {
+      return null;
+    }
+  }
+
   const assemblySections = Array.isArray(paperDraftSnapshot.assemblySections)
-    ? paperDraftSnapshot.assemblySections.map(
+    ? normalizeCompleteArray(
+        paperDraftSnapshot.assemblySections,
         normalizeOrganizationTrainingPaperAssemblySection,
       )
     : [];
-
-  if (assemblySections.some((section) => section === null)) {
+  if (assemblySections === null) {
     return null;
   }
 
   const paperSections = Array.isArray(paperDraftSnapshot.paperSections)
-    ? paperDraftSnapshot.paperSections.map(
+    ? normalizeCompleteArray(
+        paperDraftSnapshot.paperSections,
         normalizeOrganizationTrainingPaperSectionDetail,
       )
     : [];
-
-  if (paperSections.some((section) => section === null)) {
+  if (paperSections === null) {
     return null;
   }
 
   const questions = Array.isArray(paperDraftSnapshot.questions)
-    ? paperDraftSnapshot.questions.map(
+    ? normalizeCompleteArray(
+        paperDraftSnapshot.questions,
         normalizeOrganizationTrainingQuestionDetail,
       )
     : [];
-
-  if (questions.some((question) => question === null)) {
+  if (questions === null) {
     return null;
   }
 
@@ -800,19 +971,17 @@ export function resolveOrganizationTrainingPaperDraftSnapshot(
     ...(assemblySections.length === 0
       ? {}
       : {
-          assemblySections:
-            assemblySections as AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload[],
+          assemblySections,
         }),
     ...(paperSections.length === 0
       ? {}
       : {
-          paperSections:
-            paperSections as OrganizationTrainingAdminPaperSectionDetailDto[],
+          paperSections,
         }),
     ...(questions.length === 0
       ? {}
       : {
-          questions: questions as OrganizationTrainingAdminQuestionDetailDto[],
+          questions,
         }),
     redactionStatus: "admin_safe_detail",
   };

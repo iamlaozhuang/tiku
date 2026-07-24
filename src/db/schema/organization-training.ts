@@ -20,7 +20,7 @@ import {
   evidenceStatusEnum,
 } from "./ai-rag";
 import { employee, orgAuth, organization, professionEnum } from "./auth";
-import { subjectEnum } from "./paper";
+import { questionTypeValues, subjectEnum } from "./paper";
 
 const idColumn = () =>
   bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey();
@@ -139,11 +139,7 @@ export type OrganizationTrainingQuestionOptionSnapshotValue = {
 export type OrganizationTrainingQuestionSnapshotValue = {
   publicId: string;
   sequenceNumber: number;
-  questionType:
-    | "single_choice"
-    | "multi_choice"
-    | "true_false"
-    | "short_answer";
+  questionType: (typeof questionTypeValues)[number];
   paperSectionKey?: string;
   paperSectionTitle?: string;
   paperSectionSortOrder?: number;
@@ -152,6 +148,17 @@ export type OrganizationTrainingQuestionSnapshotValue = {
   materialContent: string | null;
   stem: string;
   options: OrganizationTrainingQuestionOptionSnapshotValue[];
+  scoringPoints?: {
+    description: string;
+    score: number;
+    sortOrder: number;
+  }[];
+  fillBlankAnswers?: {
+    blankKey: string;
+    standardAnswers: string[];
+    score: number;
+    sortOrder: number;
+  }[];
   score: number;
   standardAnswer: string;
   analysisSummary: string;

@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type { AiPaperSelectableQuestionDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type { QuestionAccessRow } from "../repositories/question-repository";
+import { parseCurrentAiGenerationQuestionType } from "./ai-generation-question-type-contract";
 
 type OrganizationTrainingQuestionSnapshot = NonNullable<
   OrganizationTrainingPublishedVersionDto["questions"]
@@ -17,22 +18,28 @@ export type AiPaperEnterpriseQuestionSourceAdapterInput = {
   trainingVersions: readonly OrganizationTrainingPublishedVersionDto[];
 };
 
-const enterpriseTrainingQuestionTypes = new Set([
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "short_answer",
-]);
-
 export function mapPlatformQuestionRowsToAiPaperQuestions(
   input: AiPaperPlatformQuestionSourceAdapterInput,
 ): AiPaperSelectableQuestionDto[] {
   const availableRows = input.questionRows.filter(
     (questionRow) => questionRow.status === "available",
   );
+  const normalizedRows: Array<{
+    row: QuestionAccessRow;
+    questionType: AiPaperSelectableQuestionDto["questionType"];
+  }> = [];
+  for (const row of availableRows) {
+    const questionType = parseCurrentAiGenerationQuestionType(
+      row.question_type,
+    );
+    if (questionType === null) {
+      return [];
+    }
+    normalizedRows.push({ row, questionType });
+  }
   const materialRowsByPublicId = new Map<string, QuestionAccessRow[]>();
 
-  for (const questionRow of availableRows) {
+  for (const { row: questionRow } of normalizedRows) {
     if (questionRow.material_id === null) {
       continue;
     }
@@ -48,7 +55,8 @@ export function mapPlatformQuestionRowsToAiPaperQuestions(
     materialRowsByPublicId.set(materialPublicId, materialRows);
   }
 
-  return availableRows.flatMap((questionRow) => {
+  const mappedQuestions: AiPaperSelectableQuestionDto[] = [];
+  for (const { row: questionRow, questionType } of normalizedRows) {
     const questionGroup = createPlatformQuestionGroup(
       questionRow,
       materialRowsByPublicId,
@@ -58,48 +66,52 @@ export function mapPlatformQuestionRowsToAiPaperQuestions(
       return [];
     }
 
-    return [
-      {
-        publicId: questionRow.public_id,
-        sourceKind: "platform_formal_question",
-        organizationPublicId: null,
-        status: "available",
-        profession: questionRow.profession,
-        level: questionRow.level,
-        subject: questionRow.subject,
-        questionType: questionRow.question_type,
-        difficulty: questionRow.difficulty ?? null,
-        knowledgeNodePublicIds: [...questionRow.knowledge_node_public_ids],
-        parentKnowledgeNodePublicIds: [
-          ...(questionRow.parent_knowledge_node_public_ids ?? []),
-        ],
-        ancestorKnowledgeNodePublicIds: [
-          ...(questionRow.ancestor_knowledge_node_public_ids ?? []),
-        ],
-        ...(questionGroup === null ? {} : { questionGroup }),
-      } satisfies AiPaperSelectableQuestionDto,
-    ];
-  });
+    mappedQuestions.push({
+      publicId: questionRow.public_id,
+      sourceKind: "platform_formal_question",
+      organizationPublicId: null,
+      status: "available",
+      profession: questionRow.profession,
+      level: questionRow.level,
+      subject: questionRow.subject,
+      questionType,
+      difficulty: questionRow.difficulty ?? null,
+      knowledgeNodePublicIds: [...questionRow.knowledge_node_public_ids],
+      parentKnowledgeNodePublicIds: [
+        ...(questionRow.parent_knowledge_node_public_ids ?? []),
+      ],
+      ancestorKnowledgeNodePublicIds: [
+        ...(questionRow.ancestor_knowledge_node_public_ids ?? []),
+      ],
+      ...(questionGroup === null ? {} : { questionGroup }),
+    });
+  }
+
+  return mappedQuestions;
 }
 
 export function mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions(
   input: AiPaperEnterpriseQuestionSourceAdapterInput,
 ): AiPaperSelectableQuestionDto[] {
-  return input.trainingVersions.flatMap((trainingVersion) => {
+  const mappedQuestions: AiPaperSelectableQuestionDto[] = [];
+  for (const trainingVersion of input.trainingVersions) {
     if (
       trainingVersion.organizationPublicId !== input.organizationPublicId ||
       trainingVersion.status !== "published" ||
       trainingVersion.takenDownAt !== null
     ) {
-      return [];
+      continue;
     }
 
     const questionSnapshots = trainingVersion.questions ?? [];
     const validQuestionGroups =
       createEnterpriseQuestionGroups(questionSnapshots);
 
-    return questionSnapshots.flatMap((questionSnapshot) => {
-      if (!enterpriseTrainingQuestionTypes.has(questionSnapshot.questionType)) {
+    for (const questionSnapshot of questionSnapshots) {
+      const questionType = parseCurrentAiGenerationQuestionType(
+        questionSnapshot.questionType,
+      );
+      if (questionType === null) {
         return [];
       }
 
@@ -125,31 +137,31 @@ export function mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions(
         return [];
       }
 
-      return [
-        {
-          publicId: questionSnapshot.publicId,
-          sourceKind: "enterprise_training_snapshot",
-          organizationPublicId: trainingVersion.organizationPublicId,
-          status: "published",
-          profession: trainingVersion.profession,
-          level: trainingVersion.level,
-          subject: trainingVersion.subject,
-          questionType: questionSnapshot.questionType,
-          difficulty: questionSnapshot.difficulty ?? null,
-          knowledgeNodePublicIds: [
-            ...(questionSnapshot.knowledgeNodePublicIds ?? []),
-          ],
-          parentKnowledgeNodePublicIds: [
-            ...(questionSnapshot.parentKnowledgeNodePublicIds ?? []),
-          ],
-          ancestorKnowledgeNodePublicIds: [
-            ...(questionSnapshot.ancestorKnowledgeNodePublicIds ?? []),
-          ],
-          ...(questionGroup === null ? {} : { questionGroup }),
-        } satisfies AiPaperSelectableQuestionDto,
-      ];
-    });
-  });
+      mappedQuestions.push({
+        publicId: questionSnapshot.publicId,
+        sourceKind: "enterprise_training_snapshot",
+        organizationPublicId: trainingVersion.organizationPublicId,
+        status: "published",
+        profession: trainingVersion.profession,
+        level: trainingVersion.level,
+        subject: trainingVersion.subject,
+        questionType,
+        difficulty: questionSnapshot.difficulty ?? null,
+        knowledgeNodePublicIds: [
+          ...(questionSnapshot.knowledgeNodePublicIds ?? []),
+        ],
+        parentKnowledgeNodePublicIds: [
+          ...(questionSnapshot.parentKnowledgeNodePublicIds ?? []),
+        ],
+        ancestorKnowledgeNodePublicIds: [
+          ...(questionSnapshot.ancestorKnowledgeNodePublicIds ?? []),
+        ],
+        ...(questionGroup === null ? {} : { questionGroup }),
+      });
+    }
+  }
+
+  return mappedQuestions;
 }
 
 function createPlatformQuestionGroup(

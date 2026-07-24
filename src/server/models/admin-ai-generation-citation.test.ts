@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
+
 import {
   createAdminAiGenerationCitationSnapshot,
   resolveAdminAiGenerationCitationProjection,
@@ -46,7 +48,7 @@ const groundingContext = {
       score: 0.9,
     },
   ],
-};
+} satisfies AiGenerationRouteIntegratedGroundingContext;
 
 describe("admin AI generation citation projection", () => {
   it("creates a bounded deduplicated snapshot containing only source titles and heading paths", () => {

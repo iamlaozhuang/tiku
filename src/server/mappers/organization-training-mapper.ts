@@ -27,6 +27,7 @@ import {
   type OrganizationTrainingValidationStatus,
   type OrganizationTrainingVersionStatus,
 } from "../models/organization-training";
+import { parseCurrentAiGenerationQuestionType } from "../services/ai-generation-question-type-contract";
 import { subjectValues, type Subject } from "../models/paper";
 
 export type OrganizationTrainingVersionRow = {
@@ -326,30 +327,85 @@ function mapQuestionSnapshots(
     return [];
   }
 
-  return snapshots
-    .map((snapshot) => ({
+  const questions: OrganizationTrainingQuestionSnapshotDto[] = [];
+  const publicIds = new Set<string>();
+  const foldedPublicIds = new Set<string>();
+  for (let index = 0; index < snapshots.length; index += 1) {
+    if (!Object.hasOwn(snapshots, index)) {
+      throw new Error("Invalid organization training question snapshot.");
+    }
+
+    const snapshot = snapshots[index];
+    const questionType = parseCurrentAiGenerationQuestionType(
+      snapshot.questionType,
+    );
+    const foldedPublicId =
+      typeof snapshot.publicId === "string"
+        ? snapshot.publicId.toLowerCase()
+        : "";
+    if (
+      typeof snapshot.publicId !== "string" ||
+      snapshot.publicId.length === 0 ||
+      publicIds.has(snapshot.publicId) ||
+      foldedPublicIds.has(foldedPublicId) ||
+      !Number.isInteger(snapshot.sequenceNumber) ||
+      snapshot.sequenceNumber < 1 ||
+      questionType === null ||
+      typeof snapshot.stem !== "string" ||
+      snapshot.stem.length === 0 ||
+      !Number.isFinite(snapshot.score) ||
+      snapshot.score <= 0 ||
+      !Array.isArray(snapshot.options) ||
+      !hasDenseArrayEntries(snapshot.options)
+    ) {
+      throw new Error("Invalid organization training question snapshot.");
+    }
+
+    const options = snapshot.options.map((option) => ({
+      publicId: option.publicId,
+      label: option.label,
+      content: option.content,
+    }));
+    if (
+      options.some(
+        (option) =>
+          typeof option.publicId !== "string" ||
+          option.publicId.length === 0 ||
+          typeof option.label !== "string" ||
+          option.label.length === 0 ||
+          typeof option.content !== "string" ||
+          option.content.length === 0,
+      ) ||
+      new Set(options.map((option) => option.publicId)).size !==
+        options.length ||
+      new Set(options.map((option) => option.label)).size !== options.length
+    ) {
+      throw new Error("Invalid organization training question snapshot.");
+    }
+
+    publicIds.add(snapshot.publicId);
+    foldedPublicIds.add(foldedPublicId);
+    questions.push({
       publicId: snapshot.publicId,
       sequenceNumber: snapshot.sequenceNumber,
-      questionType: snapshot.questionType,
+      questionType,
       materialTitle: snapshot.materialTitle,
       materialContent: snapshot.materialContent,
       ...copyQuestionGroupSnapshotFields(snapshot),
       stem: snapshot.stem,
-      options: Array.isArray(snapshot.options)
-        ? snapshot.options.map((option) => ({
-            publicId: option.publicId,
-            label: option.label,
-            content: option.content,
-          }))
-        : [],
+      options,
       score: snapshot.score,
-    }))
-    .filter(
-      (question): question is OrganizationTrainingQuestionSnapshotDto =>
-        typeof question.publicId === "string" &&
-        Number.isInteger(question.sequenceNumber) &&
-        typeof question.stem === "string",
-    );
+    });
+  }
+
+  return questions;
+}
+
+function hasDenseArrayEntries(value: readonly unknown[]): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) return false;
+  }
+  return true;
 }
 
 type QuestionGroupSnapshotFields = {
@@ -524,12 +580,23 @@ function isQuestionTypeSummary(
     return false;
   }
 
-  return [
+  const legacyValues = [
     candidate.singleChoice,
     candidate.multiChoice,
     candidate.trueFalse,
     candidate.shortAnswer,
-  ].every(isNonNegativeInteger);
+  ];
+  const currentValues = [
+    candidate.fillBlank,
+    candidate.caseAnalysis,
+    candidate.calculation,
+  ];
+
+  return (
+    legacyValues.every(isNonNegativeInteger) &&
+    (currentValues.every((value) => value === undefined) ||
+      currentValues.every(isNonNegativeInteger))
+  );
 }
 
 function isRecord(candidate: unknown): candidate is Record<string, unknown> {
@@ -563,7 +630,16 @@ function copyQuestionTypeSummary(
     singleChoice: summary.singleChoice,
     multiChoice: summary.multiChoice,
     trueFalse: summary.trueFalse,
+    ...(summary.fillBlank === undefined
+      ? {}
+      : { fillBlank: summary.fillBlank }),
     shortAnswer: summary.shortAnswer,
+    ...(summary.caseAnalysis === undefined
+      ? {}
+      : { caseAnalysis: summary.caseAnalysis }),
+    ...(summary.calculation === undefined
+      ? {}
+      : { calculation: summary.calculation }),
   };
 }
 

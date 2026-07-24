@@ -538,6 +538,8 @@ function createPublishInput(
             content: "distractor option",
           },
         ],
+        scoringPoints: [],
+        fillBlankAnswers: [],
         score: 2,
         standardAnswer: "A",
         analysisSummary: "choice rationale",
@@ -552,6 +554,10 @@ function createPublishInput(
         materialContent: null,
         stem: "Describe the handling rule.",
         options: [],
+        scoringPoints: [
+          { description: "handling rule", score: 3, sortOrder: 1 },
+        ],
+        fillBlankAnswers: [],
         score: 3,
         standardAnswer: "expected answer",
         analysisSummary: "scoring rationale",
@@ -966,7 +972,10 @@ describe("organization training service", () => {
           singleChoice: 0,
           multiChoice: 0,
           trueFalse: 0,
+          fillBlank: 0,
           shortAnswer: 0,
+          caseAnalysis: 0,
+          calculation: 0,
         },
         evidenceStatus: "none",
         validationStatus: "needs_review",
@@ -1000,7 +1009,10 @@ describe("organization training service", () => {
           singleChoice: 0,
           multiChoice: 0,
           trueFalse: 0,
+          fillBlank: 0,
           shortAnswer: 0,
+          caseAnalysis: 0,
+          calculation: 0,
         },
         evidenceStatus: "none",
         validationStatus: "needs_review",
@@ -1340,7 +1352,10 @@ describe("organization training service", () => {
             singleChoice: 1,
             multiChoice: 0,
             trueFalse: 0,
+            fillBlank: 0,
             shortAnswer: 0,
+            caseAnalysis: 0,
+            calculation: 0,
           },
         },
         questions: [
@@ -2001,7 +2016,10 @@ describe("organization training service", () => {
           singleChoice: 1,
           multiChoice: 0,
           trueFalse: 0,
+          fillBlank: 0,
           shortAnswer: 1,
+          caseAnalysis: 0,
+          calculation: 0,
         },
         status: "published",
         publishedAt: fixedNow.toISOString(),
@@ -2107,6 +2125,37 @@ describe("organization training service", () => {
       publishInput: createPublishInput({
         authorizationPublicId: " ",
       }),
+      persistenceLineage: createPersistenceLineage(),
+    });
+
+    expect(result).toEqual({
+      success: false,
+      reason: "invalid_publish_input",
+      message: "Organization training publish is blocked.",
+    });
+    expect(getPublishedVersions()).toEqual([]);
+  });
+
+  it("blocks publish when authoritative scoring-point totals do not equal the question score", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+    const publishInput = createPublishInput();
+    const reviewQuestion = publishInput.questions[1];
+    const scoringPoint = reviewQuestion?.scoringPoints?.[0];
+    if (reviewQuestion === undefined || scoringPoint === undefined) {
+      throw new Error("Expected a scored review question fixture.");
+    }
+    publishInput.questions[1] = {
+      ...reviewQuestion,
+      scoringPoints: [
+        {
+          ...scoringPoint,
+          score: reviewQuestion.score + 1,
+        },
+      ],
+    };
+
+    const result = await service.publishVersion({
+      publishInput,
       persistenceLineage: createPersistenceLineage(),
     });
 

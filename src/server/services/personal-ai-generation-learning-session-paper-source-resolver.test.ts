@@ -153,6 +153,56 @@ function createEnterpriseSnapshot(
 }
 
 describe("personal AI generation learning session paper source resolver", () => {
+  it.each([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const)(
+    "preserves canonical %s source identity without filtering",
+    async (questionType) => {
+      const container = createPaperAssemblyContainer();
+      container.requestedQuestionCount = 1;
+      container.selectedQuestionCount = 1;
+      container.sourceComposition = {
+        platformFormalQuestionCount: 1,
+        enterpriseTrainingSnapshotCount: 0,
+      };
+      container.sections = [
+        {
+          ...container.sections[0]!,
+          questionType,
+          targetQuestionCount: 1,
+          selectedQuestionCount: 1,
+          selectedQuestions: [container.sections[0]!.selectedQuestions[0]!],
+        },
+      ];
+      const resolver =
+        createPersonalAiGenerationLearningSessionPaperSourceResolver({
+          questionRepository: createQuestionRepository([
+            createQuestionRow({ question_type: questionType }),
+          ]),
+        });
+
+      const result = await resolver({
+        userContext: personalUserContext,
+        ownerScope: {
+          ownerType: "personal",
+          ownerPublicId: personalUserContext.userPublicId,
+          actorPublicId: personalUserContext.userPublicId,
+        },
+        sourceResultPublicId: "resolver_result_type_001",
+        sourceTaskPublicId: "resolver_task_type_001",
+        paperAssemblyContainer: container,
+      });
+
+      expect(result).toEqual([expect.objectContaining({ questionType })]);
+    },
+  );
+
   it("preserves the selected immutable material group snapshot while revalidating exact current source membership", async () => {
     const container = createPaperAssemblyContainer();
     const group = {
@@ -328,7 +378,7 @@ describe("personal AI generation learning session paper source resolver", () => 
     ] satisfies PersonalAiGenerationLearningPaperSourceQuestionDto[]);
   });
 
-  it("reloads a selected platform question by exact public id outside a moving list window", async () => {
+  it("fails the whole exact source resolution when one selected source is unavailable", async () => {
     const aiPaperSourceQueries: unknown[] = [];
     let legacyListCalls = 0;
     const questionRepository = {
@@ -358,12 +408,7 @@ describe("personal AI generation learning session paper source resolver", () => 
       paperAssemblyContainer: createPaperAssemblyContainer(),
     });
 
-    expect(sourceQuestions).toEqual([
-      expect.objectContaining({
-        questionPublicId: "resolver_platform_question_public_001",
-        sourceKind: "platform_formal_question",
-      }),
-    ]);
+    expect(sourceQuestions).toEqual([]);
     expect(legacyListCalls).toBe(0);
     expect(aiPaperSourceQueries).toEqual([
       {
@@ -376,7 +421,7 @@ describe("personal AI generation learning session paper source resolver", () => 
     ]);
   });
 
-  it("keeps personal paper source resolution platform-only even when enterprise selection is present", async () => {
+  it("does not return a partial platform source set when a personal container also selects enterprise content", async () => {
     let enterpriseRepositoryCalled = false;
     const resolver =
       createPersonalAiGenerationLearningSessionPaperSourceResolver({
@@ -403,12 +448,7 @@ describe("personal AI generation learning session paper source resolver", () => 
     });
 
     expect(enterpriseRepositoryCalled).toBe(false);
-    expect(sourceQuestions).toEqual([
-      expect.objectContaining({
-        questionPublicId: "resolver_platform_question_public_001",
-        sourceKind: "platform_formal_question",
-      }),
-    ]);
+    expect(sourceQuestions).toEqual([]);
   });
 });
 

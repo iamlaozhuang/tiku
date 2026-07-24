@@ -803,11 +803,11 @@ describe("shared route-integrated Provider execution primitives", () => {
           title: "synthetic paper section title",
           questionCount: 20,
         },
-        { paperSectionType: "judge", questionCount: 30 },
+        { paperSectionType: "true_false", questionCount: 30 },
       ],
       questionTypeDistribution: {
         single_choice: 20,
-        judge: 30,
+        true_false: 30,
       },
       knowledgeCoverage: [
         "redacted_knowledge_node_a",
@@ -852,6 +852,76 @@ describe("shared route-integrated Provider execution primitives", () => {
       title: "synthetic paper section title",
       questionCount: 20,
       questionDrafts: [],
+    });
+  });
+
+  it.each([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ])(
+    "accepts canonical %s paper sections without narrowing to four types",
+    (questionType) => {
+      const content = JSON.stringify({
+        title: "synthetic paper plan title",
+        targetQuestionCount: 1,
+        sections: [
+          {
+            paperSectionType: questionType,
+            questionCount: 1,
+          },
+        ],
+        knowledgeCoverage: ["redacted_knowledge_node_a"],
+      });
+
+      expect(
+        createRouteIntegratedVisibleGeneratedContent(content, {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+          },
+        }),
+      ).toMatchObject({
+        structuredPreview: {
+          kind: "paper_draft",
+          parseStatus: "parsed",
+          questionCount: 1,
+        },
+      });
+    },
+  );
+
+  it.each([
+    "multiple_choice",
+    "subjective",
+    "judge",
+    "判断题",
+    "SINGLE_CHOICE",
+    " single_choice",
+  ])("rejects non-canonical new Provider paper section %j", (questionType) => {
+    const content = JSON.stringify({
+      title: "synthetic paper plan title",
+      targetQuestionCount: 1,
+      sections: [{ paperSectionType: questionType, questionCount: 1 }],
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 1,
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+      },
     });
   });
 
@@ -1253,7 +1323,7 @@ describe("shared route-integrated Provider execution primitives", () => {
       {
         sections: [
           { paperSectionType: "single_choice", questionCount: 20 },
-          { paperSectionType: "judge", questionCount: 30 },
+          { paperSectionType: "true_false", questionCount: 30 },
         ],
       },
       50,
@@ -1264,7 +1334,7 @@ describe("shared route-integrated Provider execution primitives", () => {
         paperSections: [{ paperSectionType: "single_choice" }],
         questionTypeDistribution: {
           single_choice: 20,
-          judge: 30,
+          true_false: 30,
         },
       },
       50,
@@ -1298,7 +1368,7 @@ describe("shared route-integrated Provider execution primitives", () => {
     const content = JSON.stringify({
       paperSections: [
         { paperSectionType: "single_choice", questionCount: 20 },
-        { paperSectionType: "judge", questionCount: 29 },
+        { paperSectionType: "true_false", questionCount: 29 },
       ],
     });
 
@@ -1433,7 +1503,7 @@ describe("shared route-integrated Provider execution primitives", () => {
           ],
         },
         {
-          paperSectionType: "judge",
+          paperSectionType: "true_false",
           questionDrafts: [
             { redactedDraftSummary: "synthetic question summary c" },
           ],
@@ -1441,7 +1511,7 @@ describe("shared route-integrated Provider execution primitives", () => {
       ],
       questionTypeDistribution: {
         single_choice: 2,
-        judge: 1,
+        true_false: 1,
       },
       knowledgeCoverage: ["redacted_knowledge_node_a"],
     });

@@ -606,6 +606,162 @@ describe("StudentOrganizationTrainingPage", () => {
     );
   });
 
+  it("preserves legacy option-backed and current text-backed true_false answers", async () => {
+    const trueFalseVersion = {
+      ...inProgressVisibleVersion,
+      publicId: "organization-training-version-ui-true-false",
+      draftPublicId: "organization-training-draft-ui-true-false",
+      questionCount: 2,
+      totalScore: 2,
+      questions: [
+        {
+          publicId: "organization-training-question-ui-legacy-true-false",
+          sequenceNumber: 1,
+          questionType: "true_false" as const,
+          materialTitle: null,
+          materialContent: null,
+          stem: "legacy option-backed true false",
+          options: [
+            {
+              publicId: "organization-training-option-ui-legacy-true",
+              label: "A",
+              content: "正确",
+            },
+            {
+              publicId: "organization-training-option-ui-legacy-false",
+              label: "B",
+              content: "错误",
+            },
+          ],
+          score: 1,
+        },
+        {
+          publicId: "organization-training-question-ui-current-true-false",
+          sequenceNumber: 2,
+          questionType: "true_false" as const,
+          materialTitle: null,
+          materialContent: null,
+          stem: "current text-backed true false",
+          options: [],
+          score: 1,
+        },
+      ],
+    } satisfies AdversarialVisibleVersionFixture;
+    const restoredAnswer = {
+      ...draftAnswer,
+      revision: 4,
+      trainingVersionPublicId: trueFalseVersion.publicId,
+      answerItems: [
+        {
+          questionPublicId:
+            "organization-training-question-ui-legacy-true-false",
+          selectedOptionPublicIds: [
+            "organization-training-option-ui-legacy-true",
+          ],
+          textAnswer: null,
+        },
+        {
+          questionPublicId:
+            "organization-training-question-ui-current-true-false",
+          selectedOptionPublicIds: [],
+          textAnswer: null,
+        },
+      ],
+    } satisfies AdversarialAnswerFixture;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+        const method = init?.method ?? "GET";
+
+        if (path.endsWith("/visible-list") && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { versions: [trueFalseVersion] },
+          });
+        }
+        if (path.endsWith("/employee-answers/draft") && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { answer: restoredAnswer },
+          });
+        }
+        if (
+          path.endsWith("/employee-answers/draft-save") &&
+          method === "POST"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { answer: restoredAnswer },
+          });
+        }
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentOrganizationTrainingPage));
+
+    const row = await screen.findByTestId(
+      "organization-training-row-organization-training-version-ui-true-false",
+    );
+    fireEvent.click(within(row).getByRole("button", { name: "继续训练" }));
+    const workspace = screen.getByTestId(
+      "organization-training-workspace-organization-training-version-ui-true-false",
+    );
+    await waitFor(() =>
+      expect(within(workspace).getByLabelText("A. 正确")).toBeChecked(),
+    );
+    expect(
+      within(workspace).getByText("已作答 1 / 2 题，提交前可保存草稿。"),
+    ).toBeInTheDocument();
+    expect(within(workspace).getByLabelText("第 2 题作答")).toHaveValue("");
+
+    fireEvent.change(within(workspace).getByLabelText("第 2 题作答"), {
+      target: { value: "false" },
+    });
+    expect(
+      within(workspace).getByText("已作答 2 / 2 题，提交前可保存草稿。"),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      within(workspace).getByRole("button", { name: "保存草稿" }),
+    );
+
+    await waitFor(() =>
+      expect(
+        readJsonRequestBody(
+          fetchMock,
+          "/api/v1/organization-trainings/organization-training-version-ui-true-false/employee-answers/draft-save",
+          "POST",
+        ),
+      ).toMatchObject({
+        expectedRevision: 4,
+        answerItems: [
+          {
+            questionPublicId:
+              "organization-training-question-ui-legacy-true-false",
+            selectedOptionPublicIds: [
+              "organization-training-option-ui-legacy-true",
+            ],
+            textAnswer: null,
+          },
+          {
+            questionPublicId:
+              "organization-training-question-ui-current-true-false",
+            selectedOptionPublicIds: [],
+            textAnswer: "false",
+          },
+        ],
+      }),
+    );
+  });
+
   it("suppresses duplicate draft requests while one action is in flight", async () => {
     let releaseDraft: (() => void) | undefined;
     const draftBarrier = new Promise<void>((resolve) => {

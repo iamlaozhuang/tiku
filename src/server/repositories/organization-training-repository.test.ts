@@ -2623,6 +2623,13 @@ describe("organization training repository", () => {
       getPaperQuestionSnapshotLookupInputs,
     } = createGateway({
       paperQuestionSnapshotRows: [createPaperQuestionSnapshotRow()],
+      employeeVisibleVersionRows: [
+        createVersionRow({ question_count: 1, total_score: "2" }),
+      ],
+      publishedVersionRow: createVersionRow({
+        question_count: 1,
+        total_score: "2",
+      }),
     });
     const repository = createOrganizationTrainingRepository(gateway);
 
@@ -2947,7 +2954,7 @@ describe("organization training repository", () => {
     );
   });
 
-  it("caps paper-source question snapshots by the published training question count", async () => {
+  it("fails closed instead of slicing an overfull paper-source snapshot", async () => {
     const { gateway } = createGateway({
       paperQuestionSnapshotRows: [
         createPaperQuestionSnapshotRow({
@@ -2972,10 +2979,7 @@ describe("organization training repository", () => {
     });
 
     expect(versions[0]?.questionCount).toBe(2);
-    expect(versions[0]?.questions).toHaveLength(2);
-    expect(
-      versions[0]?.questions?.map((question) => question.publicId),
-    ).toEqual(["paper_question_public_001", "paper_question_public_002"]);
+    expect(versions[0]?.questions).toBeUndefined();
   });
 
   it("passes employee visible organization scope to the visible version gateway", async () => {

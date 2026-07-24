@@ -27,6 +27,20 @@ if (generationPromptTemplate === undefined) {
   throw new Error("Missing active question generation prompt definition.");
 }
 const generationPromptTemplateHash = generationPromptTemplate.templateHash;
+const paperPromptTemplates = promptTemplateDefinitions.filter(
+  (definition) =>
+    definition.promptTemplateKey ===
+    activePromptTemplateKeyByAiFuncType.ai_paper_generation,
+);
+if (
+  paperPromptTemplates.length !== 1 ||
+  paperPromptTemplates[0] === undefined
+) {
+  throw new Error(
+    "Expected exactly one active paper generation prompt definition.",
+  );
+}
+const paperPromptTemplate = paperPromptTemplates[0];
 
 function createCatalog(
   overrides: Partial<ModelConfigRuntimeCatalog["records"][number]> = {},
@@ -66,6 +80,43 @@ function createCatalog(
   };
 }
 
+function createPaperCatalog(
+  promptTemplate = {
+    promptTemplateKey: paperPromptTemplate.promptTemplateKey,
+    version: paperPromptTemplate.version,
+    templateHash: paperPromptTemplate.templateHash,
+  },
+): ModelConfigRuntimeCatalog {
+  return {
+    records: [
+      {
+        modelConfigSnapshot: createModelConfigSnapshot({
+          providerPublicId: "model-provider-qwen-public-001",
+          providerKey: "alibaba_qwen",
+          providerDisplayName: "Alibaba Qwen",
+          modelConfigPublicId: "model-config-paper-public-001",
+          aiFuncType: "ai_paper_generation",
+          modelName: "qwen3.7-max",
+          displayName: "Qwen Paper Generation",
+          configVersion: 3,
+          pricingVersion: "qwen-price-v1",
+          inputTokenPriceCnyPerMillion: "1.250000",
+          outputTokenPriceCnyPerMillion: "5.000000",
+          timeoutSecond: 60,
+          maxRetryCount: 0,
+          fallbackModelConfigPublicId: null,
+          promptTemplateKey: promptTemplate.promptTemplateKey,
+          promptTemplateVersion: promptTemplate.version,
+        }),
+        promptTemplate,
+        isEnabled: true,
+        priority: 0,
+        executionMode: "governed_provider",
+      },
+    ],
+  };
+}
+
 describe("route-integrated Provider governance service", () => {
   it("selects only an enabled model bound to the exact versioned project prompt", () => {
     const context = resolveRouteIntegratedProviderGovernanceContext({
@@ -87,6 +138,38 @@ describe("route-integrated Provider governance service", () => {
         templateHash: generationPromptTemplateHash,
       },
     });
+  });
+
+  it("selects paper v2 and rejects the preserved inactive paper v1 provenance", () => {
+    expect(
+      resolveRouteIntegratedProviderGovernanceContext({
+        taskType: "ai_paper_generation",
+        catalog: createPaperCatalog(),
+      }),
+    ).toMatchObject({
+      promptTemplate: {
+        promptTemplateKey: "ai_paper_generation_v2",
+        version: 2,
+      },
+    });
+
+    const legacyPaperPrompt = promptTemplateDefinitions.find(
+      (definition) => definition.promptTemplateKey === "ai_paper_generation_v1",
+    );
+    expect(legacyPaperPrompt?.isActive).toBe(false);
+    if (legacyPaperPrompt === undefined) {
+      throw new Error("Missing preserved paper v1 prompt definition.");
+    }
+    expect(
+      resolveRouteIntegratedProviderGovernanceContext({
+        taskType: "ai_paper_generation",
+        catalog: createPaperCatalog({
+          promptTemplateKey: legacyPaperPrompt.promptTemplateKey,
+          version: legacyPaperPrompt.version,
+          templateHash: legacyPaperPrompt.templateHash,
+        }),
+      }),
+    ).toBeNull();
   });
 
   it("fails closed for disabled, ambiguous, wrong-type, wrong-version, or wrong-hash governance bindings", () => {

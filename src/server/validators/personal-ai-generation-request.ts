@@ -17,6 +17,7 @@ import {
   normalizeAiGenerationRouteIntegratedPaperStructure,
   normalizeAiGenerationRouteIntegratedQuestionTypeDistribution,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { parseCurrentAiGenerationQuestionType } from "../services/ai-generation-question-type-contract";
 
 export type PersonalAiGenerationRequestValidationResult =
   | {
@@ -176,6 +177,10 @@ function normalizeGenerationParameters(
   const paperStructure = normalizeAiGenerationRouteIntegratedPaperStructure(
     value.paperStructure,
   );
+  const questionType =
+    value.questionType === null
+      ? null
+      : parseCurrentAiGenerationQuestionType(value.questionType);
   const knowledgeScope = normalizeAiGenerationRouteIntegratedKnowledgeScope({
     includeDescendants: value.includeDescendants,
     knowledgeNode: value.knowledgeNode,
@@ -191,6 +196,7 @@ function normalizeGenerationParameters(
     subject === null ||
     questionCount === null ||
     knowledgeScope === null ||
+    (value.questionType !== null && questionType === null) ||
     questionTypeDistribution === "invalid" ||
     paperStructure === "invalid"
   ) {
@@ -202,7 +208,7 @@ function normalizeGenerationParameters(
     level,
     subject,
     ...knowledgeScope,
-    questionType: normalizeOptionalText(value.questionType),
+    questionType,
     questionCount,
     difficulty: normalizeOptionalText(value.difficulty),
     learningObjective: normalizeOptionalText(value.learningObjective),

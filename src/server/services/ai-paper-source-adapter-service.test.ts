@@ -128,6 +128,93 @@ function createTrainingVersion(
 }
 
 describe("AI组卷题源 adapter", () => {
+  it.each([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const)("保留平台正式题的 canonical %s 题型", (questionType) => {
+    expect(
+      mapPlatformQuestionRowsToAiPaperQuestions({
+        questionRows: [createQuestionRow({ question_type: questionType })],
+      }),
+    ).toEqual([expect.objectContaining({ questionType })]);
+  });
+
+  it.each([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const)("保留企业训练快照的 canonical %s 题型", (questionType) => {
+    const version = createTrainingVersion({
+      questionCount: 1,
+      totalScore: 1,
+      questions: [
+        {
+          ...createTrainingVersion().questions![0]!,
+          questionType,
+          materialTitle: null,
+          materialContent: null,
+        },
+      ],
+    });
+
+    expect(
+      mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions({
+        organizationPublicId: "organization_public_a",
+        trainingVersions: [version],
+      }),
+    ).toEqual([expect.objectContaining({ questionType })]);
+  });
+
+  it("任一平台或企业题型损坏时拒绝整个题源投影而不是过滤后返回部分集合", () => {
+    const invalidPlatformQuestion = createQuestionRow({
+      public_id: "question_public_invalid",
+    });
+    Object.defineProperty(invalidPlatformQuestion, "question_type", {
+      configurable: true,
+      enumerable: true,
+      value: "judge",
+    });
+    const invalidEnterpriseQuestion = {
+      ...createTrainingVersion().questions![1]!,
+    };
+    Object.defineProperty(invalidEnterpriseQuestion, "questionType", {
+      configurable: true,
+      enumerable: true,
+      value: "judge",
+    });
+
+    const platformResult = mapPlatformQuestionRowsToAiPaperQuestions({
+      questionRows: [
+        createQuestionRow({ public_id: "question_public_valid" }),
+        invalidPlatformQuestion,
+      ],
+    });
+    const enterpriseResult =
+      mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions({
+        organizationPublicId: "organization_public_a",
+        trainingVersions: [
+          createTrainingVersion({
+            questions: [
+              createTrainingVersion().questions![0]!,
+              invalidEnterpriseQuestion,
+            ],
+          }),
+        ],
+      });
+
+    expect(platformResult).toEqual([]);
+    expect(enterpriseResult).toEqual([]);
+  });
+
   it("把共享可用材料的平台正式题确定性映射为完整材料题组并冻结材料快照", () => {
     const rows = ["a", "b"].map((suffix) =>
       Object.assign(
@@ -224,6 +311,45 @@ describe("AI组卷题源 adapter", () => {
     expect(
       mapPlatformQuestionRowsToAiPaperQuestions({
         questionRows: [disabled, incomplete],
+      }),
+    ).toEqual([]);
+  });
+
+  it("任一题组事实损坏时整批题源失败而不是返回其余合法题", () => {
+    const incompletePlatformQuestion = createQuestionRow({
+      public_id: "question_incomplete_mixed_material",
+      material_id: 902,
+      material_public_id: "material_incomplete_mixed",
+    });
+    expect(
+      mapPlatformQuestionRowsToAiPaperQuestions({
+        questionRows: [createQuestionRow(), incompletePlatformQuestion],
+      }),
+    ).toEqual([]);
+
+    const malformedEnterpriseVersion = createTrainingVersion({
+      questions: [
+        {
+          ...createTrainingVersion().questions![0]!,
+          questionGroupPublicId: "qgroup_incomplete_mixed",
+          questionGroupTitle: "不完整题组",
+          questionGroupQuestionSortOrder: 1,
+          questionGroupQuestionCount: 2,
+        },
+      ],
+    });
+    const canonicalEnterpriseVersion = createTrainingVersion();
+    expect(
+      mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions({
+        organizationPublicId: "organization_public_a",
+        trainingVersions: [
+          createTrainingVersion({
+            questionCount: 1,
+            totalScore: 1,
+            questions: [canonicalEnterpriseVersion.questions![1]!],
+          }),
+          malformedEnterpriseVersion,
+        ],
       }),
     ).toEqual([]);
   });
@@ -350,10 +476,15 @@ describe("AI组卷题源 adapter", () => {
   });
 
   it("maps same-organization published training snapshots into redacted enterprise candidates", () => {
+    const canonicalTrainingVersion = createTrainingVersion();
     const result = mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions({
       organizationPublicId: "organization_public_a",
       trainingVersions: [
-        createTrainingVersion(),
+        createTrainingVersion({
+          questionCount: 1,
+          totalScore: 1,
+          questions: [canonicalTrainingVersion.questions![1]!],
+        }),
         createTrainingVersion({
           publicId: "training_version_public_other_org",
           organizationPublicId: "organization_public_other",
@@ -396,29 +527,5 @@ describe("AI组卷题源 adapter", () => {
     expect(serializedResult).not.toContain("SENSITIVE_MATERIAL_CONTENT_MARKER");
     expect(serializedResult).not.toContain("SENSITIVE_TRAINING_STEM_MARKER");
     expect(serializedResult).not.toContain("SENSITIVE_TRAINING_OPTION_MARKER");
-  });
-
-  it("skips enterprise snapshot question types outside the v1 training bank subset", () => {
-    const version = createTrainingVersion({
-      questions: [
-        {
-          publicId: "training_question_public_case",
-          sequenceNumber: 1,
-          questionType: "case_analysis" as never,
-          materialTitle: null,
-          materialContent: null,
-          stem: "SENSITIVE_UNSUPPORTED_STEM_MARKER",
-          options: [],
-          score: 1,
-        },
-      ],
-    });
-
-    expect(
-      mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions({
-        organizationPublicId: "organization_public_a",
-        trainingVersions: [version],
-      }),
-    ).toEqual([]);
   });
 });

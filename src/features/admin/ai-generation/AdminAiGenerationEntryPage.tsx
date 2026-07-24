@@ -558,18 +558,27 @@ const adminSubjectValueByLabel = Object.fromEntries(
 ) as Record<string, AiGenerationRouteIntegratedSubject>;
 
 const adminQuestionTypeLabelByValue = {
+  calculation: "计算题",
   case_analysis: "案例分析题",
-  judge: "判断题",
-  multiple_choice: "多选题",
+  fill_blank: "填空题",
+  multi_choice: "多选题",
+  short_answer: "简答题",
   single_choice: "单选题",
-} as const;
+  true_false: "判断题",
+} as const satisfies Record<
+  NonNullable<AiGenerationRouteIntegratedGenerationParameters["questionType"]>,
+  string
+>;
 
 const adminQuestionTypeValueByLabel = Object.fromEntries(
   Object.entries(adminQuestionTypeLabelByValue).map(([value, label]) => [
     label,
     value,
   ]),
-) as Record<string, string>;
+) as Record<
+  string,
+  NonNullable<AiGenerationRouteIntegratedGenerationParameters["questionType"]>
+>;
 
 const adminDifficultyLabelByValue = {
   easy: "基础",
@@ -690,7 +699,7 @@ function createDefaultAdminGenerationParameters(
           ? "内容题目评审"
           : "内容试卷评审",
     questionTypeDistribution:
-      generationKind === "paper" ? "balanced_40_30_30" : null,
+      generationKind === "paper" ? "weak_point_priority" : null,
     paperStructure: generationKind === "paper" ? "by_question_type" : null,
   };
 }
@@ -881,6 +890,20 @@ function resolveQuestionTypeDistribution(
     : fallbackValue;
 }
 
+function resolveQuestionType(
+  value: unknown,
+  fallbackValue: AiGenerationRouteIntegratedGenerationParameters["questionType"],
+): AiGenerationRouteIntegratedGenerationParameters["questionType"] {
+  return typeof value === "string" &&
+    Object.hasOwn(adminQuestionTypeLabelByValue, value)
+    ? (value as NonNullable<
+        AiGenerationRouteIntegratedGenerationParameters["questionType"]
+      >)
+    : value === null
+      ? null
+      : fallbackValue;
+}
+
 function resolvePaperStructure(
   value: unknown,
   fallbackValue: AiGenerationRouteIntegratedGenerationParameters["paperStructure"],
@@ -961,7 +984,7 @@ export function resolveAdminAiGenerationParameters(
       persistedParameters.sourcePreference,
       defaultParameters.sourcePreference,
     ),
-    questionType: resolveNullableText(
+    questionType: resolveQuestionType(
       persistedParameters.questionType,
       defaultParameters.questionType,
     ),
@@ -1033,7 +1056,15 @@ function getAiGenerationDetailControls(
       {
         inputMode: "select",
         label: "题型",
-        options: ["单选题", "多选题", "判断题", "案例分析题"],
+        options: [
+          "单选题",
+          "多选题",
+          "判断题",
+          "填空题",
+          "简答题",
+          "案例分析题",
+          "计算题",
+        ],
         value:
           generationParameters.questionType === null
             ? "单选题"
@@ -1096,14 +1127,10 @@ function getAiGenerationDetailControls(
     {
       inputMode: "select",
       label: "题型分布",
-      options: [
-        "单选 40% / 多选 30% / 判断 30%",
-        "单选 50% / 多选 25% / 判断 25%",
-        "按薄弱项动态分配",
-      ],
+      options: ["按薄弱项动态分配"],
       value:
         adminQuestionTypeDistributionLabelByValue[
-          generationParameters.questionTypeDistribution ?? "balanced_40_30_30"
+          generationParameters.questionTypeDistribution ?? "weak_point_priority"
         ],
     },
     {
@@ -2236,7 +2263,8 @@ function createContentAdminGenerationTraceabilitySummary({
         label: "题型分布",
         value:
           adminQuestionTypeDistributionLabelByValue[
-            generationParameters.questionTypeDistribution ?? "balanced_40_30_30"
+            generationParameters.questionTypeDistribution ??
+              "weak_point_priority"
           ],
       },
       {

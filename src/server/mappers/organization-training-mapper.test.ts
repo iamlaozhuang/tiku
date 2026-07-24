@@ -210,6 +210,49 @@ describe("organization training mapper", () => {
     ).toThrow("Invalid organization training question-group snapshot");
   });
 
+  it("fails the whole published projection for one non-canonical question", () => {
+    const questions = [
+      {
+        publicId: "question_public_valid",
+        sequenceNumber: 1,
+        questionType: "single_choice" as const,
+        materialTitle: null,
+        materialContent: null,
+        stem: "valid question",
+        options: [
+          { publicId: "option_a", label: "A", content: "A" },
+          { publicId: "option_b", label: "B", content: "B" },
+        ],
+        score: 2,
+        standardAnswer: "A",
+        analysisSummary: "analysis",
+        evidenceStatus: "sufficient" as const,
+        citationCount: 1,
+      },
+      {
+        publicId: "question_public_corrupt",
+        sequenceNumber: 2,
+        questionType: "short_answer" as const,
+        materialTitle: null,
+        materialContent: null,
+        stem: "corrupt question",
+        options: [],
+        score: 3,
+        standardAnswer: "answer",
+        analysisSummary: "analysis",
+        evidenceStatus: "sufficient" as const,
+        citationCount: 1,
+      },
+    ];
+    Reflect.set(questions[1], "questionType", "judge");
+
+    expect(() =>
+      mapOrganizationTrainingVersionRowToDto(
+        createVersionRow({ question_snapshot: questions }),
+      ),
+    ).toThrow("Invalid organization training question snapshot");
+  });
+
   it("maps a manual draft row to the public metadata-only DTO", () => {
     const dto = mapOrganizationTrainingDraftRowToDto(createDraftRow());
     const serializedDto = JSON.stringify(dto);

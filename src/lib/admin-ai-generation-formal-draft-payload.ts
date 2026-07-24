@@ -21,6 +21,11 @@ import type {
   ScoringMethod,
   Subject,
 } from "@/server/models/paper";
+import { getDefaultScoringConfiguration } from "./question-scoring-contract";
+import {
+  isAiGenerationReviewRequiredQuestionType,
+  parseCurrentAiGenerationQuestionType,
+} from "@/server/services/ai-generation-question-type-contract";
 
 type ContentAdminFormalReviewedDraftLocalContract =
   | AdminAiGenerationLocalContractBaseDto
@@ -41,23 +46,6 @@ type CreateContentAdminFormalReviewedDraftPayloadInput = {
 };
 
 export type { AdminAiGenerationFormalReviewedDraftPayload };
-
-const formalQuestionTypes = [
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "fill_blank",
-  "short_answer",
-  "case_analysis",
-  "calculation",
-] as const satisfies readonly QuestionType[];
-
-const objectiveQuestionTypes = new Set<QuestionType>([
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "fill_blank",
-]);
 
 export function createContentAdminFormalReviewedDraftPayload({
   localContractSummary,
@@ -181,28 +169,64 @@ function createFormalQuestionDraftPayload(
   | AdminAiGenerationFormalQuestionReviewCandidatePayload
   | null {
   const stemRichText = normalizeRequiredText(questionDraft.questionStem);
-  const standardAnswerRichText = normalizeRequiredText(
+  const providerStandardAnswer = normalizeRequiredText(
     questionDraft.standardAnswer,
   );
   const analysisRichText = normalizeRequiredText(questionDraft.analysis);
 
   if (
     stemRichText === null ||
-    standardAnswerRichText === null ||
+    providerStandardAnswer === null ||
     analysisRichText === null
   ) {
     return null;
   }
-
-  const questionType = normalizeQuestionType(
+  const questionType = parseCurrentAiGenerationQuestionType(
     questionDraft.questionType ?? generationParameters.questionType,
   );
+  if (questionType === null) {
+    return null;
+  }
+  const standardAnswerRichText = projectFormalStandardAnswer(
+    questionType,
+    providerStandardAnswer,
+  );
+  if (standardAnswerRichText === null) {
+    return null;
+  }
+  const questionOptions = createQuestionOptions(
+    questionDraft,
+    providerStandardAnswer,
+    questionType,
+  );
+  if (
+    questionOptions === null ||
+    !hasValidQuestionOptions(questionType, questionOptions)
+  ) {
+    return null;
+  }
   const difficulty = normalizeQuestionDifficulty(questionDraft.difficulty);
   const knowledgeNodePublicIds = [
     ...new Set(generationParameters.knowledgeNodePublicIds),
   ];
 
   if (difficulty === null) {
+    return null;
+  }
+
+  const scoringPoints = copyQuestionScoringPoints(questionDraft.scoringPoints);
+  const fillBlankAnswers = copyQuestionFillBlankAnswers(
+    questionDraft.fillBlankAnswers,
+  );
+  if (
+    scoringPoints === null ||
+    fillBlankAnswers === null ||
+    !hasValidQuestionTypeScoringFacts({
+      questionType,
+      scoringPoints,
+      fillBlankAnswers,
+    })
+  ) {
     return null;
   }
 
@@ -218,15 +242,9 @@ function createFormalQuestionDraftPayload(
     multiChoiceRule: "all_correct_only" satisfies MultiChoiceRule,
     scoringMethod: resolveScoringMethod(questionType),
     materialPublicId: null,
-    questionOptions: createQuestionOptions(
-      questionDraft,
-      standardAnswerRichText,
-    ),
-    scoringPoints: [],
-    fillBlankAnswers:
-      questionType === "fill_blank"
-        ? createFillBlankAnswers(standardAnswerRichText)
-        : [],
+    questionOptions,
+    scoringPoints,
+    fillBlankAnswers,
     knowledgeNodePublicIds,
     tagPublicIds: [],
   };
@@ -341,67 +359,202 @@ function normalizeQuestionDifficulty(
     : null;
 }
 
-function normalizeQuestionType(value: string | null | undefined): QuestionType {
-  if (value === "judge") {
-    return "true_false";
-  }
-
-  return formalQuestionTypes.includes(value as QuestionType)
-    ? (value as QuestionType)
-    : "short_answer";
+function resolveScoringMethod(questionType: QuestionType): ScoringMethod {
+  return getDefaultScoringConfiguration(questionType).scoringMethod;
 }
 
-function resolveScoringMethod(questionType: QuestionType): ScoringMethod {
-  return objectiveQuestionTypes.has(questionType) ? "auto_match" : "ai_scoring";
+function projectFormalStandardAnswer(
+  questionType: QuestionType,
+  providerStandardAnswer: string,
+): string | null {
+  if (questionType !== "true_false") {
+    return providerStandardAnswer;
+  }
+  if (providerStandardAnswer === "true") return "A";
+  if (providerStandardAnswer === "false") return "B";
+  return null;
 }
 
 function createQuestionOptions(
   questionDraft: AiGenerationRouteIntegratedQuestionDraftSummary,
-  standardAnswerRichText: string,
-): AdminAiGenerationFormalQuestionDraftPayload["questionOptions"] {
+  providerStandardAnswer: string,
+  questionType: QuestionType,
+): AdminAiGenerationFormalQuestionDraftPayload["questionOptions"] | null {
+  const values = questionDraft.questionOptions;
+  if (!Array.isArray(values) || !hasDenseArrayEntries(values)) return null;
+  if (questionType === "true_false") {
+    if (
+      values.length !== 0 ||
+      (providerStandardAnswer !== "true" && providerStandardAnswer !== "false")
+    ) {
+      return null;
+    }
+    return [
+      {
+        label: "A",
+        contentRichText: "正确",
+        isCorrect: providerStandardAnswer === "true",
+        sortOrder: 1,
+      },
+      {
+        label: "B",
+        contentRichText: "错误",
+        isCorrect: providerStandardAnswer === "false",
+        sortOrder: 2,
+      },
+    ];
+  }
+
   const answerTokens = new Set(
-    standardAnswerRichText
+    providerStandardAnswer
       .split(/[,，;；、\s]+/u)
       .map((token) => token.trim().toLowerCase())
       .filter((token) => token.length > 0),
   );
 
-  return (questionDraft.questionOptions ?? [])
-    .map((questionOption, optionIndex) => {
-      const label =
-        normalizeRequiredText(questionOption.optionLabel) ??
-        String.fromCharCode(65 + optionIndex);
-      const contentRichText = normalizeRequiredText(questionOption.optionText);
-
-      if (contentRichText === null) {
-        return null;
-      }
-
-      return {
-        label,
-        contentRichText,
-        isCorrect:
-          typeof questionOption.isCorrect === "boolean"
-            ? questionOption.isCorrect
-            : answerTokens.has(label.toLowerCase()) ||
-              answerTokens.has(contentRichText.toLowerCase()),
-        sortOrder: optionIndex + 1,
-      };
-    })
-    .filter((questionOption) => questionOption !== null);
+  const questionOptions: AdminAiGenerationFormalQuestionDraftPayload["questionOptions"] =
+    [];
+  const labels = new Set<string>();
+  for (let optionIndex = 0; optionIndex < values.length; optionIndex += 1) {
+    const questionOption = values[optionIndex];
+    const label = normalizeRequiredText(questionOption.optionLabel);
+    const contentRichText = normalizeRequiredText(questionOption.optionText);
+    if (label === null || contentRichText === null || labels.has(label)) {
+      return null;
+    }
+    labels.add(label);
+    questionOptions.push({
+      label,
+      contentRichText,
+      isCorrect:
+        typeof questionOption.isCorrect === "boolean"
+          ? questionOption.isCorrect
+          : answerTokens.has(label.toLowerCase()) ||
+            answerTokens.has(contentRichText.toLowerCase()),
+      sortOrder: optionIndex + 1,
+    });
+  }
+  return questionOptions;
 }
 
-function createFillBlankAnswers(
-  standardAnswerRichText: string,
-): AdminAiGenerationFormalQuestionDraftPayload["fillBlankAnswers"] {
-  return [
-    {
-      blankKey: "blank_1",
-      standardAnswers: [standardAnswerRichText],
-      score: "1.0",
-      sortOrder: 1,
-    },
-  ];
+function hasValidQuestionOptions(
+  questionType: QuestionType,
+  questionOptions: AdminAiGenerationFormalQuestionDraftPayload["questionOptions"],
+): boolean {
+  if (questionType !== "single_choice" && questionType !== "multi_choice") {
+    if (questionType !== "true_false") return questionOptions.length === 0;
+    return (
+      questionOptions.length === 2 &&
+      questionOptions[0]?.label === "A" &&
+      questionOptions[0]?.contentRichText === "正确" &&
+      questionOptions[1]?.label === "B" &&
+      questionOptions[1]?.contentRichText === "错误" &&
+      questionOptions.filter((option) => option.isCorrect).length === 1
+    );
+  }
+  const correctCount = questionOptions.filter(
+    (option) => option.isCorrect,
+  ).length;
+  return (
+    questionOptions.length >= 2 &&
+    (questionType === "single_choice" ? correctCount === 1 : correctCount >= 2)
+  );
+}
+
+function copyQuestionScoringPoints(
+  values: AiGenerationRouteIntegratedQuestionDraftSummary["scoringPoints"],
+): AdminAiGenerationFormalQuestionDraftPayload["scoringPoints"] | null {
+  if (!Array.isArray(values) || !hasDenseArrayEntries(values)) return null;
+  const scoringPoints: AdminAiGenerationFormalQuestionDraftPayload["scoringPoints"] =
+    [];
+  for (let index = 0; index < values.length; index += 1) {
+    const value = values[index];
+    const description = normalizeRequiredText(value.description);
+    if (
+      description === null ||
+      !Number.isFinite(Number(value.score)) ||
+      Number(value.score) <= 0 ||
+      value.sortOrder !== index + 1
+    ) {
+      return null;
+    }
+    scoringPoints.push({
+      description,
+      score: value.score,
+      sortOrder: value.sortOrder,
+    });
+  }
+  return scoringPoints;
+}
+
+function copyQuestionFillBlankAnswers(
+  values: AiGenerationRouteIntegratedQuestionDraftSummary["fillBlankAnswers"],
+): AdminAiGenerationFormalQuestionDraftPayload["fillBlankAnswers"] | null {
+  if (!Array.isArray(values) || !hasDenseArrayEntries(values)) return null;
+  const fillBlankAnswers: AdminAiGenerationFormalQuestionDraftPayload["fillBlankAnswers"] =
+    [];
+  const blankKeys = new Set<string>();
+  for (let index = 0; index < values.length; index += 1) {
+    const value = values[index];
+    const blankKey = normalizeRequiredText(value.blankKey);
+    if (!hasDenseArrayEntries(value.standardAnswers)) return null;
+    const standardAnswers: string[] = [];
+    for (const standardAnswer of value.standardAnswers) {
+      const normalizedAnswer = normalizeRequiredText(standardAnswer);
+      if (
+        normalizedAnswer === null ||
+        standardAnswers.includes(normalizedAnswer)
+      ) {
+        return null;
+      }
+      standardAnswers.push(normalizedAnswer);
+    }
+    if (
+      blankKey === null ||
+      blankKeys.has(blankKey) ||
+      standardAnswers.length === 0 ||
+      !Number.isFinite(Number(value.score)) ||
+      Number(value.score) <= 0 ||
+      value.sortOrder !== index + 1
+    ) {
+      return null;
+    }
+    blankKeys.add(blankKey);
+    fillBlankAnswers.push({
+      blankKey,
+      standardAnswers,
+      score: value.score,
+      sortOrder: value.sortOrder,
+    });
+  }
+  return fillBlankAnswers;
+}
+
+function hasDenseArrayEntries(value: readonly unknown[]): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) return false;
+  }
+  return true;
+}
+
+function hasValidQuestionTypeScoringFacts(input: {
+  questionType: QuestionType;
+  scoringPoints: AdminAiGenerationFormalQuestionDraftPayload["scoringPoints"];
+  fillBlankAnswers: AdminAiGenerationFormalQuestionDraftPayload["fillBlankAnswers"];
+}): boolean {
+  if (input.questionType === "fill_blank") {
+    return (
+      input.scoringPoints.length === 0 && input.fillBlankAnswers.length > 0
+    );
+  }
+  if (isAiGenerationReviewRequiredQuestionType(input.questionType)) {
+    return (
+      input.scoringPoints.length > 0 && input.fillBlankAnswers.length === 0
+    );
+  }
+  return (
+    input.scoringPoints.length === 0 && input.fillBlankAnswers.length === 0
+  );
 }
 
 function createContentAdminFormalPaperDraftName(requestedAt: string): string {

@@ -178,7 +178,14 @@ type StudentAiPaperStructure = NonNullable<
   AiGenerationRouteIntegratedGenerationParameters["paperStructure"]
 >;
 type StudentAiSubjectLabel = "理论" | "技能";
-type StudentAiQuestionTypeLabel = "单选题" | "多选题" | "判断题" | "主观题";
+type StudentAiQuestionTypeLabel =
+  | "单选题"
+  | "多选题"
+  | "判断题"
+  | "填空题"
+  | "简答题"
+  | "案例分析题"
+  | "计算题";
 type StudentAiDifficultyLabel = "基础" | "中等" | "提高";
 type StudentAiPaperQuestionTypeDistributionLabel =
   (typeof studentAiPaperQuestionTypeDistributionOptions)[number];
@@ -220,14 +227,13 @@ const studentAiQuestionTypeOptions = [
   "单选题",
   "多选题",
   "判断题",
-  "主观题",
+  "填空题",
+  "简答题",
+  "案例分析题",
+  "计算题",
 ] as const;
 const studentAiDifficultyOptions = ["基础", "中等", "提高"] as const;
-const studentAiPaperQuestionTypeDistributionOptions = [
-  "均衡分布",
-  "单选50% / 多选25% / 判断25%",
-  "薄弱点优先",
-] as const;
+const studentAiPaperQuestionTypeDistributionOptions = ["薄弱点优先"] as const;
 const studentAiPaperStructureOptions = [
   "按题型分大题",
   "按知识点分大题",
@@ -341,10 +347,13 @@ const contractValueLabelMap: Record<string, string> = {
 };
 
 const aiPaperQuestionTypeLabelMap: Record<string, string> = {
-  single_choice: "单选题",
+  calculation: "计算题",
+  case_analysis: "案例分析题",
+  fill_blank: "填空题",
   multi_choice: "多选题",
+  short_answer: "简答题",
+  single_choice: "单选题",
   true_false: "判断题",
-  short_answer: "主观题",
 };
 
 const aiPaperMatchQualityLabelMap: Record<string, string> = {
@@ -795,20 +804,6 @@ function mapStudentAiPaperSourcePreference(
   return "balanced";
 }
 
-function mapStudentAiPaperQuestionTypeDistribution(
-  value: string,
-): StudentAiPaperQuestionTypeDistribution {
-  if (value === "单选50% / 多选25% / 判断25%") {
-    return "single_50_multi_25_true_false_25";
-  }
-
-  if (value === "薄弱点优先") {
-    return "weak_point_priority";
-  }
-
-  return "balanced_40_30_30";
-}
-
 function mapStudentAiPaperStructure(value: string): StudentAiPaperStructure {
   return value === "按知识点分大题" ? "by_knowledge_node" : "by_question_type";
 }
@@ -819,20 +814,25 @@ function mapStudentAiSubject(
   return value === "技能" ? "skill" : "theory";
 }
 
-function mapStudentAiQuestionType(value: StudentAiQuestionTypeLabel): string {
-  if (value === "多选题") {
-    return "multi_choice";
-  }
+function mapStudentAiQuestionType(
+  value: StudentAiQuestionTypeLabel,
+): NonNullable<
+  AiGenerationRouteIntegratedGenerationParameters["questionType"]
+> {
+  const questionTypeByLabel = {
+    单选题: "single_choice",
+    多选题: "multi_choice",
+    判断题: "true_false",
+    填空题: "fill_blank",
+    简答题: "short_answer",
+    案例分析题: "case_analysis",
+    计算题: "calculation",
+  } satisfies Record<
+    StudentAiQuestionTypeLabel,
+    NonNullable<AiGenerationRouteIntegratedGenerationParameters["questionType"]>
+  >;
 
-  if (value === "判断题") {
-    return "true_false";
-  }
-
-  if (value === "主观题") {
-    return "short_answer";
-  }
-
-  return "single_choice";
+  return questionTypeByLabel[value];
 }
 
 function mapStudentAiDifficulty(value: string): string {
@@ -1027,7 +1027,7 @@ function createStudentGenerationParameters(
   sourcePreference: AiGenerationRouteIntegratedSourcePreference | null,
   detailParameters: {
     subject: AiGenerationRouteIntegratedGenerationParameters["subject"];
-    questionType: string | null;
+    questionType: AiGenerationRouteIntegratedGenerationParameters["questionType"];
     difficulty: string | null;
     learningObjective: string | null;
     questionTypeDistribution?: StudentAiPaperQuestionTypeDistribution;
@@ -3678,7 +3678,7 @@ export function StudentPersonalAiGenerationPage() {
   const [aiPaperForm, setAiPaperForm] = useState<StudentAiPaperFormState>({
     subject: "理论",
     questionCount: AI_PAPER_DEFAULT_QUESTION_COUNT,
-    questionTypeDistribution: "均衡分布",
+    questionTypeDistribution: "薄弱点优先",
     paperStructure: "按题型分大题",
     difficulty: "中等",
     learningObjective: "阶段自测",
@@ -4213,10 +4213,7 @@ export function StudentPersonalAiGenerationPage() {
           ? {
               subject: mapStudentAiSubject(aiPaperForm.subject),
               questionType: null,
-              questionTypeDistribution:
-                mapStudentAiPaperQuestionTypeDistribution(
-                  aiPaperForm.questionTypeDistribution,
-                ),
+              questionTypeDistribution: "weak_point_priority",
               paperStructure: mapStudentAiPaperStructure(
                 aiPaperForm.paperStructure,
               ),

@@ -24,7 +24,91 @@ function createPersistenceRow(
   };
 }
 
+const canonicalQuestionTypes = [
+  "single_choice",
+  "multi_choice",
+  "true_false",
+  "fill_blank",
+  "short_answer",
+  "case_analysis",
+  "calculation",
+] as const;
+
+function createSnapshotRow(questionType: unknown) {
+  return createPersistenceRow({
+    generation_snapshot_version: 1,
+    generation_input_snapshot: {
+      generationParameters: {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNode: null,
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        includeDescendants: false,
+        knowledgeNodeSupplement: null,
+        sourcePreference: null,
+        questionType,
+        questionCount: 3,
+        difficulty: "medium",
+        learningObjective: null,
+        questionTypeDistribution: null,
+        paperStructure: null,
+      },
+    },
+    generation_constraint_snapshot: {
+      authorizationSource: "personal_auth",
+      authorizationPublicId: "personal_auth_public_160",
+      ownerType: "personal",
+      ownerPublicId: "student_public_160",
+      organizationPublicId: null,
+      quotaOwnerType: "personal",
+      quotaOwnerPublicId: "student_public_160",
+      effectiveEdition: "advanced",
+      profession: "marketing",
+      level: 3,
+    },
+    generation_snapshot_digest: `sha256:${"a".repeat(64)}`,
+  });
+}
+
 describe("personal AI generation request mapper", () => {
+  it("preserves every canonical question type and explicit null", () => {
+    for (const questionType of [...canonicalQuestionTypes, null]) {
+      expect(
+        mapPersonalAiGenerationRequestRowToHistoryDto(
+          createSnapshotRow(questionType),
+        ).generationSnapshot,
+      ).toMatchObject({
+        status: "available",
+        generationParameters: { questionType },
+      });
+    }
+  });
+
+  it.each([
+    "multiple_choice",
+    "subjective",
+    "judge",
+    "判断题",
+    "Single_choice",
+    " single_choice",
+    "single_choice ",
+    "unknown",
+  ])(
+    "fails the complete persisted snapshot for non-canonical type %s",
+    (questionType) => {
+      expect(
+        mapPersonalAiGenerationRequestRowToHistoryDto(
+          createSnapshotRow(questionType),
+        ).generationSnapshot,
+      ).toEqual({
+        status: "unavailable",
+        reason: "legacy_snapshot_unavailable",
+      });
+    },
+  );
+
   it("maps complete snapshots to a redacted reconstructable history view and legacy rows to unavailable", () => {
     const available = mapPersonalAiGenerationRequestRowToHistoryDto(
       createPersistenceRow({

@@ -11,7 +11,9 @@ import {
   createAdminAiGenerationResultsByTaskPublicIdsCondition,
   resolveGenerationParametersSnapshot,
   resolveOrganizationTrainingPaperDraftSnapshot,
+  resolveOrganizationTrainingQuestionDraftSnapshot,
 } from "./admin-ai-generation-result-persistence-repository";
+import { aiGenerationQuestionTypeValues } from "../services/ai-generation-question-type-contract";
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
   if (typeof value === "string") {
@@ -68,6 +70,67 @@ function createResultRow(
     created_at: new Date("2026-06-26T20:00:00.000Z"),
     updated_at: new Date("2026-06-26T20:00:00.000Z"),
     ...overrides,
+  };
+}
+
+function createPersistedOrganizationTrainingQuestion(
+  questionType: string,
+  sequenceNumber = 1,
+  options: { currentTypeFacts?: boolean } = {},
+) {
+  const currentTypeFacts = options.currentTypeFacts ?? true;
+  const isChoice =
+    questionType === "single_choice" || questionType === "multi_choice";
+  const isFillBlank = questionType === "fill_blank";
+  const isScoredSubjective = [
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ].includes(questionType);
+
+  return {
+    publicId: `organization_training_question_${sequenceNumber}`,
+    sequenceNumber,
+    questionType,
+    materialTitle: null,
+    materialContent: null,
+    stem: `Question ${sequenceNumber}`,
+    options: isChoice
+      ? [
+          {
+            publicId: `organization_training_question_${sequenceNumber}_option_a`,
+            label: "A",
+            content: "Answer A",
+          },
+        ]
+      : [],
+    ...(currentTypeFacts
+      ? {
+          scoringPoints: isScoredSubjective
+            ? [{ description: "Key fact", score: 1, sortOrder: 1 }]
+            : [],
+          fillBlankAnswers: isFillBlank
+            ? [
+                {
+                  blankKey: "blank_1",
+                  standardAnswers: ["Answer"],
+                  score: 1,
+                  sortOrder: 1,
+                },
+              ]
+            : [],
+        }
+      : {}),
+    score: 1,
+    evidenceSummary: {
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+    },
+    answerAndAnalysis: {
+      visibility: "collapsed_by_default",
+      standardAnswer: isFillBlank ? "Answer" : "A",
+      analysis: "Analysis",
+    },
   };
 }
 
@@ -481,6 +544,200 @@ describe("admin AI generation result persistence repository", () => {
     expect(JSON.stringify(draftResults)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput|"id":/u,
     );
+  });
+
+  it("preserves all seven canonical question types and their current type facts", () => {
+    const snapshot = resolveOrganizationTrainingQuestionDraftSnapshot({
+      workspace: "organization",
+      generation_kind: "question",
+      content_redacted_snapshot: {
+        organizationTrainingQuestionDraft: {
+          questions: aiGenerationQuestionTypeValues.map((questionType, index) =>
+            createPersistedOrganizationTrainingQuestion(
+              questionType,
+              index + 1,
+            ),
+          ),
+        },
+      },
+    });
+
+    expect(
+      snapshot?.questions.map((question) => question.questionType),
+    ).toEqual(aiGenerationQuestionTypeValues);
+    expect(snapshot?.questions[3]).toMatchObject({
+      questionType: "fill_blank",
+      scoringPoints: [],
+      fillBlankAnswers: [
+        {
+          blankKey: "blank_1",
+          standardAnswers: ["Answer"],
+          score: 1,
+          sortOrder: 1,
+        },
+      ],
+    });
+    expect(
+      snapshot?.questions.slice(4).map((question) => question.scoringPoints),
+    ).toEqual([
+      [{ description: "Key fact", score: 1, sortOrder: 1 }],
+      [{ description: "Key fact", score: 1, sortOrder: 1 }],
+      [{ description: "Key fact", score: 1, sortOrder: 1 }],
+    ]);
+  });
+
+  it.each([
+    ["multiple_choice", "multi_choice"],
+    ["subjective", "short_answer"],
+  ] as const)(
+    "normalizes the explicit legacy persisted alias %s to %s without re-emitting the alias",
+    (legacyQuestionType, canonicalQuestionType) => {
+      const snapshot = resolveOrganizationTrainingQuestionDraftSnapshot({
+        workspace: "organization",
+        generation_kind: "question",
+        content_redacted_snapshot: {
+          organizationTrainingQuestionDraft: {
+            questions: [
+              createPersistedOrganizationTrainingQuestion(
+                legacyQuestionType,
+                1,
+                { currentTypeFacts: false },
+              ),
+            ],
+          },
+        },
+      });
+
+      expect(snapshot?.questions).toHaveLength(1);
+      expect(snapshot?.questions[0]?.questionType).toBe(canonicalQuestionType);
+      expect(JSON.stringify(snapshot)).not.toContain(legacyQuestionType);
+    },
+  );
+
+  it.each([
+    "unknown",
+    "judge",
+    "判断题",
+    "Multi_Choice",
+    " multi_choice",
+    "multi_choice ",
+  ])("rejects the noncanonical persisted question type %s", (questionType) => {
+    expect(
+      resolveOrganizationTrainingQuestionDraftSnapshot({
+        workspace: "organization",
+        generation_kind: "question",
+        content_redacted_snapshot: {
+          organizationTrainingQuestionDraft: {
+            questions: [
+              createPersistedOrganizationTrainingQuestion(questionType, 1, {
+                currentTypeFacts: false,
+              }),
+            ],
+          },
+        },
+      }),
+    ).toBeNull();
+  });
+
+  it("rejects the whole persisted question result when one question is malformed", () => {
+    expect(
+      resolveOrganizationTrainingQuestionDraftSnapshot({
+        workspace: "organization",
+        generation_kind: "question",
+        content_redacted_snapshot: {
+          organizationTrainingQuestionDraft: {
+            questions: [
+              createPersistedOrganizationTrainingQuestion("single_choice", 1),
+              createPersistedOrganizationTrainingQuestion("unknown", 2),
+            ],
+          },
+        },
+      }),
+    ).toBeNull();
+  });
+
+  it("rejects a sparse persisted question collection instead of returning a partial projection", () => {
+    const questions = [
+      createPersistedOrganizationTrainingQuestion("single_choice", 1),
+      createPersistedOrganizationTrainingQuestion("multi_choice", 2),
+    ];
+    delete questions[1];
+
+    expect(
+      resolveOrganizationTrainingQuestionDraftSnapshot({
+        workspace: "organization",
+        generation_kind: "question",
+        content_redacted_snapshot: {
+          organizationTrainingQuestionDraft: { questions },
+        },
+      }),
+    ).toBeNull();
+  });
+
+  it("normalizes legacy aliases in a whole paper projection and rejects a malformed section without partial output", () => {
+    const createPaperSnapshot = (sectionQuestionType: string) => ({
+      paperTitle: "Legacy paper",
+      requestedQuestionCount: 1,
+      selectedQuestionCount: 1,
+      sourceComposition: {
+        platformFormalQuestionCount: 1,
+        enterpriseTrainingSnapshotCount: 0,
+      },
+      matchQuality: "fully_matched",
+      paperSections: [
+        {
+          sectionKey: "legacy_section",
+          title: "Legacy section",
+          questionType: sectionQuestionType,
+          targetQuestionCount: 1,
+          selectedQuestionCount: 1,
+          totalScore: 1,
+          questions: [
+            createPersistedOrganizationTrainingQuestion(
+              sectionQuestionType,
+              1,
+              { currentTypeFacts: false },
+            ),
+          ],
+        },
+      ],
+      redactionStatus: "admin_safe_detail",
+    });
+    const legacySnapshot = resolveOrganizationTrainingPaperDraftSnapshot({
+      workspace: "organization",
+      generation_kind: "paper",
+      content_redacted_snapshot: {
+        organizationTrainingPaperDraft: createPaperSnapshot("subjective"),
+      },
+    });
+
+    expect(legacySnapshot?.paperSections?.[0]?.questionType).toBe(
+      "short_answer",
+    );
+    expect(legacySnapshot?.paperSections?.[0]?.questions[0]?.questionType).toBe(
+      "short_answer",
+    );
+    expect(JSON.stringify(legacySnapshot)).not.toContain("subjective");
+
+    expect(
+      resolveOrganizationTrainingPaperDraftSnapshot({
+        workspace: "organization",
+        generation_kind: "paper",
+        content_redacted_snapshot: {
+          organizationTrainingPaperDraft: {
+            ...createPaperSnapshot("single_choice"),
+            paperSections: [
+              ...createPaperSnapshot("single_choice").paperSections,
+              {
+                ...createPaperSnapshot("single_choice").paperSections[0],
+                sectionKey: "broken_section",
+                questionType: "judge",
+              },
+            ],
+          },
+        },
+      }),
+    ).toBeNull();
   });
 
   it("surfaces organization AI question results as enterprise training draft snapshots", async () => {

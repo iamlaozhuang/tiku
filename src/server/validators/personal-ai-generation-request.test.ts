@@ -2,7 +2,72 @@ import { describe, expect, it } from "vitest";
 
 import { normalizePersonalAiGenerationRequestInput } from "./personal-ai-generation-request";
 
+const canonicalQuestionTypes = [
+  "single_choice",
+  "multi_choice",
+  "true_false",
+  "fill_blank",
+  "short_answer",
+  "case_analysis",
+  "calculation",
+] as const;
+
+function createGenerationRequest(questionType: unknown) {
+  return {
+    userPublicId: "student_public_160",
+    authorizationPublicId: "personal_auth_public_160",
+    generationParameters: {
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      knowledgeNode: null,
+      knowledgeNodeMode: "balanced",
+      knowledgeNodePublicIds: [],
+      includeDescendants: false,
+      knowledgeNodeSupplement: null,
+      sourcePreference: null,
+      questionType,
+      questionCount: 3,
+      difficulty: "medium",
+      learningObjective: null,
+    },
+  };
+}
+
 describe("personal AI generation request validator", () => {
+  it("preserves every canonical question type and explicit null", () => {
+    for (const questionType of [...canonicalQuestionTypes, null]) {
+      const result = normalizePersonalAiGenerationRequestInput(
+        createGenerationRequest(questionType),
+      );
+
+      expect(result).toMatchObject({
+        success: true,
+        value: { generationParameters: { questionType } },
+      });
+    }
+  });
+
+  it.each([
+    "multiple_choice",
+    "subjective",
+    "judge",
+    "判断题",
+    "Single_choice",
+    " single_choice",
+    "single_choice ",
+    "unknown",
+  ])("rejects non-canonical current question type %s", (questionType) => {
+    expect(
+      normalizePersonalAiGenerationRequestInput(
+        createGenerationRequest(questionType),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid personal AI generation request input.",
+    });
+  });
+
   it("accepts real learner generation parameters without demo lineage", () => {
     expect(
       normalizePersonalAiGenerationRequestInput({

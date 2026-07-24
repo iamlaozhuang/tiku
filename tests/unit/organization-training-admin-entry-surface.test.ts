@@ -13,6 +13,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import AdminOrganizationTrainingRoutePage from "@/app/(admin)/organization/organization-training/page";
 import { AdminOrganizationTrainingPage } from "@/features/admin/organization-training/AdminOrganizationTrainingPage";
+import { normalizeOrganizationTrainingDraftSaveInput } from "@/server/validators/organization-training";
 
 const contentOrganizationTrainingPagePath =
   "src/app/(admin)/content/organization-training/page.tsx";
@@ -1821,6 +1822,12 @@ describe("AdminOrganizationTrainingPage", () => {
                           label: "A",
                           content: "synthetic AI paper option A",
                         },
+                        {
+                          publicId:
+                            "organization-training-ai-paper-ui-001-option-b",
+                          label: "B",
+                          content: "synthetic AI paper option B",
+                        },
                       ],
                       score: 5,
                       evidenceSummary: {
@@ -1850,6 +1857,12 @@ describe("AdminOrganizationTrainingPage", () => {
                         "organization-training-ai-paper-ui-001-option-a",
                       label: "A",
                       content: "synthetic AI paper option A",
+                    },
+                    {
+                      publicId:
+                        "organization-training-ai-paper-ui-001-option-b",
+                      label: "B",
+                      content: "synthetic AI paper option B",
                     },
                   ],
                   score: 5,
@@ -2125,6 +2138,21 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.change(publishForm.getByLabelText("第 1 题题型"), {
       target: { value: "single_choice" },
     });
+    expect(
+      Array.from(
+        (publishForm.getByLabelText("第 1 题题型") as HTMLSelectElement)
+          .options,
+        (option) => option.value,
+      ),
+    ).toEqual([
+      "single_choice",
+      "multi_choice",
+      "true_false",
+      "fill_blank",
+      "short_answer",
+      "case_analysis",
+      "calculation",
+    ]);
     fireEvent.change(publishForm.getByLabelText("第 1 题分值"), {
       target: { value: "5" },
     });
@@ -2224,6 +2252,175 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(JSON.stringify(publishBody)).not.toContain("rawPrompt");
     expect(JSON.stringify(publishBody)).not.toContain("providerPayload");
   });
+
+  it.each([
+    ["single_choice", "A"],
+    ["multi_choice", "A,B"],
+    ["true_false", "true"],
+    ["fill_blank", "canonical blank answer"],
+    ["short_answer", "canonical review answer"],
+    ["case_analysis", "canonical review answer"],
+    ["calculation", "canonical review answer"],
+  ] as const)(
+    "builds a strict %s UI request accepted by the authoritative draft validator",
+    async (questionType, standardAnswer) => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+      const fetchMock = vi.fn(
+        async (url: RequestInfo | URL, init?: RequestInit) => {
+          const path = String(url);
+          const method = init?.method ?? "GET";
+
+          if (path === "/api/v1/sessions") {
+            return createJsonResponse(adminSessionPayload);
+          }
+          if (isOrganizationTrainingListGet(url, init)) {
+            return createJsonResponse({
+              code: 0,
+              message: "ok",
+              data: {
+                items: [
+                  {
+                    publicId: persistedAiDraft.publicId,
+                    resourceType: "organization_training_draft",
+                    organizationPublicId: persistedAiDraft.organizationPublicId,
+                    authorizationPublicId:
+                      persistedAiDraft.authorizationPublicId,
+                    profession: persistedAiDraft.profession,
+                    level: persistedAiDraft.level,
+                    subject: persistedAiDraft.subject,
+                    title: persistedAiDraft.title,
+                    description: persistedAiDraft.description,
+                    questionCount: persistedAiDraft.questionCount,
+                    totalScore: persistedAiDraft.totalScore,
+                    questionTypeSummary: persistedAiDraft.questionTypeSummary,
+                    status: "draft",
+                    availableActions: ["publish"],
+                  },
+                ],
+                redactionStatus: "metadata_only",
+                integrityStatus: "complete",
+                warningCode: null,
+              },
+            });
+          }
+          if (
+            path ===
+              "/api/v1/organization-trainings/organization-training-draft-ai-ui-001" &&
+            method === "PATCH"
+          ) {
+            return createJsonResponse({
+              code: 0,
+              message: "ok",
+              data: { draft: { ...persistedAiDraft, revision: 2 } },
+            });
+          }
+          if (
+            path ===
+              "/api/v1/organization-trainings/organization-training-draft-ai-ui-001/publish" &&
+            method === "POST"
+          ) {
+            return createJsonResponse({
+              code: 0,
+              message: "ok",
+              data: {
+                version: {
+                  publicId: "organization-training-version-ai-ui-001",
+                },
+              },
+            });
+          }
+          return createJsonResponse({
+            code: 404001,
+            message: "missing",
+            data: null,
+          });
+        },
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(createElement(AdminOrganizationTrainingPage));
+      const persistedDraftCard = await screen.findByTestId(
+        "organization-training-lifecycle-organization-training-draft-ai-ui-001",
+      );
+      fireEvent.click(
+        within(persistedDraftCard).getByRole("button", { name: "发布" }),
+      );
+      const publishForm = within(
+        screen.getByRole("form", { name: "企业训练发布表单" }),
+      );
+      fireEvent.change(publishForm.getByLabelText("第 1 题题干"), {
+        target: { value: `strict ${questionType} stem` },
+      });
+      fireEvent.change(publishForm.getByLabelText("第 1 题题型"), {
+        target: { value: questionType },
+      });
+      fireEvent.change(publishForm.getByLabelText("第 1 题分值"), {
+        target: { value: "7" },
+      });
+      if (questionType === "single_choice" || questionType === "multi_choice") {
+        fireEvent.change(publishForm.getByLabelText("第 1 题选项 A"), {
+          target: { value: "canonical option A" },
+        });
+        fireEvent.change(publishForm.getByLabelText("第 1 题选项 B"), {
+          target: { value: "canonical option B" },
+        });
+      }
+      if (questionType === "fill_blank") {
+        expect(publishForm.getByLabelText("第 1 题填空 1 分值")).toHaveValue(7);
+        fireEvent.change(
+          publishForm.getByLabelText("第 1 题填空 1 可接受答案"),
+          { target: { value: "canonical blank answer" } },
+        );
+      }
+      if (
+        questionType === "short_answer" ||
+        questionType === "case_analysis" ||
+        questionType === "calculation"
+      ) {
+        expect(publishForm.getByLabelText("第 1 题评分点 1 分值")).toHaveValue(
+          7,
+        );
+        fireEvent.change(publishForm.getByLabelText("第 1 题评分点 1 描述"), {
+          target: { value: "canonical scoring point" },
+        });
+      }
+      fireEvent.change(publishForm.getByLabelText("第 1 题标准答案"), {
+        target: { value: standardAnswer },
+      });
+      fireEvent.change(publishForm.getByLabelText("第 1 题解析"), {
+        target: { value: "canonical analysis" },
+      });
+      fireEvent.change(publishForm.getByLabelText("作答截止时间"), {
+        target: { value: "2026-07-08T12:00:00.000Z" },
+      });
+      fireEvent.click(publishForm.getByLabelText("确认弱依据后发布"));
+      fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
+
+      await waitFor(() =>
+        expect(
+          fetchMock.mock.calls.some(
+            ([requestUrl, requestInit]) =>
+              String(requestUrl) ===
+                "/api/v1/organization-trainings/organization-training-draft-ai-ui-001" &&
+              requestInit?.method === "PATCH",
+          ),
+        ).toBe(true),
+      );
+      const draftSaveBody = readJsonRequestBody(
+        fetchMock,
+        "/api/v1/organization-trainings/organization-training-draft-ai-ui-001",
+        "PATCH",
+      );
+      expect(
+        normalizeOrganizationTrainingDraftSaveInput(draftSaveBody),
+      ).toMatchObject({
+        success: true,
+        value: {
+          questions: [{ questionType, score: 7 }],
+        },
+      });
+    },
+  );
 
   it("announces organization training mutation failures as alerts", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");

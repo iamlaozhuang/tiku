@@ -252,6 +252,17 @@ export type OrganizationTrainingAdminQuestionDetailDto = {
   materialContent: string | null;
   stem: string;
   options: OrganizationTrainingQuestionOptionSnapshotDto[];
+  scoringPoints?: {
+    description: string;
+    score: number;
+    sortOrder: number;
+  }[];
+  fillBlankAnswers?: {
+    blankKey: string;
+    standardAnswers: string[];
+    score: number;
+    sortOrder: number;
+  }[];
   score: number;
   evidenceSummary: {
     evidenceStatus: EvidenceStatus;

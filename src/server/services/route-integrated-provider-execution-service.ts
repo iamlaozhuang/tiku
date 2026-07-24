@@ -19,6 +19,11 @@ import type {
   AiGenerationRouteIntegratedGroundingSummary,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
+import {
+  aiGenerationQuestionTypeValues,
+  parseCurrentAiGenerationQuestionType,
+  parseCurrentAiGenerationQuestionTypeList,
+} from "./ai-generation-question-type-contract";
 import { normalizeProviderTokenUsageAtAdapterEdge } from "./ai-call-observation";
 import {
   createAiGenerationSharedTaskStructuredPreviewOptions,
@@ -699,15 +704,7 @@ const questionDraftKeys = [
   "scoringPoints",
   "fillBlankAnswers",
 ] as const;
-const questionTypes = new Set([
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "fill_blank",
-  "short_answer",
-  "case_analysis",
-  "calculation",
-]);
+const questionTypes = new Set<string>(aiGenerationQuestionTypeValues);
 
 function hasExactKeys(
   value: Record<string, unknown>,
@@ -1094,6 +1091,16 @@ function findPaperDraftContractFailure(
   | "difficulty_mismatch"
   | "knowledge_scope_mismatch"
   | null {
+  for (const paperSection of paperSections) {
+    if (
+      !isRecord(paperSection) ||
+      readPaperSectionQuestionType(paperSection) === null ||
+      readPaperSectionQuestionTypes(paperSection) === null
+    ) {
+      return "paper_structure_mismatch";
+    }
+  }
+
   const expectedSourcePreference = generationParameters?.sourcePreference;
   const actualSourcePreference = readSafeLabel(parsedContent, [
     "sourcePreference",
@@ -1524,6 +1531,7 @@ function arePaperSectionsCompatibleWithStructure(
 
       return (
         questionType !== null &&
+        questionTypes !== null &&
         questionTypes.length <= 1 &&
         (questionTypes.length === 0 || questionTypes[0] === questionType)
       );
@@ -1543,54 +1551,36 @@ function arePaperSectionsCompatibleWithStructure(
 function readPaperSectionQuestionType(
   paperSection: Record<string, unknown>,
 ): string | null {
-  return normalizePaperSectionQuestionType(
-    readSafeLabel(paperSection, [
-      "questionType",
-      "question_type",
-      "paperSectionType",
-      "paper_section_type",
-      "type",
-    ]),
-  );
+  const values = [
+    "questionType",
+    "question_type",
+    "paperSectionType",
+    "paper_section_type",
+    "type",
+  ].filter((key) => Object.hasOwn(paperSection, key));
+
+  return values.length === 1
+    ? parseCurrentAiGenerationQuestionType(paperSection[values[0]])
+    : null;
 }
 
 function readPaperSectionQuestionTypes(
   paperSection: Record<string, unknown>,
-): string[] {
-  const questionTypes = readStringArray(paperSection, [
+): string[] | null {
+  const keys = [
     "questionTypes",
     "question_types",
     "questionTypeList",
     "question_type_list",
-  ])
-    .map(normalizePaperSectionQuestionType)
-    .filter((questionType): questionType is string => questionType !== null);
+  ].filter((key) => Object.hasOwn(paperSection, key));
 
-  return Array.from(new Set(questionTypes));
-}
-
-function normalizePaperSectionQuestionType(
-  value: string | null,
-): string | null {
-  if (value === null) {
-    return null;
+  if (keys.length === 0) {
+    return [];
   }
 
-  const normalizedValue = value.trim();
-  const questionTypeAliases: Record<string, string> = {
-    judge: "true_false",
-    true_false: "true_false",
-    判断: "true_false",
-    判断题: "true_false",
-    multi_choice: "multi_choice",
-    多选: "multi_choice",
-    多选题: "multi_choice",
-    single_choice: "single_choice",
-    单选: "single_choice",
-    单选题: "single_choice",
-  };
-
-  return questionTypeAliases[normalizedValue] ?? null;
+  return keys.length === 1
+    ? parseCurrentAiGenerationQuestionTypeList(paperSection[keys[0]])
+    : null;
 }
 
 function hasPaperSectionKnowledgeScope(
@@ -1713,28 +1703,7 @@ function readArrayProperty(
 }
 
 function normalizeQuestionTypeContractValue(value: unknown): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const normalizedValue = value.trim();
-  const questionTypeAliases: Record<string, string> = {
-    case_analysis: "case_analysis",
-    案例分析: "case_analysis",
-    案例分析题: "case_analysis",
-    judge: "true_false",
-    true_false: "true_false",
-    判断: "true_false",
-    判断题: "true_false",
-    multi_choice: "multi_choice",
-    多选: "multi_choice",
-    多选题: "multi_choice",
-    single_choice: "single_choice",
-    单选: "single_choice",
-    单选题: "single_choice",
-  };
-
-  return questionTypeAliases[normalizedValue] ?? normalizedValue;
+  return parseCurrentAiGenerationQuestionType(value);
 }
 
 function normalizeDifficultyContractValue(value: unknown): string | null {

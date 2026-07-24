@@ -14,13 +14,7 @@ import type {
   PersonalAiGenerationLearningPaperSourceQuestionResolver,
   PersonalAiGenerationLearningPaperSourceQuestionResolverInput,
 } from "./personal-ai-generation-learning-session-route";
-
-const supportedQuestionTypes = new Set<string>([
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "short_answer",
-]);
+import { parseCurrentAiGenerationQuestionType } from "./ai-generation-question-type-contract";
 
 export function createPersonalAiGenerationLearningSessionPaperSourceResolver(input: {
   questionRepository: AiPaperQuestionSourceRepository;
@@ -41,30 +35,43 @@ export function createPersonalAiGenerationLearningSessionPaperSourceResolver(inp
       resolverInput,
       organizationTrainingRepository: input.organizationTrainingRepository,
     });
-    const sourceQuestionByKey = new Map(
-      [...platformSourceQuestions, ...enterpriseSourceQuestions].map(
-        (sourceQuestion) => [
-          createSelectedQuestionKey(sourceQuestion),
-          sourceQuestion,
-        ],
-      ),
+    const sourceQuestions = [
+      ...platformSourceQuestions,
+      ...enterpriseSourceQuestions,
+    ];
+    const selectedQuestionKeys = selectedQuestions.map(
+      createSelectedQuestionKey,
     );
+    const sourceQuestionByKey = new Map(
+      sourceQuestions.map((sourceQuestion) => [
+        createSelectedQuestionKey(sourceQuestion),
+        sourceQuestion,
+      ]),
+    );
+    if (
+      new Set(selectedQuestionKeys).size !== selectedQuestionKeys.length ||
+      sourceQuestionByKey.size !== sourceQuestions.length
+    ) {
+      return [];
+    }
 
-    const resolvedQuestions = selectedQuestions
-      .map((selectedQuestion) =>
-        sourceQuestionByKey.get(createSelectedQuestionKey(selectedQuestion)),
-      )
-      .filter(
-        (
-          sourceQuestion,
-        ): sourceQuestion is PersonalAiGenerationLearningPaperSourceQuestionDto =>
-          sourceQuestion !== undefined,
-      );
+    const resolvedQuestions: PersonalAiGenerationLearningPaperSourceQuestionDto[] =
+      [];
+    for (const selectedQuestionKey of selectedQuestionKeys) {
+      const sourceQuestion = sourceQuestionByKey.get(selectedQuestionKey);
+      if (sourceQuestion === undefined) {
+        return [];
+      }
+      resolvedQuestions.push(sourceQuestion);
+    }
 
-    return filterIncompleteResolvedQuestionGroups(
+    const completeGroupQuestions = filterIncompleteResolvedQuestionGroups(
       selectedQuestions,
       resolvedQuestions,
     );
+    return completeGroupQuestions.length === selectedQuestions.length
+      ? completeGroupQuestions
+      : [];
   };
 }
 
@@ -394,9 +401,7 @@ function createSelectedQuestionKey(input: {
 function normalizeQuestionType(
   questionType: string,
 ): PersonalAiGenerationLearningSessionQuestionType | null {
-  return supportedQuestionTypes.has(questionType)
-    ? (questionType as PersonalAiGenerationLearningSessionQuestionType)
-    : null;
+  return parseCurrentAiGenerationQuestionType(questionType);
 }
 
 function normalizeAnswerLabels(labels: string[]): string[] {

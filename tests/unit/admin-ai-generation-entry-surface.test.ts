@@ -940,6 +940,20 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).not.toHaveTextContent("技师");
     expect(screen.getByLabelText("科目")).toHaveDisplayValue("理论知识");
     expect(screen.getByLabelText("题型")).toHaveDisplayValue("单选题");
+    expect(
+      Array.from(
+        (screen.getByLabelText("题型") as HTMLSelectElement).options,
+        (option) => option.value,
+      ),
+    ).toEqual([
+      "单选题",
+      "多选题",
+      "判断题",
+      "填空题",
+      "简答题",
+      "案例分析题",
+      "计算题",
+    ]);
     expect(screen.getByLabelText("出题数量")).toHaveDisplayValue("3");
     expect(screen.getByLabelText("出题数量")).toHaveAttribute("max", "10");
     expect(screen.getByLabelText("知识点覆盖")).toHaveDisplayValue("均衡覆盖");
@@ -953,10 +967,10 @@ describe("admin AI generation entry surfaces", () => {
       target: { value: "物流管理" },
     });
     fireEvent.change(screen.getByLabelText("题型"), {
-      target: { value: "多选题" },
+      target: { value: "计算题" },
     });
     expect(screen.getByLabelText("专业")).toHaveDisplayValue("物流管理");
-    expect(screen.getByLabelText("题型")).toHaveDisplayValue("多选题");
+    expect(screen.getByLabelText("题型")).toHaveDisplayValue("计算题");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
       "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
@@ -1014,7 +1028,7 @@ describe("admin AI generation entry surfaces", () => {
       "按大题模块组织",
     );
     expect(screen.getByLabelText("题型分布")).toHaveDisplayValue(
-      "单选 40% / 多选 30% / 判断 30%",
+      "按薄弱项动态分配",
     );
     expect(document.body.textContent).not.toContain("providerPayload");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
@@ -1614,7 +1628,7 @@ describe("admin AI generation entry surfaces", () => {
       await screen.findByLabelText("选择知识点 营销/基础知识/市场调研"),
     );
     fireEvent.change(screen.getByLabelText("题型分布"), {
-      target: { value: "单选 50% / 多选 25% / 判断 25%" },
+      target: { value: "按薄弱项动态分配" },
     });
     fireEvent.change(screen.getByLabelText("试卷结构"), {
       target: { value: "按知识点模块组织" },
@@ -1642,7 +1656,7 @@ describe("admin AI generation entry surfaces", () => {
         knowledgeNodeMode: "selected",
         knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
         sourcePreference: "balanced",
-        questionTypeDistribution: "single_50_multi_25_true_false_25",
+        questionTypeDistribution: "weak_point_priority",
         paperStructure: "by_knowledge_node",
       },
     });
@@ -3305,7 +3319,7 @@ describe("admin AI generation entry surfaces", () => {
     );
     expect(traceabilitySummary).toHaveTextContent("参数与依据追溯");
     expect(traceabilitySummary).toHaveTextContent(
-      /题型分布\s*单选 40% \/ 多选 30% \/ 判断 30%/u,
+      /题型分布\s*按薄弱项动态分配/u,
     );
     expect(traceabilitySummary).toHaveTextContent(/试卷结构\s*按大题模块组织/u);
     expect(traceabilitySummary).toHaveTextContent(/题量\s*2\/2/u);

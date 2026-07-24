@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { promptTemplateDefinitions } from "@/ai/prompts/templates";
+import {
+  promptTemplateKeysByFuncType as activePromptTemplateKeyByAiFuncType,
+  promptTemplateDefinitions,
+} from "@/ai/prompts/templates";
 
 import { createRouteIntegratedProviderInstruction } from "./route-integrated-provider-instruction-service";
 import type {
@@ -12,7 +15,10 @@ function createGovernanceContext(
   taskType: "ai_question_generation" | "ai_paper_generation",
 ): AiGenerationRouteIntegratedGovernanceContext {
   const promptTemplate = promptTemplateDefinitions.find(
-    (definition) => definition.aiFuncType === taskType,
+    (definition) =>
+      definition.aiFuncType === taskType &&
+      definition.promptTemplateKey ===
+        activePromptTemplateKeyByAiFuncType[taskType],
   );
 
   if (promptTemplate === undefined || promptTemplate.aiFuncType !== taskType) {
@@ -202,6 +208,15 @@ describe("route-integrated Provider instruction service", () => {
     expect(readOutputContractLine(instructions.systemInstruction)).toContain(
       "paperStructure",
     );
+    expect(readOutputContractLine(instructions.systemInstruction)).toContain(
+      "single_choice、multi_choice、true_false、fill_blank、short_answer、case_analysis、calculation",
+    );
+    expect(
+      readOutputContractLine(instructions.systemInstruction),
+    ).not.toContain("multiple_choice");
+    expect(
+      readOutputContractLine(instructions.systemInstruction),
+    ).not.toContain("subjective");
     expect(instructions.untrustedDataPrompt).toContain(
       '"sourcePreference":"prefer_platform"',
     );
@@ -226,9 +241,9 @@ describe("route-integrated Provider instruction service", () => {
     expect(
       readOutputContractLine(instructions.systemInstruction),
     ).not.toContain("standardAnswer");
-    expect(
-      readOutputContractLine(instructions.systemInstruction),
-    ).not.toContain("analysis");
+    expect(readOutputContractLine(instructions.systemInstruction)).not.toMatch(
+      /(?:^|[；，])analysis(?:[；，]|$)/u,
+    );
     expect(instructions.systemInstruction).toContain("仅依据提供的数据生成");
   });
 

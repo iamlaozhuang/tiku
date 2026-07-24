@@ -260,7 +260,7 @@ function createStructuredAdminProviderContent(
 
   const questionTypeDistribution =
     resolvedGenerationParameters.questionTypeDistribution ??
-    "balanced_40_30_30";
+    "weak_point_priority";
   const paperStructure =
     resolvedGenerationParameters.paperStructure ?? "by_question_type";
 
@@ -2531,6 +2531,71 @@ describe("admin AI generation local contract route handlers", () => {
     expect(JSON.stringify(payload)).not.toContain("providerPayload");
   });
 
+  it.each([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const)(
+    "preserves canonical %s in new organization training snapshots",
+    async (questionType) => {
+      enableSyntheticQuotaAvailableAfterAdmissionHarness();
+      const generationParameters = {
+        ...defaultAdminGenerationParameters,
+        questionCount: 1,
+        questionType,
+      };
+      const generatedResultPersistenceRecorder =
+        createGeneratedResultPersistenceRecorder();
+      const response = await postLocalContractRequest({
+        workspace: "organization",
+        adminRoles: ["org_advanced_admin"],
+        organizationPublicId: "organization_public_123",
+        requestPublicId: `admin_ai_generation_request_${questionType}`,
+        taskPersistenceRepository: createTaskPersistenceRecorder().repository,
+        resultPersistenceRepository:
+          generatedResultPersistenceRecorder.repository,
+        runtimeBridgeControl: createFakeProviderRuntimeBridgeControl([], {
+          content: createStructuredAdminProviderContent(
+            "question",
+            generationParameters,
+          ),
+        }),
+        body: { generationKind: "question", generationParameters },
+      });
+
+      expect(response.status).toBe(200);
+      expect(
+        generatedResultPersistenceRecorder.calls[0]?.contentRedactedSnapshot
+          .organizationTrainingQuestionDraft,
+      ).toMatchObject({ questions: [{ questionType }] });
+      const persistedQuestion = (
+        generatedResultPersistenceRecorder.calls[0]
+          ?.contentRedactedSnapshot as {
+          organizationTrainingQuestionDraft?: {
+            questions: {
+              scoringPoints?: unknown[];
+              fillBlankAnswers?: unknown[];
+            }[];
+          };
+        }
+      ).organizationTrainingQuestionDraft?.questions[0];
+      expect(persistedQuestion?.fillBlankAnswers).toHaveLength(
+        questionType === "fill_blank" ? 1 : 0,
+      );
+      expect(persistedQuestion?.scoringPoints).toHaveLength(
+        questionType === "short_answer" ||
+          questionType === "case_analysis" ||
+          questionType === "calculation"
+          ? 1
+          : 0,
+      );
+    },
+  );
+
   it("hands off assembled AI paper containers in organization advanced admin local contracts before persistence", async () => {
     enableSyntheticQuotaAvailableAfterAdmissionHarness();
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
@@ -2559,6 +2624,7 @@ describe("admin AI generation local contract route handlers", () => {
         generationParameters: {
           ...defaultAdminGenerationParameters,
           questionCount: 3,
+          questionTypeDistribution: "balanced_40_30_30",
         },
         clientOnlyFixturePaperAssembly: "OMITTED_FIXTURE_PAPER_ASSEMBLY",
       },
@@ -2750,6 +2816,7 @@ describe("admin AI generation local contract route handlers", () => {
         generationParameters: {
           ...defaultAdminGenerationParameters,
           questionCount: 3,
+          questionTypeDistribution: "balanced_40_30_30",
         },
       },
     });
@@ -3202,7 +3269,7 @@ describe("admin AI generation local contract route handlers", () => {
         generationParameters: {
           ...defaultAdminGenerationParameters,
           questionCount: 50,
-          questionTypeDistribution: "balanced_40_30_30",
+          questionTypeDistribution: "weak_point_priority",
           paperStructure: "by_question_type",
         },
         requestPublicId: "admin_ai_generation_request_public_route_test",

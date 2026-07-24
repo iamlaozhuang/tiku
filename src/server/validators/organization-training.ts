@@ -18,6 +18,7 @@ import {
   organizationTrainingSourceContextTypeValues,
 } from "../models/organization-training";
 import { subjectValues } from "../models/paper";
+import { isAiGenerationReviewRequiredQuestionType } from "../services/ai-generation-question-type-contract";
 import {
   normalizeStudentAnswerItemList,
   normalizeStudentAnswerSelections,
@@ -47,6 +48,49 @@ export const invalidOrganizationTrainingSourceContextInputMessage =
 
 export const invalidOrganizationTrainingAuditLogReferenceInputMessage =
   "Invalid organization training audit_log reference input.";
+
+export function hasExactOrganizationTrainingQuestionScoreAllocation(input: {
+  questionType: OrganizationTrainingQuestionType;
+  questionScore: number;
+  scoringPoints: readonly { score: number }[];
+  fillBlankAnswers: readonly { score: number }[];
+}): boolean {
+  if (
+    !Number.isSafeInteger(input.questionScore) ||
+    input.questionScore <= 0 ||
+    !Array.isArray(input.scoringPoints) ||
+    !Array.isArray(input.fillBlankAnswers)
+  ) {
+    return false;
+  }
+  const scoringPointScores = input.scoringPoints.map((point) => point.score);
+  const fillBlankScores = input.fillBlankAnswers.map((answer) => answer.score);
+  if (
+    [...scoringPointScores, ...fillBlankScores].some(
+      (score) => !Number.isSafeInteger(score) || score <= 0,
+    )
+  ) {
+    return false;
+  }
+
+  if (input.questionType === "fill_blank") {
+    return (
+      scoringPointScores.length === 0 &&
+      fillBlankScores.length > 0 &&
+      fillBlankScores.reduce((sum, score) => sum + score, 0) ===
+        input.questionScore
+    );
+  }
+  if (isAiGenerationReviewRequiredQuestionType(input.questionType)) {
+    return (
+      scoringPointScores.length > 0 &&
+      fillBlankScores.length === 0 &&
+      scoringPointScores.reduce((sum, score) => sum + score, 0) ===
+        input.questionScore
+    );
+  }
+  return scoringPointScores.length === 0 && fillBlankScores.length === 0;
+}
 
 export const invalidOrganizationTrainingEmployeeAnswerDraftInputMessage =
   "Invalid organization training employee answer draft input.";
@@ -394,7 +438,7 @@ function normalizeQuestionOption(value: unknown) {
 }
 
 function normalizeQuestionOptions(value: unknown) {
-  if (!Array.isArray(value)) {
+  if (!Array.isArray(value) || !hasDenseArrayEntries(value)) {
     return null;
   }
 
@@ -404,9 +448,127 @@ function normalizeQuestionOptions(value: unknown) {
     return null;
   }
 
-  return normalizedOptions as NonNullable<
+  const completeOptions = normalizedOptions as NonNullable<
     OrganizationTrainingPublishQuestionInput["options"]
   >;
+  const publicIds = completeOptions.map((option) => option.publicId);
+  const labels = completeOptions.map((option) => option.label);
+
+  return new Set(publicIds).size === publicIds.length &&
+    new Set(labels).size === labels.length
+    ? completeOptions
+    : null;
+}
+
+function hasDenseArrayEntries(value: readonly unknown[]): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function normalizeUniqueRequiredTextList(value: unknown): string[] | null {
+  if (!Array.isArray(value) || !hasDenseArrayEntries(value)) {
+    return null;
+  }
+
+  const normalizedValues = value.map(normalizeRequiredText);
+  if (
+    normalizedValues.length === 0 ||
+    normalizedValues.some((item) => item === null)
+  ) {
+    return null;
+  }
+
+  const completeValues = normalizedValues.filter(
+    (item): item is string => item !== null,
+  );
+  return new Set(completeValues).size === completeValues.length
+    ? completeValues
+    : null;
+}
+
+function hasValidQuestionTypeFields(input: {
+  questionType: OrganizationTrainingQuestionType;
+  options: OrganizationTrainingPublishQuestionInput["options"];
+  standardAnswer: string;
+}): boolean {
+  const isChoiceQuestion =
+    input.questionType === "single_choice" ||
+    input.questionType === "multi_choice";
+
+  if (!isChoiceQuestion) {
+    return (
+      input.options.length === 0 &&
+      (input.questionType !== "true_false" ||
+        input.standardAnswer === "true" ||
+        input.standardAnswer === "false")
+    );
+  }
+
+  if (input.options.length < 2) {
+    return false;
+  }
+
+  const references = input.standardAnswer.split(",");
+  const allowedReferences = new Set(
+    input.options.flatMap((option) => [option.publicId, option.label]),
+  );
+
+  return (
+    references.length === new Set(references).size &&
+    references.every((reference) => allowedReferences.has(reference)) &&
+    (input.questionType === "single_choice"
+      ? references.length === 1
+      : references.length >= 2)
+  );
+}
+
+function normalizeQuestionScoringPoints(value: unknown) {
+  if (!Array.isArray(value) || !hasDenseArrayEntries(value)) return null;
+  const normalized = value.map((item, index) => {
+    if (!isRecord(item)) return null;
+    const description = normalizeRequiredText(item.description);
+    const score = normalizePositiveInteger(item.score);
+    const sortOrder = normalizePositiveInteger(item.sortOrder);
+    return description !== null && score !== null && sortOrder === index + 1
+      ? { description, score, sortOrder }
+      : null;
+  });
+  return normalized.some((item) => item === null)
+    ? null
+    : (normalized as NonNullable<
+        OrganizationTrainingPublishQuestionInput["scoringPoints"]
+      >);
+}
+
+function normalizeFillBlankAnswers(value: unknown) {
+  if (!Array.isArray(value) || !hasDenseArrayEntries(value)) return null;
+  const normalized = value.map((item, index) => {
+    if (!isRecord(item)) return null;
+    const blankKey = normalizeRequiredText(item.blankKey);
+    const standardAnswers = normalizeUniqueRequiredTextList(
+      item.standardAnswers,
+    );
+    const score = normalizePositiveInteger(item.score);
+    const sortOrder = normalizePositiveInteger(item.sortOrder);
+    return blankKey !== null &&
+      standardAnswers !== null &&
+      score !== null &&
+      sortOrder === index + 1
+      ? { blankKey, standardAnswers, score, sortOrder }
+      : null;
+  });
+  if (normalized.some((item) => item === null)) return null;
+
+  const completeAnswers = normalized as NonNullable<
+    OrganizationTrainingPublishQuestionInput["fillBlankAnswers"]
+  >;
+  const blankKeys = completeAnswers.map((answer) => answer.blankKey);
+  return new Set(blankKeys).size === blankKeys.length ? completeAnswers : null;
 }
 
 function normalizeAnswerItem(
@@ -593,6 +755,14 @@ function normalizePublishQuestion(
   const score = normalizePositiveInteger(value.score);
   const standardAnswer = normalizeRequiredText(value.standardAnswer);
   const analysisSummary = normalizeRequiredText(value.analysisSummary);
+  const hasScoringPoints = Object.hasOwn(value, "scoringPoints");
+  const hasFillBlankAnswers = Object.hasOwn(value, "fillBlankAnswers");
+  const scoringPoints = hasScoringPoints
+    ? normalizeQuestionScoringPoints(value.scoringPoints)
+    : null;
+  const fillBlankAnswers = hasFillBlankAnswers
+    ? normalizeFillBlankAnswers(value.fillBlankAnswers)
+    : null;
   const citationCount = normalizeNonNegativeInteger(value.citationCount);
   const hasPaperSectionMetadata = [
     "paperSectionKey",
@@ -622,6 +792,10 @@ function normalizePublishQuestion(
     score === null ||
     standardAnswer === null ||
     analysisSummary === null ||
+    !hasScoringPoints ||
+    !hasFillBlankAnswers ||
+    scoringPoints === null ||
+    fillBlankAnswers === null ||
     !isEvidenceStatus(value.evidenceStatus) ||
     citationCount === null ||
     (hasPaperSectionMetadata &&
@@ -637,7 +811,24 @@ function normalizePublishQuestion(
     return null;
   }
 
-  if (value.questionType !== "short_answer" && options.length === 0) {
+  if (
+    !hasValidQuestionTypeFields({
+      questionType: value.questionType,
+      options,
+      standardAnswer,
+    })
+  ) {
+    return null;
+  }
+
+  if (
+    !hasExactOrganizationTrainingQuestionScoreAllocation({
+      questionType: value.questionType,
+      questionScore: score,
+      scoringPoints,
+      fillBlankAnswers,
+    })
+  ) {
     return null;
   }
 
@@ -657,6 +848,8 @@ function normalizePublishQuestion(
     materialContent,
     stem,
     options,
+    scoringPoints,
+    fillBlankAnswers,
     score,
     standardAnswer,
     analysisSummary,

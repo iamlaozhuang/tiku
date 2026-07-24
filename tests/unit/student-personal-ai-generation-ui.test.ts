@@ -1830,6 +1830,20 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题科目")).toHaveValue("理论");
     expect(screen.getByLabelText("AI出题题型")).toHaveValue("单选题");
+    expect(
+      Array.from(
+        (screen.getByLabelText("AI出题题型") as HTMLSelectElement).options,
+        (option) => option.value,
+      ),
+    ).toEqual([
+      "单选题",
+      "多选题",
+      "判断题",
+      "填空题",
+      "简答题",
+      "案例分析题",
+      "计算题",
+    ]);
     expect(screen.getByLabelText("AI出题难度")).toHaveValue("中等");
     expect(screen.getByLabelText("AI出题学习目标")).toHaveValue("弱项巩固");
 
@@ -1837,7 +1851,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       target: { value: "技能" },
     });
     fireEvent.change(screen.getByLabelText("AI出题题型"), {
-      target: { value: "多选题" },
+      target: { value: "计算题" },
     });
     fireEvent.change(screen.getByLabelText("AI出题题目数量"), {
       target: { value: "7" },
@@ -1870,7 +1884,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(requestBody.generationParameters).toMatchObject({
       subject: "skill",
-      questionType: "multi_choice",
+      questionType: "calculation",
       questionCount: 7,
       difficulty: "hard",
       learningObjective: "综合辨析训练",
@@ -1895,7 +1909,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       target: { value: "45" },
     });
     fireEvent.change(screen.getByLabelText("AI组卷题型分布"), {
-      target: { value: "单选50% / 多选25% / 判断25%" },
+      target: { value: "薄弱点优先" },
     });
     fireEvent.change(screen.getByLabelText("AI组卷大题结构"), {
       target: { value: "按知识点分大题" },
@@ -1929,7 +1943,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(requestBody.generationParameters).toMatchObject({
       subject: "skill",
       questionCount: 45,
-      questionTypeDistribution: "single_50_multi_25_true_false_25",
+      questionTypeDistribution: "weak_point_priority",
       paperStructure: "by_knowledge_node",
       difficulty: "easy",
       learningObjective: "阶段技能自测",
@@ -2176,7 +2190,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         learningObjective: "阶段自测",
         paperStructure: "by_question_type",
         questionCount: 30,
-        questionTypeDistribution: "balanced_40_30_30",
+        questionTypeDistribution: "weak_point_priority",
         sourcePreference: null,
       },
     });
@@ -2325,7 +2339,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     fireEvent.change(screen.getByLabelText("AI组卷题型分布"), {
-      target: { value: "单选50% / 多选25% / 判断25%" },
+      target: { value: "薄弱点优先" },
     });
     fireEvent.change(screen.getByLabelText("AI组卷大题结构"), {
       target: { value: "按知识点分大题" },
@@ -2354,7 +2368,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
         learningObjective: "企业薄弱点自测",
         paperStructure: "by_knowledge_node",
-        questionTypeDistribution: "single_50_multi_25_true_false_25",
+        questionTypeDistribution: "weak_point_priority",
         sourcePreference: "balanced",
       },
     });
@@ -2929,7 +2943,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI组卷等级")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷科目")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷题目数量")).toHaveValue(30);
-    expect(screen.getByLabelText("AI组卷题型分布")).toHaveValue("均衡分布");
+    expect(screen.getByLabelText("AI组卷题型分布")).toHaveValue("薄弱点优先");
     expect(screen.getByLabelText("AI组卷知识点覆盖")).toHaveValue("balanced");
     expect(screen.getByLabelText("AI组卷包含下级知识点")).toBeDisabled();
     expect(screen.getByLabelText("AI组卷知识点补充说明")).toBeInTheDocument();

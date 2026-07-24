@@ -398,6 +398,8 @@ function createManualDraftDto(
             content: "Distractor option",
           },
         ],
+        scoringPoints: [],
+        fillBlankAnswers: [],
         score: 5,
         standardAnswer: "A",
         analysisSummary: "Choose the compliant answer.",
@@ -3204,6 +3206,88 @@ describe("organization training employee answer route handlers", () => {
       }),
     );
   });
+
+  it.each([
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const)(
+    "resolves governed scoring provenance before submitting canonical %s answers",
+    async (questionType) => {
+      const resolveScoringProvenance = vi.fn(async () => null);
+      const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+        sessionService: createCurrentSessionService({
+          code: 0,
+          message: "ok",
+          data: createEmployeeAuthContext(),
+        }),
+        effectiveAuthorizationService:
+          createRouteEffectiveAuthorizationService(),
+        resolveCanonicalQuestions: async () => [
+          {
+            publicId: "training_question_route_public_401",
+            sequenceNumber: 1,
+            questionType,
+            materialTitle: null,
+            materialContent: null,
+            stem: "Canonical review-required question",
+            options: [],
+            scoringPoints:
+              questionType === "fill_blank"
+                ? []
+                : [
+                    {
+                      description: "Canonical scoring point",
+                      score: 5,
+                      sortOrder: 1,
+                    },
+                  ],
+            fillBlankAnswers:
+              questionType === "fill_blank"
+                ? [
+                    {
+                      blankKey: "blank_1",
+                      standardAnswers: ["answer"],
+                      score: 5,
+                      sortOrder: 1,
+                    },
+                  ]
+                : [],
+            score: 5,
+            standardAnswer: "answer",
+            analysisSummary: "Canonical analysis",
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+          },
+        ],
+        resolveScoringProvenance,
+      });
+
+      const response = await handlers.employeeAnswerSubmit.POST(
+        createEmployeeAnswerSubmitRequest({
+          trainingVersionPublicId: takeDownPathPublicId,
+          expectedRevision: 0,
+          operationId: `answer_submit_route_${questionType}_401`,
+          answerItems: [
+            {
+              questionPublicId: "training_question_route_public_401",
+              selectedOptionPublicIds: [],
+              textAnswer: "answer",
+            },
+          ],
+        }),
+        createRouteContext(takeDownPathPublicId),
+      );
+
+      expect(response.status).toBe(200);
+      await expect(resolveJsonPayload(response)).resolves.toMatchObject({
+        code: 409076,
+      });
+      expect(resolveScoringProvenance).toHaveBeenCalledOnce();
+      expect(runtimeRepositoryMock.submitEmployeeAnswer).not.toHaveBeenCalled();
+    },
+  );
 
   it("returns an employee readonly answer summary without raw answer fields", async () => {
     const sessionService = createCurrentSessionService({

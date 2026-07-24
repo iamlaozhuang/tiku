@@ -1,17 +1,7 @@
 import type { EvidenceStatus } from "./ai-rag";
+import { questionTypeValues, type QuestionType } from "./paper";
 
-export const organizationTrainingQuestionTypeValues = [
-  "single_choice",
-  "multi_choice",
-  "true_false",
-  "short_answer",
-] as const;
-
-export const organizationTrainingDeferredQuestionTypeValues = [
-  "fill_blank",
-  "case_analysis",
-  "calculation",
-] as const;
+export const organizationTrainingQuestionTypeValues = questionTypeValues;
 
 export const organizationTrainingValidationStatusValues = [
   "valid",
@@ -69,11 +59,7 @@ export const organizationTrainingAuditLogTargetResourceTypeValues = [
   "organization_training_summary",
 ] as const;
 
-export type OrganizationTrainingQuestionType =
-  (typeof organizationTrainingQuestionTypeValues)[number];
-
-export type OrganizationTrainingDeferredQuestionType =
-  (typeof organizationTrainingDeferredQuestionTypeValues)[number];
+export type OrganizationTrainingQuestionType = QuestionType;
 
 export type OrganizationTrainingValidationStatus =
   (typeof organizationTrainingValidationStatusValues)[number];
@@ -114,7 +100,10 @@ export type OrganizationTrainingQuestionTypeSummary = {
   singleChoice: number;
   multiChoice: number;
   trueFalse: number;
+  fillBlank?: number;
   shortAnswer: number;
+  caseAnalysis?: number;
+  calculation?: number;
 };
 
 export type OrganizationTrainingCapabilityContext = {
@@ -127,6 +116,19 @@ export type OrganizationTrainingPublishQuestionOptionInput = {
   publicId: string;
   label: string;
   content: string;
+};
+
+export type OrganizationTrainingQuestionScoringPointInput = {
+  description: string;
+  score: number;
+  sortOrder: number;
+};
+
+export type OrganizationTrainingFillBlankAnswerInput = {
+  blankKey: string;
+  standardAnswers: string[];
+  score: number;
+  sortOrder: number;
 };
 
 export type OrganizationTrainingPublishQuestionInput = {
@@ -145,6 +147,8 @@ export type OrganizationTrainingPublishQuestionInput = {
   materialContent: string | null;
   stem: string;
   options: OrganizationTrainingPublishQuestionOptionInput[];
+  scoringPoints?: OrganizationTrainingQuestionScoringPointInput[];
+  fillBlankAnswers?: OrganizationTrainingFillBlankAnswerInput[];
   score: number;
   standardAnswer: string;
   analysisSummary: string;

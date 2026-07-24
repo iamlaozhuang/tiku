@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AdminAiGenerationLocalContractDto } from "@/server/contracts/admin-ai-generation-local-contract";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "@/server/contracts/route-integrated-provider-execution-contract";
+import { normalizeCreateQuestionInput } from "@/server/validators/question";
 import { createContentAdminFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-payload";
 
 const generationParameters: AiGenerationRouteIntegratedGenerationParameters = {
@@ -53,6 +54,8 @@ function createContentQuestionContract(): AdminAiGenerationLocalContractDto {
               ],
               standardAnswer: "A",
               analysis: "synthetic reviewed analysis",
+              scoringPoints: [],
+              fillBlankAnswers: [],
               reviewStatus: "draft_review_required",
             },
           ],
@@ -132,6 +135,267 @@ function createContentPaperContract(
 }
 
 describe("content admin formal reviewed draft payload", () => {
+  it("preserves fill-blank and subjective scoring facts without type fallback", () => {
+    const caseContract = createContentQuestionContract();
+    const casePreview =
+      caseContract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+    if (casePreview?.kind === "question_set") {
+      casePreview.draftSummaries[0] = {
+        ...casePreview.draftSummaries[0],
+        questionType: "case_analysis",
+        questionOptions: [],
+        scoringPoints: [
+          { description: "reasoning", score: "2.0", sortOrder: 1 },
+        ],
+        fillBlankAnswers: [],
+      };
+    }
+    expect(
+      createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: caseContract,
+        generationParameters,
+        requestedAt: "2026-07-08T10:00:00.000Z",
+      }),
+    ).toMatchObject({
+      questionType: "case_analysis",
+      scoringMethod: "ai_scoring",
+      questionOptions: [],
+      scoringPoints: [{ description: "reasoning", score: "2.0", sortOrder: 1 }],
+      fillBlankAnswers: [],
+    });
+
+    const fillBlankContract = createContentQuestionContract();
+    const fillBlankPreview =
+      fillBlankContract.runtimeBridge.visibleGeneratedContent
+        ?.structuredPreview;
+    if (fillBlankPreview?.kind === "question_set") {
+      fillBlankPreview.draftSummaries[0] = {
+        ...fillBlankPreview.draftSummaries[0],
+        questionType: "fill_blank",
+        questionOptions: [],
+        scoringPoints: [],
+        fillBlankAnswers: [
+          {
+            blankKey: "blank_1",
+            standardAnswers: ["first"],
+            score: "1.0",
+            sortOrder: 1,
+          },
+          {
+            blankKey: "blank_2",
+            standardAnswers: ["second", "second alias"],
+            score: "1.0",
+            sortOrder: 2,
+          },
+        ],
+      };
+    }
+    expect(
+      createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: fillBlankContract,
+        generationParameters,
+        requestedAt: "2026-07-08T10:00:00.000Z",
+      }),
+    ).toMatchObject({
+      questionType: "fill_blank",
+      scoringMethod: "auto_match",
+      questionOptions: [],
+      scoringPoints: [],
+      fillBlankAnswers: [
+        { blankKey: "blank_1", standardAnswers: ["first"], sortOrder: 1 },
+        {
+          blankKey: "blank_2",
+          standardAnswers: ["second", "second alias"],
+          sortOrder: 2,
+        },
+      ],
+    });
+  });
+
+  it.each([
+    "single_choice",
+    "multi_choice",
+    "true_false",
+    "fill_blank",
+    "short_answer",
+    "case_analysis",
+    "calculation",
+  ] as const)(
+    "projects canonical %s drafts into a payload accepted by the authoritative question validator",
+    (questionType) => {
+      const contract = createContentQuestionContract();
+      const preview =
+        contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+      if (preview?.kind !== "question_set") {
+        throw new Error("Expected a question_set fixture.");
+      }
+
+      preview.draftSummaries[0] = {
+        ...preview.draftSummaries[0],
+        questionType,
+        questionOptions:
+          questionType === "single_choice"
+            ? [
+                { optionLabel: "A", optionText: "first", isCorrect: true },
+                { optionLabel: "B", optionText: "second", isCorrect: false },
+              ]
+            : questionType === "multi_choice"
+              ? [
+                  { optionLabel: "A", optionText: "first", isCorrect: true },
+                  { optionLabel: "B", optionText: "second", isCorrect: true },
+                  { optionLabel: "C", optionText: "third", isCorrect: false },
+                ]
+              : [],
+        standardAnswer:
+          questionType === "single_choice"
+            ? "A"
+            : questionType === "multi_choice"
+              ? "A,B"
+              : questionType === "true_false"
+                ? "true"
+                : "canonical answer",
+        scoringPoints:
+          questionType === "short_answer" ||
+          questionType === "case_analysis" ||
+          questionType === "calculation"
+            ? [{ description: "review point", score: "2.0", sortOrder: 1 }]
+            : [],
+        fillBlankAnswers:
+          questionType === "fill_blank"
+            ? [
+                {
+                  blankKey: "blank_1",
+                  standardAnswers: ["canonical answer"],
+                  score: "2.0",
+                  sortOrder: 1,
+                },
+              ]
+            : [],
+      };
+
+      const payload = createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: contract,
+        generationParameters,
+        requestedAt: "2026-07-08T10:00:00.000Z",
+      });
+
+      expect(payload).not.toBeNull();
+      expect(normalizeCreateQuestionInput(payload).success).toBe(true);
+      if (questionType === "true_false") {
+        expect(payload).toMatchObject({
+          standardAnswerRichText: "A",
+          questionOptions: [
+            {
+              label: "A",
+              contentRichText: "正确",
+              isCorrect: true,
+              sortOrder: 1,
+            },
+            {
+              label: "B",
+              contentRichText: "错误",
+              isCorrect: false,
+              sortOrder: 2,
+            },
+          ],
+        });
+      }
+    },
+  );
+
+  it.each([
+    ["true", "A"],
+    ["false", "B"],
+  ] as const)(
+    "projects canonical true_false answer %s into the formal A/B option contract",
+    (providerAnswer, expectedLabel) => {
+      const contract = createContentQuestionContract();
+      const preview =
+        contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+      if (preview?.kind !== "question_set") {
+        throw new Error("Expected a question_set fixture.");
+      }
+      preview.draftSummaries[0] = {
+        ...preview.draftSummaries[0],
+        questionType: "true_false",
+        questionOptions: [],
+        standardAnswer: providerAnswer,
+        scoringPoints: [],
+        fillBlankAnswers: [],
+      };
+
+      const payload = createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: contract,
+        generationParameters,
+        requestedAt: "2026-07-08T10:00:00.000Z",
+      });
+
+      expect(payload).toMatchObject({
+        standardAnswerRichText: expectedLabel,
+        questionOptions: [
+          { label: "A", isCorrect: providerAnswer === "true" },
+          { label: "B", isCorrect: providerAnswer === "false" },
+        ],
+      });
+      expect(normalizeCreateQuestionInput(payload).success).toBe(true);
+    },
+  );
+
+  it.each([
+    "multiple_choice",
+    "subjective",
+    "judge",
+    "判断题",
+    "SINGLE_CHOICE",
+    " single_choice",
+    "unknown",
+  ])(
+    "fails closed for non-canonical reviewed question type %j",
+    (questionType) => {
+      const contract = createContentQuestionContract();
+      const preview =
+        contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+
+      if (preview?.kind === "question_set") {
+        preview.draftSummaries[0] = {
+          ...preview.draftSummaries[0],
+          questionType,
+        };
+      }
+
+      expect(
+        createContentAdminFormalReviewedDraftPayload({
+          localContractSummary: contract,
+          generationParameters,
+          requestedAt: "2026-07-08T10:00:00.000Z",
+        }),
+      ).toBeNull();
+    },
+  );
+
+  it("fails the whole formal payload instead of filtering a malformed option", () => {
+    const contract = createContentQuestionContract();
+    const preview =
+      contract.runtimeBridge.visibleGeneratedContent?.structuredPreview;
+    if (preview?.kind === "question_set") {
+      preview.draftSummaries[0] = {
+        ...preview.draftSummaries[0],
+        questionOptions: [
+          ...(preview.draftSummaries[0].questionOptions ?? []),
+          { optionLabel: "", optionText: "malformed", isCorrect: false },
+        ],
+      };
+    }
+
+    expect(
+      createContentAdminFormalReviewedDraftPayload({
+        localContractSummary: contract,
+        generationParameters,
+        requestedAt: "2026-07-08T10:00:00.000Z",
+      }),
+    ).toBeNull();
+  });
+
   it("carries strict difficulty and selected knowledge node public ids into formal question drafts", () => {
     const payload = createContentAdminFormalReviewedDraftPayload({
       localContractSummary: createContentQuestionContract(),

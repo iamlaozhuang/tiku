@@ -8,7 +8,6 @@ import type {
 } from "../contracts/organization-training-contract";
 import {
   organizationTrainingAnswerStatusValues,
-  organizationTrainingDeferredQuestionTypeValues,
   organizationTrainingQuestionTypeValues,
   organizationTrainingSensitiveAdminSummaryFieldValues,
 } from "../models/organization-training";
@@ -17,6 +16,7 @@ import {
   normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
   normalizeOrganizationTrainingCopyToNewDraftInput,
   normalizeOrganizationTrainingCopyToNewDraftRouteInput,
+  normalizeOrganizationTrainingDraftSaveInput,
   normalizeOrganizationTrainingManualDraftInput,
   normalizeOrganizationTrainingAiResultCopyInput,
   normalizeOrganizationTrainingPublishInput,
@@ -31,6 +31,199 @@ import {
 } from "./student-answer";
 
 describe("organization training contract and validator scaffold", () => {
+  it("accepts all seven canonical question types without aliases or pseudo options", () => {
+    const questionTypes = [
+      "single_choice",
+      "multi_choice",
+      "true_false",
+      "fill_blank",
+      "short_answer",
+      "case_analysis",
+      "calculation",
+    ] as const;
+    const questions = questionTypes.map((questionType, index) => ({
+      publicId: `question_public_${index + 1}`,
+      sequenceNumber: index + 1,
+      questionType,
+      materialTitle: null,
+      materialContent: null,
+      stem: `Question ${index + 1}`,
+      options:
+        questionType === "single_choice" || questionType === "multi_choice"
+          ? [
+              { publicId: `option_${index + 1}_a`, label: "A", content: "A" },
+              { publicId: `option_${index + 1}_b`, label: "B", content: "B" },
+            ]
+          : [],
+      scoringPoints:
+        questionType === "short_answer" ||
+        questionType === "case_analysis" ||
+        questionType === "calculation"
+          ? [{ description: "review point", score: 2, sortOrder: 1 }]
+          : [],
+      fillBlankAnswers:
+        questionType === "fill_blank"
+          ? [
+              {
+                blankKey: "blank_1",
+                standardAnswers: ["review answer"],
+                score: 2,
+                sortOrder: 1,
+              },
+            ]
+          : [],
+      score: 2,
+      standardAnswer:
+        questionType === "single_choice"
+          ? "A"
+          : questionType === "multi_choice"
+            ? "A,B"
+            : questionType === "true_false"
+              ? "true"
+              : "review answer",
+      analysisSummary: "analysis",
+    }));
+
+    expect(
+      normalizeOrganizationTrainingDraftSaveInput({
+        draftPublicId: "training_draft_public_123",
+        expectedRevision: 1,
+        operationId: "operation_public_123",
+        title: "Seven type training",
+        description: null,
+        questions,
+      }),
+    ).toMatchObject({
+      success: true,
+      value: {
+        questions: questionTypes.map((questionType) => ({ questionType })),
+      },
+    });
+
+    for (const alias of ["multiple_choice", "subjective", "judge"]) {
+      expect(
+        normalizeOrganizationTrainingDraftSaveInput({
+          draftPublicId: "training_draft_public_123",
+          expectedRevision: 1,
+          operationId: "operation_public_123",
+          title: "Seven type training",
+          description: null,
+          questions: [{ ...questions[0], questionType: alias }],
+        }).success,
+      ).toBe(false);
+    }
+
+    const sparseScoringPoints = Array(2);
+    sparseScoringPoints[0] = {
+      description: "review point",
+      score: 2,
+      sortOrder: 1,
+    };
+    const sparseOptions = Array(2);
+    sparseOptions[0] = questions[0].options[0];
+    for (const malformedQuestions of [
+      [
+        {
+          ...questions[4],
+          scoringPoints: sparseScoringPoints,
+        },
+      ],
+      [
+        {
+          ...questions[0],
+          options: sparseOptions,
+        },
+      ],
+      [
+        {
+          ...questions[3],
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: ["answer", "answer"],
+              score: 2,
+              sortOrder: 1,
+            },
+          ],
+        },
+      ],
+      [
+        {
+          ...questions[3],
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: ["answer", ""],
+              score: 2,
+              sortOrder: 1,
+            },
+          ],
+        },
+      ],
+    ]) {
+      expect(
+        normalizeOrganizationTrainingDraftSaveInput({
+          draftPublicId: "training_draft_public_123",
+          expectedRevision: 1,
+          operationId: "operation_public_123",
+          title: "Seven type training",
+          description: null,
+          questions: malformedQuestions,
+        }).success,
+      ).toBe(false);
+    }
+
+    const {
+      scoringPoints: _missingScoringPoints,
+      fillBlankAnswers: _missingFillBlankAnswers,
+      ...missingCurrentTypeFacts
+    } = questions[0];
+    expect(_missingScoringPoints).toEqual([]);
+    expect(_missingFillBlankAnswers).toEqual([]);
+    expect(
+      normalizeOrganizationTrainingDraftSaveInput({
+        draftPublicId: "training_draft_public_123",
+        expectedRevision: 1,
+        operationId: "operation_public_123",
+        title: "Seven type training",
+        description: null,
+        questions: [missingCurrentTypeFacts],
+      }).success,
+    ).toBe(false);
+
+    for (const mismatchedQuestion of [
+      {
+        ...questions[3],
+        fillBlankAnswers: [
+          {
+            ...questions[3].fillBlankAnswers[0],
+            score: questions[3].score + 1,
+          },
+        ],
+      },
+      {
+        ...questions[4],
+        scoringPoints: [
+          {
+            ...questions[4].scoringPoints[0],
+            score: questions[4].score + 1,
+          },
+        ],
+      },
+    ]) {
+      expect(
+        normalizeOrganizationTrainingDraftSaveInput({
+          draftPublicId: "training_draft_public_123",
+          expectedRevision: 1,
+          operationId: "operation_public_123",
+          title: "Seven type training",
+          description: null,
+          questions: [mismatchedQuestion],
+        }).success,
+      ).toBe(false);
+    }
+  });
+
   it("accepts only the server-owned organization AI result copy identity", () => {
     expect(
       normalizeOrganizationTrainingAiResultCopyInput({
@@ -80,12 +273,15 @@ describe("organization training contract and validator scaffold", () => {
     ]);
   });
 
-  it("normalizes publish input with first-release question types and null optional fields", () => {
+  it("keeps the current publish contract aligned with all seven canonical question types", () => {
     expect(organizationTrainingQuestionTypeValues).toEqual([
       "single_choice",
       "multi_choice",
       "true_false",
+      "fill_blank",
       "short_answer",
+      "case_analysis",
+      "calculation",
     ]);
 
     expect(
@@ -495,13 +691,7 @@ describe("organization training contract and validator scaffold", () => {
     ).toBe(false);
   });
 
-  it("rejects deferred question types and incomplete publish confirmation", () => {
-    expect(organizationTrainingDeferredQuestionTypeValues).toEqual([
-      "fill_blank",
-      "case_analysis",
-      "calculation",
-    ]);
-
+  it("rejects incomplete current question facts and incomplete publish confirmation", () => {
     expect(
       normalizeOrganizationTrainingPublishInput({
         draftPublicId: "training_draft_public_123",

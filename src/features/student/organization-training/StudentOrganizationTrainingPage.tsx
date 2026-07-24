@@ -165,14 +165,19 @@ function createRecoveredAnswerValues(
         const validOptionPublicIds = new Set(
           question.options.map((option) => option.publicId),
         );
+        const isOptionBacked = isOptionBackedAnswerQuestion(question);
 
         return [
           question.publicId,
           {
-            selectedOptionPublicIds: (
-              persistedAnswerItem?.selectedOptionPublicIds ?? []
-            ).filter((publicId) => validOptionPublicIds.has(publicId)),
-            textAnswer: persistedAnswerItem?.textAnswer ?? "",
+            selectedOptionPublicIds: isOptionBacked
+              ? (persistedAnswerItem?.selectedOptionPublicIds ?? []).filter(
+                  (publicId) => validOptionPublicIds.has(publicId),
+                )
+              : [],
+            textAnswer: isOptionBacked
+              ? ""
+              : (persistedAnswerItem?.textAnswer ?? ""),
           },
         ];
       }),
@@ -281,11 +286,21 @@ function isQuestionAnswered(
 ): boolean {
   const answerItem = readAnswerItemValue(values, question.publicId);
 
-  if (question.questionType === "short_answer") {
+  if (!isOptionBackedAnswerQuestion(question)) {
     return answerItem.textAnswer.trim().length > 0;
   }
 
   return answerItem.selectedOptionPublicIds.length > 0;
+}
+
+function isOptionBackedAnswerQuestion(
+  question: OrganizationTrainingQuestionSnapshotDto,
+): boolean {
+  return (
+    question.questionType === "single_choice" ||
+    question.questionType === "multi_choice" ||
+    (question.questionType === "true_false" && question.options.length > 0)
+  );
 }
 
 function countAnsweredQuestions(
@@ -1323,6 +1338,7 @@ function QuestionAnswerField({
     onChange((currentValue) => ({
       ...currentValue,
       selectedOptionPublicIds: [optionPublicId],
+      textAnswer: "",
     }));
   }
 
@@ -1365,22 +1381,41 @@ function QuestionAnswerField({
         </div>
       )}
       <p className="text-text-primary text-sm leading-6">{question.stem}</p>
-      {question.questionType === "short_answer" ? (
+      {!isOptionBackedAnswerQuestion(question) ? (
         <label className="grid gap-2 text-sm font-medium">
           <span className="text-text-secondary">
             第 {question.sequenceNumber} 题作答
           </span>
-          <textarea
-            aria-label={`第 ${question.sequenceNumber} 题作答`}
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-24 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
-            value={answerItem.textAnswer}
-            onChange={(event) =>
-              onChange((currentValue) => ({
-                ...currentValue,
-                textAnswer: event.target.value,
-              }))
-            }
-          />
+          {question.questionType === "true_false" ? (
+            <select
+              aria-label={`第 ${question.sequenceNumber} 题作答`}
+              className="border-input bg-surface h-9 rounded-lg border px-2.5 text-sm"
+              value={answerItem.textAnswer}
+              onChange={(event) =>
+                onChange((currentValue) => ({
+                  ...currentValue,
+                  selectedOptionPublicIds: [],
+                  textAnswer: event.target.value,
+                }))
+              }
+            >
+              <option value="">请选择</option>
+              <option value="true">正确</option>
+              <option value="false">错误</option>
+            </select>
+          ) : (
+            <textarea
+              aria-label={`第 ${question.sequenceNumber} 题作答`}
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-24 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+              value={answerItem.textAnswer}
+              onChange={(event) =>
+                onChange((currentValue) => ({
+                  ...currentValue,
+                  textAnswer: event.target.value,
+                }))
+              }
+            />
+          )}
         </label>
       ) : (
         <div className="space-y-2">
@@ -1583,7 +1618,19 @@ function getQuestionTypeLabel(
     return "判断题";
   }
 
-  return "简答题";
+  if (questionType === "fill_blank") {
+    return "填空题";
+  }
+
+  if (questionType === "short_answer") {
+    return "简答题";
+  }
+
+  if (questionType === "case_analysis") {
+    return "案例分析题";
+  }
+
+  return "计算题";
 }
 
 function formatDateLabel(value: string | null | undefined): string {

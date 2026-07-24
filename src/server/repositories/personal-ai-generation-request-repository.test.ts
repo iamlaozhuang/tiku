@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
+
 import type {
   PersonalAiGenerationRequestPersistenceRow,
   PersonalAiGenerationRequestTaskGateway,
@@ -67,7 +69,9 @@ function createPersistenceRow(
   };
 }
 
-function createGenerationParameters(questionCount = 3) {
+function createGenerationParameters(
+  questionCount = 3,
+): AiGenerationRouteIntegratedGenerationParameters {
   return {
     profession: "marketing" as const,
     level: 3 as const,

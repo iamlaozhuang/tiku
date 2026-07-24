@@ -97,6 +97,7 @@ import {
 } from "./effective-authorization-service";
 import type { SessionService } from "./session-service";
 import { selectAuthorizationObjectScope } from "./authorization-object-scope";
+import { isAiGenerationReviewRequiredQuestionType } from "./ai-generation-question-type-contract";
 
 export type OrganizationTrainingPublishRouteContext = {
   params: Promise<{
@@ -2858,8 +2859,8 @@ export function createOrganizationTrainingRouteHandlers(
           trainingVersionPublicId: input.value.trainingVersionPublicId,
           employeeContext,
         });
-        const requiresAiScoring = canonicalQuestions.some(
-          (question) => question.questionType === "short_answer",
+        const requiresAiScoring = canonicalQuestions.some((question) =>
+          isAiGenerationReviewRequiredQuestionType(question.questionType),
         );
 
         const result = await submitEmployeeAnswerService({

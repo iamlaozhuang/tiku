@@ -46,7 +46,7 @@ const routePlanContent = JSON.stringify({
     {
       sectionKey: "true-false",
       title: "判断题",
-      questionType: "judge",
+      questionType: "true_false",
       targetQuestionCount: 1,
       targetScore: 1,
       knowledgeNodePublicIds: ["knowledge_node_public_b"],
@@ -637,6 +637,72 @@ describe("AI组卷 route-visible plan local assembly", () => {
       rejection: {
         failureCategory: "invalid_plan_shape",
       },
+    });
+  });
+
+  it("rejects a mixed canonical and unknown question type list without filtering the bad value", () => {
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          title: "Canonical plan",
+          targetQuestionCount: 1,
+          sections: [
+            {
+              sectionKey: "single-choice",
+              title: "Single choice",
+              questionType: "single_choice",
+              targetQuestionCount: 1,
+              targetScore: 1,
+            },
+          ],
+          knowledgeCoverage: { targetKnowledgeNodePublicIds: [] },
+        }),
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+          },
+        },
+      );
+    Object.defineProperty(visibleGeneratedContent, "content", {
+      configurable: true,
+      enumerable: true,
+      value: JSON.stringify({
+        title: "Corrupt plan",
+        targetQuestionCount: 1,
+        sections: [
+          {
+            sectionKey: "single-choice",
+            title: "Single choice",
+            questionType: "single_choice",
+            questionTypes: ["single_choice", "judge"],
+            targetQuestionCount: 1,
+            targetScore: 1,
+          },
+        ],
+        knowledgeCoverage: { targetKnowledgeNodePublicIds: [] },
+      }),
+    });
+
+    expect(
+      assembleAiPaperFromRouteVisiblePlan({
+        role: "personal_advanced_student",
+        organizationPublicId: null,
+        generationParameters: {
+          ...generationParameters,
+          questionCount: 1,
+          paperStructure: "by_question_type",
+        },
+        visibleGeneratedContent,
+        platformQuestions: [
+          createQuestion({ publicId: "question_public_single" }),
+        ],
+        enterpriseQuestions: [],
+      }),
+    ).toEqual({
+      status: "rejected",
+      assembly: null,
+      rejection: { failureCategory: "invalid_plan_shape" },
     });
   });
 

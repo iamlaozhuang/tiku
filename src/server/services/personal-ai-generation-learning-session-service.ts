@@ -21,6 +21,7 @@ import {
   normalizePersonalAiLearningLabels,
 } from "../validators/personal-ai-generation-learning-session";
 import { projectPersonalAiLearningSessionForLearner } from "@/lib/learner-content-projection";
+import { isAiGenerationReviewRequiredQuestionType } from "./ai-generation-question-type-contract";
 
 export function createPersonalAiGenerationLearningSessionService(input: {
   repository: PersonalAiGenerationLearningSessionRepository;
@@ -399,11 +400,9 @@ async function submitLearningSessionAnswer(
   const selectedOptionLabels = normalizePersonalAiLearningLabels(
     input.selectedOptionLabels,
   );
-  const isSubjectiveQuestion =
-    question.questionType === "short_answer" ||
-    question.questionType === "fill_blank" ||
-    question.questionType === "case_analysis" ||
-    question.questionType === "calculation";
+  const isSubjectiveQuestion = isAiGenerationReviewRequiredQuestionType(
+    question.questionType,
+  );
 
   if (isSubjectiveQuestion) {
     const textAnswer = input.textAnswer?.trim() ?? "";

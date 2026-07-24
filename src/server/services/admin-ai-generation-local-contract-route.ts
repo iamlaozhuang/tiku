@@ -105,6 +105,7 @@ import {
   type QuestionAccessRow,
 } from "../repositories/question-repository";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
+import { parseCurrentAiGenerationQuestionType } from "./ai-generation-question-type-contract";
 import {
   buildAdminAiGenerationRuntimeBridgeReadModel,
   buildAdminAiGenerationRuntimeBridgeReadModelForRoute,
@@ -435,6 +436,10 @@ function normalizeRouteIntegratedGenerationParameters(
   const paperStructure = normalizeAiGenerationRouteIntegratedPaperStructure(
     value.paperStructure,
   );
+  const questionType =
+    value.questionType === null
+      ? null
+      : parseCurrentAiGenerationQuestionType(value.questionType);
 
   if (
     profession === null ||
@@ -442,6 +447,7 @@ function normalizeRouteIntegratedGenerationParameters(
     subject === null ||
     questionCount === null ||
     knowledgeScope === null ||
+    (value.questionType !== null && questionType === null) ||
     questionTypeDistribution === "invalid" ||
     paperStructure === "invalid"
   ) {
@@ -453,13 +459,13 @@ function normalizeRouteIntegratedGenerationParameters(
     level,
     subject,
     ...knowledgeScope,
-    questionType: normalizeOptionalText(value.questionType),
+    questionType,
     questionCount,
     difficulty: normalizeOptionalText(value.difficulty),
     learningObjective: normalizeOptionalText(value.learningObjective),
     questionTypeDistribution:
       taskType === "ai_paper_generation"
-        ? (questionTypeDistribution ?? "balanced_40_30_30")
+        ? (questionTypeDistribution ?? "weak_point_priority")
         : null,
     paperStructure:
       taskType === "ai_paper_generation"
@@ -1726,16 +1732,6 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
   };
 }
 
-const organizationTrainingQuestionTypeByAiType = {
-  case_analysis: "short_answer",
-  judge: "true_false",
-  multiple_choice: "multi_choice",
-  single_choice: "single_choice",
-} as const satisfies Record<
-  string,
-  OrganizationTrainingAdminQuestionDetailDto["questionType"]
->;
-
 function createOrganizationTrainingQuestionDraftSnapshot(input: {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   localContractSummary: AdminAiGenerationLocalContractBaseDto;
@@ -1812,7 +1808,48 @@ function createOrganizationTrainingQuestionDetailFromDraft(input: {
   const questionType = resolveOrganizationTrainingQuestionType(
     input.questionDraft.questionType ?? input.generationParameters.questionType,
   );
+  if (questionType === null) {
+    return null;
+  }
+
   const publicId = `${input.taskPublicId}_question_${input.questionDraft.draftNumber}`;
+  const options = createOrganizationTrainingQuestionOptions({
+    publicId,
+    questionDraft: input.questionDraft,
+    questionType,
+  });
+
+  if (options === null) {
+    return null;
+  }
+  const scoringPoints = (input.questionDraft.scoringPoints ?? []).map(
+    (scoringPoint) => ({
+      description: scoringPoint.description,
+      score: Number(scoringPoint.score),
+      sortOrder: scoringPoint.sortOrder,
+    }),
+  );
+  const fillBlankAnswers = (input.questionDraft.fillBlankAnswers ?? []).map(
+    (fillBlankAnswer) => ({
+      blankKey: fillBlankAnswer.blankKey,
+      standardAnswers: [...fillBlankAnswer.standardAnswers],
+      score: Number(fillBlankAnswer.score),
+      sortOrder: fillBlankAnswer.sortOrder,
+    }),
+  );
+
+  if (
+    scoringPoints.some(
+      (scoringPoint) =>
+        !Number.isFinite(scoringPoint.score) || scoringPoint.score <= 0,
+    ) ||
+    fillBlankAnswers.some(
+      (fillBlankAnswer) =>
+        !Number.isFinite(fillBlankAnswer.score) || fillBlankAnswer.score <= 0,
+    )
+  ) {
+    return null;
+  }
 
   return {
     publicId,
@@ -1822,12 +1859,11 @@ function createOrganizationTrainingQuestionDetailFromDraft(input: {
     materialContent: null,
     stem,
     options:
-      questionType === "short_answer"
-        ? []
-        : createOrganizationTrainingQuestionOptions({
-            publicId,
-            questionDraft: input.questionDraft,
-          }),
+      questionType === "single_choice" || questionType === "multi_choice"
+        ? options
+        : [],
+    scoringPoints,
+    fillBlankAnswers,
     score: 1,
     evidenceSummary: {
       evidenceStatus: input.evidenceStatus,
@@ -1843,46 +1879,54 @@ function createOrganizationTrainingQuestionDetailFromDraft(input: {
 
 function resolveOrganizationTrainingQuestionType(
   value: string | null | undefined,
-): OrganizationTrainingAdminQuestionDetailDto["questionType"] {
-  return (
-    organizationTrainingQuestionTypeByAiType[
-      value as keyof typeof organizationTrainingQuestionTypeByAiType
-    ] ?? "short_answer"
-  );
+): OrganizationTrainingAdminQuestionDetailDto["questionType"] | null {
+  return parseCurrentAiGenerationQuestionType(value);
 }
 
 function createOrganizationTrainingQuestionOptions(input: {
   publicId: string;
   questionDraft: AiGenerationRouteIntegratedQuestionDraftSummary;
-}): OrganizationTrainingAdminQuestionDetailDto["options"] {
-  return (input.questionDraft.questionOptions ?? [])
-    .map((option, index) => {
-      const label =
-        normalizeRequiredText(option.optionLabel ?? null) ??
-        String.fromCharCode(65 + index);
-      const content = normalizeRequiredText(option.optionText);
+  questionType: OrganizationTrainingAdminQuestionDetailDto["questionType"];
+}): OrganizationTrainingAdminQuestionDetailDto["options"] | null {
+  const options = input.questionDraft.questionOptions ?? [];
+  const isChoiceQuestion =
+    input.questionType === "single_choice" ||
+    input.questionType === "multi_choice";
 
-      if (content === null) {
-        return null;
-      }
+  if (
+    (isChoiceQuestion && options.length === 0) ||
+    (!isChoiceQuestion && options.length > 0)
+  ) {
+    return null;
+  }
 
-      return {
-        publicId: `${input.publicId}_option_${label.toLowerCase()}`,
-        label,
-        content,
-      };
-    })
-    .filter(
-      (
-        option,
-      ): option is OrganizationTrainingAdminQuestionDetailDto["options"][number] =>
-        option !== null,
-    );
+  const normalizedOptions: OrganizationTrainingAdminQuestionDetailDto["options"] =
+    [];
+  const labels = new Set<string>();
+  const foldedLabels = new Set<string>();
+  for (const option of options) {
+    const label = normalizeRequiredText(option.optionLabel ?? null);
+    const content = normalizeRequiredText(option.optionText);
+
+    if (
+      label === null ||
+      content === null ||
+      labels.has(label) ||
+      foldedLabels.has(label.toLowerCase())
+    ) {
+      return null;
+    }
+    labels.add(label);
+    foldedLabels.add(label.toLowerCase());
+    normalizedOptions.push({
+      publicId: `${input.publicId}_option_${label.toLowerCase()}`,
+      label,
+      content,
+    });
+  }
+
+  return normalizedOptions;
 }
-
-const organizationTrainingQuestionTypes = new Set<
-  OrganizationTrainingAdminQuestionDetailDto["questionType"]
->(["single_choice", "multi_choice", "true_false", "short_answer"]);
 
 async function resolveOrganizationTrainingPaperDraftDetailSnapshot(input: {
   localContractSummary: AdminAiGenerationLocalContractBaseDto;
@@ -2261,11 +2305,7 @@ function createSelectedPaperQuestionKey(input: {
 function normalizeOrganizationTrainingQuestionType(
   value: string,
 ): OrganizationTrainingAdminQuestionDetailDto["questionType"] | null {
-  return organizationTrainingQuestionTypes.has(
-    value as OrganizationTrainingAdminQuestionDetailDto["questionType"],
-  )
-    ? (value as OrganizationTrainingAdminQuestionDetailDto["questionType"])
-    : null;
+  return parseCurrentAiGenerationQuestionType(value);
 }
 
 function normalizeRequiredText(

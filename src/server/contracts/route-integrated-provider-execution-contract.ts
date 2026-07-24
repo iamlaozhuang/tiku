@@ -1,5 +1,6 @@
 import type { EvidenceStatus } from "../models/ai-rag";
 import type { ModelConfigSnapshot } from "../models/ai-rag";
+import type { QuestionType } from "../models/paper";
 
 export type AiGenerationRouteIntegratedProviderMetadata = {
   modelProvider: "openai_compatible";
@@ -185,7 +186,7 @@ export type AiGenerationRouteIntegratedGenerationParameters = {
   profession: AiGenerationRouteIntegratedProfession;
   level: 1 | 2 | 3 | 4 | 5;
   subject: AiGenerationRouteIntegratedSubject;
-  questionType: string | null;
+  questionType: QuestionType | null;
   questionCount: number;
   difficulty: string | null;
   learningObjective: string | null;

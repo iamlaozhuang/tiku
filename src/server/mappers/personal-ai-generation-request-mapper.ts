@@ -5,6 +5,7 @@ import type {
 } from "../models/ai-generation-task";
 import type { EvidenceStatus } from "../models/ai-rag";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
+import { parseCurrentAiGenerationQuestionType } from "../services/ai-generation-question-type-contract";
 
 export type PersonalAiGenerationRequestPersistenceRow = {
   public_id: string;
@@ -101,6 +102,10 @@ function mapGenerationParameters(
   const sourcePreference = value.sourcePreference;
   const questionTypeDistribution = value.questionTypeDistribution;
   const paperStructure = value.paperStructure;
+  const questionType =
+    value.questionType === null
+      ? null
+      : parseCurrentAiGenerationQuestionType(value.questionType);
 
   if (
     (profession !== "monopoly" &&
@@ -125,7 +130,7 @@ function mapGenerationParameters(
       sourcePreference !== "balanced" &&
       sourcePreference !== "prefer_platform" &&
       sourcePreference !== "prefer_enterprise") ||
-    !isNormalizedOptionalText(value.questionType) ||
+    (value.questionType !== null && questionType === null) ||
     typeof value.questionCount !== "number" ||
     !Number.isInteger(value.questionCount) ||
     value.questionCount < 1 ||
@@ -153,7 +158,7 @@ function mapGenerationParameters(
     includeDescendants: value.includeDescendants,
     knowledgeNodeSupplement: value.knowledgeNodeSupplement,
     sourcePreference,
-    questionType: value.questionType,
+    questionType,
     questionCount: value.questionCount,
     difficulty: value.difficulty,
     learningObjective: value.learningObjective,

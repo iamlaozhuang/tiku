@@ -16,9 +16,9 @@ describe("Phase 5 prompt template definitions", () => {
       kn_recommendation: "kn_recommendation_v1",
       learning_suggestion: "learning_suggestion_v1",
       ai_question_generation: "ai_question_generation_v2",
-      ai_paper_generation: "ai_paper_generation_v1",
+      ai_paper_generation: "ai_paper_generation_v2",
     });
-    expect(promptTemplateDefinitions).toHaveLength(7);
+    expect(promptTemplateDefinitions).toHaveLength(8);
   });
 
   it("keeps templates versioned and bound to explicit required variables", () => {
@@ -70,6 +70,12 @@ describe("Phase 5 prompt template definitions", () => {
         key: "ai_paper_generation_v1",
         aiFuncType: "ai_paper_generation",
         version: 1,
+        isActive: false,
+      },
+      {
+        key: "ai_paper_generation_v2",
+        aiFuncType: "ai_paper_generation",
+        version: 2,
         isActive: true,
       },
     ]);
@@ -79,7 +85,7 @@ describe("Phase 5 prompt template definitions", () => {
       "scoringPoints",
       "ragContext",
     ]);
-    expect(promptTemplateDefinitions.slice(-2)).toEqual([
+    expect(promptTemplateDefinitions.slice(-3)).toEqual([
       expect.objectContaining({
         promptTemplateKey: "ai_question_generation_v2",
         requiredVariables: ["sceneLabel", "outputContract", "draftInstruction"],
@@ -88,15 +94,22 @@ describe("Phase 5 prompt template definitions", () => {
         promptTemplateKey: "ai_paper_generation_v1",
         requiredVariables: ["sceneLabel", "outputContract", "draftInstruction"],
       }),
+      expect.objectContaining({
+        promptTemplateKey: "ai_paper_generation_v2",
+        requiredVariables: ["sceneLabel", "outputContract", "draftInstruction"],
+      }),
     ]);
   });
 
-  it("binds question generation v2 to the strict versioned draft schema while leaving paper v1 unchanged", () => {
+  it("keeps paper v1 immutable for history and activates a seven-type paper v2", () => {
     const question = promptTemplateDefinitions.find(
       (definition) => definition.aiFuncType === "ai_question_generation",
     );
-    const paper = promptTemplateDefinitions.find(
-      (definition) => definition.aiFuncType === "ai_paper_generation",
+    const paperV1 = promptTemplateDefinitions.find(
+      (definition) => definition.promptTemplateKey === "ai_paper_generation_v1",
+    );
+    const paperV2 = promptTemplateDefinitions.find(
+      (definition) => definition.promptTemplateKey === "ai_paper_generation_v2",
     );
 
     expect(question).toMatchObject({
@@ -111,12 +124,25 @@ describe("Phase 5 prompt template definitions", () => {
     expect(question?.templateContent).toContain("fill_blank");
     expect(question?.templateContent).toContain("case_analysis");
     expect(question?.templateContent).toContain("不适用的数组必须为空数组");
-    expect(paper).toMatchObject({
+    expect(paperV1).toMatchObject({
       promptTemplateKey: "ai_paper_generation_v1",
       version: 1,
+      isActive: false,
       templateHash:
         "15c72c7c0267c4720038d797909a4bfe2aae95a3d8662bbf95dfaa3e8a3a8148",
     });
+    expect(paperV2).toMatchObject({
+      promptTemplateKey: "ai_paper_generation_v2",
+      version: 2,
+      isActive: true,
+    });
+    expect(paperV2?.templateContent).toContain("single_choice");
+    expect(paperV2?.templateContent).toContain("multi_choice");
+    expect(paperV2?.templateContent).toContain("true_false");
+    expect(paperV2?.templateContent).toContain("fill_blank");
+    expect(paperV2?.templateContent).toContain("short_answer");
+    expect(paperV2?.templateContent).toContain("case_analysis");
+    expect(paperV2?.templateContent).toContain("calculation");
   });
 
   it("binds executable generation templates to SHA-256 content digests", () => {
@@ -126,7 +152,7 @@ describe("Phase 5 prompt template definitions", () => {
         definition.aiFuncType === "ai_paper_generation",
     );
 
-    expect(generationDefinitions).toHaveLength(2);
+    expect(generationDefinitions).toHaveLength(3);
 
     for (const definition of generationDefinitions) {
       expect(definition.templateHash).toMatch(/^[a-f0-9]{64}$/u);

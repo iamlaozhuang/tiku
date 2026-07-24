@@ -62,7 +62,6 @@ import type {
 } from "../contracts/organization-training-contract";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import { OrganizationTrainingPersistenceConflictError } from "../contracts/organization-training-persistence-contract";
-import { organizationTrainingQuestionTypeValues } from "../models/organization-training";
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
   OrganizationTrainingEmployeeAnswerSubmissionWrite,
@@ -74,6 +73,7 @@ import type {
   OrganizationTrainingVersionCopyToNewDraftWrite,
   OrganizationTrainingVersionTakedownWrite,
 } from "../services/organization-training-service";
+import { parseCurrentAiGenerationQuestionType } from "../services/ai-generation-question-type-contract";
 import {
   resolveGenerationParametersSnapshot,
   resolveOrganizationTrainingPaperDraftSnapshot,
@@ -1583,6 +1583,19 @@ function createOrganizationAiCopyQuestions(row: {
     materialContent: question.materialContent,
     stem: question.stem,
     options: question.options,
+    ...(question.scoringPoints === undefined
+      ? {}
+      : {
+          scoringPoints: question.scoringPoints.map((point) => ({ ...point })),
+        }),
+    ...(question.fillBlankAnswers === undefined
+      ? {}
+      : {
+          fillBlankAnswers: question.fillBlankAnswers.map((answer) => ({
+            ...answer,
+            standardAnswers: [...answer.standardAnswers],
+          })),
+        }),
     score: question.score,
     standardAnswer: question.answerAndAnalysis.standardAnswer ?? "",
     analysisSummary: question.answerAndAnalysis.analysis ?? "",
@@ -1599,10 +1612,27 @@ function createOrganizationAiCopyQuestionTypeSummary(
       if (question.questionType === "single_choice") summary.singleChoice += 1;
       if (question.questionType === "multi_choice") summary.multiChoice += 1;
       if (question.questionType === "true_false") summary.trueFalse += 1;
+      if (question.questionType === "fill_blank") {
+        summary.fillBlank = (summary.fillBlank ?? 0) + 1;
+      }
       if (question.questionType === "short_answer") summary.shortAnswer += 1;
+      if (question.questionType === "case_analysis") {
+        summary.caseAnalysis = (summary.caseAnalysis ?? 0) + 1;
+      }
+      if (question.questionType === "calculation") {
+        summary.calculation = (summary.calculation ?? 0) + 1;
+      }
       return summary;
     },
-    { singleChoice: 0, multiChoice: 0, trueFalse: 0, shortAnswer: 0 },
+    {
+      singleChoice: 0,
+      multiChoice: 0,
+      trueFalse: 0,
+      fillBlank: 0,
+      shortAnswer: 0,
+      caseAnalysis: 0,
+      calculation: 0,
+    },
   );
 }
 
@@ -2939,11 +2969,15 @@ function mapPaperQuestionSnapshotRowsToDto(
   rows: readonly OrganizationTrainingPaperQuestionSnapshotRow[],
   maxQuestionCount: number,
 ): OrganizationTrainingQuestionSnapshotDto[] {
-  if (!Number.isInteger(maxQuestionCount) || maxQuestionCount < 1) {
+  if (
+    !Number.isInteger(maxQuestionCount) ||
+    maxQuestionCount < 1 ||
+    rows.length !== maxQuestionCount
+  ) {
     return [];
   }
 
-  return [...rows]
+  const questions = [...rows]
     .sort((left, right) => {
       if (left.sortOrder !== right.sortOrder) {
         return left.sortOrder - right.sortOrder;
@@ -2953,12 +2987,11 @@ function mapPaperQuestionSnapshotRowsToDto(
         right.paperQuestionPublicId,
       );
     })
-    .map((row, index) => mapPaperQuestionSnapshotRowToDto(row, index + 1))
-    .filter(
-      (question): question is OrganizationTrainingQuestionSnapshotDto =>
-        question !== null,
-    )
-    .slice(0, maxQuestionCount);
+    .map((row, index) => mapPaperQuestionSnapshotRowToDto(row, index + 1));
+
+  return questions.some((question) => question === null)
+    ? []
+    : (questions as OrganizationTrainingQuestionSnapshotDto[]);
 }
 
 function mapPaperQuestionSnapshotRowToDto(
@@ -3146,11 +3179,15 @@ function mapPaperQuestionSnapshotRowsToAdminDetail(
   rows: readonly OrganizationTrainingPaperQuestionSnapshotRow[],
   maxQuestionCount: number,
 ): OrganizationTrainingAdminQuestionDetailDto[] {
-  if (!Number.isInteger(maxQuestionCount) || maxQuestionCount < 1) {
+  if (
+    !Number.isInteger(maxQuestionCount) ||
+    maxQuestionCount < 1 ||
+    rows.length !== maxQuestionCount
+  ) {
     return [];
   }
 
-  return [...rows]
+  const questions = [...rows]
     .sort((left, right) => {
       if (left.sortOrder !== right.sortOrder) {
         return left.sortOrder - right.sortOrder;
@@ -3162,12 +3199,11 @@ function mapPaperQuestionSnapshotRowsToAdminDetail(
     })
     .map((row, index) =>
       mapPaperQuestionSnapshotRowToAdminDetail(row, index + 1),
-    )
-    .filter(
-      (question): question is OrganizationTrainingAdminQuestionDetailDto =>
-        question !== null,
-    )
-    .slice(0, maxQuestionCount);
+    );
+
+  return questions.some((question) => question === null)
+    ? []
+    : (questions as OrganizationTrainingAdminQuestionDetailDto[]);
 }
 
 function mapQuestionOptionSnapshots(
@@ -3227,12 +3263,7 @@ function getFirstStringField(
 function getOrganizationTrainingQuestionType(
   value: unknown,
 ): OrganizationTrainingQuestionSnapshotDto["questionType"] | null {
-  return typeof value === "string" &&
-    (organizationTrainingQuestionTypeValues as readonly string[]).includes(
-      value,
-    )
-    ? (value as OrganizationTrainingQuestionSnapshotDto["questionType"])
-    : null;
+  return parseCurrentAiGenerationQuestionType(value);
 }
 
 function getNonNegativeNumber(value: unknown): number {
@@ -3330,14 +3361,12 @@ function mapQuestionSnapshotRecordToAdminDetail(
 function mapQuestionSnapshotsToAdminDetail(
   snapshots: readonly unknown[],
 ): OrganizationTrainingAdminQuestionDetailDto[] {
-  return snapshots
-    .map((snapshot, index) =>
-      mapQuestionSnapshotRecordToAdminDetail(asRecord(snapshot), index + 1),
-    )
-    .filter(
-      (question): question is OrganizationTrainingAdminQuestionDetailDto =>
-        question !== null,
-    );
+  const questions = snapshots.map((snapshot, index) =>
+    mapQuestionSnapshotRecordToAdminDetail(asRecord(snapshot), index + 1),
+  );
+  return questions.some((question) => question === null)
+    ? []
+    : (questions as OrganizationTrainingAdminQuestionDetailDto[]);
 }
 
 function mapQuestionSnapshotsToAdminPaperSections(
@@ -3530,7 +3559,16 @@ function copyQuestionTypeSummary(
     singleChoice: summary.singleChoice,
     multiChoice: summary.multiChoice,
     trueFalse: summary.trueFalse,
+    ...(summary.fillBlank === undefined
+      ? {}
+      : { fillBlank: summary.fillBlank }),
     shortAnswer: summary.shortAnswer,
+    ...(summary.caseAnalysis === undefined
+      ? {}
+      : { caseAnalysis: summary.caseAnalysis }),
+    ...(summary.calculation === undefined
+      ? {}
+      : { calculation: summary.calculation }),
   };
 }
 
@@ -3925,7 +3963,16 @@ function createVersionInsertInput(
       singleChoice: input.questionTypeSummary.singleChoice,
       multiChoice: input.questionTypeSummary.multiChoice,
       trueFalse: input.questionTypeSummary.trueFalse,
+      ...(input.questionTypeSummary.fillBlank === undefined
+        ? {}
+        : { fillBlank: input.questionTypeSummary.fillBlank }),
       shortAnswer: input.questionTypeSummary.shortAnswer,
+      ...(input.questionTypeSummary.caseAnalysis === undefined
+        ? {}
+        : { caseAnalysis: input.questionTypeSummary.caseAnalysis }),
+      ...(input.questionTypeSummary.calculation === undefined
+        ? {}
+        : { calculation: input.questionTypeSummary.calculation }),
     },
     questionSnapshot: input.questionSnapshot.map((question) => ({
       ...question,

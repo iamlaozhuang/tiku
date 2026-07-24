@@ -54,7 +54,9 @@ import {
 } from "../models/organization-training";
 import { subjectValues, type Subject } from "../models/paper";
 import { selectAuthorizationObjectScope } from "./authorization-object-scope";
+import { isAiGenerationReviewRequiredQuestionType } from "./ai-generation-question-type-contract";
 import {
+  hasExactOrganizationTrainingQuestionScoreAllocation,
   invalidOrganizationTrainingAuditLogReferenceInputMessage,
   normalizeOrganizationTrainingAuditLogReferenceInput,
 } from "../validators/organization-training";
@@ -1152,8 +1154,20 @@ function buildQuestionTypeSummaryFromAdminDetailQuestions(
       return { ...summary, trueFalse: summary.trueFalse + 1 };
     }
 
+    if (question.questionType === "fill_blank") {
+      return { ...summary, fillBlank: (summary.fillBlank ?? 0) + 1 };
+    }
+
     if (question.questionType === "short_answer") {
       return { ...summary, shortAnswer: summary.shortAnswer + 1 };
+    }
+
+    if (question.questionType === "case_analysis") {
+      return { ...summary, caseAnalysis: (summary.caseAnalysis ?? 0) + 1 };
+    }
+
+    if (question.questionType === "calculation") {
+      return { ...summary, calculation: (summary.calculation ?? 0) + 1 };
     }
 
     return summary;
@@ -1180,6 +1194,19 @@ function copyAdminDetailQuestions(
     materialContent: question.materialContent,
     stem: question.stem,
     options: question.options.map((option) => ({ ...option })),
+    ...(question.scoringPoints === undefined
+      ? {}
+      : {
+          scoringPoints: question.scoringPoints.map((point) => ({ ...point })),
+        }),
+    ...(question.fillBlankAnswers === undefined
+      ? {}
+      : {
+          fillBlankAnswers: question.fillBlankAnswers.map((answer) => ({
+            ...answer,
+            standardAnswers: [...answer.standardAnswers],
+          })),
+        }),
     score: question.score,
     evidenceSummary: {
       evidenceStatus: question.evidenceSummary.evidenceStatus,
@@ -1349,7 +1376,10 @@ function createEmptyQuestionTypeSummary(): OrganizationTrainingQuestionTypeSumma
     singleChoice: 0,
     multiChoice: 0,
     trueFalse: 0,
+    fillBlank: 0,
     shortAnswer: 0,
+    caseAnalysis: 0,
+    calculation: 0,
   };
 }
 
@@ -1420,6 +1450,23 @@ function createDraftQuestionIntegrityPayload(
       label: option.label,
       content: option.content,
     })),
+    ...(question.scoringPoints === undefined
+      ? {}
+      : {
+          scoringPoints: question.scoringPoints.map((scoringPoint) => ({
+            ...scoringPoint,
+          })),
+        }),
+    ...(question.fillBlankAnswers === undefined
+      ? {}
+      : {
+          fillBlankAnswers: question.fillBlankAnswers.map(
+            (fillBlankAnswer) => ({
+              ...fillBlankAnswer,
+              standardAnswers: [...fillBlankAnswer.standardAnswers],
+            }),
+          ),
+        }),
     score: question.score,
     standardAnswer: question.standardAnswer,
     analysisSummary: question.analysisSummary,
@@ -1544,16 +1591,28 @@ export function evaluateOrganizationTrainingAnswer(input: {
       question.options.map((option) => option.publicId),
     );
     const textAnswer = normalizeOptionalText(answerItem.textAnswer);
-    const isChoiceQuestion = question.questionType !== "short_answer";
+    const isReviewRequiredQuestion = isAiGenerationReviewRequiredQuestionType(
+      question.questionType,
+    );
+    const isChoiceQuestion =
+      question.questionType === "single_choice" ||
+      question.questionType === "multi_choice" ||
+      (question.questionType === "true_false" && question.options.length > 0);
+    const isTrueFalseTextQuestion =
+      question.questionType === "true_false" && question.options.length === 0;
 
     if (
       selectedOptionPublicIds.some(
         (optionPublicId) => !allowedOptionPublicIds.has(optionPublicId),
       ) ||
       (isChoiceQuestion && textAnswer !== null) ||
-      (!isChoiceQuestion && selectedOptionPublicIds.length > 0) ||
-      ((question.questionType === "single_choice" ||
-        question.questionType === "true_false") &&
+      ((isReviewRequiredQuestion || isTrueFalseTextQuestion) &&
+        selectedOptionPublicIds.length > 0) ||
+      (isTrueFalseTextQuestion &&
+        textAnswer !== null &&
+        textAnswer !== "true" &&
+        textAnswer !== "false") ||
+      (question.questionType === "single_choice" &&
         selectedOptionPublicIds.length > 1)
     ) {
       return null;
@@ -1571,7 +1630,8 @@ export function evaluateOrganizationTrainingAnswer(input: {
   ].filter(([questionPublicId, answerItem]) => {
     const question = questionByPublicId.get(questionPublicId)!;
 
-    return question.questionType === "short_answer"
+    return isAiGenerationReviewRequiredQuestionType(question.questionType) ||
+      (question.questionType === "true_false" && question.options.length === 0)
       ? answerItem.textAnswer !== null
       : answerItem.selectedOptionPublicIds.length > 0;
   }).length;
@@ -1597,7 +1657,16 @@ export function evaluateOrganizationTrainingAnswer(input: {
 
     let score = 0;
 
-    if (question.questionType !== "short_answer") {
+    if (
+      question.questionType === "true_false" &&
+      question.options.length === 0
+    ) {
+      score =
+        answerItem.textAnswer === question.standardAnswer ? question.score : 0;
+      objectiveScore += score;
+    } else if (
+      !isAiGenerationReviewRequiredQuestionType(question.questionType)
+    ) {
       const standardAnswerOptionPublicIds =
         normalizeStandardAnswerTokens(question);
 
@@ -1630,8 +1699,8 @@ export function evaluateOrganizationTrainingAnswer(input: {
   );
   const requiresAiScoring =
     input.requireComplete &&
-    input.questions.some(
-      (question) => question.questionType === "short_answer",
+    input.questions.some((question) =>
+      isAiGenerationReviewRequiredQuestionType(question.questionType),
     );
 
   return {
@@ -1660,7 +1729,16 @@ function copyQuestionTypeSummary(
     singleChoice: questionTypeSummary.singleChoice,
     multiChoice: questionTypeSummary.multiChoice,
     trueFalse: questionTypeSummary.trueFalse,
+    ...(questionTypeSummary.fillBlank === undefined
+      ? {}
+      : { fillBlank: questionTypeSummary.fillBlank }),
     shortAnswer: questionTypeSummary.shortAnswer,
+    ...(questionTypeSummary.caseAnalysis === undefined
+      ? {}
+      : { caseAnalysis: questionTypeSummary.caseAnalysis }),
+    ...(questionTypeSummary.calculation === undefined
+      ? {}
+      : { calculation: questionTypeSummary.calculation }),
   };
 }
 
@@ -2239,8 +2317,23 @@ function areCanonicalDraftQuestionsValid(
     return false;
   }
 
-  return questions.every(
-    (question, index) =>
+  return questions.every((question, index) => {
+    const isChoiceQuestion =
+      question.questionType === "single_choice" ||
+      question.questionType === "multi_choice";
+    const scoringPoints = question.scoringPoints;
+    const fillBlankAnswers = question.fillBlankAnswers;
+    const hasValidTypeFacts =
+      Array.isArray(scoringPoints) &&
+      Array.isArray(fillBlankAnswers) &&
+      hasExactOrganizationTrainingQuestionScoreAllocation({
+        questionType: question.questionType,
+        questionScore: question.score,
+        scoringPoints,
+        fillBlankAnswers,
+      });
+
+    return (
       normalizeRequiredText(question.publicId) !== null &&
       question.sequenceNumber === index + 1 &&
       isOrganizationTrainingQuestionType(question.questionType) &&
@@ -2251,16 +2344,22 @@ function areCanonicalDraftQuestionsValid(
           normalizeRequiredText(option.label) !== null &&
           normalizeRequiredText(option.content) !== null,
       ) &&
-      (question.questionType === "short_answer" ||
-        question.options.length > 0) &&
+      (isChoiceQuestion
+        ? question.options.length >= 2
+        : question.options.length === 0) &&
+      (question.questionType !== "true_false" ||
+        question.standardAnswer === "true" ||
+        question.standardAnswer === "false") &&
+      hasValidTypeFacts &&
       isPositiveInteger(question.score) &&
       normalizeRequiredText(question.standardAnswer) !== null &&
       normalizeRequiredText(question.analysisSummary) !== null &&
       (question.evidenceStatus === "sufficient" ||
         question.evidenceStatus === "weak" ||
         question.evidenceStatus === "none") &&
-      isNonNegativeInteger(question.citationCount),
-  );
+      isNonNegativeInteger(question.citationCount)
+    );
+  });
 }
 
 function hasNoEvidenceQuestion(
@@ -2314,6 +2413,19 @@ function copyPublishQuestionSnapshot(
       label: option.label,
       content: option.content,
     })),
+    ...(question.scoringPoints === undefined
+      ? {}
+      : {
+          scoringPoints: question.scoringPoints.map((point) => ({ ...point })),
+        }),
+    ...(question.fillBlankAnswers === undefined
+      ? {}
+      : {
+          fillBlankAnswers: question.fillBlankAnswers.map((answer) => ({
+            ...answer,
+            standardAnswers: [...answer.standardAnswers],
+          })),
+        }),
     score: question.score,
     standardAnswer: question.standardAnswer,
     analysisSummary: question.analysisSummary,
@@ -2332,8 +2444,14 @@ function buildQuestionTypeSummary(
       summary.multiChoice += 1;
     } else if (question.questionType === "true_false") {
       summary.trueFalse += 1;
-    } else {
+    } else if (question.questionType === "fill_blank") {
+      summary.fillBlank = (summary.fillBlank ?? 0) + 1;
+    } else if (question.questionType === "short_answer") {
       summary.shortAnswer += 1;
+    } else if (question.questionType === "case_analysis") {
+      summary.caseAnalysis = (summary.caseAnalysis ?? 0) + 1;
+    } else {
+      summary.calculation = (summary.calculation ?? 0) + 1;
     }
 
     return summary;
@@ -2344,14 +2462,31 @@ function isQuestionTypeSummaryValid(
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary,
   questionCount: number,
 ): boolean {
-  const summaryValues = [
+  const legacySummaryValues = [
     questionTypeSummary.singleChoice,
     questionTypeSummary.multiChoice,
     questionTypeSummary.trueFalse,
     questionTypeSummary.shortAnswer,
   ];
+  const currentSummaryValues = [
+    questionTypeSummary.fillBlank,
+    questionTypeSummary.caseAnalysis,
+    questionTypeSummary.calculation,
+  ];
+  const hasLegacyShape = currentSummaryValues.every(
+    (value) => value === undefined,
+  );
+  const hasCurrentShape = currentSummaryValues.every(
+    (value) => value !== undefined && isNonNegativeInteger(value),
+  );
+  const summaryValues = hasLegacyShape
+    ? legacySummaryValues
+    : hasCurrentShape
+      ? [...legacySummaryValues, ...(currentSummaryValues as number[])]
+      : [];
 
   return (
+    summaryValues.length > 0 &&
     summaryValues.every(isNonNegativeInteger) &&
     summaryValues.reduce((summaryTotal, value) => summaryTotal + value, 0) ===
       questionCount
@@ -3415,15 +3550,19 @@ export function createOrganizationTrainingService(
                   ),
                 })),
                 shortAnswerQuestionPublicIds: command.canonicalQuestions
-                  .filter(
-                    (question) => question.questionType === "short_answer",
+                  .filter((question) =>
+                    isAiGenerationReviewRequiredQuestionType(
+                      question.questionType,
+                    ),
                   )
                   .map((question) => question.publicId),
                 shortAnswerItems: evaluation.answerItems.filter((answerItem) =>
                   command.canonicalQuestions.some(
                     (question) =>
                       question.publicId === answerItem.questionPublicId &&
-                      question.questionType === "short_answer",
+                      isAiGenerationReviewRequiredQuestionType(
+                        question.questionType,
+                      ),
                   ),
                 ),
               },
