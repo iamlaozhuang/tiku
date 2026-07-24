@@ -509,6 +509,67 @@ describe("StudentOrganizationTrainingPage", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it.each(["scoring", "scoring_failed", "read_only"] as const)(
+    "opens a taken-down %s attempt only through the read-only result action",
+    async (answerStatus) => {
+      const takenDownVersion = {
+        ...submittedVisibleVersion,
+        publicId: `organization-training-version-ui-taken-down-${answerStatus}`,
+        status: "taken_down",
+        employeeAnswerStatus: answerStatus,
+        takenDownAt: "2026-06-18T08:20:00.000Z",
+        takedownReason: "训练已下架",
+      } satisfies OrganizationTrainingPublishedVersionDto;
+      const readonlyAnswer = {
+        ...draftAnswer,
+        trainingVersionPublicId: takenDownVersion.publicId,
+        answerStatus,
+        scoreSummary: { score: 4, totalScore: 5 },
+        submittedAt: "2026-06-18T08:10:00.000Z",
+        resultSummaryVisible: true,
+        answerItems: [],
+        questionResults: [],
+      } satisfies EmployeeOrganizationTrainingAnswerDto;
+      const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+        if (String(url).endsWith("/visible-list")) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { versions: [takenDownVersion] },
+          });
+        }
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: { answer: readonlyAnswer },
+        });
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(createElement(StudentOrganizationTrainingPage));
+
+      const row = await screen.findByTestId(
+        `organization-training-row-${takenDownVersion.publicId}`,
+      );
+      expect(within(row).getByText("已下架")).toBeInTheDocument();
+      expect(
+        within(row).queryByRole("button", { name: "开始训练" }),
+      ).not.toBeInTheDocument();
+      expect(
+        within(row).queryByRole("button", { name: "继续训练" }),
+      ).not.toBeInTheDocument();
+      fireEvent.click(within(row).getByRole("button", { name: "查看结果" }));
+
+      expect(
+        await screen.findByTestId(
+          `organization-training-workspace-${takenDownVersion.publicId}`,
+        ),
+      ).toBeInTheDocument();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    },
+  );
+
   it("restores an in-progress answer after refresh before continuing edits", async () => {
     const restoredDraftAnswer = {
       ...draftAnswer,

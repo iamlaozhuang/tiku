@@ -1175,6 +1175,8 @@ function createRepositoryBackedEmployeeVisibleVersionsReader(
     const input = {
       employeePublicId: employeeContext.employeePublicId,
       organizationPublicId: employeeContext.currentOrganizationPublicId,
+      authorizationPublicId:
+        employeeContext.authorizationContext.authorizationPublicId,
       visibleOrganizationPublicIds:
         employeeContext.visibleOrganizationPublicIds,
     };

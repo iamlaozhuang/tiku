@@ -2844,7 +2844,7 @@ describe("organization training service", () => {
     });
   });
 
-  it("lists only published training versions visible to the employee organization context", async () => {
+  it("lists answerable published training and taken-down own read-only history only", async () => {
     const { service } = createServiceFixture();
 
     const result = await service.listEmployeeVisibleVersions({
@@ -2871,22 +2871,76 @@ describe("organization training service", () => {
           status: "taken_down",
           takenDownAt: fixedNow.toISOString(),
           takedownReason: "outdated training",
+          employeeAnswerStatus: "read_only",
+          submittedScoreSummary: { score: 4, totalScore: 5 },
+        }),
+        createPublishedVersion({
+          publicId: "training_version_taken_down_without_answer_public_999",
+          status: "taken_down",
+          takenDownAt: fixedNow.toISOString(),
+          takedownReason: "outdated training",
         }),
       ],
     });
 
     expect(result).toEqual({
       success: true,
-      versions: [createPublicPublishedVersion()],
+      versions: [
+        createPublicPublishedVersion(),
+        createPublicPublishedVersion({
+          publicId: "training_version_taken_down_public_789",
+          status: "taken_down",
+          takenDownAt: fixedNow.toISOString(),
+          takedownReason: "outdated training",
+          employeeAnswerStatus: "read_only",
+          submittedScoreSummary: { score: 4, totalScore: 5 },
+        }),
+      ],
     });
   });
 
-  it("intersects every training version with the employee's exact authorization public id, profession and level", async () => {
+  it.each(["submitted", "scoring", "scoring_failed", "read_only"] as const)(
+    "keeps a taken-down own %s attempt visible as history",
+    async (employeeAnswerStatus) => {
+      const { service } = createServiceFixture();
+      const version = createPublishedVersion({
+        status: "taken_down",
+        takenDownAt: fixedNow.toISOString(),
+        takedownReason: "outdated training",
+        employeeAnswerStatus,
+      });
+
+      await expect(
+        service.listEmployeeVisibleVersions({
+          employeeContext: {
+            employeePublicId: "employee_public_123",
+            currentOrganizationPublicId: "organization_branch_public_456",
+            visibleOrganizationPublicIds: [
+              "organization_branch_public_456",
+              "organization_public_123",
+            ],
+            authorizationContext: createAdvancedOrgAuthContext(),
+          },
+          sourceVersions: [version],
+        }),
+      ).resolves.toEqual({
+        success: true,
+        versions: [
+          createPublicPublishedVersion({
+            status: "taken_down",
+            takenDownAt: fixedNow.toISOString(),
+            takedownReason: "outdated training",
+            employeeAnswerStatus,
+          }),
+        ],
+      });
+    },
+  );
+
+  it("partitions visible history by the exact selected authorization even when another matching authorization exists", async () => {
     const { service } = createServiceFixture();
-    const matchingAuthorizationContext = createAdvancedOrgAuthContext({
-      authorizationPublicId: "org_auth_matching_public_456",
-      profession: "logistics",
-      level: 4,
+    const otherAuthorizationContext = createAdvancedOrgAuthContext({
+      authorizationPublicId: "org_auth_other_public_456",
     });
     const result = await service.listEmployeeVisibleVersions({
       employeeContext: {
@@ -2899,25 +2953,24 @@ describe("organization training service", () => {
         authorizationContext: createAdvancedOrgAuthContext(),
         authorizationContexts: [
           createAdvancedOrgAuthContext(),
-          matchingAuthorizationContext,
+          otherAuthorizationContext,
         ],
       },
       sourceVersions: [
         createPublishedVersion({
-          publicId: "training_version_matching_scope_public_456",
-          authorizationPublicId: "org_auth_matching_public_456",
-          profession: "logistics",
-          level: 4,
+          publicId: "training_version_selected_auth_public_123",
         }),
         createPublishedVersion({
-          publicId: "training_version_wrong_profession_public_789",
-          authorizationPublicId: "org_auth_matching_public_456",
-          profession: "marketing",
-          level: 4,
+          publicId: "training_version_other_auth_public_456",
+          authorizationPublicId: "org_auth_other_public_456",
         }),
         createPublishedVersion({
-          publicId: "training_version_wrong_auth_public_999",
-          authorizationPublicId: "org_auth_unassigned_public_999",
+          publicId: "training_version_other_auth_taken_down_public_789",
+          authorizationPublicId: "org_auth_other_public_456",
+          status: "taken_down",
+          takenDownAt: fixedNow.toISOString(),
+          takedownReason: "outdated training",
+          employeeAnswerStatus: "read_only",
         }),
       ],
     });
@@ -2926,9 +2979,7 @@ describe("organization training service", () => {
       success: true,
       versions: [
         createPublicPublishedVersion({
-          publicId: "training_version_matching_scope_public_456",
-          profession: "logistics",
-          level: 4,
+          publicId: "training_version_selected_auth_public_123",
         }),
       ],
     });

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
+import { drizzle } from "drizzle-orm/postgres-js";
+import * as databaseSchema from "@/db/schema";
+import { organizationTrainingVersion } from "@/db/schema";
 
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
@@ -21,6 +24,10 @@ import {
   createOrganizationTrainingRecipientSnapshotFromCandidates,
   createOrganizationTrainingRepository,
   createOrganizationTrainingAdminLifecyclePageSql,
+  createOrganizationTrainingTakedownAnswerLockQuery,
+  createOrganizationTrainingTakedownAnswerTransitionQuery,
+  createOrganizationTrainingTakedownEmployeeIdentityLockQuery,
+  createOrganizationTrainingTakedownOrganizationIdentityLockQuery,
   createOrganizationTrainingVisibleOrganizationPublicIdArraySql,
   createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingEmployeeAnswerLookupInput,
@@ -423,9 +430,12 @@ type PaperQuestionSnapshotRow = {
   sortOrder: number;
 };
 
-function createRevokedMembershipPersistenceDatabase() {
+function createRevokedMembershipPersistenceDatabase(
+  lockedVersionOverrides: Partial<OrganizationTrainingVersionRow> = {},
+) {
   const events: string[] = [];
   const mutations: string[] = [];
+  let transactionSelectCount = 0;
   const createSelectBuilder = (rows: unknown[]) => {
     const builder = {
       from() {
@@ -438,6 +448,9 @@ function createRevokedMembershipPersistenceDatabase() {
         return builder;
       },
       limit() {
+        return builder;
+      },
+      for() {
         return builder;
       },
       then<TResult1 = unknown[], TResult2 = never>(
@@ -467,6 +480,20 @@ function createRevokedMembershipPersistenceDatabase() {
       throw new Error("membership conflict must not insert");
     },
     select() {
+      transactionSelectCount += 1;
+      if (transactionSelectCount === 1) {
+        events.push("version_lock");
+        return createSelectBuilder([
+          createVersionRow({
+            id: 801,
+            public_id: "training_version_public_123",
+            organization_id: 501,
+            organization_public_id: "organization_public_123",
+            ...lockedVersionOverrides,
+          }),
+        ]);
+      }
+
       events.push("membership_recheck");
       return createSelectBuilder([]);
     },
@@ -738,6 +765,180 @@ function createVersionWrite(
     takenDownAt: null,
     takedownReason: null,
     ...overrides,
+  };
+}
+
+type TakedownLockedAnswerRow = {
+  id: number;
+  public_id: string;
+  organization_training_version_id: number;
+  organization_training_version_public_id: string;
+  employee_id: number;
+  employee_public_id: string;
+  organization_id: number;
+  organization_public_id: string;
+  organization_training_answer_status:
+    | "in_progress"
+    | "scoring"
+    | "submitted"
+    | "scoring_failed"
+    | "read_only";
+  revision: number;
+};
+
+function createTakedownLockedAnswerRow(
+  index: number,
+  overrides: Partial<TakedownLockedAnswerRow> = {},
+): TakedownLockedAnswerRow {
+  return {
+    id: 1_000 + index,
+    public_id: `training_answer_public_${index}`,
+    organization_training_version_id: 901,
+    organization_training_version_public_id: "training_version_public_123",
+    employee_id: 2_000 + index,
+    employee_public_id: `employee_public_${index}`,
+    organization_id: 501,
+    organization_public_id: "organization_public_123",
+    organization_training_answer_status: "in_progress",
+    revision: 1,
+    ...overrides,
+  };
+}
+
+function createTakedownPersistenceDatabase(
+  options: {
+    versionRows?: OrganizationTrainingVersionRow[];
+    answerRows?: TakedownLockedAnswerRow[];
+    employeeIdentityRows?: Array<{ id: number; public_id: string }>;
+    organizationIdentityRows?: Array<{ id: number; public_id: string }>;
+    updatedVersionRows?: OrganizationTrainingVersionRow[];
+    transitionedAnswerRows?: TakedownLockedAnswerRow[];
+  } = {},
+) {
+  const takenDownAt = new Date("2026-06-16T08:00:00.000Z");
+  const versionRows = options.versionRows ?? [createVersionRow()];
+  const answerRows = options.answerRows ?? [];
+  const employeeIdentityRows =
+    options.employeeIdentityRows ??
+    answerRows.map((answer) => ({
+      id: answer.employee_id,
+      public_id: answer.employee_public_id,
+    }));
+  const organizationIdentityRows = options.organizationIdentityRows ?? [
+    ...new Map(
+      answerRows.map((answer) => [
+        answer.organization_id,
+        {
+          id: answer.organization_id,
+          public_id: answer.organization_public_id,
+        },
+      ]),
+    ).values(),
+  ];
+  const updatedVersionRows =
+    options.updatedVersionRows ??
+    versionRows.slice(0, 1).map((version) =>
+      createVersionRow({
+        ...version,
+        version_status: "taken_down",
+        taken_down_at: takenDownAt,
+        takedown_reason: "manual owner takedown",
+        updated_at: takenDownAt,
+      }),
+    );
+  const transitionedAnswerRows =
+    options.transitionedAnswerRows ??
+    answerRows
+      .filter(
+        (answer) =>
+          answer.organization_training_answer_status === "in_progress",
+      )
+      .map((answer) => ({
+        ...answer,
+        organization_training_answer_status: "read_only" as const,
+        revision: answer.revision + 1,
+      }));
+  const events: string[] = [];
+  const committedMutations: string[] = [];
+
+  const database = {
+    async transaction<T>(callback: (transaction: unknown) => Promise<T>) {
+      const pendingMutations: string[] = [];
+      let selectCount = 0;
+      const transaction = {
+        select() {
+          selectCount += 1;
+          const rows =
+            selectCount === 1
+              ? versionRows
+              : selectCount === 2
+                ? answerRows
+                : selectCount === 3
+                  ? employeeIdentityRows
+                  : organizationIdentityRows;
+          const label =
+            selectCount === 1
+              ? "version_lock"
+              : selectCount === 2
+                ? "answer_lock"
+                : selectCount === 3
+                  ? "employee_identity_lock"
+                  : "organization_identity_lock";
+          const builder = {
+            from() {
+              return builder;
+            },
+            where() {
+              return builder;
+            },
+            orderBy() {
+              return builder;
+            },
+            limit() {
+              return builder;
+            },
+            for() {
+              events.push(label);
+              return Promise.resolve(rows);
+            },
+          };
+          return builder;
+        },
+        update(table: unknown) {
+          const isVersionUpdate = table === organizationTrainingVersion;
+          const label = isVersionUpdate ? "version_update" : "answer_update";
+          const rows = isVersionUpdate
+            ? updatedVersionRows
+            : transitionedAnswerRows;
+          const builder = {
+            set() {
+              return builder;
+            },
+            where() {
+              return builder;
+            },
+            returning() {
+              events.push(label);
+              if (rows.length > 0) {
+                pendingMutations.push(label);
+              }
+              return Promise.resolve(rows);
+            },
+          };
+          return builder;
+        },
+      };
+
+      const result = await callback(transaction);
+      committedMutations.push(...pendingMutations);
+      return result;
+    },
+  };
+
+  return {
+    database,
+    events,
+    committedMutations,
   };
 }
 
@@ -1214,6 +1415,28 @@ function createGateway(
       };
     },
   );
+  const takeDownVersionTransaction = vi.fn(
+    async (
+      input: OrganizationTrainingVersionTakedownInput,
+    ): Promise<OrganizationTrainingVersionRow | null> => {
+      takedownInputs = [...takedownInputs, input];
+
+      if (options.takedownUpdateResult === "null") {
+        return null;
+      }
+
+      return createVersionRow({
+        public_id: input.versionPublicId,
+        organization_public_id: input.organizationPublicId,
+        owner_public_id: input.organizationPublicId,
+        quota_owner_public_id: input.organizationPublicId,
+        version_status: input.status,
+        taken_down_at: new Date(input.takenDownAt),
+        takedown_reason: input.takedownReason,
+        updated_at: new Date(input.takenDownAt),
+      });
+    },
+  );
   const insertSourceContexts = vi.fn(
     async (inputs: SourceContextInsertInput[]) => {
       sourceContextInsertInputs = [...sourceContextInsertInputs, inputs];
@@ -1322,6 +1545,7 @@ function createGateway(
     upsertEmployeeAnswerSubmission,
     submitEmployeeAnswerTransaction: upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
+    takeDownVersionTransaction,
   } as unknown as OrganizationTrainingVersionGateway;
 
   return {
@@ -1343,6 +1567,7 @@ function createGateway(
     upsertEmployeeAnswerDraft,
     upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
+    takeDownVersionTransaction,
     getInsertInputs: () => insertInputs,
     getManualDraftInsertInputs: () => manualDraftInsertInputs,
     getSourceContextInsertInputs: () => sourceContextInsertInputs,
@@ -1479,6 +1704,46 @@ function createPaperQuestionSnapshotRow(
 }
 
 describe("organization training repository", () => {
+  it("materializes PostgreSQL-safe takedown locks and target-table-only RETURNING", () => {
+    const database = drizzle.mock({ schema: databaseSchema });
+    const answerLockSql = createOrganizationTrainingTakedownAnswerLockQuery(
+      database,
+      901,
+    ).toSQL().sql;
+    const employeeIdentityLockSql =
+      createOrganizationTrainingTakedownEmployeeIdentityLockQuery(
+        database,
+        [2_001],
+      ).toSQL().sql;
+    const organizationIdentityLockSql =
+      createOrganizationTrainingTakedownOrganizationIdentityLockQuery(
+        database,
+        [501],
+      ).toSQL().sql;
+    const answerTransitionSql =
+      createOrganizationTrainingTakedownAnswerTransitionQuery(database, {
+        versionId: 901,
+        answerIds: [1_001],
+        takenDownAt: new Date("2026-06-16T08:00:00.000Z"),
+      }).toSQL().sql;
+    const returningSql = answerTransitionSql.split(" returning ")[1];
+
+    expect(answerLockSql).toContain(
+      'from "organization_training_answer" where "organization_training_answer"."organization_training_version_id" = $1 for update',
+    );
+    expect(answerLockSql).not.toContain(" join ");
+    expect(employeeIdentityLockSql).toContain(
+      'from "employee" where "employee"."id" in ($1) order by "employee"."id" asc for share',
+    );
+    expect(organizationIdentityLockSql).toContain(
+      'from "organization" where "organization"."id" in ($1) order by "organization"."id" asc for share',
+    );
+    expect(returningSql).toBeDefined();
+    expect(returningSql).not.toContain('"employee"."public_id"');
+    expect(returningSql).not.toContain('"organization"."public_id"');
+    expect(returningSql?.match(/"public_id"/g)).toHaveLength(1);
+  });
+
   it("creates a metadata-only manual draft with trusted organization authorization lineage", async () => {
     const {
       gateway,
@@ -2089,19 +2354,24 @@ describe("organization training repository", () => {
   });
 
   it("takes down a version with lifecycle metadata without persisting runtime access policy", async () => {
-    const { gateway, updateVersionTakedown, getTakedownInputs } =
-      createGateway();
+    const {
+      gateway,
+      takeDownVersionTransaction,
+      updateVersionTakedown,
+      getTakedownInputs,
+    } = createGateway();
     const repository = createOrganizationTrainingRepository(gateway);
 
     const result = await repository.takeDownVersion(createTakedownWrite());
 
-    expect(updateVersionTakedown).toHaveBeenCalledWith({
+    expect(takeDownVersionTransaction).toHaveBeenCalledWith({
       versionPublicId: "training_version_public_123",
       organizationPublicId: "organization_public_123",
       status: "taken_down",
       takenDownAt: "2026-06-16T08:00:00.000Z",
       takedownReason: "manual owner takedown",
     });
+    expect(updateVersionTakedown).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       publicId: "training_version_public_123",
       organizationPublicId: "organization_public_123",
@@ -2123,6 +2393,422 @@ describe("organization training repository", () => {
     ).rejects.toThrow("organization training version takedown failed.");
   });
 
+  it("serializes takedown and answer writes with the version as the first aggregate lock", () => {
+    const source = readFileSync(
+      resolve(
+        process.cwd(),
+        "src/server/repositories/organization-training-repository.ts",
+      ),
+      "utf8",
+    );
+    const saveTransaction = source.slice(
+      source.indexOf("async saveEmployeeAnswerDraftTransaction(input)"),
+      source.indexOf("async submitEmployeeAnswerTransaction(input)"),
+    );
+    const submitTransaction = source.slice(
+      source.indexOf("async submitEmployeeAnswerTransaction(input)"),
+      source.indexOf("async insertManualDraft(input)"),
+    );
+    const takedownTransaction = source.slice(
+      source.indexOf("async takeDownVersionTransaction(input)"),
+      source.indexOf("function normalizeRequiredText"),
+    );
+
+    for (const answerTransaction of [saveTransaction, submitTransaction]) {
+      expect(
+        answerTransaction.indexOf("lockAnswerableOrganizationTrainingVersion"),
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        answerTransaction.indexOf("lockAnswerableOrganizationTrainingVersion"),
+      ).toBeLessThan(answerTransaction.indexOf("lockEmployeeIdentity"));
+    }
+    expect(takedownTransaction).toContain(
+      '.limit(2)\n          .for("update")',
+    );
+    expect(takedownTransaction).toContain(
+      'answer.organization_training_answer_status === "in_progress"',
+    );
+    expect(takedownTransaction).toContain(
+      "createOrganizationTrainingTakedownAnswerTransitionQuery",
+    );
+    expect(takedownTransaction).toContain(
+      "isExactOrganizationTrainingTakedownTransitionResult",
+    );
+    expect(takedownTransaction).toContain(
+      "lockedVersion.takedown_reason === input.takedownReason",
+    );
+  });
+
+  it("binds taken-down employee history to the exact authorization and terminal answer facts", () => {
+    const source = readFileSync(
+      resolve(
+        process.cwd(),
+        "src/server/repositories/organization-training-repository.ts",
+      ),
+      "utf8",
+    );
+    const historyReader = source.slice(
+      source.indexOf(
+        "async function listPublishedVersionsForEmployeeOrganization",
+      ),
+      source.indexOf(
+        "export function createOrganizationTrainingVisibleOrganizationPublicIdArraySql",
+      ),
+    );
+
+    expect(historyReader).toContain(
+      "eq(orgAuth.public_id, input.authorizationPublicId)",
+    );
+    expect(historyReader).toContain(
+      "organizationTrainingVersion.authorization_public_id",
+    );
+    expect(historyReader).toContain(
+      'eq(organizationTrainingVersion.version_status, "taken_down")',
+    );
+    for (const status of [
+      "submitted",
+      "scoring",
+      "scoring_failed",
+      "read_only",
+    ]) {
+      expect(historyReader).toContain(`"${status}"`);
+    }
+    expect(historyReader).not.toContain('"in_progress"');
+  });
+
+  it("fails closed when a gateway returns a version from another authorization partition", async () => {
+    const { gateway } = createGateway({
+      employeeVisibleVersionRows: [
+        createVersionRow({
+          authorization_public_id: "org_auth_other_public_456",
+        }),
+      ],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    await expect(
+      repository.readEmployeeVisibleVersions({
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+      }),
+    ).resolves.toEqual({
+      versions: [],
+      integrityStatus: "partial",
+      warningCode: "historical_version_unavailable",
+    });
+  });
+
+  it.each([0, 1, 3])(
+    "atomically takes down a version with %i in-progress answers",
+    async (answerCount) => {
+      const answerRows = Array.from({ length: answerCount }, (_, index) =>
+        createTakedownLockedAnswerRow(index + 1),
+      );
+      const fixture = createTakedownPersistenceDatabase({ answerRows });
+      const repository = createPostgresOrganizationTrainingRepository({
+        createDatabase: () => fixture.database as never,
+      });
+
+      await expect(
+        repository.takeDownVersion(createTakedownWrite()),
+      ).resolves.toMatchObject({
+        publicId: "training_version_public_123",
+        status: "taken_down",
+        takenDownAt: "2026-06-16T08:00:00.000Z",
+        takedownReason: "manual owner takedown",
+      });
+      expect(fixture.events).toEqual([
+        "version_lock",
+        "answer_lock",
+        ...(answerCount === 0
+          ? []
+          : ["employee_identity_lock", "organization_identity_lock"]),
+        "version_update",
+        ...(answerCount === 0 ? [] : ["answer_update"]),
+      ]);
+      expect(fixture.committedMutations).toEqual([
+        "version_update",
+        ...(answerCount === 0 ? [] : ["answer_update"]),
+      ]);
+    },
+  );
+
+  it("preserves terminal answers while transitioning the exact locked in-progress subset", async () => {
+    const inProgressAnswer = createTakedownLockedAnswerRow(1);
+    const submittedAnswer = createTakedownLockedAnswerRow(2, {
+      organization_training_answer_status: "submitted",
+      revision: 2,
+    });
+    const fixture = createTakedownPersistenceDatabase({
+      answerRows: [submittedAnswer, inProgressAnswer],
+    });
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).resolves.toMatchObject({ status: "taken_down" });
+    expect(fixture.events).toEqual([
+      "version_lock",
+      "answer_lock",
+      "employee_identity_lock",
+      "organization_identity_lock",
+      "version_update",
+      "answer_update",
+    ]);
+    expect(fixture.committedMutations).toEqual([
+      "version_update",
+      "answer_update",
+    ]);
+  });
+
+  it("replays an exact coherent takedown without rewriting and rejects reason drift or legacy in-progress residue", async () => {
+    const takenDownAt = new Date("2026-06-16T08:00:00.000Z");
+    const takenDownVersion = createVersionRow({
+      version_status: "taken_down",
+      taken_down_at: takenDownAt,
+      takedown_reason: "manual owner takedown",
+      updated_at: takenDownAt,
+    });
+    const replayFixture = createTakedownPersistenceDatabase({
+      versionRows: [takenDownVersion],
+      answerRows: [],
+    });
+    const replayRepository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => replayFixture.database as never,
+    });
+
+    await expect(
+      replayRepository.takeDownVersion(createTakedownWrite()),
+    ).resolves.toMatchObject({ status: "taken_down" });
+    expect(replayFixture.events).toEqual(["version_lock", "answer_lock"]);
+    expect(replayFixture.committedMutations).toEqual([]);
+
+    const differentReasonFixture = createTakedownPersistenceDatabase({
+      versionRows: [takenDownVersion],
+      answerRows: [],
+    });
+    const differentReasonRepository =
+      createPostgresOrganizationTrainingRepository({
+        createDatabase: () => differentReasonFixture.database as never,
+      });
+    await expect(
+      differentReasonRepository.takeDownVersion(
+        createTakedownWrite({ takedownReason: "different reason" }),
+      ),
+    ).rejects.toThrow("organization training version takedown failed.");
+    expect(differentReasonFixture.committedMutations).toEqual([]);
+
+    const residueFixture = createTakedownPersistenceDatabase({
+      versionRows: [takenDownVersion],
+      answerRows: [createTakedownLockedAnswerRow(1)],
+    });
+    const residueRepository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => residueFixture.database as never,
+    });
+    await expect(
+      residueRepository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow("organization training version takedown failed.");
+    expect(residueFixture.committedMutations).toEqual([]);
+
+    const corruptMarkerFixture = createTakedownPersistenceDatabase({
+      versionRows: [
+        createVersionRow({
+          version_status: "taken_down",
+          taken_down_at: null,
+          takedown_reason: "manual owner takedown",
+        }),
+      ],
+      answerRows: [],
+    });
+    const corruptMarkerRepository =
+      createPostgresOrganizationTrainingRepository({
+        createDatabase: () => corruptMarkerFixture.database as never,
+      });
+    await expect(
+      corruptMarkerRepository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow("organization training version takedown failed.");
+    expect(corruptMarkerFixture.committedMutations).toEqual([]);
+  });
+
+  it.each([
+    [
+      "version identity drift",
+      createTakedownLockedAnswerRow(1, {
+        organization_training_version_public_id:
+          "training_version_public_conflict",
+      }),
+    ],
+    [
+      "duplicate answer public id",
+      createTakedownLockedAnswerRow(2, {
+        public_id: "training_answer_public_1",
+      }),
+    ],
+    [
+      "revision overflow",
+      createTakedownLockedAnswerRow(1, { revision: 2_147_483_647 }),
+    ],
+  ])("rolls back a takedown on %s", async (label, corruptAnswer) => {
+    const answerRows =
+      label === "duplicate answer public id"
+        ? [createTakedownLockedAnswerRow(1), corruptAnswer]
+        : [corruptAnswer];
+    const fixture = createTakedownPersistenceDatabase({ answerRows });
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow("organization training version takedown failed.");
+    expect(fixture.committedMutations).toEqual([]);
+  });
+
+  it.each([
+    [
+      "employee identity drift",
+      {
+        employeeIdentityRows: [
+          { id: 2_001, public_id: "employee_public_conflict" },
+        ],
+      },
+    ],
+    [
+      "organization identity drift",
+      {
+        organizationIdentityRows: [
+          { id: 501, public_id: "organization_public_conflict" },
+        ],
+      },
+    ],
+  ])("rolls back a takedown on %s", async (_label, identityOverrides) => {
+    const fixture = createTakedownPersistenceDatabase({
+      answerRows: [createTakedownLockedAnswerRow(1)],
+      ...identityOverrides,
+    });
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow("organization training version takedown failed.");
+    expect(fixture.committedMutations).toEqual([]);
+  });
+
+  it("rolls back the version update when the answer RETURNING set is incomplete", async () => {
+    const answerRows = [
+      createTakedownLockedAnswerRow(1),
+      createTakedownLockedAnswerRow(2),
+    ];
+    const fixture = createTakedownPersistenceDatabase({
+      answerRows,
+      transitionedAnswerRows: [
+        createTakedownLockedAnswerRow(1, {
+          organization_training_answer_status: "read_only",
+          revision: 2,
+        }),
+      ],
+    });
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow(
+      "organization training takedown answer transition conflict.",
+    );
+    expect(fixture.committedMutations).toEqual([]);
+  });
+
+  it("rejects a version update cardinality failure without committing answer changes", async () => {
+    const fixture = createTakedownPersistenceDatabase({
+      answerRows: [createTakedownLockedAnswerRow(1)],
+      updatedVersionRows: [],
+    });
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow("organization training version takedown failed.");
+    expect(fixture.events).toEqual([
+      "version_lock",
+      "answer_lock",
+      "employee_identity_lock",
+      "organization_identity_lock",
+      "version_update",
+    ]);
+    expect(fixture.committedMutations).toEqual([]);
+  });
+
+  it("rejects a drifted version RETURNING identity without committing answer changes", async () => {
+    const takenDownAt = new Date("2026-06-16T08:00:00.000Z");
+    const fixture = createTakedownPersistenceDatabase({
+      answerRows: [createTakedownLockedAnswerRow(1)],
+      updatedVersionRows: [
+        createVersionRow({
+          id: 999,
+          version_status: "taken_down",
+          taken_down_at: takenDownAt,
+          takedown_reason: "manual owner takedown",
+          updated_at: takenDownAt,
+        }),
+      ],
+    });
+    const repository = createPostgresOrganizationTrainingRepository({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow(
+      "organization training takedown version transition conflict.",
+    );
+    expect(fixture.events).toEqual([
+      "version_lock",
+      "answer_lock",
+      "employee_identity_lock",
+      "organization_identity_lock",
+      "version_update",
+    ]);
+    expect(fixture.committedMutations).toEqual([]);
+  });
+
+  it.each(["draft", "submit"] as const)(
+    "rejects a late %s write after takedown at the first version lock",
+    async (command) => {
+      const fixture = createRevokedMembershipPersistenceDatabase({
+        version_status: "taken_down",
+        taken_down_at: new Date("2026-06-16T08:00:00.000Z"),
+        takedown_reason: "manual owner takedown",
+      });
+      const repository = createPostgresOrganizationTrainingRepository({
+        createDatabase: () => fixture.database as never,
+      });
+      const operation =
+        command === "draft"
+          ? repository.saveEmployeeAnswerDraft(createEmployeeAnswerDraftWrite())
+          : repository.submitEmployeeAnswer(
+              createEmployeeAnswerSubmissionWrite(),
+            );
+
+      await expect(operation).rejects.toMatchObject({
+        kind:
+          command === "draft"
+            ? "answer_draft_conflict"
+            : "answer_submit_conflict",
+      });
+      expect(fixture.events).toEqual(["lineage_lookup", "version_lock"]);
+      expect(fixture.mutations).toEqual([]);
+    },
+  );
+
   it("fails a stale draft lineage before answer locking or mutation when membership was replaced", async () => {
     const fixture = createRevokedMembershipPersistenceDatabase();
     const repository = createPostgresOrganizationTrainingRepository({
@@ -2134,6 +2820,7 @@ describe("organization training repository", () => {
     ).rejects.toMatchObject({ kind: "answer_draft_conflict" });
     expect(fixture.events).toEqual([
       "lineage_lookup",
+      "version_lock",
       "employee_identity_lock",
       "membership_recheck",
     ]);
@@ -2151,6 +2838,7 @@ describe("organization training repository", () => {
     ).rejects.toMatchObject({ kind: "answer_submit_conflict" });
     expect(fixture.events).toEqual([
       "lineage_lookup",
+      "version_lock",
       "employee_identity_lock",
       "membership_recheck",
     ]);
@@ -2389,6 +3077,7 @@ describe("organization training repository", () => {
     const versions = await repository.listEmployeeVisibleVersions({
       employeePublicId: " employee_public_123 ",
       organizationPublicId: " organization_public_123 ",
+      authorizationPublicId: " org_auth_public_123 ",
     });
     const version = await repository.findPublishedVersionByPublicId({
       trainingVersionPublicId: " training_version_public_123 ",
@@ -2401,6 +3090,7 @@ describe("organization training repository", () => {
     expect(listPublishedVersionsForEmployeeOrganization).toHaveBeenCalledWith({
       employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_public_123",
       visibleOrganizationPublicIds: ["organization_public_123"],
     });
     expect(findPublishedVersionByPublicId).toHaveBeenCalledWith({
@@ -2414,6 +3104,7 @@ describe("organization training repository", () => {
       {
         employeePublicId: "employee_public_123",
         organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
         visibleOrganizationPublicIds: ["organization_public_123"],
       },
     ]);

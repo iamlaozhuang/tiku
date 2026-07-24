@@ -2925,6 +2925,7 @@ describe("organization training employee answer route handlers", () => {
     ).toHaveBeenCalledWith({
       employeePublicId: "employee_route_public_401",
       organizationPublicId: "organization_route_public_401",
+      authorizationPublicId: "org_auth_effective_route_401",
       visibleOrganizationPublicIds: ["organization_route_public_401"],
     });
   });

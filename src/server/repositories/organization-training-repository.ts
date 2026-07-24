@@ -32,6 +32,7 @@ import {
   eq,
   gt,
   inArray,
+  isNull,
   lte,
   or,
   sql,
@@ -41,7 +42,10 @@ import {
   createOrgAuthCoversOrganizationCondition,
   lockOrganizationScopeMutation,
 } from "./organization-scope-query";
-import { lockEmployeeIdentity } from "./employee-org-auth-quota-repository";
+import {
+  lockEmployeeIdentity,
+  type EmployeeOrgAuthQuotaDatabase,
+} from "./employee-org-auth-quota-repository";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
@@ -80,6 +84,10 @@ import {
   resolveOrganizationTrainingQuestionDraftSnapshot,
 } from "./admin-ai-generation-result-persistence-repository";
 import { evidenceStatusValues } from "../models/ai-rag";
+import {
+  organizationTrainingAnswerStatusValues,
+  type OrganizationTrainingAnswerStatus,
+} from "../models/organization-training";
 import {
   mapOrganizationTrainingAnswerRowToDto,
   mapOrganizationTrainingDraftRowToDto,
@@ -424,6 +432,7 @@ export type OrganizationTrainingEmployeeAnswerPersistenceLineageLookupInput = {
 export type OrganizationTrainingEmployeeVisibleVersionListInput = {
   employeePublicId: string;
   organizationPublicId: string;
+  authorizationPublicId?: string;
   visibleOrganizationPublicIds?: readonly string[];
 };
 
@@ -619,6 +628,9 @@ export type OrganizationTrainingVersionGateway = {
   updateVersionTakedown(
     input: OrganizationTrainingVersionTakedownInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
+  takeDownVersionTransaction?(
+    input: OrganizationTrainingVersionTakedownInput,
+  ): Promise<OrganizationTrainingVersionRow | null>;
   saveCanonicalDraftTransaction?(
     input: OrganizationTrainingDraftSavePersistenceInput,
   ): Promise<OrganizationTrainingDraftRow | null>;
@@ -769,6 +781,121 @@ const organizationTrainingVersionSelection = {
   updated_at: organizationTrainingVersion.updated_at,
 };
 
+type OrganizationTrainingTakedownAnswerRow = {
+  id: number;
+  public_id: string;
+  organization_training_version_id: number;
+  organization_training_version_public_id: string;
+  employee_id: number;
+  employee_public_id: string;
+  organization_id: number;
+  organization_public_id: string;
+  organization_training_answer_status: OrganizationTrainingAnswerStatus;
+  revision: number;
+};
+
+type OrganizationTrainingTakedownIdentityRow = {
+  id: number;
+  public_id: string;
+};
+
+const organizationTrainingTakedownAnswerTargetSelection = {
+  id: organizationTrainingAnswer.id,
+  public_id: organizationTrainingAnswer.public_id,
+  organization_training_version_id:
+    organizationTrainingAnswer.organization_training_version_id,
+  organization_training_version_public_id:
+    organizationTrainingAnswer.organization_training_version_public_id,
+  employee_id: organizationTrainingAnswer.employee_id,
+  employee_public_id: organizationTrainingAnswer.employee_public_id,
+  organization_id: organizationTrainingAnswer.organization_id,
+  organization_public_id: organizationTrainingAnswer.organization_public_id,
+  organization_training_answer_status:
+    organizationTrainingAnswer.organization_training_answer_status,
+  revision: organizationTrainingAnswer.revision,
+};
+
+const organizationTrainingTakedownIdentitySelection = {
+  id: employee.id,
+  public_id: employee.public_id,
+};
+
+const organizationTrainingTakedownOrganizationIdentitySelection = {
+  id: organization.id,
+  public_id: organization.public_id,
+};
+
+export function createOrganizationTrainingTakedownAnswerLockQuery(
+  database: EmployeeOrgAuthQuotaDatabase,
+  versionId: number,
+) {
+  return database
+    .select(organizationTrainingTakedownAnswerTargetSelection)
+    .from(organizationTrainingAnswer)
+    .where(
+      eq(
+        organizationTrainingAnswer.organization_training_version_id,
+        versionId,
+      ),
+    )
+    .for("update");
+}
+
+export function createOrganizationTrainingTakedownEmployeeIdentityLockQuery(
+  database: EmployeeOrgAuthQuotaDatabase,
+  employeeIds: readonly number[],
+) {
+  return database
+    .select(organizationTrainingTakedownIdentitySelection)
+    .from(employee)
+    .where(inArray(employee.id, [...employeeIds]))
+    .orderBy(asc(employee.id))
+    .for("share");
+}
+
+export function createOrganizationTrainingTakedownOrganizationIdentityLockQuery(
+  database: EmployeeOrgAuthQuotaDatabase,
+  organizationIds: readonly number[],
+) {
+  return database
+    .select(organizationTrainingTakedownOrganizationIdentitySelection)
+    .from(organization)
+    .where(inArray(organization.id, [...organizationIds]))
+    .orderBy(asc(organization.id))
+    .for("share");
+}
+
+export function createOrganizationTrainingTakedownAnswerTransitionQuery(
+  database: EmployeeOrgAuthQuotaDatabase,
+  input: {
+    versionId: number;
+    answerIds: readonly number[];
+    takenDownAt: Date;
+  },
+) {
+  return database
+    .update(organizationTrainingAnswer)
+    .set({
+      organization_training_answer_status: "read_only",
+      revision: sql`${organizationTrainingAnswer.revision} + 1`,
+      updated_at: input.takenDownAt,
+    })
+    .where(
+      and(
+        inArray(organizationTrainingAnswer.id, [...input.answerIds]),
+        eq(
+          organizationTrainingAnswer.organization_training_version_id,
+          input.versionId,
+        ),
+        eq(
+          organizationTrainingAnswer.organization_training_answer_status,
+          "in_progress",
+        ),
+      ),
+    )
+    .returning(organizationTrainingTakedownAnswerTargetSelection);
+}
+
 const organizationTrainingAnswerSelection = {
   id: organizationTrainingAnswer.id,
   public_id: organizationTrainingAnswer.public_id,
@@ -891,7 +1018,12 @@ export function createOrganizationTrainingRepository(
         normalizedInput,
       );
     const versions = rows
-      .map(tryMapEmployeeVisibleOrganizationTrainingVersionRowToDto)
+      .map((row) =>
+        normalizedInput.authorizationPublicId !== undefined &&
+        row.authorization_public_id !== normalizedInput.authorizationPublicId
+          ? null
+          : tryMapEmployeeVisibleOrganizationTrainingVersionRowToDto(row),
+      )
       .filter(
         (version): version is OrganizationTrainingPublishedVersionDto =>
           version !== null,
@@ -1421,7 +1553,14 @@ export function createOrganizationTrainingRepository(
         throw new Error("organization training version takedown failed.");
       }
 
-      const updatedRow = await gateway.updateVersionTakedown(takedownInput);
+      if (gateway.takeDownVersionTransaction === undefined) {
+        throw new Error(
+          "organization training version takedown transaction unavailable.",
+        );
+      }
+
+      const updatedRow =
+        await gateway.takeDownVersionTransaction(takedownInput);
 
       if (updatedRow === null) {
         throw new Error("organization training version takedown failed.");
@@ -2375,6 +2514,12 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async saveEmployeeAnswerDraftTransaction(input) {
       return getDatabase().transaction(async (transaction) => {
+        if (
+          !(await lockAnswerableOrganizationTrainingVersion(transaction, input))
+        ) {
+          return null;
+        }
+
         await lockEmployeeIdentity(transaction, input.employeePublicId);
 
         if (!(await hasCurrentEmployeeMembership(transaction, input))) {
@@ -2475,6 +2620,12 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async submitEmployeeAnswerTransaction(input) {
       return getDatabase().transaction(async (transaction) => {
+        if (
+          !(await lockAnswerableOrganizationTrainingVersion(transaction, input))
+        ) {
+          return null;
+        }
+
         await lockEmployeeIdentity(transaction, input.employeePublicId);
 
         if (!(await hasCurrentEmployeeMembership(transaction, input))) {
@@ -2831,6 +2982,182 @@ export function createPostgresOrganizationTrainingRepository(
         .returning(organizationTrainingVersionSelection);
 
       return (row as OrganizationTrainingVersionRow | undefined) ?? null;
+    },
+    async takeDownVersionTransaction(input) {
+      return getDatabase().transaction(async (transaction) => {
+        const lockedVersions = await transaction
+          .select(organizationTrainingVersionSelection)
+          .from(organizationTrainingVersion)
+          .where(
+            and(
+              eq(organizationTrainingVersion.public_id, input.versionPublicId),
+              eq(
+                organizationTrainingVersion.organization_public_id,
+                input.organizationPublicId,
+              ),
+            ),
+          )
+          .limit(2)
+          .for("update");
+
+        if (lockedVersions.length !== 1) {
+          return null;
+        }
+
+        const lockedVersion = lockedVersions[0] as
+          | (OrganizationTrainingVersionRow & { id: number })
+          | undefined;
+        if (
+          lockedVersion === undefined ||
+          !isExactOrganizationTrainingTakedownVersionIdentity(
+            lockedVersion,
+            input,
+          )
+        ) {
+          return null;
+        }
+
+        const lockedAnswerCandidates =
+          (await createOrganizationTrainingTakedownAnswerLockQuery(
+            transaction,
+            lockedVersion.id,
+          )) as OrganizationTrainingTakedownAnswerRow[];
+        const lockedAnswerTargets =
+          validateLockedOrganizationTrainingAnswerTargetsForTakedown(
+            lockedAnswerCandidates,
+            lockedVersion,
+          );
+
+        if (lockedAnswerTargets === null) {
+          return null;
+        }
+
+        const employeeIdentityRows =
+          lockedAnswerTargets.length === 0
+            ? []
+            : ((await createOrganizationTrainingTakedownEmployeeIdentityLockQuery(
+                transaction,
+                lockedAnswerTargets.map((answer) => answer.employee_id),
+              )) as OrganizationTrainingTakedownIdentityRow[]);
+        const organizationIdentityRows =
+          lockedAnswerTargets.length === 0
+            ? []
+            : ((await createOrganizationTrainingTakedownOrganizationIdentityLockQuery(
+                transaction,
+                [
+                  ...new Set(
+                    lockedAnswerTargets.map((answer) => answer.organization_id),
+                  ),
+                ],
+              )) as OrganizationTrainingTakedownIdentityRow[]);
+        const lockedAnswers = validateAuthoritativeTakedownAnswerIdentities(
+          lockedAnswerTargets,
+          employeeIdentityRows,
+          organizationIdentityRows,
+        );
+
+        if (lockedAnswers === null) {
+          return null;
+        }
+
+        const inProgressAnswers = lockedAnswers.filter(
+          (answer) =>
+            answer.organization_training_answer_status === "in_progress",
+        );
+
+        if (lockedVersion.version_status === "taken_down") {
+          return lockedVersion.takedown_reason === input.takedownReason &&
+            lockedVersion.taken_down_at !== null &&
+            inProgressAnswers.length === 0
+            ? lockedVersion
+            : null;
+        }
+
+        if (
+          lockedVersion.version_status !== "published" ||
+          lockedVersion.taken_down_at !== null ||
+          lockedVersion.takedown_reason !== null
+        ) {
+          return null;
+        }
+
+        const takenDownAt = new Date(input.takenDownAt);
+        const updatedVersions = await transaction
+          .update(organizationTrainingVersion)
+          .set({
+            version_status: "taken_down",
+            taken_down_at: takenDownAt,
+            takedown_reason: input.takedownReason,
+            updated_at: takenDownAt,
+          })
+          .where(
+            and(
+              eq(organizationTrainingVersion.id, lockedVersion.id),
+              eq(
+                organizationTrainingVersion.public_id,
+                lockedVersion.public_id,
+              ),
+              eq(
+                organizationTrainingVersion.organization_id,
+                lockedVersion.organization_id,
+              ),
+              eq(
+                organizationTrainingVersion.organization_public_id,
+                lockedVersion.organization_public_id,
+              ),
+              eq(organizationTrainingVersion.version_status, "published"),
+              isNull(organizationTrainingVersion.taken_down_at),
+              isNull(organizationTrainingVersion.takedown_reason),
+            ),
+          )
+          .returning(organizationTrainingVersionSelection);
+
+        const updatedVersion = updatedVersions[0] as
+          | (OrganizationTrainingVersionRow & { id: number })
+          | undefined;
+        if (updatedVersions.length === 0) {
+          return null;
+        }
+        if (
+          updatedVersions.length !== 1 ||
+          updatedVersion === undefined ||
+          !isExactOrganizationTrainingTakedownVersionResult(
+            updatedVersion,
+            lockedVersion,
+            input,
+          )
+        ) {
+          throw new Error(
+            "organization training takedown version transition conflict.",
+          );
+        }
+
+        if (inProgressAnswers.length > 0) {
+          const transitionedAnswers =
+            (await createOrganizationTrainingTakedownAnswerTransitionQuery(
+              transaction,
+              {
+                versionId: lockedVersion.id,
+                answerIds: inProgressAnswers.map((answer) => answer.id),
+                takenDownAt,
+              },
+            )) as OrganizationTrainingTakedownAnswerRow[];
+
+          if (
+            !isExactOrganizationTrainingTakedownTransitionResult(
+              transitionedAnswers,
+              inProgressAnswers,
+              lockedVersion,
+            )
+          ) {
+            throw new Error(
+              "organization training takedown answer transition conflict.",
+            );
+          }
+        }
+
+        return updatedVersion;
+      });
     },
   });
 }
@@ -3773,6 +4100,10 @@ function normalizeEmployeeVisibleVersionListInput(
   const organizationPublicId = normalizeRequiredText(
     input.organizationPublicId,
   );
+  const authorizationPublicId =
+    input.authorizationPublicId === undefined
+      ? undefined
+      : normalizeRequiredText(input.authorizationPublicId);
   const visibleOrganizationPublicIds = [
     ...new Set([
       organizationPublicId,
@@ -3783,6 +4114,7 @@ function normalizeEmployeeVisibleVersionListInput(
   if (
     employeePublicId === null ||
     organizationPublicId === null ||
+    authorizationPublicId === null ||
     visibleOrganizationPublicIds.length === 0
   ) {
     return null;
@@ -3791,6 +4123,7 @@ function normalizeEmployeeVisibleVersionListInput(
   return {
     employeePublicId,
     organizationPublicId,
+    ...(authorizationPublicId === undefined ? {} : { authorizationPublicId }),
     visibleOrganizationPublicIds,
   };
 }
@@ -4917,6 +5250,15 @@ async function listPublishedVersionsForEmployeeOrganization(
         eq(user.status, "active"),
         eq(organization.public_id, input.organizationPublicId),
         eq(organization.status, "active"),
+        input.authorizationPublicId === undefined
+          ? undefined
+          : and(
+              eq(orgAuth.public_id, input.authorizationPublicId),
+              eq(
+                organizationTrainingVersion.authorization_public_id,
+                input.authorizationPublicId,
+              ),
+            ),
         eq(orgAuth.status, "active"),
         lte(orgAuth.starts_at, now),
         gt(orgAuth.expires_at, now),
@@ -4924,7 +5266,18 @@ async function listPublishedVersionsForEmployeeOrganization(
         createOrganizationTrainingRecipientOrLegacyAuthorizationCondition(),
         eq(organizationTrainingVersion.profession, orgAuth.profession),
         eq(organizationTrainingVersion.level, orgAuth.level),
-        eq(organizationTrainingVersion.version_status, "published"),
+        input.authorizationPublicId === undefined
+          ? eq(organizationTrainingVersion.version_status, "published")
+          : or(
+              eq(organizationTrainingVersion.version_status, "published"),
+              and(
+                eq(organizationTrainingVersion.version_status, "taken_down"),
+                inArray(
+                  organizationTrainingAnswer.organization_training_answer_status,
+                  ["submitted", "scoring", "scoring_failed", "read_only"],
+                ),
+              ),
+            ),
         sql`${organizationTrainingVersion.publish_scope_snapshot}->'organizationPublicIds' ?| ${createOrganizationTrainingVisibleOrganizationPublicIdArraySql(visibleOrganizationPublicIds)}`,
       ),
     )
@@ -5606,6 +5959,313 @@ async function hasCurrentEmployeeMembership(
     .limit(1);
 
   return membership !== undefined;
+}
+
+const POSTGRES_INTEGER_MAX = 2_147_483_647;
+
+function isExactOrganizationTrainingTakedownVersionIdentity(
+  version: OrganizationTrainingVersionRow & { id: number },
+  input: OrganizationTrainingVersionTakedownInput,
+): boolean {
+  if (
+    !Number.isSafeInteger(version.id) ||
+    version.id <= 0 ||
+    version.public_id !== input.versionPublicId ||
+    version.organization_public_id !== input.organizationPublicId ||
+    tryMapOrganizationTrainingVersionRowToDto(version) === null
+  ) {
+    return false;
+  }
+
+  if (version.version_status === "published") {
+    return version.taken_down_at === null && version.takedown_reason === null;
+  }
+
+  return (
+    version.version_status === "taken_down" &&
+    version.taken_down_at instanceof Date &&
+    Number.isFinite(version.taken_down_at.getTime()) &&
+    typeof version.takedown_reason === "string" &&
+    version.takedown_reason.trim() === version.takedown_reason &&
+    version.takedown_reason.length > 0 &&
+    version.updated_at.getTime() >= version.taken_down_at.getTime()
+  );
+}
+
+function isExactOrganizationTrainingTakedownVersionResult(
+  updatedVersion: OrganizationTrainingVersionRow & { id: number },
+  lockedVersion: OrganizationTrainingVersionRow & { id: number },
+  input: OrganizationTrainingVersionTakedownInput,
+): boolean {
+  const expectedTakenDownAt = Date.parse(input.takenDownAt);
+
+  return (
+    isExactOrganizationTrainingTakedownVersionIdentity(updatedVersion, input) &&
+    updatedVersion.id === lockedVersion.id &&
+    updatedVersion.draft_public_id === lockedVersion.draft_public_id &&
+    updatedVersion.version_number === lockedVersion.version_number &&
+    updatedVersion.organization_id === lockedVersion.organization_id &&
+    updatedVersion.org_auth_id === lockedVersion.org_auth_id &&
+    updatedVersion.authorization_source ===
+      lockedVersion.authorization_source &&
+    updatedVersion.authorization_public_id ===
+      lockedVersion.authorization_public_id &&
+    updatedVersion.owner_type === lockedVersion.owner_type &&
+    updatedVersion.owner_public_id === lockedVersion.owner_public_id &&
+    updatedVersion.quota_owner_type === lockedVersion.quota_owner_type &&
+    updatedVersion.quota_owner_public_id ===
+      lockedVersion.quota_owner_public_id &&
+    updatedVersion.version_status === "taken_down" &&
+    updatedVersion.taken_down_at?.getTime() === expectedTakenDownAt &&
+    updatedVersion.takedown_reason === input.takedownReason &&
+    updatedVersion.updated_at.getTime() === expectedTakenDownAt
+  );
+}
+
+function validateLockedOrganizationTrainingAnswerTargetsForTakedown(
+  candidates: readonly OrganizationTrainingTakedownAnswerRow[],
+  lockedVersion: OrganizationTrainingVersionRow & { id: number },
+): OrganizationTrainingTakedownAnswerRow[] | null {
+  const answerIds = new Set<number>();
+  const answerPublicIds = new Set<string>();
+  const foldedAnswerPublicIds = new Set<string>();
+  const employeeIds = new Set<number>();
+  const employeePublicIds = new Set<string>();
+  const foldedEmployeePublicIds = new Set<string>();
+  const visibleOrganizationPublicIds = new Set(
+    lockedVersion.publish_scope_snapshot.organizationPublicIds,
+  );
+
+  for (const candidate of candidates) {
+    const isRevisionSafe =
+      Number.isInteger(candidate.revision) &&
+      candidate.revision >= 1 &&
+      candidate.revision <= POSTGRES_INTEGER_MAX &&
+      (candidate.organization_training_answer_status !== "in_progress" ||
+        candidate.revision < POSTGRES_INTEGER_MAX);
+
+    if (
+      !Number.isSafeInteger(candidate.id) ||
+      candidate.id <= 0 ||
+      !isCanonicalStoredPublicId(candidate.public_id) ||
+      candidate.organization_training_version_id !== lockedVersion.id ||
+      candidate.organization_training_version_public_id !==
+        lockedVersion.public_id ||
+      !Number.isSafeInteger(candidate.employee_id) ||
+      candidate.employee_id <= 0 ||
+      !isCanonicalStoredPublicId(candidate.employee_public_id) ||
+      !Number.isSafeInteger(candidate.organization_id) ||
+      candidate.organization_id <= 0 ||
+      !isCanonicalStoredPublicId(candidate.organization_public_id) ||
+      !visibleOrganizationPublicIds.has(candidate.organization_public_id) ||
+      !organizationTrainingAnswerStatusValues.includes(
+        candidate.organization_training_answer_status,
+      ) ||
+      !isRevisionSafe
+    ) {
+      return null;
+    }
+
+    const foldedAnswerPublicId = candidate.public_id.toLowerCase();
+    const foldedEmployeePublicId = candidate.employee_public_id.toLowerCase();
+    if (
+      answerIds.has(candidate.id) ||
+      answerPublicIds.has(candidate.public_id) ||
+      foldedAnswerPublicIds.has(foldedAnswerPublicId) ||
+      employeeIds.has(candidate.employee_id) ||
+      employeePublicIds.has(candidate.employee_public_id) ||
+      foldedEmployeePublicIds.has(foldedEmployeePublicId)
+    ) {
+      return null;
+    }
+
+    answerIds.add(candidate.id);
+    answerPublicIds.add(candidate.public_id);
+    foldedAnswerPublicIds.add(foldedAnswerPublicId);
+    employeeIds.add(candidate.employee_id);
+    employeePublicIds.add(candidate.employee_public_id);
+    foldedEmployeePublicIds.add(foldedEmployeePublicId);
+  }
+
+  return [...candidates].sort(compareOrganizationTrainingTakedownAnswerRows);
+}
+
+function validateAuthoritativeTakedownAnswerIdentities(
+  lockedAnswers: readonly OrganizationTrainingTakedownAnswerRow[],
+  employeeIdentityRows: readonly OrganizationTrainingTakedownIdentityRow[],
+  organizationIdentityRows: readonly OrganizationTrainingTakedownIdentityRow[],
+): OrganizationTrainingTakedownAnswerRow[] | null {
+  const employeeIdentityMap =
+    createExactTakedownIdentityMap(employeeIdentityRows);
+  const organizationIdentityMap = createExactTakedownIdentityMap(
+    organizationIdentityRows,
+  );
+  const expectedEmployeeIds = new Set(
+    lockedAnswers.map((answer) => answer.employee_id),
+  );
+  const expectedOrganizationIds = new Set(
+    lockedAnswers.map((answer) => answer.organization_id),
+  );
+
+  if (
+    employeeIdentityMap === null ||
+    organizationIdentityMap === null ||
+    employeeIdentityMap.size !== expectedEmployeeIds.size ||
+    organizationIdentityMap.size !== expectedOrganizationIds.size
+  ) {
+    return null;
+  }
+
+  for (const answer of lockedAnswers) {
+    if (
+      employeeIdentityMap.get(answer.employee_id) !==
+        answer.employee_public_id ||
+      organizationIdentityMap.get(answer.organization_id) !==
+        answer.organization_public_id
+    ) {
+      return null;
+    }
+  }
+
+  return [...lockedAnswers];
+}
+
+function createExactTakedownIdentityMap(
+  rows: readonly OrganizationTrainingTakedownIdentityRow[],
+): Map<number, string> | null {
+  const identities = new Map<number, string>();
+  const publicIds = new Set<string>();
+  const foldedPublicIds = new Set<string>();
+
+  for (const row of rows) {
+    if (
+      !Number.isSafeInteger(row.id) ||
+      row.id <= 0 ||
+      !isCanonicalStoredPublicId(row.public_id)
+    ) {
+      return null;
+    }
+
+    const foldedPublicId = row.public_id.toLowerCase();
+    if (
+      identities.has(row.id) ||
+      publicIds.has(row.public_id) ||
+      foldedPublicIds.has(foldedPublicId)
+    ) {
+      return null;
+    }
+
+    identities.set(row.id, row.public_id);
+    publicIds.add(row.public_id);
+    foldedPublicIds.add(foldedPublicId);
+  }
+
+  return identities;
+}
+
+function isExactOrganizationTrainingTakedownTransitionResult(
+  transitionedCandidates: readonly OrganizationTrainingTakedownAnswerRow[],
+  lockedInProgressAnswers: readonly OrganizationTrainingTakedownAnswerRow[],
+  lockedVersion: OrganizationTrainingVersionRow & { id: number },
+): boolean {
+  const transitionedAnswers =
+    validateLockedOrganizationTrainingAnswerTargetsForTakedown(
+      transitionedCandidates,
+      lockedVersion,
+    );
+  if (
+    transitionedAnswers === null ||
+    transitionedAnswers.length !== lockedInProgressAnswers.length
+  ) {
+    return false;
+  }
+
+  const expectedAnswers = lockedInProgressAnswers
+    .map((answer) => ({
+      ...answer,
+      organization_training_answer_status: "read_only" as const,
+      revision: answer.revision + 1,
+    }))
+    .sort(compareOrganizationTrainingTakedownAnswerRows);
+
+  return transitionedAnswers.every(
+    (answer, index) =>
+      createOrganizationTrainingTakedownAnswerFact(answer) ===
+      createOrganizationTrainingTakedownAnswerFact(expectedAnswers[index]),
+  );
+}
+
+function compareOrganizationTrainingTakedownAnswerRows(
+  left: OrganizationTrainingTakedownAnswerRow,
+  right: OrganizationTrainingTakedownAnswerRow,
+): number {
+  if (left.id !== right.id) {
+    return left.id - right.id;
+  }
+
+  return left.public_id < right.public_id
+    ? -1
+    : left.public_id > right.public_id
+      ? 1
+      : 0;
+}
+
+function createOrganizationTrainingTakedownAnswerFact(
+  answer: OrganizationTrainingTakedownAnswerRow | undefined,
+): string | null {
+  return answer === undefined
+    ? null
+    : JSON.stringify([
+        answer.id,
+        answer.public_id,
+        answer.organization_training_version_id,
+        answer.organization_training_version_public_id,
+        answer.employee_id,
+        answer.employee_public_id,
+        answer.organization_id,
+        answer.organization_public_id,
+        answer.organization_training_answer_status,
+        answer.revision,
+      ]);
+}
+
+function isCanonicalStoredPublicId(value: unknown): value is string {
+  return (
+    typeof value === "string" && value.length > 0 && value.trim() === value
+  );
+}
+
+async function lockAnswerableOrganizationTrainingVersion(
+  database: Parameters<typeof lockEmployeeIdentity>[0],
+  input:
+    | OrganizationTrainingEmployeeAnswerDraftUpsertInput
+    | OrganizationTrainingEmployeeAnswerSubmissionUpsertInput,
+): Promise<boolean> {
+  const lockedVersions = await database
+    .select(organizationTrainingVersionSelection)
+    .from(organizationTrainingVersion)
+    .where(
+      and(
+        eq(organizationTrainingVersion.id, input.organizationTrainingVersionId),
+        eq(
+          organizationTrainingVersion.public_id,
+          input.trainingVersionPublicId,
+        ),
+        eq(organizationTrainingVersion.organization_id, input.organizationId),
+        eq(
+          organizationTrainingVersion.organization_public_id,
+          input.organizationPublicId,
+        ),
+      ),
+    )
+    .limit(2)
+    .for("update");
+
+  return (
+    lockedVersions.length === 1 &&
+    lockedVersions[0]?.version_status === "published" &&
+    lockedVersions[0].taken_down_at === null
+  );
 }
 
 function createDefaultVersionPublicId(): string {

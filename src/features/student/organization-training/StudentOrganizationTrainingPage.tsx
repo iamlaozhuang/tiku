@@ -259,7 +259,12 @@ function createTrainingOverview(
 function getTrainingPrimaryActionLabel(
   status: OrganizationTrainingPublishedVersionDto["employeeAnswerStatus"],
 ): string {
-  if (status === "submitted" || status === "read_only") {
+  if (
+    status === "submitted" ||
+    status === "scoring" ||
+    status === "scoring_failed" ||
+    status === "read_only"
+  ) {
     return "查看结果";
   }
 
@@ -1026,7 +1031,10 @@ function TrainingVersionSummaryCard({
   onSelect: () => void;
   version: OrganizationTrainingPublishedVersionDto;
 }) {
-  const answerStatusLabel = getAnswerStatusLabel(version.employeeAnswerStatus);
+  const answerStatusLabel =
+    version.status === "taken_down"
+      ? "已下架"
+      : getAnswerStatusLabel(version.employeeAnswerStatus);
 
   return (
     <article

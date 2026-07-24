@@ -2010,6 +2010,25 @@ function isVersionVisibleToEmployee(
   );
 }
 
+function isVersionInSelectedEmployeeAuthorizationPartition(
+  version: OrganizationTrainingPublishedVersionDto,
+  employeeContext: NormalizedEmployeeContext,
+): boolean {
+  const versionAuthorizationPublicId =
+    typeof version.authorizationPublicId === "string"
+      ? normalizeRequiredText(version.authorizationPublicId)
+      : null;
+  const selectedAuthorizationPublicId = normalizeRequiredText(
+    employeeContext.authorizationContext.authorizationPublicId,
+  );
+
+  return (
+    versionAuthorizationPublicId !== null &&
+    selectedAuthorizationPublicId !== null &&
+    versionAuthorizationPublicId === selectedAuthorizationPublicId
+  );
+}
+
 function isAnswerDeadlineExpired(
   version: OrganizationTrainingPublishedVersionDto,
   now: Date,
@@ -2045,6 +2064,18 @@ function isVersionAnswerable(
   now: Date,
 ) {
   return getVersionNotAnswerableReason(version, now) === null;
+}
+
+function isTakenDownEmployeeHistoryVisible(
+  version: OrganizationTrainingPublishedVersionDto,
+): boolean {
+  return (
+    version.status === "taken_down" &&
+    (version.employeeAnswerStatus === "submitted" ||
+      version.employeeAnswerStatus === "scoring" ||
+      version.employeeAnswerStatus === "scoring_failed" ||
+      version.employeeAnswerStatus === "read_only")
+  );
 }
 
 function createAnswerOrganizationSnapshot(
@@ -3336,7 +3367,12 @@ export function createOrganizationTrainingService(
         versions: command.sourceVersions
           .filter(
             (version) =>
-              isVersionAnswerable(version, clock.now()) &&
+              (isVersionAnswerable(version, clock.now()) ||
+                isTakenDownEmployeeHistoryVisible(version)) &&
+              isVersionInSelectedEmployeeAuthorizationPartition(
+                version,
+                normalizedEmployeeContext,
+              ) &&
               isVersionVisibleToEmployee(version, normalizedEmployeeContext),
           )
           .map(copyPublishedVersion),
