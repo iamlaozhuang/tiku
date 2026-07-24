@@ -3,6 +3,12 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import {
+  auditLog,
+  employee,
+  organizationTrainingAnswer,
+  user,
+} from "@/db/schema";
 import { setEmployeeAccountStatusWithQuota } from "@/server/repositories/employee-org-auth-quota-repository";
 
 function readSource(path: string): string {
@@ -19,73 +25,144 @@ function readBetween(source: string, startMarker: string, endMarker: string) {
   return source.slice(start, end);
 }
 
+type LifecycleIdentityRow = {
+  auth_user_id: string | null;
+  employee_id: number | null;
+  employee_public_id: string | null;
+  organization_id: number | null;
+  organization_public_id: string | null;
+  user_id: number;
+  user_public_id: string;
+  user_type: "employee" | "personal";
+};
+
+function createLifecycleDatabase(
+  identityRows: LifecycleIdentityRow[],
+  options: { failAuditInsert?: boolean } = {},
+) {
+  const attemptedOperations: string[] = [];
+  const committedOperations: string[] = [];
+  const readTargetLabel = (target: unknown): string => {
+    if (target === auditLog) {
+      return "audit_log";
+    }
+
+    if (target === employee) {
+      return "employee";
+    }
+
+    if (target === organizationTrainingAnswer) {
+      return "organization_training_answer";
+    }
+
+    if (target === user) {
+      return "user";
+    }
+
+    return "other";
+  };
+  const database = {
+    async transaction(
+      run: (transaction: unknown) => Promise<unknown>,
+    ): Promise<unknown> {
+      const pendingOperations: string[] = [];
+      type SelectionBuilder = {
+        from(): SelectionBuilder;
+        leftJoin(): SelectionBuilder;
+        where(): SelectionBuilder;
+        limit(): Promise<LifecycleIdentityRow[]>;
+      };
+      const selectionBuilder: SelectionBuilder = {
+        from() {
+          return selectionBuilder;
+        },
+        leftJoin() {
+          return selectionBuilder;
+        },
+        where() {
+          return selectionBuilder;
+        },
+        async limit() {
+          return identityRows;
+        },
+      };
+      const record = (operation: string): void => {
+        attemptedOperations.push(operation);
+        pendingOperations.push(operation);
+      };
+      const transaction = {
+        async execute() {
+          return [];
+        },
+        delete(target: unknown) {
+          return {
+            where() {
+              record(`delete:${readTargetLabel(target)}`);
+              return {
+                async returning() {
+                  return [];
+                },
+              };
+            },
+          };
+        },
+        insert(target: unknown) {
+          return {
+            async values() {
+              if (target === auditLog && options.failAuditInsert === true) {
+                throw new Error("injected audit failure");
+              }
+
+              record(`insert:${readTargetLabel(target)}`);
+            },
+          };
+        },
+        select() {
+          return selectionBuilder;
+        },
+        update(target: unknown) {
+          return {
+            set() {
+              return {
+                async where() {
+                  record(`update:${readTargetLabel(target)}`);
+                },
+              };
+            },
+          };
+        },
+      };
+
+      const result = await run(transaction);
+      committedOperations.push(...pendingOperations);
+      return result;
+    },
+  };
+
+  return { attemptedOperations, committedOperations, database };
+}
+
 describe("F-0015 lifecycle command atomicity", () => {
   it("rolls back account lifecycle writes when the transactional audit insert fails", async () => {
-    const committedOperations: string[] = [];
-    const database = {
-      async transaction(
-        run: (transaction: unknown) => Promise<unknown>,
-      ): Promise<unknown> {
-        const pendingOperations: string[] = [];
-        const transaction = {
-          async execute() {
-            return [];
-          },
-          insert() {
-            return {
-              async values() {
-                throw new Error("injected audit failure");
-              },
-            };
-          },
-          select() {
-            return {
-              from() {
-                return {
-                  leftJoin() {
-                    return {
-                      where() {
-                        return {
-                          async limit() {
-                            return [
-                              {
-                                auth_user_id: null,
-                                employee_id: null,
-                                organization_id: null,
-                                user_id: 41,
-                                user_type: "personal",
-                              },
-                            ];
-                          },
-                        };
-                      },
-                    };
-                  },
-                };
-              },
-            };
-          },
-          update() {
-            return {
-              set() {
-                return {
-                  async where() {
-                    pendingOperations.push("update");
-                  },
-                };
-              },
-            };
-          },
-        };
-
-        const result = await run(transaction);
-        committedOperations.push(...pendingOperations);
-        return result;
-      },
-    };
+    const { committedOperations, database } = createLifecycleDatabase(
+      [
+        {
+          auth_user_id: null,
+          employee_id: null,
+          employee_public_id: null,
+          organization_id: null,
+          organization_public_id: null,
+          user_id: 41,
+          user_public_id: "user-public-001",
+          user_type: "personal",
+        },
+      ],
+      { failAuditInsert: true },
+    );
 
     await expect(
       setEmployeeAccountStatusWithQuota(database as never, {
+        identityKind: "user",
         status: "disabled",
         successAudit: {
           actorPublicId: "admin-public-001",
@@ -99,6 +176,107 @@ describe("F-0015 lifecycle command atomicity", () => {
       }),
     ).rejects.toThrow("injected audit failure");
     expect(committedOperations).toEqual([]);
+  });
+
+  it("fails a missing authoritative employee organization before any mutation", async () => {
+    const { attemptedOperations, committedOperations, database } =
+      createLifecycleDatabase([
+        {
+          auth_user_id: "auth-user-employee-001",
+          employee_id: 71,
+          employee_public_id: "employee-public-001",
+          organization_id: 81,
+          organization_public_id: null,
+          user_id: 61,
+          user_public_id: "user-public-employee-001",
+          user_type: "employee",
+        },
+      ]);
+
+    await expect(
+      setEmployeeAccountStatusWithQuota(database as never, {
+        employeePublicId: "employee-public-001",
+        identityKind: "employee",
+        operator: {
+          publicId: "admin-public-001",
+          requestIp: null,
+          role: "ops_admin",
+        },
+        status: "disabled",
+      }),
+    ).resolves.toBeNull();
+    expect(attemptedOperations).toEqual([]);
+    expect(committedOperations).toEqual([]);
+  });
+
+  it("rolls back the employee lifecycle when its final success audit fails", async () => {
+    const { attemptedOperations, committedOperations, database } =
+      createLifecycleDatabase(
+        [
+          {
+            auth_user_id: "auth-user-employee-001",
+            employee_id: 71,
+            employee_public_id: "employee-public-001",
+            organization_id: 81,
+            organization_public_id: "organization-public-001",
+            user_id: 61,
+            user_public_id: "user-public-employee-001",
+            user_type: "employee",
+          },
+        ],
+        { failAuditInsert: true },
+      );
+
+    await expect(
+      setEmployeeAccountStatusWithQuota(database as never, {
+        employeePublicId: "employee-public-001",
+        identityKind: "employee",
+        operator: {
+          publicId: "admin-public-001",
+          requestIp: null,
+          role: "ops_admin",
+        },
+        status: "disabled",
+      }),
+    ).rejects.toThrow("injected audit failure");
+    expect(attemptedOperations).toContain("update:employee");
+    expect(attemptedOperations).toContain(
+      "update:organization_training_answer",
+    );
+    expect(committedOperations).toEqual([]);
+  });
+
+  it("keeps the generic user command from mutating employee identity rows", async () => {
+    const { committedOperations, database } = createLifecycleDatabase([
+      {
+        auth_user_id: "auth-user-employee-001",
+        employee_id: 71,
+        employee_public_id: "employee-public-001",
+        organization_id: 81,
+        organization_public_id: "organization-public-001",
+        user_id: 61,
+        user_public_id: "user-public-employee-001",
+        user_type: "employee",
+      },
+    ]);
+
+    await expect(
+      setEmployeeAccountStatusWithQuota(database as never, {
+        identityKind: "user",
+        status: "disabled",
+        successAudit: {
+          actorPublicId: "admin-public-001",
+          actorRole: "ops_admin",
+          actionType: "user.disable",
+          metadataSummary: "redacted user disable metadata",
+          requestIp: null,
+          targetPublicId: "user-public-employee-001",
+        },
+        userPublicId: "user-public-employee-001",
+      }),
+    ).resolves.toBe("updated_with_audit");
+    expect(committedOperations).toContain("update:user");
+    expect(committedOperations).not.toContain("update:employee");
   });
 
   it("keeps account disable, access termination, training blocking and success audit in one transaction", () => {

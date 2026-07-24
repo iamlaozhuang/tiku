@@ -88,7 +88,7 @@ describe("P0 RC-02 organization scope, quota and employee lifecycle", () => {
     );
     const disableEmployeeSource = readFunction(
       repositorySource,
-      "async disableEmployee(publicId)",
+      "async disableEmployee(input)",
       "async transferEmployee(input)",
     );
 
@@ -108,8 +108,10 @@ describe("P0 RC-02 organization scope, quota and employee lifecycle", () => {
     expect(quotaSource).toContain("authSession");
     expect(quotaSource).toContain('practice_status: "terminated"');
     expect(quotaSource).toContain('exam_status: "terminated"');
-    expect(disableEmployeeSource).toContain('practice_status: "terminated"');
-    expect(disableEmployeeSource).toContain('exam_status: "terminated"');
+    expect(disableEmployeeSource).toContain(
+      "setEmployeeAccountStatusWithQuota",
+    );
+    expect(disableEmployeeSource).not.toContain("database.transaction");
   });
 
   it("requires a quota reservation in employee authorization consumers", () => {

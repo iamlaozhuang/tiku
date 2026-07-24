@@ -278,6 +278,12 @@ function canManageEmployee(actor: AdminOrganizationOrgAuthActor): boolean {
   );
 }
 
+function readEmployeeManagerRole(
+  actor: AdminOrganizationOrgAuthActor,
+): "ops_admin" | "super_admin" {
+  return actor.roles.includes("super_admin") ? "super_admin" : "ops_admin";
+}
+
 function canManageOrgAuth(actor: AdminOrganizationOrgAuthActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
@@ -541,7 +547,9 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   }): Promise<void> {
     await repositories.auditLogRepository?.appendAuditLog({
       actorPublicId: input.actor.publicId,
-      actorRole: input.actor.roles[0],
+      actorRole: canManageEmployee(input.actor)
+        ? readEmployeeManagerRole(input.actor)
+        : input.actor.roles[0],
       actionType: input.actionType,
       targetResourceType: "employee",
       targetPublicId: input.targetPublicId,
@@ -1831,20 +1839,33 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(employeeMutationUnavailableResponse);
           }
 
-          const didDisable = await repositories.disableEmployee(publicId);
-
-          await appendEmployeeAuditLog({
-            request,
-            actor: actorOrError,
-            actionType: "employee.disable",
-            targetPublicId: publicId,
-            resultStatus: didDisable ? "success" : "failed",
-            metadataSummary: "redacted employee disable metadata",
+          const commandResult = await repositories.disableEmployee({
+            employeePublicId: publicId,
+            operator: {
+              publicId: actorOrError.publicId,
+              requestIp: readRequestIp(request),
+              role: readEmployeeManagerRole(actorOrError),
+            },
           });
 
-          return createJsonResponse(
-            didDisable ? createSuccessResponse(null) : employeeNotFoundResponse,
-          );
+          if (commandResult === null) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.disable",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee disable missing metadata",
+            });
+
+            return createJsonResponse(employeeNotFoundResponse);
+          }
+
+          if (commandResult.successAuditPersisted !== true) {
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          return createJsonResponse(createSuccessResponse(commandResult.data));
         },
       },
       transfer: {

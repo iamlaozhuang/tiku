@@ -10,9 +10,13 @@ import {
 import type { EmployeeImportCommandService } from "@/server/services/employee-import-command-service";
 import type { SessionService } from "@/server/services/session-service";
 
+type TestAdminRole = "super_admin" | "ops_admin" | "content_admin";
+
 function createAdminSessionService(
-  role: "super_admin" | "ops_admin" | "content_admin",
+  roleOrRoles: TestAdminRole | [TestAdminRole, ...TestAdminRole[]],
 ): Pick<SessionService, "getCurrentSession"> {
+  const roles = Array.isArray(roleOrRoles) ? roleOrRoles : [roleOrRoles];
+
   return {
     async getCurrentSession(input) {
       if (input.authorization !== "Bearer admin-session-token") {
@@ -38,7 +42,7 @@ function createAdminSessionService(
             employeePublicId: null,
             organizationPublicId: null,
             adminPublicId: "admin-public-001",
-            adminRoles: [role],
+            adminRoles: roles,
           },
         },
       };
@@ -153,13 +157,15 @@ function createEnterpriseRepositories(input: {
         },
       };
     },
-    async disableEmployee(publicId) {
+    async disableEmployee(commandInput) {
       input.employeeMutationInputs.push({
         action: "disableEmployee",
-        publicId,
+        input: commandInput,
       });
 
-      return publicId === "employee-public-001";
+      return commandInput.employeePublicId === "employee-public-001"
+        ? { data: null, successAuditPersisted: true }
+        : null;
     },
     auditLogRepository: {
       async appendAuditLog(auditLogInput) {
@@ -398,7 +404,17 @@ describe("phase 11 system ops user management loop", () => {
       data: null,
     });
     expect(employeeMutationInputs).toEqual([
-      { action: "disableEmployee", publicId: "employee-public-001" },
+      {
+        action: "disableEmployee",
+        input: {
+          employeePublicId: "employee-public-001",
+          operator: {
+            publicId: "admin-public-001",
+            requestIp: "203.0.113.20",
+            role: "super_admin",
+          },
+        },
+      },
     ]);
     expect(serviceInputs).toEqual([
       {
@@ -418,17 +434,110 @@ describe("phase 11 system ops user management loop", () => {
         idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
       },
     ]);
-    expect(auditInputs).toEqual([
-      expect.objectContaining({
-        actionType: "employee.disable",
-        targetResourceType: "employee",
-        targetPublicId: "employee-public-001",
-        resultStatus: "success",
-        metadataSummary: "redacted employee disable metadata",
-      }),
-    ]);
+    expect(auditInputs).toEqual([]);
     expect(
       JSON.stringify({ auditInputs, employeeMutationInputs, serviceInputs }),
     ).not.toContain("admin-session-token");
+  });
+
+  it("normalizes the effective employee manager role without expanding employee permissions", async () => {
+    const deniedAuditInputs: unknown[] = [];
+    const deniedMutationInputs: unknown[] = [];
+    const deniedHandlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories: createEnterpriseRepositories({
+        auditInputs: deniedAuditInputs,
+        employeeMutationInputs: deniedMutationInputs,
+      }),
+      sessionService: createAdminSessionService("content_admin"),
+    });
+    const deniedResponse = await deniedHandlers.employees.disable.POST(
+      new Request(
+        "http://localhost/api/v1/employees/employee-public-001/disable",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      { params: Promise.resolve({ publicId: "employee-public-001" }) },
+    );
+
+    await expect(deniedResponse.json()).resolves.toMatchObject({
+      code: 403601,
+    });
+    expect(deniedMutationInputs).toEqual([]);
+    expect(deniedAuditInputs).toEqual([
+      expect.objectContaining({
+        actorRole: "content_admin",
+        actionType: "employee.disable",
+        resultStatus: "failed",
+      }),
+    ]);
+
+    const authorizedAuditInputs: unknown[] = [];
+    const authorizedMutationInputs: unknown[] = [];
+    const authorizedHandlers =
+      createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+        repositories: createEnterpriseRepositories({
+          auditInputs: authorizedAuditInputs,
+          employeeMutationInputs: authorizedMutationInputs,
+        }),
+        sessionService: createAdminSessionService([
+          "content_admin",
+          "ops_admin",
+        ]),
+      });
+    const authorizedResponse = await authorizedHandlers.employees.disable.POST(
+      new Request(
+        "http://localhost/api/v1/employees/employee-public-001/disable",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      { params: Promise.resolve({ publicId: "employee-public-001" }) },
+    );
+
+    await expect(authorizedResponse.json()).resolves.toMatchObject({ code: 0 });
+    expect(authorizedMutationInputs).toEqual([
+      expect.objectContaining({
+        input: expect.objectContaining({
+          operator: expect.objectContaining({ role: "ops_admin" }),
+        }),
+      }),
+    ]);
+    expect(authorizedAuditInputs).toEqual([]);
+
+    const preferredMutationInputs: unknown[] = [];
+    const preferredHandlers =
+      createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+        repositories: createEnterpriseRepositories({
+          auditInputs: [],
+          employeeMutationInputs: preferredMutationInputs,
+        }),
+        sessionService: createAdminSessionService([
+          "ops_admin",
+          "content_admin",
+          "super_admin",
+        ]),
+      });
+    const preferredResponse = await preferredHandlers.employees.disable.POST(
+      new Request(
+        "http://localhost/api/v1/employees/employee-public-001/disable",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      { params: Promise.resolve({ publicId: "employee-public-001" }) },
+    );
+
+    await expect(preferredResponse.json()).resolves.toMatchObject({ code: 0 });
+    expect(preferredMutationInputs).toEqual([
+      expect.objectContaining({
+        input: expect.objectContaining({
+          operator: expect.objectContaining({ role: "super_admin" }),
+        }),
+      }),
+    ]);
   });
 });

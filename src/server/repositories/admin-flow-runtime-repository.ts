@@ -1961,6 +1961,7 @@ async function updateUserStatus(
   >[1]["successAudit"],
 ): Promise<UserLifecycleMutationRepositoryResult> {
   return setEmployeeAccountStatusWithQuota(database, {
+    identityKind: "user",
     successAudit,
     status,
     userPublicId: publicId,

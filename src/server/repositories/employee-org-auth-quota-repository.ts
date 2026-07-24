@@ -1,6 +1,16 @@
 import { randomUUID } from "node:crypto";
 
-import { and, asc, count, eq, gt, inArray, notInArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  eq,
+  gt,
+  ilike,
+  inArray,
+  notInArray,
+  sql,
+} from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
@@ -17,6 +27,7 @@ const {
   employeeOrgAuth,
   mockExam,
   orgAuth,
+  organization,
   organizationTrainingAnswer,
   practice,
   user,
@@ -89,6 +100,35 @@ export type EmployeeAccountLifecycleSuccessAudit = {
   requestIp: string | null;
   targetPublicId: string;
 };
+
+export type EmployeeDisableLifecycleOperator = {
+  publicId: string;
+  requestIp: string | null;
+  role: "ops_admin" | "super_admin";
+};
+
+export type EmployeeDisableLifecycleCommandResult = {
+  data: null;
+  successAuditPersisted: true;
+};
+
+type UserAccountStatusWithQuotaInput = {
+  identityKind: "user";
+  status: "active" | "disabled";
+  successAudit?: EmployeeAccountLifecycleSuccessAudit;
+  userPublicId: string;
+};
+
+type EmployeeAccountDisableWithQuotaInput = {
+  employeePublicId: string;
+  identityKind: "employee";
+  operator: EmployeeDisableLifecycleOperator;
+  status: "disabled";
+};
+
+export type EmployeeAccountStatusWithQuotaInput =
+  | EmployeeAccountDisableWithQuotaInput
+  | UserAccountStatusWithQuotaInput;
 
 async function lockEmployeeIdentity(
   database: EmployeeOrgAuthQuotaDatabase,
@@ -392,34 +432,69 @@ export async function reconcileCurrentAndDescendantQuotaReservations(
 
 export async function setEmployeeAccountStatusWithQuota(
   database: EmployeeOrgAuthQuotaDatabase,
-  input: {
-    successAudit?: EmployeeAccountLifecycleSuccessAudit;
-    status: "active" | "disabled";
-    userPublicId: string;
-  },
-): Promise<EmployeeAccountStatusWithQuotaResult> {
+  input: EmployeeAccountDisableWithQuotaInput,
+): Promise<EmployeeDisableLifecycleCommandResult | null>;
+export async function setEmployeeAccountStatusWithQuota(
+  database: EmployeeOrgAuthQuotaDatabase,
+  input: UserAccountStatusWithQuotaInput,
+): Promise<EmployeeAccountStatusWithQuotaResult>;
+export async function setEmployeeAccountStatusWithQuota(
+  database: EmployeeOrgAuthQuotaDatabase,
+  input: EmployeeAccountStatusWithQuotaInput,
+): Promise<
+  | EmployeeAccountStatusWithQuotaResult
+  | EmployeeDisableLifecycleCommandResult
+  | null
+> {
   return database.transaction(async (transaction) => {
     const transactionalDatabase = transaction as EmployeeOrgAuthQuotaDatabase &
       OrganizationScopeDatabase;
+    const identityPublicId =
+      input.identityKind === "employee"
+        ? input.employeePublicId
+        : input.userPublicId;
 
     await lockOrganizationScopeMutation(transactionalDatabase);
-    await lockEmployeeIdentity(transactionalDatabase, input.userPublicId);
+    await lockEmployeeIdentity(transactionalDatabase, identityPublicId);
 
-    const [row] = await transactionalDatabase
+    const identityRows = await transactionalDatabase
       .select({
         auth_user_id: user.auth_user_id,
         employee_id: employee.id,
+        employee_public_id: employee.public_id,
         organization_id: employee.organization_id,
+        organization_public_id: organization.public_id,
         user_id: user.id,
+        user_public_id: user.public_id,
         user_type: user.user_type,
       })
       .from(user)
       .leftJoin(employee, eq(employee.user_id, user.id))
-      .where(eq(user.public_id, input.userPublicId))
-      .limit(1);
+      .leftJoin(organization, eq(organization.id, employee.organization_id))
+      .where(
+        input.identityKind === "employee"
+          ? ilike(employee.public_id, input.employeePublicId)
+          : eq(user.public_id, input.userPublicId),
+      )
+      .limit(2);
 
-    if (row === undefined) {
-      return "not_found";
+    if (identityRows.length !== 1) {
+      return input.identityKind === "employee" ? null : "not_found";
+    }
+
+    const row = identityRows[0]!;
+    const hasExactEmployeeIdentity =
+      input.identityKind === "employee" &&
+      row.employee_public_id === input.employeePublicId &&
+      row.organization_id !== null &&
+      row.organization_public_id !== null &&
+      row.user_type === "employee";
+    const hasExactUserIdentity =
+      input.identityKind === "user" &&
+      row.user_public_id === input.userPublicId;
+
+    if (!hasExactEmployeeIdentity && !hasExactUserIdentity) {
+      return input.identityKind === "employee" ? null : "not_found";
     }
 
     if (
@@ -458,6 +533,13 @@ export async function setEmployeeAccountStatusWithQuota(
         updated_at: lifecycleChangedAt,
       })
       .where(eq(user.id, row.user_id));
+
+    if (input.identityKind === "employee" && row.employee_id !== null) {
+      await transactionalDatabase
+        .update(employee)
+        .set({ updated_at: lifecycleChangedAt })
+        .where(eq(employee.id, row.employee_id));
+    }
 
     if (input.status === "disabled") {
       if (row.auth_user_id !== null) {
@@ -520,6 +602,25 @@ export async function setEmployeeAccountStatusWithQuota(
             ),
           );
       }
+    }
+
+    if (input.identityKind === "employee") {
+      await transactionalDatabase.insert(auditLog).values({
+        public_id: `audit-log-${randomUUID()}`,
+        actor_public_id: input.operator.publicId,
+        actor_role: input.operator.role,
+        action_type: "employee.disable",
+        target_resource_type: "employee",
+        target_public_id: input.employeePublicId,
+        result_status: "success",
+        metadata_summary: "redacted employee disable metadata",
+        request_ip: input.operator.requestIp,
+      });
+
+      return {
+        data: null,
+        successAuditPersisted: true,
+      };
     }
 
     if (input.successAudit !== undefined) {

@@ -3,16 +3,11 @@ import { createRequire } from "node:module";
 
 import { describe, expect, it } from "vitest";
 
-const CURRENT_TASK_ID = "p1-remediation-rc-09-residual-jit-review-2026-07-24";
-const PREVIOUS_TASK_ID =
-  "p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24";
-const PRODUCT_TASK_ID =
+const CURRENT_TASK_ID =
   "p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24";
-const AMENDMENT_ID =
-  "guardian-rc09-residual-jit-state-transition-test-amendment-2026-07-24";
-const INVALIDATED_BINDING_ID =
-  "guardian-rc09-residual-jit-f0012-final-tree-b54b1089-2026-07-24";
-const TEST_PATH = "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts";
+const PREVIOUS_TASK_ID = "p1-remediation-rc-09-residual-jit-review-2026-07-24";
+const APPROVAL_ID =
+  "guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24";
 
 type ProgramState = {
   currentTaskId: string;
@@ -31,30 +26,22 @@ type TaskProjection = {
     commit: string;
     parent: string;
     tree: string;
+    changedFileCount: number;
   };
-  rc09ResidualReview: {
-    selectedFindingId: string;
-    selectedFindingStatus: string;
-    otherFindingDisposition: string;
-  };
-  nextTask: {
-    proposedProductTaskId: string;
-    findingId: string;
-    status: string;
-    active: boolean;
-    materialized: boolean;
-  };
-  runtimeHold: {
-    findingId: string;
-    status: string;
+  jitRevalidation: {
+    "F-0012": string;
+    "F-0013": string;
+    otherRc09Findings: string;
   };
   riskBoundary: {
+    category: string;
+    approvalStatus: string;
+    approvalId: string;
+    requestedBaseSha: string;
     allowedFiles: number;
     coreFiles: number;
     contingencyFiles: number;
-    scopeAmendmentId: string;
-    invalidatedFinalTreeBindingApprovalId: string;
-    validationCorrection: string;
+    permissionPathClassifiedWithoutScopeExpansion: boolean;
   };
 };
 
@@ -68,25 +55,32 @@ type QueueProjection = {
   activeTasks: TaskProjection[];
 };
 
-type TaskSafety = TaskProjection & {
+type TaskSafety = {
   taskId: string;
+  findingIds: string[];
+  status: string;
+  branch: string;
+  baseSha: string;
+  riskCategory: string;
+  approvalStatus: string;
   approvalId: string;
   allowedFiles: string[];
   coreFiles: string[];
   contingencyFiles: string[];
-  push: { target: string };
-  conditionalCloseout: { approved: boolean; approvalId: string };
-  scopeAmendments: Array<{
-    approvalId: string;
-    decision: string;
-    invalidatedFinalTreeBindingApprovalId: string;
-    correction: string;
-  }>;
+  approvalSources: {
+    database: string | null;
+    permission: string | null;
+  };
+  previousTaskCloseout: TaskProjection["previousTaskCloseout"];
+  jitRevalidation: TaskProjection["jitRevalidation"];
   validationCommands: Array<{
     name: string;
+    kind: string;
     executable: string;
     arguments: string[];
   }>;
+  push: { target: string };
+  conditionalCloseout: { approved: boolean; approvalId: string };
 };
 
 function parseYamlStrictly(path: string): unknown {
@@ -115,52 +109,43 @@ function assertProgramState(program: ProgramState): void {
   expect(program.taskStatusById[PREVIOUS_TASK_ID]).toBe("closed");
   expect(program.materializedTaskIds).toContain(CURRENT_TASK_ID);
   expect(program.completedTaskIds).toContain(PREVIOUS_TASK_ID);
-  expect(program.materializedTaskIds).not.toContain(PRODUCT_TASK_ID);
-  expect(program.taskStatusById[PRODUCT_TASK_ID]).toBeUndefined();
 }
 
-function assertTaskProjection(task: TaskProjection): void {
+function assertCurrentTask(task: TaskProjection): void {
   expect(task).toMatchObject({
     id: CURRENT_TASK_ID,
     status: "in_progress",
-    executionStage: "approved_state_only_transition_pending_final_tree_binding",
-    findingIds: [],
+    executionStage: "implemented_verified_static_pending_final_tree_binding",
+    findingIds: ["F-0012"],
     previousTaskCloseout: {
       taskId: PREVIOUS_TASK_ID,
-      commit: "3df9475e95621f1c3946be6693afd7ab9667cdae",
-      parent: "e3d812bac133db24721d11d9eb7852ab2e9d17b9",
-      tree: "5d9bbc0b47a577c2db18392cbe56c8414b51fe8c",
+      commit: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
+      parent: "3df9475e95621f1c3946be6693afd7ab9667cdae",
+      tree: "a9453d1a769b5b248febbd3ec1e8eca9d2f856a2",
+      changedFileCount: 4,
     },
-    rc09ResidualReview: {
-      selectedFindingId: "F-0012",
-      selectedFindingStatus: "revalidated_reachable_next_only",
-      otherFindingDisposition: "unchanged_pending_independent_revalidation",
-    },
-    nextTask: {
-      proposedProductTaskId: PRODUCT_TASK_ID,
-      findingId: "F-0012",
-      status: "selected_pending_fresh_database_approval",
-      active: false,
-      materialized: false,
-    },
-    runtimeHold: {
-      findingId: "F-0013",
-      status: "runtime_evidence_required_runtime_hold_RV0007",
+    jitRevalidation: {
+      "F-0012": "active_product_task_root_cause_revalidated_reachable",
+      "F-0013":
+        "runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization",
+      otherRc09Findings: "unchanged_pending_independent_revalidation",
     },
     riskBoundary: {
-      allowedFiles: 4,
-      coreFiles: 4,
-      contingencyFiles: 0,
-      scopeAmendmentId: AMENDMENT_ID,
-      invalidatedFinalTreeBindingApprovalId: INVALIDATED_BINDING_ID,
-      validationCorrection:
-        "replace_unsafe_inline_tsx_state_contract_with_kernel_allowed_exact_vitest_test",
+      category:
+        "database_application_logic_and_permission_path_classified_without_scope_expansion",
+      approvalStatus: "approved",
+      approvalId: APPROVAL_ID,
+      requestedBaseSha: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
+      allowedFiles: 18,
+      coreFiles: 13,
+      contingencyFiles: 5,
+      permissionPathClassifiedWithoutScopeExpansion: true,
     },
   });
 }
 
-describe("RC-09 residual JIT state transition", () => {
-  it("keeps one current task, the prior closeout, F-0012 next-only and F-0013 on runtime hold", () => {
+describe("RC-09 F-0012 product task materialization", () => {
+  it("closes the prior state task and keeps exactly one current F-0012 WIP", () => {
     const project = parseYamlStrictly(
       "docs/04-agent-system/state/project-state.yaml",
     ) as StateProjection;
@@ -177,43 +162,56 @@ describe("RC-09 residual JIT state transition", () => {
     assertProgramState(project.p1RemediationSerialProgram);
     assertProgramState(queue.p1RemediationSerialProgram);
     expect(inProgressTasks).toHaveLength(1);
-    assertTaskProjection(project.currentTask);
-    assertTaskProjection(inProgressTasks[0]!);
-    assertTaskProjection({
-      ...safety,
-      id: safety.taskId,
-      status: "in_progress",
-      executionStage: safety.status,
-      riskBoundary: {
-        allowedFiles: safety.allowedFiles.length,
-        coreFiles: safety.coreFiles.length,
-        contingencyFiles: safety.contingencyFiles.length,
-        scopeAmendmentId: safety.scopeAmendments[0]!.approvalId,
-        invalidatedFinalTreeBindingApprovalId:
-          safety.scopeAmendments[0]!.invalidatedFinalTreeBindingApprovalId,
-        validationCorrection: safety.scopeAmendments[0]!.correction,
+    assertCurrentTask(project.currentTask);
+    assertCurrentTask(inProgressTasks[0]!);
+    expect(safety).toMatchObject({
+      taskId: CURRENT_TASK_ID,
+      findingIds: ["F-0012"],
+      status: "implemented_verified_static_pending_final_tree_binding",
+      branch: "fix/employee-disable-active-flow-equivalence",
+      baseSha: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
+      riskCategory:
+        "database_application_logic_and_permission_path_classified_without_scope_expansion",
+      approvalStatus: "approved",
+      approvalId: APPROVAL_ID,
+      previousTaskCloseout: {
+        taskId: PREVIOUS_TASK_ID,
+        commit: "a61da4c2e46968b117ab984874c888ea81ebc5e7",
+        parent: "3df9475e95621f1c3946be6693afd7ab9667cdae",
+        tree: "a9453d1a769b5b248febbd3ec1e8eca9d2f856a2",
+        changedFileCount: 4,
       },
+      jitRevalidation: project.currentTask.jitRevalidation,
     });
   });
 
-  it("uses the only Kernel-safe Vitest state-contract command and the exact four-file envelope", () => {
+  it("binds the exact 18-file envelope and both classified risk sources", () => {
     const safety = JSON.parse(
       readFileSync("docs/04-agent-system/state/task-safety.json", "utf8"),
     ) as TaskSafety;
-    const stateContract = safety.validationCommands.find(
+    const focusedValidation = safety.validationCommands.find(
+      (command) => command.name === "employee-disable-focused",
+    );
+    const stateValidation = safety.validationCommands.find(
       (command) => command.name === "state-contract",
     );
-    const serializedCommand = JSON.stringify(stateContract);
 
-    expect(safety.allowedFiles).toEqual(safety.coreFiles);
-    expect(safety.allowedFiles).toEqual([
-      "docs/04-agent-system/state/project-state.yaml",
-      "docs/04-agent-system/state/task-queue.yaml",
-      "docs/04-agent-system/state/task-safety.json",
-      TEST_PATH,
-    ]);
-    expect(safety.contingencyFiles).toEqual([]);
-    expect(stateContract).toEqual({
+    expect(safety.allowedFiles).toHaveLength(18);
+    expect(new Set(safety.allowedFiles).size).toBe(18);
+    expect(safety.coreFiles).toHaveLength(13);
+    expect(safety.contingencyFiles).toHaveLength(5);
+    expect(
+      safety.coreFiles.filter((path) => safety.contingencyFiles.includes(path)),
+    ).toEqual([]);
+    expect(safety.approvalSources).toMatchObject({
+      database: APPROVAL_ID,
+      permission: APPROVAL_ID,
+    });
+    expect(focusedValidation).toMatchObject({
+      kind: "test",
+      executable: "corepack.cmd",
+    });
+    expect(stateValidation).toEqual({
       name: "state-contract",
       kind: "test",
       executable: "corepack.cmd",
@@ -222,31 +220,15 @@ describe("RC-09 residual JIT state transition", () => {
         "exec",
         "vitest",
         "run",
-        TEST_PATH,
+        "tests/unit/p1-rc-09-residual-jit-state-transition.test.ts",
         "--maxWorkers=1",
       ],
     });
-    expect(serializedCommand).not.toContain("tsx");
-    expect(serializedCommand).not.toContain('"-e"');
-    expect(serializedCommand).not.toContain("inline");
-    expect(serializedCommand).not.toMatch(/(?:guard|smoke)/iu);
-    expect(safety.approvalId).toBe(
-      "guardian-rc09-residual-jit-f0012-selection-state-transition-2026-07-24",
-    );
+    expect(JSON.stringify(safety.validationCommands)).not.toContain("tsx");
     expect(safety.push).toEqual({ target: "origin/master" });
-    expect(safety.conditionalCloseout).toEqual(
-      expect.objectContaining({
-        approved: true,
-        approvalId:
-          "guardian-rc09-residual-jit-f0012-selection-state-transition-2026-07-24",
-      }),
-    );
-    expect(safety.scopeAmendments).toContainEqual({
-      approvalId: AMENDMENT_ID,
-      decision: "approved_exact_test_only_scope_amendment",
-      invalidatedFinalTreeBindingApprovalId: INVALIDATED_BINDING_ID,
-      correction:
-        "replace_unsafe_inline_tsx_state_contract_with_kernel_allowed_exact_vitest_test",
+    expect(safety.conditionalCloseout).toMatchObject({
+      approved: true,
+      approvalId: APPROVAL_ID,
     });
   });
 });

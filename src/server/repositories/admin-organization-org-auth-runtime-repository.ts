@@ -71,6 +71,8 @@ import {
   releaseEmployeeOrgAuthQuota,
   reserveEmployeeOrgAuthQuota,
   previewEmployeeOrgAuthQuota,
+  setEmployeeAccountStatusWithQuota,
+  type EmployeeDisableLifecycleOperator,
 } from "./employee-org-auth-quota-repository";
 import {
   createOrgAuthCoversOrganizationCondition,
@@ -153,7 +155,9 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   expandOrgAuthQuota?(
     input: OrgAuthQuotaExpansionCommandInput,
   ): Promise<OrgAuthClosureMutationResult>;
-  disableEmployee?(publicId: string): Promise<boolean>;
+  disableEmployee?(
+    input: EmployeeDisableCommandInput,
+  ): Promise<LifecycleCommandResult<null> | null>;
   transferEmployee?(
     input: EmployeeTransferInput,
   ): Promise<EmployeeTransferRepositoryResult | null>;
@@ -166,6 +170,11 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   auditLogRepository?: {
     appendAuditLog(input: AppendEmployeeAuditLogInput): Promise<void>;
   };
+};
+
+export type EmployeeDisableCommandInput = {
+  employeePublicId: string;
+  operator: EmployeeDisableLifecycleOperator;
 };
 
 export type EmployeeUnbindInput =
@@ -1829,95 +1838,12 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         };
       });
     },
-    async disableEmployee(publicId) {
-      const database = getDatabase();
-
-      return database.transaction(async (transaction) => {
-        const transactionalDatabase =
-          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
-
-        await lockOrganizationScopeMutation(transactionalDatabase);
-        await lockEmployeeIdentity(transactionalDatabase, publicId);
-
-        const [employeeRow] = await transactionalDatabase
-          .select({
-            employee_id: employee.id,
-            user_id: user.id,
-            auth_user_id: user.auth_user_id,
-          })
-          .from(employee)
-          .innerJoin(user, eq(user.id, employee.user_id))
-          .where(
-            and(
-              eq(employee.public_id, publicId),
-              eq(user.user_type, "employee"),
-            ),
-          )
-          .limit(1);
-
-        if (employeeRow === undefined) {
-          return false;
-        }
-
-        await releaseEmployeeOrgAuthQuota(
-          transactionalDatabase,
-          employeeRow.employee_id,
-        );
-        const lifecycleChangedAt = new Date();
-
-        await transactionalDatabase
-          .update(user)
-          .set({
-            status: "disabled",
-            disabled_at: lifecycleChangedAt,
-            updated_at: lifecycleChangedAt,
-          })
-          .where(eq(user.id, employeeRow.user_id));
-        await transactionalDatabase
-          .update(employee)
-          .set({ updated_at: lifecycleChangedAt })
-          .where(eq(employee.id, employeeRow.employee_id));
-
-        if (employeeRow.auth_user_id !== null) {
-          await transactionalDatabase
-            .delete(authSession)
-            .where(eq(authSession.user_id, employeeRow.auth_user_id));
-        }
-
-        await transactionalDatabase
-          .update(practice)
-          .set({
-            practice_status: "terminated",
-            terminated_at: lifecycleChangedAt,
-            termination_reason: "account_disabled",
-            updated_at: lifecycleChangedAt,
-          })
-          .where(
-            and(
-              eq(practice.user_id, employeeRow.user_id),
-              eq(practice.practice_status, "in_progress"),
-            ),
-          );
-        await transactionalDatabase
-          .update(mockExam)
-          .set({
-            exam_status: "terminated",
-            terminated_at: lifecycleChangedAt,
-            termination_reason: "account_disabled",
-            updated_at: lifecycleChangedAt,
-          })
-          .where(
-            and(
-              eq(mockExam.user_id, employeeRow.user_id),
-              inArray(mockExam.exam_status, [
-                "in_progress",
-                "scoring",
-                "scoring_partial_failed",
-              ]),
-            ),
-          );
-
-        return true;
+    async disableEmployee(input) {
+      return setEmployeeAccountStatusWithQuota(getDatabase(), {
+        employeePublicId: input.employeePublicId,
+        identityKind: "employee",
+        operator: input.operator,
+        status: "disabled",
       });
     },
     async transferEmployee(input) {

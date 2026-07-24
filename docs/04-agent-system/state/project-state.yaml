@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-09-residual-jit-review-2026-07-24
+  currentTaskId: p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
   currentCandidateClusterId: P1-RC-09
   candidateClusterOrder:
     - P1-RC-01
@@ -588,7 +588,9 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
     - p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24
     - p1-remediation-rc-09-residual-jit-review-2026-07-24
+    - p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
   completedTaskIds:
+    - p1-remediation-rc-09-residual-jit-review-2026-07-24
     - p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24
     - p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24
     - p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24
@@ -797,7 +799,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-08-f0163-closeout-f0164-jit-materialization-2026-07-24: closed
     p1-remediation-rc-08-personal-ai-learning-session-lifecycle-history-statistics-2026-07-24: closed
     p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24: closed
-    p1-remediation-rc-09-residual-jit-review-2026-07-24: in_progress
+    p1-remediation-rc-09-residual-jit-review-2026-07-24: closed
+    p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24: in_progress
     p1-remediation-rc-04-paper-asset-create-idempotency-audit-2026-07-21: closed
     p1-remediation-rc-04-paper-asset-upload-saga-2026-07-21: closed
     p1-remediation-rc-04-f0031-static-closure-2026-07-21: closed
@@ -1004,44 +1007,42 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-09-residual-jit-review-2026-07-24
-  title: RC-09 residual JIT review and F-0012 next selection
-  phase: p1-remediation-rc-09-residual-jit-review-2026-07-24
+  id: p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
+  title: Employee disable active-flow equivalence
+  phase: p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
   status: in_progress
   priority: p1
-  taskKind: low_risk_state_only_transition
-  productClosureContribution: closes_previous_state_only_task_and_selects_F0012_as_next_only
-  branch: fix/rc-09-residual-jit-review
+  taskKind: database_application_logic_and_permission_path_classified_without_scope_expansion
+  productClosureContribution: closes_F0012_employee_disable_active_flow_and_audit_atomicity_static_product_partition
+  branch: fix/employee-disable-active-flow-equivalence
   taskSafetyContractPath: docs/04-agent-system/state/task-safety.json
-  findingIds: []
+  findingIds:
+    - F-0012
   candidateRootCauseCluster: P1-RC-09
-  objective: atomically close the delivered RC-08 state-only transition and select F-0012 as the only next product candidate pending fresh database approval
-  executionStage: approved_state_only_transition_pending_final_tree_binding
-  findingStatus: F0012_selected_next_only_pending_fresh_database_approval
-  findingDisposition: F0012_root_cause_revalidated_reachable_and_selected_next_only; all_RC09_findings_remain_unclosed; F0013_runtime_evidence_required_runtime_hold_RV0007
+  objective: make generic user and employee account disable consume one atomic lifecycle transaction command with exact active-flow termination, server-derived redacted success audit facts, and unchanged permission scope
+  executionStage: implemented_verified_static_pending_final_tree_binding
+  findingStatus: implemented_verified_static_pending_final_tree_binding
+  findingDisposition: F0012_implemented_verified_static_pending_final_tree_binding; all_other_RC09_findings_remain_unclosed; F0013_runtime_evidence_required_runtime_hold_RV0007
   riskBoundary:
-    category: low_risk_state_only
+    category: database_application_logic_and_permission_path_classified_without_scope_expansion
     approvalStatus: approved
-    approvalId: guardian-rc09-residual-jit-f0012-selection-state-transition-2026-07-24
-    requestedBaseSha: 3df9475e95621f1c3946be6693afd7ab9667cdae
-    allowedFiles: 4
-    coreFiles: 4
-    contingencyFiles: 0
-    scopeAmendmentId: guardian-rc09-residual-jit-state-transition-test-amendment-2026-07-24
-    invalidatedFinalTreeBindingApprovalId: guardian-rc09-residual-jit-f0012-final-tree-b54b1089-2026-07-24
-    validationCorrection: replace_unsafe_inline_tsx_state_contract_with_kernel_allowed_exact_vitest_test
+    approvalId: guardian-f0012-employee-disable-active-flow-equivalence-2026-07-24
+    requestedBaseSha: a61da4c2e46968b117ab984874c888ea81ebc5e7
+    allowedFiles: 18
+    coreFiles: 13
+    contingencyFiles: 5
     schemaMigrationSourceChange: false
     migrationApplyOrRealDatabase: false
-    permissionScopeChange: false
+    permissionPathClassifiedWithoutScopeExpansion: true
     providerOrExternalCall: false
     dependencyOrMechanismChange: false
     conditionalCloseout: true
   previousTaskCloseout:
-    taskId: p1-remediation-rc-08-f0164-closeout-static-residual-disposition-2026-07-24
-    commit: 3df9475e95621f1c3946be6693afd7ab9667cdae
-    parent: e3d812bac133db24721d11d9eb7852ab2e9d17b9
-    tree: 5d9bbc0b47a577c2db18392cbe56c8414b51fe8c
-    changedFileCount: 3
+    taskId: p1-remediation-rc-09-residual-jit-review-2026-07-24
+    commit: a61da4c2e46968b117ab984874c888ea81ebc5e7
+    parent: 3df9475e95621f1c3946be6693afd7ab9667cdae
+    tree: a9453d1a769b5b248febbd3ec1e8eca9d2f856a2
+    changedFileCount: 4
     status: closed_state_only_committed_ff_only_merged_pushed_synced_and_cleaned
     closeoutKernel: pass
     prePushKernel: pass
@@ -1049,20 +1050,31 @@ currentTask:
     worktreeClean: true
     shortBranchCleanup: pass
     proofBoundary: state_only_no_product_schema_migration_database_permission_provider_dependency_or_mechanism_change
-  rc09ResidualReview:
-    selectedFindingId: F-0012
-    selectedFindingStatus: revalidated_reachable_next_only
-    otherFindingDisposition: unchanged_pending_independent_revalidation
-  nextTask:
-    proposedProductTaskId: p1-remediation-rc-09-employee-disable-active-flow-equivalence-2026-07-24
-    proposedBranch: fix/employee-disable-active-flow-equivalence
-    findingId: F-0012
-    status: selected_pending_fresh_database_approval
-    active: false
-    materialized: false
-  runtimeHold:
-    findingId: F-0013
-    status: runtime_evidence_required_runtime_hold_RV0007
+  jitRevalidation:
+    F-0012: active_product_task_root_cause_revalidated_reachable
+    F-0013: runtime_hold_RV0007_requires_separate_runtime_and_deployment_authorization
+    otherRc09Findings: unchanged_pending_independent_revalidation
+  verificationEvidence:
+    tddRed: pass_expected_3_failures_of_3_before_product_implementation
+    focused: pass_7_files_38_tests
+    lint: pass_0_errors_3_pre_existing_warnings
+    typecheck: pass
+    build: pass
+    format: pass_exact_18_file_envelope
+    diffStateSourceReview: pass_main_thread_adversarial_review_and_envelope_scan
+    schemaMigrationChange: false
+    realDatabaseOrData: false
+    permissionScopeExpansion: false
+  guardianReview:
+    decision: correction_required
+    rejectedCandidateTree: 703122fa21242c1a870dfbf60893387845026254
+    rejectedRawCachedDiffSha256: 05ed93e2cb023ab482e1a1b84e6f0012d5b5c01ba25582ae2f148f2ddc1b063d
+    tokensIssued: false
+    correctionStatus: applied_verified_pending_fresh_final_tree_binding
+    corrections:
+      - keep_employee_timestamp_mutation_exclusive_to_employee_specific_branch
+      - validate_authoritative_organization_row_inside_employee_transaction
+      - directly_test_missing_organization_audit_rollback_and_generic_user_zero_employee_mutation
 p1ExecutionPolicy:
   policyId: P1_EXECUTION_POLICY_CAPSULE_V1_1
   status: active
